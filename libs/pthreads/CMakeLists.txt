@@ -1,8 +1,6 @@
 # Copyright (c) 2010 Daniel Pfeifer <daniel@pfeifer-mail.de>
 #               2011 Stefan Eilemann <eile@eyescale.ch>
 
-find_package(Threads REQUIRED)
-
 set(PTHREAD_LIBRARIES pthread)
 
 if(CMAKE_USE_PTHREADS_INIT)

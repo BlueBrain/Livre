@@ -23,9 +23,6 @@ source_group(tree   FILES ${MSV_TREE_PUBLIC_HEADERS}  ${MSV_TREE_SOURCES}  )
 source_group(types  FILES ${MSV_TYPES_PUBLIC_HEADERS} ${MSV_TYPES_SOURCES} )
 source_group(util   FILES ${MSV_UTIL_PUBLIC_HEADERS}  ${MSV_UTIL_SOURCES}  )
 
-find_package(PNG REQUIRED)
-include_directories(${PNG_INCLUDE_DIR})
-
 set(MSV_ALL_SOURCES
   ${MSV_IO_SOURCES}
   ${MSV_TREE_SOURCES}
