@@ -130,10 +130,10 @@ set(VOLVIS_UTIL_HEADERS
 )
 
 set(VOLVIS_SHADERS
-  ./renderer/raycasting/vertexShader_raycast.glsl
-  ./renderer/raycasting/fragmentShader_raycast.glsl
-  ./renderer/raycasting/fragmentShader_raycast_ext.glsl
-  ./renderer/slice/vertexShader_slice.glsl
-  ./renderer/slice/fragmentShader_slice.glsl
+  renderer/raycasting/vertexShader_raycast.glsl
+  renderer/raycasting/fragmentShader_raycast.glsl
+  renderer/raycasting/fragmentShader_raycast_ext.glsl
+  renderer/slice/vertexShader_slice.glsl
+  renderer/slice/fragmentShader_slice.glsl
 )
 

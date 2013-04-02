@@ -6,8 +6,6 @@
 include(CMakeParseArguments)
 include(PurpleInstallPDB)
 
-set(MSV_LIB "${PROJECT_BINARY_DIR}/lib/libmsv.so")
-
 macro(MASSVOL_ADD_TOOL NAME)
   cmake_parse_arguments(THIS "" "" "SOURCES;HEADERS;LINK_LIBRARIES" ${ARGN})
   set(THIS_TARGET ${NAME})
@@ -37,9 +35,9 @@ massvol_add_tool(dataConverter
     dataConverter/dataManipulation.cpp
     dataConverter/main.cpp
   LINK_LIBRARIES
-    ${MSV_LIB}
+    msv
   )
-add_dependencies(dataConverter ${MSV_LIB})
+add_dependencies(dataConverter msv)
 
 # if(CUDA_FOUND)
 #  include_directories(SYSTEM ${CUDA_INCLUDE_DIRS})

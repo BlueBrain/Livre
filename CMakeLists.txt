@@ -17,6 +17,7 @@ include(Common)
 
 set(PROJECT_INCLUDE_NAME livre)
 include(FindPackages)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/libs)
 
 add_subdirectory(libs)
 add_subdirectory(tools)

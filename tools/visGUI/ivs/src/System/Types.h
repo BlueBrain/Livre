@@ -7,6 +7,7 @@
 #ifndef IVS_SYSTEM_TYPES_H
 #define IVS_SYSTEM_TYPES_H
 
+#include <lunchbox/bitOperation.h>
 #include <eq/fabric/vmmlib.h>
 
 namespace ivs

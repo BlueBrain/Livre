@@ -88,7 +88,7 @@ const std::string _logoTextureName = std::string( EQ_INSTALL_DIR ) +
                                  std::string( "share/Equalizer/data/logo.rgb" );
 #  endif
 #else
-const std::string _logoTextureName = std::string( EQ_SOURCE_DIR ) +
+const std::string _logoTextureName = std::string( VOLVIS_SOURCE_DIR ) +
                                       std::string( "/massVolVis/volVis/logo.rgb" );
 #endif
 }

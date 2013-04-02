@@ -11,6 +11,8 @@ endif(MSVC)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
+add_definitions(-DVOLVIS_SOURCE_DIR="${CMAKE_SOURCE_DIR}/")
+
 
 # if(CUDA_FOUND)
 #   include_directories(SYSTEM ${CUDA_INCLUDE_DIRS})
@@ -18,8 +20,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 # endif()
 
 include(files.cmake)
-
-set(MSV_LIB "${PROJECT_BINARY_DIR}/lib/libmsv.so")
 
 source_group(volVis REGULAR_EXPRESSION .*)
 source_group(\\ FILES CMakeLists.txt files.cmake ${VOLVIS_MAIN_SOURCES} )
@@ -30,15 +30,15 @@ source_group(render         FILES ${VOLVIS_RENDERER_HEADERS}        ${VOLVIS_REN
 source_group(util           FILES ${VOLVIS_UTIL_HEADERS} )
 source_group(shaders        FILES ${VOLVIS_SHADERS} )
 
-function(EQ_ADD_EXAMPLE NAME)
-  cmake_parse_arguments(THIS "" "" "SOURCES;HEADERS;SHADERS;LINK_LIBRARIES"
-    ${ARGN})
+eq_stringify_shaders(SHADERS ${VOLVIS_SHADERS})
 
-  eq_stringify_shaders(SHADERS ${THIS_SHADERS})
+function(EQ_ADD_EXAMPLE NAME)
+  cmake_parse_arguments(THIS "" "" "SOURCES;HEADERS;LINK_LIBRARIES"
+    ${ARGN})
 
   set(THIS_TARGET ${NAME})
   set(THIS_INPUT)
-  source_group(\\ FILES ${THIS_SOURCES} ${THIS_HEADERS} ${THIS_SHADERS})
+  source_group(\\ FILES ${THIS_SOURCES} ${THIS_HEADERS} ${VOLVIS_SHADERS})
   add_executable(${THIS_TARGET} MACOSX_BUNDLE ${THIS_SOURCES} ${THIS_HEADERS}
                  ${SHADERS})
   target_link_libraries(${THIS_TARGET} ${EQUALIZER_LIBRARIES}
@@ -54,8 +54,8 @@ function(EQ_ADD_EXAMPLE NAME)
   endif()
 
   install(TARGETS ${THIS_TARGET} DESTINATION bin COMPONENT apps)
-  install(FILES CMakeLists.txt ${THIS_SOURCES} ${THIS_HEADERS} ${THIS_SHADERS}
-    DESTINATION share/Equalizer/examples/${NAME} COMPONENT examples)
+  install(FILES CMakeLists.txt ${THIS_SOURCES} ${THIS_HEADERS} ${VOLVIS_SHADERS}
+    DESTINATION share/Livre/examples/${NAME} COMPONENT examples)
 endfunction(EQ_ADD_EXAMPLE NAME)
 
 eq_add_example(volVis
@@ -71,13 +71,11 @@ eq_add_example(volVis
     ${VOLVIS_LB_SOURCES}
     ${VOLVIS_RENDERER_SOURCES}
     ${VOLVIS_MAIN_SOURCES}
-  SHADERS
-    ${VOLVIS_SHADERS}
   LINK_LIBRARIES
     ${CARBON_LIBRARY}
 #    ${CUDA_LIBRARIES}
     ${LUNCHBOX_LIBRARIES}
-    ${MSV_LIB}
+    msv
     X11
   )
 
@@ -99,13 +97,11 @@ eq_add_example(_volVisTests
     ${VOLVIS_LB_SOURCES}
     ${VOLVIS_RENDERER_SOURCES}
     ${VOLVIS_MAIN_TESTS_SOURCES}
-  SHADERS
-    ${VOLVIS_SHADERS}
   LINK_LIBRARIES
     ${CARBON_LIBRARY}
 #    ${CUDA_LIBRARIES}
     ${LUNCHBOX_LIBRARIES}
-    ${MSV_LIB}
+    msv
     X11
   )
 
