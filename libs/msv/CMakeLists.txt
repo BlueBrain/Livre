@@ -40,12 +40,11 @@ set(MSV_ALL_HEADERS
   ${MSV_UTIL_PUBLIC_HEADERS}
   )
 
-purple_add_library(msv SHARED
-  HEADERS_PREFIX "msv/"
-  HEADERS ${MSV_ALL_HEADERS}
-  SOURCES ${MSV_ALL_SOURCES}
-  LINK_LIBRARIES
-    "png"
-    ${LUNCHBOX_LIBRARIES}
-  )
-
+add_library(msv SHARED ${MSV_ALL_HEADERS} ${MSV_ALL_SOURCES})
+target_link_libraries(msv "png" ${LUNCHBOX_LIBRARIES})
+install(FILES ${HEADER}
+      DESTINATION include/msv COMPONENT dev)
+install(TARGETS msv
+      ARCHIVE DESTINATION lib COMPONENT dev
+      RUNTIME DESTINATION bin COMPONENT lib
+      LIBRARY DESTINATION lib COMPONENT lib)

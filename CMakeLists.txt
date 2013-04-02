@@ -22,9 +22,8 @@ add_subdirectory(libs)
 add_subdirectory(tools)
 add_subdirectory(volVis)
 
-include(DoxygenRule)
-include(DoxygenRule)
-include(CPackConfig)
+#include(DoxygenRule)
+#include(CPackConfig)
 
 set(CTEST_CUSTOM_WARNING_EXCEPTION ${CTEST_CUSTOM_WARNING_EXCEPTION}
   # http://public.kitware.com/Bug/view.php?id=10179

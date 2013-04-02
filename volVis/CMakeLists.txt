@@ -2,6 +2,7 @@
 # Copyright (c) 2011 Maxim Makhinya <maxmah@gmail.com>
 #               2012 David Steiner  <steiner@ifi.uzh.ch>
 
+include(EqStringifyShaders)
 
 if(MSVC)
   add_definitions(/wd4996)
@@ -28,6 +29,34 @@ source_group(LB             FILES ${VOLVIS_LB_HEADERS}              ${VOLVIS_LB_
 source_group(render         FILES ${VOLVIS_RENDERER_HEADERS}        ${VOLVIS_RENDERER_SOURCES}      )
 source_group(util           FILES ${VOLVIS_UTIL_HEADERS} )
 source_group(shaders        FILES ${VOLVIS_SHADERS} )
+
+function(EQ_ADD_EXAMPLE NAME)
+  cmake_parse_arguments(THIS "" "" "SOURCES;HEADERS;SHADERS;LINK_LIBRARIES"
+    ${ARGN})
+
+  eq_stringify_shaders(SHADERS ${THIS_SHADERS})
+
+  set(THIS_TARGET ${NAME})
+  set(THIS_INPUT)
+  source_group(\\ FILES ${THIS_SOURCES} ${THIS_HEADERS} ${THIS_SHADERS})
+  add_executable(${THIS_TARGET} MACOSX_BUNDLE ${THIS_SOURCES} ${THIS_HEADERS}
+                 ${SHADERS})
+  target_link_libraries(${THIS_TARGET} ${EQUALIZER_LIBRARIES}
+    ${THIS_LINK_LIBRARIES} ${OPENGL_gl_LIBRARY})
+
+  set_target_properties(${THIS_TARGET} PROPERTIES OUTPUT_NAME ${NAME}
+                        FOLDER "Examples")
+  if(APPLE AND AGL) # set preference to 32 bit if AGL is available
+    update_file(${CMAKE_SOURCE_DIR}/CMake/MacOSXBundleInfo.plist.in
+      ${CMAKE_CURRENT_BINARY_DIR}/MacOSXBundleInfo.plist)
+    set_target_properties(${THIS_TARGET} PROPERTIES
+      MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_BINARY_DIR}/MacOSXBundleInfo.plist)
+  endif()
+
+  install(TARGETS ${THIS_TARGET} DESTINATION bin COMPONENT apps)
+  install(FILES CMakeLists.txt ${THIS_SOURCES} ${THIS_HEADERS} ${THIS_SHADERS}
+    DESTINATION share/Equalizer/examples/${NAME} COMPONENT examples)
+endfunction(EQ_ADD_EXAMPLE NAME)
 
 eq_add_example(volVis
   HEADERS

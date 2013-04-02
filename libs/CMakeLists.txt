@@ -5,8 +5,6 @@
 #                    2011 Maxim  Makhinya <maxmah@gmail.com>
 #                    2012, David Steiner  <steiner@ifi.uzh.ch>
 
-include(PurpleAddLibrary)
-
 option(MASSVOL_BUILD_STATIC_LIBS "Build static MassVolVis libraries" OFF)
 mark_as_advanced(MASSVOL_BUILD_STATIC_LIBS)
 if(NOT MASSVOL_BUILD_STATIC_LIBS)
