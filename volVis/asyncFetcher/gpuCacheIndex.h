@@ -14,7 +14,7 @@ namespace massVolVis
 /**
  * Mapping of linear index of a block in the GPU memory to 3D index of actual storage.
  *
- * Data is stored on the GPU in a single 3D texture, which contain multiple blocks 
+ * Data is stored on the GPU in a single 3D texture, which contain multiple blocks
  * of data.
  */
 class GPUCacheIndex
@@ -26,18 +26,18 @@ public:
      *
      * \param gpuMemorySize     - has to be in bytes and it has to be pre-divided by number of bytes per data element.
      * \param blockDim          - dimention of a cubical data block (with borders).
-     * \param maxCacheDimention - maximum allowed size of 3D texture on GPU.
+     * \param maxCacheDim - maximum allowed size of 3D texture on GPU.
      */
     GPUCacheIndex( const uint32_t gpuMemorySize, const uint32_t blockDim, const uint32_t maxCacheDim );
 
     /**
      * Total size of 3D texture cache in the GPU memory in blocks.
-     */ 
+     */
     const Vec3_ui32& totalCacheTextureDimBlocks() const { return _cacheTextureDimBlocks; }
 
     /**
      * Total size of 3D texture cache in the GPU memory.
-     */ 
+     */
     const Vec3_ui32& totalCacheTextureDim() const { return _cacheTextureDim; }
 
     /**
@@ -49,7 +49,7 @@ public:
 
 
     /**
-     * Returns relative memory coordinates of a texture block start 
+     * Returns relative memory coordinates of a texture block start
      * within cache texture, based on a given index.
      *
      * \param id - linear index. Has to be less than "capacity()".
@@ -64,17 +64,17 @@ public:
 
     /**
      * Maximum number of blocks that is storred in the cache.
-     */ 
+     */
      uint32_t capacity() const { return _capacity; }
 
     /**
      * Relative size of a block compared to the total texture size
-     */ 
+     */
     const Vec3_f&   getBlockScale() const { return _blockScale; }
 
     /**
      * Relative size of a voxel compared to the total texture size
-     */ 
+     */
     const Vec3_f&   getVoxelScale() const { return _voxelScale; }
 
 
@@ -87,7 +87,7 @@ private:
 
     /**
      * Checks if a given block id lay within avaliable capacity
-     */ 
+     */
     bool _isWithinCapacity( const uint32_t id ) const;
 
     Vec3_ui32   _cacheTextureDim;       //!< dimentions of GPU cache in voxels

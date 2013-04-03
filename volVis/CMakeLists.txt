@@ -54,8 +54,8 @@ function(EQ_ADD_EXAMPLE NAME)
   endif()
 
   install(TARGETS ${THIS_TARGET} DESTINATION bin COMPONENT apps)
-  install(FILES CMakeLists.txt ${THIS_SOURCES} ${THIS_HEADERS} ${VOLVIS_SHADERS}
-    DESTINATION share/Livre/examples/${NAME} COMPONENT examples)
+  install(FILES ${THIS_HEADERS}
+    DESTINATION include/livre/${NAME} COMPONENT examples)
 endfunction(EQ_ADD_EXAMPLE NAME)
 
 eq_add_example(volVis

@@ -69,9 +69,6 @@ public:
 
     virtual uint32_t getBlockSize_() const;
 
-    /**
-     * @param [out] hddIO Data IO, based on parameters and compression
-     */
     virtual DataHDDIOSPtr createDataHDDIO( bool initTree = true );
 
     int                 getVersion()      const { return _version;      }

@@ -41,6 +41,10 @@ public:
      * \param       nodesMax    nodes budget
      * \param       tfHist      histogram of a current Transfer Function
      * \param       msMax       time budget
+     * \param       maxTreeDepth
+     * \param       frontToBack
+     * \param       useRenderingError
+     * \param       renderingError
      */
     void compute(       RenderNodeVec&    renderNodes,
                         NodeIdPosVec&     desiredIds,
