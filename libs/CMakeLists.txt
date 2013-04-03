@@ -18,5 +18,4 @@ if(NOT MASSVOL_BUILD_MODULARIZED)
 endif(NOT MASSVOL_BUILD_MODULARIZED)
 
 add_subdirectory(msv)
-add_subdirectory(tclap)
 
