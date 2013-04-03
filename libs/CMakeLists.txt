@@ -17,8 +17,6 @@ if(NOT MASSVOL_BUILD_MODULARIZED)
   list(APPEND MSV_LIB_VARIANT EXCLUDE_FROM_ALL)
 endif(NOT MASSVOL_BUILD_MODULARIZED)
 
-include(pthreads/CMakeLists.txt)
-
 add_subdirectory(msv)
 add_subdirectory(tclap)
 
