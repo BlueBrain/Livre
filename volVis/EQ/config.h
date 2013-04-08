@@ -49,7 +49,7 @@ protected:
     virtual ~Config();
 
     /** @sa eq::Config::handleEvent */
-    virtual bool handleEvent( eq::EventICommand command );
+    virtual bool handleEvent( const eq::ConfigEvent* event );
 
     int  _spinX, _spinY;
     int  _advance;
@@ -73,7 +73,7 @@ private:
     void _switchLayout( int32_t increment );
     void _deregisterData();
     bool _handleKeyEvent( const eq::KeyEvent& event );
-    
+
     eq::View* _getCurrentView();
     const eq::View* _getCurrentView() const;
 

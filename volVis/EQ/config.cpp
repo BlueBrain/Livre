@@ -155,35 +155,31 @@ void Config::_resetMessage()
 }
 
 
-bool Config::handleEvent( eq::EventICommand command )
+bool Config::handleEvent( const eq::ConfigEvent* event )
 {
-    switch( command.getEventType() )
+    switch( event->data.type )
     {
         case eq::Event::KEY_PRESS:
         {
-            const eq::Event& event = command.get< eq::Event >();
-
-            if( _handleKeyEvent( event.keyPress ))
+            if( _handleKeyEvent( event->data.keyPress ))
                 return true;
             break;
         }
-        
+
         case eq::Event::CHANNEL_POINTER_BUTTON_PRESS:
         {
-            const eq::Event& event = command.get< eq::Event >();
-            const lunchbox::UUID& viewId = event.context.view.identifier;
-            _frameData.setCurrentViewId( viewId );
-            if( viewId == lunchbox::UUID::ZERO )
+            const eq::uint128_t& viewID = event->data.context.view.identifier;
+            _frameData.setCurrentViewId( viewID );
+            if( viewID == 0 )
             {
                 _currentCanvas = 0;
-                return true;
+                return false;
             }
-            _forceUpdate = false;
 
-            const eq::View* view = find< eq::View >( viewId );
+            const eq::View* view = find< eq::View >( viewID );
             const eq::Layout* layout = view->getLayout();
             const eq::Canvases& canvases = getCanvases();
-            for( eq::Canvases::const_iterator i = canvases.begin();
+            for( eq::CanvasesCIter i = canvases.begin();
                  i != canvases.end(); ++i )
             {
                 eq::Canvas* canvas = *i;
@@ -200,94 +196,91 @@ bool Config::handleEvent( eq::EventICommand command )
 
         case eq::Event::CHANNEL_POINTER_BUTTON_RELEASE:
         {
-            const eq::Event& event = command.get< eq::Event >();
-            if( event.pointerButtonRelease.buttons == eq::PTR_BUTTON_NONE
-                && event.pointerButtonRelease.button  == eq::PTR_BUTTON1 )
+            const eq::PointerEvent& releaseEvent =
+                event->data.pointerButtonRelease;
+            if( releaseEvent.buttons == eq::PTR_BUTTON_NONE)
             {
-                _spinY = event.pointerButtonRelease.dx*5.f;
-                _spinX = event.pointerButtonRelease.dy*5.f;
-
-                if( _spinX == 0 && _spinY == 0 )
+                if( releaseEvent.button == eq::PTR_BUTTON1 )
                 {
-                    if( _frameData.usePilotMode())
-                        _frameData.spinCamera( 0.f, 0.f );
-                    else
-                        _frameData.spinModel( 0.f, 0.f, 0.f );
-                    _forceUpdate = true;
+                    _spinX = releaseEvent.dy;
+                    _spinY = releaseEvent.dx;
+                    return true;
+                }
+                if( releaseEvent.button == eq::PTR_BUTTON2 )
+                {
+                    _advance = -releaseEvent.dy;
+                    return true;
                 }
             }
-            return true;
+            break;
         }
-        
         case eq::Event::CHANNEL_POINTER_MOTION:
         {
-            const eq::Event& event = command.get< eq::Event >();
-            switch( event.pointerMotion.buttons )
+            switch( event->data.pointerMotion.buttons )
             {
-                case eq::PTR_BUTTON_NONE: 
-                    return true;
+              case eq::PTR_BUTTON1:
+                  _spinX = 0;
+                  _spinY = 0;
 
-                case eq::PTR_BUTTON1:
-                    _spinX = 0;
-                    _spinY = 0;
+                  if( _frameData.usePilotMode())
+                      _frameData.spinCamera(
+                          -0.005f * event->data.pointerMotion.dy,
+                          -0.005f * event->data.pointerMotion.dx );
+                  else
+                      _frameData.spinModel(
+                          -0.005f * event->data.pointerMotion.dy,
+                          -0.005f * event->data.pointerMotion.dx, 0.f );
+                  return true;
 
-                    if( _frameData.usePilotMode())
-                        _frameData.spinCamera(  -0.005f * event.pointerMotion.dy,
-                                                -0.005f * event.pointerMotion.dx );
-                    else
-                        _frameData.spinModel(   -0.005f * event.pointerMotion.dy,
-                                                -0.005f * event.pointerMotion.dx, 0.f );
-                    return true;
+              case eq::PTR_BUTTON2:
+                  _advance = -event->data.pointerMotion.dy;
+                  _frameData.moveCamera( 0.f, 0.f, .005f * _advance );
+                  return true;
 
-                case eq::PTR_BUTTON2:
-                case eq::PTR_BUTTON1 | eq::PTR_BUTTON3:
-                    _frameData.moveCamera( .0, .0, .005f * event.pointerMotion.dy);
-                    return true;
-
-                case eq::PTR_BUTTON3:
-                    _frameData.moveCamera( .0005f * event.pointerMotion.dx,
-                                          -.0005f * event.pointerMotion.dy, .0 );
-                    return true;
+              case eq::PTR_BUTTON3:
+                  _frameData.moveCamera(  .0005f * event->data.pointerMotion.dx,
+                                         -.0005f * event->data.pointerMotion.dy,
+                                          0.f );
+                  return true;
             }
+            break;
         }
-        
-        case eq::Event::WINDOW_POINTER_WHEEL:
+
+        case eq::Event::CHANNEL_POINTER_WHEEL:
         {
-            const eq::Event& event = command.get< eq::Event >();
-            _frameData.moveCamera( -0.05f * event.pointerWheel.yAxis,
+            _frameData.moveCamera( -0.05f * event->data.pointerWheel.yAxis,
                                    0.f,
-                                   0.05f * event.pointerWheel.xAxis );
+                                   0.05f * event->data.pointerWheel.xAxis );
             return true;
         }
 
         case eq::Event::MAGELLAN_AXIS:
         {
-            const eq::Event& event = command.get< eq::Event >();
             _spinX = 0;
             _spinY = 0;
             _advance = 0;
-            _frameData.spinModel( 0.0001f * event.magellan.xRotation,
-                                  0.0001f * event.magellan.yRotation,
-                                  0.0001f * event.magellan.zRotation );
-            _frameData.moveCamera( 0.0001f * event.magellan.xAxis,
-                                   0.0001f * event.magellan.yAxis,
-                                   0.0001f * event.magellan.zAxis );
+            _frameData.spinModel( 0.0001f * event->data.magellan.xRotation,
+                                  0.0001f * event->data.magellan.yRotation,
+                                  0.0001f * event->data.magellan.zRotation );
+            _frameData.moveCamera( 0.0001f * event->data.magellan.xAxis,
+                                   0.0001f * event->data.magellan.yAxis,
+                                   0.0001f * event->data.magellan.zAxis );
             return true;
         }
 
         case eq::Event::MAGELLAN_BUTTON:
         {
-            const eq::Event& event = command.get< eq::Event >();
-            if( event.magellan.button == eq::PTR_BUTTON1 )
+            if( event->data.magellan.button == eq::PTR_BUTTON1 )
                 _frameData.toggleColorMode();
 
             return true;
         }
-        
+
         default:
             break;
     }
-    return eq::Config::handleEvent( command );
+
+    return eq::Config::handleEvent( event );
 }
 
 
