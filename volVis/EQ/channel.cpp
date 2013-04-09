@@ -255,8 +255,8 @@ void Channel::frameDraw( const eq::uint128_t& frameId )
     const eq::Matrix4f projection   = frustum.compute_matrix();
     const eq::Matrix4f projectionMV = projection * modelviewM;
 
-    const eq::PixelViewport& windowPVP = getWindow()->getPixelViewport();
-    const Vec2_f screenSize( windowPVP.w, windowPVP.h );
+    const eq::PixelViewport& pvp = getPixelViewport();
+    const Vec2_f screenSize( pvp.w, pvp.h );
 
 //    const eq::Vector4d clip( 0, 0, -1, -0.5 );
 //    EQ_GL_CALL( glClipPlane( GL_CLIP_PLANE0, clip.array ));
@@ -399,8 +399,8 @@ void Channel::clearViewport( const eq::PixelViewport &pvp )
     glClear( GL_COLOR_BUFFER_BIT );
 
     // restore assembly state
-    const eq::PixelViewport& windowPVP = getWindow()->getPixelViewport();
-    glScissor( 0, 0, windowPVP.w, windowPVP.h );
+    const eq::PixelViewport& channelPvp = getPixelViewport();
+    glScissor(  0, 0, channelPvp.w, channelPvp.h );
 }
 
 
@@ -450,8 +450,8 @@ void Channel::_orderFrames( eq::Frames& frames )
     const eq::Matrix4f projection   = frustum.compute_matrix();
     const eq::Matrix4f projectionMV = projection * modelviewM;
 
-    const eq::PixelViewport& windowPVP = getWindow()->getPixelViewport();  // TODO: check why not Channel::getPixelViewport()?
-    const Vec2_f screenSize( windowPVP.w, windowPVP.h );
+    const eq::PixelViewport& pvp = getPixelViewport();
+    const Vec2_f screenSize( pvp.w, pvp.h );
 
     CameraParameters cp( modelviewM, projectionMV, getScreenCenter(), screenSize );
 
@@ -572,7 +572,7 @@ void Channel::frameAssemble( const eq::uint128_t& )
     // blend DB frames in order
     try
     {
-        eq::Compositor::assembleFramesSorted( dbFrames, this, 0, 
+        eq::Compositor::assembleFramesSorted( dbFrames, this, 0,
                                               true /*blendAlpha*/ );
     }
     catch( const co::Exception& e )

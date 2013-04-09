@@ -88,6 +88,9 @@ void LocalInitData::parseArguments( const int argc, char** argv )
         TCLAP::ValueArg<std::string> wsArg( "w", "windowSystem", wsHelp,
                                             false, "auto", "string", command );
 
+        TCLAP::ValueArg<std::string> ignore( "e", "eq-config", "dummy",
+                                            false, "auto", "string", command );
+
         TCLAP::ValueArg<std::string> pathArg( "a", "cameraPath",
                                         "File containing camera path animation",
                                               false, "", "string", command );
