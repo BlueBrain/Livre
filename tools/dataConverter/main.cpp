@@ -120,6 +120,7 @@ int main( int argc, char **argv )
 
             dataConverter.setReaderType( DataConverter::OCT );
             srcDim = Vec3_ui32( octreeBSArg.getValue( ));
+            srcFileInfo.setBlockDim( octreeBSArg.getValue( ));
         }else
             throw( TCLAP::ArgException( "srcType is wrong", "inType" ));
 
