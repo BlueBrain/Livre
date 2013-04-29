@@ -55,7 +55,7 @@ if(Equalizer_name)
   include_directories(${${Equalizer_name}_INCLUDE_DIRS})
 endif()
 
-find_package(Lunchbox 1.7.1 REQUIRED)
+find_package(Lunchbox 1.7.5 REQUIRED)
 if(Lunchbox_FOUND)
   set(Lunchbox_name Lunchbox)
 endif()
@@ -66,6 +66,19 @@ if(Lunchbox_name)
   list(APPEND FIND_PACKAGES_DEFINES LIVRE_USE_LUNCHBOX)
   link_directories(${${Lunchbox_name}_LIBRARY_DIRS})
   include_directories(${${Lunchbox_name}_INCLUDE_DIRS})
+endif()
+
+find_package(OpenGL  REQUIRED)
+if(OpenGL_FOUND)
+  set(OpenGL_name OpenGL)
+endif()
+if(OPENGL_FOUND)
+  set(OpenGL_name OPENGL)
+endif()
+if(OpenGL_name)
+  list(APPEND FIND_PACKAGES_DEFINES LIVRE_USE_OPENGL)
+  link_directories(${${OpenGL_name}_LIBRARY_DIRS})
+  include_directories(${${OpenGL_name}_INCLUDE_DIRS})
 endif()
 
 find_package(PNG  REQUIRED)
@@ -95,7 +108,7 @@ if(Threads_name)
 endif()
 
 
-set(LIVRE_DEPENDS Qt4;Boost;Collage;Equalizer;Lunchbox;PNG;Threads)
+set(LIVRE_DEPENDS Qt4;Boost;Collage;Equalizer;Lunchbox;OpenGL;PNG;Threads)
 
 # Write defines.h and options.cmake
 if(NOT PROJECT_INCLUDE_NAME)

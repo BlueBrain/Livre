@@ -42,7 +42,8 @@ function(EQ_ADD_EXAMPLE NAME)
   add_executable(${THIS_TARGET} MACOSX_BUNDLE ${THIS_SOURCES} ${THIS_HEADERS}
                  ${SHADERS})
   target_link_libraries(${THIS_TARGET} ${EQUALIZER_LIBRARIES}
-    ${THIS_LINK_LIBRARIES} ${OPENGL_gl_LIBRARY})
+    ${THIS_LINK_LIBRARIES} ${OPENGL_gl_LIBRARY} ${X11_LIBRARIES}
+    ${CARBON_LIBRARY} dl msv)
 
   set_target_properties(${THIS_TARGET} PROPERTIES OUTPUT_NAME ${NAME}
                         FOLDER "Examples")
@@ -56,7 +57,7 @@ function(EQ_ADD_EXAMPLE NAME)
   install(TARGETS ${THIS_TARGET} DESTINATION bin COMPONENT apps)
   install(FILES ${THIS_HEADERS}
     DESTINATION include/livre/${NAME} COMPONENT examples)
-endfunction(EQ_ADD_EXAMPLE NAME)
+endfunction()
 
 eq_add_example(volVis
   HEADERS
@@ -71,12 +72,6 @@ eq_add_example(volVis
     ${VOLVIS_LB_SOURCES}
     ${VOLVIS_RENDERER_SOURCES}
     ${VOLVIS_MAIN_SOURCES}
-  LINK_LIBRARIES
-    ${CARBON_LIBRARY}
-#    ${CUDA_LIBRARIES}
-    ${LUNCHBOX_LIBRARIES}
-    msv
-    X11
   )
 
 
@@ -97,11 +92,5 @@ eq_add_example(_volVisTests
     ${VOLVIS_LB_SOURCES}
     ${VOLVIS_RENDERER_SOURCES}
     ${VOLVIS_MAIN_TESTS_SOURCES}
-  LINK_LIBRARIES
-    ${CARBON_LIBRARY}
-#    ${CUDA_LIBRARIES}
-    ${LUNCHBOX_LIBRARIES}
-    msv
-    X11
   )
 
