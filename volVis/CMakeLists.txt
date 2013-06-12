@@ -38,12 +38,9 @@ function(EQ_ADD_EXAMPLE NAME)
 
   set(THIS_TARGET ${NAME})
   set(THIS_INPUT)
-  source_group(\\ FILES ${THIS_SOURCES} ${THIS_HEADERS} ${VOLVIS_SHADERS})
-  add_executable(${THIS_TARGET} MACOSX_BUNDLE ${THIS_SOURCES} ${THIS_HEADERS}
-                 ${SHADERS})
-  target_link_libraries(${THIS_TARGET} ${EQUALIZER_LIBRARIES}
-    ${THIS_LINK_LIBRARIES} ${OPENGL_gl_LIBRARY} ${X11_LIBRARIES}
-    ${CARBON_LIBRARY} dl msv)
+  source_group(\\ FILES ${THIS_SOURCES} ${THIS_HEADERS})
+  add_executable(${THIS_TARGET} MACOSX_BUNDLE ${THIS_SOURCES} ${THIS_HEADERS})
+  target_link_libraries(${THIS_TARGET} Livre)
 
   set_target_properties(${THIS_TARGET} PROPERTIES OUTPUT_NAME ${NAME}
                         FOLDER "Examples")
@@ -59,38 +56,22 @@ function(EQ_ADD_EXAMPLE NAME)
     DESTINATION include/livre/${NAME} COMPONENT examples)
 endfunction()
 
-eq_add_example(volVis
-  HEADERS
-    ${VOLVIS_ASYNC_FETCHER_HEADERS}
-    ${VOLVIS_EQ_HEADERS}
-    ${VOLVIS_LB_HEADERS}
-    ${VOLVIS_RENDERER_HEADERS}
-    ${VOLVIS_UTIL_HEADERS}
-  SOURCES
-    ${VOLVIS_ASYNC_FETCHER_SOURCES}
-    ${VOLVIS_EQ_SOURCES}
-    ${VOLVIS_LB_SOURCES}
-    ${VOLVIS_RENDERER_SOURCES}
-    ${VOLVIS_MAIN_SOURCES}
-  )
+add_library(Livre SHARED ${VOLVIS_ALL_HEADERS} ${VOLVIS_ALL_SOURCES} ${SHADERS})
+target_link_libraries(Livre ${EQUALIZER_LIBRARIES} ${OPENGL_gl_LIBRARY}
+                            ${X11_LIBRARIES} ${CARBON_LIBRARY} dl msv)
+install(FILES ${VOLVIS_ALL_HEADERS}
+      DESTINATION include/livre COMPONENT dev)
+install(TARGETS Livre
+      ARCHIVE DESTINATION lib COMPONENT dev
+      RUNTIME DESTINATION bin COMPONENT lib
+      LIBRARY DESTINATION lib COMPONENT lib)
+
+eq_add_example(volVis SOURCES ${VOLVIS_MAIN_SOURCES})
 
 
 
 source_group(_volVisTests REGULAR_EXPRESSION .*)
 source_group(\\ FILES ${VOLVIS_MAIN_TESTS_SOURCES} )
 
-eq_add_example(_volVisTests
-  HEADERS
-    ${VOLVIS_ASYNC_FETCHER_HEADERS}
-    ${VOLVIS_EQ_HEADERS}
-    ${VOLVIS_LB_HEADERS}
-    ${VOLVIS_RENDERER_HEADERS}
-    ${VOLVIS_UTIL_HEADERS}
-  SOURCES
-    ${VOLVIS_ASYNC_FETCHER_SOURCES}
-    ${VOLVIS_EQ_SOURCES}
-    ${VOLVIS_LB_SOURCES}
-    ${VOLVIS_RENDERER_SOURCES}
-    ${VOLVIS_MAIN_TESTS_SOURCES}
-  )
+eq_add_example(_volVisTests SOURCES ${VOLVIS_MAIN_TESTS_SOURCES})
 
