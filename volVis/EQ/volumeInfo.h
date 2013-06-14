@@ -60,7 +60,6 @@ private:
     uint32_t            _fileNameVersion;
     uint32_t            _tfVersion;
     uint32_t            _rTypeVersion;
-    uint32_t            _tpVersion;
 };
 
 

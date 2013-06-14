@@ -46,6 +46,7 @@ protected:
     void clearViewport( const eq::PixelViewport &pvp );
 
 private:
+    void _drawAxiss( const float size );
     void _drawLogo();
     void _drawHelp();
 

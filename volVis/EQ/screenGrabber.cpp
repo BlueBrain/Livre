@@ -40,7 +40,6 @@ void ScreenGrabber::Frame::resize( int w_, int h_, int b_ )
 ScreenGrabber::ScreenGrabber( const GLEWContext* context )
     : _numBytes( 4 )
     , _frameNumber( 0 )
-    , _glewContext( context )
     , _texturePtr( new eq::util::Texture( GL_TEXTURE_RECTANGLE_ARB, context ))
     , _clockPtr( new lunchbox::Clock( ))
 {

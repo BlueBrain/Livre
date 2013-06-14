@@ -96,7 +96,7 @@ int VolVis::run()
     lunchbox::Clock clock;
 
     config->setInitData( _initData );
-    if( !config->init( ))
+    if( !config->init( 0 ))
     {
         server->releaseConfig( config );
         disconnectServer( server );
@@ -115,7 +115,7 @@ int VolVis::run()
     clock.reset();
     while( config->isRunning( ) && maxFrames-- )
     {
-        config->startFrame();
+        config->startFrame( 0 );
         if( config->getError( ))
             LBWARN << "Error during frame start: " << config->getError()
                    << std::endl;

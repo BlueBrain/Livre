@@ -27,7 +27,7 @@ Config::~Config()
 }
 
 
-bool Config::init()
+bool Config::init( const eq::uint128_t& )
 {
     if( !_animation.isValid( ))
         _animation.loadAnimation( _initData.getPathFilename( ));
@@ -112,7 +112,7 @@ void Config::_deregisterData()
 }
 
 
-uint32_t Config::startFrame()
+uint32_t Config::startFrame( const eq::uint128_t& )
 {
     // update camera
     if( _animation.isValid( ))

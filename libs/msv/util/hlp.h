@@ -13,9 +13,7 @@
 namespace hlpFuncs
 {
 
-namespace
-{
-uint32_t getPow2( int32_t val )
+inline uint32_t getPow2( int32_t val )
 {
     if( val <= 0 )
         return 1;
@@ -31,7 +29,6 @@ uint32_t getPow2( int32_t val )
     val++;
 
     return val;
-}
 }
 
 template < typename T >
@@ -72,7 +69,7 @@ T myClip( const T& val, const T& mn, const T& mx )
 template <typename T>
 void clearVector( std::vector<T>& vec )
 {
-    memset( &vec[0], 0, vec.size()*sizeof( T )); 
+    memset( &vec[0], 0, vec.size()*sizeof( T ));
 }
 }
 

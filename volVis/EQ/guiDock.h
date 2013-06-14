@@ -19,7 +19,7 @@ namespace massVolVis
 {
 
 class Config;
-class TransferFunction;
+struct TransferFunction;
 
 class GUINode : public co::LocalNode, private NonCopyable
 {

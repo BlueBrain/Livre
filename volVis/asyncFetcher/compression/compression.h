@@ -14,7 +14,7 @@ namespace massVolVis
 
 class DecompressorBase;
 class DataHDDIO;
-class GPULoadRequest;
+struct GPULoadRequest;
 class RAMDataElement;
 class VolumeTreeBase;
 

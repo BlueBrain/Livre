@@ -53,7 +53,6 @@ private:
 
 // connection
     std::string      _host;
-    short            _port;
 
     co::LocalNodePtr _localNode;
     co::NodePtr      _applicationNode;

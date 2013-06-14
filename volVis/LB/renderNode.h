@@ -38,13 +38,10 @@ struct RenderNode
 
 typedef std::vector<RenderNode> RenderNodeVec;
 
-namespace
+inline std::ostream& operator << ( std::ostream& os, const RenderNode& rn )
 {
-std::ostream& operator << ( std::ostream& os, const RenderNode& rn )
-{
-    os << "nId: " << rn.nodeId << " coords: " << rn.coords; 
+    os << "nId: " << rn.nodeId << " coords: " << rn.coords;
     return os;
-}
 }
 
 }

@@ -29,12 +29,12 @@ public:
     Config( eq::ServerPtr parent );
 
     /** @sa eq::Config::init. */
-    virtual bool init();
+    virtual bool init( const eq::uint128_t& initID );
     /** @sa eq::Config::exit. */
     virtual bool exit();
 
     /** @sa eq::Config::startFrame. */
-    virtual uint32_t startFrame();
+    virtual uint32_t startFrame( const eq::uint128_t& frameID );
 
     void setInitData( const LocalInitData& data ) { _initData = data; }
     const InitData& getInitData() const { return _initData; }

@@ -135,52 +135,7 @@ void _setLights( eq::Matrix4f& invRotationM )
 }
 
 
-void _drawAxiss( const float size )
-{
-    const float ls  = size / 40.f;
-    const float ls2 = ls*2.f;
-    glDisable( GL_LIGHTING    );
 
-    glLineWidth( 1.5 );
-    glBegin( GL_LINES );
-        // X
-        glColor3f(   1.f,  0.f,  0.f );
-        glVertex3f(  0.f,  0.f,  0.f );
-        glVertex3f( size,  0.f,  0.f );
-
-        glVertex3f( size+ls-ls, -ls,  0.f );
-        glVertex3f( size+ls+ls,  ls,  0.f );
-        glVertex3f( size+ls-ls,  ls,  0.f );
-        glVertex3f( size+ls+ls, -ls,  0.f );
-
-        // Y
-        glColor3f(   0.f,  1.f,  0.f );
-        glVertex3f(  0.f,  0.f,  0.f );
-        glVertex3f(  0.f, size,  0.f );
-
-        glVertex3f(  0.f, size+ls2,  0.f );
-        glVertex3f(   ls, size+ls2+ls,  0.f );
-
-        glVertex3f(  0.f, size+ls2,  0.f );
-        glVertex3f(  -ls, size+ls2+ls,  0.f );
-
-        glVertex3f(  0.f, size+ls2,  0.f );
-        glVertex3f(  0.f, size+ls2-ls,  0.f );
-
-        // Z
-        glColor3f(   0.f,  0.f,  1.f );
-        glVertex3f(  0.f,  0.f,  0.f );
-        glVertex3f(  0.f,  0.f, size );
-    glEnd();
-    glBegin( GL_LINE_STRIP );
-        glVertex3f( -ls,  ls, size+ls );
-        glVertex3f(  ls,  ls, size+ls );
-        glVertex3f( -ls, -ls, size+ls );
-        glVertex3f(  ls, -ls, size+ls );
-    glEnd();
-
-    glEnable( GL_LIGHTING    );
-}
 
 float _getTaintAlpha( const ColorMode colorMode )
 {
@@ -606,6 +561,53 @@ void Channel::frameReadback( const eq::uint128_t& frameId )
     }
 
     eq::Channel::frameReadback( frameId );
+}
+
+void Channel::_drawAxiss( const float size )
+{
+    const float ls  = size / 40.f;
+    const float ls2 = ls*2.f;
+    glDisable( GL_LIGHTING    );
+
+    glLineWidth( 1.5 );
+    glBegin( GL_LINES );
+        // X
+        glColor3f(   1.f,  0.f,  0.f );
+        glVertex3f(  0.f,  0.f,  0.f );
+        glVertex3f( size,  0.f,  0.f );
+
+        glVertex3f( size+ls-ls, -ls,  0.f );
+        glVertex3f( size+ls+ls,  ls,  0.f );
+        glVertex3f( size+ls-ls,  ls,  0.f );
+        glVertex3f( size+ls+ls, -ls,  0.f );
+
+        // Y
+        glColor3f(   0.f,  1.f,  0.f );
+        glVertex3f(  0.f,  0.f,  0.f );
+        glVertex3f(  0.f, size,  0.f );
+
+        glVertex3f(  0.f, size+ls2,  0.f );
+        glVertex3f(   ls, size+ls2+ls,  0.f );
+
+        glVertex3f(  0.f, size+ls2,  0.f );
+        glVertex3f(  -ls, size+ls2+ls,  0.f );
+
+        glVertex3f(  0.f, size+ls2,  0.f );
+        glVertex3f(  0.f, size+ls2-ls,  0.f );
+
+        // Z
+        glColor3f(   0.f,  0.f,  1.f );
+        glVertex3f(  0.f,  0.f,  0.f );
+        glVertex3f(  0.f,  0.f, size );
+    glEnd();
+    glBegin( GL_LINE_STRIP );
+        glVertex3f( -ls,  ls, size+ls );
+        glVertex3f(  ls,  ls, size+ls );
+        glVertex3f( -ls, -ls, size+ls );
+        glVertex3f(  ls, -ls, size+ls );
+    glEnd();
+
+    glEnable( GL_LIGHTING    );
 }
 
 

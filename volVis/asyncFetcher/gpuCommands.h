@@ -3,7 +3,7 @@
  *               2012, David Steiner  <steiner@ifi.uzh.ch>
  *
  */
-// // 
+// //
 #ifndef MASS_VOL__GPU_COMMANDS_H
 #define MASS_VOL__GPU_COMMANDS_H
 
@@ -60,15 +60,12 @@ struct GPULoadRequest
     }
 };
 
-namespace
-{
-std::ostream& operator<<( std::ostream& out, const GPULoadRequest& req )
+inline std::ostream& operator<<( std::ostream& out, const GPULoadRequest& req )
 {
     out << "GPULoadRequest [" << req.nodeId    << ", "
                               << req.posOnGPU  << ", "
                               << (req.reload ? "reload" : "new_data" ) << ")";
     return out;
-}
 }
 
 typedef std::vector<GPULoadRequest> GPULoadRequestVec;

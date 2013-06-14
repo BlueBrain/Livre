@@ -21,8 +21,8 @@ typedef struct GLEWContextStruct GLEWContext;
 namespace massVolVis
 {
 
-class TransferFunction;
-class RenderNode;
+struct TransferFunction;
+struct RenderNode;
 class GLSLShaders;
 
 /**

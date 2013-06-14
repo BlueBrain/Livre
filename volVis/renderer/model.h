@@ -99,7 +99,7 @@ private:
 
     Rect_i32 _region; //!< Rendered screen region during last call of render()
     uint32_t _bricksRendered; //!< number of bricks rendered during last call of render()
-    float    _cameraSpin; // !< using damping for mouse motion softening
+    //float    _cameraSpin; // !< using damping for mouse motion softening
 
     util::EventLogger* const _events;
 
