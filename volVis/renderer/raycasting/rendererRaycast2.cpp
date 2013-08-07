@@ -299,7 +299,7 @@ void RendererRaycast2::renderBrick
 //    glUniform2fARB( tParamNameGL, renderNode.screenRect.s.x, renderNode.screenRect.s.y ); //v-shader
     glUniform2fARB( tParamNameGL, 0.f, 0.f ); //v-shader
 
-    EQASSERT( renderNode.treeLevel > 0 );
+    LBASSERT( renderNode.treeLevel > 0 );
     tParamNameGL = glGetUniformLocationARB(  shader,  "samplingDelta" );
 
 #if 1 // use opacity correction

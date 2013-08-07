@@ -24,7 +24,7 @@
 #include <QtGui/QShortcut>
 
 #include <QtGui/QTextEdit>
- 
+
 namespace massVolGUI
 {
 
@@ -44,12 +44,12 @@ MainWindow::MainWindow( QWidget *_parent )
     , _connectDialog( 0 )
 {
     _tf = new ivs::TransferFunctionPair();
-    EQASSERT( _tf );
-    _tf->first.init(  256, ivs::tf::RGBA8 ); // rgba 
+    LBASSERT( _tf );
+    _tf->first.init(  256, ivs::tf::RGBA8 ); // rgba
     _tf->second.init( 256, ivs::tf::RGBA8 ); //  sda
 
     _controller = new Controller( _tf );
-    EQASSERT( _controller );
+    LBASSERT( _controller );
 
     setWindowTitleBase(tr( "volVisGUI" ));
 
@@ -237,7 +237,7 @@ void MainWindow::_loadFile( const QString& fileName )
 {
     if( fileName.length() > VOL_VIS_GUI_MAX_PATH_LEN-1 )
     {
-        QMessageBox::warning( this, QString( "Exception" ), 
+        QMessageBox::warning( this, QString( "Exception" ),
                                     QString( "File path is too long (%1 characters max)" ).arg( VOL_VIS_GUI_MAX_PATH_LEN-1 ),
                                     QMessageBox::Ok, QMessageBox::Ok );
         return;
@@ -280,8 +280,8 @@ void MainWindow::_connect()
         QString port = _connectDialog->getPort();
         if( !_controller->connect( host.toStdString(), port.toShort( )))
         {
-            QMessageBox::warning( this, QString( "Exception" ), 
-                                        QString( "Failed to connect to %1:%2" ).arg( host, port ), 
+            QMessageBox::warning( this, QString( "Exception" ),
+                                        QString( "Failed to connect to %1:%2" ).arg( host, port ),
                                         QMessageBox::Ok, QMessageBox::Ok );
         }
     }

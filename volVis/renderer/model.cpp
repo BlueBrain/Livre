@@ -148,9 +148,9 @@ namespace
 //    if( cameraSpin > 0.0000001 )
 //    {
 //        if( cameraSpin > maxs )
-//            budget = EQ_MIN( budget, Maxs );
+//            budget = LB_MIN( budget, Maxs );
 //        else
-//            budget = EQ_MIN( budget, as / cameraSpin + bs );
+//            budget = LB_MIN( budget, as / cameraSpin + bs );
 //    }
 ////    std::cout << "spin: " << cameraSpin << " a: " << as << " b: " << bs << " budget: " << budget <<  std::endl;
 //}
@@ -225,7 +225,7 @@ void Model::render( const ModelRenderParameters& rParams )
     LBASSERT( blockNum >= 0 );
     const Box_f& dataBB = bbs[blockNum].bb;
 
-    uint32_t budget = EQ_MIN( blocksBudget, rParams.renderBudget );
+    uint32_t budget = LB_MIN( blocksBudget, rParams.renderBudget );
 
 //    _adjustBudjet( budget, _cameraSpin, rParams.cameraSpin );
 

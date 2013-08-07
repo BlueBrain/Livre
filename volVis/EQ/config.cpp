@@ -33,8 +33,8 @@ bool Config::init( const eq::uint128_t& )
         _animation.loadAnimation( _initData.getPathFilename( ));
 
     // init distributed objects
-    EQCHECK( registerObject( &_frameData  ));
-    EQCHECK( registerObject( &_volumeInfo ));
+    LBCHECK( registerObject( &_frameData  ));
+    LBCHECK( registerObject( &_volumeInfo ));
 
     _initData.setFrameDataId(  _frameData.getID(  ));
     _initData.setVolumeInfoId( _volumeInfo.getID( ));
@@ -54,7 +54,7 @@ bool Config::init( const eq::uint128_t& )
     _volumeInfo.commit();
 
 
-    EQCHECK( registerObject( &_initData ));
+    LBCHECK( registerObject( &_initData ));
 
     // init config
     if( !eq::Config::init( _initData.getID( )))

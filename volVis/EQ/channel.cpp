@@ -259,7 +259,7 @@ void Channel::frameDraw( const eq::uint128_t& frameId )
             eq::Frames dbFrames;
             dbFrames.push_back( &_frame );
 
-            eq::Window::ObjectManager* glObjects = getObjectManager();
+            eq::util::ObjectManager& glObjects = getObjectManager();
 
             _frame.setOffset( eq::Vector2i( 0, 0 ));
             _frame.setZoom( getZoom() );
@@ -511,7 +511,7 @@ void Channel::frameAssemble( const eq::uint128_t& )
         }
         else if( coveredPVP.hasArea())
         {
-            eq::Window::ObjectManager* glObjects = getObjectManager();
+            eq::util::ObjectManager& glObjects = getObjectManager();
 
             _frame.setOffset( eq::Vector2i( 0, 0 ));
             _frame.setZoom( zoom );
@@ -693,7 +693,7 @@ void Channel::_drawHelp()
 
     if( frameData.showHelp( ))
     {
-        const eq::Window::Font* font = getWindow()->getSmallFont();
+        const eq::util::BitmapFont* font = getWindow()->getSmallFont();
         std::string help = VolVis::getHelp();
         float y = 340.f;
 
@@ -713,7 +713,7 @@ void Channel::_drawHelp()
 
     if( !message.empty() )
     {
-        const eq::Window::Font* font = getWindow()->getMediumFont();
+        const eq::util::BitmapFont* font = getWindow()->getMediumFont();
 
         const eq::Viewport& vp = getViewport();
         const eq::PixelViewport& pvp = getPixelViewport();
@@ -756,7 +756,7 @@ void Channel::drawFPS( const eq::PixelViewport& pvp, float fps )
     std::ostringstream fpsText;
     fpsText << std::setprecision(3) << fps << " FPS";
 
-    const eq::Window::Font* font = getWindow()->getSmallFont();
+    const eq::util::BitmapFont* font = getWindow()->getSmallFont();
 
     if( _bgColor == eq::Vector3f( 1.f, 1.f, 1.f ))
     {

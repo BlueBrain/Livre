@@ -31,7 +31,7 @@ Controller::Controller( ivs::TransferFunctionPair* tf )
     , _tfNew( false )
     , _fileNameNew( false )
 {
-    EQASSERT( _tf );
+    LBASSERT( _tf );
 
     _localNode = new co::LocalNode;
 
@@ -118,8 +118,8 @@ bool Controller::updateTF()
     if( !isConnected( ))
         return false;
 
-    EQASSERT( _tf->first.size()      == 256            );
-    EQASSERT( _tf->first.getFormat() == ivs::tf::RGBA8 );
+    LBASSERT( _tf->first.size()      == 256            );
+    LBASSERT( _tf->first.getFormat() == ivs::tf::RGBA8 );
 
     const float* data = _tf->first.getData();
     std::vector<byte> rgba( 256*4 );

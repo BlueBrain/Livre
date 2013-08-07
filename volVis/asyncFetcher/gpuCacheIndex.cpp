@@ -5,7 +5,7 @@
 
 #include "gpuCacheIndex.h"
 
-#include <lunchbox/debug.h>       // EQASSERT macro
+#include <lunchbox/debug.h>       // LBASSERT macro
 
 #include <math.h> // cbrt
 

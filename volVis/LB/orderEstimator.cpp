@@ -326,7 +326,7 @@ void OrderEstimator::compute(
                     node.screenSize    = node.screenRect.getDiagonalSize();
                     node.renderingTime = _estimateRenderingTime( node.screenSize );
 
-                    EQASSERT( current->treeLevel > 0 );
+                    LBASSERT( current->treeLevel > 0 );
                     node.treeLevel  = current->treeLevel + 1;
 
                     childrenRenderingTime += node.renderingTime;

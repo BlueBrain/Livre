@@ -7,7 +7,7 @@
 
 #include <stdlib.h>
 
-#include <lunchbox/debug.h>       // EQASSERT macro
+#include <lunchbox/debug.h>       // LBASSERT macro
 
 using namespace massVolVis;
 
