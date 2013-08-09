@@ -68,7 +68,7 @@ int VolVis::run()
     }
 
     // 2. choose config
-    eq::ConfigParams configParams;
+    eq::fabric::ConfigParams configParams;
     Config* config = static_cast<Config*>(server->chooseConfig( configParams ));
 
     if( !config )

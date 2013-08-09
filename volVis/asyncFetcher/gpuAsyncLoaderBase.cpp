@@ -42,38 +42,33 @@ eq::SystemWindow* initSharedContextWindow( eq::Window* wnd,
     eq::Pipe* pipe = wnd->getPipe();
     LBASSERT( pipe );
 
+    const std::string& ws = pipe->getWindowSystem().getName();
     eq::SystemWindow* sharedContextWindow = 0;
-    switch( pipe->getWindowSystem( ))
-    {
+    LBINFO << "Using " << ws << " window" << std::endl;
 #ifdef GLX
-        case eq::WINDOW_SYSTEM_GLX:
-            LBINFO << "Using GLXWindow" << std::endl;
-            sharedContextWindow = new GLXWindowShared( wnd );
-            break;
+    if( ws == "GLX" )
+        sharedContextWindow = new GLXWindowShared( wnd );
 #endif
 #ifdef AGL
-        case eq::WINDOW_SYSTEM_AGL:
-            LBINFO << "Using AGLWindow" << std::endl;
-            sharedContextWindow = new AGLWindowShared( wnd );
-            break;
+    if( ws == "AGL" )
+        sharedContextWindow = new AGLWindowShared( wnd );
 #endif
 #ifdef WGL
-        case eq::WINDOW_SYSTEM_WGL:
-            LBINFO << "Using WGLWindow" << std::endl;
-            sharedContextWindow = new eq::WGLWindow( wnd );
-            break;
+    if( ws == "WGL" )
+        sharedContextWindow = new eq::WGLWindow( wnd );
 #endif
 
-        default:
-            LBERROR << "Window system " << pipe->getWindowSystem()
-                    << " not implemented or supported" << std::endl;
-            return 0;
+    if( !sharedContextWindow )
+    {
+        LBERROR << "Window system " << ws << " not implemented or supported"
+                << std::endl;
+        LBASSERT( sharedContextWindow );
+        return 0;
     }
-    LBASSERT( sharedContextWindow );
 
     if( !sharedContextWindow->configInit( ))
     {
-        LBWARN << "OS Window initialization failed: " << std::endl;
+        LBWARN << ws << " window initialization failed: " << std::endl;
         delete sharedContextWindow;
         sharedContextWindow = 0;
         return 0;
@@ -83,21 +78,6 @@ eq::SystemWindow* initSharedContextWindow( eq::Window* wnd,
     wnd->setIAttribute( eq::Window::IATTR_PLANES_STENCIL, stencil );
 
     sharedContextWindow->makeCurrent();
-
-/*
-    LBASSERT( (*computeCtx) == 0 );
-    *computeCtx = new eq::CUDAContext( pipe );
-
-    if( !(*computeCtx)->configInit() )
-    {
-        LBASSERT( pipe->getError() != eq::ERROR_NONE );
-        LBERROR << "GPU Computing context initialization failed: "
-                << pipe->getError() << std::endl;
-        delete *computeCtx;
-    }
-    pipe->setComputeContext( *computeCtx );
-    *computeCtx = 0;
-*/
     LBWARN << "Async fetcher initialization finished" << std::endl;
     return sharedContextWindow;
 }

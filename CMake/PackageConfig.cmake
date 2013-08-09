@@ -25,9 +25,12 @@
 #    ${UPPER_PROJECT_NAME}_${component}_LIBRARY - The path & name of the ${component} library
 #
 #    ${UPPER_PROJECT_NAME}_DEB_DEPENDENCIES - A list of dependencies for the CPack deb generator
+#    ${UPPER_PROJECT_NAME}_DEB_LIB_DEPENDENCY - The runtime dependency for the CPack deb generator
+#    ${UPPER_PROJECT_NAME}_DEB_DEV_DEPENDENCY - The compile-time dependency for the CPack deb generator
 
 
 include(CMakePackageConfigHelpers)
+include(${CMAKE_CURRENT_LIST_DIR}/CMakeInstallPath.cmake)
 
 # Write the ProjectConfig.cmake.in file for configure_package_config_file
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/pkg/${CMAKE_PROJECT_NAME}Config.cmake.in
@@ -35,6 +38,11 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/pkg/${CMAKE_PROJECT_NAME}Config.cmake.in
 # add helper stuff from CMakePackageConfigHelpers
   "@PACKAGE_INIT@\n"
   "\n"
+  "set(${CMAKE_PROJECT_NAME}_PREFIX_DIR \${PACKAGE_PREFIX_DIR})\n"
+  "if(CMAKE_VERSION VERSION_LESS 2.8.3) # WAR bug\n"
+  "  get_filename_component(CMAKE_CURRENT_LIST_DIR \${CMAKE_CURRENT_LIST_FILE} PATH)\n"
+  "endif()\n"
+  "list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})\n"
 # reset before using them
   "set(_output_type)\n"
   "set(_out)\n"
@@ -47,26 +55,28 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/pkg/${CMAKE_PROJECT_NAME}Config.cmake.in
   "if(NOT _fail)\n"
 # setup VERSION, INCLUDE_DIRS and DEB_DEPENDENCIES
   "  set(${UPPER_PROJECT_NAME}_VERSION ${VERSION})\n"
-  "  set_and_check(${UPPER_PROJECT_NAME}_INCLUDE_DIRS "@PACKAGE_INCLUDE_INSTALL_DIR@")\n"
+  "  list(APPEND ${UPPER_PROJECT_NAME}_INCLUDE_DIRS \${${CMAKE_PROJECT_NAME}_PREFIX_DIR}/include)\n"
   "  set(${UPPER_PROJECT_NAME}_DEB_DEPENDENCIES \"${LOWER_PROJECT_NAME}${VERSION_ABI} (>= ${VERSION_MAJOR}.${VERSION_MINOR})\")\n"
+  "  set(${UPPER_PROJECT_NAME}_DEB_LIB_DEPENDENCY \"${LOWER_PROJECT_NAME}${VERSION_ABI}-lib (>= ${VERSION_MAJOR}.${VERSION_MINOR})\")\n"
+  "  set(${UPPER_PROJECT_NAME}_DEB_DEV_DEPENDENCY \"${LOWER_PROJECT_NAME}${VERSION_ABI}-dev (>= ${VERSION_MAJOR}.${VERSION_MINOR})\")\n"
   "\n"
 # find components if specified
   "  if(${CMAKE_PROJECT_NAME}_FIND_COMPONENTS)\n"
   "    find_library(\${UPPER_PROJECT_NAME}_LIBRARY ${CMAKE_PROJECT_NAME} NO_DEFAULT_PATH\n"
-  "                 PATHS \${PACKAGE_PREFIX_DIR} PATH_SUFFIXES lib ${PYTHON_LIBRARY_PREFIX})\n"
+  "                 PATHS \${${CMAKE_PROJECT_NAME}_PREFIX_DIR} PATH_SUFFIXES lib ${PYTHON_LIBRARY_PREFIX})\n"
   "    list(APPEND ${UPPER_PROJECT_NAME}_LIBRARIES \${${UPPER_PROJECT_NAME}_LIBRARY})\n"
   "    foreach(_component \${${CMAKE_PROJECT_NAME}_FIND_COMPONENTS})\n"
   "      find_library(\${_component}_libraryname ${CMAKE_PROJECT_NAME}_\${_component} NO_DEFAULT_PATH\n"
-  "        PATHS \${PACKAGE_PREFIX_DIR} PATH_SUFFIXES lib ${PYTHON_LIBRARY_PREFIX})\n"
+  "        PATHS \${${CMAKE_PROJECT_NAME}_PREFIX_DIR} PATH_SUFFIXES lib ${PYTHON_LIBRARY_PREFIX})\n"
   "\n"
   "      if(\${_component}_libraryname MATCHES "\${_component}_libraryname-NOTFOUND")\n"
   "        if(${CMAKE_PROJECT_NAME}_FIND_REQUIRED_\${_component})\n"
   "          set(_fail \"Component library \${_component} not found\")\n"
   "          message(FATAL_ERROR \"   ${CMAKE_PROJECT_NAME}_\${_component} \"\n"
-  "            \"not found in \${PACKAGE_PREFIX_DIR}/lib\")\n"
+  "            \"not found in \${${CMAKE_PROJECT_NAME}_PREFIX_DIR}/lib\")\n"
   "        elseif(NOT _quiet)\n"
   "          message(STATUS \"   ${CMAKE_PROJECT_NAME}_\${_component} \"\n"
-  "            \"not found in \${PACKAGE_PREFIX_DIR}/lib\")\n"
+  "            \"not found in \${${CMAKE_PROJECT_NAME}_PREFIX_DIR}/lib\")\n"
   "        endif()\n"
   "      else()\n"
   "        string(TOUPPER \${_component} _COMPONENT)\n"
@@ -82,12 +92,12 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/pkg/${CMAKE_PROJECT_NAME}Config.cmake.in
   "    foreach(_libraryname \${${UPPER_PROJECT_NAME}_LIBRARY_NAMES})\n"
   "      string(TOUPPER \${_libraryname} _LIBRARYNAME)\n"
   "      find_library(\${_LIBRARYNAME}_LIBRARY \${_libraryname} NO_DEFAULT_PATH\n"
-  "                   PATHS \${PACKAGE_PREFIX_DIR} PATH_SUFFIXES lib ${PYTHON_LIBRARY_PREFIX})\n"
+  "                   PATHS \${${CMAKE_PROJECT_NAME}_PREFIX_DIR} PATH_SUFFIXES lib ${PYTHON_LIBRARY_PREFIX})\n"
   "      if(\${_LIBRARYNAME}_LIBRARY MATCHES "\${_LIBRARYNAME}_LIBRARY-NOTFOUND")\n"
   "        set(_fail \"\${_libraryname} not found\")\n"
   "        if(_out)\n"
   "          message(\${_output_type} \"   Missing the ${CMAKE_PROJECT_NAME} \"\n"
-  "            \"library in \${PACKAGE_PREFIX_DIR}/lib.\")\n"
+  "            \"library in \${${CMAKE_PROJECT_NAME}_PREFIX_DIR}/lib.\")\n"
   "        endif()\n"
   "      else()\n"
   "        list(APPEND ${UPPER_PROJECT_NAME}_LIBRARIES \${\${_LIBRARYNAME}_LIBRARY})\n"
@@ -100,8 +110,8 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/pkg/${CMAKE_PROJECT_NAME}Config.cmake.in
   "  endif()\n"
   "\n"
 # include options.cmake if existing
-  "  if(EXISTS \${PACKAGE_PREFIX_DIR}/${CMAKE_MODULE_INSTALL_PATH}/options.cmake)\n"
-  "    include(\${PACKAGE_PREFIX_DIR}/${CMAKE_MODULE_INSTALL_PATH}/options.cmake)\n"
+  "  if(EXISTS \${${CMAKE_PROJECT_NAME}_PREFIX_DIR}/${CMAKE_MODULE_INSTALL_PATH}/options.cmake)\n"
+  "    include(\${${CMAKE_PROJECT_NAME}_PREFIX_DIR}/${CMAKE_MODULE_INSTALL_PATH}/options.cmake)\n"
   "  endif()\n"
   "endif()\n"
   "\n"
@@ -174,13 +184,30 @@ foreach(_dependent ${${UPPER_PROJECT_NAME}_DEPENDENT_LIBRARIES})
   endif()
   if(${${_dependent}_name}_VERSION)
     set(${${_dependent}_name}_findmode EXACT)
+    set(_FIND_VERSION "${${${_dependent}_name}_VERSION}")
+    set(_FIND_MAX_VERSION "${${${_dependent}_name}_VERSION}")
+
+    if("${_FIND_VERSION}" MATCHES "^([0-9]+\\.[0-9]+)")
+      set(_FIND_VERSION "${CMAKE_MATCH_1}")
+    endif()
   else()
     set(${${_dependent}_name}_findmode REQUIRED)
+    set(_FIND_VERSION)
   endif()
   list(APPEND DEPENDENTS
-    "find_package(${_dependent} ${${${_dependent}_name}_VERSION} ${${${_dependent}_name}_findmode} \${_req} \${_quiet})\n"
-    "if(${${_dependent}_name}_FOUND)\n"
+    "find_package(${_dependent} ${_FIND_VERSION} \${_req} \${_quiet})\n"
+    "if(${${_dependent}_name}_FOUND)\n")
+  if(_FIND_VERSION)
+    list(APPEND DEPENDENTS
+      "  if(\"${${${_dependent}_name}_VERSION}\" MATCHES \"^([0-9]+\\\\.[0-9]+)\")\n"
+      "    if(CMAKE_MATCH_1 VERSION_GREATER ${_FIND_VERSION})\n"
+      "      message(FATAL_ERROR \"${${_dependent}_name} ${${${_dependent}_name}_VERSION} not compatible with ${_FIND_VERSION}\")\n"
+      "    endif()\n"
+      "  endif()\n")
+  endif()
+  list(APPEND DEPENDENTS
     "  list(APPEND ${UPPER_PROJECT_NAME}_LIBRARIES \${${${_dependent}_name}_LIBRARIES})\n"
+    "  list(APPEND ${UPPER_PROJECT_NAME}_INCLUDE_DIRS \${${${_dependent}_name}_INCLUDE_DIRS})\n"
     "else()\n"
     "  set(_fail TRUE)\n"
     "endif()\n\n")
@@ -202,7 +229,7 @@ configure_package_config_file(
 # create and install ProjectConfigVersion.cmake
 write_basic_package_version_file(
   ${CMAKE_CURRENT_BINARY_DIR}/pkg/${CMAKE_PROJECT_NAME}ConfigVersion.cmake
-  VERSION ${VERSION} COMPATIBILITY AnyNewerVersion)
+  VERSION ${VERSION_MAJOR}.${VERSION_MINOR} COMPATIBILITY SameMajorVersion)
 
 install(
   FILES ${CMAKE_CURRENT_BINARY_DIR}/pkg/${CMAKE_PROJECT_NAME}Config.cmake
@@ -210,6 +237,10 @@ install(
   DESTINATION ${CMAKE_MODULE_INSTALL_PATH} COMPONENT dev)
 
 # create and install Project.pc
+if(NOT LIBRARY_DIR)
+  set(LIBRARY_DIR lib)
+endif()
+
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/pkg/${CMAKE_PROJECT_NAME}.pc
   "prefix=${CMAKE_INSTALL_PREFIX}\n"
   "exec_prefix=\${prefix}\n"

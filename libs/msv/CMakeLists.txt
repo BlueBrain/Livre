@@ -16,7 +16,7 @@ include(files.cmake)
 STRING(REGEX REPLACE "-Wall" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} )
 STRING(REGEX REPLACE "-Wextra" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} )
 STRING(REGEX REPLACE "/WX" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} )
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-parentheses-equality -Wno-deprecated-writable-strings")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-parentheses-equality")
 
 source_group(msv REGULAR_EXPRESSION .*)
 source_group(\\ FILES CMakeLists.txt files.cmake)

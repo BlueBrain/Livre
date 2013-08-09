@@ -16,11 +16,7 @@
 #include "System/Config.h"
 #include "System/Timer.h"
 
-#ifndef IVS_LINUX
-#  include "GUI/ui_TransferFunctionEditor.h"
-#else
-#  include "ui_TransferFunctionEditor.h"
-#endif
+#include "ui_TransferFunctionEditor.h"
 
 #include "TransferFunction.h"
 #include "TransferFunctionGraphCore.h"
@@ -81,7 +77,7 @@ public:
 
   bool getRangeAutoUpate() const;
   void setRangeAutoUpdate(bool _rangeAutoUpdate);
-  
+
 ///  IvsWidget *getIvsWidget();
 
   virtual void update() ;
@@ -106,7 +102,7 @@ protected Q_SLOTS:
   virtual void saveTransferFunction(bool _checked);
 
 private:
-    
+
   void initializeGraph(TransferFunctionGraph *_transferFunctionGraph);
   void backup(unsigned int _size,
               const float *_data,

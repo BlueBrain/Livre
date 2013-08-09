@@ -11,7 +11,11 @@ namespace massVolVis
 InitData::InitData()
     : _frameDataId(  lunchbox::UUID::ZERO   )
     , _volumeInfoId( lunchbox::UUID::ZERO   )
-    , _windowSystem( eq::WINDOW_SYSTEM_NONE )
+#ifdef AGL
+    , _windowSystem( "AGL" ) // prefer over GLX
+#else
+    , _windowSystem()
+#endif
     , _filename( "" )
 {}
 
