@@ -1,5 +1,11 @@
 # Copyright (c) 2010 Daniel Pfeifer <daniel@pfeifer-mail.de>
-#               2011 Stefan Eilemann <eile@eyescale.ch>
+#               2011-2013 Stefan Eilemann <eile@eyescale.ch>
+
+if(GLEW_MX_FIND_QUIETLY)
+  set(_glew_mx_output)
+else()
+  set(_glew_mx_output 1)
+endif()
 
 find_path(_glew_mx_INCLUDE_DIR GL/glew.h
   /usr/include /usr/local/include /opt/local/include)
@@ -15,24 +21,45 @@ if(_glew_mx_INCLUDE_DIR AND _glew_mx_LIBRARY)
     "int main(int argc, char* argv[])\n"
     "{\n"
     "  glewContextInit(0);\n"
+    "}\n"
     )
-  if(X11_FOUND)
-    file(APPEND ${TEST_SRC} "  glxewContextInit();\n")
-  endif()
-  file(APPEND ${TEST_SRC} "}\n")
 
   try_compile(_glew_mx_SUPPORTED ${CMAKE_BINARY_DIR}/glew_test ${TEST_SRC}
     CMAKE_FLAGS
-      "-DINCLUDE_DIRECTORIES:STRING=${_glew_mx_INCLUDE_DIR}"
-      "-DLINK_LIBRARIES:STRING=${_glew_mx_LIBRARY}"
+    "-DINCLUDE_DIRECTORIES:STRING=${_glew_mx_INCLUDE_DIR}"
+    "-DLINK_LIBRARIES:STRING=${_glew_mx_LIBRARY}"
     COMPILE_DEFINITIONS -DGLEW_MX=1
     )
 
   if(NOT _glew_mx_SUPPORTED)
-    message(STATUS "  ${_glew_mx_LIBRARY} does not support GLEW_MX.")
+    if(_glew_mx_output)
+      message(STATUS "  ${_glew_mx_LIBRARY} does not support GLEW_MX.")
+    endif()
     set(_glew_mx_INCLUDE_DIR 0)
     set(_glew_mx_LIBRARY 0)
-  endif(NOT _glew_mx_SUPPORTED)
+  elseif(X11_FOUND)
+    file(WRITE ${TEST_SRC}
+      "#include <GL/glxew.h>\n"
+      "int main(int argc, char* argv[])\n"
+      "{\n"
+      "  glxewContextInit(0);\n"
+      "}\n"
+      )
+
+    try_compile(_glxew_mx_SUPPORTED ${CMAKE_BINARY_DIR}/glew_test ${TEST_SRC}
+      CMAKE_FLAGS
+      "-DINCLUDE_DIRECTORIES:STRING=${_glew_mx_INCLUDE_DIR}"
+      "-DLINK_LIBRARIES:STRING=${_glew_mx_LIBRARY}"
+      COMPILE_DEFINITIONS -DGLEW_MX=1
+      )
+    if(NOT _glxew_mx_SUPPORTED)
+      if(_glew_mx_output)
+        message(STATUS "  ${_glew_mx_LIBRARY} is missing glxewContextInit().")
+      endif()
+      set(_glew_mx_INCLUDE_DIR 0)
+      set(_glew_mx_LIBRARY 0)
+    endif()
+  endif()
 endif()
 
 include(FindPackageHandleStandardArgs)
@@ -41,6 +68,7 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(GLEW_MX DEFAULT_MSG
 
 set(GLEW_MX_INCLUDE_DIRS ${_glew_mx_INCLUDE_DIR})
 set(GLEW_MX_LIBRARIES ${_glew_mx_LIBRARY})
-if(GLEW_MX_FOUND)
-  message(STATUS "Found GLEW_MX in ${GLEW_MX_INCLUDE_DIRS};${GLEW_MX_LIBRARIES}")
+if(GLEW_MX_FOUND AND _glew_mx_output)
+  message(STATUS
+    "Found GLEW_MX in ${GLEW_MX_INCLUDE_DIRS};${GLEW_MX_LIBRARIES}")
 endif()

@@ -1,6 +1,12 @@
 
 # Copyright (c) 2013 David Steiner <steiner@ifi.uzh.ch>
 
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANG)
+  # WAR for https://codereview.qt-project.org/#change,4960
+  #  eile: somehow I couldn't get -isystem to clang on OS X
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-self-assign")
+endif()
+
 if (LUNCHBOX_FOUND)
   if (COLLAGE_FOUND)
 

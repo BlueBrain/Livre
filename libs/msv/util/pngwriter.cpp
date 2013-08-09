@@ -999,7 +999,7 @@ void pngwriter::close()
    text_ptr[2].text = textdescription_;
    text_ptr[2].compression = PNG_TEXT_COMPRESSION_NONE;
    strcpy( text_ptr[3].key, "Creation Time"  );
-   text_ptr[3].text = png_convert_to_rfc1123(png_ptr, &mod_time);
+   text_ptr[3].text = (char*)png_convert_to_rfc1123(png_ptr, &mod_time);
    text_ptr[3].compression = PNG_TEXT_COMPRESSION_NONE;
    strcpy( text_ptr[4].key, "Software" );
    text_ptr[4].text = textsoftware_;
@@ -1206,7 +1206,7 @@ void pngwriter::readfromfile(char * name)
    png_structp     png_ptr;
    png_infop       info_ptr;
    unsigned char   **image;
-   unsigned long   width, height;
+   png_uint_32     width, height;
    int bit_depth, color_type, interlace_type;
    //   png_uint_32     i;
    //
@@ -1312,7 +1312,7 @@ void pngwriter::readfromfile(char * name)
    if(color_type == PNG_COLOR_TYPE_GRAY && bit_depth<8)
      {
     // png_set_expand(png_ptr);
-    png_set_gray_1_2_4_to_8(png_ptr);  // Just an alias of the above.
+    png_set_expand_gray_1_2_4_to_8(png_ptr);  // Just an alias of the above.
     transformation_ = 1;
      }
 
@@ -1531,7 +1531,7 @@ int pngwriter::read_png_info(FILE *fp, png_structp *png_ptr, png_infop *info_ptr
     fclose(fp);
     return 0;
      }
-   if (setjmp((*png_ptr)->jmpbuf)) /*(setjmp(png_jmpbuf(*png_ptr)) )*//////////////////////////////////////
+   if (setjmp(png_jmpbuf(*png_ptr)) )
      {
     png_destroy_read_struct(png_ptr, info_ptr, (png_infopp)NULL);
     std::cerr << " PNGwriter::read_png_info - ERROR **: This file may be a corrupted PNG file. (setjmp(*png_ptr)->jmpbf) failed)." << std::endl;
@@ -4720,4 +4720,3 @@ void pngwriter::diamond( int x, int y, int width, int height, double red, double
 {
    this->diamond(  x,  y,  width,  height, int(red*65535), int(green*65535), int(blue*65535) );
 }
-
