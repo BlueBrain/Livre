@@ -57,18 +57,17 @@ set(OUTPUT_INCLUDE_DIR ${CMAKE_BINARY_DIR}/include)
 file(MAKE_DIRECTORY ${OUTPUT_INCLUDE_DIR})
 include_directories(BEFORE ${CMAKE_SOURCE_DIR} ${OUTPUT_INCLUDE_DIR})
 
-if(MSVC)
-  set(CMAKE_MODULE_INSTALL_PATH ${CMAKE_PROJECT_NAME}/CMake)
-else()
-  set(CMAKE_MODULE_INSTALL_PATH share/${CMAKE_PROJECT_NAME}/CMake)
+if(NOT DOC_DIR)
+  set(DOC_DIR share/${CMAKE_PROJECT_NAME}/doc)
 endif()
 
+include(${CMAKE_CURRENT_LIST_DIR}/CMakeInstallPath.cmake)
+
 # Boost settings
-if(BOOST_ROOT)
-  set(Boost_NO_SYSTEM_PATHS TRUE)
-endif()
 set(Boost_NO_BOOST_CMAKE ON CACHE BOOL "Enable fix for FindBoost.cmake" )
 add_definitions(-DBOOST_ALL_NO_LIB) # Don't use 'pragma lib' on Windows
+add_definitions(-DBoost_NO_BOOST_CMAKE) # Fix for CMake problem in FindBoost
+add_definitions(-DBOOST_TEST_DYN_LINK) # generates main() for unit tests
 
 include(TestBigEndian)
 test_big_endian(BIGENDIAN)
@@ -77,32 +76,7 @@ if(BIGENDIAN)
 endif()
 
 include(Compiler) # compiler-specific default options and warnings
-
-if(MSVC)
-  add_definitions(
-    /D_CRT_SECURE_NO_WARNINGS
-    /D_SCL_SECURE_NO_WARNINGS
-    /wd4068 # disable unknown pragma warnings
-    /wd4244 # conversion from X to Y, possible loss of data
-    /wd4800 # forcing value to bool 'true' or 'false' (performance warning)
-    )
-
-  # By default, do not warn when built on machines using only VS Express
-  # http://cmake.org/gitweb?p=cmake.git;a=commit;h=fa4a3b04d0904a2e93242c0c3dd02a357d337f77
-  if(NOT DEFINED CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS)
-      SET(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS ON)
-  endif()
-
-  # http://www.ogre3d.org/forums/viewtopic.php?f=2&t=60015&start=0
-  if(RELEASE_VERSION)
-    set(CMAKE_CXX_FLAGS "/DWIN32 /D_WINDOWS /W3 /Zm500 /EHsc /GR")
-  else()
-    set(CMAKE_CXX_FLAGS "/DWIN32 /D_WINDOWS /W3 /Zm500 /EHsc /GR /WX")
-  endif()
-elseif(EXISTS ${CMAKE_SOURCE_DIR}/CMake/${CMAKE_PROJECT_NAME}.in.spec)
-  configure_file(${CMAKE_SOURCE_DIR}/CMake/${CMAKE_PROJECT_NAME}.in.spec
-    ${CMAKE_SOURCE_DIR}/CMake/${CMAKE_PROJECT_NAME}.spec @ONLY)
-endif()
+include(TestCPP11)
 
 if(CMAKE_SYSTEM_NAME MATCHES "Linux")
   set(LINUX TRUE)
@@ -120,6 +94,7 @@ set(LIBRARY_DIR lib${LIB_SUFFIX})
 
 if(APPLE)
   list(APPEND CMAKE_PREFIX_PATH /opt/local/ /opt/local/lib) # Macports
+  set(ENV{PATH} "/opt/local/bin:$ENV{PATH}") # dito
   if(NOT CMAKE_OSX_ARCHITECTURES OR CMAKE_OSX_ARCHITECTURES STREQUAL "")
     if(_CMAKE_OSX_MACHINE MATCHES "ppc")
       set(CMAKE_OSX_ARCHITECTURES "ppc;ppc64" CACHE
@@ -138,44 +113,4 @@ if(APPLE)
     "Building ${CMAKE_PROJECT_NAME} ${VERSION} for ${CMAKE_OSX_ARCHITECTURES}")
 endif(APPLE)
 
-# hooks to gather all targets (libraries & executables)
-include(CMakeParseArguments)
-set(ALL_DEP_TARGETS "")
-set(ALL_LIB_TARGETS "")
-macro(add_executable _target)
-  _add_executable(${_target} ${ARGN})
-  set_property(GLOBAL APPEND PROPERTY ALL_DEP_TARGETS ${_target})
-endmacro()
-macro(add_library _target)
-  _add_library(${_target} ${ARGN})
-
-  # ignore IMPORTED add_library from finders (e.g. Qt)
-  cmake_parse_arguments(_arg "IMPORTED" "" "" ${ARGN})
-  if(NOT _arg_IMPORTED)
-    # add defines TARGET_DSO_NAME and TARGET_SHARED for dlopen() usage
-    get_target_property(THIS_DEFINITIONS ${_target} COMPILE_DEFINITIONS)
-    if(NOT THIS_DEFINITIONS)
-      set(THIS_DEFINITIONS) # clear THIS_DEFINITIONS-NOTFOUND
-    endif()
-    string(TOUPPER ${_target} _TARGET)
-
-    if(MSVC OR XCODE_VERSION)
-      set(_libraryname ${CMAKE_SHARED_LIBRARY_PREFIX}${_target}${CMAKE_SHARED_LIBRARY_SUFFIX})
-    else()
-      if(APPLE)
-        set(_libraryname ${CMAKE_SHARED_LIBRARY_PREFIX}${_target}.${VERSION_ABI}${CMAKE_SHARED_LIBRARY_SUFFIX})
-      else()
-        set(_libraryname ${CMAKE_SHARED_LIBRARY_PREFIX}${_target}${CMAKE_SHARED_LIBRARY_SUFFIX}.${VERSION_ABI})
-      endif()
-    endif()
-
-    list(APPEND THIS_DEFINITIONS
-      ${_TARGET}_SHARED ${_TARGET}_DSO_NAME=\"${_libraryname}\")
-
-    set_target_properties(${_target} PROPERTIES
-      COMPILE_DEFINITIONS "${THIS_DEFINITIONS}")
-
-    set_property(GLOBAL APPEND PROPERTY ALL_DEP_TARGETS ${_target})
-    set_property(GLOBAL APPEND PROPERTY ALL_LIB_TARGETS ${_target})
-  endif()
-endmacro()
+include(${CMAKE_CURRENT_LIST_DIR}/TargetHooks.cmake)
