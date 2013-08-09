@@ -7,8 +7,9 @@
 #define MASS_VOL__RENDERER_RAYCAST_2_H
 
 #include "../rendererBase.h"
-
 #include "../glslShaders.h"
+
+#include <boost/scoped_ptr.hpp>
 
 namespace eq {
 namespace util {
@@ -69,7 +70,7 @@ private:
 
     uint32_t        _precision;     //!< multiplyer for number of slices
 
-    typedef std::auto_ptr< eq::util::FrameBufferObject > FboAutoPtr;
+    typedef boost::scoped_ptr< eq::util::FrameBufferObject > FboAutoPtr;
 
     FboAutoPtr _cubeFacesFboPtr;   //!< front/back faces of cube == start/end of rays
     FboAutoPtr _frameBufferFboPtr; //!< FB replacement (to be able to read from FB while rendering)

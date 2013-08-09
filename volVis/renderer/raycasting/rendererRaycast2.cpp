@@ -87,13 +87,13 @@ bool RendererRaycast2::init( GLuint texture3D )
 
     if( !_cubeFacesFboPtr.get() )
     {
-        _cubeFacesFboPtr = FboAutoPtr( new eq::util::FrameBufferObject( context, GL_TEXTURE_RECTANGLE_ARB ));
+        _cubeFacesFboPtr.reset( new eq::util::FrameBufferObject( context, GL_TEXTURE_RECTANGLE_ARB ));
         LBCHECK( _cubeFacesFboPtr->init( 64, 64, GL_RGB, 0, 0 ));
         _cubeFacesFboPtr->unbind();
     }
     if( !_frameBufferFboPtr.get() )
     {
-        _frameBufferFboPtr = FboAutoPtr( new eq::util::FrameBufferObject( context, GL_TEXTURE_RECTANGLE_ARB ));
+        _frameBufferFboPtr.reset( new eq::util::FrameBufferObject( context, GL_TEXTURE_RECTANGLE_ARB ));
         LBCHECK( _frameBufferFboPtr->init( 64, 64, GL_RGBA, 0, 0 ));
         _frameBufferFboPtr->unbind();
     }
@@ -195,7 +195,7 @@ void RendererRaycast2::frameInit( const FrameInitParameters& fInitParams )
             0, 0, fInitParams.screenSize.x, fInitParams.screenSize.y ));
 //*/
     _frameBufferFboPtr->bind();
-    if( _frameBufferFboPtr->getError() != co::ERROR_NONE )
+    if( _frameBufferFboPtr->getError() != eq::fabric::ERROR_NONE )
         LBERROR << "FBO ERROR: " << _frameBufferFboPtr->getError() << std::endl;
     EQ_GL_CALL( glClearColor( 0.f, 0.f, 0.f, 1.f ) );
     EQ_GL_CALL( glClear( GL_COLOR_BUFFER_BIT ));
@@ -264,7 +264,7 @@ void RendererRaycast2::renderBrick
 //*
     // Prepare exit coordinates through drawing back-faces to fbo
     _cubeFacesFboPtr->bind();
-    if( _cubeFacesFboPtr->getError() != co::ERROR_NONE )
+    if( _cubeFacesFboPtr->getError() != eq::fabric::ERROR_NONE )
         LBERROR << "FBO ERROR: " << _cubeFacesFboPtr->getError() << std::endl;
     EQ_GL_CALL( glClearColor( 0, 0, 0, 0 ) );
     EQ_GL_CALL( glClear( GL_COLOR_BUFFER_BIT ));
@@ -275,7 +275,7 @@ void RendererRaycast2::renderBrick
 //    _dumpDebug( *texture, glewGetContext());
 
     _frameBufferFboPtr->bind();
-    if( _frameBufferFboPtr->getError() != co::ERROR_NONE )
+    if( _frameBufferFboPtr->getError() != eq::fabric::ERROR_NONE )
         LBERROR << "FBO ERROR: " << _frameBufferFboPtr->getError() << std::endl;
 
     // Put data to the shader

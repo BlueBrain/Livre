@@ -38,12 +38,12 @@ namespace massVolVis
 /**
  * Used to disable additional message pump creation.
  */
-class GLXWindowShared : public eq::GLXWindow
+class GLXWindowShared : public eq::glx::Window
 {
 public:
     GLXWindowShared( eq::Window* parent, Display* xDisplay = 0,
                      GLXEWContext* glxewContext = 0 )
-                 : eq::GLXWindow( parent, xDisplay, glxewContext ){}
+        : eq::glx::Window( parent, xDisplay, glxewContext ){}
 
     // Disabling event handling to avoid message pump conflicts
     virtual void initEventHandler() {}

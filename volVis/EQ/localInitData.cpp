@@ -106,30 +106,11 @@ void LocalInitData::parseArguments( const int argc, char** argv )
 
         if( wsArg.isSet( ))
         {
-            const std::string windowSystem = strUtil::toLower( wsArg.getValue( ));
-
-            if( windowSystem == "glx" )
-                setWindowSystem( eq::WINDOW_SYSTEM_GLX );
-            else if( windowSystem == "agl" )
-                setWindowSystem( eq::WINDOW_SYSTEM_AGL );
-            else if( windowSystem == "wgl" )
-                setWindowSystem( eq::WINDOW_SYSTEM_WGL );
+            std::string ws = wsArg.getValue();
+            transform( ws.begin(), ws.end(), ws.begin(),
+                       (int(*)(int))std::toupper );
+            setWindowSystem( ws );
         }
-
-#ifdef GLX
-        bool useGLX = getWindowSystem() == eq::WINDOW_SYSTEM_GLX;
-#ifndef AGL
-        useGLX = true;
-#endif
-        if( useGLX )
-        {
-            LBWARN << "Using GLX" << std::endl;
-#ifndef __APPLE__
-            XInitThreads();
-#endif
-        }else
-#endif
-        LBWARN << "Not using GLX" << std::endl;
 
         if( rendererArg.isSet( ))
         {
