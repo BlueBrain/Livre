@@ -36,7 +36,7 @@ int main( int argc, char **argv )
                                              "source dimensions: \"64,128,128\" or \"64x128x128\"",
                                                false, "", "string", command );
 
-        TCLAP::ValueArg<uint> octreeBSArg( "k", "octDim", "Octree block size",
+        TCLAP::ValueArg<unsigned> octreeBSArg( "k", "octDim", "Octree block size",
                                                false, 64, "integer", command );
 
         TCLAP::ValueArg<int> dstBitsArg( "n", "outBits", "number of bits in the output file (8, 16)",
@@ -45,7 +45,7 @@ int main( int argc, char **argv )
         TCLAP::ValueArg<int> srcBitsArg( "b", "inBits", "number of bits in the input file (8, 16)",
                                        false, 8, "integer", command );
 
-        TCLAP::ValueArg<uint> borderArg( "e", "border", "number of border elements (width)",
+        TCLAP::ValueArg<unsigned> borderArg( "e", "border", "number of border elements (width)",
                                        false, 0, "integer", command );
 
         TCLAP::ValueArg<std::string> dstTypeArg( "o", "outType", "dst file type (oct, oct_head)",
@@ -258,4 +258,3 @@ int main( int, char** )
     tree.saveTree( s );
     tree.loadTree( s );
 #endif
-

@@ -5,6 +5,11 @@
 
 cmake_minimum_required(VERSION 2.8)
 project(Livre)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
+if(NOT BUILDYARD)
+  include(Buildyard)
+  return()
+endif()
 
 set(RELEASE_VERSION OFF) # OFF or ABI version
 set(LAST_RELEASE 0.1.0)
@@ -12,7 +17,6 @@ set(VERSION_MAJOR "0")
 set(VERSION_MINOR "1")
 set(VERSION_PATCH "0")
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
 include(Common)
 
 set(PROJECT_INCLUDE_NAME livre)
