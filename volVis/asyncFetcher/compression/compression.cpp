@@ -59,7 +59,7 @@ bool DecompressorNone::load( const RAMDataElement* dataEl, GPULoadRequest& reque
         return true;
     }
 
-    LBERROR << "PBO mapping failed: " << _pboSPtr->getError() << std::endl;
+    LBERROR << "PBO mapping failed" << std::endl;
     return false;
 }
 

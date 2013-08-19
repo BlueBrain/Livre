@@ -28,23 +28,23 @@ bool Window::configInitGL( const eq::uint128_t& initId )
 {
     if( !GLEW_ARB_shader_objects )
     {
-        setError( ERROR_VOLVIS_ARB_SHADER_OBJECTS_MISSING );
+        sendError( ERROR_VOLVIS_ARB_SHADER_OBJECTS_MISSING );
         return false;
     }
     if( !GLEW_EXT_blend_func_separate )
     {
-        setError( ERROR_VOLVIS_EXT_BLEND_FUNC_SEPARATE_MISSING );
+        sendError( ERROR_VOLVIS_EXT_BLEND_FUNC_SEPARATE_MISSING );
         return false;
     }
     if( !GLEW_ARB_multitexture )
     {
-        setError( ERROR_VOLVIS_ARB_MULTITEXTURE_MISSING );
+        sendError( ERROR_VOLVIS_ARB_MULTITEXTURE_MISSING );
         return false;
     }
 
     if( !GLEW_NV_texture_barrier )
     {
-        setError( ERROR_VOLVIS_NV_TEXTURE_BARRIER_MISSING );
+        sendError( ERROR_VOLVIS_NV_TEXTURE_BARRIER_MISSING );
         return false;
     }
 

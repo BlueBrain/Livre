@@ -102,9 +102,6 @@ int VolVis::run()
         disconnectServer( server );
         return EXIT_FAILURE;
     }
-    else if( config->getError( ))
-        LBWARN << "Error during initialization: " << config->getError()
-               << std::endl;
 
     LBLOG( LOG_STATS ) << "Config init took " << clock.getTimef() << " ms"
                        << std::endl;
@@ -116,9 +113,6 @@ int VolVis::run()
     while( config->isRunning( ) && maxFrames-- )
     {
         config->startFrame( 0 );
-        if( config->getError( ))
-            LBWARN << "Error during frame start: " << config->getError()
-                   << std::endl;
         config->finishFrame();
     }
     const uint32_t frame = config->finishAllFrames();
