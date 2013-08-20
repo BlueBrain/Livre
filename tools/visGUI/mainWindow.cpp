@@ -3,6 +3,9 @@
  *               2013, David Steiner  <steiner@ifi.uzh.ch>
  */
 
+// must be included before any header file that defines Status
+#include <QtGui/QtGui>
+
 #include "mainWindow.h"
 
 #include "controller.h"
@@ -15,7 +18,6 @@
 
 #include <volVis/EQ/guiPackets.h> // VOL_VIS_GUI_MAX_PATH_LEN
 
-#include <QtGui/QtGui>
 #include <QtCore/QDebug>
 
 #include <QtGui/QAction>
@@ -290,4 +292,3 @@ void MainWindow::_connect()
 
 
 } //namespace GUI
-
