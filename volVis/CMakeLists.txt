@@ -56,6 +56,10 @@ function(EQ_ADD_EXAMPLE NAME)
     DESTINATION include/livre/${NAME} COMPONENT examples)
 endfunction()
 
+if(APPLE AND GLX)
+  list(APPEND EQUALIZER_LIBRARIES GL)
+endif()
+
 add_library(Livre SHARED ${VOLVIS_ALL_HEADERS} ${VOLVIS_ALL_SOURCES} ${SHADERS})
 target_link_libraries(Livre ${EQUALIZER_LIBRARIES} ${OPENGL_gl_LIBRARY}
                             ${X11_LIBRARIES} ${CARBON_LIBRARY} dl msv)
@@ -74,4 +78,3 @@ source_group(_volVisTests REGULAR_EXPRESSION .*)
 source_group(\\ FILES ${VOLVIS_MAIN_TESTS_SOURCES} )
 
 eq_add_example(_volVisTests SOURCES ${VOLVIS_MAIN_TESTS_SOURCES})
-

@@ -181,11 +181,15 @@ void RendererRaycast::frameInit( const FrameInitParameters& fInitParams )
     // Disable shader
     glUseProgramObjectARB( 0 );
 
-    if( !_cubeFacesFboPtr->resize( fInitParams.screenSize.x, fInitParams.screenSize.y ))
-        LBERROR << "FBO ERROR: " << _cubeFacesFboPtr->getError() << std::endl;
+    eq::Error error = _cubeFacesFboPtr->resize( fInitParams.screenSize.x,
+                                                fInitParams.screenSize.y );
+    if( error )
+        LBERROR << "FBO ERROR: " << error << std::endl;
 
-    if( !_frameBufferFboPtr->resize( fInitParams.screenSize.x, fInitParams.screenSize.y ))
-        LBERROR << "FBO ERROR: " << _frameBufferFboPtr->getError() << std::endl;
+    error = _frameBufferFboPtr->resize( fInitParams.screenSize.x,
+                                        fInitParams.screenSize.y );
+    if( error )
+        LBERROR << "FBO ERROR: " << error << std::endl;
 }
 
 
@@ -253,8 +257,6 @@ void RendererRaycast::renderBrick
 
     // Prepare exit coordinates through drawing back-faces to fbo
     _cubeFacesFboPtr->bind();
-    if( _cubeFacesFboPtr->getError() != eq::fabric::ERROR_NONE )
-        LBERROR << "FBO ERROR: " << _cubeFacesFboPtr->getError() << std::endl;
     EQ_GL_CALL( glClearColor( 1.0, 0, 0, 0 ) );
     EQ_GL_CALL( glClear( GL_COLOR_BUFFER_BIT ));
     _grawBox( renderNode.coords, GL_BACK );

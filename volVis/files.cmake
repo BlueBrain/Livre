@@ -5,11 +5,6 @@
 set(VOLVIS_ASYNC_SYSTEM_SOURCES)
 set(VOLVIS_ASYNC_SYSTEM_HEADERS)
 
-if(EQ_AGL_USED)
-  set(VOLVIS_ASYNC_SYSTEM_HEADERS asyncFetcher/aglWindowShared.h)
-  set(VOLVIS_ASYNC_SYSTEM_SOURCES asyncFetcher/aglWindowShared.cpp)
-endif()
-
 if(EQ_GLX_USED)
   set(VOLVIS_ASYNC_SYSTEM_HEADERS asyncFetcher/glXWindowShared.h)
 endif()

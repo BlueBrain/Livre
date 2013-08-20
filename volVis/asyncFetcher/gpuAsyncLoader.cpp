@@ -168,13 +168,14 @@ void GPUAsyncLoader::_update3DTexture()
 
     _pbo = PboSPtr( new eq::util::PixelBufferObject( glewGetContext(), false ));
 
-    if( !_pbo->setup( _uncompressedBS, GL_WRITE_ONLY_ARB ))
-        LBERROR << "PBO initialization failed: " << _pbo->getError() << std::endl;
+    const eq::Error& error = _pbo->setup( _uncompressedBS, GL_WRITE_ONLY_ARB );
+    if( error )
+        LBERROR << "PBO initialization failed: " << error << std::endl;
 
     // check that PBO has proper size
     _pbo->bind();
     int pboSize = 0;
-    glGetBufferParameteriv( GL_PIXEL_UNPACK_BUFFER, GL_BUFFER_SIZE, (GLint*)&pboSize ); 
+    glGetBufferParameteriv( GL_PIXEL_UNPACK_BUFFER, GL_BUFFER_SIZE, (GLint*)&pboSize );
     if( (uint32_t)pboSize != _uncompressedBS )
         LBERROR << "PBO allocation failed" << std::endl;
     _pbo->unbind();

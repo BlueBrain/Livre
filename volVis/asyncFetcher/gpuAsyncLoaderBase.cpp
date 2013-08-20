@@ -8,9 +8,6 @@
 #include "../EQ/window.h"
 
 #include <eq/client/system.h>
-#ifdef AGL
-#  include "aglWindowShared.h"
-#endif
 #ifdef GLX
 #  include "glXWindowShared.h"
 #endif
@@ -51,11 +48,11 @@ eq::SystemWindow* initSharedContextWindow( eq::Window* wnd,
 #endif
 #ifdef AGL
     if( ws == "AGL" )
-        sharedContextWindow = new AGLWindowShared( wnd );
+        sharedContextWindow = new eq::agl::Window( wnd );
 #endif
 #ifdef WGL
     if( ws == "WGL" )
-        sharedContextWindow = new eq::WGLWindow( wnd );
+        sharedContextWindow = new eq::wgl::Window( wnd );
 #endif
 
     if( !sharedContextWindow )

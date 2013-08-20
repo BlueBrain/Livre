@@ -184,24 +184,15 @@ void RendererRaycast2::frameInit( const FrameInitParameters& fInitParams )
     // Disable shader
     glUseProgramObjectARB( 0 );
 
-    if( !_cubeFacesFboPtr->resize( fInitParams.screenSize.x, fInitParams.screenSize.y ))
-        LBERROR << "FBO ERROR: " << _cubeFacesFboPtr->getError() << std::endl;
+    eq::Error error = _cubeFacesFboPtr->resize( fInitParams.screenSize.x,
+                                                fInitParams.screenSize.y );
+    if( error )
+        LBERROR << "FBO ERROR: " << error << std::endl;
 
-    if( !_frameBufferFboPtr->resize( fInitParams.screenSize.x, fInitParams.screenSize.y ))
-        LBERROR << "FBO ERROR: " << _frameBufferFboPtr->getError() << std::endl;
-
-/*    _frameBufferFboPtr->getColorTextures()[0]->copyFromFrameBuffer(
-            GL_RGBA, eq::fabric::PixelViewport(
-            0, 0, fInitParams.screenSize.x, fInitParams.screenSize.y ));
-//*/
-    _frameBufferFboPtr->bind();
-    if( _frameBufferFboPtr->getError() != eq::fabric::ERROR_NONE )
-        LBERROR << "FBO ERROR: " << _frameBufferFboPtr->getError() << std::endl;
-    EQ_GL_CALL( glClearColor( 0.f, 0.f, 0.f, 1.f ) );
-    EQ_GL_CALL( glClear( GL_COLOR_BUFFER_BIT ));
-    _frameBufferFboPtr->unbind();
-
-//*/
+    error = _frameBufferFboPtr->resize( fInitParams.screenSize.x,
+                                        fInitParams.screenSize.y );
+    if( error )
+        LBERROR << "FBO ERROR: " << error << std::endl;
 }
 
 
@@ -264,8 +255,6 @@ void RendererRaycast2::renderBrick
 //*
     // Prepare exit coordinates through drawing back-faces to fbo
     _cubeFacesFboPtr->bind();
-    if( _cubeFacesFboPtr->getError() != eq::fabric::ERROR_NONE )
-        LBERROR << "FBO ERROR: " << _cubeFacesFboPtr->getError() << std::endl;
     EQ_GL_CALL( glClearColor( 0, 0, 0, 0 ) );
     EQ_GL_CALL( glClear( GL_COLOR_BUFFER_BIT ));
     _grawBox( renderNode.coords, GL_BACK );
@@ -275,8 +264,6 @@ void RendererRaycast2::renderBrick
 //    _dumpDebug( *texture, glewGetContext());
 
     _frameBufferFboPtr->bind();
-    if( _frameBufferFboPtr->getError() != eq::fabric::ERROR_NONE )
-        LBERROR << "FBO ERROR: " << _frameBufferFboPtr->getError() << std::endl;
 
     // Put data to the shader
     GLint tParamNameGL;

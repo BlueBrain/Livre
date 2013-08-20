@@ -84,7 +84,7 @@ void Node::_frameStart( const eq::uint128_t& frameId, const uint32_t frameNumber
 
     LBWARN << _volTree->getInfoString().c_str() << std::endl;
 // Resume RAM loader
-    // TODO: set RAM limits correctly 
+    // TODO: set RAM limits correctly
 //    _ramPool->startDataLoading( dataHDDIO, 3*1024, _fileNameVersionTested );
     _ramPool->startDataLoading( dataHDDIO, 1024, _fileNameVersionTested );
     _fileNameVersion = _fileNameVersionTested;
@@ -118,13 +118,13 @@ bool Node::configInit( const eq::uint128_t& initId )
     Config* config = static_cast< Config* >( getConfig( ));
     if( !config->mapData( initId ))
     {
-        setError( ERROR_VOLVIS_MAP_CONFIG_OBJECT_FAILED );
+        sendError( ERROR_VOLVIS_MAP_CONFIG_OBJECT_FAILED );
         return false;
     }
 
     if( !config->mapObject( _volumeInfo.get(), config->getInitData().getVolumeInfoId( )))
     {
-        setError( ERROR_VOLVIS_MAP_VOLUME_INFO_OBJECT_FAILED );
+        sendError( ERROR_VOLVIS_MAP_VOLUME_INFO_OBJECT_FAILED );
         return false;
     }
 
