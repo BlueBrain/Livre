@@ -79,7 +79,7 @@ bool Config::mapData( const eq::uint128_t& initDataId )
 {
     if( !_initData.isAttached() )
     {
-        if( !mapObject( &_initData, initDataId ))
+        if( !mapObject( &_initData, co::UUID( initDataId )))
             return false;
         unmapObject( &_initData ); // data was retrieved, unmap immediately
     }
@@ -108,7 +108,7 @@ void Config::_deregisterData()
     deregisterObject( &_volumeInfo );
     deregisterObject( &_frameData  );
 
-    _initData.setFrameDataId( lunchbox::UUID::ZERO );
+    _initData.setFrameDataId( lunchbox::UUID( ));
 }
 
 

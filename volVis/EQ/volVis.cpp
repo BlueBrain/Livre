@@ -96,7 +96,7 @@ int VolVis::run()
     lunchbox::Clock clock;
 
     config->setInitData( _initData );
-    if( !config->init( 0 ))
+    if( !config->init( eq::uint128_t( )))
     {
         server->releaseConfig( config );
         disconnectServer( server );
@@ -112,7 +112,7 @@ int VolVis::run()
     clock.reset();
     while( config->isRunning( ) && maxFrames-- )
     {
-        config->startFrame( 0 );
+        config->startFrame( eq::uint128_t( ));
         config->finishFrame();
     }
     const uint32_t frame = config->finishAllFrames();

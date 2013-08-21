@@ -22,8 +22,8 @@ InitData::InitData()
 
 InitData::~InitData()
 {
-    setFrameDataId(  lunchbox::UUID::ZERO );
-    setVolumeInfoId( lunchbox::UUID::ZERO );
+    setFrameDataId( lunchbox::UUID( ));
+    setVolumeInfoId( lunchbox::UUID( ));
 }
 
 
@@ -37,7 +37,7 @@ void InitData::applyInstanceData( co::DataIStream& is )
 {
     is >> _frameDataId >> _volumeInfoId >> _windowSystem >> _filename;
 
-    LBASSERT( _frameDataId != lunchbox::UUID::ZERO );
+    LBASSERT( _frameDataId != 0 );
 }
 
 
