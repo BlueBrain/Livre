@@ -1,5 +1,6 @@
 
 /* Copyright (c) 2011, Maxim Makhinya <maxmah@gmail.com>
+ *               2013, David Steiner  <steiner@ifi.uzh.ch>
  *
  */
 
@@ -16,8 +17,8 @@
 namespace massVolGUI
 {
 
-RecentFiles::RecentFiles( QWidget *_parent, RecentFilesType t, bool adjustTitle )
-    : QMainWindow( _parent )
+RecentFiles::RecentFiles( QWidget *arg, RecentFilesType t, bool adjustTitle )
+    : QMainWindow( arg )
     , _separatorAct( 0 )
     , _type( t )
     , _changed( false )

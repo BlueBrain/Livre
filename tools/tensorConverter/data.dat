@@ -1,0 +1,14 @@
+#ObjectFileName:     /windows/C/_volume_data/_susanne/1024_8bit
+#ObjectFileName:     /media/164A4A754A4A5223/_volume_data/_susanne/1024_quantized_flower
+ObjectFileName:     /media/DATAS/_volume_data/_susanne/1024_quantized_flower
+TFFileName:         ./flower_tf_ivs.tf
+Version:            1
+SrcSize:            1024 1024 1024
+U123SrcSize:        32 1024
+U123Size:           32 1024
+MaxRankSize:        32
+BorderSize:         2
+BlockSize:          64
+Format:             BYTE
+Compression:        TENSOR_QUANTIZED
+

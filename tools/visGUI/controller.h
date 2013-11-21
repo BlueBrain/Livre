@@ -1,7 +1,6 @@
 
 /* Copyright (c) 2011, Fatih Erol
  *               2011, Maxim Makhinya <maxmah@gmail.com>
- *               2013, David Steiner  <steiner@ifi.uzh.ch>
  *
  */
 
@@ -33,7 +32,7 @@ class Controller
 {
 public:
 
-    Controller( ivs::TransferFunctionPair* tf );
+    Controller( ivs::TransferFunctionPair* tf, std::vector<byte>* ranks );
 
     ~Controller();
 
@@ -46,6 +45,8 @@ public:
 
     bool updateTF();
 
+    bool updateTensorRanks();
+
     bool loadFile(  const std::string &fileName  );
 
 private:
@@ -53,6 +54,7 @@ private:
 
 // connection
     std::string      _host;
+    short            _port;
 
     co::LocalNodePtr _localNode;
     co::NodePtr      _applicationNode;
@@ -63,6 +65,9 @@ private:
 
     ivs::TransferFunctionPair* _tf;
     bool                       _tfNew;
+
+    std::vector<byte>*         _ranks;
+    bool                       _ranksNew;
 
     std::string _fileName;
     bool        _fileNameNew;

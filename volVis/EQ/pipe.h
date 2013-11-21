@@ -1,7 +1,6 @@
 
 /* Copyright (c) 2006-2011, Stefan Eilemann <eile@equalizergraphics.com>
  *                    2011, Maxim Makhinya  <maxmah@gmail.com>
- *                    2012, David Steiner   <steiner@ifi.uzh.ch>
  */
 
 #ifndef MASS_VOL__PIPE_H
@@ -17,6 +16,10 @@ namespace massVolVis
 
 class Window;
 class Model;
+class TensorParameters;
+
+typedef boost::shared_ptr<       TensorParameters >      TensorParametersSPtr;
+typedef boost::shared_ptr< const TensorParameters > constTensorParametersSPtr;
 
 typedef boost::shared_ptr< Model > ModelSPtr;
 
@@ -75,6 +78,9 @@ private:
     uint32_t  _rTypeVersion;    //!< version of the renderer type
     uint32_t  _tfVersion;       //!< version of the TF
     uint32_t  _fileNameVersion; //!< version of the model name (data set version)
+    uint32_t  _tpVersion;       //!< version of Tensor Parameters
+
+    TensorParametersSPtr _tensorParameters; //!< tensor decompression parameters
 
     uint32_t _lastFrameNumber; //!< used to make sure we check for new parameters only once per frame
 };

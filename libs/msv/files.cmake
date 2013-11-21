@@ -1,11 +1,11 @@
 
 # Copyright (c) 2011 Maxim Makhinya <maxmah@gmail.com>
-#               2012 David Steiner  <steiner@ifi.uzh.ch>
 
 set(MSV_IO_PUBLIC_HEADERS
   ./IO/dataHDDIO.h
   ./IO/dataHDDIORaw.h
   ./IO/dataHDDIOOctree.h
+  ./IO/dataHDDIOTensor.h
   ./IO/volumeFileInfo.h
   )
 
@@ -13,16 +13,21 @@ set(MSV_IO_SOURCES
   ./IO/dataHDDIO.cpp
   ./IO/dataHDDIORaw.cpp
   ./IO/dataHDDIOOctree.cpp
+  ./IO/dataHDDIOTensor.cpp
   ./IO/volumeFileInfo.cpp
   )
 
 set(MSV_TREE_PUBLIC_HEADERS
   ./tree/nodeId.h
+  ./tree/rankErrors.h
   ./tree/volumeTreeBase.h
+  ./tree/volumeTreeTensor.h
   )
 
 set(MSV_TREE_SOURCES
+  ./tree/rankErrors.cpp
   ./tree/volumeTreeBase.cpp
+  ./tree/volumeTreeTensor.cpp
   )
 
 set(MSV_TYPES_PUBLIC_HEADERS
@@ -56,7 +61,7 @@ set(MSV_UTIL_PUBLIC_HEADERS
   ./util/fileIO.h
   ./util/hlp.h
   ./util/md5.h
-  ./util/pngwriter.h
+#  ./util/pngwriter.h
   ./util/statLogger.h
   ./util/str.h
   ./util/testing.h
@@ -66,7 +71,7 @@ set(MSV_UTIL_SOURCES
   ./util/debug.cpp
   ./util/fileIO.cpp
   ./util/md5.cpp
-  ./util/pngwriter.cpp
+#  ./util/pngwriter.cpp
   ./util/statLogger.cpp
   ./util/str.cpp
   ./util/testing.cpp

@@ -1,6 +1,5 @@
 
 /* Copyright (c) 2011, Maxim Makhinya <maxmah@gmail.com>
- *               2012, David Steiner  <steiner@ifi.uzh.ch>
  *
  */
 
@@ -79,7 +78,9 @@ public:
     virtual     byte getBytesNum()                       const { return VolumeFileInfo::getBytesNum();   }
 
     using VolumeFileInfo::getBlockDim;
+    using VolumeFileInfo::getMaxRankDim;
     using VolumeFileInfo::getBorderDim;
+    using VolumeFileInfo::getU123Dims;
     using VolumeFileInfo::getBytesNum;
     using VolumeFileInfo::getTFFileName;
     using VolumeFileInfo::getBlockAndBordersDim;

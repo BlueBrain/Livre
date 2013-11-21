@@ -73,7 +73,7 @@ void _copyData(       char*      dst,    // destination
 
 bool DataHDDIORaw::read( const Box_i32& dim, void* dst )
 {
-    static bool errorReported = true;
+    static bool errorReported = false;
     if( sizeof(std::streamoff) < sizeof(int64_t) && !errorReported )
     {
         LOG_ERROR << "sizeof(std::streamoff) < sizeof(int64_t): reading from large files is probably broken!" << std::endl;
@@ -118,7 +118,7 @@ bool DataHDDIORaw::read( const Box_i32& dim, void* dst )
     const int64_t srcX =                                bb.s.w * uint64_t(bytes);
 
     // amout of data we are going to use
-    const uint64_t sliceSize =  uint64_t(srcDim.h) * uint64_t(srcDim.w) * uint64_t(bbDim.d) * uint64_t(bytes);
+    const int64_t sliceSize = srcDim.h * srcDim.w * bbDim.d * bytes;
 
     if( srcZ != _oldZ || static_cast<int64_t>(bbDim.d) != _oldD )
     {

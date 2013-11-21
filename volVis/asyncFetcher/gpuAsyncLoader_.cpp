@@ -1,6 +1,5 @@
 
 /* Copyright (c) 2009-2011, Maxim Makhinya <maxmah@gmail.com>
- *               2012,      David Steiner  <steiner@ifi.uzh.ch>
  *
  */
 
@@ -19,7 +18,9 @@
 #include <msv/util/hlp.h>
 #include <msv/util/testing.h>
 
+#include <msv/IO/dataHDDIOTensor.h>
 #include <msv/tree/volumeTreeBase.h>
+#include <msv/tree/volumeTreeTensor.h>
 #include <ctime>
 
 #include <msv/util/statLogger.h>
@@ -185,7 +186,7 @@ void GPUAsyncLoader::_update3DTexture()
 
 bool GPUAsyncLoader::canRedecompress() const
 {
-    return false;
+    return _decompressor ? _decompressor->rankDependant() : false;
 }
 
 

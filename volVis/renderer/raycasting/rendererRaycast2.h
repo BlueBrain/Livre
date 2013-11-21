@@ -7,6 +7,7 @@
 #define MASS_VOL__RENDERER_RAYCAST_2_H
 
 #include "../rendererBase.h"
+
 #include "../glslShaders.h"
 
 #include <boost/scoped_ptr.hpp>

@@ -1,6 +1,5 @@
 
 /* Copyright (c) 2011, Maxim Makhinya <maxmah@gmail.com>
- *               2012, David Steiner  <steiner@ifi.uzh.ch>
  *
  */
 
@@ -22,12 +21,15 @@ namespace massVolVis
 class CameraParameters;
 class GPUCacheManager;
 class VolumeTreeBase;
+class TensorParameters;
+
+typedef boost::shared_ptr< const TensorParameters > constTensorParametersSPtr;
 
 
 class OrderEstimator : private NonCopyable
 {
 public:
-    OrderEstimator();
+    OrderEstimator( constTensorParametersSPtr tensorPrms );
 
     /**
      * Computes lists of blocks to render and to schedule for uploading
@@ -39,12 +41,8 @@ public:
      * \param       bb          BB of desired data x,y,z belong to [-1..1]
      * \param       cp          camera parameters (occlusion culling, order estimation)
      * \param       nodesMax    nodes budget
-     * \param       tfHist      histogram of a current Transfer Function
+     * \param       tfHist      historgam of a current Transfer Function
      * \param       msMax       time budget
-     * \param       maxTreeDepth
-     * \param       frontToBack
-     * \param       useRenderingError
-     * \param       renderingError
      */
     void compute(       RenderNodeVec&    renderNodes,
                         NodeIdPosVec&     desiredIds,
@@ -73,6 +71,8 @@ private:
     vecBoxN_f _bbs;    //!< DB data split layout
     Box_f     _dataBB; //!< total data BB
     const std::auto_ptr< CameraParameters > _cpPtr; //!< Old camera parameters
+
+    constTensorParametersSPtr _tensorPrms;
 
     double _timePerBlockUnitSize;
 };

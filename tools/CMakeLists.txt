@@ -30,10 +30,57 @@ massvol_add_tool(dataConverter
   )
 add_dependencies(dataConverter msv)
 
-# if(CUDA_FOUND)
-#  include_directories(SYSTEM ${CUDA_INCLUDE_DIRS})
-#  list(APPEND EQUALIZER_DEFINES EQ_USE_CUDA)
-#  message(STATUS "Using CUDA from: ${CUDA_INCLUDE_DIRS}")
-# endif()
+massvol_add_tool(tensorConverter
+  HEADERS
+  SOURCES
+    tensorConverter/main.cpp
+  LINK_LIBRARIES
+    msv
+  )
+
+massvol_add_tool(histBuilder
+  HEADERS
+  SOURCES
+    histBuilder/main.cpp
+    ../volVis/asyncFetcher/compression/tensorCPU.cpp
+  LINK_LIBRARIES
+    msv
+  )
+
+massvol_add_tool(tmpTst
+  HEADERS
+  SOURCES
+    tmpTst/main.cpp
+  LINK_LIBRARIES
+    msv
+  )
+
+if(CUDA_FOUND)
+  include_directories(SYSTEM ${CUDA_INCLUDE_DIRS})
+  list(APPEND EQUALIZER_DEFINES EQ_USE_CUDA)
+  message(STATUS "Using CUDA from: ${CUDA_INCLUDE_DIRS}")
+endif()
+
+set(CUDA_COMP_FILES)
+if(CUDA_FOUND)
+  remove_definitions(${EQ_DEFINITIONS})
+  cuda_compile(CUDA_COMP_FILES cudaTest/cudaDecompressor.cu)
+  add_definitions(${EQ_DEFINITIONS})
+endif()
+
+if(CUDA_FOUND)
+  massvol_add_tool(cudaTest
+    HEADERS
+      cudaTest/cudaDecompressor.h
+      cudaTest/cpuDecompressor.h
+    SOURCES
+      ${CUDA_COMP_FILES}
+      cudaTest/main.cpp
+      cudaTest/cpuDecompressor.cpp
+    LINK_LIBRARIES
+      ${CUDA_LIBRARIES}
+      msv
+    )
+endif(CUDA_FOUND)
 
 add_subdirectory(visGUI)

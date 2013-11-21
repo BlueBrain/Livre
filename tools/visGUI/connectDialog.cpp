@@ -1,6 +1,6 @@
 
 /* Copyright (c) 2011, Fatih Erol
- *
+ *               2013, David Steiner
  */
 
 
@@ -15,8 +15,8 @@
 namespace massVolGUI
 {
 
-ConnectDialog::ConnectDialog( QWidget *parent_ )    // to compensate for a bug in g++, 'parent' is renamed
-    : QDialog( parent_ )
+ConnectDialog::ConnectDialog( QWidget *arg )
+    : QDialog( arg )
 {
     QFormLayout *_formLayout = new QFormLayout( this );
     setModal( true );

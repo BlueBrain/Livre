@@ -36,7 +36,7 @@ public:
 
     /**
      * Captures one frame from the screen to the memory buffer.
-     *
+     * 
      * @param w width  of the viewport
      * @param h height of the viewport
      */
@@ -46,9 +46,9 @@ public:
 
     /**
      * Stores all captured frames as a sequence of video frames
-     * of a specific frame rate (duplicates or removes images
+     * of a specific frame rate (duplicates or removes images 
      * if necessary).
-     *
+     * 
      * @param nameTemplate path and beginning of the file name
      * @param frameRate    how many frames per second is required
      */
@@ -82,6 +82,7 @@ private:
     static void _writeImage( const FrameSharedPtr framePtr, const std::string& nameTemplate, uint32_t frameNum );
     static void _writeImage( const FrameSharedPtr framePtr, const std::string& fileName );
 
+    const GLEWContext* _glewContext;
     const std::auto_ptr< eq::util::Texture > _texturePtr;
     const std::auto_ptr< lunchbox::Clock   > _clockPtr;
 

@@ -1,6 +1,5 @@
 
-/* Copyright (c) 2011, Maxim Makhinya <maxmah@gmail.com>
- *               2012, David Steiner  <steiner@ifi.uzh.ch>
+/* Copyright (c) 2011, Maxim Makhinya  <maxmah@gmail.com>
  */
 
 #ifndef MASS_VOLL__VOLUME_INFO_H
@@ -9,6 +8,7 @@
 #include <eq/eq.h>
 #include "../renderer/rendererTypes.h"
 #include "../renderer/transferFunction.h"
+#include "../asyncFetcher/compression/tensorParameters.h"
 
 namespace massVolVis
 {
@@ -23,14 +23,17 @@ public:
     void setTransferFunction( const TransferFunction& tf       );
     void resetTransferFunction();
     void setRendererType(     const RendererType      rType    );
+    void setTensorParameters( const TensorParameters& tp       );
 
     const std::string&      getModelFileName()    const { return _fileName; }
     const TransferFunction& getTransferFunction() const { return _tf;       }
           RendererType      getRendererType()     const { return _rType;    }
+    const TensorParameters& getTensorParameters() const { return _tp;       }
 
     uint32_t getModelFileNameVersion()    const { return _fileNameVersion; }
     uint32_t getTransferFunctionVersion() const { return _tfVersion;       }
     uint32_t getRendererTypeVersion()     const { return _rTypeVersion;    }
+    uint32_t getTensorParametersVersion() const { return _tpVersion;       }
 
 
 protected:
@@ -56,10 +59,12 @@ private:
     std::string         _fileName;
     TransferFunction    _tf;
     RendererType        _rType;
+    TensorParameters    _tp;
 
     uint32_t            _fileNameVersion;
     uint32_t            _tfVersion;
     uint32_t            _rTypeVersion;
+    uint32_t            _tpVersion;
 };
 
 

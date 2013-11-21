@@ -1,18 +1,31 @@
 
 # Copyright (c) 2011 Maxim Makhinya <maxmah@gmail.com>
-#               2012 David Steiner  <steiner@ifi.uzh.ch>
 
 set(VOLVIS_ASYNC_SYSTEM_SOURCES)
 set(VOLVIS_ASYNC_SYSTEM_HEADERS)
+
+if(EQ_AGL_USED)
+  set(VOLVIS_ASYNC_SYSTEM_HEADERS asyncFetcher/aglWindowShared.h)
+  set(VOLVIS_ASYNC_SYSTEM_SOURCES asyncFetcher/aglWindowShared.cpp)
+endif()
 
 if(EQ_GLX_USED)
   set(VOLVIS_ASYNC_SYSTEM_HEADERS asyncFetcher/glXWindowShared.h)
 endif()
 
-# set(CUDA_COMP_FILES)
+set(CUDA_COMP_FILES)
+# WAR bug in FindCUDA.cmake:
+if(CUDA_FOUND)
+  remove_definitions(${EQ_DEFINITIONS})
+  cuda_compile(CUDA_COMP_FILES ./asyncFetcher/compression/tensorCUDA.cu)
+  add_definitions(${EQ_DEFINITIONS})
+endif()
 
 set(VOLVIS_ASYNC_FETCHER_HEADERS
   ./asyncFetcher/compression/compression.h
+  ./asyncFetcher/compression/tensorCPU.h
+  ./asyncFetcher/compression/tensorCUDA.h
+  ./asyncFetcher/compression/tensorParameters.h
   ./asyncFetcher/gpuAsyncLoader.h
   ./asyncFetcher/gpuAsyncLoaderBase.h
   ./asyncFetcher/gpuCacheIndex.h
@@ -29,7 +42,8 @@ set(VOLVIS_ASYNC_FETCHER_HEADERS
 
 set(VOLVIS_ASYNC_FETCHER_SOURCES
   ./asyncFetcher/compression/compression.cpp
-#  ${CUDA_COMP_FILES}
+  ./asyncFetcher/compression/tensorCPU.cpp
+  ${CUDA_COMP_FILES}
   ./asyncFetcher/gpuAsyncLoader.cpp
   ./asyncFetcher/gpuAsyncLoaderBase.cpp
   ./asyncFetcher/gpuCacheIndex.cpp
@@ -125,11 +139,11 @@ set(VOLVIS_UTIL_HEADERS
 )
 
 set(VOLVIS_SHADERS
-  renderer/raycasting/vertexShader_raycast.glsl
-  renderer/raycasting/fragmentShader_raycast.glsl
-  renderer/raycasting/fragmentShader_raycast_ext.glsl
-  renderer/slice/vertexShader_slice.glsl
-  renderer/slice/fragmentShader_slice.glsl
+  ./renderer/raycasting/vertexShader_raycast.glsl
+  ./renderer/raycasting/fragmentShader_raycast.glsl
+  ./renderer/raycasting/fragmentShader_raycast_ext.glsl
+  ./renderer/slice/vertexShader_slice.glsl
+  ./renderer/slice/fragmentShader_slice.glsl
 )
 
 set(VOLVIS_ALL_HEADERS ${VOLVIS_ASYNC_FETCHER_HEADERS} ${VOLVIS_EQ_HEADERS}

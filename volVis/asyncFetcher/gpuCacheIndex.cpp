@@ -5,7 +5,7 @@
 
 #include "gpuCacheIndex.h"
 
-#include <lunchbox/debug.h>       // LBASSERT macro
+#include <lunchbox/debug.h>       // EQASSERT macro
 
 #include <math.h> // cbrt
 
@@ -14,6 +14,7 @@ namespace massVolVis
 
 namespace
 {
+
 Vec3_ui32 _findBest3DTextureMatch( const uint32_t maxBlocks, const uint32_t maxDim )
 {
     // check if we have more memory than it is allowed to allocate due to 3D texture size limitations

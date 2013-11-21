@@ -2,7 +2,6 @@
  * ivs - interactive volume splatter
  *
  * @author Philipp Schlegel (schlegel@ifi.uzh.ch)
- * edited: David Steiner (steiner@ifi.uzh.ch)
  **/
 
 #ifndef IVS_TRANSFERFUNCTIONEDITOR_H
@@ -16,7 +15,11 @@
 #include "System/Config.h"
 #include "System/Timer.h"
 
-#include "ui_TransferFunctionEditor.h"
+#ifndef IVS_LINUX
+#  include "GUI/ui_TransferFunctionEditor.h"
+#else
+#  include "ui_TransferFunctionEditor.h"
+#endif
 
 #include "TransferFunction.h"
 #include "TransferFunctionGraphCore.h"
@@ -60,6 +63,8 @@ public:
   /** set a new transfer function. 0 is not allowed. **/
   virtual void setTransferFunction(TransferFunctionPair *_transferFunction);
 
+  virtual void setTensorRanks( byte* globalRank, std::vector<byte>* ranks );
+
   /** set a histogram which will be shown as background **/
   void setHistogram(const unsigned int *_histogram, unsigned int _size);
 
@@ -77,7 +82,7 @@ public:
 
   bool getRangeAutoUpate() const;
   void setRangeAutoUpdate(bool _rangeAutoUpdate);
-
+  
 ///  IvsWidget *getIvsWidget();
 
   virtual void update() ;
@@ -91,6 +96,12 @@ public Q_SLOTS:
   virtual void changeRangeAutoUpdate(bool _checked);
   virtual void triggerMainWndUpdate();
 
+  virtual void changeGlobalRank( int value );
+  virtual void changeRank( int value );
+  virtual void changeRank( int value, int rank );
+  virtual void changeRankAutoUpdate( int state );
+  virtual void updateTensorRanks( bool force = true );
+
 protected:
   virtual void closeEvent(QCloseEvent *_event);
 
@@ -102,6 +113,7 @@ protected Q_SLOTS:
   virtual void saveTransferFunction(bool _checked);
 
 private:
+  void connectTensorRanks();
 
   void initializeGraph(TransferFunctionGraph *_transferFunctionGraph);
   void backup(unsigned int _size,
@@ -117,6 +129,9 @@ private:
   void backupTransferFunction();
   void restoreTransferFunction();
 
+  void backupTensorRanks();
+  void restoreTensorRanks();
+
   QPoint                      position_;
   QDir                        directory_;
   TransferFunctionGraph      *transferFunctionGraph_;
@@ -128,6 +143,14 @@ private:
   sys::Timer                  timer_;
   massVolGUI::MainWindow     *mainWnd_;
 
+  byte*                 globalRank_;
+  std::vector<byte>*    ranks_;
+  byte                  globalRankBackup_;
+  std::vector<byte>     ranksMaxSet_;
+  std::vector<byte>     ranksBackup_;
+  std::vector<byte>     ranksLastCommit_;
+  QList<QSpinBox *>     ranksSpinBoxList_;
+  bool                  autoUpdateRanks_;
   bool                  updateMaxSet_;
 };
 

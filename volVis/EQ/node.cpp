@@ -1,6 +1,5 @@
 
-/* Copyright (c) 2011, Maxim Makhinya <maxmah@gmail.com>
- *               2012, David Steiner  <steiner@ifi.uzh.ch>
+/* Copyright (c) 2011, Maxim Makhinya  <maxmah@gmail.com>
  *
  */
 
@@ -83,6 +82,7 @@ void Node::_frameStart( const eq::uint128_t& frameId, const uint32_t frameNumber
     LBASSERT( _volTree );
 
     LBWARN << _volTree->getInfoString().c_str() << std::endl;
+    LBWARN << "New Max Rank Size: " << _volFileInfo->getMaxRankDim() << std::endl;
 // Resume RAM loader
     // TODO: set RAM limits correctly
 //    _ramPool->startDataLoading( dataHDDIO, 3*1024, _fileNameVersionTested );

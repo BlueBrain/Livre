@@ -1,6 +1,5 @@
 
-/* Copyright (c) 2011, Maxim Makhinya <maxmah@gmail.com>
- *               2012, David Steiner  <steiner@ifi.uzh.ch>
+/* Copyright (c) 2011, Maxim Makhinya  <maxmah@gmail.com>
  */
 
 
@@ -41,6 +40,13 @@ void VolumeInfo::setTransferFunction( const TransferFunction& tf )
     setDirty( DIRTY_TF );
 }
 
+void VolumeInfo::setTensorParameters( const TensorParameters& tp )
+{
+    _tp = tp;
+    ++_tpVersion;
+    setDirty( DIRTY_TP );
+}
+
 
 void VolumeInfo::setRendererType( const RendererType rType )
 {
@@ -62,6 +68,8 @@ void VolumeInfo::serialize( co::DataOStream& os, const uint64_t dirtyBits )
     if( dirtyBits & DIRTY_RENDERER_TYPE )
         os << _rType << _rTypeVersion;
 
+    if( dirtyBits & DIRTY_TP )
+        os << _tp << _tpVersion;
 }
 
 
@@ -76,6 +84,9 @@ void VolumeInfo::deserialize( co::DataIStream& is, const uint64_t dirtyBits )
 
     if( dirtyBits & DIRTY_RENDERER_TYPE )
         is >> _rType >> _rTypeVersion;
+
+    if( dirtyBits & DIRTY_TP )
+        is >> _tp >> _tpVersion;
 }
 
 }//namespace massVolVis

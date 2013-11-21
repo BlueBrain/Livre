@@ -35,8 +35,8 @@ public:
     void setWindowTitleBase( const QString& titleBase );
 
     /**
-     *  When a directory gets selected from "open" or from recent dirs. This
-     *  function will update recent dir menu and also store it in app's system
+     *  When a directory gets selected from "open" or from recent dirs. This 
+     *  function will update recent dir menu and also store it in app's system 
      *  settings.
      */
     void setCurrentName( const QString &name );
@@ -57,7 +57,7 @@ signals:
 
 private slots:
     /**
-     *  Called when any of recent files are picked from the menu.
+     *  Called when any of recent files are picked from the menu. 
      *  Decodes file name and calls openRecentAction function.
      */
     void _openRecent();
@@ -94,3 +94,4 @@ private:
 } //namespace massVolGUI
 
 #endif //MAXUS_RECENT_FILES_H
+

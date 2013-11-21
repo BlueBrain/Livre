@@ -1,5 +1,4 @@
 /* Copyright (c) 2011, Maxim Makhinya <maxmah@gmail.com>
- *               2012, David Steiner  <steiner@ifi.uzh.ch>
  *
  */
 
@@ -22,6 +21,7 @@ struct RenderNode
         , screenRectSquare( 0 )
         , screenSize( 0 )
         , renderingTime( 0 )
+        , rank( 0 )
         , fullyVsible( false ){}
 
     NodeId   nodeId;
@@ -33,15 +33,19 @@ struct RenderNode
     uint32_t screenRectSquare;
     uint32_t screenSize;
     float    renderingTime;
+    byte     rank;
     bool     fullyVsible;
 };
 
 typedef std::vector<RenderNode> RenderNodeVec;
 
-inline std::ostream& operator << ( std::ostream& os, const RenderNode& rn )
+namespace
 {
-    os << "nId: " << rn.nodeId << " coords: " << rn.coords;
+std::ostream& operator << ( std::ostream& os, const RenderNode& rn )
+{
+    os << "nId: " << rn.nodeId << " coords: " << rn.coords; 
     return os;
+}
 }
 
 }

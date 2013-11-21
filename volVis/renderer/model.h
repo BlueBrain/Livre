@@ -1,6 +1,5 @@
 
 /* Copyright (c) 2011, Maxim Makhinya <maxmah@gmail.com>
- *               2012, David Steiner  <steiner@ifi.uzh.ch>
  *
  */
 
@@ -34,6 +33,7 @@ class GPUCacheManager;
 class OrderEstimator;
 class CameraParameters;
 class VolumeTreeBase;
+class TensorParameters;
 struct ModelRenderParameters;
 
 typedef boost::shared_ptr< GPUCacheManager > GPUCacheManagerSPtr;
@@ -42,6 +42,7 @@ typedef std::vector< bool > LevelsResetVec;
 
 typedef boost::shared_ptr< const VolumeTreeBase > constVolumeTreeBaseSPtr;
 
+typedef boost::shared_ptr< const TensorParameters > constTensorParametersSPtr;
 
 /**
  * - selection of renderer
@@ -53,7 +54,7 @@ public:
     Model( constVolumeTreeBaseSPtr volumeTree, byte borderDim,  // for Model
            constGPUCacheIndexSPtr cacheIndex,                   // for GPUCacheManager
            RAMPoolSPtr ramPool, const byte bytesNum,            // for GPUAsyncLoader
-           Window* wnd ); // for GPUAsyncLoader, OrderEstimator
+           Window* wnd, constTensorParametersSPtr tensorPrms ); // for GPUAsyncLoader, OrderEstimator
 
     void initTF( const TransferFunction& tf );
 
@@ -99,7 +100,7 @@ private:
 
     Rect_i32 _region; //!< Rendered screen region during last call of render()
     uint32_t _bricksRendered; //!< number of bricks rendered during last call of render()
-    //float    _cameraSpin; // !< using damping for mouse motion softening
+    float    _cameraSpin; // !< using damping for mouse motion softening
 
     util::EventLogger* const _events;
 

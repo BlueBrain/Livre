@@ -22,16 +22,19 @@ namespace massVolGUI
 {
 
 
-Controller::Controller( ivs::TransferFunctionPair* tf )
+Controller::Controller( ivs::TransferFunctionPair* tf, std::vector<byte>* ranks )
     : _localNode( NULL )
     , _applicationNode( NULL )
     , _x( 0 )
     , _xNew( true )
     , _tf( tf )
     , _tfNew( false )
+    , _ranks( ranks )
+    , _ranksNew( false )
     , _fileNameNew( false )
 {
     LBASSERT( _tf );
+    LBASSERT( _ranks );
 
     _localNode = new co::LocalNode;
 
@@ -133,6 +136,22 @@ bool Controller::updateTF()
 
     _applicationNode->send( massVolVis::CMD_GUI_SET_TF ) << rgba << sda;
     _tfNew = false;
+
+    return true;
+}
+
+
+bool Controller::updateTensorRanks()
+{
+    std::cout << "New Tensor Parameters: "; for( size_t i = 0; i < _ranks->size(); ++i )  std::cout << (int)((*_ranks)[i]) << ", "; std::cout << std::endl;
+
+    _ranksNew = true;
+
+    if( !isConnected( ))
+        return false;
+
+    _applicationNode->send( massVolVis::CMD_GUI_SET_TENSOR_PARAMETERS ) << *_ranks;
+    _ranksNew = false;
 
     return true;
 }

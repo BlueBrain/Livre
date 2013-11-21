@@ -162,7 +162,9 @@ bool Config::handleEvent( const eq::ConfigEvent* event )
         case eq::Event::KEY_PRESS:
         {
             if( _handleKeyEvent( event->data.keyPress ))
+            {
                 return true;
+            }
             break;
         }
 
@@ -214,6 +216,7 @@ bool Config::handleEvent( const eq::ConfigEvent* event )
             }
             break;
         }
+        
         case eq::Event::CHANNEL_POINTER_MOTION:
         {
             switch( event->data.pointerMotion.buttons )
@@ -279,7 +282,6 @@ bool Config::handleEvent( const eq::ConfigEvent* event )
         default:
             break;
     }
-
     return eq::Config::handleEvent( event );
 }
 

@@ -1,6 +1,5 @@
 
 /* Copyright (c) 2011, Maxim Makhinya <maxmah@gmail.com>
- *               2012, David Steiner  <steiner@ifi.uzh.ch>
  *
  */
 
@@ -12,6 +11,7 @@
 #include <msv/types/vec3.h>
 #include <msv/types/types.h>
 
+#include <msv/tree/rankErrors.h>
 
 #include <msv/types/bits.h>
 
@@ -44,11 +44,18 @@ public:
         COMPRESSION  = Bits::B_6,
         DATA_FILE    = Bits::B_7,
         TF_FILE      = Bits::B_8,
+        MAX_RANK     = Bits::B_9,  // Tensor stuff
+        U123_DIMS    = Bits::B_10, // Tensor stuff
+        U_OFFSETS    = Bits::B_11  // Tensor stuff
     };
 
     enum CompressionType
     {
         NONE                       = 0,
+        TENSOR                     = 1,
+        TENSOR_QUANTIZED           = 2,
+        TENSOR_QUANTIZED_2G        = 3,
+        TENSOR_QUANTIZED_ERRORS_2G = 4
     };
 
     VolumeFileInfo();
@@ -60,7 +67,10 @@ public:
 
     virtual void setVersion(      const int             version  ) { _version      = version;  _setAttribute( VERSION     ); }
     virtual void setSourceDims(   const Vec3_ui16&      dims     ) { _srcDims      = dims;     _setAttribute( SOURCE_DIMS ); }
+    virtual void setU123SrcDims(  const Vec2_ui16&      dims     ) { _u123SrcDims  = dims;     _setAttribute( U123_DIMS   ); }
+    virtual void setUOffsets(     const std::string&    uOffsets ) { _uOffsets     = uOffsets; _setAttribute( U_OFFSETS   ); }
     virtual void setBlockDim(     const uint32_t        blockDim ) { _blockDim     = blockDim; _setAttribute( BLOCK_DIM   ); }
+    virtual void setMaxRankDim(   const uint32_t        rankDim  ) { _maxRankDim   = rankDim;  _setAttribute( MAX_RANK    ); }
     virtual void setBorderDim(    const byte            border   ) { _border       = border;   _setAttribute( BORDER_DIM  ); }
     virtual void setBytesNum(     const byte            bytes    ) { _bytes        = bytes;    _setAttribute( BYTES       ); }
     virtual void setCompression(  const CompressionType cmpr     ) { _compression  = cmpr;     _setAttribute( COMPRESSION ); }
@@ -69,11 +79,20 @@ public:
 
     virtual uint32_t getBlockSize_() const;
 
+    /**
+     * If compression is TENSOR, then this function might update maxRank.
+     *
+     * @param [out] hddIO Data IO, based on parameters and compression
+     */
     virtual DataHDDIOSPtr createDataHDDIO( bool initTree = true );
 
     int                 getVersion()      const { return _version;      }
     const Vec3_ui16&    getSourceDims()   const { return _srcDims;      }
+    const Vec2_ui16&    getU123SrcDims()  const { return _u123SrcDims;  }
+    const Vec2_ui16     getU123Dims()     const { return Vec2_ui16( _maxRankDim, _u123SrcDims.h ); }
+    const std::string&  getUOffsets()     const { return _uOffsets;     }
     uint32_t            getBlockDim()     const { return _blockDim;     }
+    uint32_t            getMaxRankDim()   const { return _maxRankDim;   }
     byte                getBorderDim()    const { return _border;       }
     byte                getBytesNum()     const { return _bytes;        }
     CompressionType     getCompression()  const { return _compression;  }
@@ -99,7 +118,10 @@ private:
 
     int             _version;       //!< config file version
     Vec3_ui16       _srcDims;       //!< original dimensions of the data
+    Vec2_ui16       _u123SrcDims;   //!< Initial tensor U1/U2/U3 dimensions (same for all matrixes)
+    std::string     _uOffsets;      //!< list of column offsets for different levels of tree in tensor compression
     uint32_t        _blockDim;      //!< block dimention (we have cubes, also this is constant for all blocks)
+    uint32_t        _maxRankDim;    //!< maximum rank dimention for tensors (we have cubes, also this is constant for all blocks)
     byte            _border;        //!< border size (borders are symmetrical for all dimensions)
     byte            _bytes;         //!< number of bytes per value (usually 1 or 2, i.e. 8 or 16 bit data)
     CompressionType _compression;   //!< type of compression used for the data
