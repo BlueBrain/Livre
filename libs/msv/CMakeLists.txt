@@ -40,7 +40,7 @@ set(MSV_ALL_HEADERS
   )
 
 add_library(msv SHARED ${MSV_ALL_HEADERS} ${MSV_ALL_SOURCES})
-target_link_libraries(msv "png" ${LUNCHBOX_LIBRARIES})
+target_link_libraries(msv "png" ${LUNCHBOX_LIBRARIES} gcov )
 install(FILES ${MSV_ALL_HEADERS}
       DESTINATION include/livre/msv COMPONENT dev)
 install(TARGETS msv
