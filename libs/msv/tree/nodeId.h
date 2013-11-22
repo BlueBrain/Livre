@@ -1,6 +1,5 @@
 
 /* Copyright (c) 2011, Maxim Makhinya <maxmah@gmail.com>
- *               2012, David Steiner  <steiner@ifi.uzh.ch>
  *
  */
 
@@ -16,14 +15,16 @@ typedef uint32_t NodeId;
 
 struct NodeIdPos
 {
-    NodeIdPos() : id(0), treePos(0) {}
+    NodeIdPos() : id(0), treePos(0), rank(0) {}
 
-    NodeIdPos( NodeId id_, uint32_t treePos_ )
+    NodeIdPos( NodeId id_, uint32_t treePos_, byte rank_ )
         : id(  id_  )
-        , treePos( treePos_ ){}
+        , treePos( treePos_ )
+        , rank(    rank_    ){}
 
     NodeId   id;
     uint32_t treePos;
+    byte     rank;
 
     bool operator == ( const NodeIdPos& other ) const
     {

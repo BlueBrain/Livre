@@ -25,6 +25,7 @@
 #include <eq/client/image.h>
 #include <eq/client/log.h>
 #include <eq/fabric/pixelViewport.h>
+// #include <co/plugins/compressorTypes.h>
 
 namespace massVolVis
 {
@@ -164,7 +165,7 @@ void RendererRaycast::frameInit( const FrameInitParameters& fInitParams )
     glUniform1fARB( tParamNameGL,  50.0f         ); //f-shader
 
     // rotate viewPosition in the opposite direction of model rotation
-    // to keep light position constant but not recalculate normals
+    // to keep light position constant but not recalculate normals 
     // in the fragment shader
     tParamNameGL = glGetUniformLocationARB(  shader,  "viewVec"       );
     glUniform3fARB( tParamNameGL, fInitParams.viewVector.x(),
@@ -206,26 +207,26 @@ void RendererRaycast::frameFinish()
 
 namespace
 {
-//void _dumpDebug( const eq::util::Texture& texture, const GLEWContext* glewContext )
-//{
-//    static eq::Image tmpImg;
-//    static uint32_t counter = 0;
-//    std::ostringstream ss;
-//    ss << "~/_img_" << ++counter;
+void _dumpDebug( const eq::util::Texture& texture, const GLEWContext* glewContext )
+{
+    static eq::Image tmpImg;
+    static uint32_t counter = 0;
+    std::ostringstream ss;
+    ss << "~/_img_" << ++counter;
 
-//    tmpImg.reset();
-//    tmpImg.setPixelViewport( eq::PixelViewport( 0, 0, texture.getWidth(), texture.getHeight( )));
-//    tmpImg.allocDownloader( eq::Frame::BUFFER_COLOR,
-//                             EQ_COMPRESSOR_TRANSFER_RGBA_TO_BGR,
-//                             glewContext );
-//    tmpImg.clearPixelData( eq::Frame::BUFFER_COLOR );
+    tmpImg.reset();
+    tmpImg.setPixelViewport( eq::PixelViewport( 0, 0, texture.getWidth(), texture.getHeight( )));
+    tmpImg.allocDownloader( eq::Frame::BUFFER_COLOR,
+                             EQ_COMPRESSOR_TRANSFER_RGBA_TO_BGR,
+                             glewContext );
+    tmpImg.clearPixelData( eq::Frame::BUFFER_COLOR );
 
-//    uint8_t* dst  = tmpImg.getPixelPointer( eq::Frame::BUFFER_COLOR );
-//    texture.download( dst );
+    uint8_t* dst  = tmpImg.getPixelPointer( eq::Frame::BUFFER_COLOR );
+    texture.download( dst );
 
-//    LBWARN << "Dumping image: " << ss.str( ) << std::endl;
-//    tmpImg.writeImages( ss.str( ));
-//}
+    LBWARN << "Dumping image: " << ss.str( ) << std::endl;
+    tmpImg.writeImages( ss.str( ));
+}
 }
 
 
@@ -418,7 +419,7 @@ void RendererRaycast::initTF( const TransferFunction& tf )
         // average Alpha from two neighbouring TF values
         const float tauc =    ( rgba[(i-1)*4+3] + rgba[i*4+3] ) / 2. / 255.;
 
-        // SAT of average RGBs from two neighbouring TF values
+        // SAT of average RGBs from two neighbouring TF values 
         // multiplied with Alpha
         rInt[i] = rInt[i-1] + ( rgba[(i-1)*4+0] + rgba[i*4+0] )/2.*tauc;
         gInt[i] = gInt[i-1] + ( rgba[(i-1)*4+1] + rgba[i*4+1] )/2.*tauc;
@@ -493,7 +494,7 @@ void RendererRaycast::initTF( const TransferFunction& tf )
 
     for( int i=1; i<256; i++ )
     {
-        // SAT of average SDAs from two neighbouring TF values
+        // SAT of average SDAs from two neighbouring TF values 
         rInt[i] = rInt[i-1] + ( sda[(i-1)*3+0] + sda[i*3+0] )/2.;
         gInt[i] = gInt[i-1] + ( sda[(i-1)*3+1] + sda[i*3+1] )/2.;
         bInt[i] = bInt[i-1] + ( sda[(i-1)*3+2] + sda[i*3+2] )/2.;

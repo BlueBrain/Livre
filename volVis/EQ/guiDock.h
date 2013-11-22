@@ -18,8 +18,9 @@
 namespace massVolVis
 {
 
-class Config;
 struct TransferFunction;
+class Config;
+class TensorParameters;
 
 class GUINode : public co::LocalNode, private NonCopyable
 {
@@ -31,10 +32,12 @@ private:
     bool _cmdSetX(    co::ICommand &command );
     bool _cmdSetFile( co::ICommand &command );
     bool _cmdSetTF(   co::ICommand &command );
+    bool _cmdSetTensorParameters( co::ICommand &command );
 
     Config* _config;
 
     const std::auto_ptr<TransferFunction> _tfTmpPtr;
+    const std::auto_ptr<TensorParameters> _tpTmpPtr;
 };
 
 /** Dock for eqGUI clients */

@@ -65,9 +65,10 @@ Rect_i32 CameraParameters::computeScreenProjectionRect( const Box_f& coords ) co
     float x[] = {coords.s.x, coords.e.x};
     float y[] = {coords.s.y, coords.e.y};
     float z[] = {coords.s.z, coords.e.z};
-
-    Rect_f res( (Vec2_f( Limits< float >::max() )),
-                (Vec2_f( Limits< float >::min() )));
+    
+    float minimum=Limits< float >::min();
+    float maximum=Limits< float >::max();
+    Rect_f res((Vec2_f(maximum)), Vec2_f(minimum));
 
     for( int i = 0; i < 2; ++i )
         for( int j = 0; j < 2; ++j )

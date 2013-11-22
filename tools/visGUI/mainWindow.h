@@ -48,6 +48,8 @@ public:
 
     void updateTransferFunction();
 
+    void updateTensorRanks();
+
 signals:
     void updateRecentActions();
 
@@ -96,6 +98,10 @@ private:
 
 // TF
     ivs::TransferFunctionPair *_tf;
+
+// Tensor ranks
+    byte              _globalRank;
+    std::vector<byte> _ranks;
 
 // Dialogs
     ConnectDialog *_connectDialog;

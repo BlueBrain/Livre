@@ -3,7 +3,7 @@
 #include "screenGrabber.h"
 
 #include <msv/util/str.h>  // toString
-#include <msv/util/pngwriter.h>
+//#include <msv/util/pngwriter.h>
 #include <msv/util/fileIO.h> // paddFilename
 
 #include <lunchbox/debug.h>
@@ -40,6 +40,7 @@ void ScreenGrabber::Frame::resize( int w_, int h_, int b_ )
 ScreenGrabber::ScreenGrabber( const GLEWContext* context )
     : _numBytes( 4 )
     , _frameNumber( 0 )
+    , _glewContext( context )
     , _texturePtr( new eq::util::Texture( GL_TEXTURE_RECTANGLE_ARB, context ))
     , _clockPtr( new lunchbox::Clock( ))
 {
@@ -131,6 +132,7 @@ void ScreenGrabber::saveScreenshot( const GLEWContext* context, const std::strin
 
 void ScreenGrabber::_writeImage( const FrameSharedPtr framePtr, const std::string& fileName )
 {
+/*
     LBASSERT( framePtr );
     LBASSERT( static_cast<int32_t>(framePtr->data.size()) >= framePtr->w*framePtr->h*framePtr->b );
 
@@ -147,6 +149,7 @@ void ScreenGrabber::_writeImage( const FrameSharedPtr framePtr, const std::strin
             png.plot( x, y, r, g, b );
         }
     png.close();
+    */
 }
 
 

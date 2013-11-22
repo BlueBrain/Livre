@@ -1,4 +1,3 @@
-//std12
 
 #include "model.h"
 
@@ -26,7 +25,7 @@ namespace massVolVis
 
 namespace
 {
-//void _drawRectangles( const Channel* channel, const RenderNodeVec& rNodes );
+void _drawRectangles( const Channel* channel, const RenderNodeVec& rNodes );
 
 util::EventLogger* _getEventLogger( void* p )
 {
@@ -39,13 +38,13 @@ util::EventLogger* _getEventLogger( void* p )
 
 Model::Model( constVolumeTreeBaseSPtr volumeTree, byte borderDim,
               constGPUCacheIndexSPtr cacheIndex, RAMPoolSPtr ramPool, const byte bytesNum,
-              Window* wnd )
+              Window* wnd, constTensorParametersSPtr tensorPrms )
     : _gpuChacheMager( new GPUCacheManager( cacheIndex, ramPool, bytesNum, wnd ))
     , _volumeTree( volumeTree )
-    , _orderEstimatorPtr( new OrderEstimator())
+    , _orderEstimatorPtr( new OrderEstimator( tensorPrms ))
     , _rType( NONE )
     , _bricksRendered( 0 )
-    //, _cameraSpin( 0 )
+    , _cameraSpin( 0 )
     , _events( _getEventLogger( this ))
     , _timeLastFrameFinish( 0 )
     , _frameNumber( 0 )
@@ -132,28 +131,28 @@ const vecBoxN_f& Model::getDataSplit( const uint32_t          n,
 
 namespace
 {
-//void _adjustBudjet( uint32_t& budget, float& cameraSpin, float newCameraSpin )
-//{
-//    if( cameraSpin < newCameraSpin )
-//        cameraSpin = 0.5*cameraSpin + 0.5*newCameraSpin;
-//    else
-//        cameraSpin = 0.2*cameraSpin + 0.8*newCameraSpin;
+void _adjustBudjet( uint32_t& budget, float& cameraSpin, float newCameraSpin )
+{
+    if( cameraSpin < newCameraSpin )
+        cameraSpin = 0.5*cameraSpin + 0.5*newCameraSpin;
+    else
+        cameraSpin = 0.2*cameraSpin + 0.8*newCameraSpin;
 
-//    const float mins = 0.001;
-//    const float maxs = 0.1;
-//    const float Mins = 109.0;
-//    const float Maxs =  10.0;
-//    const float as = (Maxs-Mins)*(maxs*mins)/(mins-maxs);
-//    const float bs = Mins - as/mins;
-//    if( cameraSpin > 0.0000001 )
-//    {
-//        if( cameraSpin > maxs )
-//            budget = LB_MIN( budget, Maxs );
-//        else
-//            budget = LB_MIN( budget, as / cameraSpin + bs );
-//    }
-////    std::cout << "spin: " << cameraSpin << " a: " << as << " b: " << bs << " budget: " << budget <<  std::endl;
-//}
+    const float mins = 0.001;
+    const float maxs = 0.1;
+    const float Mins = 109.0;
+    const float Maxs =  10.0;
+    const float as = (Maxs-Mins)*(maxs*mins)/(mins-maxs);
+    const float bs = Mins - as/mins;
+    if( cameraSpin > 0.0000001 )
+    {
+        if( cameraSpin > maxs )
+            budget = LB_MIN( budget, Maxs );
+        else
+            budget = LB_MIN( budget, as / cameraSpin + bs );
+    }
+//    std::cout << "spin: " << cameraSpin << " a: " << as << " b: " << bs << " budget: " << budget <<  std::endl;
+}
 }
 
 void Model::render( const ModelRenderParameters& rParams )
@@ -258,7 +257,17 @@ void Model::render( const ModelRenderParameters& rParams )
     {
         std::stringstream ss;
         ss << "Last ord est speed: " << tSum / tIt << " desired nodes: " << _desiredIds.size() << " rendered nodes: " << _renderNodes.size() << std::endl;
+/*
+        ss << "Ranks: " << std::endl;
+        for( size_t i = 0; i < _renderNodes.size(); ++i )
+        {
+            ss << (int)_renderNodes[i].treeLevel << (_renderNodes[i].rank < 10  ? "__" : "_") << (int)_renderNodes[i].rank
+               << (i != _renderNodes.size()-1 ? "|" : "");
 
+            if( (i+1)%30 == 0 || i == _renderNodes.size()-1 )
+                ss << std::endl;
+        }
+//*/
         std::cout << ss.str().c_str() << std::flush;
 
         tIt  = 0;
@@ -520,32 +529,32 @@ void Model::render( const eq::Matrix4f& ,
 
 namespace
 {
-//void _drawRectangles( const Channel* channel, const RenderNodeVec& rNodes )
-//{
-//    glMatrixMode( GL_PROJECTION );
-//    glLoadIdentity();
-//    channel->applyScreenFrustum();
-//    glMatrixMode( GL_MODELVIEW );
-//    glLoadIdentity();
+void _drawRectangles( const Channel* channel, const RenderNodeVec& rNodes )
+{
+    glMatrixMode( GL_PROJECTION );
+    glLoadIdentity();
+    channel->applyScreenFrustum();
+    glMatrixMode( GL_MODELVIEW );
+    glLoadIdentity();
 
-//    glDisable( GL_DEPTH_TEST );
-//    glDisable( GL_LIGHTING );
+    glDisable( GL_DEPTH_TEST );
+    glDisable( GL_LIGHTING );
 
-//    glColor3f( 1.0f, 1.0f, 1.0f );
+    glColor3f( 1.0f, 1.0f, 1.0f );
 
 
-//    for( size_t i = 0; i < rNodes.size(); ++i )
-//    {
-//        const Rect_i32& rect = rNodes[i].screenRect;
-//        glBegin( GL_LINE_LOOP );
-//            glVertex3f( rect.s.x, rect.s.y, 0.0f );
-//            glVertex3f( rect.e.x, rect.s.y, 0.0f );
-//            glVertex3f( rect.e.x, rect.e.y, 0.0f );
-//            glVertex3f( rect.s.x, rect.e.y, 0.0f );
-//        glEnd();
-//    }
+    for( size_t i = 0; i < rNodes.size(); ++i )
+    {
+        const Rect_i32& rect = rNodes[i].screenRect;
+        glBegin( GL_LINE_LOOP );
+            glVertex3f( rect.s.x, rect.s.y, 0.0f );
+            glVertex3f( rect.e.x, rect.s.y, 0.0f );
+            glVertex3f( rect.e.x, rect.e.y, 0.0f );
+            glVertex3f( rect.s.x, rect.e.y, 0.0f );
+        glEnd();
+    }
 
-//}
+}
 }
 
 

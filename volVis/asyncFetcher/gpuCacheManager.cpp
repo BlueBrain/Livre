@@ -1,6 +1,5 @@
 
 /* Copyright (c) 2011, Maxim Makhinya <maxmah@gmail.com>
- *               2012, David Steiner  <steiner@ifi.uzh.ch>
  *
  */
 
@@ -78,7 +77,7 @@ void GPUCacheManager::_processRespond( const GPULoadRespond& respond )
 //                LBWARN << "GPUCacheManager: loading confirmed: " << respond.nodeId << " / " << respond.posOnGPU << std::endl;
             LBASSERT( respond.posOnGPU < _cacheValues.size( ));
             _cacheValues[  respond.posOnGPU  ].set( _iteration, respond.nodeId );
-            _usedElements[ respond.nodeId ] = GpuLocation( respond.posOnGPU );
+            _usedElements[ respond.nodeId ] = GpuLocation( respond.posOnGPU, respond.rank );
             _nodeIdBeingLoaded = 0;
             break;
 
@@ -156,6 +155,7 @@ void GPUCacheManager::updateFront( const NodeIdPosVec& desiredIds )
         _cacheValues[ _cachePosBeingLoaded ].iteration = _iteration;
 
     _requests.clear();
+    const bool canRedecompress = _gpuLoader && _gpuLoader->canRedecompress();
     for( size_t i = 0; i < desiredIds.size(); ++i )
     {
         const NodeIdPos& testNodeId = desiredIds[i];
@@ -168,6 +168,9 @@ void GPUCacheManager::updateFront( const NodeIdPosVec& desiredIds )
             LBASSERT( _cacheValues[ cachePos ].nodeId == testNodeId.id );
 
             _cacheValues[ cachePos ].iteration = _iteration;
+            if( canRedecompress && nodeId.rank != testNodeId.rank )
+                _requests.push_back(
+                    GPULoadRequest( testNodeId.id, cachePos, testNodeId.treePos, testNodeId.rank, true ));
         }else
         {
             _newIds.push_back( desiredIds[i] );
@@ -230,7 +233,7 @@ void GPUCacheManager::updateFront( const NodeIdPosVec& desiredIds )
         const uint32_t cachePos = _cacheValuesTmp[i].getPos();
         LBASSERT( _cacheValues[ cachePos ].isFree() );
         _requests.push_back(
-            GPULoadRequest( _newIds[i].id, cachePos, _newIds[i].treePos, false ));
+            GPULoadRequest( _newIds[i].id, cachePos, _newIds[i].treePos, _newIds[i].rank, false ));
     }
 
     _gpuLoader->clearRAMLoadRequests();

@@ -12,6 +12,7 @@
 #include "volumeInfo.h"
 
 #include "../renderer/transferFunction.h"
+#include "../asyncFetcher/compression/tensorParameters.h"
 
 #include <co/connectionDescription.h>
 #include <boost/concept_check.hpp>
@@ -24,6 +25,7 @@ GUINode::GUINode()
     : co::LocalNode()
     , _config( 0 )
     , _tfTmpPtr( new TransferFunction( ))
+    , _tpTmpPtr( new TensorParameters( ))
 {
 }
 
@@ -46,6 +48,10 @@ bool GUINode::init( Config* config )
 
     registerCommand( CMD_GUI_SET_TF,
                     co::CommandFunc<GUINode>( this, &GUINode::_cmdSetTF ),
+                    getCommandThreadQueue( ));
+
+    registerCommand( CMD_GUI_SET_TENSOR_PARAMETERS,
+                    co::CommandFunc<GUINode>( this, &GUINode::_cmdSetTensorParameters ),
                     getCommandThreadQueue( ));
 
     return true;
@@ -81,6 +87,18 @@ bool GUINode::_cmdSetTF( co::ICommand &command )
 
     VolumeInfo& volInfo = _config->getVolumeInfo();
     volInfo.setTransferFunction( *_tfTmpPtr  );
+    volInfo.commit();
+
+    return true;
+}
+
+
+bool GUINode::_cmdSetTensorParameters( co::ICommand &command )
+{
+    command >> _tpTmpPtr->ranks;
+    
+    VolumeInfo& volInfo = _config->getVolumeInfo();
+    volInfo.setTensorParameters( *_tpTmpPtr  );
     volInfo.commit();
 
     return true;

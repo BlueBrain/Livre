@@ -19,7 +19,7 @@ namespace fabric {
 namespace massVolVis
 {
 
-struct RenderNode;
+class RenderNode;
 
 class NearPlaneClipper
 {

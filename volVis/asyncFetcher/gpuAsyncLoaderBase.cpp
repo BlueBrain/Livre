@@ -8,6 +8,9 @@
 #include "../EQ/window.h"
 
 #include <eq/client/system.h>
+#ifdef AGL
+#  include "aglWindowShared.h"
+#endif
 #ifdef GLX
 #  include "glXWindowShared.h"
 #endif
@@ -62,6 +65,7 @@ eq::SystemWindow* initSharedContextWindow( eq::Window* wnd,
         LBASSERT( sharedContextWindow );
         return 0;
     }
+    LBASSERT( sharedContextWindow );
 
     if( !sharedContextWindow->configInit( ))
     {
@@ -75,6 +79,21 @@ eq::SystemWindow* initSharedContextWindow( eq::Window* wnd,
     wnd->setIAttribute( eq::Window::IATTR_PLANES_STENCIL, stencil );
 
     sharedContextWindow->makeCurrent();
+
+/*
+    LBASSERT( (*computeCtx) == 0 );
+    *computeCtx = new eq::CUDAContext( pipe );
+
+    if( !(*computeCtx)->configInit() )
+    {
+        LBASSERT( pipe->getError() != eq::ERROR_NONE );
+        LBERROR << "GPU Computing context initialization failed: "
+                << pipe->getError() << std::endl;
+        delete *computeCtx;
+    }
+    pipe->setComputeContext( *computeCtx );
+    *computeCtx = 0;
+*/
     LBWARN << "Async fetcher initialization finished" << std::endl;
     return sharedContextWindow;
 }

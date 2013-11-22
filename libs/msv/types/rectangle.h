@@ -16,7 +16,7 @@ struct Rectangle
 {
     Rectangle(){}
 
-    Rectangle( const Vec2<T>& s_, const Vec2<T>& e_ ) : s( s_ ), e( e_ ) {}
+    explicit Rectangle( const Vec2<T>& s_, const Vec2<T>& e_ ) : s( s_ ), e( e_ ) {}
 
     explicit Rectangle( const Vec2<T>& e_ ) : e( e_ ) {}
 

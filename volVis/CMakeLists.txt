@@ -13,11 +13,10 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_definitions(-DVOLVIS_SOURCE_DIR="${CMAKE_SOURCE_DIR}/")
 
-
-# if(CUDA_FOUND)
-#   include_directories(SYSTEM ${CUDA_INCLUDE_DIRS})
-#   message(STATUS "Using CUDA from: ${CUDA_INCLUDE_DIRS}")
-# endif()
+if(CUDA_FOUND)
+  include_directories(SYSTEM ${CUDA_INCLUDE_DIRS})
+  message(STATUS "Using CUDA from: ${CUDA_INCLUDE_DIRS}")
+endif()
 
 include(files.cmake)
 

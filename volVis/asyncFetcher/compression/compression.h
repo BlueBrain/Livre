@@ -4,7 +4,7 @@
 #define MASS_VOL__COMPRESSION_H
 
 #include <boost/shared_ptr.hpp>
-#include <eq/client/gl.h>
+#include <GL/glew.h>
 #include <msv/types/types.h>
 
 namespace eq { namespace util { class PixelBufferObject; }}
@@ -12,9 +12,9 @@ namespace eq { namespace util { class PixelBufferObject; }}
 namespace massVolVis
 {
 
+struct GPULoadRequest;
 class DecompressorBase;
 class DataHDDIO;
-struct GPULoadRequest;
 class RAMDataElement;
 class VolumeTreeBase;
 
@@ -43,6 +43,7 @@ public:
     virtual bool load( const RAMDataElement* dataEl, GPULoadRequest& request ) = 0;
 
     virtual bool supportsFastReloading() const { return false; }
+    virtual bool rankDependant() const { return false; }
 
     bool isIntialized() const { return _initialized; }
 

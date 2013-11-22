@@ -313,7 +313,7 @@ void DataConverter::convert()
         const uint32_t dimXY = dim*dim;
 
         // two layers of blocks along z axiss
-        cache.resize( uint64_t(dimXY)*uint64_t(dstBlockDim.z+borderDim)*uint64_t(2)*uint64_t(dstBytesNum) );
+        cache.resize( dimXY*(dstBlockDim.z+borderDim)*2*dstBytesNum );
         memset( &cache[0], 0, cache.size()*sizeof(cache[0]) );
 
         const Vec3_i64  blockStride = dstBlockAndBordersDim;

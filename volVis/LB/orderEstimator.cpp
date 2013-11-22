@@ -1,6 +1,5 @@
 
 /* Copyright (c) 2011, Maxim Makhinya <maxmah@gmail.com>
- *               2012, David Steiner  <steiner@ifi.uzh.ch>
  *
  */
 
@@ -10,6 +9,9 @@
 #include "cameraParameters.h"
 
 #include <msv/tree/volumeTreeBase.h>
+#include <msv/tree/volumeTreeTensor.h>
+
+#include "../asyncFetcher/compression/tensorParameters.h"
 
 #include <list>
 #include <algorithm>
@@ -19,8 +21,9 @@ namespace massVolVis
 {
 
 
-OrderEstimator::OrderEstimator()
+OrderEstimator::OrderEstimator( constTensorParametersSPtr tensorPrms )
     : _cpPtr( new CameraParameters() )
+    , _tensorPrms( tensorPrms )
     , _timePerBlockUnitSize( 10.0 / 500.0 )
 {
 }
@@ -131,9 +134,30 @@ bool RenderNodeListItCmp( const RenderNodeListIt& first, const RenderNodeListIt&
 
 namespace
 {
-
-bool _validResolution( bool screenSizeValid, bool useRenderingError, uint16_t renderingError, int32_t pos )
+byte _getRank( byte tensorPrmsRank, bool useRenderingError, uint16_t renderingError, int32_t pos, const VolumeTreeTensorErrors* treeErr )
 {
+    if( !useRenderingError )
+        return tensorPrmsRank;
+
+    LBASSERT( treeErr );
+
+    byte validRank = treeErr->getValidRank( pos, renderingError );
+    return validRank < tensorPrmsRank ? validRank : tensorPrmsRank;
+}
+
+bool _validResolution( bool screenSizeValid, bool useRenderingError, uint16_t renderingError, int32_t pos, const VolumeTreeTensorErrors* treeErr )
+{
+    if( !useRenderingError )
+        return screenSizeValid;
+
+    LBASSERT( treeErr );
+
+    if( treeErr->isQualityTooLow( pos, renderingError ))
+        return false;
+
+    if( treeErr->isQualityTooHigh( pos, renderingError ))
+        return true;
+
     return screenSizeValid;
 }
 }
@@ -176,13 +200,17 @@ void OrderEstimator::compute(
         return;
     }
 
-    useRenderingError = false;
+    const VolumeTreeTensorErrors* treeErr = dynamic_cast< const VolumeTreeTensorErrors* >(&tree);
+    if( !treeErr )
+        useRenderingError = false;
+
+    byte rank = _getRank( _tensorPrms->getRank(0), useRenderingError, renderingError, 0, treeErr );
 
     // Check if root node is loaded
     if( !gpuManager.hasNodeOnGPU( rootNodeId ))
     {
         // always keep root node loaded
-        desiredIds.push_back( NodeIdPos( rootNodeId, rootNodePos ));
+        desiredIds.push_back( NodeIdPos( rootNodeId, rootNodePos, rank ));
         return;
     }
 
@@ -197,6 +225,7 @@ void OrderEstimator::compute(
     rNode.screenRectSquare = rNode.screenRect.getAreaSize();
     rNode.screenSize    = rNode.screenRect.getDiagonalSize();
     rNode.renderingTime = _estimateRenderingTime( rNode.screenSize );
+    rNode.rank          = rank;
     rNode.fullyVsible   = cp.computeVisibility( rNode.coords ) == vmml::VISIBILITY_FULL;
 
     std::list<RenderNode> renderList;
@@ -248,7 +277,7 @@ void OrderEstimator::compute(
 //            LBWARN << "nS: " << current->screenSize << " tS: " << tree.getBlockSize() << std::endl;
             bool screenSizeValid = static_cast<int>( current->screenSize )/2.8 < tree.getBlockSize();
 //            if( screenSizeValid )
-            if( _validResolution( screenSizeValid, useRenderingError, renderingError, current->treePos ))
+            if( _validResolution( screenSizeValid, useRenderingError, renderingError, current->treePos, treeErr ))
             {
                 pop_heap( renderHeap.begin(), renderHeap.end(), RenderNodeListItCmp ); renderHeap.pop_back();
                 continue;
@@ -328,6 +357,7 @@ void OrderEstimator::compute(
 
                     LBASSERT( current->treeLevel > 0 );
                     node.treeLevel  = current->treeLevel + 1;
+                    node.rank = _getRank( _tensorPrms->getRank(current->treeLevel-1), useRenderingError, renderingError, node.treePos, treeErr );
 
                     childrenRenderingTime += node.renderingTime;
 
@@ -340,6 +370,15 @@ void OrderEstimator::compute(
             nodesUsed += count; // adjust budget
 
             bool childrenQualityTooHigh = useRenderingError;
+            if( useRenderingError )
+            {
+                for( uint32_t i = 0; i < count; ++i )
+                    if( !treeErr->isQualityTooHigh( childrenNodes[i].treePos, renderingError ))
+                    {
+                        childrenQualityTooHigh = false;
+                        break;
+                    }
+            }
 
             if( count != countGPU || // some children are not on GPU or rendering of children would take too long
                 timeUsed - current->renderingTime + childrenRenderingTime > msMax ||
@@ -348,7 +387,7 @@ void OrderEstimator::compute(
                 // scedule children for loading
                 for( uint32_t i = 0; i < count; ++i )
                     desiredIds.push_back(
-                        NodeIdPos( childrenNodes[i].nodeId, childrenNodes[i].treePos ));
+                        NodeIdPos( childrenNodes[i].nodeId, childrenNodes[i].treePos, childrenNodes[i].rank ));
 
                 pop_heap( renderHeap.begin(), renderHeap.end(), RenderNodeListItCmp ); renderHeap.pop_back();
                 continue;
@@ -359,7 +398,7 @@ void OrderEstimator::compute(
             timeUsed = timeUsed - current->renderingTime + childrenRenderingTime;
 
             // replace root with children
-            desiredIds.push_back( NodeIdPos( current->nodeId, current->treePos ));
+            desiredIds.push_back( NodeIdPos( current->nodeId, current->treePos, current->rank ));
 
             // replace root with first child
             RenderNodeListIt parentId = renderHeap.front();
@@ -391,7 +430,7 @@ void OrderEstimator::compute(
         {
             RenderNode* current = &(*it);
             renderNodes.push_back( *current );
-            desiredIds.push_back( NodeIdPos( current->nodeId, current->treePos ));
+            desiredIds.push_back( NodeIdPos( current->nodeId, current->treePos, current->rank ));
         }
     }else
     {
@@ -401,7 +440,7 @@ void OrderEstimator::compute(
             --it;
             RenderNode* current = &(*it);
             renderNodes.push_back( *current );
-            desiredIds.push_back( NodeIdPos( current->nodeId, current->treePos ));
+            desiredIds.push_back( NodeIdPos( current->nodeId, current->treePos, current->rank ));
         }
     }
 }

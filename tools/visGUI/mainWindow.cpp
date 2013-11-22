@@ -1,6 +1,7 @@
 
 /* Copyright (c) 2011, Maxim Makhinya <maxmah@gmail.com>
  *               2013, David Steiner  <steiner@ifi.uzh.ch>
+ *
  */
 
 // must be included before any header file that defines Status
@@ -43,14 +44,16 @@ MainWindow::MainWindow( QWidget *_parent )
     , _quitAct( 0 )
     , _controller( 0 )
     , _tf( 0 )
+    , _globalRank( 32 )
+    , _ranks( 10, 32 )
     , _connectDialog( 0 )
 {
     _tf = new ivs::TransferFunctionPair();
     LBASSERT( _tf );
-    _tf->first.init(  256, ivs::tf::RGBA8 ); // rgba
+    _tf->first.init(  256, ivs::tf::RGBA8 ); // rgba 
     _tf->second.init( 256, ivs::tf::RGBA8 ); //  sda
 
-    _controller = new Controller( _tf );
+    _controller = new Controller( _tf, &_ranks );
     LBASSERT( _controller );
 
     setWindowTitleBase(tr( "volVisGUI" ));
@@ -239,7 +242,7 @@ void MainWindow::_loadFile( const QString& fileName )
 {
     if( fileName.length() > VOL_VIS_GUI_MAX_PATH_LEN-1 )
     {
-        QMessageBox::warning( this, QString( "Exception" ),
+        QMessageBox::warning( this, QString( "Exception" ), 
                                     QString( "File path is too long (%1 characters max)" ).arg( VOL_VIS_GUI_MAX_PATH_LEN-1 ),
                                     QMessageBox::Ok, QMessageBox::Ok );
         return;
@@ -255,6 +258,7 @@ void MainWindow::_adjustTF()
 {
     ivs::TransferFunctionEditor tfEditor( this, this );
     tfEditor.setTransferFunction( _tf );
+    tfEditor.setTensorRanks( &_globalRank, &_ranks );
     tfEditor.exec();
 }
 
@@ -266,6 +270,13 @@ void MainWindow::updateTransferFunction( )
 //    _controller->setX( i );
     _controller->updateTF();
 }
+
+
+void MainWindow::updateTensorRanks()
+{
+    _controller->updateTensorRanks();
+}
+
 
 void MainWindow::_connect()
 {
@@ -282,8 +293,8 @@ void MainWindow::_connect()
         QString port = _connectDialog->getPort();
         if( !_controller->connect( host.toStdString(), port.toShort( )))
         {
-            QMessageBox::warning( this, QString( "Exception" ),
-                                        QString( "Failed to connect to %1:%2" ).arg( host, port ),
+            QMessageBox::warning( this, QString( "Exception" ), 
+                                        QString( "Failed to connect to %1:%2" ).arg( host, port ), 
                                         QMessageBox::Ok, QMessageBox::Ok );
         }
     }
@@ -292,3 +303,4 @@ void MainWindow::_connect()
 
 
 } //namespace GUI
+

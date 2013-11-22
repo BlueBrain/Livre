@@ -1,6 +1,5 @@
 
 /* Copyright (c) 2011, Maxim Makhinya <maxmah@gmail.com>
- *               2012, David Steiner  <steiner@ifi.uzh.ch>
  *
  */
 
@@ -38,12 +37,13 @@ typedef boost::shared_ptr< RAMPool > RAMPoolSPtr;
 
 struct GpuLocation
 {
-    GpuLocation() : posOnGpu( 0 ) {}
+    GpuLocation() : posOnGpu( 0 ), rank( 0 ) {}
 
-    explicit GpuLocation( uint32_t posOnGpu_ )
-        : posOnGpu( posOnGpu_ ){}
+    explicit GpuLocation( uint32_t posOnGpu_, byte rank_ )
+        : posOnGpu( posOnGpu_ ), rank( rank_ ){}
 
     uint32_t posOnGpu;
+    byte rank;
 };
 
 /**

@@ -1,9 +1,8 @@
 
 /* Copyright (c) 2011, Maxim Makhinya <maxmah@gmail.com>
- *               2012, David Steiner  <steiner@ifi.uzh.ch>
  *
  */
-// //
+
 #ifndef MASS_VOL__GPU_COMMANDS_H
 #define MASS_VOL__GPU_COMMANDS_H
 
@@ -41,14 +40,16 @@ struct GPULoadRequest
     NodeId   nodeId;
     uint32_t posOnGPU;
     uint32_t treePos;
+    byte     rank;
     bool     reload;
 
-    GPULoadRequest() : nodeId(0), posOnGPU(0), treePos(0), reload( false ) {}
+    GPULoadRequest() : nodeId(0), posOnGPU(0), treePos(0), rank(0), reload( false ) {}
 
-    explicit GPULoadRequest( NodeId nodeId_, uint32_t posOnGPU_, uint32_t treePos_, bool reload_ )
+    explicit GPULoadRequest( NodeId nodeId_, uint32_t posOnGPU_, uint32_t treePos_, byte rank_, bool reload_ )
         : nodeId(   nodeId_     )
         , posOnGPU( posOnGPU_   )
         , treePos(  treePos_    )
+        , rank(     rank_       )
         , reload(   reload_     )
     {}
 
@@ -56,16 +57,21 @@ struct GPULoadRequest
     {
         return nodeId   == other.nodeId   &&
                posOnGPU == other.posOnGPU &&
+               rank     == other.rank     &&
                reload   == other.reload  ;
     }
 };
 
-inline std::ostream& operator<<( std::ostream& out, const GPULoadRequest& req )
+namespace
+{
+std::ostream& operator<<( std::ostream& out, const GPULoadRequest& req )
 {
     out << "GPULoadRequest [" << req.nodeId    << ", "
                               << req.posOnGPU  << ", "
+                              << (int)req.rank << ", "
                               << (req.reload ? "reload" : "new_data" ) << ")";
     return out;
+}
 }
 
 typedef std::vector<GPULoadRequest> GPULoadRequestVec;

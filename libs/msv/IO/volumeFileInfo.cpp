@@ -1,11 +1,12 @@
-//std12
 
 #include "volumeFileInfo.h"
 
+#include <msv/tree/volumeTreeTensor.h>
 #include <msv/tree/volumeTreeBase.h>
 
 #include <msv/IO/dataHDDIORaw.h>
 #include <msv/IO/dataHDDIOOctree.h>
+#include <msv/IO/dataHDDIOTensor.h>
 
 #include <msv/util/debug.h>
 #include <msv/util/str.h>
@@ -47,8 +48,34 @@ DataHDDIOSPtr VolumeFileInfo::createDataHDDIO( bool initTree )
         return DataHDDIOSPtr( new DataHDDIOOctree( *this ));
     }
 
-    LOG_ERROR << " Compression is not supported " << std::endl;
-    return DataHDDIOSPtr();
+    DataHDDIOSPtr tensorIO;
+    switch( _compression )
+    {
+        case TENSOR:
+            tensorIO = DataHDDIOSPtr( new DataHDDIOTensorBasic( *this, initTree ));
+            break;
+
+        case TENSOR_QUANTIZED:
+            tensorIO = DataHDDIOSPtr( new DataHDDIOTensorQuantized( *this, initTree ));
+            break;
+
+        case TENSOR_QUANTIZED_2G:
+            tensorIO = DataHDDIOSPtr( new DataHDDIOTensorQuantized2G( *this, initTree ));
+            break;
+
+        case TENSOR_QUANTIZED_ERRORS_2G:
+            tensorIO = DataHDDIOSPtr( new DataHDDIOTensorQuantizedErrors2G( *this, initTree ));
+            break;
+
+        default:
+            LOG_ERROR << " Specified compression is not supported " << std::endl;
+            return DataHDDIOSPtr();
+    }
+
+    if( tensorIO->getMaxRankDim() != getMaxRankDim() )
+        setMaxRankDim( tensorIO->getMaxRankDim() );
+
+    return tensorIO;
 }
 
 
@@ -56,7 +83,10 @@ void VolumeFileInfo::reset()
 {
     setVersion(   0 );
     setSourceDims( Vec3_ui16() );
+    setU123SrcDims(Vec2_ui16() );
+    setUOffsets( "" );
     setBlockDim(  0 );
+    setMaxRankDim(0 );
     setBorderDim( 0 );
     setBytesNum(  0 );
     setCompression( NONE );
@@ -98,7 +128,19 @@ bool VolumeFileInfo::isAttributeSet( const DataType dataType ) const
 
 uint32_t VolumeFileInfo::getBlockSize_() const
 {
-    //no compression
+    if( _compression == TENSOR )
+    {
+        const uint32_t r = getMaxRankDim();
+        return r*r*r*sizeof(float);
+    }
+    if( _compression == TENSOR_QUANTIZED ||
+        _compression == TENSOR_QUANTIZED_2G ||
+        _compression == TENSOR_QUANTIZED_ERRORS_2G )
+    {
+        const uint32_t r = getMaxRankDim();
+        return r*r*r*sizeof(byte);
+    }
+    //else no compression
     uint32_t bs = _blockDim + _border*2;
     bs = bs*bs*bs*_bytes;
 
@@ -185,6 +227,12 @@ bool VolumeFileInfo::load( const std::string& file )
         }
     }
 
+    if(( it = values.find( "UOffsets" )) != values.end() )
+    {
+        _uOffsets = it->second;
+        _setAttribute( U_OFFSETS );
+    }
+
     if(( it = values.find( "Version" )) != values.end() )
     {
         std::stringstream ss( it->second );
@@ -199,6 +247,21 @@ bool VolumeFileInfo::load( const std::string& file )
         ss >> _srcDims.h;
         ss >> _srcDims.d;
         _setAttribute( SOURCE_DIMS );
+    }
+
+    if(( it = values.find( "MaxRankSize" )) != values.end() )
+    {
+        std::stringstream ss( it->second );
+        ss >> _maxRankDim;
+        _setAttribute( MAX_RANK );
+    }
+
+    if(( it = values.find( "U123SrcSize" )) != values.end() )
+    {
+        std::stringstream ss( it->second );
+        ss >> _u123SrcDims.w;
+        ss >> _u123SrcDims.h;
+        _setAttribute( U123_DIMS );
     }
 
     if(( it = values.find( "BlockSize" )) != values.end() )
@@ -226,8 +289,25 @@ bool VolumeFileInfo::load( const std::string& file )
         _setAttribute( BYTES );
     }
 
-    _compression = NONE;
-    _setAttribute( COMPRESSION );
+    if(( it = values.find( "Compression" )) != values.end() )
+    {
+        if( it->second == "NONE" )
+            _compression = NONE;
+
+        if( it->second == "TENSOR" )
+            _compression = TENSOR;
+
+        if( it->second == "TENSOR_QUANTIZED" )
+            _compression = TENSOR_QUANTIZED;
+
+        if( it->second == "TENSOR_QUANTIZED_2G" )
+            _compression = TENSOR_QUANTIZED_2G;
+
+        if( it->second == "TENSOR_QUANTIZED_ERRORS_2G" )
+            _compression = TENSOR_QUANTIZED_ERRORS_2G;
+
+        _setAttribute( COMPRESSION );
+    }
 
     return true;
 }
@@ -250,13 +330,21 @@ bool VolumeFileInfo::save( const std::string& file ) const
     if( isAttributeSet( SOURCE_DIMS )) ss << "SrcSize:          " << _srcDims.w << " "
                                                                   << _srcDims.h << " "
                                                                   << _srcDims.d     << std::endl;
+    if( isAttributeSet( U123_DIMS   )) ss << "U123SrcSize:      " << _u123SrcDims.w << " "
+                                                                  << _u123SrcDims.h << std::endl;
+    if( isAttributeSet( U_OFFSETS   )) ss << "UOffsets:         " << _uOffsets      << std::endl;
     if( isAttributeSet( BLOCK_DIM   )) ss << "BlockSize:        " << _blockDim      << std::endl;
+    if( isAttributeSet( MAX_RANK    )) ss << "MaxRankSize:      " << _maxRankDim    << std::endl;
     if( isAttributeSet( BORDER_DIM  )) ss << "BorderSize:       " << int(_border)   << std::endl;
     if( isAttributeSet( BYTES       )) ss << "Format:           " << ((_bytes == 1) ? "BYTE" : "SHORT") << std::endl;
     if( isAttributeSet( COMPRESSION ))
     {
         ss << "Compression:      ";
-        ss << "NONE";
+        if( _compression == TENSOR                     ) ss << "TENSOR";              else
+        if( _compression == TENSOR_QUANTIZED           ) ss << "TENSOR_QUANTIZED";    else
+        if( _compression == TENSOR_QUANTIZED_2G        ) ss << "TENSOR_QUANTIZED_2G"; else
+        if( _compression == TENSOR_QUANTIZED_ERRORS_2G ) ss << "TENSOR_QUANTIZED_ERRORS_2G"; else
+                                                  ss << "NONE";
         ss << std::endl;
     }
 
@@ -277,13 +365,22 @@ std::ostream& operator<< ( std::ostream& out, const VolumeFileInfo& info )
                                                                << "   Dir File:         " << info._dataFileDir.c_str()  << std::endl;
     if( info.isAttributeSet( VolumeFileInfo::TF_FILE     )) ss << "  TF File:           " << info._tfFileName.c_str()   << std::endl;
     if( info.isAttributeSet( VolumeFileInfo::SOURCE_DIMS )) ss << "  Source size:       " << info._srcDims     << std::endl;
+    if( info.isAttributeSet( VolumeFileInfo::U123_DIMS   )) ss << "  U1/U2/U3 src size: " << info._u123SrcDims << std::endl;
+    if( info.isAttributeSet( VolumeFileInfo::U123_DIMS   )) ss << "  U1/U2/U3 size:     " << info.getU123Dims() << std::endl;
+    if( info.isAttributeSet( VolumeFileInfo::U_OFFSETS   )) ss << "  UOffsets:          " << info.getUOffsets() << std::endl;
     if( info.isAttributeSet( VolumeFileInfo::BLOCK_DIM   )) ss << "  Block size:        " << info._blockDim    << std::endl;
+    if( info.isAttributeSet( VolumeFileInfo::MAX_RANK    )) ss << "  Max Rank size:     " << info._maxRankDim  << std::endl;
     if( info.isAttributeSet( VolumeFileInfo::BORDER_DIM  )) ss << "  Border size:       " << int(info._border) << std::endl;
     if( info.isAttributeSet( VolumeFileInfo::BYTES       )) ss << "  Bytes size:        " << static_cast<int>( info._bytes ) << std::endl;
     if( info.isAttributeSet( VolumeFileInfo::COMPRESSION ))
     {
         ss << "  Compression: ";
-        ss << "NONE";
+        if( info._compression == VolumeFileInfo::TENSOR                     ) ss << "TENSOR";                     else
+        if( info._compression == VolumeFileInfo::TENSOR_QUANTIZED           ) ss << "TENSOR_QUANTIZED";           else
+        if( info._compression == VolumeFileInfo::TENSOR_QUANTIZED_2G        ) ss << "TENSOR_QUANTIZED_2G";        else
+        if( info._compression == VolumeFileInfo::TENSOR_QUANTIZED_ERRORS_2G ) ss << "TENSOR_QUANTIZED_ERRORS_2G"; else
+                                                                       ss << "NONE";
+
         ss << std::endl;
     }
     ss << "}" << std::endl;

@@ -18,6 +18,7 @@ using namespace std;
 namespace ivs
 {
 
+
 TransferFunctionEditor::TransferFunctionEditor( massVolGUI::MainWindow *_mainWnd, QWidget *_parent ):
   QDialog(_parent),
 ///  directory_(QString::fromStdString(_ivsWidget->getDataPath())),
@@ -29,6 +30,8 @@ TransferFunctionEditor::TransferFunctionEditor( massVolGUI::MainWindow *_mainWnd
   sdaSize_(0),
   histogramSize_(0),
   mainWnd_(_mainWnd),
+  globalRank_( 0 ),
+  ranks_( 0 ),
   updateMaxSet_( true )
 {
   ui_.setupUi(this);
@@ -42,7 +45,21 @@ TransferFunctionEditor::TransferFunctionEditor( massVolGUI::MainWindow *_mainWnd
   position_ = pos();
   transferFunctionGraph_ = new FreehandGraph();
   initializeGraph(transferFunctionGraph_);
+  connectTensorRanks();
   timer_.start();
+
+  ranksSpinBoxList_.append( ui_.spinBoxRank0_ );
+  ranksSpinBoxList_.append( ui_.spinBoxRank1_ );
+  ranksSpinBoxList_.append( ui_.spinBoxRank2_ );
+  ranksSpinBoxList_.append( ui_.spinBoxRank3_ );
+  ranksSpinBoxList_.append( ui_.spinBoxRank4_ );
+  ranksSpinBoxList_.append( ui_.spinBoxRank5_ );
+  ranksSpinBoxList_.append( ui_.spinBoxRank6_ );
+  ranksSpinBoxList_.append( ui_.spinBoxRank7_ );
+  ranksSpinBoxList_.append( ui_.spinBoxRank8_ );
+  ranksSpinBoxList_.append( ui_.spinBoxRank9_ );
+
+  autoUpdateRanks_ = ui_.checkBoxTensorAutoUpdate_->isChecked();
 }
 
 TransferFunctionEditor::~TransferFunctionEditor()
@@ -51,6 +68,153 @@ TransferFunctionEditor::~TransferFunctionEditor()
   delete [] rgba_;
   delete [] sda_;
 }
+
+
+void TransferFunctionEditor::connectTensorRanks()
+{
+  connect( ui_.spinBoxRankGlobal_, SIGNAL( valueChanged(int) ), this, SLOT( changeGlobalRank(int) ));
+  connect( ui_.spinBoxRank0_     , SIGNAL( valueChanged(int) ), this, SLOT( changeRank(int) ));
+  connect( ui_.spinBoxRank1_     , SIGNAL( valueChanged(int) ), this, SLOT( changeRank(int) ));
+  connect( ui_.spinBoxRank2_     , SIGNAL( valueChanged(int) ), this, SLOT( changeRank(int) ));
+  connect( ui_.spinBoxRank3_     , SIGNAL( valueChanged(int) ), this, SLOT( changeRank(int) ));
+  connect( ui_.spinBoxRank4_     , SIGNAL( valueChanged(int) ), this, SLOT( changeRank(int) ));
+  connect( ui_.spinBoxRank5_     , SIGNAL( valueChanged(int) ), this, SLOT( changeRank(int) ));
+  connect( ui_.spinBoxRank6_     , SIGNAL( valueChanged(int) ), this, SLOT( changeRank(int) ));
+  connect( ui_.spinBoxRank7_     , SIGNAL( valueChanged(int) ), this, SLOT( changeRank(int) ));
+  connect( ui_.spinBoxRank8_     , SIGNAL( valueChanged(int) ), this, SLOT( changeRank(int) ));
+  connect( ui_.spinBoxRank9_     , SIGNAL( valueChanged(int) ), this, SLOT( changeRank(int) ));
+
+  connect( ui_.checkBoxTensorAutoUpdate_, SIGNAL( stateChanged(int) ), this, SLOT( changeRankAutoUpdate(int) ));
+  connect( ui_.pushButtonTensorUpdate_,   SIGNAL( clicked()),          this, SLOT( updateTensorRanks() ));
+}
+
+void TransferFunctionEditor::updateTensorRanks( bool force )
+{
+  bool changed = force;
+  assert( ranks_->size() == ranksLastCommit_.size() );
+  for( size_t i = 0; i < ranksLastCommit_.size(); ++i )
+    if( (*ranks_)[i] != ranksLastCommit_[i] )
+    {
+        changed = true;
+        break;
+    }
+  if( changed )
+  {
+    ranksLastCommit_ = *ranks_;
+    mainWnd_->updateTensorRanks();
+  }
+}
+
+void TransferFunctionEditor::changeRankAutoUpdate( int state )
+{
+  autoUpdateRanks_ = (state == Qt::Checked);
+  if( autoUpdateRanks_ )
+    updateTensorRanks( false );
+}
+
+void TransferFunctionEditor::changeRank( int value )
+{
+  int i = 0;
+  foreach( QSpinBox *sb, ranksSpinBoxList_ )
+  {
+    if( (QSpinBox *)sender() == sb )
+    {
+        changeRank( value, i );
+        return;
+    }
+    ++i;
+  }
+}
+
+void TransferFunctionEditor::changeGlobalRank( int value )
+{
+  bool changed    = false;
+  bool autoUpdate  = autoUpdateRanks_;
+  autoUpdateRanks_ = false;
+  updateMaxSet_    = false;
+
+  *globalRank_ = value;
+  int i = 0;
+  foreach( QSpinBox *sb, ranksSpinBoxList_ )
+  {
+    const byte oldValue = (*ranks_)[i];
+    assert( sb->value() == oldValue );
+    sb->setMaximum( value );
+
+    if( oldValue > value )
+    {
+        (*ranks_)[i] = value;
+        changed = true;
+    }else
+        if( (*ranks_)[i] <= ranksMaxSet_[i] && 
+            (*ranks_)[i] < value )
+        {
+            (*ranks_)[i] = qMin( (int)ranksMaxSet_[i], value );
+            sb->setValue( (*ranks_)[i] );
+            changed = true;
+        }
+    ++i;
+  }
+
+  autoUpdateRanks_ = autoUpdate;
+  updateMaxSet_    = true;
+
+  if( changed && autoUpdateRanks_ )
+    updateTensorRanks( false );
+}
+
+
+void TransferFunctionEditor::changeRank( int value, int rank )
+{
+  assert( rank >= 0 && rank <= (int)ranks_->size() );
+  (*ranks_)[rank] = value;
+
+  if( updateMaxSet_ )
+    ranksMaxSet_[rank] = value;
+
+  if( autoUpdateRanks_ )
+    updateTensorRanks( false );
+}
+
+void TransferFunctionEditor::setTensorRanks( byte* globalRank, std::vector<byte>* ranks )
+{
+  std::cout << "Set Tensor Parameters: "; for( size_t i = 0; i < ranks->size(); ++i )  std::cout << (int)((*ranks)[i]) << ", "; std::cout << std::endl;
+
+  globalRank_ = globalRank;
+  ranks_      = ranks;
+  backupTensorRanks();
+
+  ranksMaxSet_ = *ranks;
+
+  bool autoUpdate = autoUpdateRanks_;
+  autoUpdateRanks_ = false;
+  assert( (int)ranks->size() >= ranksSpinBoxList_.size() );
+  int i = 0;
+  foreach( QSpinBox *sb, ranksSpinBoxList_ )
+  {
+    if( (*ranks)[i] > *globalRank )
+        (*ranks)[i] = *globalRank;
+
+    sb->setValue( (*ranks)[i] );
+    ++i;
+  }
+  ui_.spinBoxRankGlobal_->setValue( *globalRank );
+  autoUpdateRanks_ = autoUpdate;
+}
+
+void TransferFunctionEditor::backupTensorRanks()
+{
+  globalRankBackup_  = *globalRank_;
+  ranksBackup_       = *ranks_;
+  ranksLastCommit_   = *ranks_;
+}
+
+void TransferFunctionEditor::restoreTensorRanks()
+{
+  *globalRank_  = globalRankBackup_;
+  *ranks_       = ranksBackup_;
+}
+
 
 void TransferFunctionEditor::setTransferFunction(TransferFunctionPair *_transferFunction)
 {
@@ -148,6 +312,11 @@ void TransferFunctionEditor::accept()
     mainWnd_->updateTransferFunction();
     triggerMainWndUpdate();
   }
+  if( globalRank_ != 0 )
+  {
+    backupTensorRanks();
+    updateTensorRanks( false );
+  }
 }
 
 void TransferFunctionEditor::reject()
@@ -159,6 +328,11 @@ void TransferFunctionEditor::reject()
     restoreTransferFunction();
     mainWnd_->updateTransferFunction();
     triggerMainWndUpdate();
+  }
+  if (globalRank_ != 0 )
+  {
+    restoreTensorRanks();
+    updateTensorRanks( false );
   }
 }
 

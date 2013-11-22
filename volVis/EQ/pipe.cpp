@@ -1,7 +1,6 @@
 
 /* Copyright (c) 2006-2011, Stefan Eilemann <eile@equalizergraphics.com>
  *               2007-2011, Maxim Makhinya  <maxmah@gmail.com>
- *               2012,      David Steiner   <steiner@ifi.uzh.ch>
  */
 
 #include "pipe.h"
@@ -24,6 +23,8 @@ Pipe::Pipe( eq::Node* parent )
     , _rTypeVersion(     0 )
     , _tfVersion(        0 )
     , _fileNameVersion(  0 )
+    , _tpVersion(        0 )
+    , _tensorParameters( new TensorParameters() )
     , _lastFrameNumber(  0 )
 {
     LBASSERT( parent );
@@ -57,7 +58,7 @@ void Pipe::_intializeModel( Window* wnd )
    _model = ModelSPtr( new Model( node->getVolumeTree(), volInfo->getBorderDim(),   // for model
                                   gpuCacheIndex,                                    // for GPUCacheManager
                                   node->getRAMPool(), volInfo->getBytesNum(),       // for GPUAsyncLoader
-                                  wnd ));                                           // for GPUAsyncLoader
+                                  wnd, _tensorParameters ));                        // for GPUAsyncLoader
 }
 
 
@@ -157,6 +158,16 @@ void Pipe::checkRenderingParameters( Window* wnd, uint32_t frameNumber )
     {
         _model->initTF( volumeInfo->getTransferFunction( ));
         _tfVersion = tfVersion;
+    }
+
+
+// set TensorParameters if required (from volumeInfo)
+    const uint32_t tpVersion = volumeInfo->getTensorParametersVersion();
+    if( _tpVersion < tpVersion )
+    {
+        const TensorParameters& newTP = volumeInfo->getTensorParameters();
+        *_tensorParameters = newTP;
+        _tpVersion = tpVersion;
     }
 }
 
