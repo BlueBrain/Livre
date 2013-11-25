@@ -30,7 +30,6 @@ const std::string _help( "TENSOR_QUANTIZED to TENSOR_QUANTIZED_2G converter\n"
 using namespace massVolVis;
 
 typedef boost::shared_ptr<DataHDDIOTensorBase> DataHDDIOTensorBaseSPtr;
-typedef boost::shared_ptr< const VolumeTreeBase > constVolumeTreeBaseSPtr;
 
 int main( int argc, char **argv )
 {
