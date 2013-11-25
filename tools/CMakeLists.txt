@@ -55,6 +55,14 @@ massvol_add_tool(tmpTst
     msv
   )
 
+massvol_add_tool(treeBuiler
+  HEADERS
+  SOURCES
+    treeBuilder/main.cpp
+  LINK_LIBRARIES
+    msv
+  )
+
 if(CUDA_FOUND)
   include_directories(SYSTEM ${CUDA_INCLUDE_DIRS})
   list(APPEND EQUALIZER_DEFINES EQ_USE_CUDA)
