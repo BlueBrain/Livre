@@ -4,7 +4,7 @@
 #define MASS_VOL__COMPRESSION_H
 
 #include <boost/shared_ptr.hpp>
-#include <GL/glew.h>
+#include <eq/client/gl.h>
 #include <msv/types/types.h>
 
 namespace eq { namespace util { class PixelBufferObject; }}
