@@ -59,7 +59,6 @@ massvol_add_tool(treeBuilder
   SOURCES
     treeBuilder/main.cpp
   LINK_LIBRARIES
-    msv
   )
 
 if(CUDA_FOUND)
