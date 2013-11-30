@@ -1,4 +1,3 @@
-
 # Copyright (c)  2010 Daniel Pfeifer <daniel@pfeifer-mail.de>
 #                2011 Maxim Makhinya <maxmah@gmail.com>
 #                2012 David Steiner  <steiner@ifi.uzh.ch>
@@ -53,6 +52,13 @@ massvol_add_tool(tmpTst
     tmpTst/main.cpp
   LINK_LIBRARIES
     msv
+  )
+
+massvol_add_tool(treeBuilder
+  HEADERS
+  SOURCES
+    treeBuilder/main.cpp
+  LINK_LIBRARIES
   )
 
 if(CUDA_FOUND)
