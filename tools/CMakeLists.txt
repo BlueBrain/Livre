@@ -59,6 +59,7 @@ massvol_add_tool(treeBuilder
   SOURCES
     treeBuilder/main.cpp
   LINK_LIBRARIES
+    blas lapack
   )
 
 if(CUDA_FOUND)
