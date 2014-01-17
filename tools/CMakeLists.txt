@@ -54,13 +54,51 @@ massvol_add_tool(tmpTst
     msv
   )
 
-massvol_add_tool(treeBuilder
-  HEADERS
-  SOURCES
-    treeBuilder/main.cpp
-  LINK_LIBRARIES
-    blas lapack
-  )
+if(BLAS_FOUND)
+    check_library_exists(${BLAS_LIBRARIES} cblas_dgemm "cblas.h" CBLAS_DGEMM_SUPPORTED)
+    if(NOT CBLAS_DGEMM_SUPPORTED)
+        message(STATUS "Default blas library doesnt support cblas_dgemm")
+        set(BLAS_FOUND FALSE)
+    endif()
+endif()
+
+set(ATLAS_BLAS_FOUND FALSE)
+
+if(NOT BLAS_FOUND)
+  if(ATLAS_CBLAS_LIBRARY AND ATLAS_CBLAS_INCLUDE_DIR)
+      message(STATUS "Atlas cblas found")
+      set(BLAS_LIBRARIES ${ATLAS_CBLAS_LIBRARY})
+      set(BLAS_FOUND TRUE)
+      set(ATLAS_BLAS_FOUND TRUE)
+      include_directories(BEFORE ${ATLAS_CBLAS_INCLUDE_DIR})
+   endif()
+endif()
+
+# If Atlas blas is found, try using the lapack version from atlas
+if(ATLAS_BLAS_FOUND)
+  if(ATLAS_LAPACK_ATLAS_LIBRARY AND ATLAS_CLAPACK_ATLAS_LIBRARY AND ATLAS_CLAPACK_INCLUDE_DIR)
+      message(STATUS "Atlas clapack found")
+      set(LAPACK_LIBRARIES ${ATLAS_LAPACK_ATLAS_LIBRARY} ${ATLAS_CLAPACK_ATLAS_LIBRARY})
+      set(LAPACK_FOUND TRUE)
+      include_directories(BEFORE ${ATLAS_LAPACK_INCLUDE_DIR})
+   endif()
+endif()
+
+if((NOT BLAS_FOUND) OR (NOT LAPACK_FOUND))
+   message(STATUS "Missing lapack and/or cblas, disabling BLAS/LAPACK support")
+   set(BLAS_FOUND FALSE)
+   set(LAPACK_FOUND FALSE)
+endif()
+
+if(BLAS_FOUND AND LAPACK_FOUND)
+    massvol_add_tool(treeBuilder
+      HEADERS
+      SOURCES
+        treeBuilder/main.cpp
+      LINK_LIBRARIES
+        ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES}
+      )
+endif()
 
 if(CUDA_FOUND)
   include_directories(SYSTEM ${CUDA_INCLUDE_DIRS})
