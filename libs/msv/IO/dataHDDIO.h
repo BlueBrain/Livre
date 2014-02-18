@@ -74,7 +74,7 @@ public:
 
     virtual uint32_t getMaxBlockSize()                   const { return VolumeFileInfo::getBlockSize_(); }
     virtual uint32_t getBlockSize_()                     const { return VolumeFileInfo::getBlockSize_(); }
-    virtual uint32_t getBlockSize_( const uint32_t pos ) const { return VolumeFileInfo::getBlockSize_(); }
+    virtual uint32_t getBlockSize_( const uint32_t ) const { return VolumeFileInfo::getBlockSize_(); }
     virtual     byte getBytesNum()                       const { return VolumeFileInfo::getBytesNum();   }
 
     using VolumeFileInfo::getBlockDim;
