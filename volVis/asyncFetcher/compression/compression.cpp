@@ -464,7 +464,8 @@ bool DecompressorTensorQuantizedCPU::load( const RAMDataElement* dataEl, GPULoad
 
 namespace
 {
-DecompressorSPtr _select( constDataHDDIOSPtr dataIOSPtr, constVolumeTreeBaseSPtr volumeTreeSPtr, PboSPtr pboSPtr, uint32_t capacity )
+DecompressorSPtr _select( constDataHDDIOSPtr dataIOSPtr, constVolumeTreeBaseSPtr volumeTreeSPtr, PboSPtr pboSPtr,
+                          uint32_t )
 {
     if( !dataIOSPtr || !pboSPtr )
     {
