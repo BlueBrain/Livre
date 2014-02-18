@@ -130,7 +130,7 @@ void ScreenGrabber::saveScreenshot( const GLEWContext* context, const std::strin
 }
 
 
-void ScreenGrabber::_writeImage( const FrameSharedPtr framePtr, const std::string& fileName )
+void ScreenGrabber::_writeImage( const FrameSharedPtr, const std::string& )
 {
 /*
     LBASSERT( framePtr );

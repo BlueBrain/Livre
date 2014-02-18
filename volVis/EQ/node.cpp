@@ -32,7 +32,7 @@ Node::Node( eq::Config* parent )
 }
 
 
-void Node::_frameStart( const eq::uint128_t& frameId, const uint32_t frameNumber )
+void Node::_frameStart( const eq::uint128_t&, const uint32_t )
 {
 // check if file name parameter has changed and setup ramPool
     _volumeInfo->sync();

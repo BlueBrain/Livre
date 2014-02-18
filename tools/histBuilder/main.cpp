@@ -36,8 +36,12 @@ namespace
 const std::string _help( "TENSOR_QUANTIZED to TENSOR_QUANTIZED_2G converter\n" );
 
 
-void _decompressBlock( const uint32_t treePos, const DataHDDIOTensorBase* hddIO, constVolumeTreeTensorSPtr tree,
-                      const std::vector<float>& u123, std::vector<byte>& dst, std::vector<byte>& src  )
+void _decompressBlock( const uint32_t,
+                       const DataHDDIOTensorBase*,
+                       constVolumeTreeTensorSPtr,
+                       const std::vector<float>&,
+                       std::vector<byte>& ,
+                       std::vector<byte>& )
 {
 /*    const bool tensorQuantized = dynamic_cast<const DataHDDIOTensorQuantized*>( hddIO ) == 0 ? false : true;
 
@@ -128,7 +132,7 @@ uint32_t getHistogram( const uint8_t* src, uint32_t voxelsPerBlock, bool is8bits
 } // namespace
 
 
-int main( int argc, char **argv )
+int main( int, char ** )
 {
 /*    try
     {
