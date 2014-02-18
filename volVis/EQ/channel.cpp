@@ -201,7 +201,7 @@ eq::Vector4f _getTaintColor( const ColorMode colorMode,
 }
 }// namespace
 
-void Channel::frameDraw( const eq::uint128_t& frameId )
+void Channel::frameDraw( const eq::uint128_t& )
 {
     // Setup frustum
     EQ_GL_CALL( applyBuffer( ));
@@ -365,7 +365,7 @@ void Channel::frameDraw( const eq::uint128_t& frameId )
 }
 
 
-void Channel::frameViewFinish( const eq::uint128_t& frameId )
+void Channel::frameViewFinish( const eq::uint128_t& )
 {
     _drawHelp();
 //    _drawLogo();
