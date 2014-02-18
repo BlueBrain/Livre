@@ -5,11 +5,18 @@
 
 cmake_minimum_required(VERSION 2.8)
 project(Livre)
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
-if(NOT BUILDYARD)
-  include(Buildyard)
-  return()
+
+
+
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake
+  ${CMAKE_SOURCE_DIR}/CMake/common)
+
+include(Buildyard)
+if(BUILDYARD_STOP)
+    return()
 endif()
+
+include(GitExternal)
 
 set(RELEASE_VERSION OFF) # OFF or ABI version
 set(LAST_RELEASE 0.1.0)
