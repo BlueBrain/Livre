@@ -76,19 +76,19 @@ namespace
                            unsigned char ){}
 
     void cudaDecompTensorQuantized(
-                                unsigned int  pboDst,
-                                float*   tmp1,
-                                float*   tmp2,
-                          const uint8_t* core,
-                          const float*   u1,
-                          const float*   u2,
-                          const float*   u3,
-                                int      coreDim,
-                                int      rank,
-                                int      blockDim,
-                                int      uStride,
-                                float    scale,
-                           unsigned char bytes ) {}
+                                unsigned int,
+                                float*,
+                                float*,
+                          const uint8_t*,
+                          const float*,
+                          const float*,
+                          const float*,
+                                int,
+                                int,
+                                int,
+                                int,
+                                float,
+                           unsigned char) {}
 }
 #endif
 
