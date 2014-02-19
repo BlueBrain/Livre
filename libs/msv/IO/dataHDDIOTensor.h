@@ -87,7 +87,7 @@ public:
 protected:
     explicit DataHDDIOTensorBase( const VolumeFileInfo& fileInfo );
 
-    virtual void _correctBlockPos( Vec3_i32& bPos ) const {}
+    virtual void _correctBlockPos( Vec3_i32& ) const {}
 
     // call this from derived classes' constructors once
     bool _initTree();
