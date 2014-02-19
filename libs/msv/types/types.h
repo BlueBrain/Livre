@@ -9,6 +9,8 @@
 #include <stdint.h>
 #include <vector>
 
+#include <lunchbox/compiler.h>
+
 //#define CHAR_BIT 8 // have no clue why this has to be defined manually =(
 
 typedef uint8_t byte;
@@ -23,7 +25,6 @@ template<typename T> struct TypeParseTraits { static const char* name; };
 // used to register TypeParseTraits names
 #define REGISTER_PARSE_TYPE(X) template <> struct TypeParseTraits<X> \
     { static const char* name; } ; const char* TypeParseTraits<X>::name = #X
-
 
 #endif // MASS_VOL__TYPES_H
 
