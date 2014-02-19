@@ -11,7 +11,7 @@
 
 using namespace massVolVis;
 
-int main( const int argc, char** argv )
+int main( const int, char** )
 {
 // ----------- cache index tests -----------
     {
