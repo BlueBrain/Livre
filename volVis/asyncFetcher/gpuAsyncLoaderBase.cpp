@@ -8,12 +8,6 @@
 #include "../EQ/window.h"
 
 #include <eq/client/system.h>
-#ifdef AGL
-#  include "aglWindowShared.h"
-#endif
-#ifdef GLX
-#  include "glXWindowShared.h"
-#endif
 
 #include <eq/client/cudaContext.h>
 
@@ -29,34 +23,15 @@ eq::SystemWindow* initSharedContextWindow( eq::Window* wnd,
 {
     LBASSERT( wnd );
 
-    // store old drawable of window and set window's drawable to FBO,
-    // create another (shared) osWindow and restore original drowable
-    const int32_t drawable =
-        wnd->getIAttribute( eq::Window::IATTR_HINT_DRAWABLE );
-    wnd->setIAttribute( eq::Window::IATTR_HINT_DRAWABLE, eq::FBO );
-
-    const int32_t stencil =
-        wnd->getIAttribute( eq::Window::IATTR_PLANES_STENCIL );
-    wnd->setIAttribute( eq::Window::IATTR_PLANES_STENCIL, eq::OFF );
+    eq::WindowSettings settings = wnd->getSettings();
+    settings.setIAttribute( eq::WindowSettings::IATTR_HINT_DRAWABLE, eq::FBO );
+    settings.setIAttribute( eq::WindowSettings::IATTR_PLANES_STENCIL, eq::OFF );
 
     eq::Pipe* pipe = wnd->getPipe();
     LBASSERT( pipe );
 
     const std::string& ws = pipe->getWindowSystem().getName();
-    eq::SystemWindow* sharedContextWindow = 0;
-    LBINFO << "Using " << ws << " window" << std::endl;
-#ifdef GLX
-    if( ws == "GLX" )
-        sharedContextWindow = new GLXWindowShared( wnd );
-#endif
-#ifdef AGL
-    if( ws == "AGL" )
-        sharedContextWindow = new eq::agl::Window( wnd );
-#endif
-#ifdef WGL
-    if( ws == "WGL" )
-        sharedContextWindow = new eq::wgl::Window( wnd );
-#endif
+    eq::SystemWindow* sharedContextWindow = pipe->getWindowSystem().createWindow( wnd, settings );
 
     if( !sharedContextWindow )
     {
@@ -74,9 +49,6 @@ eq::SystemWindow* initSharedContextWindow( eq::Window* wnd,
         sharedContextWindow = 0;
         return 0;
     }
-
-    wnd->setIAttribute( eq::Window::IATTR_HINT_DRAWABLE, drawable );
-    wnd->setIAttribute( eq::Window::IATTR_PLANES_STENCIL, stencil );
 
     sharedContextWindow->makeCurrent();
 
@@ -110,16 +82,10 @@ void deleteSharedContextWindow( eq::Window* wnd,
     delete *computeCtx;
     *computeCtx = 0;
 
-    const int32_t drawable =
-        wnd->getIAttribute( eq::Window::IATTR_HINT_DRAWABLE );
-    wnd->setIAttribute( eq::Window::IATTR_HINT_DRAWABLE, eq::FBO );
-
     (*sharedContextWindow)->configExit(); // mb set window to 0 before that?
 
     delete *sharedContextWindow;
     *sharedContextWindow = 0;
-
-    wnd->setIAttribute( eq::Window::IATTR_HINT_DRAWABLE, drawable );
 }
 } // namespace
 

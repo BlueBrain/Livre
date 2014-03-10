@@ -13,6 +13,8 @@
 
 #include <eq/client/gl.h>
 
+#include <memory>
+
 
 struct GLEWContextStruct;
 typedef struct GLEWContextStruct GLEWContext;
