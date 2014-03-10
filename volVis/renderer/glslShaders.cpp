@@ -1,6 +1,6 @@
 
 /* Copyright (c) 2007,       Maxim Makhinya
-   Copyright (c) 2008,       Stefan Eilemann <eile@equalizergraphics.com> 
+   Copyright (c) 2008,       Stefan Eilemann <eile@equalizergraphics.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,6 +28,8 @@
  */
 
 #include "glslShaders.h"
+
+#include <lunchbox/debug.h>
 
 namespace massVolVis
 {
@@ -88,7 +90,7 @@ GLhandleARB GLSLShaders::_loadShader( const std::string &shader,
         return handle;
 
     _printLog( handle, "Compiling" );
-    std::cerr << " Shader text -----------" << shader.c_str() 
+    std::cerr << " Shader text -----------" << shader.c_str()
               << std::endl << "-----------" << std::endl;
     glDeleteObjectARB( handle );
     return 0;
