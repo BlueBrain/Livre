@@ -19,7 +19,7 @@ namespace massVolVis
 namespace
 {
 eq::SystemWindow* initSharedContextWindow( eq::Window* wnd,
-                                                  eq::ComputeContext** computeCtx )
+                                           eq::ComputeContext** )
 {
     LBASSERT( wnd );
 

@@ -2,7 +2,7 @@
 # Copyright (c) 2011 Maxim Makhinya <maxmah@gmail.com>
 #               2012 David Steiner  <steiner@ifi.uzh.ch>
 
-include(EqStringifyShaders)
+include(StringifyShaders)
 
 if(MSVC)
   add_definitions(/wd4996)
@@ -29,7 +29,7 @@ source_group(render         FILES ${VOLVIS_RENDERER_HEADERS}        ${VOLVIS_REN
 source_group(util           FILES ${VOLVIS_UTIL_HEADERS} )
 source_group(shaders        FILES ${VOLVIS_SHADERS} )
 
-eq_stringify_shaders(SHADERS ${VOLVIS_SHADERS})
+stringify_shaders(${VOLVIS_SHADERS})
 
 function(EQ_ADD_EXAMPLE NAME)
   cmake_parse_arguments(THIS "" "" "SOURCES;HEADERS;LINK_LIBRARIES"
@@ -59,7 +59,7 @@ if(APPLE AND GLX)
   list(APPEND EQUALIZER_LIBRARIES GL)
 endif()
 
-add_library(Livre SHARED ${VOLVIS_ALL_HEADERS} ${VOLVIS_ALL_SOURCES} ${SHADERS})
+add_library(Livre SHARED ${VOLVIS_ALL_HEADERS} ${VOLVIS_ALL_SOURCES} ${SHADER_SOURCES})
 target_link_libraries(Livre ${EQUALIZER_LIBRARIES} ${OPENGL_gl_LIBRARY}
                             ${X11_LIBRARIES} ${CARBON_LIBRARY} dl msv)
 install(FILES ${VOLVIS_ALL_HEADERS}
