@@ -71,7 +71,7 @@ eq::SystemWindow* initSharedContextWindow( eq::Window* wnd,
 }
 
 
-void deleteSharedContextWindow( eq::Window* wnd,
+void deleteSharedContextWindow( eq::Window*,
                                 eq::SystemWindow**  sharedContextWindow,
                                 eq::ComputeContext** computeCtx )
 {

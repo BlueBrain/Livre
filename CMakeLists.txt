@@ -14,17 +14,15 @@ if(BUILDYARD_STOP)
     return()
 endif()
 
-include(FindPackages)
-include(Common)
-
 set(RELEASE_VERSION OFF) # OFF or ABI version
 set(LAST_RELEASE 0.1.0)
 set(VERSION_MAJOR "0")
 set(VERSION_MINOR "1")
 set(VERSION_PATCH "0")
 
-
 set(PROJECT_INCLUDE_NAME livre)
+include(FindPackages)
+include(Common)
 
 include_directories(${CMAKE_CURRENT_LIST_DIR}/libs)
 
