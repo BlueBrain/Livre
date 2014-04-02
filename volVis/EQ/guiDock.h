@@ -22,7 +22,7 @@ struct TransferFunction;
 class Config;
 class TensorParameters;
 
-class GUINode : public co::LocalNode, private NonCopyable
+class GUINode : public co::LocalNode
 {
 public:
     GUINode();
