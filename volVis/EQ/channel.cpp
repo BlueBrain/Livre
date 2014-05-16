@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2006-2011, Stefan Eilemann <eile@equalizergraphics.com>
+/* Copyright (c) 2006-2014, Stefan Eilemann <eile@equalizergraphics.com>
  *               2007-2011, Maxim Makhinya  <maxmah@gmail.com>
  */
 
@@ -484,14 +484,12 @@ void Channel::_orderFrames( eq::Frames& frames )
                << std::endl;
 }
 
-
-void Channel::frameAssemble( const eq::uint128_t& )
+void Channel::frameAssemble( const eq::uint128_t&, const eq::Frames& frames )
 {
     const bool composeOnly = (_drawRange == eq::Range::ALL);
 
     _startAssemble();
 
-    const eq::Frames& frames = getInputFrames();
     eq::PixelViewport  coveredPVP;
     eq::Frames         dbFrames;
     eq::Zoom           zoom( eq::Zoom::NONE );
@@ -592,10 +590,10 @@ void Channel::_startAssemble()
 }
 
 
-void Channel::frameReadback( const eq::uint128_t& frameId )
+void Channel::frameReadback( const eq::uint128_t& frameId,
+                             const eq::Frames& frames )
 {
     // Drop depth buffer flag from all output frames
-    const eq::Frames& frames = getOutputFrames();
     const FrameData& frameData = _getFrameData();
     for( eq::FramesCIter i = frames.begin(); i != frames.end(); ++i )
     {
@@ -605,7 +603,7 @@ void Channel::frameReadback( const eq::uint128_t& frameId )
         frame->getFrameData()->setRange( _drawRange );
     }
 
-    eq::Channel::frameReadback( frameId );
+    eq::Channel::frameReadback( frameId, frames );
 }
 
 
@@ -776,4 +774,3 @@ void Channel::drawFPS( const eq::PixelViewport& pvp, float fps )
 
 
 } // namespace massVolVis
-

@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2006-2011, Stefan Eilemann <eile@equalizergraphics.com>
+/* Copyright (c) 2006-2014, Stefan Eilemann <eile@equalizergraphics.com>
  *                    2011, Maxim Makhinya  <maxmah@gmail.com>
  */
 
@@ -31,17 +31,17 @@ public:
 protected:
     const FrameData& _getFrameData() const;
 
-    virtual bool configInit( const eq::uint128_t& initId );
-    virtual bool configExit();
+    bool configInit( const eq::uint128_t& initId ) override;
+    bool configExit() override;
 
-    virtual void frameStart( const eq::uint128_t& frameID,
-                             const uint32_t frameNumber );
+    void frameStart( const eq::uint128_t& frameID,
+                     const uint32_t frameNumber ) override;
 
-    virtual void frameDraw(         const eq::uint128_t& frameId );
-    virtual void frameAssemble(     const eq::uint128_t& frameId );
-    virtual void frameReadback(     const eq::uint128_t& frameId );
-    virtual void frameViewFinish(   const eq::uint128_t& frameId );
-    virtual void frameClear(        const eq::uint128_t& frameId );
+    void frameDraw(         const eq::uint128_t& frameId ) override;
+    void frameAssemble( const eq::uint128_t&, const eq::Frames& ) override;
+    void frameReadback( const eq::uint128_t&, const eq::Frames& ) override;
+    void frameViewFinish(   const eq::uint128_t& frameId ) override;
+    void frameClear(        const eq::uint128_t& frameId ) override;
 
     void clearViewport( const eq::PixelViewport &pvp );
 
@@ -80,5 +80,3 @@ private:
 } //namespace massVolVis
 
 #endif //MASS_VOL__CHANNEL_H
-
-
