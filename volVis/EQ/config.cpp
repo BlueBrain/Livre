@@ -216,7 +216,7 @@ bool Config::handleEvent( const eq::ConfigEvent* event )
             }
             break;
         }
-        
+
         case eq::Event::CHANNEL_POINTER_MOTION:
         {
             switch( event->data.pointerMotion.buttons )
@@ -404,7 +404,7 @@ bool Config::_handleKeyEvent( const eq::KeyEvent& event )
             if( canvases.empty( ))
                 return true;
 
-            _frameData.setCurrentViewId( lunchbox::UUID::ZERO );
+            _frameData.setCurrentViewId( lunchbox::uint128_t() );
 
             if( !_currentCanvas )
             {
@@ -458,7 +458,7 @@ bool Config::_handleKeyEvent( const eq::KeyEvent& event )
 
             ++i;
             if( i == views.end( ))
-                _frameData.setCurrentViewId( lunchbox::UUID::ZERO );
+                _frameData.setCurrentViewId( lunchbox::uint128_t() );
             else
                 _frameData.setCurrentViewId( (*i)->getID( ));
             return true;
@@ -481,7 +481,7 @@ void Config::_switchLayout( int32_t increment )
     if( !_currentCanvas )
         return;
 
-    _frameData.setCurrentViewId( lunchbox::UUID::ZERO );
+    _frameData.setCurrentViewId( lunchbox::uint128_t() );
 
     size_t index = _currentCanvas->getActiveLayoutIndex() + increment;
     const eq::Layouts& layouts = _currentCanvas->getLayouts();

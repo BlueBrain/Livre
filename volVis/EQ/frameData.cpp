@@ -24,7 +24,7 @@ FrameData::FrameData()
     , _boundingBoxes( false )
     , _help(          false )
     , _quality( 1.0f )
-    , _currentViewId( lunchbox::UUID::ZERO )
+    , _currentViewId()
     , _renderBudget( 0xFFFFFFFF )
     , _screenShot( 0 )
     , _renderError( 0xFFF )
@@ -170,7 +170,7 @@ void FrameData::toggleBackground()
 
 void FrameData::toggleNormalsQuality()
 {
-    _normalsQuality = 
+    _normalsQuality =
         static_cast< NormalsQuality >(( _normalsQuality + 1 ) % NQ_ALL );
     setDirty( DIRTY_FLAGS );
 }

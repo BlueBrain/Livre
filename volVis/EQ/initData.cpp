@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2006-2010, Stefan Eilemann <eile@equalizergraphics.com>
+/* Copyright (c) 2006-2014, Stefan Eilemann <eile@equalizergraphics.com>
  *               2007-2011, Maxim Makhinya  <maxmah@gmail.com>
  */
 
@@ -9,8 +9,8 @@ namespace massVolVis
 {
 
 InitData::InitData()
-    : _frameDataId(  lunchbox::UUID::ZERO   )
-    , _volumeInfoId( lunchbox::UUID::ZERO   )
+    : _frameDataId()
+    , _volumeInfoId()
 #ifdef AGL
     , _windowSystem( "AGL" ) // prefer over GLX
 #else
@@ -21,10 +21,7 @@ InitData::InitData()
 
 
 InitData::~InitData()
-{
-    setFrameDataId( lunchbox::UUID( ));
-    setVolumeInfoId( lunchbox::UUID( ));
-}
+{}
 
 
 void InitData::getInstanceData( co::DataOStream& os )
