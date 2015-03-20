@@ -20,37 +20,63 @@
 #ifndef _DashTree_h_
 #define _DashTree_h_
 
-#include <dash/dash.h>
-
+#include <boost/noncopyable.hpp>
 #include <livre/core/types.h>
+#include <livre/core/dashTypes.h>
 
 namespace livre
 {
 
+namespace detail
+{
+    class DashTree;
+}
+
 /**
- * The DashTree class to access the root of the dash octree.
+ * The DashTree class keeps the hierarcy of the dash nodes representing the LOD nodes.
  */
-class DashTree
+class DashTree : public boost::noncopyable
 {
 public:
 
-    DashTree( );
-
-    DashTree( const DashTree& dashTree );
-
-    /**
-     * @return The root dash node of the dash tree.
-     */
-    const dash::NodePtr getRootNode( ) const { return rootNode_; }
+    DashTree( ConstVolumeDataSourcePtr dataSource );
+    ~DashTree();
 
     /**
-     * @return The root dash node of the dash tree.
+     * @return Returns the data source
      */
-    dash::NodePtr getRootNode( ) { return rootNode_; }
+    ConstVolumeDataSourcePtr getDataSource( ) const;
+
+    /**
+     * Creates a new context, registers it and maps its data to already registered contexts.
+     * @return Returns a new dash context
+     */
+    DashContextPtr createContext();
+
+    /**
+     * @return The render status of the dash tree.
+     */
+    const DashRenderStatus& getRenderStatus() const;
+
+    /**
+     * @return The render status of the dash tree.
+     */
+    DashRenderStatus& getRenderStatus();
+
+    /**
+     * @return parent of the render node. If there is no parent empty NodePtr is returned.
+     */
+    const dash::NodePtr getParentNode( const NodeId& nodeId );
+
+    /**
+     * @return a node by its nodeId, creates a new one if it does not exist.
+     */
+    dash::NodePtr getDashNode( const NodeId& nodeId );
 
 private:
 
-    dash::NodePtr rootNode_;
+    detail::DashTree* _impl;
+
 
 };
 

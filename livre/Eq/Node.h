@@ -31,9 +31,14 @@
 namespace livre
 {
 
+namespace detail
+{
+class Node;
+}
+
 /**
- * The Node class is a standard EQ abstraction for a process. It manages the data loaders and keeps the
- * data cache.
+ * The Node class is a standard EQ abstraction for a process. It manages the data loaders
+ * and keeps the data cache.
  */
 class Node : public eq::Node, public DashContextTrait
 {
@@ -43,6 +48,7 @@ public:
      * @param parent Parent config that owns the Node.
      */
     Node( eq::Config* parent );
+    ~Node();
 
     /**
      * @return The raw data cache.
@@ -55,36 +61,20 @@ public:
     TextureDataCache& getTextureDataCache();
 
     /**
-     * @return The volume data source.
-     */
-    ConstVolumeDataSourcePtr getVolumeDataSource( ) const;
-
-    /**
      * @return The dash tree.
      */
     DashTreePtr getDashTree( );
 
 private:
 
-    bool initializeVolume_();
-    void releaseVolume_();
+    bool configInit( const eq::uint128_t& initId ) final;
+    void frameStart(  const eq::uint128_t& frameId,
+                      const uint32_t frameNumber ) final;
+    bool configExit() final;
 
-    void initializeCaches_();
-    void releaseCaches_();
+    detail::Node* _impl;
 
-    FrameData& getFrameData_();
 
-    virtual bool configInit( const eq::uint128_t& initId );
-    virtual void frameStart(  const eq::uint128_t& frameId, const uint32_t frameNumber );
-    virtual bool configExit();
-
-    VolumeSettingsPtr volumeSettingsPtr_;
-    ConstVolumeRendererParametersPtr vrRenderParametersPtr_;
-    RawDataCachePtr rawDataCachePtr_;
-    TextureDataCachePtr textureDataCachePtr_;
-    VolumeDataSourcePtr dataSourcePtr_;
-    DashTreePtr dashTreePtr_;
-    DataSourceFactoryPtr dataSourceFactoryPtr_;
 };
 
 

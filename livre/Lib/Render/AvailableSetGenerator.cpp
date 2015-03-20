@@ -17,49 +17,57 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/Lib/Render/GRSLowerLOD.h>
+#include <livre/core/Dash/DashRenderNode.h>
+#include <livre/core/Dash/DashTree.h>
+#include <livre/core/Render/RenderBrick.h>
+#include <livre/core/Data/VolumeDataSource.h>
+#include <livre/core/Data/VolumeInformation.h>
+#include <livre/core/Visitor/RenderNodeVisitor.h>
+#include <livre/Lib/Render/AvailableSetGenerator.h>
 #include <livre/Lib/Visitor/CollectionTraversal.h>
 #include <livre/Lib/Visitor/DFSTraversal.h>
-#include <livre/core/Dash/DashRenderNode.h>
-#include <livre/core/Render/RenderBrick.h>
 #include <livre/Lib/Cache/TextureObject.h>
 #include <livre/Lib/Algorithm/LODFrustum.h>
-#include <livre/core/Data/VolumeInformation.h>
 
 namespace livre
 {
 
 typedef boost::unordered_map< NodeId, dash::NodePtr > NodeIdDashNodeMap;
 
-class VisibleCollectorVisitor : public NodeVisitor< dash::NodePtr >
+class VisibleCollectorVisitor : public RenderNodeVisitor
 {
 public:
 
-    VisibleCollectorVisitor( const VolumeInformation& volumeInformation,
+    VisibleCollectorVisitor( DashTreePtr dashTree,
                              const Frustum& frustum,
                              const float screenSpaceError,
                              const uint32_t windowHeight,
                              DashNodeVector& nodeVector );
 
-    virtual void visit( dash::NodePtr dashNode, VisitState& state );
+    void visit( DashRenderNode& renderNode, VisitState& state ) final;
 
     LODFrustum lodFrustum_;
     DashNodeVector& nodeVector_;
 };
 
 VisibleCollectorVisitor::VisibleCollectorVisitor(
-        const VolumeInformation& volumeInformation,
+        DashTreePtr dashTree,
         const Frustum& frustum,
         const float screenSpaceError,
         const uint32_t windowHeight,
         DashNodeVector& nodeVector )
-    : nodeVector_( nodeVector )
+    : RenderNodeVisitor( dashTree ),
+      nodeVector_( nodeVector )
 {
     FloatVector distances;
-    distances.resize( 6, 0.0f );
 
+    const float frustumSurfaceDelta = 0.0f;
+    distances.resize( PL_FAR + 1, frustumSurfaceDelta );
+
+    const VolumeInformation& volumeInformation =
+            dashTree->getDataSource()->getVolumeInformation();
     const float wsPerVoxel = volumeInformation.worldSpacePerVoxel;
-    const float depth = volumeInformation.depth;
+    const float depth = volumeInformation.rootNode.getDepth();
     const float levelZeroNodeSize = float( volumeInformation.maximumBlockSize[ 0 ] ) *
                                     volumeInformation.worldSpacePerVoxel;
 
@@ -72,10 +80,8 @@ VisibleCollectorVisitor::VisibleCollectorVisitor(
                               distances );
 }
 
-void VisibleCollectorVisitor::visit( dash::NodePtr dashNode, VisitState& state )
+void VisibleCollectorVisitor::visit( DashRenderNode& renderNode, VisitState& state )
 {
-    DashRenderNode renderNode( dashNode );
-
     const LODNode& lodNode = renderNode.getLODNode();
     if( !lodNode.isValid( ))
         return;
@@ -95,51 +101,56 @@ void VisibleCollectorVisitor::visit( dash::NodePtr dashNode, VisitState& state )
 
     if( lodFrustum_.boxInSubFrustum( worldBox, index ) )
     {
-        nodeVector_.push_back( dashNode );
+        nodeVector_.push_back( renderNode.getDashNode() );
         state.setVisitChild( false );
     }
 }
 
-class LoadedTextureCollectVisitor : public NodeVisitor< dash::NodePtr >
+class LoadedTextureCollectVisitor : public RenderNodeVisitor
 {
 public:
 
-    LoadedTextureCollectVisitor( NodeIdDashNodeMap& nodeIdDashNodeMap,
+    LoadedTextureCollectVisitor( DashTreePtr dashTree,
+                                 NodeIdDashNodeMap& nodeIdDashNodeMap,
                                  DashNodeVector& notAvailableRenderNodeList )
-        : nodeIdDashNodeMap_( nodeIdDashNodeMap ),
-          notAvailableRenderNodeList_( notAvailableRenderNodeList )
+        : RenderNodeVisitor( dashTree ),
+          _nodeIdDashNodeMap( nodeIdDashNodeMap ),
+          _notAvailableRenderNodeList( notAvailableRenderNodeList )
     {}
 
-    void visit( dash::NodePtr dashNode, VisitState& )
+    void visit( DashRenderNode& renderNode, VisitState& )
     {
-        dash::NodePtr current = dashNode;
+        dash::NodePtr current = renderNode.getDashNode();
         while( current )
         {
-            DashRenderNode renderNode( current );
+            DashRenderNode currentRenderNode( current );
+            const NodeId& nodeId = currentRenderNode.getLODNode().getNodeId();
+
             const ConstTextureObjectPtr texture =
-                boost::static_pointer_cast< const TextureObject >( renderNode.getTextureObject( ));
+                boost::static_pointer_cast< const TextureObject >(
+                        currentRenderNode.getTextureObject( ));
 
             if( texture && texture->isLoaded( ))
             {
-                nodeIdDashNodeMap_[ renderNode.getLODNode().getNodeId() ] =
-                    current;
+                _nodeIdDashNodeMap[ nodeId ] = current;
                 break;
             }
 
-            current = current->hasParents() ? current->getParent( 0 ) : 0;
+            current = nodeId.isRoot() ? 0 : getDashTree()->getParentNode( nodeId );
         }
 
-        if( dashNode != current )
-            notAvailableRenderNodeList_.push_back( dashNode );
+        if( renderNode.getDashNode() != current )
+            _notAvailableRenderNodeList.push_back( renderNode.getDashNode() );
     }
 
 private:
-    NodeIdDashNodeMap& nodeIdDashNodeMap_;
-    DashNodeVector& notAvailableRenderNodeList_;
+    NodeIdDashNodeMap& _nodeIdDashNodeMap;
+    DashNodeVector& _notAvailableRenderNodeList;
 };
 
 
-bool hasParentInMap( DashRenderNode& childRenderNode, const NodeIdDashNodeMap& nodeIdDashNodeMap )
+bool hasParentInMap( DashRenderNode& childRenderNode,
+                     const NodeIdDashNodeMap& nodeIdDashNodeMap )
 {
     const LODNode& childNode = childRenderNode.getLODNode();
 
@@ -154,38 +165,40 @@ bool hasParentInMap( DashRenderNode& childRenderNode, const NodeIdDashNodeMap& n
     return false;
 }
 
-GRSLowerLOD::GRSLowerLOD( const VolumeInformation& volumeInformation,
-                          dash::NodePtr tree,
+AvailableSetGenerator::AvailableSetGenerator( DashTreePtr tree,
                           const uint32_t windowHeight,
                           const float screenSpaceError )
-    : GenerateRenderingSet( volumeInformation, tree ),
-      windowHeight_( windowHeight ),
-      screenSpaceError_( screenSpaceError )
+    : RenderingSetGenerator( tree ),
+      _windowHeight( windowHeight ),
+      _screenSpaceError( screenSpaceError )
 {
 }
 
-void GRSLowerLOD::generateRenderingSet( const Frustum& viewFrustum,
+void AvailableSetGenerator::generateRenderingSet( const Frustum& viewFrustum,
                                         DashNodeVector& allNodesList,
                                         DashNodeVector& renderNodeList,
                                         DashNodeVector& notAvailableRenderNodeList,
                                         RenderBricks& renderBrickList )
 {
     DFSTraversal dfsTraverser_;
-    VisibleCollectorVisitor visibleSelector( _volumeInformation,
+    VisibleCollectorVisitor visibleSelector( _tree,
                                              viewFrustum,
-                                             screenSpaceError_,
-                                             windowHeight_,
+                                             _screenSpaceError,
+                                             _windowHeight,
                                              allNodesList );
-    dfsTraverser_.traverse( _tree, visibleSelector );
+    dfsTraverser_.traverse( _tree->getDataSource()->getVolumeInformation().rootNode,
+                            visibleSelector );
 
     NodeIdDashNodeMap nodeIdDashNodeMap;
 
-    LoadedTextureCollectVisitor collector( nodeIdDashNodeMap, notAvailableRenderNodeList );
+    LoadedTextureCollectVisitor collector( _tree,
+                                           nodeIdDashNodeMap,
+                                           notAvailableRenderNodeList );
 
-    CollectionTraversal< const DashNodeVector > colTraverser;
+    CollectionTraversal colTraverser;
     colTraverser.traverse( allNodesList, collector );
 
-    NodeIdDashNodeMap::iterator it = nodeIdDashNodeMap.begin();
+    NodeIdDashNodeMap::const_iterator it = nodeIdDashNodeMap.begin();
     while( it != nodeIdDashNodeMap.end() )
     {
         DashRenderNode childNode( it->second );
@@ -198,9 +211,10 @@ void GRSLowerLOD::generateRenderingSet( const Frustum& viewFrustum,
             renderNodeList.push_back( it->second );
 
             const ConstTextureObjectPtr texture =
-                    boost::static_pointer_cast< const TextureObject >( childNode.getTextureObject() );
+                boost::static_pointer_cast< const TextureObject >( childNode.getTextureObject( ));
 
-            RenderBrickPtr renderBrick( new RenderBrick( texture->getLODNode(), texture->getTextureState() ) );
+            RenderBrickPtr renderBrick( new RenderBrick( texture->getLODNode(),
+                                                         texture->getTextureState( )));
             renderBrickList.push_back( renderBrick );
             ++it;
         }

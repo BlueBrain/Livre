@@ -24,34 +24,46 @@
 #include <livre/core/types.h>
 #include <livre/core/dashTypes.h>
 #include <livre/core/Visitor/NodeVisitor.h>
-#include <livre/core/Visitor/VisitState.h>
 
 namespace livre
 {
+
+namespace detail
+{
+    class DFSTraversal;
+}
+
 
 /** Depth First Search ( DFS ) traverser for a dash node tree. */
 class DFSTraversal
 {
 public:
-    /**
-     * @brief DFSTraversal constructor.
-     */
+
     DFSTraversal();
+    ~DFSTraversal();
 
     /**
-     * @brief traverse Starts the traversing of dash node tree.
-     * @param root the root of the tree to traverse.
-     * @param visitor Visitors visit is revoked for each visit of a dash node.
+     * Traverse the dash node tree starting from the given node.
+     * @param rootNode The tree root information.
+     * @param node starting node to traverse.
+     * @param visitor Visitor object.
      * @return Returns true if traversal is completed, without being broken.
      */
-    bool traverse( dash::NodePtr root,
-                   NodeVisitor< dash::NodePtr >& visitor );
+    bool traverse( const RootNode& rootNode,
+                   const NodeId& node,
+                   NodeVisitor& visitor );
+
+    /**
+     * Traverse the dash node tree starting from the root.
+     * @param rootNode  The tree root information.
+     * @param visitor Visitor object.
+     */
+    void traverse( const RootNode& rootNode,
+                   NodeVisitor& visitor );
 
 private:
-    VisitState state_; //!< Status of the travel
 
-    void traverse_( dash::NodePtr dashNode,
-                    NodeVisitor< dash::NodePtr >& visitor );
+    detail::DFSTraversal *_impl;
 };
 
 }

@@ -27,7 +27,7 @@
 
 #include <livre/core/DashPipeline/DashProcessor.h>
 #include <livre/core/Visitor/NodeVisitor.h>
-#include <livre/core/Dash/DashRenderNode.h>
+#include <livre/core/Dash/DashRenderStatus.h>
 #include <livre/core/Render/GLContextTrait.h>
 #include <livre/Lib/Cache/LRUCachePolicy.h>
 
@@ -35,59 +35,43 @@ namespace livre
 {
 
 /**
- * @brief The TextureLoadProcessor class is responsible for loading texture data to GPU.
+ * The TextureLoadProcessor class is responsible for loading texture data to GPU.
  */
 class TextureUploadProcessor : public DashProcessor, public GLContextTrait
 {
 public:
 
     /**
-     * @brief TextureLoadProcessor constructor.
+     * @param dashTree The dash node hierarchy.
      * @param textureCache Texture cache.
      */
-    TextureUploadProcessor( TextureCache &textureCache );
+    TextureUploadProcessor( DashTreePtr dashTree,
+                            TextureCache &textureCache );
 
     /**
-     * @brief setGLWidget sets the GL window to update
+     * Set the GL window to send update commands.
      * @param glWidgetPtr GLWidget to send update commands.
      */
     void setGLWidget( GLWidgetPtr glWidgetPtr );
 
-    /**
-     * @brief setDashTree Sets the dash tree.
-     * @param dashTree Hieararchical Dash Tree respresenting the volume.
-     */
-    void setDashTree( dash::NodePtr dashTree );
-
 private:
 
-    virtual bool onPreCommit_( const uint32_t connection );
+    bool onPreCommit_( const uint32_t connection ) final;
+    void onPostCommit_( const uint32_t connection, const CommitState state ) final;
+    bool initializeThreadRun_( ) final;
+    void runLoop_( ) final;
 
-    virtual void onPostCommit_( const uint32_t connection, const CommitState state );
+    void _loadData();
+    void _checkThreadOperation( );
 
-    virtual bool initializeThreadRun_( );
-
-    virtual void runLoop_( );
-
-    void loadData_();
-
-    void checkThreadOperation_( );
-
-    dash::NodePtr dashTree_;
-
-    GLWidgetPtr glWidgetPtr_;
-
-    TextureCache& textureCache_;
-
-    LRUCachePolicy cachePolicy_;
-
-    uint64_t currentFrameID_;
-
-    ThreadOperation threadOp_;
-
-    CacheIdSet protectUnloading_;
-
-    bool firstTimeLoaded_;
+    DashTreePtr _dashTree;
+    GLWidgetPtr _glWidgetPtr;
+    TextureCache& _textureCache;
+    LRUCachePolicy _cachePolicy;
+    uint64_t _currentFrameID;
+    ThreadOperation _threadOp;
+    CacheIdSet _protectUnloading;
+    bool _firstTimeLoaded;
 };
 
 }

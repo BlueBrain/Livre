@@ -60,12 +60,6 @@ public:
      */
     const VolumeInformation& getVolumeInformation() const;
 
-    /**
-     * @param dashTree Initializes the dash tree into using volume data.
-     * @return False if data source is not initialized.
-     */
-    bool initializeDashTree( dash::NodePtr dashTree ) const;
-
     /** Initializes the GL specific functions. */
     bool initializeGL();
 

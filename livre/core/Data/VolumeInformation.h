@@ -21,7 +21,7 @@
 #define _VolumeInformation_h_
 
 #include <livre/core/mathTypes.h>
-#include <dash/dash.h>
+#include <livre/core/Data/NodeId.h>
 
 namespace livre
 {
@@ -48,7 +48,6 @@ struct VolumeInformation
     VolumeInformation( )
         : isBigEndian( false )
         , compCount( 1u )
-        , depth( 0u )
         , dataType( DT_UINT8 )
         , overlap( 0u )
         , maximumBlockSize( 0u )
@@ -69,11 +68,6 @@ struct VolumeInformation
      * The component count of voxel.
      */
     uint32_t compCount;
-
-    /**
-     * Depth of the tree.
-     */
-    uint32_t depth;
 
     /**
      * The data type of every component of voxel.
@@ -109,14 +103,15 @@ struct VolumeInformation
     Boxf boundingBox;
 
     /**
-     * The block dimensions for each tree level.
-     */
-    std::vector< Vector3ui > levelBlockDimensions;
-
-    /**
      * The world space per voxel. Assumes the volume is isotropic.
      */
     float worldSpacePerVoxel;
+
+    /**
+      * Root node info
+      * keeps level count, number of blocks, number of frames
+      */
+    RootNode rootNode;
 
     /** @return the number of bytes per element. */
     size_t getBytesPerVoxel() const

@@ -32,7 +32,7 @@ GLWidget::~GLWidget( )
 
 }
 
-void GLWidget::renderView( View* view, GenerateRenderingSet& renderListGenerator )
+void GLWidget::renderView( View* view, RenderingSetGenerator& renderListGenerator )
 {
     view->render( *this, renderListGenerator );
 }

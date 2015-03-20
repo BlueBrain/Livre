@@ -18,18 +18,22 @@
  */
 
 #include <livre/Lib/Render/RenderView.h>
-#include <livre/core/Render/Frustum.h>
 #include <livre/Lib/Algorithm/LODFrustum.h>
-#include <livre/core/Dash/DashRenderNode.h>
+
 #include <livre/Lib/Cache/TextureObject.h>
 #include <livre/Lib/Visitor/LODSelectionVisitor.h>
 #include <livre/Lib/Configuration/EFPrefetchAlgorithmParameters.h>
-#include <livre/core/Render/GenerateRenderingSet.h>
-#include <livre/core/Maths/Maths.h>
-#include <livre/core/Data/VolumeInformation.h>
-#include <livre/core/Render/GLWidget.h>
 #include <livre/Lib/Algorithm/Optimizer.h>
 #include <livre/Lib/types.h>
+
+#include <livre/core/Render/Frustum.h>
+#include <livre/core/Dash/DashRenderNode.h>
+#include <livre/core/Dash/DashTree.h>
+#include <livre/core/Render/RenderingSetGenerator.h>
+#include <livre/core/Maths/Maths.h>
+#include <livre/core/Data/VolumeDataSource.h>
+#include <livre/core/Data/VolumeInformation.h>
+#include <livre/core/Render/GLWidget.h>
 
 namespace livre
 {
@@ -39,7 +43,8 @@ RenderView::RenderView( )
     , texturePFrustumScreenSpaceError_( 0 )
     , dataPFrustumScreenSpaceError_( 0 )
 {
-    prefetchDistanceRatios_.resize( 6, 1.0f );
+    const float frustumSurfaceDelta = 1.0f;
+    prefetchDistanceRatios_.resize( PL_FAR + 1, frustumSurfaceDelta );
     prefetchDistanceRatios_[ PL_NEAR ] = 0.1f;
 }
 
@@ -58,7 +63,7 @@ void RenderView::setParameters( ConstVolumeRendererParametersPtr volumeRendererP
 
 bool RenderView::onPreRender_( const GLWidget& /*widget*/,
                                const FrameInfo& frameInfo,
-                               GenerateRenderingSet& renderListGenerator,
+                               RenderingSetGenerator& renderListGenerator,
                                Frustum& modifiedFrustum )
 {
     switch( volumeRendererParameters_.renderStrategy )
@@ -83,7 +88,7 @@ bool RenderView::onPreRender_( const GLWidget& /*widget*/,
 void RenderView::onPostRender_( const bool /*rendered*/,
                                 const GLWidget& widget,
                                 const FrameInfo& frameInfo,
-                                GenerateRenderingSet& renderListGenerator )
+                                RenderingSetGenerator& renderListGenerator )
 {
     if( frameInfo.previousFrustum != frameInfo.currentFrustum )
          freeTextures_( frameInfo.renderNodeList );
@@ -95,7 +100,7 @@ void RenderView::onPostRender_( const bool /*rendered*/,
     generateRequest_( frameInfo.currentFrustum, renderListGenerator, windowHeight );
 }
 
-void RenderView::generateIteratedFrustum_( GenerateRenderingSet& renderListGenerator,
+void RenderView::generateIteratedFrustum_( RenderingSetGenerator& renderListGenerator,
                                            const Frustum& previousFrustum,
                                            const Frustum& currentFrustum,
                                            Frustum& modifiedFrustum ) const
@@ -118,14 +123,21 @@ void RenderView::generateIteratedFrustum_( GenerateRenderingSet& renderListGener
 
     const Vector3f difference = newEyePosition - prevEyePosition;
 
-    for( float t = 0.9f; t >= 0.0f ; t+= -0.1f )
-    {
-        t =  std::max( t, 0.0f );
+    const float interpolateBegin = 0.9f;
+    const float interpolateEnd = 0.0f;
+    const float interpolateDelta = 0.1f;
 
-        Quaternionf interpolatedQuat = Quaternionf::slerp( t, prevRotation, newRotation );
+    for( float t = interpolateBegin; t >= interpolateEnd ; t+= -interpolateDelta )
+    {
+        t = std::max( t, 0.0f );
+
+        const Quaternionf& interpolatedQuat =
+                Quaternionf::slerp( t, prevRotation, newRotation );
+
         const Vector3f translation = prevEyePosition + difference * t;
 
-        const Matrix4f& modelViewMatrix = maths::computeModelViewMatrix( interpolatedQuat, translation );
+        const Matrix4f& modelViewMatrix =
+                maths::computeModelViewMatrix( interpolatedQuat, translation );
 
         Frustum iteratedFrustum;
         iteratedFrustum.initialize( modelViewMatrix, currentFrustum.getProjectionMatrix() );
@@ -140,7 +152,7 @@ void RenderView::generateIteratedFrustum_( GenerateRenderingSet& renderListGener
                                                   notAvailableRenderNodeList,
                                                   renderBrickList );
 
-        if( notAvailableRenderNodeList.empty() )
+        if( notAvailableRenderNodeList.empty( ))
         {
             modifiedFrustum = iteratedFrustum;
             return;
@@ -153,42 +165,45 @@ void RenderView::generateIteratedFrustum_( GenerateRenderingSet& renderListGener
 void RenderView::freeTextures_( const DashNodeVector& renderNodeList )
 {
     DashNodeSet currentSet;
-    for( DashNodeVector::const_iterator it = renderNodeList.begin(); it != renderNodeList.end(); ++it )
+    for( DashNodeVector::const_iterator it = renderNodeList.begin();
+         it != renderNodeList.end(); ++it )
     {
         dash::NodePtr node = *it;
         currentSet.insert( node );
     }
 
     DashNodeSet cleanSet;
-    std::set_difference( previousVisibleSet_.begin( ),
-                         previousVisibleSet_.end( ),
-                         currentSet.begin( ),
-                         currentSet.end( ),
-                         std::inserter( cleanSet, cleanSet.begin() ) );
+    std::set_difference( previousVisibleSet_.begin(),
+                         previousVisibleSet_.end(),
+                         currentSet.begin(),
+                         currentSet.end(),
+                         std::inserter( cleanSet, cleanSet.begin( )));
 
     // Unreference not needed textures
     for( DashNodeSet::iterator it = cleanSet.begin(); it != cleanSet.end(); ++it )
     {
         DashRenderNode renderNode( *it );
         if( renderNode.getLODNode().getRefLevel() != 0 )
-            renderNode.setTextureObject( TextureObject::getEmptyPtr() );
+            renderNode.setTextureObject( TextureObject::getEmptyPtr( ));
     }
 
     previousVisibleSet_ = currentSet;
 }
 
 void RenderView::generateRequest_( const Frustum& currentFrustum,
-                                   GenerateRenderingSet& renderListGenerator,
+                                   RenderingSetGenerator& renderListGenerator,
                                    const uint32_t windowHeight )
 {
 
     FloatVector distances;
-    distances.resize( 6, 0.0f );
+    const float frustumSurfaceDelta = 0.0f;
+    distances.resize( PL_FAR + 1, frustumSurfaceDelta );
 
-    const VolumeInformation& volumeInfo = renderListGenerator.getVolumeInformation();
+    const VolumeInformation& volumeInfo =
+            renderListGenerator.getDashTree()->getDataSource()->getVolumeInformation();
 
     const float wsPerVoxel = volumeInfo.worldSpacePerVoxel;
-    const float depth = volumeInfo.depth;
+    const float depth = volumeInfo.rootNode.getDepth();
     const float levelZeroNodeSize = float( volumeInfo.maximumBlockSize[ 0 ] ) *
                                     volumeInfo.worldSpacePerVoxel;
 
@@ -199,10 +214,10 @@ void RenderView::generateRequest_( const Frustum& currentFrustum,
                                     levelZeroNodeSize,
                                     depth,
                                     distances );
+    DashTreePtr dashTree = renderListGenerator.getDashTree();
+    LODSelectionVisitor renderVisitor( dashTree, renderFrustum, DRT_VISIBILE );
 
-    LODSelectionVisitor renderVisitor( renderFrustum, DRT_VISIBILE );
-    dash::NodePtr root = renderListGenerator.getDashNodeTree();
-    dfsTraverser_.traverse( root, renderVisitor );
+    dfsTraverser_.traverse( volumeInfo.rootNode, renderVisitor );
 }
 
 }

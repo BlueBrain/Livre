@@ -24,6 +24,8 @@
 #include <lunchbox/log.h>
 #include <lunchbox/uri.h>
 
+#include <dash/types.h>
+
 #include <boost/foreach.hpp>
 #include <boost/intrusive_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -54,6 +56,8 @@ class DashConnection;
 class DashProcessor;
 class DashProcessorInput;
 class DashProcessorOutput;
+class DashRenderNode;
+class DashRenderStatus;
 class DashTree;
 class DataSourceFactory;
 class EventHandler;
@@ -64,7 +68,7 @@ class Frustum;
 class GLContext;
 class GLSLShaders;
 class GLWidget;
-class GenerateRenderingSet;
+class RenderingSetGenerator;
 class LODFrustum;
 class LODNode;
 class MemoryUnit;
@@ -76,6 +80,7 @@ class ProcessorInput;
 class ProcessorOutput;
 class RenderBrick;
 class Renderer;
+class RootNode;
 class TexturePool;
 class TexturePoolFactory;
 class View;
@@ -185,7 +190,8 @@ typedef std::vector< DashTreePtr > DashTreePtrVector;
 /**
  * Map definitions
  */
-typedef boost::unordered_map< NodeId, LODNodePtr > CacheIDLODNodePtrMap;
+typedef boost::unordered_map< NodeId, LODNodePtr > NodeIDLODNodePtrMap;
+typedef boost::unordered_map< NodeId, dash::NodePtr > NodeIDDashNodePtrMap;
 typedef boost::unordered_map< CacheId, CacheObjectPtr > CacheMap;
 typedef boost::unordered_map< uint32_t, bool > BoolMap;
 typedef boost::unordered_map< uint32_t, EventHandlerPtr > EventHandlerPtrMap;

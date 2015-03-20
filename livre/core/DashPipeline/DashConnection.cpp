@@ -66,17 +66,4 @@ void DashConnection::setDestinationContext( DashContextPtr contextPtr )
     destinationContextPtr_= contextPtr;
 }
 
-void DashConnection::map( dash::NodePtr node )
-{
-    LBASSERT( sourceContextPtr_.get() && destinationContextPtr_.get() );
-    sourceContextPtr_->map( node, *destinationContextPtr_ );
-}
-
-void DashConnection::map( dash::AttributePtr attribute )
-{
-    LBASSERT( sourceContextPtr_.get() && destinationContextPtr_.get() );
-    sourceContextPtr_->map( attribute, *destinationContextPtr_ );
-}
-
-
 }

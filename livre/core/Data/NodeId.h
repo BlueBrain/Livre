@@ -70,48 +70,89 @@ public:
             const Vector3ui& position,
             const uint32_t frame = 0 );
 
-    uint32_t getLevel( ) const  { return _level; } //!< The octree level
-    uint32_t getFrame( ) const { return _frame; } //!< Temporal position
-    bool isRoot( ) const { return _level == 0; } //!< Is one of the root nodes
-    Vector3ui getPosition( ) const; //!< Return position in current level of octree
-    NodeIds getParents( ) const; //!< Return all parents
-    NodeId getParent( ) const; //!< Return current parent
+    uint32_t getLevel() const  { return _level; } //!< The octree level
+    uint32_t getFrame() const { return _frame; } //!< Temporal position
+    bool isRoot() const { return _level == 0; } //!< Is one of the root nodes
+    Vector3ui getPosition() const; //!< Return position in current level of octree
+    NodeIds getParents() const; //!< Return all parents
+    NodeId getParent() const; //!< Return direct parent
     bool isParent( const NodeId& parentNodeId ) const; //!< Is parentNodeId my parent
     bool isChild( const NodeId& childNodeId ) const; //!< Is childNodeId my child
-    bool isValid( ) const { return _level != INVALID_LEVEL; } //!< Is valid node id
-    NodeIds getChildren( ) const; //!< Get children on level up
-    NodeId getRoot() const; //!< Return most root node
-    NodeIds getSiblings( ) const; //<! Return siblings
+    bool isValid() const { return _level != INVALID_LEVEL; } //!< Is valid node id
+    NodeIds getChildren() const; //!< Returns children.
+    NodeId getRoot() const; //!< Return root node
+    NodeIds getSiblings() const; //<! Return siblings
     NodeIds getChildrenAtLevel( const uint32_t level ) const; //<! Returns children at level
-    Identifier getId( ) const { return _id; } //<! Returns the unique identifier
+    Identifier getId() const { return _id; } //<! Returns the unique identifier
 
     /**
      * @param node The node which is compared against
-     * @return Retruns true if two nodes has the same id
+     * @return true if two nodes have the same id
      */
     bool operator==( const NodeId& node ) const
         {  return _id == node._id; }
 
     /**
      * @param id The identifier which is compared against
-     * @return Retruns true if the node has the same id
+     * @return true if the nodes have the same id
      */
     bool operator==( const Identifier id ) const
         { return _id == id; }
 
     /**
      * @param node The node which is compared against
-     * @return Retruns false if two nodes has the same id
+     * @return false if two nodes have the same id
      */
     bool operator!=( const NodeId& node ) const
         { return _id != node._id; }
 
     /**
      * @param id The identifier which is compared against
-     * @return Retruns false if the node has the same id
+     * @return false if two nodes have the same id
      */
     bool operator!=( const Identifier id ) const
         { return _id != id; } //<! Checks equality of the node
+};
+
+/**
+ * The root node holds the number of levels, the number of blocks in the root node
+ * and the number of frames
+ */
+class RootNode
+{
+public:
+
+    /**
+     * @param depth of the tree.
+     * @param size of the root blocks.
+     * @param frames is total number of frames.
+     */
+    RootNode( const uint32_t depth = 0,
+              const Vector3ui& size = Vector3ui( 0u ),
+              const uint32_t frames = 0  )
+        : _nodeId( depth, size, frames )
+    {}
+
+    /**
+     * @return the depth.
+     */
+    uint32_t getDepth() const { return _nodeId.getLevel(); }
+
+    /**
+     * @param level of the tree.
+     * @return the number of nodes at the given level.
+     */
+    Vector3ui getBlockSize( const uint32_t level = 0 ) const
+        { return _nodeId.getPosition() * (1u << level); }
+
+    /**
+     * @return the number of frames
+     */
+    uint32_t getNFrames() const { return _nodeId.getFrame(); }
+
+private:
+
+    NodeId _nodeId;
 };
 
 

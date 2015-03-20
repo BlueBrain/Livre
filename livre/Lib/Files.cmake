@@ -21,12 +21,11 @@ set(LIVRELIB_PUBLIC_HEADERS
   Configuration/ApplicationParameters.h
   Configuration/EFPrefetchAlgorithmParameters.h
   Configuration/VolumeRendererParameters.h
-  Render/GRSLowerLOD.h
+  Render/AvailableSetGenerator.h
   Render/SliceRenderer.h
   Render/RenderView.h
   Uploaders/DataUploadProcessor.h
   Uploaders/TextureUploadProcessor.h
-  Visitor/BFSTraversal.h
   Visitor/CollectionTraversal.h
   Visitor/DFSTraversal.h
   Visitor/LODSelectionVisitor.h)
@@ -51,12 +50,11 @@ set(LIVRELIB_SOURCES
   Configuration/ApplicationParameters.cpp
   Configuration/EFPrefetchAlgorithmParameters.cpp
   Configuration/VolumeRendererParameters.cpp
-  Render/GRSLowerLOD.cpp
+  Render/AvailableSetGenerator.cpp
   Render/SliceRenderer.cpp
   Render/RenderView.cpp
   Uploaders/DataUploadProcessor.cpp
   Uploaders/TextureUploadProcessor.cpp
-  Visitor/BFSTraversal.cpp
   Visitor/DFSTraversal.cpp
   Visitor/LODSelectionVisitor.cpp)
 

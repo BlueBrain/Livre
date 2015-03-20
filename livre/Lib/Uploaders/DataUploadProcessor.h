@@ -28,25 +28,28 @@
 
 #include <livre/core/DashPipeline/DashProcessor.h>
 #include <livre/core/Visitor/NodeVisitor.h>
-#include <livre/core/Dash/DashRenderNode.h>
+#include <livre/core/Dash/DashRenderStatus.h>
 #include <livre/core/Render/GLContextTrait.h>
 
 namespace livre
 {
 
 /**
- * @brief The DataUploadProcessor class is responsible for loading data into memory.
+ * The DataUploadProcessor class is responsible for loading data into CPU memory.
+ * It is derived from GLContextTrait class because some algorithms may need OpenGL
+ * to generate the data.
  */
 class DataUploadProcessor : public DashProcessor, public GLContextTrait
 {
 public:
 
     /**
-     * @brief DataUploadProcessor constructor.
-     * @param rawDataCache Raw data cache that holds the raw data in the memory.
-     * @param textureDataCache Texture data cache holds the modified data in the memory.
+     * @param dashTree The dash node hierarchy.
+     * @param rawDataCache Raw data cache that holds the raw data in the CPU memory.
+     * @param textureDataCache Texture data cache holds the data in the CPU memory.
      */
-    DataUploadProcessor( RawDataCache& rawDataCache,
+    DataUploadProcessor( DashTreePtr dashTree,
+                         RawDataCache& rawDataCache,
                          TextureDataCache& textureDataCache );
 
     /**
@@ -54,38 +57,21 @@ public:
      */
     void setGLWidget( GLWidgetPtr glWidgetPtr );
 
-
-    /**
-     * @brief setDashTree Sets the dash tree.
-     * @param dashTree Hieararchical Dash Tree respresenting the volume.
-     */
-    void setDashTree( dash::NodePtr dashTree );
-
 private:
 
-    virtual bool initializeThreadRun_( );
+    bool initializeThreadRun_( ) final;
+    void runLoop_( ) final;
+    void _loadData();
+    bool _loadPrioritizedData( const Frustum& frustum,
+                               const LoadPriority priority );
 
-    virtual void runLoop_( );
-
-    void loadData_();
-
-    bool loadPrioritizedData_( const Frustum& frustum, const LoadPriority priority );
-
-    dash::NodePtr dashTree_;
-
-    RawDataCache& rawDataCache_;
-
-    TextureDataCache& textureDataCache_;
-
-    uint64_t currentFrameID_;
-
-    void checkThreadOperation_( );
-
-    ThreadOperation threadOp_;
-
-    DFSTraversal traverser_;
-
-    GLWidgetPtr glWidgetPtr_;
+    DashTreePtr _dashTree;
+    RawDataCache& _rawDataCache;
+    TextureDataCache& _textureDataCache;
+    uint64_t _currentFrameID;
+    void _checkThreadOperation( );
+    ThreadOperation _threadOp;
+    GLWidgetPtr _glWidgetPtr;
 };
 
 }

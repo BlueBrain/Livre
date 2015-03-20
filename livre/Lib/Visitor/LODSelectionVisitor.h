@@ -23,32 +23,34 @@
 #include <livre/Lib/types.h>
 
 #include <livre/core/Dash/DashRenderNode.h>
-#include <livre/core/Visitor/NodeVisitor.h>
+#include <livre/core/Visitor/RenderNodeVisitor.h>
 
 namespace livre
 {
 
 /**
- * The LODSelectionVisitor class computes the nodes to be loaded according to given lod frustum and
- * request type. It marks the dash tree with the appropriate flags.
+ * The LODSelectionVisitor class computes the nodes to be loaded according to the given lod
+ * frustum and request type. It marks the dash tree with the appropriate flags.
  */
-class LODSelectionVisitor : public NodeVisitor< dash::NodePtr >
+class LODSelectionVisitor : public RenderNodeVisitor
 {
 public:
 
     /**
-     * @param lodFrustum LODFrustum to be queried.
+     * @param dashTree The data structure for dash tree.
+     * @param lodFrustum Frustum to be queried.
      * @param requestType Type of query ( visible, texture data, data ).
      */
-    LODSelectionVisitor( const LODFrustum& lodFrustum,
+    LODSelectionVisitor( DashTreePtr dashTree,
+                         const LODFrustum& lodFrustum,
                          const RequestType requestType );
 
     /**
-     * Is called when node is being visited.
-     * @param dashNode is the node being visited.
+     * Visits the node.
+     * @param renderNode The node being visited.
      * @param state Visit state.
      */
-    virtual void visit( dash::NodePtr dashNode, VisitState& state );
+    void visit( DashRenderNode& renderNode, VisitState& state ) final;
 
 private:
 

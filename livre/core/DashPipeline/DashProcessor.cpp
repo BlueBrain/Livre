@@ -54,7 +54,7 @@ void DashProcessor::onSetDashContext_()
 
 bool DashProcessor::initializeThreadRun_()
 {
-    if( !getDashContext().get() )
+    if( !getDashContext().get( ))
         return false;
 
     getDashContext()->setCurrent();

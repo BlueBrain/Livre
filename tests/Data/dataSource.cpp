@@ -43,7 +43,7 @@ void _testDataSource( const std::string& uriStr )
     const livre::VolumeInformation& info = source.getVolumeInformation();
 
      // 32 << depth = 512 - shortest dimension of the volume.
-    BOOST_CHECK( info.depth == 5 );
+    BOOST_CHECK( info.rootNode.getDepth() == 5 );
 
     // Component count per voxel, intensity only 1 channels.
     BOOST_CHECK( info.compCount == 1 );

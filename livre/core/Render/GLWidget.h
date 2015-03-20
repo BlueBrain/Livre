@@ -27,13 +27,15 @@ namespace livre
 {
 
 /**
- * RenderWidget class is the base class for renderWidgets, that has the information of the window of rendering.
+ * RenderWidget class is the base class for renderWidgets, that has the information of the
+ * window of rendering.
  */
 class GLWidget : public GLContextTrait
 {
 public:
 
-    void renderView( View* view, GenerateRenderingSet& renderListGenerator );
+    void renderView( View* view,
+                     RenderingSetGenerator& renderListGenerator );
 
     virtual void setViewport( const View* view, Viewporti& viewport ) const;
 

@@ -30,26 +30,12 @@ enum DashAttributeType
     DNT_VISIBLE           ,
     DNT_TEXTURE_REQUESTED ,
     DNT_DATA_REQUESTED    ,
-    DNT_CACHE_MODIFIED    ,
-
-    // Specific to root tree node
-    DNT_TREE_PRIORITY     ,
-    DNT_FRAME_ID          ,
-    DNT_THREAD_OPERATION  ,
-    DNT_FRUSTUM
+    DNT_CACHE_MODIFIED
 };
 
 DashRenderNode::DashRenderNode( dash::NodePtr dashNode )
-    : dashNode_( dashNode )
+    : _dashNode( dashNode )
 { }
-
-DashRenderNode DashRenderNode::getParent( ) const
-{
-    dash::NodePtr parentNode;
-    if( dashNode_->getNParents() == 1 )
-        parentNode = dashNode_->getParent( 0 );
-    return DashRenderNode( parentNode );
-}
 
 const LODNode& DashRenderNode::getLODNode( ) const
 {
@@ -83,32 +69,32 @@ bool DashRenderNode::isTextureRequested( ) const
 
 void DashRenderNode::setLODNode( const LODNode& node )
 {
-    *(dashNode_->getAttribute( DNT_NODE )) = node;
+    *(_dashNode->getAttribute( DNT_NODE )) = node;
 }
 
 void DashRenderNode::setTextureDataObject( ConstCacheObjectPtr textureData )
 {
-    *(dashNode_->getAttribute( DNT_TEXTUREDATA )) = textureData;
+    *(_dashNode->getAttribute( DNT_TEXTUREDATA )) = textureData;
 }
 
 void DashRenderNode::setTextureObject( ConstCacheObjectPtr texture )
 {
-    *(dashNode_->getAttribute( DNT_TEXTURE )) = texture;
+    *(_dashNode->getAttribute( DNT_TEXTURE )) = texture;
 }
 
 void DashRenderNode::setVisible( bool visibility )
 {
-    *(dashNode_->getAttribute( DNT_VISIBLE )) = visibility;
+    *(_dashNode->getAttribute( DNT_VISIBLE )) = visibility;
 }
 
 void DashRenderNode::setDataRequested( bool isRequested )
 {
-    *(dashNode_->getAttribute( DNT_DATA_REQUESTED )) = isRequested;
+    *(_dashNode->getAttribute( DNT_DATA_REQUESTED )) = isRequested;
 }
 
 void DashRenderNode::setTextureRequested( bool isRequested )
 {
-    *(dashNode_->getAttribute( DNT_TEXTURE_REQUESTED )) = isRequested;
+    *(_dashNode->getAttribute( DNT_TEXTURE_REQUESTED )) = isRequested;
 }
 
 void DashRenderNode::setRequested( RequestType requestType, bool isRequested )
@@ -125,11 +111,6 @@ void DashRenderNode::setRequested( RequestType requestType, bool isRequested )
             setTextureRequested( isRequested );
             break;
     }
-}
-
-bool DashRenderNode::hasParent( ) const
-{
-    return dashNode_->hasParents();
 }
 
 void DashRenderNode::initializeDashNode( dash::NodePtr dashNode )
@@ -166,71 +147,10 @@ void DashRenderNode::initializeDashNode( dash::NodePtr dashNode )
     dashNode->insert( cacheObjectModified );
 }
 
-void DashRenderNode::initializeRootNode( dash::NodePtr dashNode )
-{
-    initializeDashNode( dashNode );
-
-    dash::AttributePtr priority = new dash::Attribute();
-    *priority = LP_NONE;
-    dashNode->insert( priority );
-
-    dash::AttributePtr currentRenderID = new dash::Attribute();
-    *currentRenderID = (uint64_t)0;
-    dashNode->insert( currentRenderID );
-
-    dash::AttributePtr threadOp = new dash::Attribute();
-    *threadOp = TO_NONE;
-    dashNode->insert( threadOp );
-
-    dash::AttributePtr frustum = new dash::Attribute();
-    *frustum = Frustum();
-    dashNode->insert( frustum );
-}
-
-LoadPriority DashRenderNode::rootGetLoadPriority_( ) const
-{
-    return getAttribute_< LoadPriority >( DNT_TREE_PRIORITY );
-}
-
-void DashRenderNode::rootSetTreePriority_( LoadPriority priority )
-{
-    *(dashNode_->getAttribute( DNT_TREE_PRIORITY )) = priority;
-}
-
-uint64_t DashRenderNode::rootGetFrameID_( ) const
-{
-    return getAttribute_< uint64_t >( DNT_FRAME_ID );
-}
-
-void DashRenderNode::rootSetFrameID_( const uint64_t frameId )
-{
-    *(dashNode_->getAttribute( DNT_FRAME_ID )) = frameId;
-}
-
-Frustum DashRenderNode::rootGetFrustum_( ) const
-{
-    return getAttribute_< Frustum >( DNT_FRUSTUM );
-}
-
-void DashRenderNode::rootSetFrustum_( const Frustum& frustum )
-{
-    *(dashNode_->getAttribute( DNT_FRUSTUM )) = frustum;
-}
-
-ThreadOperation DashRenderNode::rootGetThreadOp_( ) const
-{
-    return getAttribute_< ThreadOperation >( DNT_THREAD_OPERATION );
-}
-
-void DashRenderNode::rootSetThreadOp_( const ThreadOperation op )
-{
-    *(dashNode_->getAttribute( DNT_THREAD_OPERATION )) = op;
-}
-
 template< class T >
 T DashRenderNode::getAttribute_( const uint32_t nodeType ) const
 {
-    dash::ConstAttributePtr attribute = dashNode_->getAttribute( nodeType );
+    dash::ConstAttributePtr attribute = _dashNode->getAttribute( nodeType );
     return attribute->getUnsafe< T >( );
 }
 

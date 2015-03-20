@@ -37,8 +37,13 @@
 namespace livre
 {
 
+namespace detail
+{
+class Channel;
+}
+
 /**
- * The Channel class implements view in opengl.
+ * The Channel class implements a view in opengl.
  */
 class Channel : public eq::Channel
 {
@@ -51,55 +56,20 @@ public:
 
     virtual ~Channel();
 
-    /**
-     * Computes the frustum.
-     * @param frustum Frustum is initialized.
-     */
-    const Frustum& initializeLivreFrustum();
-
-    /**
-     * @return The \see GLWidget.
-     */
-    GLWidgetPtr getGLWidget();
-
 private:
 
-    void applyCamera_( );
+    bool configInit( const eq::uint128_t& initId ) final;
+    bool configExit() final;
 
-    void initializeFrame_();
+    void frameDraw( const eq::uint128_t& frameId ) final;
+    void frameFinish( const eq::uint128_t&, const uint32_t ) final;
+    void frameViewStart( const uint128_t& frameId ) final;
+    void frameViewFinish( const eq::uint128_t &frameID ) final;
+    void frameAssemble( const eq::uint128_t&, const eq::Frames& ) final;
+    void frameReadback( const eq::uint128_t&, const eq::Frames& ) final;
 
-    void prepareFramesAndSetPvp_( const eq::Frames& frames,
-                                  eq::Frames& dbFrames,
-                                  eq::PixelViewport& coveredPVP,
-                                  eq::Zoom& zoom );
+    detail::Channel* _impl;
 
-    void composeFrames_(  const eq::PixelViewport& coveredPVP,
-                          const eq::Zoom& zoom,
-                          eq::FrameDataPtr data,
-                          eq::Frames& dbFrames );
-
-    void clearViewport_( const eq::PixelViewport &pvp );
-    void initializeRenderer_( );
-    void initializeGLContextAndStartUploaders_( );
-    ConstFrameDataPtr getFrameData_( ) const;
-
-    bool configInit( const eq::uint128_t& initId ) override;
-    bool configExit() override;
-
-    void frameDraw( const eq::uint128_t& frameId ) override;
-    void frameFinish( const eq::uint128_t&, const uint32_t ) override;
-    void frameViewStart( const uint128_t& frameId ) override;
-    void frameViewFinish( const eq::uint128_t &frameID ) override;
-    void frameAssemble( const eq::uint128_t&, const eq::Frames& ) override;
-    void frameReadback( const eq::uint128_t&, const eq::Frames& ) override;
-    void frameClear( const eq::uint128_t& frameId ) override;
-
-    eq::Range drawRange_;
-    eq::Frame frame_;
-    Frustum currentFrustum_;
-    ViewPtr renderViewPtr_;
-    GLWidgetPtr glWidgetPtr_;
-    FrameGrabber frameGrabber_;
 };
 
 }

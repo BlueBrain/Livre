@@ -35,12 +35,13 @@ namespace livre
  */
 struct FrameInfo
 {
-    FrameInfo( const Frustum& cFrustum, const Frustum& pFrustum );
+    FrameInfo( const Frustum& cFrustum,
+               const Frustum& pFrustum );
     RenderBricks renderBrickList; //!<The textures are guaranteed to be in memory.
     DashNodeVector allNodeList; //!< The list of nodes to be rendered.
     DashNodeVector renderNodeList; //!< The list of nodes to be rendered.
     DashNodeVector notAvailableRenderNodeList; //<! The unavailable nodes for rendering.
-    const Frustum& previousFrustum; //!< The previous frustum. Some algorithms can use the previous frustum.
+    const Frustum& previousFrustum; //!< The previous frustum.
     const Frustum& currentFrustum; //!< The current frustum.
 };
 
@@ -83,7 +84,7 @@ public:
      * @param renderListGenerator The renderlist generator.
      */
     virtual void render( const GLWidget& widget,
-                         GenerateRenderingSet& renderListGenerator );
+                         RenderingSetGenerator& renderListGenerator );
 
     /**
      * @param frustum Derived class should implement the get frustum method.
@@ -102,7 +103,7 @@ protected:
      */
     virtual bool onPreRender_( const GLWidget& widget,
                                const FrameInfo& frameInfo,
-                               GenerateRenderingSet& renderListGenerator,
+                               RenderingSetGenerator& renderListGenerator,
                                Frustum& modifiedFrustum );
 
     /**
@@ -115,7 +116,7 @@ protected:
     virtual void onPostRender_( const bool rendered,
                                 const GLWidget& widget,
                                 const FrameInfo& frameInfo,
-                                GenerateRenderingSet& renderListGenerator );
+                                RenderingSetGenerator& renderListGenerator );
 
     RendererPtr rendererPtr_; //!< Renderer.
     Viewportf viewport_; //!< The normalized viewport.

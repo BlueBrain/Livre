@@ -1,5 +1,5 @@
 /* Copyright (c) 2011-2015, EPFL/Blue Brain Project
- *                         Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -17,32 +17,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _GRSLowerLOD_h_
-#define _GRSLowerLOD_h_
+#ifndef _RenderingSetGenerator_h_
+#define _RenderingSetGenerator_h_
 
-#include <livre/core/Render/GenerateRenderingSet.h>
+#include <livre/core/types.h>
+#include <livre/core/dashTypes.h>
+
+#include <livre/core/Data/VolumeInformation.h>
 
 namespace livre
 {
 
 /**
- * The GRSLowerLOD class, generates a rendering set where if there is no lod node to be rendered, it computes
- * the closest parent to be rendered.
+ * The RenderingSetGenerator class is used to generate the list of dash nodes to be rendered.
  */
-class GRSLowerLOD : public GenerateRenderingSet
+class RenderingSetGenerator
 {
 public:
 
     /**
-     * @param volumeInformation The \see VolumeInformation
-     * @param tree The initialized dash tree with the volume.
-     * @param windowHeight View height in pixels.
-     * @param screenSpaceError Screen space error.
+     * @param tree This parameter set the Dash Tree of Hierarchical Volume Data ( HVD ).
      */
-    GRSLowerLOD( const VolumeInformation& volumeInformation,
-                 dash::NodePtr tree,
-                 const uint32_t windowHeight,
-                 const float screenSpaceError );
+    RenderingSetGenerator( DashTreePtr tree );
+
+    virtual ~RenderingSetGenerator( );
 
     /**
      * Generates the rendering set according to the given frustum.
@@ -52,18 +50,23 @@ public:
      * @param notAvailableRenderNodeList The nodes which are not available for the frustum query.
      * @param renderBrickList The list of bricks to be rendered.
      */
-    void generateRenderingSet( const Frustum& viewFrustum,
-                               DashNodeVector& allNodesList,
-                               DashNodeVector& renderNodeList,
-                               DashNodeVector& notAvailableRenderNodeList,
-                               RenderBricks& renderBrickList );
+    virtual void generateRenderingSet( const Frustum& viewFrustum,
+                                       DashNodeVector& allNodesList,
+                                       DashNodeVector& renderNodeList,
+                                       DashNodeVector& notAvailableRenderNodeList,
+                                       RenderBricks& renderBrickList ) = 0;
 
-private:
+    /**
+     * @return Get dash tree.
+     */
+    DashTreePtr getDashTree( );
 
-    const uint32_t windowHeight_;
-    const float screenSpaceError_;
+protected:
+
+    DashTreePtr _tree;
+
 };
 
-
 }
-#endif // _GVSLowerLOD_h_
+
+#endif // _RenderingSet_h_

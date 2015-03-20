@@ -30,7 +30,7 @@ namespace livre
 {
 
 /**
- * The DashConnection class implements dash based connection.
+ * The DashConnection class implements the connection between dash processors based on dash commits.
  */
 class DashConnection : public Connection< dash::Commit >
 {
@@ -40,18 +40,6 @@ public:
      * @param maxSize Maximum size of queue.
      */
     DashConnection( const uint32_t maxSize );
-
-    /**
-     * Maps a dash node from source context to destination context.
-     * @param node Dash node to map between contexes.
-     */
-    void map( dash::NodePtr node );
-
-    /**
-     * Maps a dash attribute from source context to destination context.
-     * @param attribute Dash attribute to map between contexes.
-     */
-    void map( dash::AttributePtr attribute );
 
     /**
      * Sets the source context.

@@ -19,7 +19,7 @@
 
 #include <livre/core/Render/View.h>
 #include <livre/core/Render/Renderer.h>
-#include <livre/core/Render/GenerateRenderingSet.h>
+#include <livre/core/Render/RenderingSetGenerator.h>
 #include <livre/core/Render/GLWidget.h>
 
 namespace livre
@@ -55,7 +55,7 @@ const Viewportf& View::getViewport() const
 }
 
 void View::render( const GLWidget& widget,
-                   GenerateRenderingSet& renderListGenerator )
+                   RenderingSetGenerator& renderListGenerator )
 {
     if( !rendererPtr_ )
         return ;
@@ -99,7 +99,7 @@ void View::render( const GLWidget& widget,
 
 bool View::onPreRender_( const GLWidget& glWidget LB_UNUSED,
                          const FrameInfo& frameInfo LB_UNUSED,
-                         GenerateRenderingSet& renderListGenerator LB_UNUSED,
+                         RenderingSetGenerator& renderListGenerator LB_UNUSED,
                          Frustum& modifiedFrustum LB_UNUSED )
 {
     return true;
@@ -108,7 +108,7 @@ bool View::onPreRender_( const GLWidget& glWidget LB_UNUSED,
 void View::onPostRender_( const bool rendered LB_UNUSED,
                           const GLWidget& glWidget LB_UNUSED,
                           const FrameInfo& frameInfo LB_UNUSED,
-                          GenerateRenderingSet& renderListGenerator LB_UNUSED )
+                          RenderingSetGenerator& renderListGenerator LB_UNUSED )
 {
 }
 

@@ -27,7 +27,7 @@ namespace livre
 
 ConstLODNodePtr VolumeDataSourcePlugin::getNodeFromNodeID( const NodeId nodeId ) const
 {
-    CacheIDLODNodePtrMap::iterator it = _lodNodeMap.find( nodeId );
+    NodeIDLODNodePtrMap::iterator it = _lodNodeMap.find( nodeId );
     if( it == _lodNodeMap.end( ) )
     {
         LODNodePtr lodNodePtr( new LODNode() );
@@ -43,48 +43,11 @@ const VolumeInformation& VolumeDataSourcePlugin::getVolumeInformation() const
     return _volumeInfo;
 }
 
-void initDashTree( const VolumeDataSourcePlugin* plugin,
-                   const NodeId childNode,
-                   dash::NodePtr destParent )
-{
-    if( childNode.getLevel() == plugin->getVolumeInformation().depth )
-        return;
-
-    dash::NodePtr node = new dash::Node();
-    DashRenderNode::initializeDashNode( node );
-    DashRenderNode dashNode( node );
-    dash::Context::getCurrent().commit();
-    ConstLODNodePtr lodNodePtr = plugin->getNodeFromNodeID( childNode );
-    dashNode.setLODNode( *lodNodePtr );
-    dash::Context::getCurrent().commit();
-    destParent->insert( node );
-    dash::Context::getCurrent().commit();
-
-    const NodeIds& children = childNode.getChildren();
-    BOOST_FOREACH( const NodeId childId, children )
-    {
-        initDashTree( plugin, childId, node );
-    }
-}
-
-bool VolumeDataSourcePlugin::initializeDashTree( dash::NodePtr dashTree ) const
-{
-    DashRenderNode::initializeDashNode( dashTree );
-    dash::Context::getCurrent().commit();
-    const Vector3ui& rootDims = _volumeInfo.levelBlockDimensions.front();
-    for( uint32_t x = 0; x < rootDims.x(); ++x )
-        for( uint32_t y = 0; y < rootDims.y(); ++y )
-            for( uint32_t z = 0; z < rootDims.x(); ++z )
-                initDashTree( this, NodeId( 0, Vector3ui( x, y, z )), dashTree );
-
-    return true;
-}
-
 void VolumeDataSourcePlugin::internalNodeToLODNode(
     const NodeId internalNode, LODNode& lodNode ) const
 {
     const uint32_t refLevel = internalNode.getLevel();
-    const Vector3ui& bricksInRefLevel = _volumeInfo.levelBlockDimensions[ refLevel ];
+    const Vector3ui& bricksInRefLevel = _volumeInfo.rootNode.getBlockSize( refLevel );
     const Boxi localBlockPos( internalNode.getPosition(),
                               internalNode.getPosition() + 1u );
 
@@ -107,10 +70,10 @@ void VolumeDataSourcePlugin::internalNodeToLODNode(
 #endif
 
     lodNode = LODNode( internalNode,
-                       _volumeInfo.depth,
+                       _volumeInfo.rootNode.getDepth(),
                        _volumeInfo.maximumBlockSize - _volumeInfo.overlap * 2,
                        Boxf( boxCoordMin - _volumeInfo.worldSize * 0.5f,
-                             boxCoordMax - _volumeInfo.worldSize * 0.5f ) );
+                             boxCoordMax - _volumeInfo.worldSize * 0.5f ));
 }
 
 bool isPowerOfTwo( const uint32_t x )
@@ -162,19 +125,11 @@ bool fillRegularVolumeInfo( VolumeInformation& info )
     const uint32_t yDepth = std::log2( blocksSize[1] );
     const uint32_t zDepth = std::log2( blocksSize[2] );
 
-    info.depth = std::min( xDepth, std::min( yDepth, zDepth )) + 1;
+    const uint32_t depth = std::min( xDepth, std::min( yDepth, zDepth ));
+    blocksSize = blocksSize / ( 1u << depth );
 
-    // Set max, min values and generate the node arrays for each tree level
-    info.levelBlockDimensions.resize( info.depth );
-
-    blocksSize = numBlocks;
-    for( uint32_t i = 0; i < info.depth; ++i )
-    {
-        const uint32_t level = info.depth - i - 1;
-        info.levelBlockDimensions[ level ] = blocksSize;
-        blocksSize = blocksSize / 2;
-    }
-
+    info.rootNode = RootNode(  depth + 1,
+                               blocksSize );
     return true;
 }
 

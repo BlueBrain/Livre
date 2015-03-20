@@ -25,7 +25,9 @@
 #include <livre/Lib/Uploaders/TextureUploadProcessor.h>
 #include <livre/Lib/Visitor/DFSTraversal.h>
 
+#include <livre/core/Visitor/RenderNodeVisitor.h>
 #include <livre/core/Dash/DashRenderNode.h>
+#include <livre/core/Dash/DashTree.h>
 #include <livre/core/Render/GLContext.h>
 #include <livre/core/Render/GLWidget.h>
 #include <livre/core/Render/Renderer.h>
@@ -37,13 +39,14 @@ namespace livre
 #ifdef _ITT_DEBUG_
 #include "ittnotify.h"
 __itt_domain* ittTextureLoadDomain = __itt_domain_create("Texture Loading");
-__itt_string_handle* ittTextureComputationTask = __itt_string_handle_create("Texture loading computation");
+__itt_string_handle* ittTextureComputationTask =
+        __itt_string_handle_create("Texture loading computation");
 __itt_string_handle* ittTextureLoadTask = __itt_string_handle_create("Texture loading task");
 #endif // _ITT_DEBUG_
 
 
 // Dont forget to apply cache policy after each traversal
-class TextureLoaderVisitor : public NodeVisitor< dash::NodePtr >
+class TextureLoaderVisitor : public RenderNodeVisitor
 {
 public:
 
@@ -53,17 +56,19 @@ public:
         LP_TEXTURE
     };
 
-    TextureLoaderVisitor( TextureCache& textureCache,
+    TextureLoaderVisitor( DashTreePtr dashTree,
+                          TextureCache& textureCache,
                           ProcessorInputPtr processorInput,
                           ProcessorOutputPtr processorOutput,
-                          const LoadPriority loadPriority  )
-        : textureCache_( textureCache ),
+                          LoadPriority loadPriority  )
+        : RenderNodeVisitor( dashTree ),
+          textureCache_( textureCache ),
           processorInput_( processorInput ),
           processorOutput_( processorOutput ),
           loadPriority_( loadPriority )
     {}
 
-    void visit( dash::NodePtr dashNode, VisitState& state );
+    void visit( DashRenderNode& renderNode, VisitState& state ) final;
     void setLoadPriority( LoadPriority loadPriority ) { loadPriority_ = loadPriority; }
 
 private:
@@ -74,15 +79,16 @@ private:
     LoadPriority loadPriority_;
 };
 
-class CollectVisiblesVisitor : public NodeVisitor< dash::NodePtr >
+class CollectVisiblesVisitor : public RenderNodeVisitor
 {
 public:
-    CollectVisiblesVisitor( CacheIdSet& currentVisibleSet )
-     : currentVisibleSet_( currentVisibleSet ) {}
+    CollectVisiblesVisitor( DashTreePtr dashTree,
+                            CacheIdSet& currentVisibleSet )
+     : RenderNodeVisitor( dashTree ),
+       currentVisibleSet_( currentVisibleSet ) {}
 
-    void visit( dash::NodePtr dashNode, VisitState& state )
+    void visit( DashRenderNode& renderNode, VisitState& state ) final
     {
-        DashRenderNode renderNode( dashNode );
         const LODNode& lodNode = renderNode.getLODNode();
 
         if( !lodNode.isValid() ||
@@ -101,17 +107,20 @@ private:
     CacheIdSet& currentVisibleSet_;
 };
 
-TextureUploadProcessor::TextureUploadProcessor( TextureCache &textureCache )
-    : textureCache_( textureCache ),
-      currentFrameID_( 0 ),
-      threadOp_( TO_NONE ),
-      firstTimeLoaded_( false )
+TextureUploadProcessor::TextureUploadProcessor( DashTreePtr dashTree,
+                                                TextureCache &textureCache )
+    : _dashTree( dashTree ),
+      _textureCache( textureCache ),
+      _currentFrameID( 0 ),
+      _threadOp( TO_NONE ),
+      _firstTimeLoaded( false )
 {
+    setDashContext( dashTree->createContext());
 }
 
 void TextureUploadProcessor::setGLWidget( GLWidgetPtr glWidgetPtr )
 {
-    glWidgetPtr_ = glWidgetPtr;
+    _glWidgetPtr = glWidgetPtr;
 }
 
 bool TextureUploadProcessor::initializeThreadRun_()
@@ -120,58 +129,47 @@ bool TextureUploadProcessor::initializeThreadRun_()
     if( !DashProcessor::initializeThreadRun_( ) )
         return false;
 
-    if( !glContextPtr_.get() )
-        return false;
-
-    if( !glWidgetPtr_.get() || !glWidgetPtr_->getGLContext().get() )
-        return false;
-
-    glWidgetPtr_->getGLContext()->shareContext( getGLContext() );
-    glContextPtr_->makeCurrent();
     return true;
 }
 
 bool TextureUploadProcessor::onPreCommit_( const uint32_t outputConnection LB_UNUSED )
 {
-    if( !firstTimeLoaded_ )
+    if( !_firstTimeLoaded )
         return false;
 
     return true;
 }
 
-void TextureUploadProcessor::onPostCommit_( const uint32_t connection LB_UNUSED, const CommitState state LB_UNUSED )
+void TextureUploadProcessor::onPostCommit_( const uint32_t connection LB_UNUSED,
+                                            const CommitState state LB_UNUSED )
 {
-    if( state != CS_NOCHANGE )
-    {
+    if( _glWidgetPtr && state != CS_NOCHANGE )
         glFinish( );
-    }
 
-    if( state == CS_COMMITED )
-    {
-        glWidgetPtr_->update();
-    }
+    if( _glWidgetPtr && state == CS_COMMITED )
+        _glWidgetPtr->update();
 }
 
-void TextureUploadProcessor::setDashTree( dash::NodePtr dashTree )
+void TextureUploadProcessor::_loadData()
 {
-    dashTree_ = dashTree;
-}
-
-void TextureUploadProcessor::loadData_()
-{
-    TextureLoaderVisitor loadVisitor( textureCache_,
+    TextureLoaderVisitor loadVisitor( _dashTree,
+                                      _textureCache,
                                       processorInputPtr_,
                                       processorOutputPtr_,
                                       TextureLoaderVisitor::LP_VISIBLE );
 
     DFSTraversal traverser;
-    switch( DashRenderNode( dashTree_ ).rootGetLoadPriority_() )
+    const RootNode& rootNode = _dashTree->getDataSource()->getVolumeInformation().rootNode;
+    const DashRenderStatus& renderStatus = _dashTree->getRenderStatus();
+    switch( renderStatus.getLoadPriority( ))
     {
         case LP_ALL:
+        {
             loadVisitor.setLoadPriority( TextureLoaderVisitor::LP_VISIBLE );
-            traverser.traverse( dashTree_, loadVisitor );
+            traverser.traverse( rootNode, loadVisitor );
             loadVisitor.setLoadPriority( TextureLoaderVisitor::LP_TEXTURE );
             break;
+        }
         case LP_VISIBLE:
             loadVisitor.setLoadPriority( TextureLoaderVisitor::LP_VISIBLE );
             break;
@@ -181,32 +179,45 @@ void TextureUploadProcessor::loadData_()
         default:
             break;
     }
-    traverser.traverse( dashTree_, loadVisitor );
+    traverser.traverse( rootNode, loadVisitor );
 
-    if( !firstTimeLoaded_ )
-        firstTimeLoaded_ = true;
+    if( !_firstTimeLoaded )
+        _firstTimeLoaded = true;
 }
 
 void TextureUploadProcessor::runLoop_( )
 {
+    if( _glWidgetPtr && getGLContext() &&
+            livre::GLContext::getCurrent() != glContextPtr_.get( ))
+    {
+        _glWidgetPtr->getGLContext()->shareContext( getGLContext( ));
+        glContextPtr_->makeCurrent();
+    }
+
+    if( livre::GLContext::getCurrent() != glContextPtr_.get( ))
+        return;
+
     processorInputPtr_->applyAll( 0 );
 #ifdef _ITT_DEBUG_
     __itt_task_begin ( ittTextureLoadDomain, __itt_null, __itt_null, ittTextureComputationTask );
 #endif //_ITT_DEBUG_
 
-    DashRenderNode rootRenderNode( dashTree_ );
-    if( rootRenderNode.rootGetFrameID_() != currentFrameID_ )
+    const DashRenderStatus& renderStatus = _dashTree->getRenderStatus();
+    if( renderStatus.getFrameID() != _currentFrameID )
     {
-        protectUnloading_.clear();
-        CollectVisiblesVisitor collectVisibles( protectUnloading_ );
+        _protectUnloading.clear();
+        CollectVisiblesVisitor collectVisibles( _dashTree,
+                                                _protectUnloading );
         DFSTraversal traverser;
-        traverser.traverse( dashTree_, collectVisibles );
-        textureCache_.setProtectList( protectUnloading_ );
-        currentFrameID_ = rootRenderNode.rootGetFrameID_();
+        const RootNode& rootNode =
+                _dashTree->getDataSource()->getVolumeInformation().rootNode;
+        traverser.traverse( rootNode, collectVisibles );
+        _textureCache.setProtectList( _protectUnloading );
+        _currentFrameID = renderStatus.getFrameID();
     }
 
-    checkThreadOperation_( );
-    loadData_( );
+    _checkThreadOperation();
+    _loadData();
     processorOutputPtr_->commit( 0 );
 
 #ifdef _ITT_DEBUG_
@@ -214,27 +225,23 @@ void TextureUploadProcessor::runLoop_( )
 #endif //_ITT_DEBUG_
 }
 
-void TextureUploadProcessor::checkThreadOperation_( )
+void TextureUploadProcessor::_checkThreadOperation()
 {
-    DashRenderNode rootNode( dashTree_ );
-    ThreadOperation op = rootNode.rootGetThreadOp_();
-    if( op != threadOp_ )
+    DashRenderStatus& renderStatus = _dashTree->getRenderStatus();
+    ThreadOperation op = renderStatus.getThreadOp();
+    if( op != _threadOp )
     {
-        threadOp_ = op;
-        rootNode.rootSetThreadOp_( op );
+        _threadOp = op;
+        renderStatus.setThreadOp( op );
         processorOutputPtr_->commit( 0 );
     }
 
-    if( threadOp_ == TO_EXIT )
-    {
+    if( _threadOp == TO_EXIT )
         exit( );
-    }
 }
 
-void TextureLoaderVisitor::visit( dash::NodePtr dashNode, VisitState& state )
+void TextureLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state )
 {
-    DashRenderNode renderNode( dashNode );
-
     const LODNode& lodNode = renderNode.getLODNode();
     if( !lodNode.isValid() )
         return;
@@ -243,12 +250,16 @@ void TextureLoaderVisitor::visit( dash::NodePtr dashNode, VisitState& state )
     {
         switch( loadPriority_ )
         {
-        case LP_VISIBLE:
-            state.setVisitChild( !renderNode.isVisible() );
-            break;
-        case LP_TEXTURE:
-            state.setVisitChild( !( !renderNode.isTextureRequested() && renderNode.getParent().isTextureRequested() ) );
-            break;
+            case LP_VISIBLE:
+                state.setVisitChild( !renderNode.isVisible() );
+                break;
+            case LP_TEXTURE:
+            {
+                DashRenderNode parentNode( getDashTree()->getParentNode( lodNode.getNodeId( )));
+                state.setVisitChild( !( !renderNode.isTextureRequested()
+                                        && parentNode.isTextureRequested( )));
+                break;
+            }
         }
     }
 
@@ -303,7 +314,7 @@ void TextureLoaderVisitor::visit( dash::NodePtr dashNode, VisitState& state )
     {
         if( loadPriority_ == LP_VISIBLE )
         {
-             renderNode.setTextureObject( &texture );
+            renderNode.setTextureObject( &texture );
             processorOutput_->commit( 0 );
         }
     }

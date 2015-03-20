@@ -76,7 +76,7 @@ lunchbox::URI deserializeDataSource( const ::zeq::Event& event )
     builder.add_eventHigh( info.first.high( ));
     builder.add_isBigEndian( vi.isBigEndian );
     builder.add_compCount( vi.compCount );
-    builder.add_depth( vi.depth );
+    builder.add_depth( vi.rootNode.getDepth( ));
     builder.add_dataType( vi.dataType );
     builder.add_overlap( overlap );
     builder.add_maximumBlockSize( maximumBlockSize );
@@ -110,11 +110,12 @@ RemoteInformation deserializeDataSourceData( const ::zeq::Event& event )
     RemoteInformation info;
     livre::VolumeInformation& vi = info.second;
 
+
+
     info.first.low() = data->eventLow();
     info.first.high() = data->eventHigh();
     vi.isBigEndian = data->isBigEndian();
     vi.compCount = data->compCount();
-    vi.depth = data->depth();
     vi.dataType = DataType( data->dataType( ));
     vi.overlap = _deserializeVector3< unsigned >( data->overlap( ));
     vi.maximumBlockSize = _deserializeVector3< unsigned >(
@@ -129,6 +130,11 @@ RemoteInformation deserializeDataSourceData( const ::zeq::Event& event )
                                      data->boundingBoxMax( ));
     vi.worldSpacePerVoxel = data->worldSpacePerVoxel();
 
+    const Vector3ui& blockSize = vi.maximumBlockSize - vi.overlap * 2;
+    Vector3ui blocksSize = vi.voxels / blockSize;
+    blocksSize = blocksSize / ( 1u << data->depth( ));
+
+    vi.rootNode = RootNode( data->depth(), blocksSize );
     return info;
 }
 

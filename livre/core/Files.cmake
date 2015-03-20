@@ -32,6 +32,7 @@ set(LIVRECORE_HEADERS
   Configuration/Parameters.h
   Dash/DashContextTrait.h
   Dash/DashRenderNode.h
+  Dash/DashRenderStatus.h
   Dash/DashTree.h
   Data/LODNodeTrait.h
   Data/VolumeDataSource.h
@@ -52,11 +53,11 @@ set(LIVRECORE_HEADERS
   Pipeline/ProcessorInput.h
   Pipeline/ProcessorOutput.h
   Render/Frustum.h
-  Render/GenerateRenderingSet.h
   Render/GLContextTrait.h
   Render/GLWidget.h
   Render/RenderBrick.h
   Render/Renderer.h
+  Render/RenderingSetGenerator.h
   Render/TexturePool.h
   Render/TexturePoolFactory.h
   Render/TextureState.h
@@ -65,6 +66,7 @@ set(LIVRECORE_HEADERS
   Render/Viewport.h
   Util/ThreadClock.h
   Visitor/NodeVisitor.h
+  Visitor/RenderNodeVisitor.h
   Visitor/VisitState.h)
 
 set(LIVRECORE_SOURCES
@@ -75,6 +77,7 @@ set(LIVRECORE_SOURCES
   Configuration/Parameters.cpp
   Dash/DashContextTrait.cpp
   Dash/DashRenderNode.cpp
+  Dash/DashRenderStatus.cpp
   Dash/DashTree.cpp
   Data/LODNode.cpp
   Data/LODNodeTrait.cpp
@@ -93,13 +96,13 @@ set(LIVRECORE_SOURCES
   Pipeline/ProcessorInput.cpp
   Pipeline/ProcessorOutput.cpp
   Render/Frustum.cpp
-  Render/GenerateRenderingSet.cpp
   Render/GLContext.cpp
   Render/GLSLShaders.cpp
   Render/GLContextTrait.cpp
   Render/GLWidget.cpp
   Render/RenderBrick.cpp
   Render/Renderer.cpp
+  Render/RenderingSetGenerator.cpp
   Render/TexturePool.cpp
   Render/TexturePoolFactory.cpp
   Render/TextureState.cpp
@@ -107,5 +110,6 @@ set(LIVRECORE_SOURCES
   Render/View.cpp
   Util/ThreadClock.cpp
   Util/Utilities.cpp
+  Visitor/RenderNodeVisitor.cpp
   Visitor/VisitState.cpp
   ${COMMON_SOURCES})
