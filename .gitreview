@@ -1,0 +1,6 @@
+[gerrit]
+host=bbpcode.epfl.ch
+project=viz/Livre
+defaultbranch=master
+port=22
+

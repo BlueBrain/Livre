@@ -1,0 +1,111 @@
+# Copyright (c) 2011-2015, EPFL/Blue Brain Project
+#                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+#
+# This file is part of Livre <https://github.com/BlueBrain/Livre>
+#
+
+set(LIVRECORE_PUBLIC_HEADERS
+  ${COMMON_INCLUDES}
+  Data/LODNode.h
+  Data/NodeId.h
+  Data/MemoryUnit.h
+  Data/VolumeDataSourcePlugin.h
+  Data/VolumeInformation.h
+  Render/GLContext.h
+  Render/GLSLShaders.h
+  Util/Utilities.h
+  lunchboxTypes.h
+  mathTypes.h
+  types.h
+)
+
+set(LIVRECORE_HEADERS
+  dashTypes.h
+  Cache/Cache.h
+  Cache/CacheObject.h
+  Cache/CacheObjectListener.h
+  Cache/CacheObjectObserver.h
+  Cache/CachePolicy.h
+  Cache/CacheStatistics.h
+  Cache/EmptyCacheObject.h
+  Configuration/Configuration.h
+  Configuration/Parameters.h
+  Dash/DashContextTrait.h
+  Dash/DashRenderNode.h
+  Dash/DashTree.h
+  Data/LODNodeTrait.h
+  Data/VolumeDataSource.h
+  DashPipeline/DashConnection.h
+  DashPipeline/DashProcessor.h
+  DashPipeline/DashProcessorInput.h
+  DashPipeline/DashProcessorOutput.h
+  Events/EventHandler.h
+  Events/EventHandlerFactory.h
+  Events/EventInfo.h
+  Events/EventMapper.h
+  Maths/BinarySearch.h
+  Maths/Maths.h
+  Maths/Plane.h
+  Maths/Quantizer.h
+  Pipeline/Connection.h
+  Pipeline/Processor.h
+  Pipeline/ProcessorInput.h
+  Pipeline/ProcessorOutput.h
+  Render/Frustum.h
+  Render/GenerateRenderingSet.h
+  Render/GLContextTrait.h
+  Render/GLWidget.h
+  Render/RenderBrick.h
+  Render/Renderer.h
+  Render/TexturePool.h
+  Render/TexturePoolFactory.h
+  Render/TextureState.h
+  Render/TransferFunction1D.h
+  Render/View.h
+  Render/Viewport.h
+  Util/ThreadClock.h
+  Visitor/NodeVisitor.h
+  Visitor/VisitState.h)
+
+set(LIVRECORE_SOURCES
+  Cache/Cache.cpp
+  Cache/CacheObject.cpp
+  Cache/CacheStatistics.cpp
+  Configuration/Configuration.cpp
+  Configuration/Parameters.cpp
+  Dash/DashContextTrait.cpp
+  Dash/DashRenderNode.cpp
+  Dash/DashTree.cpp
+  Data/LODNode.cpp
+  Data/LODNodeTrait.cpp
+  Data/MemoryUnit.cpp
+  Data/NodeId.cpp
+  Data/VolumeDataSource.cpp
+  Data/VolumeDataSourcePlugin.cpp
+  DashPipeline/DashConnection.cpp
+  DashPipeline/DashProcessor.cpp
+  DashPipeline/DashProcessorInput.cpp
+  DashPipeline/DashProcessorOutput.cpp
+  Events/EventMapper.cpp
+  Maths/Maths.cpp
+  Maths/Plane.cpp
+  Pipeline/Processor.cpp
+  Pipeline/ProcessorInput.cpp
+  Pipeline/ProcessorOutput.cpp
+  Render/Frustum.cpp
+  Render/GenerateRenderingSet.cpp
+  Render/GLContext.cpp
+  Render/GLSLShaders.cpp
+  Render/GLContextTrait.cpp
+  Render/GLWidget.cpp
+  Render/RenderBrick.cpp
+  Render/Renderer.cpp
+  Render/TexturePool.cpp
+  Render/TexturePoolFactory.cpp
+  Render/TextureState.cpp
+  Render/TransferFunction1D.cpp
+  Render/View.cpp
+  Util/ThreadClock.cpp
+  Util/Utilities.cpp
+  Visitor/VisitState.cpp
+  ${COMMON_SOURCES})

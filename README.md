@@ -3,4 +3,4 @@
 Livre
 =====
 
-LOD-based Interactive Volume Rendering Engine
+Largescale Interactive Volume Rendering Engine

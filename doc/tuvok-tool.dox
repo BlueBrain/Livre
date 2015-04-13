@@ -1,0 +1,157 @@
+/**
+@page Tuvok_Tool Tuvok Volume Data Generation
+
+@section TABLE_OF_CONTENTS Table of Contents
+-# @ref GENERAL_INFORMATION
+-# @ref PIPELINE
+    -# @ref Fiji
+    -# @ref TuvokDataConverter
+
+@htmlonly
+<hr>
+@endhtmlonly
+
+@section GENERAL_INFORMATION General Information
+
+Out-of-core volume rendering algorithms require the volume data to be pre-processed before
+visualization. Tuvok volume format (UVF) is an out-of-core format and is supported by Livre.
+
+@section PIPELINE Pipeline
+
+Tuvok library provides the "TuvokDataConverter" tool for pre-processing the NRRD
+( Nearly Raw Raster Data ) format, therefore the data to be visualized should be first converted to
+NRRD format.
+
+Generally data is either tiff slices or raw format, both can be read and converted to NRRD by the
+"Fiji" ( http://fiji.sc/Fiji ) tool. Then, the resulting NRRD volumes can be converted to UVF
+format.
+
+@subsection Fiji Fiji
+
+Fiji is a scientific image processing tool and it has tons of features to convert, analyze, p
+rocess images and volumes. But, in context of this documentation we are only interested in
+converting the image stacks, raw volumes to NRRD format.
+
+Image stacks mean sequence of ordered images in a folder. Those can be in any format such as tiff,
+jpg, etc. Those stacks can be loaded into Fiji using the menu items "File->Import->Image
+Sequence...". After this menu item is selected, the first image in the stack should be selected by
+the file browser.
+
+The following dialog will be presented to the user after selecting the first file.
+
+@image html ImageSeq.png "Image Sequence Dialog"
+
+Here "Number of images" is the number of slices in the volume. You can change starting point of
+slices and rescaling parameters. While working with low memory "Use virtual stack" is an important
+item to select. If your images are 16 bit tiff images, you can either quantize them to 8 bits or
+you can directly use the 16 bit data using the "Convert to 8-bit Grayscale".
+
+After a successful import, you can export your volume to NRRD format using the
+"File->Save as->Nrrd..." menu option. A "raw volume" means that, the data has no format attached to
+it. So, before importing any raw volume user should be aware of the per data item format ( 8bit,
+16bit, signed, unsigned, float etc, endianness ), the width, height and length of the volume.
+
+To import the raw volumes in Fiji, "File->Import->Raw..." menu item should be selected. After
+choosing your raw volume through the file browser the following dialog will be presented.
+
+@image html ImportRaw.png "Import Raw Dialog"
+
+In the GUI, "Image type" is the data type per item, "Width", "Height" and "Number of images"
+correspond to the width, height and length of the volume, respectively. In case of low memory,
+"Use virtual stack" is highly recommneded.
+
+After a successful import, again, you can export your volume to NRRD format using the
+"File->Save as->Nrrd..." menu option.
+
+@subsection TuvokDataConverter TuvokDataConverter
+
+"TuvokDataConverter" [source code](https://github.com/BlueBrain/TuvokDataConverter.git)is the
+tool to convert NRRD volumes into Tuvok format. If you execute the command with "--help" option,
+you can see the parameters of the executable.
+
+\code
+TuvokDataConverter --help
+
+USAGE:
+
+  TuvokDataConverter  {-i <filename> ... |-d <path>} [-q] [--experimental]
+                      [-g] [-e <string>] [-v <positive integer>] [-p
+                      <positive integer>] [-l <positive integer>] [-r
+                      <positive integer>] [-c <positive integer>] [-m
+                      <floating point number>] [-s <floating point
+                      number>] [-b <floating point number>] -o <filename>
+                      [--] [--version] [-h]
+
+Where:
+
+  -i <filename>,  --input <filename>  (accepted multiple times)
+    (OR required)  input file.  Repeat to merge volumes
+        -- OR --
+  -d <path>,  --directory <path>
+    (OR required)  input directory
+
+
+  -q,  --quantize
+    Quantize to 8 bits
+
+  --experimental
+    Enable experimental features
+
+  -g,  --debug
+    Enable debugging mode
+
+  -e <string>,  --expression <string>
+    merge expression
+
+  -v <positive integer>,  --level <positive integer>
+    UVF compression level between (1..10)
+
+  -p <positive integer>,  --compress <positive integer>
+    UVF compression method 0: no compression, 1: zlib, 2: lzma, 3: lz4, 4:
+    bzlib, 5: lzham
+
+  -l <positive integer>,  --bricklayout <positive integer>
+    brick layout on disk 0: scanline, 1: morton, 2: hilbert, 3: random
+    order
+
+  -r <positive integer>,  --brickoverlap <positive integer>
+    set brick overlap
+
+  -c <positive integer>,  --bricksize <positive integer>
+    set maximum brick size (64)
+
+  -m <floating point number>,  --memory <floating point number>
+     max allowed memory to use in MB 16384
+
+  -s <floating point number>,  --scale <floating point number>
+    (merging) scaling value for second file
+
+  -b <floating point number>,  --bias <floating point number>
+    (merging) bias value for second file
+
+  -o <filename>,  --output <filename>
+    (required)  output file (uvf)
+
+  --,  --ignore_rest
+    Ignores the rest of the labeled arguments following this flag.
+
+  --version
+    Displays version information and exits.
+
+  -h,  --help
+    Displays usage information and exits.
+\endcode
+
+The important parameters are:
+
+- "-i" for the input NRRD file
+- "-o" for the output UVF file
+- "-p" for compression algorithm where compression can be enabled at the cost of more computing,
+but less data reading -
+- "-c" for maximum brick size. A smaller brick size can increase the complexity of the out-of-core
+data structure, while bigger bricks may increase the loading times. If for ex: the volume is
+1024x1024x1024 in size, selecting a 32 size block will cause a 5 deep out-of-core tree, where
+algorithms can be slower when camera is close to the object - this still has to be improved )
+
+
+*/

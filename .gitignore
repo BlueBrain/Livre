@@ -1,2 +1,16 @@
 CMakeLists.txt.user*
 Makefile
+CMake/common/
+___*
+Collage/
+Deflect/
+Equalizer/
+FlatBuffers/
+GLStats/
+Lunchbox/
+Pression/
+build/
+dash/
+hwsd/
+vmmlib/
+zeq/

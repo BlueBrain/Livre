@@ -1,0 +1,7 @@
+# -*- mode: cmake -*-
+git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git eb372a2)
+git_subproject(Lunchbox https://github.com/Eyescale/Lunchbox.git b0e3e0a)
+git_subproject(dash https://github.com/BlueBrain/dash.git a8d8799)
+git_subproject(zeq https://github.com/HBPVis/zeq.git f268bca)
+git_subproject(Collage https://github.com/Eyescale/Collage.git bddbf4d)
+git_subproject(Equalizer https://github.com/Eyescale/Equalizer.git 05f7551)

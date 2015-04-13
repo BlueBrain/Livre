@@ -1,41 +1,41 @@
+#
+# Copyright (c) 2011-2015, EPFL/Blue Brain Project
+#                          David Steiner <steiner@ifi.uzh.ch>
+#                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+#                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+#                          Maxim Makhinya  <maxmah@gmail.com>
+#
+# This file is part of Livre <https://github.com/BlueBrain/Livre>
+#
 
-# Copyright (c) 2011 Maxim Makhinya <maxmah@gmail.com>
-#               2012 David Steiner  <steiner@ifi.uzh.ch>
-#               2013 Daniel Nachbaur <daniel.nachbaur@epfl.ch>
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 project(Livre)
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake
-                              ${CMAKE_SOURCE_DIR}/CMake/common )
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
+  ${CMAKE_SOURCE_DIR}/CMake/common)
 
-include(Buildyard)
-if(BUILDYARD_STOP)
-    return()
-endif()
+include(GitExternal)
+include(SubProject)
 
-set(RELEASE_VERSION OFF) # OFF or ABI version
-set(LAST_RELEASE 0.1.0)
 set(VERSION_MAJOR "0")
-set(VERSION_MINOR "1")
+set(VERSION_MINOR "2")
 set(VERSION_PATCH "0")
+set(VERSION_ABI 1) # OFF or ABI version
 
-set(PROJECT_INCLUDE_NAME livre)
-include(FindPackages)
+set(PROJECT_namespace livre)
+set(PROJECT_INCLUDE_NAME livre/core)
+set(LIVRE_DESCRIPTION "Largescale Interactive Volume Rendering Engine")
+set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)
+
 include(Common)
+include(FindPackages)
+include(EqGLLibraries)
+set(LIVRE_DEPENDENT_LIBRARIES vmmlib Lunchbox dash Equalizer)
 
-include_directories(${CMAKE_CURRENT_LIST_DIR}/libs)
+add_subdirectory(livre)
+add_subdirectory(apps)
+add_subdirectory(tests)
 
-add_subdirectory(libs)
-add_subdirectory(tools)
-add_subdirectory(volVis)
-
+include(CPackConfig)
 include(DoxygenRule)
-#include(CPackConfig)
-
-set(CTEST_CUSTOM_WARNING_EXCEPTION ${CTEST_CUSTOM_WARNING_EXCEPTION}
-  # http://public.kitware.com/Bug/view.php?id=10179
-  "ld: warning: duplicate dylib")
-include(CTest)
-
-include(PackageConfig)

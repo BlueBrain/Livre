@@ -1,0 +1,112 @@
+/**
+@page User_Guide User Guide
+
+@section TABLE_OF_CONTENTS Table of Contents
+-# @ref GENERAL_INFORMATION
+    -# @ref Overview
+-# @ref INSTALLATION
+    -# @ref Setup
+-# @ref GETTING_STARTED
+    -# @ref Pre-processing_Tools
+    -# @ref Livre
+    -# @ref LivreGUI
+
+@htmlonly
+<hr>
+@endhtmlonly
+@section GENERAL_INFORMATION General Information
+
+@subsection Overview Overview
+
+Livre is a out-of-core volume rendering engine depending Equalizer and OpenGL for rendering, and
+Tuvok library for data management.
+
+@section INSTALLATION Installation
+
+@subsection Setup Setup
+
+Livre, currently doesn't have Ubuntu or Redhat packages. It should be build from the source code at
+github.(The compiler should support the C++11 - minimum g++ 4.6 - to compile the project because of
+the Tuvok library dependency). The basic building procedure is as below:
+
+\code
+$ git clone https://github.com/BlueBrain/Livre.git
+$ cd Livre
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make
+$ make install
+\endcode
+
+The above commands will fetch the necessary packages and build the dependencies, and install the
+executables and libraries.
+
+After a successful build and installation, the following executables will be available:
+
+- livre ( The command line render application )
+- livreGUI ( Transfer function editor )
+- TuvokDataConverter ( @ref TuvokDataConverter )
+
+@section GETTING_STARTED Getting Started
+
+@subsection Pre-processing_Tools Volume pre-processing tools
+
+The volumetric data should be pre-processed in order to visualize in Livre. More information about
+the pipeline of preprocessing can be found at @ref Tuvok_Tool tools page.
+
+@subsection Livre Livre
+
+The volume renderer is executed through the command line. To test if the volume renderer is working
+or not, you can simply execute :
+
+\code
+livre --volume mem://1024,1024,1024,32
+\endcode
+
+which will render an in memory test volume data structure. Here 1024,1024 and 1024 are the width,
+height and length of the volume in voxels, respectively. 32 is the block size and "mem://" is the
+scheme to generate in memory volume. You should be getting an image like below:
+
+@image html livre.png "Livre"
+
+The command line parameters are shown below:
+
+\code
+Application Parameters
+  --volume URL
+
+Volume Renderer Parameters
+  --sse arg (=1)                    Screen space error
+  --datacachemem arg (=1024)        Maximum data cache memory (MB)
+  --texturecachemem arg (=3072)     Maximum texture cache memory (MB)
+  --texturedatacachemem arg (=8192) Maximum texture data cache memory (MB)
+  --maxrendermem arg (=1536)        Maximum render memory
+\endcode
+
+The important parameters are :
+
+- "--volume" ( URL of the volume )
+- "--sse" ( Quality of the rendering, the lower the value, the higher the quality. If value is 1,
+1 pixel is 1 voxel, for lower quality values should be larger than 1 )
+
+@subsection LivreGUI Transfer function editor
+
+Transfer function editor helps the users to attach different colors and opacities to voxel values.
+The "livreGUI" is the main application for editing the transfer function. It can connect the "livre
+"application remotely and can modify the colors. Each color channel can be modified separately.
+The starting dialog is as below:
+
+@image html MainWindow.png "Main Window"
+
+For connection, hit the connect button and enter the hostname where "livre" application is running.
+
+@image html Connection.png "Connection Dialog"
+
+After successfull connection, you can open the transfer function editor. In the plot area x axis
+represents the values of voxel and the y axis represents the opacity values. Each color channel can
+be modified seperately by selecting the channel from the color channels.
+
+@image html TransferFunctionEditor.png "Transfer Function Editor"
+
+*/
