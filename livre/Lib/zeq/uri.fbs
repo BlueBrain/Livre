@@ -1,0 +1,8 @@
+
+namespace livre.zeq;
+
+table URI {
+  uri:string;
+}
+
+root_type URI;

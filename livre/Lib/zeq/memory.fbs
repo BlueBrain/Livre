@@ -1,0 +1,8 @@
+
+namespace livre.zeq;
+
+table Memory {
+  data:[ubyte];
+}
+
+root_type Memory;
