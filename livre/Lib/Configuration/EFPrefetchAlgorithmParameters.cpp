@@ -71,7 +71,7 @@ EFPrefetchAlgorithmParameters &EFPrefetchAlgorithmParameters::operator=(
     return *this;
 }
 
-void EFPrefetchAlgorithmParameters::initializeParameters_()
+void EFPrefetchAlgorithmParameters::initialize_()
 {
 }
 

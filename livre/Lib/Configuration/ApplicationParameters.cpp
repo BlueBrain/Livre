@@ -32,11 +32,11 @@ std::istream& operator>>( std::istream& is, vmml::vector<3ul, float>& vec )
 namespace livre
 {
 
-const char *LOGFILE_PARAM = "logfile";
-const char *DATAFILE_PARAM = "volume";
-const char *NUMFRAMES_PARAM = "numframes";
-const char *CAMERAPOS_PARAM = "camerapos";
-const char *GUI_ENABLED_PARAM = "enablegui";
+const std::string LOGFILE_PARAM = "logfile";
+const std::string DATAFILE_PARAM = "volume";
+const std::string NUMFRAMES_PARAM = "numframes";
+const std::string CAMERAPOS_PARAM = "camerapos";
+const std::string GUI_ENABLED_PARAM = "enablegui";
 
 ApplicationParameters::ApplicationParameters()
     : Parameters( "Application Parameters" ),
@@ -114,7 +114,7 @@ void ApplicationParameters::deserialize( co::DataIStream &is, const uint64_t dir
        >> cameraPosition;
 }
 
-void ApplicationParameters::initializeParameters_()
+void ApplicationParameters::initialize_()
 {
     configuration_.getValue( LOGFILE_PARAM, logFileName );
     configuration_.getValue( DATAFILE_PARAM, dataFileName );

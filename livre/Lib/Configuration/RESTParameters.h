@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+ *                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -17,34 +17,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _VolumeRendererParameters_h_
-#define _VolumeRendererParameters_h_
+#ifndef _RESTParameters_h_
+#define _RESTParameters_h_
 
+#include <livre/core/mathTypes.h>
 #include <livre/core/Configuration/Parameters.h>
 
 namespace livre
 {
 
-enum RenderStrategy
+/**
+ * The RESTParameters struct keeps the parameters for RESTConnector.
+ */
+struct RESTParameters : public Parameters
 {
-    RS_ANY_FRAME, //!< Render with data available
-    RS_ITERATED_FULL_FRAME, //!< Render in between frames between two camera positions for all the needed data
-    RS_FULL_FRAME //!< Render for all data at the current camera position, do not skip until it is satisfied
-};
+    RESTParameters( );
 
-struct VolumeRendererParameters : public Parameters
-{
-    VolumeRendererParameters( );
-
-    RenderStrategy renderStrategy; //!< Render strategy
-    float screenSpaceError;  //!< Screen space error
-    uint32_t maxDataMemoryMB;  //!< Settings for data cache
-    uint32_t maxTextureMemoryMB; //!< Settings for texture cache
-    uint32_t maxTextureDataMemoryMB; //!< Settings for texture cache
-    uint32_t maxRenderMemoryMB; //!< Maximum render frustum
-    bool skipLoadingEnabled; //!< Skip loading the data when a new frame data request arrives
-    bool disableNormalization; //!< Normalize data
-    bool dropAnimationFrames; //!< Drop animation frames
+    std::string hostName; //<! hostname for RESTConnector.
+    uint16_t port; //<! port for RESTConnector.
+    std::string zeqSchema; //<! zeq schema for RESTConncetor and Livre
+    bool useRESTConnector;
 
     /**
      * De-serializes the object from input stream.
@@ -61,9 +53,9 @@ struct VolumeRendererParameters : public Parameters
     virtual void serialize( co::DataOStream& os, const uint64_t dirtyBits );
 
     /**
-     * @param volumeRendererParameters The source parameters.
+     * @param parameters The source parameters.
      */
-    VolumeRendererParameters& operator=( const VolumeRendererParameters& volumeRendererParameters );
+    RESTParameters& operator=( const RESTParameters& parameters );
 
 protected:
 
@@ -72,4 +64,4 @@ protected:
 
 }
 
-#endif // _VolumeRendererParameters_h_
+#endif // _RESTParameters_h_

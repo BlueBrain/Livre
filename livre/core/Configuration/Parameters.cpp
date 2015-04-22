@@ -22,12 +22,12 @@
 namespace livre
 {
 
-bool Parameters::initializeParameters( const std::string& filename )
+bool Parameters::initialize( const std::string& filename )
 {
     try
     {
         configuration_.parseConfigFile( filename );
-        initializeParameters_( );
+        initialize_( );
         return true;
     }
     catch( const boost::program_options::error& exception )
@@ -38,12 +38,12 @@ bool Parameters::initializeParameters( const std::string& filename )
     return false;
 }
 
-bool Parameters::initializeParameters( const int32_t argc, char **argv )
+bool Parameters::initialize( const int32_t argc, char **argv )
 {
     try
     {
         configuration_.parseCommandLine( argc, argv );
-        initializeParameters_( );
+        initialize_( );
         return true;
     }
     catch( const boost::program_options::error& exception )

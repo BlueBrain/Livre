@@ -46,7 +46,7 @@ public:
      * @param filename The config file name.
      * @return True if file can be parsed.
      */
-    bool initializeParameters( const std::string& filename );
+    bool initialize( const std::string& filename );
 
     /**
      * Initializes parameters from arguments.
@@ -54,7 +54,7 @@ public:
      * @param argv Argument list.
      * @return True if arguments can be parsed.
      */
-    bool initializeParameters( const int32_t argc, char **argv );
+    bool initialize( const int32_t argc, char **argv );
 
     /**
      * @return The parameter name.
@@ -76,7 +76,7 @@ protected:
     /**
      * Initializes member variables from configuration variables.
      */
-    virtual void initializeParameters_( ) = 0;
+    virtual void initialize_( ) = 0;
 
     /**
      * configuration_ Configuration that keeps variadic data.
