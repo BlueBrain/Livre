@@ -37,7 +37,6 @@
 #include <livre/core/DashPipeline/DashProcessorOutput.h>
 
 #include <eq/client/gl.h>
-#include <eq/util/texture.h>
 
 #define CONNECTION_ID 0u
 
