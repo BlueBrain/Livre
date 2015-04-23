@@ -31,10 +31,6 @@
 
 #include <stdlib.h>
 
-typedef boost::program_options::variables_map ProgramOptionsMap;
-typedef boost::program_options::options_description ProgramOptionsDescription;
-typedef std::map< std::string, ProgramOptionsDescription > ProgramOptionsDescriptionMap;
-
 class NodeFactory : public eq::NodeFactory
 {
 public:

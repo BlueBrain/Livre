@@ -1,1 +1,1 @@
-config.bbp ssh://bbpcode.epfl.ch/common/config.bbp master
+config.bluebrain https://github.com/BlueBrain/config.git master
