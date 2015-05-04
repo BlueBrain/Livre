@@ -61,8 +61,9 @@ namespace detail
 class Config
 {
 public:
-    Config()
-        : currentCanvas( 0 )
+    Config( livre::Config* config_ )
+        : config( config_ )
+        , currentCanvas( 0 )
         , eventMapper( EventHandlerFactoryPtr( new EqEventHandlerFactory ))
         , volumeBBox( Boxf::makeUnitBox( ))
 #ifdef LIVRE_USE_ZEQ
@@ -72,6 +73,7 @@ public:
     {
     }
 
+    livre::Config* config;
     eq::Canvas* currentCanvas;
     EventMapper eventMapper;
     FrameData framedata;
@@ -120,6 +122,8 @@ public:
                                                         zeq::hbp::SCHEMA_IMAGEJPEG, zeq::PUBLISHER ) );
             vocabulary.push_back( zeq::EventDescriptor( zeq::hbp::CAMERA, zeq::hbp::EVENT_CAMERA,
                                                         zeq::hbp::SCHEMA_CAMERA, zeq::BIDIRECTIONAL ) );
+            vocabulary.push_back( zeq::EventDescriptor( zeq::vocabulary::EXIT, zeq::vocabulary::EVENT_EXIT,
+                                                        zeq::vocabulary::SCHEMA_EXIT, zeq::PUBLISHER ) );
             const zeq::Event& vocEvent = zeq::vocabulary::serializeVocabulary( vocabulary );
             _rcPublisher.publish( vocEvent );
         }
@@ -170,6 +174,16 @@ public:
         renderSettings->setTransferFunction( transferFunction );
     }
 
+    void publishExitedEvent()
+    {
+        _rcPublisher.publish( zeq::Event( zeq::vocabulary::EVENT_EXIT ));
+    }
+
+    void onExit( const zeq::Event& )
+    {
+        config->stopRunning();
+    }
+
     Subscribers subscribers;
     zeq::Publisher _publisher;
     zeq::Publisher _rcPublisher;
@@ -180,7 +194,7 @@ public:
 
 Config::Config( eq::ServerPtr parent )
         : eq::Config( parent )
-        , _impl( new detail::Config )
+        , _impl( new detail::Config( this ))
 {
     _impl->framedata.initialize( this );
 }
@@ -264,6 +278,9 @@ bool Config::init()
     rcSubscriber->registerHandler( zeq::vocabulary::EVENT_REQUEST,
                                    boost::bind( &detail::Config::onRequest,
                                                 _impl, _1 ));
+    rcSubscriber->registerHandler( zeq::vocabulary::EVENT_EXIT,
+                                   boost::bind( &detail::Config::onExit,
+                                                _impl, _1 ));
 #endif
     return true;
 }
@@ -289,6 +306,9 @@ bool Config::exit()
     _impl->framedata.deregisterObjects();
     if( !deregisterFrameData_() )
         ret = false;
+#ifdef LIVRE_USE_RESTCONNECTOR
+    _impl->publishExitedEvent();
+#endif
 
     return ret;
 }
