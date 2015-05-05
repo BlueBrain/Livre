@@ -34,7 +34,7 @@ namespace livre
 /**
  * The ShaderData structure holds all the informations for the shader (strings
  * for vertex, geometry, fragment shader and strings for separate glsl code used
- * with glsl's #include directive).
+ * with glsl's include directive).
  */
 struct ShaderData
 {
@@ -50,7 +50,7 @@ struct ShaderData
 };
 
 /**
- * The GLSLShaders class is used to load vertex, fragment and geometry shaders with glsl's #include directive support.
+ * The GLSLShaders class is used to load vertex, fragment and geometry shaders with glsl's include directive support.
  */
 class GLSLShaders
 {
@@ -63,7 +63,7 @@ public:
     typedef unsigned Handle;
 
     /**
-     * Load shaders from strings with glsl's #include directive support.
+     * Load shaders from strings with glsl's include directive support.
      * @param shaderData The data needed to compile the shader.
      * @return The OpenGL error, or GL_NO_ERROR on success
      */
