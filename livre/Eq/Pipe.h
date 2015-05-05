@@ -105,9 +105,10 @@ private:
     void mapFrameData_( const eq::uint128_t& initId );
     void unmapFrameData_( );
 
-    virtual void frameStart(  const eq::uint128_t& frameId, const uint32_t frameNumber );
-    virtual bool configInit( const eq::uint128_t& initId );
-    virtual bool configExit();
+    void frameStart( const eq::uint128_t& frameId,
+                     const uint32_t frameNumber ) final;
+    bool configInit( const eq::uint128_t& initId ) final;
+    bool configExit() final;
 
     TextureUploadProcessorPtr textureUploadProcessorPtr_;
     DataUploadProcessorPtr dataUploadProcessorPtr_;
