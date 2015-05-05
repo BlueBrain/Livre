@@ -81,8 +81,7 @@ public:
     void publishModelView()
     {
         CameraSettingsPtr cameraSettings = framedata.getCameraSettings();
-        Matrix4f modelView = Matrix4f::IDENTITY;
-        modelView = cameraSettings->getModelRotation();
+        Matrix4f modelView = cameraSettings->getModelRotation();
         modelView.set_translation( cameraSettings->getCameraPosition() );
         modelView = cameraSettings->getCameraRotation() * modelView;
 
@@ -92,9 +91,8 @@ public:
                                                        rotation,
                                                        eyePos );
 
-        const Vector3f circuitCenter = volumeBBox.getCenter();
-        const Vector3f circuitSize = volumeBBox.getDimension();
-
+        const Vector3f& circuitCenter = volumeBBox.getCenter();
+        const Vector3f& circuitSize = volumeBBox.getDimension();
         const float isotropicScale = circuitSize.find_max();
 
         eyePos = ( eyePos * isotropicScale ) + circuitCenter;
@@ -102,8 +100,7 @@ public:
         modelView = maths::computeModelViewMatrix( rotation, eyePos );
 
         const FloatVector matrix( modelView.begin(), modelView.end() );
-        const zeq::Event& event = zeq::hbp::serializeCamera( matrix );
-        _publisher.publish( event );
+        _publisher.publish( zeq::hbp::serializeCamera( matrix ));
     }
 
     void onRequest( const zeq::Event& event )

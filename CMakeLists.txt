@@ -19,9 +19,9 @@ include(GitExternal)
 include(SubProject)
 
 set(VERSION_MAJOR "0")
-set(VERSION_MINOR "2")
+set(VERSION_MINOR "3")
 set(VERSION_PATCH "0")
-set(VERSION_ABI 1) # OFF or ABI version
+set(VERSION_ABI 2) # OFF or ABI version
 
 set(PROJECT_namespace livre)
 set(PROJECT_INCLUDE_NAME livre/core)
