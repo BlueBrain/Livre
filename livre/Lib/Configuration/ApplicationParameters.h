@@ -66,7 +66,7 @@ struct ApplicationParameters : public Parameters
 
 protected:
 
-    virtual void initializeParameters_( );
+    virtual void initialize_( );
 };
 
 }

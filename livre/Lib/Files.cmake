@@ -31,6 +31,10 @@ set(LIVRELIB_PUBLIC_HEADERS
   Visitor/DFSTraversal.h
   Visitor/LODSelectionVisitor.h)
 
+if(RESTCONNECTOR_FOUND)
+  list(APPEND LIVRELIB_PUBLIC_HEADERS Configuration/RESTParameters.h)
+endif()
+
 set(LIVRELIB_SOURCES
   Algorithm/LODFrustum.cpp
   Algorithm/Optimizer.cpp
@@ -55,6 +59,10 @@ set(LIVRELIB_SOURCES
   Visitor/BFSTraversal.cpp
   Visitor/DFSTraversal.cpp
   Visitor/LODSelectionVisitor.cpp)
+
+if(RESTCONNECTOR_FOUND)
+  list(APPEND LIVRELIB_SOURCES Configuration/RESTParameters.cpp)
+endif()
 
 if(LIVRE_USE_REMOTE_DATASOURCE)
   flatbuffers_generate_c_headers(FBS

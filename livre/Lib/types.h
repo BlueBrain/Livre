@@ -36,6 +36,9 @@ class TextureUploadProcessor;
 struct ApplicationParameters;
 struct EFPrefetchAlgorithmParameters;
 struct VolumeRendererParameters;
+#ifdef LIVRE_USE_RESTCONNECTOR
+struct RESTParameters;
+#endif
 
 /** SmartPtr definitions */
 typedef boost::shared_ptr< VolumeRendererParameters > VolumeRendererParametersPtr;
@@ -43,6 +46,10 @@ typedef boost::shared_ptr< const VolumeRendererParameters > ConstVolumeRendererP
 
 typedef boost::shared_ptr< EFPrefetchAlgorithmParameters > EFPParametersPtr;
 typedef boost::shared_ptr< const EFPrefetchAlgorithmParameters > ConstEFPParametersPtr;
+#ifdef LIVRE_USE_RESTCONNECTOR
+typedef boost::shared_ptr< RESTParameters > RESTParametersPtr;
+typedef boost::shared_ptr< const RESTParameters > ConstRESTParametersPtr;
+#endif
 
 typedef boost::shared_ptr< TextureCache > TextureCachePtr;
 typedef boost::shared_ptr< DataUploadProcessor > DataUploadProcessorPtr;

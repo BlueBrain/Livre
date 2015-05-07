@@ -40,6 +40,12 @@
 #  include <zeq/hbp/hbp.h>
 #endif
 
+#ifdef LIVRE_USE_RESTCONNECTOR
+#  include <restconnector/RestConnector.h>
+static const std::string PUBLISHER_SCHEMA_SUFFIX = "resp://";
+static const std::string SUBSCRIBER_SCHEMA_SUFFIX = "cmd://";
+#endif
+
 #include <eq/eq.h>
 #include <lunchbox/uri.h>
 #include <boost/bind.hpp>
@@ -52,6 +58,7 @@ namespace
 {
 #ifdef LIVRE_USE_ZEQ
 typedef boost::shared_ptr< zeq::Subscriber > SubscriberPtr;
+typedef boost::shared_ptr< zeq::Publisher > PublisherPtr;
 typedef std::vector< SubscriberPtr > Subscribers;
 #endif
 }
@@ -68,10 +75,9 @@ public:
         , volumeBBox( Boxf::makeUnitBox( ))
 #ifdef LIVRE_USE_ZEQ
         , _publisher( lunchbox::URI( "hbp://" ))
-        , _rcPublisher( lunchbox::URI( "restresp://" ))
+        , _vwsPublisher()
 #endif
-    {
-    }
+    {}
 
     livre::Config* config;
     eq::Canvas* currentCanvas;
@@ -125,7 +131,11 @@ public:
             vocabulary.push_back( zeq::EventDescriptor( zeq::vocabulary::EXIT, zeq::vocabulary::EVENT_EXIT,
                                                         zeq::vocabulary::SCHEMA_EXIT, zeq::PUBLISHER ) );
             const zeq::Event& vocEvent = zeq::vocabulary::serializeVocabulary( vocabulary );
-            _rcPublisher.publish( vocEvent );
+            _vwsPublisher->publish( vocEvent );
+        }
+        else if( eventType == zeq::vocabulary::EVENT_EXIT )
+        {
+            onExit();
         }
     }
 
@@ -176,18 +186,21 @@ public:
 
     void publishExitedEvent()
     {
-        _rcPublisher.publish( zeq::Event( zeq::vocabulary::EVENT_EXIT ));
+        _vwsPublisher->publish( zeq::Event( zeq::vocabulary::EVENT_EXIT ));
     }
 
-    void onExit( const zeq::Event& )
+    void onExit()
     {
         config->stopRunning();
     }
 
     Subscribers subscribers;
     zeq::Publisher _publisher;
-    zeq::Publisher _rcPublisher;
     lunchbox::Clock _heartbeatClock;
+    PublisherPtr _vwsPublisher;
+#ifdef LIVRE_USE_RESTCONNECTOR
+    boost::shared_ptr< restconnector::RestConnector > _restConnector;
+#endif
 #endif
 };
 }
@@ -238,6 +251,23 @@ void Config::resetCamera( )
 
 bool Config::init()
 {
+#ifdef LIVRE_USE_RESTCONNECTOR
+    const std::string publisherSchema = _impl->framedata.getRESTParameters()->zeqSchema
+                                        + PUBLISHER_SCHEMA_SUFFIX;
+
+    _impl->_vwsPublisher.reset( new zeq::Publisher( lunchbox::URI( publisherSchema ) ) );
+
+    if( _impl->framedata.getRESTParameters()->useRESTConnector )
+    {
+        _impl->_restConnector.reset( new restconnector::RestConnector(
+                                            _impl->framedata.getRESTParameters()->hostName,
+                                            _impl->framedata.getRESTParameters()->port ) );
+        _impl->_restConnector->run(  _impl->framedata.getRESTParameters()->zeqSchema );
+    }
+#else
+    _impl->_vwsPublisher.reset( new zeq::Publisher( lunchbox::URI( "vwsresp://" ) ) );
+#endif
+
     resetCamera();
     initializeEvents_();
     _impl->framedata.registerObjects();
@@ -267,19 +297,20 @@ bool Config::init()
     subscriber->registerHandler( zeq::hbp::EVENT_LOOKUPTABLE1D,
                                  boost::bind( &detail::Config::onLookupTable1D,
                                               _impl, _1 ));
-
-    SubscriberPtr rcSubscriber( new zeq::Subscriber(
-                                    lunchbox::URI( "restcmd://" )));
-    _impl->subscribers.push_back( rcSubscriber );
+#ifdef LIVRE_USE_RESTCONNECTOR
+    const std::string subscriberSchema = _impl->framedata.getRESTParameters()->zeqSchema
+                                         + SUBSCRIBER_SCHEMA_SUFFIX;
+    SubscriberPtr vwsSubscriber( new zeq::Subscriber( lunchbox::URI( subscriberSchema ) ) );
+#else
+    SubscriberPtr vwsSubscriber( new zeq::Subscriber( lunchbox::URI( "vwscmd://" ) ) );
+#endif
+    _impl->subscribers.push_back( vwsSubscriber );
     // TODO: Define other zeq event
-    rcSubscriber->registerHandler( zeq::hbp::EVENT_CAMERA,
+    vwsSubscriber->registerHandler( zeq::hbp::EVENT_CAMERA,
                                    boost::bind( &detail::Config::onCamera,
                                                 _impl, _1 ));
-    rcSubscriber->registerHandler( zeq::vocabulary::EVENT_REQUEST,
+    vwsSubscriber->registerHandler( zeq::vocabulary::EVENT_REQUEST,
                                    boost::bind( &detail::Config::onRequest,
-                                                _impl, _1 ));
-    rcSubscriber->registerHandler( zeq::vocabulary::EVENT_EXIT,
-                                   boost::bind( &detail::Config::onExit,
                                                 _impl, _1 ));
 #endif
     return true;
@@ -293,7 +324,7 @@ uint32_t Config::startFrame( )
     if( _impl->_heartbeatClock.getTimef() >= DEFAULT_HEARTBEAT_TIME )
     {
         _impl->_heartbeatClock.reset();
-        _impl->_rcPublisher.publish( zeq::Event( zeq::vocabulary::EVENT_HEARTBEAT ) );
+        _impl->_vwsPublisher->publish( zeq::Event( zeq::vocabulary::EVENT_HEARTBEAT ) );
     }
 #endif
     return eq::Config::startFrame( version );
@@ -489,7 +520,7 @@ bool Config::handleEvent( eq::EventICommand command )
 
             const zeq::hbp::data::ImageJPEG image( dataSize, dataPtr );
             const zeq::Event& image_event = zeq::hbp::serializeImageJPEG( image );
-            _impl->_rcPublisher.publish( image_event );
+            _impl->_vwsPublisher->publish( image_event );
             return false;
         }
 #endif

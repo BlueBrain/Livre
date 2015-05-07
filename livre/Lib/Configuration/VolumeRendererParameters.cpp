@@ -22,11 +22,11 @@
 namespace livre
 {
 
-const char *SCREENSPACEERROR_PARAM = "sse";
-const char *DATACACHEMEM_PARAM = "datacachemem";
-const char *TEXTUREDATACACHEMEM_PARAM = "texturedatacachemem";
-const char *TEXTURECACHEMEM_PARAM = "texturecachemem";
-const char *MAXRENDERMEM_PARAM = "maxrendermem";
+const std::string SCREENSPACEERROR_PARAM = "sse";
+const std::string DATACACHEMEM_PARAM = "datacachemem";
+const std::string TEXTUREDATACACHEMEM_PARAM = "texturedatacachemem";
+const std::string TEXTURECACHEMEM_PARAM = "texturecachemem";
+const std::string MAXRENDERMEM_PARAM = "maxrendermem";
 
 VolumeRendererParameters::VolumeRendererParameters()
     : Parameters( "Volume Renderer Parameters" ),
@@ -93,7 +93,7 @@ VolumeRendererParameters &VolumeRendererParameters::operator=(
     return *this;
 }
 
-void VolumeRendererParameters::initializeParameters_()
+void VolumeRendererParameters::initialize_()
 {
     renderStrategy = RS_ANY_FRAME;
     configuration_.getValue( SCREENSPACEERROR_PARAM, screenSpaceError );
