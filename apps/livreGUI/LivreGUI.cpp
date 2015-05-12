@@ -22,7 +22,7 @@
 #include <livreGUI/AppSettings.h>
 #include <livreGUI/Editor/TransferFunctionEditor.h>
 
-#include <QtGui/QApplication>
+#include <QApplication>
 #include <QDesktopWidget>
 #include <QMainWindow>
 

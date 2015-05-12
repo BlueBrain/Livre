@@ -10,9 +10,7 @@ set(CPACK_DEBIAN_PACKAGE_DEPENDS "libstdc++6,
                                   libboost-program_options,
                                   libboost-date-time,
                                   libboost-thread,
-                                  libqt4-core,
-                                  libqt4-gui,
-                                  libqt4-opengl,
+                                  qtbase5-dev,
                                   equalizer,
                                   tuvok")
 

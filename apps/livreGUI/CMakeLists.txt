@@ -48,8 +48,7 @@ list(APPEND CPPCHECK_EXTRA_ARGS
   --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/Editor/moc_TransferFunctionEditor.cxx
   --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/moc_MainWindow.cxx)
 
-include(${QT_USE_FILE})
 add_definitions(${QT_DEFINITIONS} "-DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED" )
-set(LIVREGUI_LINK_LIBRARIES LivreCore LivreEq ${QT_LIBRARIES})
+set(LIVREGUI_LINK_LIBRARIES LivreCore LivreEq ${Qt5Widgets_LIBRARIES})
 
 common_application(livreGUI MACOSX_BUNDLE)
