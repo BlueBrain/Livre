@@ -28,7 +28,7 @@
 #include <livre/Lib/Configuration/ApplicationParameters.h>
 #include <livre/Lib/Configuration/EFPrefetchAlgorithmParameters.h>
 #include <livre/Lib/Configuration/VolumeRendererParameters.h>
-#ifdef LIVRE_USE_RESTCONNECTOR
+#ifdef LIVRE_USE_RESTBRIDGE
 #  include <livre/Lib/Configuration/RESTParameters.h>
 #endif
 
@@ -82,7 +82,7 @@ private:
     ApplicationParameters _applicationParameters;
     VolumeRendererParameters _rendererParameters;
     EFPrefetchAlgorithmParameters _prefetchParameters;
-#ifdef LIVRE_USE_RESTCONNECTOR
+#ifdef LIVRE_USE_RESTBRIDGE
     RESTParameters _restParameters;
 #endif
 
