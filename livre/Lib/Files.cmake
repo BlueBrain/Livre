@@ -31,7 +31,7 @@ set(LIVRELIB_PUBLIC_HEADERS
   Visitor/DFSTraversal.h
   Visitor/LODSelectionVisitor.h)
 
-if(RESTCONNECTOR_FOUND)
+if(RESTBRIDGE_FOUND)
   list(APPEND LIVRELIB_PUBLIC_HEADERS Configuration/RESTParameters.h)
 endif()
 
@@ -60,7 +60,7 @@ set(LIVRELIB_SOURCES
   Visitor/DFSTraversal.cpp
   Visitor/LODSelectionVisitor.cpp)
 
-if(RESTCONNECTOR_FOUND)
+if(RESTBRIDGE_FOUND)
   list(APPEND LIVRELIB_SOURCES Configuration/RESTParameters.cpp)
 endif()
 

@@ -36,7 +36,7 @@ enum SerializationMapIds
     SMI_VOLUME_SETTINGS,
     SMI_VR_PARAMETERS,
     SMI_EFP_PARAMETERS
-#ifdef LIVRE_USE_RESTCONNECTOR
+#ifdef LIVRE_USE_RESTBRIDGE
     ,SMI_REST_PARAMETERS
 #endif
 };
@@ -61,7 +61,7 @@ public:
     void setup( const VolumeRendererParameters& rendererParams,
                 const EFPrefetchAlgorithmParameters& prefetchParams );
 
-#ifdef LIVRE_USE_RESTCONNECTOR
+#ifdef LIVRE_USE_RESTBRIDGE
     void setup( const VolumeRendererParameters& rendererParams,
                 const EFPrefetchAlgorithmParameters& prefetchParams,
                 const RESTParameters& networkParams );
@@ -168,7 +168,7 @@ public:
      */
     ConstEFPParametersPtr getEFPParameters() const;
 
-#ifdef LIVRE_USE_RESTCONNECTOR
+#ifdef LIVRE_USE_RESTBRIDGE
     /**
      * @return The RESTConeector's parameters.
      */
@@ -189,7 +189,7 @@ private:
 
     VolumeRendererParametersPtr vrParametersPtr_;
     EFPParametersPtr prefetchParametersPtr_;
-#ifdef LIVRE_USE_RESTCONNECTOR
+#ifdef LIVRE_USE_RESTBRIDGE
     RESTParametersPtr restParametersPtr_;
 #endif
 };

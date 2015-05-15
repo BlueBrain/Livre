@@ -27,16 +27,16 @@ namespace livre
 {
 
 /**
- * The RESTParameters struct keeps the parameters for RESTConnector.
+ * The RESTParameters struct keeps the parameters for RESTBridge.
  */
 struct RESTParameters : public Parameters
 {
     RESTParameters( );
 
-    std::string hostName; //<! hostname for RESTConnector.
-    uint16_t port; //<! port for RESTConnector.
-    std::string zeqSchema; //<! zeq schema for RESTConncetor and Livre
-    bool useRESTConnector;
+    std::string hostName; //<! hostname for RESTBridge.
+    uint16_t port; //<! port for RESTBridge.
+    std::string zeqSchema; //<! zeq schema for RESTBridge and Livre
+    bool useRESTBridge;
 
     /**
      * De-serializes the object from input stream.

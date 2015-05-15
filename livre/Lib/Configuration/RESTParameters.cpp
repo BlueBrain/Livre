@@ -34,20 +34,20 @@ RESTParameters::RESTParameters()
     , hostName( "localhost" )
     , port( 4020 )
     , zeqSchema( "rest" )
-    , useRESTConnector( false )
+    , useRESTBridge( false )
 {
     configuration_.addDescription( configGroupName_, HOSTNAME_PARAM,
-                                   "RESTConnector's http hostname",
+                                   "RESTBridge's http hostname",
                                    hostName );
     configuration_.addDescription( configGroupName_, PORT_PARAM,
-                                   "RESTConnector's http port",
+                                   "RESTBridge's http port",
                                    port );
     configuration_.addDescription( configGroupName_, ZEQSCHEMA_PARAM,
-                                   "RESTConnector's internal zeq schema",
+                                   "RESTBridge's internal zeq schema",
                                    zeqSchema );
     configuration_.addDescription( configGroupName_, USEREST_PARAM,
-                                   "Use RESTConnector",
-                                   useRESTConnector );
+                                   "Use RESTBridge",
+                                   useRESTBridge );
 }
 
 void RESTParameters::deserialize( co::DataIStream &is, const uint64_t dirtyBits LB_UNUSED )
@@ -55,7 +55,7 @@ void RESTParameters::deserialize( co::DataIStream &is, const uint64_t dirtyBits 
     is >> hostName
        >> port
        >> zeqSchema
-       >> useRESTConnector;
+       >> useRESTBridge;
 }
 
 void RESTParameters::serialize( co::DataOStream &os, const uint64_t dirtyBits LB_UNUSED )
@@ -63,7 +63,7 @@ void RESTParameters::serialize( co::DataOStream &os, const uint64_t dirtyBits LB
     os << hostName
        << port
        << zeqSchema
-       << useRESTConnector;
+       << useRESTBridge;
 }
 
 RESTParameters &RESTParameters::operator=( const RESTParameters &parameters )
@@ -71,7 +71,7 @@ RESTParameters &RESTParameters::operator=( const RESTParameters &parameters )
     hostName = parameters.hostName;
     port = parameters.port;
     zeqSchema = parameters.zeqSchema;
-    useRESTConnector = parameters.useRESTConnector;
+    useRESTBridge = parameters.useRESTBridge;
 
     return *this;
 }
@@ -81,7 +81,7 @@ void RESTParameters::initialize_()
     configuration_.getValue( HOSTNAME_PARAM, hostName );
     configuration_.getValue( PORT_PARAM, port );
     configuration_.getValue( ZEQSCHEMA_PARAM, zeqSchema );
-    configuration_.getValue( USEREST_PARAM, useRESTConnector );
+    configuration_.getValue( USEREST_PARAM, useRESTBridge );
 }
 
 }

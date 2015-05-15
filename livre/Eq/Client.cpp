@@ -90,7 +90,7 @@ bool Client::_parseArguments( const int32_t argc, char **argv )
         return false;
     }
 
-#ifdef LIVRE_USE_RESTCONNECTOR
+#ifdef LIVRE_USE_RESTBRIDGE
     if( !_restParameters.initialize( argc, argv ))
     {
         LBERROR << "Error parsing command line arguments" << std::endl;
@@ -109,7 +109,7 @@ std::string Client::getHelp()
     VolumeRendererParameters vrParameters;
     EFPrefetchAlgorithmParameters prefetchParameters;
     ApplicationParameters applicationParameters;
-#ifdef LIVRE_USE_RESTCONNECTOR
+#ifdef LIVRE_USE_RESTBRIDGE
     RESTParameters restParameters;
 #endif
 
@@ -117,7 +117,7 @@ std::string Client::getHelp()
     conf.addDescription( vrParameters.getConfiguration( ));
     conf.addDescription( prefetchParameters.getConfiguration( ));
     conf.addDescription( applicationParameters.getConfiguration( ));
-#ifdef LIVRE_USE_RESTCONNECTOR
+#ifdef LIVRE_USE_RESTBRIDGE
     conf.addDescription( restParameters.getConfiguration( ));
 #endif
 
@@ -166,7 +166,7 @@ int Client::run()
     }
 
     FrameData& frameData = config->getFrameData();
-#ifdef LIVRE_USE_RESTCONNECTOR
+#ifdef LIVRE_USE_RESTBRIDGE
     frameData.setup( _rendererParameters, _prefetchParameters, _restParameters );
 #else
     frameData.setup( _rendererParameters, _prefetchParameters );

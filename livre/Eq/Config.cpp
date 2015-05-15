@@ -40,8 +40,8 @@
 #  include <zeq/hbp/hbp.h>
 #endif
 
-#ifdef LIVRE_USE_RESTCONNECTOR
-#  include <restconnector/RestConnector.h>
+#ifdef LIVRE_USE_RESTBRIDGE
+#  include <restbridge/RestBridge.h>
 static const std::string PUBLISHER_SCHEMA_SUFFIX = "resp://";
 static const std::string SUBSCRIBER_SCHEMA_SUFFIX = "cmd://";
 #endif
@@ -195,8 +195,8 @@ public:
     zeq::Publisher _publisher;
     lunchbox::Clock _heartbeatClock;
     PublisherPtr _vwsPublisher;
-#ifdef LIVRE_USE_RESTCONNECTOR
-    boost::shared_ptr< restconnector::RestConnector > _restConnector;
+#ifdef LIVRE_USE_RESTBRIDGE
+    boost::shared_ptr< restbridge::RestBridge > _restBridge;
 #endif
 #endif
 };
@@ -248,18 +248,18 @@ void Config::resetCamera( )
 
 bool Config::init()
 {
-#ifdef LIVRE_USE_RESTCONNECTOR
+#ifdef LIVRE_USE_RESTBRIDGE
     const std::string publisherSchema = _impl->framedata.getRESTParameters()->zeqSchema
                                         + PUBLISHER_SCHEMA_SUFFIX;
 
     _impl->_vwsPublisher.reset( new zeq::Publisher( lunchbox::URI( publisherSchema ) ) );
 
-    if( _impl->framedata.getRESTParameters()->useRESTConnector )
+    if( _impl->framedata.getRESTParameters()->useRESTBridge )
     {
-        _impl->_restConnector.reset( new restconnector::RestConnector(
+        _impl->_restBridge.reset( new restbridge::RestBridge(
                                             _impl->framedata.getRESTParameters()->hostName,
                                             _impl->framedata.getRESTParameters()->port ) );
-        _impl->_restConnector->run(  _impl->framedata.getRESTParameters()->zeqSchema );
+        _impl->_restBridge->run(  _impl->framedata.getRESTParameters()->zeqSchema );
     }
 #else
     _impl->_vwsPublisher.reset( new zeq::Publisher( lunchbox::URI( "vwsresp://" ) ) );
@@ -294,7 +294,7 @@ bool Config::init()
     subscriber->registerHandler( zeq::hbp::EVENT_LOOKUPTABLE1D,
                                  boost::bind( &detail::Config::onLookupTable1D,
                                               _impl, _1 ));
-#ifdef LIVRE_USE_RESTCONNECTOR
+#ifdef LIVRE_USE_RESTBRIDGE
     const std::string subscriberSchema = _impl->framedata.getRESTParameters()->zeqSchema
                                          + SUBSCRIBER_SCHEMA_SUFFIX;
     SubscriberPtr vwsSubscriber( new zeq::Subscriber( lunchbox::URI( subscriberSchema ) ) );
@@ -334,7 +334,7 @@ bool Config::exit()
     _impl->framedata.deregisterObjects();
     if( !deregisterFrameData_() )
         ret = false;
-#ifdef LIVRE_USE_RESTCONNECTOR
+#ifdef LIVRE_USE_RESTBRIDGE
     _impl->publishExitedEvent();
 #endif
 
