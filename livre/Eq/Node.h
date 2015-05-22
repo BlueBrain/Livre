@@ -26,7 +26,7 @@
 #include <livre/core/dashTypes.h>
 #include <livre/Lib/types.h>
 #include <livre/Eq/types.h>
-#include <eq/client/node.h>
+#include <eq/node.h>
 
 namespace livre
 {

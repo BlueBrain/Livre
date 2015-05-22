@@ -20,7 +20,7 @@
 #ifndef _eqTypesLivreEq_h_
 #define _eqTypesLivreEq_h_
 
-#include <eq/client/types.h>
+#include <eq/types.h>
 
 namespace livre
 {

@@ -22,7 +22,7 @@
 #ifndef _Client_h_
 #define _Client_h_
 
-#include <eq/client/client.h>
+#include <eq/client.h>
 
 #include <livre/Eq/types.h>
 #include <livre/Lib/Configuration/ApplicationParameters.h>

@@ -20,7 +20,7 @@
 #ifndef _FrameGrabber_h_
 #define _FrameGrabber_h_
 
-#include <eq/client/resultImageListener.h>
+#include <eq/resultImageListener.h>
 
 typedef void* tjhandle;
 

@@ -24,7 +24,7 @@
 #define _Config_h_
 
 #include <livre/Eq/types.h>
-#include <eq/client/config.h> // base class
+#include <eq/config.h> // base class
 
 namespace livre
 {

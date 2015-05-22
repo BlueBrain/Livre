@@ -20,7 +20,7 @@
 // Internal convenience header to include OpenGL
 //  Use only in .cpp files and do not install!
 
-#include <eq/client/gl.h>
+#include <eq/gl.h>
 #ifdef __APPLE__
 #  include <OpenGL/glu.h>
 #else

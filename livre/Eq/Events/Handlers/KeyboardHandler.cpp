@@ -26,7 +26,7 @@
 #include <livre/Eq/Events/EqEventInfo.h>
 #include <livre/Eq/Events/Handlers/KeyboardHandler.h>
 
-#include <eq/client/configEvent.h>
+#include <eq/configEvent.h>
 
 namespace livre
 {
