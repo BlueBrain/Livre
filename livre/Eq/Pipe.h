@@ -23,7 +23,7 @@
 #ifndef _Pipe_h_
 #define _Pipe_h_
 
-#include <eq/client/pipe.h>
+#include <eq/pipe.h>
 #include <livre/Eq/types.h>
 
 namespace livre

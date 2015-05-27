@@ -1,6 +1,6 @@
 
-/* Copyright (c) 2010-2011, Stefan Eilemann <eile@eyescale.ch>
- *                    2012, David Steiner   <steiner@ifi.uzh.ch>
+/* Copyright (c) 2010-2015, Stefan Eilemann <eile@eyescale.ch>
+ *                          David Steiner   <steiner@ifi.uzh.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <eq/client/global.h>
+#include <eq/global.h>
 
 #include <livre/Eq/Error.h>
 

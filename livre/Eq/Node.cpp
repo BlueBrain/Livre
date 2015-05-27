@@ -37,7 +37,7 @@
 #include <livre/core/Data/VolumeDataSource.h>
 
 #include <eq/eq.h>
-#include <eq/client/gl.h>
+#include <eq/gl.h>
 
 namespace livre
 {

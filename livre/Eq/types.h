@@ -22,7 +22,7 @@
 
 #include <livre/Lib/types.h>
 
-#include <eq/client/types.h>
+#include <eq/types.h>
 
 #include <lunchbox/refPtr.h>
 #include <boost/shared_ptr.hpp>

@@ -19,11 +19,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <eq/client/channel.h>
-#include <eq/client/frameData.h>
-#include <eq/client/compositor.h>
-#include <eq/client/image.h>
-#include <eq/client/gl.h>
+#include <eq/channel.h>
+#include <eq/frameData.h>
+#include <eq/compositor.h>
+#include <eq/image.h>
+#include <eq/gl.h>
 
 #include <livre/Eq/FrameData.h>
 #include <livre/Eq/Settings/FrameSettings.h>

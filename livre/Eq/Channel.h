@@ -22,8 +22,8 @@
 #ifndef _Channel_h_
 #define _Channel_h_
 
-#include <eq/client/channel.h>
-#include <eq/client/frame.h>
+#include <eq/channel.h>
+#include <eq/frame.h>
 #include <eq/fabric/range.h>
 
 #include <livre/core/types.h>

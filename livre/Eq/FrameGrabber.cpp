@@ -21,7 +21,7 @@
 #include <livre/Eq/Event.h>
 #include <livre/Eq/FrameGrabber.h>
 
-#include <eq/client/image.h>
+#include <eq/image.h>
 
 #ifdef LIVRE_USE_LIBJPEGTURBO
 #  include <turbojpeg.h>

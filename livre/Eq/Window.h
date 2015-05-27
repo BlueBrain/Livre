@@ -22,7 +22,7 @@
 #ifndef _Window_h_
 #define _Window_h_
 
-#include <eq/client/window.h>
+#include <eq/window.h>
 
 #include <livre/Eq/types.h>
 #include <livre/core/types.h>

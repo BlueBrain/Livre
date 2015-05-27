@@ -25,7 +25,7 @@
 #include <livre/core/types.h>
 
 #ifdef GL3_PROTOTYPES
-#  include <eq/client/gl.h>
+#  include <eq/gl.h>
 #endif
 
 namespace livre
