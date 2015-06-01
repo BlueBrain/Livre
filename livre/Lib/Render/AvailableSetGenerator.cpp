@@ -118,7 +118,7 @@ public:
           _notAvailableRenderNodeList( notAvailableRenderNodeList )
     {}
 
-    void visit( DashRenderNode& renderNode, VisitState& )
+    void visit( DashRenderNode& renderNode, VisitState& ) final
     {
         dash::NodePtr current = renderNode.getDashNode();
         while( current )
@@ -180,18 +180,17 @@ void AvailableSetGenerator::generateRenderingSet( const Frustum& viewFrustum,
                                         DashNodeVector& notAvailableRenderNodeList,
                                         RenderBricks& renderBrickList )
 {
-    DFSTraversal dfsTraverser_;
-    VisibleCollectorVisitor visibleSelector( _tree,
+    VisibleCollectorVisitor visibleSelector( getDashTree(),
                                              viewFrustum,
                                              _screenSpaceError,
                                              _windowHeight,
                                              allNodesList );
-    dfsTraverser_.traverse( _tree->getDataSource()->getVolumeInformation().rootNode,
+    DFSTraversal dfsTraverser_;
+    dfsTraverser_.traverse( getDashTree()->getDataSource()->getVolumeInformation().rootNode,
                             visibleSelector );
 
     NodeIdDashNodeMap nodeIdDashNodeMap;
-
-    LoadedTextureCollectVisitor collector( _tree,
+    LoadedTextureCollectVisitor collector( getDashTree(),
                                            nodeIdDashNodeMap,
                                            notAvailableRenderNodeList );
 
@@ -202,7 +201,8 @@ void AvailableSetGenerator::generateRenderingSet( const Frustum& viewFrustum,
     while( it != nodeIdDashNodeMap.end() )
     {
         DashRenderNode childNode( it->second );
-        if( !notAvailableRenderNodeList.empty() && hasParentInMap( childNode, nodeIdDashNodeMap ) )
+        if( !notAvailableRenderNodeList.empty() &&
+             hasParentInMap( childNode, nodeIdDashNodeMap ))
         {
             it = nodeIdDashNodeMap.erase( it );
         }

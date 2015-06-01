@@ -188,7 +188,7 @@ void TextureUploadProcessor::_loadData()
 void TextureUploadProcessor::runLoop_( )
 {
     if( _glWidgetPtr && getGLContext() &&
-            livre::GLContext::getCurrent() != glContextPtr_.get( ))
+        livre::GLContext::getCurrent() != glContextPtr_.get( ))
     {
         _glWidgetPtr->getGLContext()->shareContext( getGLContext( ));
         glContextPtr_->makeCurrent();
@@ -256,8 +256,8 @@ void TextureLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state 
             case LP_TEXTURE:
             {
                 DashRenderNode parentNode( getDashTree()->getParentNode( lodNode.getNodeId( )));
-                state.setVisitChild( !( !renderNode.isTextureRequested()
-                                        && parentNode.isTextureRequested( )));
+                state.setVisitChild( !( !renderNode.isTextureRequested() &&
+                                        parentNode.isTextureRequested( )));
                 break;
             }
         }

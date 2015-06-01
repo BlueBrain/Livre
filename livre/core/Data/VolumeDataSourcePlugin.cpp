@@ -20,12 +20,10 @@
 #include <livre/core/Data/VolumeDataSourcePlugin.h>
 #include <livre/core/Data/LODNode.h>
 
-#include <livre/core/Dash/DashRenderNode.h>
-
 namespace livre
 {
 
-ConstLODNodePtr VolumeDataSourcePlugin::getNodeFromNodeID( const NodeId nodeId ) const
+ConstLODNodePtr VolumeDataSourcePlugin::getNode( const NodeId nodeId ) const
 {
     NodeIDLODNodePtrMap::iterator it = _lodNodeMap.find( nodeId );
     if( it == _lodNodeMap.end( ) )

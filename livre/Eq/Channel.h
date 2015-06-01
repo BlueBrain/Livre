@@ -23,16 +23,6 @@
 #define _Channel_h_
 
 #include <eq/channel.h>
-#include <eq/frame.h>
-#include <eq/fabric/range.h>
-
-#include <livre/core/types.h>
-#include <livre/core/Render/Frustum.h>
-
-#include <livre/Eq/eqTypes.h>
-#include <livre/Eq/types.h>
-
-#include <livre/Eq/FrameGrabber.h>
 
 namespace livre
 {
@@ -48,28 +38,25 @@ class Channel;
 class Channel : public eq::Channel
 {
 public:
-
     /**
      * @param parent Parent window.
      */
     Channel( eq::Window* parent );
 
-    virtual ~Channel();
+    ~Channel();
 
 private:
-
     bool configInit( const eq::uint128_t& initId ) final;
     bool configExit() final;
 
     void frameDraw( const eq::uint128_t& frameId ) final;
     void frameFinish( const eq::uint128_t&, const uint32_t ) final;
-    void frameViewStart( const uint128_t& frameId ) final;
+    void frameViewStart( const eq::uint128_t& frameId ) final;
     void frameViewFinish( const eq::uint128_t &frameID ) final;
     void frameAssemble( const eq::uint128_t&, const eq::Frames& ) final;
     void frameReadback( const eq::uint128_t&, const eq::Frames& ) final;
 
     detail::Channel* _impl;
-
 };
 
 }

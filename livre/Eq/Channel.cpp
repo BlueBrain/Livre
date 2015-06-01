@@ -37,9 +37,9 @@
 #include <livre/Eq/Settings/RenderSettings.h>
 #include <livre/Eq/Render/EqContext.h>
 #include <livre/Eq/Render/RayCastRenderer.h>
+#include <livre/Eq/FrameGrabber.h>
 
 #include <livre/Lib/Configuration/ApplicationParameters.h>
-#include <livre/core/DashPipeline/DashConnection.h>
 #include <livre/core/DashPipeline/DashProcessorOutput.h>
 #include <livre/core/DashPipeline/DashProcessorInput.h>
 #include <livre/Lib/Uploaders/TextureUploadProcessor.h>
@@ -74,6 +74,7 @@ public:
 
     const Frustum& getFrustum() const final;
 
+private:
     Channel* const _channel;
 };
 
@@ -128,7 +129,7 @@ class Channel
 {
 public:
 
-    Channel( livre::Channel *channel )
+    Channel( livre::Channel* channel )
           : _renderViewPtr( new EqRenderView( this ))
           , _glWidgetPtr( new EqGlWidget( channel ))
           , _channel( channel )
@@ -167,8 +168,7 @@ public:
         livre::Pipe* pipe = static_cast< livre::Pipe* >( _channel->getPipe( ));
         Window* wnd = static_cast< Window* >( _channel->getWindow( ));
 
-        GLContextPtr currentGlContext( new EqContext( wnd ));
-        _glWidgetPtr->setGLContext( currentGlContext );
+        _glWidgetPtr->setGLContext( GLContextPtr( new EqContext( wnd )));
 
         TextureUploadProcessorPtr textureUploadProcessor =
             pipe->getTextureUploadProcessor();
@@ -176,10 +176,9 @@ public:
         textureUploadProcessor->setGLWidget( _glWidgetPtr );
 
         DataUploadProcessorPtr dataUploadProcessor = pipe->getDataUploadProcessor();
-        dataUploadProcessor->setGLContext( GLContextPtr( new EqContext( wnd ) ) );
+        dataUploadProcessor->setGLContext( GLContextPtr( new EqContext( wnd )));
         dataUploadProcessor->setGLWidget( _glWidgetPtr );
     }
-
 
     const Frustum& initializeLivreFrustum()
     {
@@ -215,7 +214,6 @@ public:
         glScissor( 0, 0, channelPvp.w, channelPvp.h );
     }
 
-    // TODO : DB load balancing.
     void frameDraw( const eq::uint128_t& )
     {
         applyCamera();
@@ -269,7 +267,7 @@ public:
                 dbFrames.push_back( frame );
                 zoom = frame->getZoom( );
 
-                BOOST_FOREACH( const eq::Image *image, frame->getImages() )
+                BOOST_FOREACH( const eq::Image* image, frame->getImages( ))
                 {
                     const eq::PixelViewport imagePVP = image->getPixelViewport( ) +
                             frame->getOffset( );
@@ -365,7 +363,7 @@ public:
         pipe->getProcessor()->getProcessorOutput_()->commit( 0 );
     }
 
-    void frameReadback( const eq::Frames& frames )
+    void frameReadback( const eq::Frames& frames ) const
     {
         // Drop depth buffer flag from all output frames
         BOOST_FOREACH( eq::Frame* frame, frames )
@@ -377,7 +375,7 @@ public:
 
     bool composeOnly() const
     {
-        return ( _drawRange == eq::Range::ALL );
+        return _drawRange == eq::Range::ALL;
     }
 
     void frameAssemble( const eq::Frames& frames )
@@ -419,9 +417,7 @@ public:
 
         // check if current frame is in proper position, read back if not
         if( !composeOnly( ))
-        {
             composeFrames( coveredPVP, zoom, data, dbFrames );
-        }
 
         // blend DB frames in order
         try
@@ -440,7 +436,7 @@ public:
     ViewPtr _renderViewPtr;
     GLWidgetPtr _glWidgetPtr;
     FrameGrabber _frameGrabber;
-    livre::Channel* _channel;
+    livre::Channel* const _channel;
 };
 
 const Frustum& EqRenderView::getFrustum() const { return _channel->initializeLivreFrustum(); }
@@ -452,7 +448,6 @@ Channel::Channel( eq::Window* parent )
         , _impl( new detail::Channel( this ))
 
 {
-     LBASSERT( parent );
 }
 
 Channel::~Channel()
@@ -506,7 +501,7 @@ void Channel::frameAssemble( const eq::uint128_t&, const eq::Frames& frames )
     applyViewport();
     setupAssemblyState();
     _impl->frameAssemble( frames );
-    resetAssemblyState( );
+    resetAssemblyState();
 }
 
 void Channel::frameReadback( const eq::uint128_t& frameId,

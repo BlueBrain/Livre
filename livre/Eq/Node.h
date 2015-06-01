@@ -1,7 +1,7 @@
 
-/* Copyright (c) 2007-2010, Stefan Eilemann <eile@equalizergraphics.com>
- *                    2011, Maxim Makhinya  <maxmah@gmail.com>
- *                    2013, Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2007-2015, Stefan Eilemann <eile@equalizergraphics.com>
+ *                          Maxim Makhinya  <maxmah@gmail.com>
+ *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -23,9 +23,7 @@
 #define _Node_h_
 
 #include <livre/core/Dash/DashContextTrait.h>
-#include <livre/core/dashTypes.h>
 #include <livre/Lib/types.h>
-#include <livre/Eq/types.h>
 #include <eq/node.h>
 
 namespace livre
@@ -66,17 +64,13 @@ public:
     DashTreePtr getDashTree( );
 
 private:
-
     bool configInit( const eq::uint128_t& initId ) final;
     void frameStart(  const eq::uint128_t& frameId,
                       const uint32_t frameNumber ) final;
     bool configExit() final;
 
     detail::Node* _impl;
-
-
 };
-
 
 }
 

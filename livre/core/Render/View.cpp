@@ -55,7 +55,7 @@ const Viewportf& View::getViewport() const
 }
 
 void View::render( const GLWidget& widget,
-                   RenderingSetGenerator& renderListGenerator )
+                   RenderingSetGenerator& renderSetGenerator )
 {
     if( !rendererPtr_ )
         return ;
@@ -65,7 +65,7 @@ void View::render( const GLWidget& widget,
 
     FrameInfo frameInfo( currentFrustum_, previousFrustum_ );
 
-    renderListGenerator.generateRenderingSet( currentFrustum_,
+    renderSetGenerator.generateRenderingSet( currentFrustum_,
                                               frameInfo.allNodeList,
                                               frameInfo.renderNodeList,
                                               frameInfo.notAvailableRenderNodeList,
@@ -83,7 +83,7 @@ void View::render( const GLWidget& widget,
     Frustum newFrustum = currentFrustum_;
 
     const bool continueRendering = onPreRender_( widget, frameInfo,
-                                                 renderListGenerator,
+                                                 renderSetGenerator,
                                                  newFrustum );
     if( continueRendering )
     {
@@ -94,22 +94,7 @@ void View::render( const GLWidget& widget,
                                   frameInfo.renderBrickList );
     }
 
-    onPostRender_( continueRendering, widget, frameInfo, renderListGenerator );
-}
-
-bool View::onPreRender_( const GLWidget& glWidget LB_UNUSED,
-                         const FrameInfo& frameInfo LB_UNUSED,
-                         RenderingSetGenerator& renderListGenerator LB_UNUSED,
-                         Frustum& modifiedFrustum LB_UNUSED )
-{
-    return true;
-}
-
-void View::onPostRender_( const bool rendered LB_UNUSED,
-                          const GLWidget& glWidget LB_UNUSED,
-                          const FrameInfo& frameInfo LB_UNUSED,
-                          RenderingSetGenerator& renderListGenerator LB_UNUSED )
-{
+    onPostRender_( continueRendering, widget, frameInfo, renderSetGenerator );
 }
 
 FrameInfo::FrameInfo( const Frustum& cFrustum, const Frustum& pFrustum )

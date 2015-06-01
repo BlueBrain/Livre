@@ -1,8 +1,8 @@
 
-/* Copyright (c) 2006-2016, Stefan Eilemann <eile@equalizergraphics.com>
- *               2011-2016, Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
- *               2007-2011, Maxim Makhinya  <maxmah@gmail.com>
- *               2012,      David Steiner   <steiner@ifi.uzh.ch>
+/* Copyright (c) 2012-2015, Stefan Eilemann <eile@equalizergraphics.com>
+ *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
+ *                          Maxim Makhinya  <maxmah@gmail.com>
+ *                          David Steiner   <steiner@ifi.uzh.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -52,44 +52,49 @@ namespace detail
 class Pipe
 {
 public:
-    Pipe()
-        : _dashProcessorPtr( new DashProcessor( )),
-          _frameDataPtr( new FrameData( )) {}
+    Pipe( livre::Pipe* pipe )
+        : _pipe( pipe )
+        , _dashProcessorPtr( new DashProcessor( ))
+        , _frameDataPtr( new FrameData( ))
+    {}
 
     void startUploadProcessors()
     {
         if( !_textureUploadProcessorPtr->isRunning( ))
-            _textureUploadProcessorPtr->start( );
+            _textureUploadProcessorPtr->start();
 
         if( !_dataUploadProcessorPtr->isRunning( ))
-            _dataUploadProcessorPtr->start( );
+            _dataUploadProcessorPtr->start();
     }
 
     void stopUploadProcessors()
     {
         // TO_EXIT was set as ThreadOp in Channel::configExit()
-        _dashProcessorPtr->getProcessorOutput_( )->commit( 0 );
+        _dashProcessorPtr->getProcessorOutput_()->commit( 0 );
         _textureUploadProcessorPtr->join();
         _dataUploadProcessorPtr->join();
     }
 
-    void mapFrameData( livre::Config* config, const eq::uint128_t& initId )
+    bool mapFrameData( const eq::uint128_t& initId )
     {
+        livre::Config* config = static_cast< livre::Config* >( _pipe->getConfig( ));
         _frameDataPtr->initialize( config );
-        _frameDataPtr->map( config, initId );
-        _frameDataPtr->mapObjects( );
+        if( !_frameDataPtr->map( config, initId ))
+            return false;
+        _frameDataPtr->mapObjects();
+        return true;
     }
 
-    void unmapFrameData( livre::Config* config )
+    void unmapFrameData()
     {
-        _frameDataPtr->unmapObjects( );
-        _frameDataPtr->unmap( config );
+        _frameDataPtr->unmapObjects();
+        _frameDataPtr->unmap( static_cast< livre::Config* >( _pipe->getConfig( )));
     }
 
     void initializeCaches()
     {
         _textureCachePtr->setMaximumMemory(
-                    _frameDataPtr->getVRParameters( )->maxTextureMemoryMB );
+                    _frameDataPtr->getVRParameters()->maxTextureMemoryMB );
     }
 
     void releaseCaches()
@@ -98,9 +103,9 @@ public:
         _textureCachePtr.reset();
     }
 
-    void initializePipelineProcessors( livre::Pipe* pipe )
+    void initializePipelineProcessors()
     {
-        livre::Node *node = static_cast< livre::Node *>( pipe->getNode( ));
+        livre::Node* node = static_cast< livre::Node* >( _pipe->getNode( ));
 
         _dashProcessorPtr->setDashContext( node->getDashTree()->createContext( ));
         _dataUploadProcessorPtr.reset( new DataUploadProcessor( node->getDashTree(),
@@ -119,8 +124,8 @@ public:
         stopUploadProcessors();
         _textureUploadProcessorPtr->setDashContext( DashContextPtr( ));
         _dataUploadProcessorPtr->setDashContext( DashContextPtr( ));
-        _textureUploadProcessorPtr.reset( );
-        _dataUploadProcessorPtr.reset( );
+        _textureUploadProcessorPtr.reset();
+        _dataUploadProcessorPtr.reset();
         _dashProcessorPtr->setDashContext( DashContextPtr( ));
     }
 
@@ -168,31 +173,33 @@ public:
     {
         _frameDataPtr->sync( frameId );
 
-        _dashProcessorPtr->getDashContext( )->setCurrent( );
+        _dashProcessorPtr->getDashContext()->setCurrent();
 
-        if( _dashProcessorPtr->getProcessorInput_( )->dataWaitingOnInput(
-                    CONNECTION_ID ) )
-            _dashProcessorPtr->getProcessorInput_( )->applyAll(
-                        CONNECTION_ID );
+        if( _dashProcessorPtr->getProcessorInput_()->dataWaitingOnInput( CONNECTION_ID ))
+            _dashProcessorPtr->getProcessorInput_()->applyAll( CONNECTION_ID );
     }
 
-    void configInit( livre::Pipe* pipe,
-                     const eq::uint128_t& initId )
+    bool configInit( const eq::uint128_t& initId )
     {
-        mapFrameData( static_cast<livre::Config*>( pipe->getConfig()), initId );
-        initializePipelineProcessors( pipe );
-        initializePipelineConnections( );
-        initializeCaches( );
+        if( !mapFrameData( initId ))
+            return false;
+        initializePipelineProcessors();
+        initializePipelineConnections();
+        initializeCaches();
+        return true;
     }
 
-    void configExit( livre::Config* config )
+    void configExit()
     {
+        if( !_dashProcessorPtr->getDashContext( ))
+            return;
         releaseCaches( );
         releasePipelineConnections( );
         releasePipelineProcessors( );
-        unmapFrameData( config );
+        unmapFrameData();
     }
 
+    livre::Pipe* const _pipe;
     TextureUploadProcessorPtr _textureUploadProcessorPtr;
     DataUploadProcessorPtr _dataUploadProcessorPtr;
     TextureCachePtr _textureCachePtr;
@@ -203,10 +210,9 @@ public:
 }
 
 Pipe::Pipe( eq::Node* parent )
-    : eq::Pipe( parent ),
-      _impl( new detail::Pipe())
+    : eq::Pipe( parent )
+    , _impl( new detail::Pipe( this ))
 {
-    LBASSERT( parent );
 }
 
 Pipe::~Pipe( )
@@ -214,7 +220,7 @@ Pipe::~Pipe( )
     delete _impl;
 }
 
-TextureUploadProcessorPtr Pipe::getTextureUploadProcessor( )
+TextureUploadProcessorPtr Pipe::getTextureUploadProcessor()
 {
     return _impl->_textureUploadProcessorPtr;
 }
@@ -239,7 +245,7 @@ DashProcessorPtr Pipe::getProcessor()
     return _impl->_dashProcessorPtr;
 }
 
-ConstDashProcessorPtr Pipe::getProcessor( ) const
+ConstDashProcessorPtr Pipe::getProcessor() const
 {
     return _impl->_dashProcessorPtr;
 }
@@ -255,17 +261,12 @@ bool Pipe::configInit( const eq::uint128_t& initId )
     if( !eq::Pipe::configInit( initId ))
         return false;
 
-    _impl->configInit( this, initId);
-    return true;
+    return _impl->configInit( initId );
 }
 
-bool Pipe::configExit( )
+bool Pipe::configExit()
 {
-    // If pipe is not configured, nothing to clean up.
-    if( !_impl->_dashProcessorPtr->getDashContext( ) )
-         return eq::Pipe::configExit( );
-
-    _impl->configExit( static_cast<livre::Config*>( getConfig( )));
+    _impl->configExit();
     return eq::Pipe::configExit();
 }
 

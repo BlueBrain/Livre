@@ -35,7 +35,7 @@ class GLWidget : public GLContextTrait
 public:
 
     void renderView( View* view,
-                     RenderingSetGenerator& renderListGenerator );
+                     RenderingSetGenerator& renderSetGenerator );
 
     virtual void setViewport( const View* view, Viewporti& viewport ) const;
 

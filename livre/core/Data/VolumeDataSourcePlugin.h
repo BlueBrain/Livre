@@ -49,7 +49,6 @@ private:
  * Interface for volume data sources.
  *
  * Implementations are responsible for filling the VolumeInformation.
- * Generates the dash tree from the volume.
  */
 class VolumeDataSourcePlugin : public boost::noncopyable
 {
@@ -91,7 +90,7 @@ public:
      * @param nodeId The nodeId to get the node for.
      * @return The LODNode for the ID or 0 if not found.
      */
-    ConstLODNodePtr getNodeFromNodeID( const NodeId nodeId ) const;
+    ConstLODNodePtr getNode( const NodeId nodeId ) const;
 
 protected:
     /**

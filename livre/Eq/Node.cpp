@@ -32,7 +32,6 @@
 #include <livre/Lib/Configuration/VolumeRendererParameters.h>
 #include <livre/Lib/Uploaders/DataUploadProcessor.h>
 #include <livre/core/Dash/DashTree.h>
-#include <livre/core/DashPipeline/DashConnection.h>
 #include <livre/core/DashPipeline/DashProcessorOutput.h>
 #include <livre/core/Data/VolumeDataSource.h>
 
@@ -48,6 +47,9 @@ namespace detail
 class Node
 {
 public:
+    Node( livre::Node* node )
+        : _config( static_cast< livre::Config* >( node->getConfig( )))
+    {}
 
     void initializeCaches()
     {
@@ -55,24 +57,28 @@ public:
         _textureDataCachePtr .reset( new livre::TextureDataCache( GL_UNSIGNED_BYTE ));
         _rawDataCachePtr->setDataSource( _dataSourcePtr );
 
+        ConstVolumeRendererParametersPtr vrRenderParametersPtr =
+                _config->getFrameData().getVRParameters();
         _rawDataCachePtr->setMaximumMemory(
-                        _vrRenderParametersPtr->maxDataMemoryMB );
+                        vrRenderParametersPtr->maxDataMemoryMB );
         _textureDataCachePtr->setMaximumMemory(
-                    _vrRenderParametersPtr->maxTextureDataMemoryMB );
+                    vrRenderParametersPtr->maxTextureDataMemoryMB );
     }
 
-    bool initializeVolume( livre::Config* config )
+    bool initializeVolume()
     {
         try
         {
-            const lunchbox::URI& uri = lunchbox::URI( _volumeSettingsPtr->getURI( ));
+            VolumeSettingsPtr volumeSettingsPtr =
+                    _config->getFrameData().getVolumeSettings();
+            const lunchbox::URI& uri = lunchbox::URI( volumeSettingsPtr->getURI( ));
             _dataSourcePtr.reset( new livre::VolumeDataSource( uri ));
-            _dashTreePtr.reset( new livre::DashTree( _dataSourcePtr ) );
+            _dashTreePtr.reset( new livre::DashTree( _dataSourcePtr ));
 
             // Inform application of real-world size for camera manipulations
             const livre::VolumeInformation& info =
                     _dataSourcePtr->getVolumeInformation();
-            config->sendEvent( VOLUME_BOUNDING_BOX ) << info.boundingBox;
+            _config->sendEvent( VOLUME_BOUNDING_BOX ) << info.boundingBox;
         }
         catch( const std::runtime_error& err )
         {
@@ -84,33 +90,34 @@ public:
         return true;
     }
 
-    bool configInit( livre::Config* config )
+    bool configInit()
     {
-        // All render data is static or multi-buffered, we can run asynchronously
-        _volumeSettingsPtr = config->getFrameData().getVolumeSettings();
-        _vrRenderParametersPtr = config->getFrameData().getVRParameters();
-
-        if( !initializeVolume( config ))
+        if( !initializeVolume( ))
             return false;
 
-        initializeCaches( );
+        initializeCaches();
         return true;
+    }
+
+    void configExit()
+    {
+        releaseCaches();
+        releaseVolume();
     }
 
     void releaseVolume()
     {
-        _dataSourcePtr.reset( );
-        _dashTreePtr.reset( );
+        _dataSourcePtr.reset();
+        _dashTreePtr.reset();
     }
 
     void releaseCaches()
     {
-        _textureDataCachePtr .reset();
+        _textureDataCachePtr.reset();
         _rawDataCachePtr.reset();
     }
 
-    VolumeSettingsPtr _volumeSettingsPtr;
-    ConstVolumeRendererParametersPtr _vrRenderParametersPtr;
+    livre::Config* const _config;
     RawDataCachePtr _rawDataCachePtr;
     TextureDataCachePtr _textureDataCachePtr;
     VolumeDataSourcePtr _dataSourcePtr;
@@ -121,7 +128,7 @@ public:
 
 Node::Node( eq::Config* parent )
     : eq::Node( parent )
-    , _impl( new detail::Node)
+    , _impl( new detail::Node( this ))
 {
 }
 
@@ -139,11 +146,26 @@ bool Node::configInit( const eq::uint128_t& initId )
     if( !eq::Node::configInit( initId ))
         return false;
 
-    Config *config = static_cast< Config *>( getConfig() );
     if( !isApplicationNode( ))
+    {
+        Config *config = static_cast< Config *>( getConfig() );
         config->mapFrameData( initId );
+    }
 
-    return _impl->configInit( config );
+    return _impl->configInit();
+}
+
+bool Node::configExit()
+{
+    _impl->configExit();
+
+    if( !isApplicationNode( ))
+    {
+        Config *config = static_cast< Config *>( getConfig() );
+        config->unmapFrameData();
+    }
+
+    return eq::Node::configExit();
 }
 
 RawDataCache& Node::getRawDataCache()
@@ -170,20 +192,6 @@ void Node::frameStart( const eq::uint128_t &frameId, const uint32_t frameNumber)
     }
 
     eq::Node::frameStart( frameId, frameNumber );
-}
-
-bool Node::configExit()
-{
-    _impl->releaseCaches();
-    _impl->releaseVolume();
-
-    if( !isApplicationNode() )
-    {
-        Config *config = static_cast< Config *>( getConfig() );
-        config->unmapFrameData();
-    }
-
-    return eq::Node::configExit();
 }
 
 }

@@ -75,8 +75,6 @@ private:
     bool configExit() final;
 
     detail::Pipe* _impl;
-
-
 };
 
 }

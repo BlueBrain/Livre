@@ -34,13 +34,12 @@ namespace livre
 class RenderingSetGenerator
 {
 public:
-
     /**
      * @param tree This parameter set the Dash Tree of Hierarchical Volume Data ( HVD ).
      */
-    RenderingSetGenerator( DashTreePtr tree );
+    explicit RenderingSetGenerator( DashTreePtr tree );
 
-    virtual ~RenderingSetGenerator( );
+    virtual ~RenderingSetGenerator();
 
     /**
      * Generates the rendering set according to the given frustum.
@@ -59,12 +58,10 @@ public:
     /**
      * @return Get dash tree.
      */
-    DashTreePtr getDashTree( );
+    DashTreePtr getDashTree();
 
-protected:
-
+private:
     DashTreePtr _tree;
-
 };
 
 }

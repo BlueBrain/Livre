@@ -79,21 +79,16 @@ public:
     /**
      * @return Returns the dash tree
      */
-    DashTreePtr getDashTree( );
+    DashTreePtr getDashTree();
 
 private:
-
-
-    void onVisitBegin( const NodeId& nodeId,
-                       const VisitState& state ) final;
-    void onVisitEnd( const NodeId& nodeId,
-                     const VisitState& state ) final;
+    void onVisitBegin( const NodeId& nodeId, const VisitState& state ) final;
+    void onVisitEnd( const NodeId& nodeId, const VisitState& state ) final;
     void onVisitChildrenBegin( const NodeId& nodeId,
                                const VisitState& state) final;
     void onVisitChildrenEnd( const NodeId& nodeId,
                              const VisitState& state ) final;
-    void visit( const NodeId& nodeId,
-                VisitState& state ) final;
+    void visit( const NodeId& nodeId, VisitState& state ) final;
 
     detail::RenderNodeVisitor* _impl;
 };

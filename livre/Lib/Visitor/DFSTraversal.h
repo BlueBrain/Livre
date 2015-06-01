@@ -63,7 +63,7 @@ public:
 
 private:
 
-    detail::DFSTraversal *_impl;
+    detail::DFSTraversal* _impl;
 };
 
 }

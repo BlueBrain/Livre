@@ -21,8 +21,6 @@
 #include <livre/core/DashPipeline/DashProcessorInput.h>
 #include <livre/core/DashPipeline/DashProcessorOutput.h>
 
-#include <dash/dash.h>
-
 namespace livre
 {
 
@@ -32,18 +30,12 @@ DashProcessor::DashProcessor()
 
 bool DashProcessor::onPreApply_( const uint32_t connection )
 {
-    if( !getProcessorInput_< DashProcessorInput >()->getConnection( connection ) )
-        return false;
-
-    return true;
+    return getProcessorInput_< DashProcessorInput >()->getConnection( connection ) != 0;
 }
 
 bool DashProcessor::onPreCommit_(const uint32_t connection)
 {
-    if( !getProcessorOutput_< DashProcessorOutput >()->getConnection( connection ) )
-        return false;
-
-    return true;
+    return getProcessorOutput_< DashProcessorOutput >()->getConnection( connection ) != 0;
 }
 
 void DashProcessor::onSetDashContext_()
@@ -54,7 +46,7 @@ void DashProcessor::onSetDashContext_()
 
 bool DashProcessor::initializeThreadRun_()
 {
-    if( !getDashContext().get( ))
+    if( !getDashContext( ))
         return false;
 
     getDashContext()->setCurrent();

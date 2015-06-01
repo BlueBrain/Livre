@@ -74,10 +74,7 @@ public:
     dash::NodePtr getDashNode( const NodeId& nodeId );
 
 private:
-
     detail::DashTree* _impl;
-
-
 };
 
 }

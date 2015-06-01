@@ -145,13 +145,7 @@ public:
     Vector3ui getBlockSize( const uint32_t level = 0 ) const
         { return _nodeId.getPosition() * (1u << level); }
 
-    /**
-     * @return the number of frames
-     */
-    uint32_t getNFrames() const { return _nodeId.getFrame(); }
-
 private:
-
     NodeId _nodeId;
 };
 
@@ -165,7 +159,7 @@ inline std::ostream& operator<<( std::ostream& os, const NodeId& nodeId )
 inline std::size_t hash_value( const NodeId& nodeId )
 {
    boost::hash<Identifier> hasher;
-   return hasher( nodeId.getId() ) ;
+   return hasher( nodeId.getId( ));
 }
 
 }

@@ -63,7 +63,7 @@ void RenderView::setParameters( ConstVolumeRendererParametersPtr volumeRendererP
 
 bool RenderView::onPreRender_( const GLWidget& /*widget*/,
                                const FrameInfo& frameInfo,
-                               RenderingSetGenerator& renderListGenerator,
+                               RenderingSetGenerator& renderSetGenerator,
                                Frustum& modifiedFrustum )
 {
     switch( volumeRendererParameters_.renderStrategy )
@@ -75,7 +75,7 @@ bool RenderView::onPreRender_( const GLWidget& /*widget*/,
         return true;
     case RS_ITERATED_FULL_FRAME:
         if( !frameInfo.notAvailableRenderNodeList.empty( ))
-            generateIteratedFrustum_( renderListGenerator,
+            generateIteratedFrustum_( renderSetGenerator,
                                       frameInfo.previousFrustum,
                                       frameInfo.currentFrustum,
                                       modifiedFrustum );
@@ -88,7 +88,7 @@ bool RenderView::onPreRender_( const GLWidget& /*widget*/,
 void RenderView::onPostRender_( const bool /*rendered*/,
                                 const GLWidget& widget,
                                 const FrameInfo& frameInfo,
-                                RenderingSetGenerator& renderListGenerator )
+                                RenderingSetGenerator& renderSetGenerator )
 {
     if( frameInfo.previousFrustum != frameInfo.currentFrustum )
          freeTextures_( frameInfo.renderNodeList );
@@ -97,10 +97,10 @@ void RenderView::onPostRender_( const bool /*rendered*/,
     widget.setViewport( this, pixelViewport );
 
     const uint32_t windowHeight = pixelViewport.getHeight();
-    generateRequest_( frameInfo.currentFrustum, renderListGenerator, windowHeight );
+    generateRequest_( frameInfo.currentFrustum, renderSetGenerator, windowHeight );
 }
 
-void RenderView::generateIteratedFrustum_( RenderingSetGenerator& renderListGenerator,
+void RenderView::generateIteratedFrustum_( RenderingSetGenerator& renderSetGenerator,
                                            const Frustum& previousFrustum,
                                            const Frustum& currentFrustum,
                                            Frustum& modifiedFrustum ) const
@@ -146,7 +146,7 @@ void RenderView::generateIteratedFrustum_( RenderingSetGenerator& renderListGene
         DashNodeVector allNodeList;
         DashNodeVector renderNodeList;
         DashNodeVector notAvailableRenderNodeList;
-        renderListGenerator.generateRenderingSet( iteratedFrustum,
+        renderSetGenerator.generateRenderingSet( iteratedFrustum,
                                                   allNodeList,
                                                   renderNodeList,
                                                   notAvailableRenderNodeList,
@@ -191,7 +191,7 @@ void RenderView::freeTextures_( const DashNodeVector& renderNodeList )
 }
 
 void RenderView::generateRequest_( const Frustum& currentFrustum,
-                                   RenderingSetGenerator& renderListGenerator,
+                                   RenderingSetGenerator& renderSetGenerator,
                                    const uint32_t windowHeight )
 {
 
@@ -200,7 +200,7 @@ void RenderView::generateRequest_( const Frustum& currentFrustum,
     distances.resize( PL_FAR + 1, frustumSurfaceDelta );
 
     const VolumeInformation& volumeInfo =
-            renderListGenerator.getDashTree()->getDataSource()->getVolumeInformation();
+            renderSetGenerator.getDashTree()->getDataSource()->getVolumeInformation();
 
     const float wsPerVoxel = volumeInfo.worldSpacePerVoxel;
     const float depth = volumeInfo.rootNode.getDepth();
@@ -214,7 +214,7 @@ void RenderView::generateRequest_( const Frustum& currentFrustum,
                                     levelZeroNodeSize,
                                     depth,
                                     distances );
-    DashTreePtr dashTree = renderListGenerator.getDashTree();
+    DashTreePtr dashTree = renderSetGenerator.getDashTree();
     LODSelectionVisitor renderVisitor( dashTree, renderFrustum, DRT_VISIBILE );
 
     dfsTraverser_.traverse( volumeInfo.rootNode, renderVisitor );

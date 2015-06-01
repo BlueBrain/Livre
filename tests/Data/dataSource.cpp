@@ -55,7 +55,7 @@ void _testDataSource( const std::string& uriStr )
     const livre::NodeId firstChildNodeId =
         parentNodeId.getChildren().front();
 
-    livre::ConstLODNodePtr lodNode = source.getNodeFromNodeID(firstChildNodeId);
+    livre::ConstLODNodePtr lodNode = source.getNode(firstChildNodeId);
     BOOST_CHECK( lodNode );
     BOOST_CHECK( lodNode->getVoxelBox().getDimension() =
                  livre::Vector3ui( BLOCK_SIZE ));

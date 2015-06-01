@@ -1,5 +1,5 @@
 /* Copyright (c) 2011-2015, EPFL/Blue Brain Project
- *                         Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -26,7 +26,7 @@ namespace livre
 {
 
 /**
- * The AvailableSetGenerator class, generates a rendering set according to the availability
+ * The AvailableSetGenerator class generates a rendering set according to the availability
  * of the textures.
  */
 class AvailableSetGenerator : public RenderingSetGenerator

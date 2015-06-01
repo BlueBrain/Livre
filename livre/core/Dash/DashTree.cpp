@@ -97,7 +97,7 @@ public:
 
         dash::NodePtr node = new dash::Node();
         DashRenderNode::initializeDashNode( node );
-        ConstLODNodePtr lodNodePtr = _dataSource->getNodeFromNodeID( nodeId );
+        ConstLODNodePtr lodNodePtr = _dataSource->getNode( nodeId );
         DashRenderNode renderNode( node );
         renderNode.setLODNode( *lodNodePtr );
 
@@ -109,7 +109,6 @@ public:
         prevCtx.setCurrent();
         _dashNodeMap[ nodeId ] = node;
         return node;
-
     }
 
     ConstVolumeDataSourcePtr _dataSource;

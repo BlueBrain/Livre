@@ -55,6 +55,7 @@ set(LIVRELIB_SOURCES
   Render/RenderView.cpp
   Uploaders/DataUploadProcessor.cpp
   Uploaders/TextureUploadProcessor.cpp
+  Visitor/CollectionTraversal.cpp
   Visitor/DFSTraversal.cpp
   Visitor/LODSelectionVisitor.cpp)
 

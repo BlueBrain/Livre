@@ -28,6 +28,7 @@ namespace livre
 class DataUploadProcessor;
 class RawDataCache;
 class RawDataObject;
+class RenderNodeVisitor;
 class TextureCache;
 class TextureDataCache;
 class TextureDataObject;
