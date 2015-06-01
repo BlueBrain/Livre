@@ -261,7 +261,7 @@ bool Config::init()
                                             _impl->framedata.getRESTParameters()->port ) );
         _impl->_restBridge->run(  _impl->framedata.getRESTParameters()->zeqSchema );
     }
-#else
+#elif LIVRE_USE_ZEQ
     _impl->_vwsPublisher.reset( new zeq::Publisher( lunchbox::URI( "vwsresp://" ) ) );
 #endif
 
