@@ -33,7 +33,7 @@ struct EqEventInfo : public EventInfo
      * @param _config The equalizer config.
      * @param _configEvent The event genrated by Equalizer.
      */
-    EqEventInfo(  Config *_config, const eq::ConfigEvent* _configEvent )
+    EqEventInfo(  Config* _config, const eq::ConfigEvent* _configEvent )
         : config( _config ), configEvent( _configEvent )
     {}
 

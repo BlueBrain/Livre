@@ -75,19 +75,14 @@ void VolumeDataSource::unloadPlugins()
         detail::VolumeDataSource::PluginFactory::getInstance().unload( plugin );
 }
 
-ConstLODNodePtr VolumeDataSource::getNodeFromNodeID( const NodeId nodeId ) const
+ConstLODNodePtr VolumeDataSource::getNode( const NodeId nodeId ) const
 {
-    return _impl->plugin->getNodeFromNodeID( nodeId );
+    return _impl->plugin->getNode( nodeId );
 }
 
 const VolumeInformation& VolumeDataSource::getVolumeInformation() const
 {
     return _impl->plugin->getVolumeInformation();
-}
-
-bool VolumeDataSource::initializeDashTree( dash::NodePtr dashTree ) const
-{
-    return _impl->plugin->initializeDashTree( dashTree );
 }
 
 bool VolumeDataSource::initializeGL()

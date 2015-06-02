@@ -17,69 +17,104 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <livre/core/Visitor/VisitState.h>
+#include <livre/core/Visitor/NodeVisitor.h>
+#include <livre/core/Dash/DashTree.h>
+#include <livre/core/Dash/DashRenderNode.h>
+#include <livre/core/Data/VolumeDataSource.h>
 #include <livre/Lib/Visitor/DFSTraversal.h>
 #include <livre/core/Visitor/VisitState.h>
 
 namespace livre
 {
 
-DFSTraversal::DFSTraversal( )
+namespace detail
 {
-}
 
-bool DFSTraversal::traverse( dash::NodePtr root,
-                             NodeVisitor< dash::NodePtr > &visitor )
+class DFSTraversal
 {
-    if( !root )
-        return false;
-
-    state_ = VisitState();
-
-    visitor.onTraverseBegin( state_ );
-    if( state_.getBreakTraversal( ) )
-        return true;
-
-    traverse_( root, visitor );
-    visitor.onTraverseEnd( state_ );
-
-    bool retVal = state_.getBreakTraversal();
-    state_.setBreakTraversal( false );
-
-    return retVal;
-}
-
-void DFSTraversal::traverse_( dash::NodePtr dashNode, NodeVisitor< dash::NodePtr >& visitor )
-{
-    if( state_.getBreakTraversal() )
-        return;
-
-    visitor.onVisitBegin( dashNode, state_ );
-    visitor.visit( dashNode, state_ );
-    visitor.onVisitEnd( dashNode, state_ );
-
-    if( state_.getBreakTraversal() || !state_.getVisitChild() )
+public:
+    bool traverse( const NodeId& nodeId,
+                   const uint32_t depth,
+                   livre::NodeVisitor& visitor )
     {
-        state_.setVisitChild( true );
-        return;
-    }
+        if( depth == 0 || _state.getBreakTraversal() )
+            return false;
 
-    if( !dashNode->getNChildren() )
-        return;
+        _state = VisitState();
 
-    visitor.onVisitChildrenBegin( dashNode, state_ );
-    const int32_t nbOfChildren = dashNode->getNChildren();
+        visitor.onTraverseBegin( _state );
+        if( _state.getBreakTraversal( ) )
+            return true;
 
-    for( int32_t i = 0; i < nbOfChildren; ++i )
-    {
-        traverse_( dashNode->getChild( i ), visitor );
-        if( !state_.getVisitNeighbours( ) )
+        visitor.onVisitBegin( nodeId, _state );
+        visitor.visit( nodeId, _state );
+        visitor.onVisitEnd( nodeId, _state );
+
+        if( _state.getBreakTraversal() || !_state.getVisitChild() )
         {
-            break;
+            _state.setVisitChild( true );
+            return false;
         }
+
+        const NodeIds& nodeIds = nodeId.getChildren();
+        visitor.onVisitChildrenBegin( nodeId, _state );
+        BOOST_FOREACH( const NodeId& childNodeId, nodeIds )
+        {
+            traverse( childNodeId, depth - 1, visitor );
+            if( !_state.getVisitNeighbours() )
+                break;
+        }
+
+        visitor.onVisitChildrenEnd( nodeId, _state );
+        _state.setVisitNeighbours( true );
+
+        visitor.onTraverseEnd( _state );
+
+        bool retVal = _state.getBreakTraversal();
+        _state.setBreakTraversal( false );
+
+        return retVal;
     }
 
-    visitor.onVisitChildrenEnd( dashNode, state_ );
-    state_.setVisitNeighbours( true );
+    VisitState _state; //!< Status of the travel
+};
+
 }
+
+
+DFSTraversal::DFSTraversal( )
+    : _impl( new detail::DFSTraversal() )
+{
+}
+
+DFSTraversal::~DFSTraversal()
+{
+    delete _impl;
+}
+
+bool DFSTraversal::traverse( const RootNode& rootNode,
+                             const NodeId& node,
+                             NodeVisitor& visitor )
+{
+    return _impl->traverse( node,
+                            rootNode.getDepth(),
+                            visitor );
+}
+
+void DFSTraversal::traverse( const RootNode& rootNode,
+                             NodeVisitor& visitor)
+{
+    const Vector3ui& blockSize = rootNode.getBlockSize();
+    for( uint32_t x = 0; x < blockSize[0]; ++x )
+        for( uint32_t y = 0; y < blockSize[1]; ++y )
+            for( uint32_t z = 0; z < blockSize[2]; ++z )
+            {
+                _impl->traverse( NodeId( 0, Vector3ui( x, y, z )),
+                                 rootNode.getDepth(),
+                                 visitor );
+            }
+}
+
 
 }

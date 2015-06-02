@@ -17,34 +17,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/core/Render/GenerateRenderingSet.h>
-#include <livre/core/Dash/DashRenderNode.h>
-#include <livre/core/Visitor/NodeVisitor.h>
-#include <livre/core/Data/LODNode.h>
+#include <livre/core/Render/RenderingSetGenerator.h>
 
 namespace livre
 {
 
-GenerateRenderingSet::GenerateRenderingSet( const VolumeInformation& volumeInformation,
-                                            dash::NodePtr tree )
-    : _volumeInformation( volumeInformation ),
-      _tree( tree )
+RenderingSetGenerator::RenderingSetGenerator( DashTreePtr tree )
+    : _tree( tree )
 {
 }
 
-GenerateRenderingSet::~GenerateRenderingSet()
+RenderingSetGenerator::~RenderingSetGenerator()
 {
 }
 
-dash::NodePtr GenerateRenderingSet::getDashNodeTree()
+DashTreePtr RenderingSetGenerator::getDashTree()
 {
     return _tree;
 }
-
-const VolumeInformation& GenerateRenderingSet::getVolumeInformation() const
-{
-    return _volumeInformation;
-}
-
 
 }

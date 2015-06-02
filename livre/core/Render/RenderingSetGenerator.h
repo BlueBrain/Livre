@@ -17,8 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _GenerateRenderingSet_h_
-#define _GenerateRenderingSet_h_
+#ifndef _RenderingSetGenerator_h_
+#define _RenderingSetGenerator_h_
 
 #include <livre/core/types.h>
 #include <livre/core/dashTypes.h>
@@ -29,20 +29,17 @@ namespace livre
 {
 
 /**
- * The GenerateRenderingSet class is used to generate the list of dash nodes to be rendered.
+ * The RenderingSetGenerator class is used to generate the list of dash nodes to be rendered.
  */
-class GenerateRenderingSet
+class RenderingSetGenerator
 {
 public:
-
     /**
-     * @param volumeInformationPtr The volume information for the dash tree.
-     * @param tree This parameter set the root of the Hierarchical Volume Data ( HVD ).
+     * @param tree This parameter set the Dash Tree of Hierarchical Volume Data ( HVD ).
      */
-    GenerateRenderingSet( const VolumeInformation& volumeInformation,
-                          dash::NodePtr tree );
+    explicit RenderingSetGenerator( DashTreePtr tree );
 
-    virtual ~GenerateRenderingSet( );
+    virtual ~RenderingSetGenerator();
 
     /**
      * Generates the rendering set according to the given frustum.
@@ -59,22 +56,14 @@ public:
                                        RenderBricks& renderBrickList ) = 0;
 
     /**
-     * @return The root of the HVD.
+     * @return Get dash tree.
      */
-    dash::NodePtr getDashNodeTree( );
+    DashTreePtr getDashTree();
 
-    /**
-     * @return The volume information.
-     */
-    const VolumeInformation& getVolumeInformation( ) const;
-
-protected:
-
-    const VolumeInformation _volumeInformation;
-    dash::NodePtr _tree;
-
+private:
+    DashTreePtr _tree;
 };
 
 }
 
-#endif // _GenerateRenderingSet_h_
+#endif // _RenderingSet_h_

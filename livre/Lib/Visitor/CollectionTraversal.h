@@ -21,73 +21,27 @@
 #ifndef _CollectionTraversal_h_
 #define _CollectionTraversal_h_
 
-#include <livre/core/types.h>
-
-#include <livre/core/Visitor/NodeVisitor.h>
-#include <livre/core/Visitor/VisitState.h>
-
-#include <boost/type_traits.hpp>
-#include <algorithm>
+#include <livre/Lib/types.h>
+#include <livre/core/dashTypes.h>
 
 namespace livre
 {
 /**
- * @brief The CollectionTraversal class is used to traverse the stl containers ( or other classes supporting
- * iterators ).
+ * The CollectionTraversal class is used to traverse the DashNodeVector with a given visitor.
  */
-template < typename T, bool reverse = false > class CollectionTraversal
+class CollectionTraversal
 {
-    typedef typename T::value_type value_type;
-
 public:
-
     /**
-     * @brief CollectionTraversal constrcutor.
-     * @param container The container object.
-     * @param reverse If true the container is iterated in reverse.
+     * Traverse a collection with the given visitor. Visitor can decide to end traversal.
+     * @param dashNodeVector the (backward-)iterable dash node collection.
+     * @param visitor Visitor object.
+     * @param reverse If reverse given, the dash vector is traversed in reverse (default: false)
+     * @return True if traversal is completed, without being aborted/ended.
      */
-    CollectionTraversal() {}
-
-    /**
-     * @brief traverse Starts the traversing of collection.
-     * @param root the (backward-)iterable collection.
-     * @param visitor Visitors visit is revoked for each visit of each collection object.
-     * @return Returns true if traversal is completed, without being broken.
-     */
-    bool traverse( T root, NodeVisitor< value_type >& visitor )
-    {
-        typename T::const_iterator begin;
-        typename T::const_iterator end;
-
-        if( reverse )
-        {
-            begin = root.end();
-            end = root.begin();
-        }
-        else
-        {
-            begin = root.begin();
-            end = root.end();
-        }
-
-        VisitState state;
-        visitor.onTraverseBegin( state );
-
-        if( !state.getBreakTraversal() )
-        {
-            for( typename T::const_iterator i = begin; i != end;
-                 reverse ? --i : ++i )
-            {
-                visitor.visit( *i, state );
-                if( state.getBreakTraversal( ) )
-                    break;
-            }
-        }
-
-        visitor.onTraverseEnd( state );
-
-        return state.getBreakTraversal();
-    }
+    bool traverse( DashNodeVector& dashNodeVector,
+                   RenderNodeVisitor& visitor,
+                   const bool reverse = false );
 };
 
 }

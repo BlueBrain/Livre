@@ -517,7 +517,7 @@ if(Threads_name)
   endif()
 endif()
 
-set(LIVRE_BUILD_DEBS autoconf;automake;avahi-daemon;bison;cmake;doxygen;flex;freeglut3-dev;git;git-review;libavahi-client-dev;libboost-date-time-dev;libboost-filesystem-dev;libboost-program-options-dev;libboost-regex-dev;libboost-serialization-dev;libboost-system-dev;libboost-test-dev;libboost-thread-dev;libgl1-mesa-dev;libglewmx1.6-dev;libhwloc-dev;libibverbs-dev;libjpeg-turbo8-dev;libleveldb-dev;libopencv-dev;libopenmpi-dev;libopenscenegraph-dev;libqt5opengl5-dev;librdmacm-dev;libspnav-dev;libturbojpeg;libudt-dev;libx11-dev;libzmq3-dev;openmpi-bin;pkg-config;qtbase5-dev;subversion)
+set(LIVRE_BUILD_DEBS autoconf;automake;avahi-daemon;bison;cmake;doxygen;flex;freeglut3-dev;git;git-review;libavahi-client-dev;libbluetooth-dev;libboost-date-time-dev;libboost-filesystem-dev;libboost-program-options-dev;libboost-regex-dev;libboost-serialization-dev;libboost-system-dev;libboost-test-dev;libboost-thread-dev;libgl1-mesa-dev;libglewmx1.6-dev;libhwloc-dev;libibverbs-dev;libjpeg-turbo8-dev;libleveldb-dev;libopencv-dev;libopenmpi-dev;libopenscenegraph-dev;libqt5opengl5-dev;librdmacm-dev;libspnav-dev;libturbojpeg;libudt-dev;libx11-dev;libzmq3-dev;openmpi-bin;pkg-config;qtbase5-dev;subversion)
 
 set(LIVRE_DEPENDS BBPTestData;OpenMP;Tuvok;VTune;GLEW_MX;zeq;FlatBuffers;RESTBridge;LibJpegTurbo;Boost;Collage;dash;Equalizer;Lunchbox;OpenGL;PNG;Qt5Core;Qt5OpenGL;Qt5Widgets;Threads)
 

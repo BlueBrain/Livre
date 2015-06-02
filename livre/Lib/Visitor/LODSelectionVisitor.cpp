@@ -21,21 +21,22 @@
 #include <livre/Lib/Cache/TextureObject.h>
 #include <livre/Lib/Cache/TextureDataObject.h>
 #include <livre/Lib/Algorithm/LODFrustum.h>
+#include <livre/core/Dash/DashTree.h>
 
 namespace livre
 {
 
-LODSelectionVisitor::LODSelectionVisitor( const LODFrustum& lodFrustum,
+LODSelectionVisitor::LODSelectionVisitor( DashTreePtr dashTree,
+                                          const LODFrustum& lodFrustum,
                                           RequestType requestType )
-    : lodFrustum_( lodFrustum ),
+    : RenderNodeVisitor( dashTree ),
+      lodFrustum_( lodFrustum ),
       requestType_( requestType )
 {
 }
 
-void LODSelectionVisitor::visit( dash::NodePtr dashNode, VisitState& state )
+void LODSelectionVisitor::visit( DashRenderNode& renderNode, VisitState& state )
 {
-    DashRenderNode renderNode( dashNode );
-
     const LODNode& lodNode = renderNode.getLODNode();
 
     if( !lodNode.isValid() )
@@ -71,14 +72,16 @@ void LODSelectionVisitor::visit( dash::NodePtr dashNode, VisitState& state )
     {
         const bool isTextureRequested = lodFrustum_.boxInSubFrustum( worldBox, index );
         renderNode.setRequested( requestType_, isTextureRequested );
-        state.setVisitChild( !( !isTextureRequested && renderNode.getParent().isTextureRequested() ) );
+        DashRenderNode parentNode( getDashTree()->getParentNode( lodNode.getNodeId( )));
+        state.setVisitChild( isTextureRequested || !parentNode.isTextureRequested( ));
         break;
     }
     case DRT_DATA :
     {
         const bool isDataRequested = lodFrustum_.boxInSubFrustum( worldBox, index );
         renderNode.setRequested( requestType_, isDataRequested );
-        state.setVisitChild( !( !isDataRequested && renderNode.getParent().isDataRequested() ) );
+        DashRenderNode parentNode( getDashTree()->getParentNode( lodNode.getNodeId( )));
+        state.setVisitChild( isDataRequested || !parentNode.isDataRequested( ));
         break;
     }
     }

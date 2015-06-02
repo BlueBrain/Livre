@@ -1,7 +1,7 @@
 
-/* Copyright (c) 2007-2010, Stefan Eilemann <eile@equalizergraphics.com>
- *                    2011, Maxim Makhinya  <maxmah@gmail.com>
- *                    2013, Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2007-2015, Stefan Eilemann <eile@equalizergraphics.com>
+ *                          Maxim Makhinya  <maxmah@gmail.com>
+ *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -23,17 +23,20 @@
 #define _Node_h_
 
 #include <livre/core/Dash/DashContextTrait.h>
-#include <livre/core/dashTypes.h>
 #include <livre/Lib/types.h>
-#include <livre/Eq/types.h>
 #include <eq/node.h>
 
 namespace livre
 {
 
+namespace detail
+{
+class Node;
+}
+
 /**
- * The Node class is a standard EQ abstraction for a process. It manages the data loaders and keeps the
- * data cache.
+ * The Node class is a standard EQ abstraction for a process. It manages the data loaders
+ * and keeps the data cache.
  */
 class Node : public eq::Node, public DashContextTrait
 {
@@ -43,6 +46,7 @@ public:
      * @param parent Parent config that owns the Node.
      */
     Node( eq::Config* parent );
+    ~Node();
 
     /**
      * @return The raw data cache.
@@ -55,38 +59,18 @@ public:
     TextureDataCache& getTextureDataCache();
 
     /**
-     * @return The volume data source.
-     */
-    ConstVolumeDataSourcePtr getVolumeDataSource( ) const;
-
-    /**
      * @return The dash tree.
      */
     DashTreePtr getDashTree( );
 
 private:
+    bool configInit( const eq::uint128_t& initId ) final;
+    void frameStart(  const eq::uint128_t& frameId,
+                      const uint32_t frameNumber ) final;
+    bool configExit() final;
 
-    bool initializeVolume_();
-    void releaseVolume_();
-
-    void initializeCaches_();
-    void releaseCaches_();
-
-    FrameData& getFrameData_();
-
-    virtual bool configInit( const eq::uint128_t& initId );
-    virtual void frameStart(  const eq::uint128_t& frameId, const uint32_t frameNumber );
-    virtual bool configExit();
-
-    VolumeSettingsPtr volumeSettingsPtr_;
-    ConstVolumeRendererParametersPtr vrRenderParametersPtr_;
-    RawDataCachePtr rawDataCachePtr_;
-    TextureDataCachePtr textureDataCachePtr_;
-    VolumeDataSourcePtr dataSourcePtr_;
-    DashTreePtr dashTreePtr_;
-    DataSourceFactoryPtr dataSourceFactoryPtr_;
+    detail::Node* _impl;
 };
-
 
 }
 

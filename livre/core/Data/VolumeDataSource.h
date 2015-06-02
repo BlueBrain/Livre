@@ -60,12 +60,6 @@ public:
      */
     const VolumeInformation& getVolumeInformation() const;
 
-    /**
-     * @param dashTree Initializes the dash tree into using volume data.
-     * @return False if data source is not initialized.
-     */
-    bool initializeDashTree( dash::NodePtr dashTree ) const;
-
     /** Initializes the GL specific functions. */
     bool initializeGL();
 
@@ -80,11 +74,11 @@ public:
      * @param nodeId The nodeId to get the node for.
      * @return The LODNode for the ID or 0 if not found.
      */
-    ConstLODNodePtr getNodeFromNodeID( const NodeId nodeId ) const;
+    ConstLODNodePtr getNode( const NodeId nodeId ) const;
 
 private:
 
-    detail::VolumeDataSource *_impl;
+    detail::VolumeDataSource* _impl;
 
 };
 

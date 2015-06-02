@@ -1,7 +1,8 @@
 
-/* Copyright (c) 2006-2011, Stefan Eilemann <eile@equalizergraphics.com>
- *               2007-2011, Maxim Makhinya  <maxmah@gmail.com>
- *               2012,      David Steiner   <steiner@ifi.uzh.ch>
+/* Copyright (c) 2012-2015, Stefan Eilemann <eile@equalizergraphics.com>
+ *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
+ *                          Maxim Makhinya  <maxmah@gmail.com>
+ *                          David Steiner   <steiner@ifi.uzh.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -40,203 +41,219 @@
 
 #define CONNECTION_ID 0u
 
+const uint32_t maxQueueSize = 65536;
+
 namespace livre
 {
 
-Pipe::Pipe( eq::Node* parent )
-    : eq::Pipe( parent ),
-      dashProcessorPtr_( new DashProcessor( ) ),
-      frameDataPtr_( new FrameData( ) )
+namespace detail
 {
-    LBASSERT( parent );
+
+class Pipe
+{
+public:
+    Pipe( livre::Pipe* pipe )
+        : _pipe( pipe )
+        , _dashProcessorPtr( new DashProcessor( ))
+        , _frameDataPtr( new FrameData( ))
+    {}
+
+    void startUploadProcessors()
+    {
+        if( !_textureUploadProcessorPtr->isRunning( ))
+            _textureUploadProcessorPtr->start();
+
+        if( !_dataUploadProcessorPtr->isRunning( ))
+            _dataUploadProcessorPtr->start();
+    }
+
+    void stopUploadProcessors()
+    {
+        // TO_EXIT was set as ThreadOp in Channel::configExit()
+        _dashProcessorPtr->getProcessorOutput_()->commit( 0 );
+        _textureUploadProcessorPtr->join();
+        _dataUploadProcessorPtr->join();
+    }
+
+    bool mapFrameData( const eq::uint128_t& initId )
+    {
+        livre::Config* config = static_cast< livre::Config* >( _pipe->getConfig( ));
+        _frameDataPtr->initialize( config );
+        if( !_frameDataPtr->map( config, initId ))
+            return false;
+        _frameDataPtr->mapObjects();
+        return true;
+    }
+
+    void unmapFrameData()
+    {
+        _frameDataPtr->unmapObjects();
+        _frameDataPtr->unmap( static_cast< livre::Config* >( _pipe->getConfig( )));
+    }
+
+    void initializeCaches()
+    {
+        _textureCachePtr->setMaximumMemory(
+                    _frameDataPtr->getVRParameters()->maxTextureMemoryMB );
+    }
+
+    void releaseCaches()
+    {
+        // has to be called from PipeThread to release textures properly
+        _textureCachePtr.reset();
+    }
+
+    void initializePipelineProcessors()
+    {
+        livre::Node* node = static_cast< livre::Node* >( _pipe->getNode( ));
+
+        _dashProcessorPtr->setDashContext( node->getDashTree()->createContext( ));
+        _dataUploadProcessorPtr.reset( new DataUploadProcessor( node->getDashTree(),
+                                                                node->getRawDataCache(),
+                                                                node->getTextureDataCache( )));
+
+        _textureCachePtr.reset( new TextureCache( GL_LUMINANCE8 ) );
+        _textureUploadProcessorPtr.reset( new TextureUploadProcessor( node->getDashTree(),
+                                                                      *_textureCachePtr ));
+
+        startUploadProcessors();
+    }
+
+    void releasePipelineProcessors()
+    {
+        stopUploadProcessors();
+        _textureUploadProcessorPtr->setDashContext( DashContextPtr( ));
+        _dataUploadProcessorPtr->setDashContext( DashContextPtr( ));
+        _textureUploadProcessorPtr.reset();
+        _dataUploadProcessorPtr.reset();
+        _dashProcessorPtr->setDashContext( DashContextPtr( ));
+    }
+
+    void initializePipelineConnections()
+    {
+        // Connects data uploader to texture uploader
+        DashConnectionPtr dataOutputConnectionPtr( new DashConnection( maxQueueSize ) );
+        _dataUploadProcessorPtr->getProcessorOutput_< DashProcessorOutput >( )
+                ->addConnection( CONNECTION_ID, dataOutputConnectionPtr );
+
+        _textureUploadProcessorPtr->getProcessorInput_< DashProcessorInput >( )
+                ->addConnection( CONNECTION_ID, dataOutputConnectionPtr );
+
+        // Connects texture uploader to pipe
+        DashConnectionPtr texOutputConnectionPtr( new DashConnection( maxQueueSize ) );
+        _textureUploadProcessorPtr->getProcessorOutput_< DashProcessorOutput >()
+                ->addConnection( CONNECTION_ID, texOutputConnectionPtr );
+        _dashProcessorPtr->getProcessorInput_< DashProcessorInput >()
+                ->addConnection( CONNECTION_ID, texOutputConnectionPtr );
+        // Connects pipe to data uploader
+        DashConnectionPtr pipeOutputConnectionPtr( new DashConnection( maxQueueSize ) );
+        _dataUploadProcessorPtr->getProcessorInput_< DashProcessorInput >()
+                ->addConnection( CONNECTION_ID, pipeOutputConnectionPtr );
+        _dashProcessorPtr->getProcessorOutput_< DashProcessorOutput >()
+                ->addConnection( CONNECTION_ID, pipeOutputConnectionPtr );
+    }
+
+    void releasePipelineConnections( )
+    {
+        _dashProcessorPtr->getProcessorOutput_< DashProcessorOutput >()
+                ->removeConnection( CONNECTION_ID );
+        _dataUploadProcessorPtr->getProcessorInput_< DashProcessorInput >()
+                ->removeConnection( CONNECTION_ID );
+        _dashProcessorPtr->getProcessorInput_< DashProcessorInput >( )
+                ->removeConnection( CONNECTION_ID );
+        _textureUploadProcessorPtr->getProcessorOutput_< DashProcessorOutput >( )
+                ->removeConnection( CONNECTION_ID );
+        _textureUploadProcessorPtr->getProcessorInput_< DashProcessorInput >( )
+                ->removeConnection( CONNECTION_ID );
+        _dataUploadProcessorPtr->getProcessorOutput_< DashProcessorOutput >( )
+                ->removeConnection( CONNECTION_ID );
+    }
+
+    void frameStart( const eq::uint128_t& frameId )
+    {
+        _frameDataPtr->sync( frameId );
+
+        _dashProcessorPtr->getDashContext()->setCurrent();
+
+        if( _dashProcessorPtr->getProcessorInput_()->dataWaitingOnInput( CONNECTION_ID ))
+            _dashProcessorPtr->getProcessorInput_()->applyAll( CONNECTION_ID );
+    }
+
+    bool configInit( const eq::uint128_t& initId )
+    {
+        if( !mapFrameData( initId ))
+            return false;
+        initializePipelineProcessors();
+        initializePipelineConnections();
+        initializeCaches();
+        return true;
+    }
+
+    void configExit()
+    {
+        if( !_dashProcessorPtr->getDashContext( ))
+            return;
+        releaseCaches( );
+        releasePipelineConnections( );
+        releasePipelineProcessors( );
+        unmapFrameData();
+    }
+
+    livre::Pipe* const _pipe;
+    TextureUploadProcessorPtr _textureUploadProcessorPtr;
+    DataUploadProcessorPtr _dataUploadProcessorPtr;
+    TextureCachePtr _textureCachePtr;
+    DashProcessorPtr _dashProcessorPtr;
+    FrameDataPtr _frameDataPtr;
+};
+
+}
+
+Pipe::Pipe( eq::Node* parent )
+    : eq::Pipe( parent )
+    , _impl( new detail::Pipe( this ))
+{
 }
 
 Pipe::~Pipe( )
 {
+    delete _impl;
 }
 
-void Pipe::startUploadProcessors_( )
+TextureUploadProcessorPtr Pipe::getTextureUploadProcessor()
 {
-    if( !textureUploadProcessorPtr_->isRunning( ) )
-        textureUploadProcessorPtr_->start( );
-
-    if( !dataUploadProcessorPtr_->isRunning( ) )
-        dataUploadProcessorPtr_->start( );
+    return _impl->_textureUploadProcessorPtr;
 }
 
-void Pipe::stopUploadProcessors_( )
+ConstTextureUploadProcessorPtr Pipe::getTextureUploadProcessor() const
 {
-    // TO_EXIT was set as ThreadOp in Channel::configExit()
-    getProcessor( )->getProcessorOutput_( )->commit( 0 );
-
-    textureUploadProcessorPtr_->join();
-    dataUploadProcessorPtr_->join();
+    return _impl->_textureUploadProcessorPtr;
 }
 
-ConstFrameDataPtr Pipe::getFrameData( ) const
+DataUploadProcessorPtr Pipe::getDataUploadProcessor()
 {
-    return frameDataPtr_;
+    return _impl->_dataUploadProcessorPtr;
 }
 
-TextureUploadProcessorPtr Pipe::getTextureUploadProcessor( )
+ConstDataUploadProcessorPtr Pipe::getDataUploadProcessor() const
 {
-    return textureUploadProcessorPtr_;
+    return _impl->_dataUploadProcessorPtr;
 }
 
-ConstTextureUploadProcessorPtr Pipe::getTextureUploadProcessor( ) const
+DashProcessorPtr Pipe::getProcessor()
 {
-    return textureUploadProcessorPtr_;
+    return _impl->_dashProcessorPtr;
 }
 
-DataUploadProcessorPtr Pipe::getDataUploadProcessor( )
+ConstDashProcessorPtr Pipe::getProcessor() const
 {
-    return dataUploadProcessorPtr_;
-}
-
-ConstDataUploadProcessorPtr Pipe::getDataUploadProcessor( ) const
-{
-    return dataUploadProcessorPtr_;
-}
-
-DashProcessorPtr Pipe::getProcessor( )
-{
-    return dashProcessorPtr_;
-}
-
-ConstDashProcessorPtr Pipe::getProcessor( ) const
-{
-    return dashProcessorPtr_;
-}
-
-void Pipe::initializeCaches_( )
-{
-    textureCachePtr_->setMaximumMemory( frameDataPtr_->getVRParameters( )->maxTextureMemoryMB );
-}
-
-void Pipe::releaseCaches_( )
-{
-    // has to be called from PipeThread to release textures properly
-    textureCachePtr_.reset();
+    return _impl->_dashProcessorPtr;
 }
 
 void Pipe::frameStart( const eq::uint128_t& frameId, const uint32_t frameNumber )
 {
-    frameDataPtr_->sync( frameId );
-
-    dashProcessorPtr_->getDashContext( )->setCurrent( );
-
-    if( dashProcessorPtr_->getProcessorInput_( )->dataWaitingOnInput( CONNECTION_ID ) )
-        dashProcessorPtr_->getProcessorInput_( )->applyAll( CONNECTION_ID );
-
+    _impl->frameStart( frameId );
     eq::Pipe::frameStart( frameId, frameNumber );
-}
-
-void Pipe::initializePipelineProcessors_( )
-{
-    DashContextPtr localContext( new dash::Context( ) );
-    dashProcessorPtr_->setDashContext( localContext );
-
-    Node *node = static_cast< Node *>( getNode( ) );
-    dataUploadProcessorPtr_.reset( new DataUploadProcessor( node->getRawDataCache( ),
-                                                            node->getTextureDataCache( ) ) );
-
-    textureCachePtr_.reset( new TextureCache( GL_LUMINANCE8 ) );
-    textureUploadProcessorPtr_.reset( new TextureUploadProcessor( *textureCachePtr_ ) );
-
-    DashContextPtr dataLoaderContext( new dash::Context( ) );
-    dataUploadProcessorPtr_->setDashContext( dataLoaderContext );
-
-    DashContextPtr textureLoaderContext( new dash::Context( ) );
-    textureUploadProcessorPtr_->setDashContext( textureLoaderContext );
-}
-
-
-void Pipe::releasePipelineProcessors_( )
-{
-    textureUploadProcessorPtr_->setDashContext( DashContextPtr() );
-    dataUploadProcessorPtr_->setDashContext( DashContextPtr() );
-    textureUploadProcessorPtr_.reset( );
-    dataUploadProcessorPtr_.reset( );
-    dashProcessorPtr_->setDashContext( DashContextPtr() );
-
-}
-
-void Pipe::initalizeMapping_( )
-{
-    Node *node = static_cast< Node *>( getNode( ) );
-
-    dataUploadProcessorPtr_->setDashTree( node->getDashTree( )->getRootNode( ) );
-    textureUploadProcessorPtr_->setDashTree( node->getDashTree( )->getRootNode( ) );
-
-    node->getDashContext( )->map( node->getDashTree( )->getRootNode( ), *dataUploadProcessorPtr_->getDashContext( ) );
-    node->getDashContext( )->map( node->getDashTree( )->getRootNode( ), *textureUploadProcessorPtr_->getDashContext( ) );
-    node->getDashContext( )->map( node->getDashTree( )->getRootNode( ), *dashProcessorPtr_->getDashContext( ) );
-
-    dashProcessorPtr_->getDashContext( )->setCurrent( );
-}
-
-void Pipe::releaseMapping_( )
-{
-    Node *node = static_cast< Node *>( getNode( ) );
-
-    dashProcessorPtr_->getDashContext( )->unmap( node->getDashTree( )->getRootNode( ) );
-    textureUploadProcessorPtr_->getDashContext( )->unmap( node->getDashTree( )->getRootNode( ) );
-    dataUploadProcessorPtr_->getDashContext( )->unmap( node->getDashTree( )->getRootNode( ) );
-
-    textureUploadProcessorPtr_->setDashTree( dash::NodePtr() );
-    dataUploadProcessorPtr_->setDashTree( dash::NodePtr() );
-}
-
-
-void Pipe::initializePipelineConnections_( )
-{
-    // Connects data uploader to texture uploader
-    const uint32_t maxQueueSize = 65536;
-
-    DashConnectionPtr dataOutputConnectionPtr( new DashConnection( maxQueueSize ) );
-    dataUploadProcessorPtr_->getProcessorOutput_< DashProcessorOutput >( )
-            ->addConnection( CONNECTION_ID, dataOutputConnectionPtr );
-
-    textureUploadProcessorPtr_->getProcessorInput_< DashProcessorInput >( )
-            ->addConnection( CONNECTION_ID, dataOutputConnectionPtr );
-
-    // Connects texture uploader to pipe
-    DashConnectionPtr texOutputConnectionPtr( new DashConnection( maxQueueSize ) );
-    textureUploadProcessorPtr_->getProcessorOutput_< DashProcessorOutput >( )
-            ->addConnection( CONNECTION_ID, texOutputConnectionPtr );
-    dashProcessorPtr_->getProcessorInput_< DashProcessorInput >( )->addConnection( CONNECTION_ID,
-                                                                                  texOutputConnectionPtr );
-    // Connects pipe to data uploader
-    DashConnectionPtr pipeOutputConnectionPtr( new DashConnection( maxQueueSize ) );
-    dataUploadProcessorPtr_->getProcessorInput_< DashProcessorInput >( )
-            ->addConnection( CONNECTION_ID, pipeOutputConnectionPtr );
-
-    dashProcessorPtr_->getProcessorOutput_< DashProcessorOutput >( )->addConnection( CONNECTION_ID,
-                                                                                    pipeOutputConnectionPtr );
-}
-
-void Pipe::releasePipelineConnections_( )
-{
-    dashProcessorPtr_->getProcessorOutput_< DashProcessorOutput >( )->removeConnection( CONNECTION_ID );
-    dataUploadProcessorPtr_->getProcessorInput_< DashProcessorInput >( )->removeConnection( CONNECTION_ID );
-    dashProcessorPtr_->getProcessorInput_< DashProcessorInput >( )->removeConnection( CONNECTION_ID );
-    textureUploadProcessorPtr_->getProcessorOutput_< DashProcessorOutput >( )->removeConnection( CONNECTION_ID );
-    textureUploadProcessorPtr_->getProcessorInput_< DashProcessorInput >( )->removeConnection( CONNECTION_ID );
-    dataUploadProcessorPtr_->getProcessorOutput_< DashProcessorOutput >( )->removeConnection( CONNECTION_ID );
-}
-
-
-void Pipe::mapFrameData_(const eq::uint128_t& initId)
-{
-    frameDataPtr_->initialize( getConfig( ) );
-    frameDataPtr_->map( getConfig( ), initId );
-    frameDataPtr_->mapObjects( );
-}
-
-void Pipe::unmapFrameData_( )
-{
-    frameDataPtr_->unmapObjects( );
-    frameDataPtr_->unmap( getConfig( ) );
 }
 
 bool Pipe::configInit( const eq::uint128_t& initId )
@@ -244,29 +261,18 @@ bool Pipe::configInit( const eq::uint128_t& initId )
     if( !eq::Pipe::configInit( initId ))
         return false;
 
-    mapFrameData_( initId );
-
-    initializePipelineProcessors_( );
-    initializePipelineConnections_( );
-    initalizeMapping_( );
-    initializeCaches_( );
-
-    return true;
+    return _impl->configInit( initId );
 }
 
-bool Pipe::configExit( )
+bool Pipe::configExit()
 {
-    // If pipe is not configured, nothing to clean up.
-    if( !dashProcessorPtr_->getDashContext( ) )
-         return eq::Pipe::configExit( );
+    _impl->configExit();
+    return eq::Pipe::configExit();
+}
 
-    releaseCaches_( );
-    releaseMapping_( );
-    releasePipelineConnections_( );
-    releasePipelineProcessors_( );
-    unmapFrameData_( );
-
-    return eq::Pipe::configExit( );
+ConstFrameDataPtr Pipe::getFrameData() const
+{
+    return _impl->_frameDataPtr;
 }
 
 }

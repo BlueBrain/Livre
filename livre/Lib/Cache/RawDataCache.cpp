@@ -47,7 +47,7 @@ ConstVolumeDataSourcePtr RawDataCache::getDataSource() const
 CacheObject* RawDataCache::generateCacheObjectFromID_( const CacheId cacheID )
 {
     ConstLODNodePtr lodNodePtr =
-            volumeDataSourcePtr_->getNodeFromNodeID( NodeId( cacheID ));
+            volumeDataSourcePtr_->getNode( NodeId( cacheID ));
 
     if( !lodNodePtr->isValid() )
         return static_cast< CacheObject* >( RawDataObject::getEmptyPtr() );

@@ -29,7 +29,6 @@ namespace livre
  * The NodeVisitor class is base class for invoking traversing events. Some of the events may not be
  * implemented by the traverser.
   */
-template< class T >
 class NodeVisitor
 {
 public:
@@ -52,48 +51,53 @@ public:
     { }
 
     /**
-     * Is called before node being visited.
-     * @param node is the node being visited.
+     * Called before the node is  visited.
+     * @param renderNode is the node being visited.
      * @param state Visit state.
      */
-    virtual void onVisitBegin( T node LB_UNUSED, const VisitState& state LB_UNUSED )
+    virtual void onVisitBegin( const NodeId& nodeId LB_UNUSED,
+                               const VisitState& state LB_UNUSED )
     { }
 
     /**
-     * Is called after node being visited.
-     * @param node is the node being visited.
+     * Called after the node has been visited.
+     * @param renderNode is the node being visited.
      * @param state Visit state.
      */
-    virtual void onVisitEnd( T node LB_UNUSED, const VisitState& state LB_UNUSED )
+    virtual void onVisitEnd( const NodeId& nodeId LB_UNUSED,
+                             const VisitState& state LB_UNUSED )
     { }
 
     /**
-     * Is called before all the children of a node is visited.
-     * @param node is the node being visited.
+     * Called before all the children of the node is visited.
+     * @param renderNode is the node being visited.
      * @param state Visit state.
      */
-    virtual void onVisitChildrenBegin( T node LB_UNUSED, const VisitState& state LB_UNUSED )
+    virtual void onVisitChildrenBegin( const NodeId& nodeId LB_UNUSED,
+                                       const VisitState& state LB_UNUSED )
     { }
 
     /**
-     * Is called after all the children of a node is visited.
-     * @param node is the node being visited.
+     * Called after all the children of the node has been visited.
+     * @param renderNode is the node being visited.
      * @param state Visit state.
      */
-    virtual void onVisitChildrenEnd( T node LB_UNUSED, const VisitState& state LB_UNUSED )
+    virtual void onVisitChildrenEnd( const NodeId& nodeId LB_UNUSED,
+                                     const VisitState& state LB_UNUSED )
     { }
 
     /**
-     * Is called when node is being visited.
-     * @param node is the node being visited.
+     * Called when the given node is being visited.
+     * @param renderNode is the node being visited.
      * @param state Visit state.
      */
-    virtual void visit( T node, VisitState& state ) = 0;
+    virtual void visit( const NodeId& nodeId,
+                        VisitState& state ) = 0;
 
     virtual ~NodeVisitor( ) { }
+
 };
 
 }
-
 
 #endif // _NodeVisitor_h_

@@ -32,7 +32,6 @@
 #include <livre/Lib/Configuration/VolumeRendererParameters.h>
 #include <livre/Lib/Uploaders/DataUploadProcessor.h>
 #include <livre/core/Dash/DashTree.h>
-#include <livre/core/DashPipeline/DashConnection.h>
 #include <livre/core/DashPipeline/DashProcessorOutput.h>
 #include <livre/core/Data/VolumeDataSource.h>
 
@@ -42,83 +41,100 @@
 namespace livre
 {
 
+namespace detail
+{
+
+class Node
+{
+public:
+    Node( livre::Node* node )
+        : _config( static_cast< livre::Config* >( node->getConfig( )))
+    {}
+
+    void initializeCaches()
+    {
+        _rawDataCachePtr.reset( new livre::RawDataCache( ));
+        _textureDataCachePtr .reset( new livre::TextureDataCache( GL_UNSIGNED_BYTE ));
+        _rawDataCachePtr->setDataSource( _dataSourcePtr );
+
+        ConstVolumeRendererParametersPtr vrRenderParametersPtr =
+                _config->getFrameData().getVRParameters();
+        _rawDataCachePtr->setMaximumMemory(
+                        vrRenderParametersPtr->maxDataMemoryMB );
+        _textureDataCachePtr->setMaximumMemory(
+                    vrRenderParametersPtr->maxTextureDataMemoryMB );
+    }
+
+    bool initializeVolume()
+    {
+        try
+        {
+            VolumeSettingsPtr volumeSettingsPtr =
+                    _config->getFrameData().getVolumeSettings();
+            const lunchbox::URI& uri = lunchbox::URI( volumeSettingsPtr->getURI( ));
+            _dataSourcePtr.reset( new livre::VolumeDataSource( uri ));
+            _dashTreePtr.reset( new livre::DashTree( _dataSourcePtr ));
+
+            // Inform application of real-world size for camera manipulations
+            const livre::VolumeInformation& info =
+                    _dataSourcePtr->getVolumeInformation();
+            _config->sendEvent( VOLUME_BOUNDING_BOX ) << info.boundingBox;
+        }
+        catch( const std::runtime_error& err )
+        {
+            LBWARN << "Data source initialization failed: "
+                   << err.what() << std::endl;
+            return false;
+        }
+
+        return true;
+    }
+
+    bool configInit()
+    {
+        if( !initializeVolume( ))
+            return false;
+
+        initializeCaches();
+        return true;
+    }
+
+    void configExit()
+    {
+        releaseCaches();
+        releaseVolume();
+    }
+
+    void releaseVolume()
+    {
+        _dataSourcePtr.reset();
+        _dashTreePtr.reset();
+    }
+
+    void releaseCaches()
+    {
+        _textureDataCachePtr.reset();
+        _rawDataCachePtr.reset();
+    }
+
+    livre::Config* const _config;
+    RawDataCachePtr _rawDataCachePtr;
+    TextureDataCachePtr _textureDataCachePtr;
+    VolumeDataSourcePtr _dataSourcePtr;
+    DashTreePtr _dashTreePtr;
+};
+
+}
+
 Node::Node( eq::Config* parent )
     : eq::Node( parent )
+    , _impl( new detail::Node( this ))
 {
-    dash::Context::getMain();
-    setDashContext( DashContextPtr( new dash::Context( ) ) );
 }
 
-RawDataCache& Node::getRawDataCache()
+Node::~Node()
 {
-    return *rawDataCachePtr_;
-}
-
-TextureDataCache& Node::getTextureDataCache()
-{
-    return *textureDataCachePtr_;
-}
-
-ConstVolumeDataSourcePtr Node::getVolumeDataSource() const
-{
-    return dataSourcePtr_;
-}
-
-DashTreePtr Node::getDashTree()
-{
-    return dashTreePtr_;
-}
-
-bool Node::initializeVolume_()
-{
-    getDashContext()->setCurrent();
-    try
-    {
-        dataSourcePtr_.reset( new VolumeDataSource( lunchbox::URI( volumeSettingsPtr_->getURI( ))));
-        dashTreePtr_.reset( new DashTree );
-        dataSourcePtr_->initializeDashTree( dashTreePtr_->getRootNode() );
-
-        // Inform application of real-world size for camera manipulations
-        const VolumeInformation& info = dataSourcePtr_->getVolumeInformation();
-        eq::Config* config = getConfig();
-        config->sendEvent( VOLUME_BOUNDING_BOX ) << info.boundingBox;
-    }
-    catch( const std::runtime_error& err )
-    {
-        LBWARN << "Data source initialization failed: "
-               << err.what() << std::endl;
-        return false;
-    }
-
-    return true;
-}
-
-void Node::releaseVolume_()
-{
-    dataSourcePtr_.reset( );
-    dashTreePtr_.reset( );
-}
-
-void Node::initializeCaches_()
-{
-    rawDataCachePtr_.reset( new RawDataCache( ) );
-    textureDataCachePtr_ .reset( new TextureDataCache( GL_UNSIGNED_BYTE ) );
-    rawDataCachePtr_->setDataSource( dataSourcePtr_ );
-
-    rawDataCachePtr_->setMaximumMemory( vrRenderParametersPtr_->maxDataMemoryMB );
-    textureDataCachePtr_->setMaximumMemory( vrRenderParametersPtr_->maxTextureDataMemoryMB );
-}
-
-void Node::releaseCaches_()
-{
-    textureDataCachePtr_ .reset( );
-    rawDataCachePtr_.reset( );
-}
-
-FrameData& Node::getFrameData_()
-{
-     Config *config = static_cast< Config *>( getConfig() );
-     return config->getFrameData();
+    delete _impl;
 }
 
 bool Node::configInit( const eq::uint128_t& initId )
@@ -130,40 +146,52 @@ bool Node::configInit( const eq::uint128_t& initId )
     if( !eq::Node::configInit( initId ))
         return false;
 
-    Config *config = static_cast< Config *>( getConfig() );
     if( !isApplicationNode( ))
+    {
+        Config *config = static_cast< Config *>( getConfig() );
         config->mapFrameData( initId );
+    }
 
-    volumeSettingsPtr_ = getFrameData_().getVolumeSettings();
-    vrRenderParametersPtr_ = getFrameData_().getVRParameters();
-
-    if( !initializeVolume_( ))
-        return false;
-
-    initializeCaches_( );
-    return true;
-}
-
-void Node::frameStart( const eq::uint128_t &frameId, const uint32_t frameNumber)
-{
-    if( !isApplicationNode() )
-        getFrameData_().sync( frameId );
-
-    eq::Node::frameStart( frameId, frameNumber );
+    return _impl->configInit();
 }
 
 bool Node::configExit()
 {
-    releaseCaches_( );
-    releaseVolume_( );
+    _impl->configExit();
 
-    if( !isApplicationNode() )
+    if( !isApplicationNode( ))
     {
         Config *config = static_cast< Config *>( getConfig() );
         config->unmapFrameData();
     }
 
     return eq::Node::configExit();
+}
+
+RawDataCache& Node::getRawDataCache()
+{
+    return *_impl->_rawDataCachePtr;
+}
+
+TextureDataCache& Node::getTextureDataCache()
+{
+    return *_impl->_textureDataCachePtr;
+}
+
+DashTreePtr Node::getDashTree()
+{
+    return _impl->_dashTreePtr;
+}
+
+void Node::frameStart( const eq::uint128_t &frameId, const uint32_t frameNumber)
+{
+    if( !isApplicationNode() )
+    {
+        Config *config = static_cast< Config *>( getConfig( ));
+        config->getFrameData().sync( frameId );
+    }
+
+    eq::Node::frameStart( frameId, frameNumber );
 }
 
 }

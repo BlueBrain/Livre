@@ -53,21 +53,21 @@ private:
 
     bool onPreRender_( const GLWidget& widget,
                        const FrameInfo& frameInfo,
-                       GenerateRenderingSet& renderListGenerator,
-                       Frustum& modifiedFrustum );
+                       RenderingSetGenerator& renderSetGenerator,
+                       Frustum& modifiedFrustum ) final;
 
     void onPostRender_(  const bool rendered,
                          const GLWidget& widget,
                          const FrameInfo& frameInfo,
-                         GenerateRenderingSet& renderListGenerator );
+                         RenderingSetGenerator& renderSetGenerator ) final;
 
-    void generateIteratedFrustum_( GenerateRenderingSet& renderListGenerator,
+    void generateIteratedFrustum_( RenderingSetGenerator& renderSetGenerator,
                                    const Frustum& previousFrustum,
                                    const Frustum& currentFrustum,
                                    Frustum& modifiedFrustum ) const;
 
     void generateRequest_( const Frustum& currentFrustum,
-                           GenerateRenderingSet& renderListGenerator,
+                           RenderingSetGenerator& renderSetGenerator,
                            const uint32_t windowHeight );
 
     void freeTextures_( const DashNodeVector& renderNodeList );

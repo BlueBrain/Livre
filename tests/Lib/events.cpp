@@ -79,7 +79,7 @@ void onDataSourceDataEvent( const zeq::Event& event,
 
     BOOST_CHECK_EQUAL( deserialized.first, zeq::uint128_t( 17, 42 ));
     BOOST_CHECK_EQUAL( info.compCount, info2.compCount );
-    BOOST_CHECK_EQUAL( info.depth, info2.depth );
+    BOOST_CHECK_EQUAL( info.rootNode.getDepth(), info2.rootNode.getDepth( ));
     BOOST_CHECK_EQUAL( info.overlap, info2.overlap );
     BOOST_CHECK_EQUAL( info.maximumBlockSize, info2.maximumBlockSize );
     BOOST_CHECK_EQUAL( info.minPos, info2.minPos );
@@ -97,7 +97,6 @@ BOOST_AUTO_TEST_CASE( testDataSourceData )
     lunchbox::RNG rng;
 
     info.compCount = rng.get<uint32_t>();
-    info.depth = rng.get<uint32_t>();
     info.overlap = Vector3ui( rng.get<uint32_t>(), rng.get<uint32_t>(),
                               rng.get<uint32_t>( ));
     info.maximumBlockSize = Vector3ui( rng.get<uint32_t>(), rng.get<uint32_t>(),
@@ -111,6 +110,8 @@ BOOST_AUTO_TEST_CASE( testDataSourceData )
     info.voxels = Vector3ui( rng.get<uint32_t>(), rng.get<uint32_t>(),
                              rng.get<uint32_t>( ));
     info.worldSpacePerVoxel = rng.get<float>();
+
+    info.rootNode = livre::RootNode( rng.get<uint32_t>(), Vector3ui( 1, 2, 3 ));
 
     BOOST_CHECK( subscriber.registerHandler( livre::zeq::EVENT_DATASOURCE_DATA,
                                             boost::bind( &onDataSourceDataEvent,
