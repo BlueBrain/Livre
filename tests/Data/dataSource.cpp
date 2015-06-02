@@ -75,7 +75,7 @@ void _testDataSource( const std::string& uriStr )
 BOOST_AUTO_TEST_CASE( memoryDataSource )
 {
     std::stringstream volumeName;
-    volumeName << "mem:///#" << VOXEL_SIZE_X << "," << VOXEL_SIZE_Y << ","
+    volumeName << "mem://#" << VOXEL_SIZE_X << "," << VOXEL_SIZE_Y << ","
                << VOXEL_SIZE_Z << "," << BLOCK_SIZE;
 
     _testDataSource( volumeName.str( ));
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE( memoryDataSource )
 BOOST_AUTO_TEST_CASE( remoteMemoryDataSource )
 {
     std::stringstream volumeName;
-    volumeName << "remotemem:///#" << VOXEL_SIZE_X << "," << VOXEL_SIZE_Y << ","
+    volumeName << "remotemem://#" << VOXEL_SIZE_X << "," << VOXEL_SIZE_Y << ","
                << VOXEL_SIZE_Z << "," << BLOCK_SIZE;
     try
     {

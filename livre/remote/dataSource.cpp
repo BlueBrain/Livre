@@ -53,6 +53,10 @@ lunchbox::URI _getSinkURI( const VolumeDataSourcePluginData& initData )
 
 lunchbox::URI _getSourceURI( const VolumeDataSourcePluginData& initData )
 {
+    if( initData.getURI().getHost().empty( ))
+        return lunchbox::URI( "livresource://" );
+    if( initData.getURI().getPort() == 0 )
+        return lunchbox::URI( "livresource://" + initData.getURI().getHost( ));
     return lunchbox::URI( "livresource://" + initData.getURI().getHost() + ":" +
                     lexical_cast< std::string >( initData.getURI().getPort( )));
 }
