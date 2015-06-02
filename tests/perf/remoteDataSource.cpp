@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE( testRemote )
 
             const livre::Vector3ui brickSize = livre::Vector3ui( i ) +
                                                info.overlap * 2;
-            BOOST_CHECK( mem );
+            BOOST_REQUIRE( mem );
             BOOST_CHECK_EQUAL( mem->getMemSize(), brickSize.product( ));
 
             const uint8_t* bytes = mem->getData< uint8_t >();
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE( testRemote )
                 mem = dataSource.getData( node );
                 ++num;
 
-                BOOST_CHECK( mem );
+                BOOST_REQUIRE( mem );
                 BOOST_CHECK_EQUAL( mem->getMemSize(), brickSize.product( ));
             }
             const float bulk = clock.getTimef();

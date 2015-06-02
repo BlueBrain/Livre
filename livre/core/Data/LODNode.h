@@ -103,11 +103,6 @@ public:
     const Vector3i& getBlockSize() const { return blockSize_; } //!< @internal
 
     /**
-     * Sets node id.
-     */
-    void setNodeId( const NodeId nodeId );
-
-    /**
      * @return True if node is valid.
      */
     bool isValid( ) const { return nodeId_.isValid(); }
