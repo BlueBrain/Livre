@@ -19,8 +19,6 @@
 
 #include <livre/Lib/Configuration/RESTParameters.h>
 
-#include <boost/algorithm/string.hpp>
-
 namespace livre
 {
 

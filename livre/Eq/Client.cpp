@@ -166,11 +166,8 @@ int Client::run()
     }
 
     FrameData& frameData = config->getFrameData();
-#ifdef LIVRE_USE_RESTBRIDGE
-    frameData.setup( _rendererParameters, _prefetchParameters, _restParameters );
-#else
-    frameData.setup( _rendererParameters, _prefetchParameters );
-#endif
+    frameData.setup( _applicationParameters, _rendererParameters,
+                     _prefetchParameters, _restParameters );
     frameData.getVolumeSettings()->setURI( _applicationParameters.dataFileName);
 
     // 3. init config

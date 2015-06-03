@@ -286,29 +286,32 @@ bool Config::init()
         _impl->currentCanvas = canvases.front();
 
 #ifdef LIVRE_USE_ZEQ
-    SubscriberPtr subscriber( new zeq::Subscriber( lunchbox::URI( "hbp://")));
+    SubscriberPtr subscriber( new zeq::Subscriber( lunchbox::URI( "hbp://" )));
     _impl->subscribers.push_back( subscriber );
-    subscriber->registerHandler( zeq::hbp::EVENT_CAMERA,
-                                 boost::bind( &detail::Config::onHBPCamera,
-                                              _impl, _1 ));
+    if( _impl->framedata.getAppParameters()->syncCamera )
+    {
+        subscriber->registerHandler( zeq::hbp::EVENT_CAMERA,
+                                     boost::bind( &detail::Config::onHBPCamera,
+                                                 _impl, _1 ));
+    }
     subscriber->registerHandler( zeq::hbp::EVENT_LOOKUPTABLE1D,
                                  boost::bind( &detail::Config::onLookupTable1D,
                                               _impl, _1 ));
 #ifdef LIVRE_USE_RESTBRIDGE
     const std::string subscriberSchema = _impl->framedata.getRESTParameters()->zeqSchema
                                          + SUBSCRIBER_SCHEMA_SUFFIX;
-    SubscriberPtr vwsSubscriber( new zeq::Subscriber( lunchbox::URI( subscriberSchema ) ) );
 #else
-    SubscriberPtr vwsSubscriber( new zeq::Subscriber( lunchbox::URI( "vwscmd://" ) ) );
+    const std::string subscriberSchema = "vwscmd://";
 #endif
+    SubscriberPtr vwsSubscriber(
+                new zeq::Subscriber( lunchbox::URI( subscriberSchema )));
     _impl->subscribers.push_back( vwsSubscriber );
-    // TODO: Define other zeq event
     vwsSubscriber->registerHandler( zeq::hbp::EVENT_CAMERA,
-                                   boost::bind( &detail::Config::onCamera,
-                                                _impl, _1 ));
+                                    boost::bind( &detail::Config::onCamera,
+                                                 _impl, _1 ));
     vwsSubscriber->registerHandler( zeq::vocabulary::EVENT_REQUEST,
-                                   boost::bind( &detail::Config::onRequest,
-                                                _impl, _1 ));
+                                    boost::bind( &detail::Config::onRequest,
+                                                 _impl, _1 ));
 #endif
     return true;
 }

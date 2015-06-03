@@ -36,16 +36,17 @@ const std::string LOGFILE_PARAM = "logfile";
 const std::string DATAFILE_PARAM = "volume";
 const std::string NUMFRAMES_PARAM = "numframes";
 const std::string CAMERAPOS_PARAM = "camerapos";
-const std::string GUI_ENABLED_PARAM = "enablegui";
+const std::string SYNC_CAMERA_PARAM = "sync-camera";
 
 ApplicationParameters::ApplicationParameters()
-    : Parameters( "Application Parameters" ),
-      animationEnabled( false ),
-      captureEnabled( false ),
-      debugWindowEnabled( false ),
-      maxFrames(-1u ),
-      isResident( false ),
-      cameraPosition( Vector3f( 0, 0, -2.0 ))
+    : Parameters( "Application Parameters" )
+    , animationEnabled( false )
+    , captureEnabled( false )
+    , debugWindowEnabled( false )
+    , maxFrames(-1u )
+    , isResident( false )
+    , cameraPosition( Vector3f( 0, 0, -2.0 ))
+    , syncCamera( false )
 {
     configuration_.addDescription< std::string >( configGroupName_,
                                                   LOGFILE_PARAM, "Renderlog", "" );
@@ -57,6 +58,12 @@ ApplicationParameters::ApplicationParameters()
     configuration_.addDescription( configGroupName_,
                                    CAMERAPOS_PARAM,
                                    "Camera position", cameraPosition );
+#ifdef LIVRE_USE_ZEQ
+    configuration_.addDescription( configGroupName_,
+                                   SYNC_CAMERA_PARAM,
+                                   "Synchronize camera with other applications",
+                                   syncCamera );
+#endif
 }
 
 void ApplicationParameters::serialize( co::DataOStream &os, const uint64_t dirtyBits )
@@ -73,7 +80,8 @@ void ApplicationParameters::serialize( co::DataOStream &os, const uint64_t dirty
        << debugWindowEnabled
        << maxFrames
        << isResident
-       << cameraPosition;
+       << cameraPosition
+       << syncCamera;
 }
 
 ApplicationParameters& ApplicationParameters::operator=(
@@ -93,11 +101,13 @@ ApplicationParameters& ApplicationParameters::operator=(
     maxFrames = parameters.maxFrames;
     isResident = parameters.isResident;
     cameraPosition = parameters.cameraPosition;
+    syncCamera = parameters.syncCamera;
 
     return *this;
 }
 
-void ApplicationParameters::deserialize( co::DataIStream &is, const uint64_t dirtyBits )
+void ApplicationParameters::deserialize( co::DataIStream &is,
+                                         const uint64_t dirtyBits )
 {
     co::Serializable::deserialize( is, dirtyBits );
 
@@ -111,7 +121,8 @@ void ApplicationParameters::deserialize( co::DataIStream &is, const uint64_t dir
        >> debugWindowEnabled
        >> maxFrames
        >> isResident
-       >> cameraPosition;
+       >> cameraPosition
+       >> syncCamera;
 }
 
 void ApplicationParameters::initialize_()
@@ -120,6 +131,7 @@ void ApplicationParameters::initialize_()
     configuration_.getValue( DATAFILE_PARAM, dataFileName );
     configuration_.getValue( NUMFRAMES_PARAM, maxFrames );
     configuration_.getValue( CAMERAPOS_PARAM, cameraPosition );
+    configuration_.getValue( SYNC_CAMERA_PARAM, syncCamera );
 }
 
 }

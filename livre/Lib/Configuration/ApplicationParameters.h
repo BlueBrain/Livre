@@ -44,6 +44,7 @@ struct ApplicationParameters : public Parameters
     uint32_t maxFrames; //<! Max frames.
     bool isResident; //<! Is the main app resident.
     Vector3f cameraPosition; //<! Camera position in world space.
+    bool syncCamera; //<! Synchronize camera with other applications using ZEQ
 
     /**
      * De-serializes the object from input stream.
