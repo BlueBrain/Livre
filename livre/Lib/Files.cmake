@@ -20,6 +20,7 @@ set(LIVRELIB_PUBLIC_HEADERS
   Data/MemoryDataSource.h
   Configuration/ApplicationParameters.h
   Configuration/EFPrefetchAlgorithmParameters.h
+  Configuration/RESTParameters.h
   Configuration/VolumeRendererParameters.h
   Render/AvailableSetGenerator.h
   Render/SliceRenderer.h
@@ -29,10 +30,6 @@ set(LIVRELIB_PUBLIC_HEADERS
   Visitor/CollectionTraversal.h
   Visitor/DFSTraversal.h
   Visitor/LODSelectionVisitor.h)
-
-if(RESTBRIDGE_FOUND)
-  list(APPEND LIVRELIB_PUBLIC_HEADERS Configuration/RESTParameters.h)
-endif()
 
 set(LIVRELIB_SOURCES
   Algorithm/LODFrustum.cpp
@@ -49,6 +46,7 @@ set(LIVRELIB_SOURCES
   Data/MemoryDataSource.cpp
   Configuration/ApplicationParameters.cpp
   Configuration/EFPrefetchAlgorithmParameters.cpp
+  Configuration/RESTParameters.cpp
   Configuration/VolumeRendererParameters.cpp
   Render/AvailableSetGenerator.cpp
   Render/SliceRenderer.cpp
@@ -58,10 +56,6 @@ set(LIVRELIB_SOURCES
   Visitor/CollectionTraversal.cpp
   Visitor/DFSTraversal.cpp
   Visitor/LODSelectionVisitor.cpp)
-
-if(RESTBRIDGE_FOUND)
-  list(APPEND LIVRELIB_SOURCES Configuration/RESTParameters.cpp)
-endif()
 
 if(LIVRE_USE_REMOTE_DATASOURCE)
   flatbuffers_generate_c_headers(FBS

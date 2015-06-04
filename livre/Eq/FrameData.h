@@ -34,11 +34,10 @@ enum SerializationMapIds
     SMI_RENDER_SETTINGS,
     SMI_CAMERA_SETTINGS,
     SMI_VOLUME_SETTINGS,
+    SMI_APP_PARAMETERS,
     SMI_VR_PARAMETERS,
-    SMI_EFP_PARAMETERS
-#ifdef LIVRE_USE_RESTBRIDGE
-    ,SMI_REST_PARAMETERS
-#endif
+    SMI_EFP_PARAMETERS,
+    SMI_REST_PARAMETERS
 };
 
 /**
@@ -58,14 +57,10 @@ public:
     void initialize( eq::Config* eqConfig );
 
     /** Set up the parameters. */
-    void setup( const VolumeRendererParameters& rendererParams,
-                const EFPrefetchAlgorithmParameters& prefetchParams );
-
-#ifdef LIVRE_USE_RESTBRIDGE
-    void setup( const VolumeRendererParameters& rendererParams,
+    void setup( const ApplicationParameters& appParams,
+                const VolumeRendererParameters& rendererParams,
                 const EFPrefetchAlgorithmParameters& prefetchParams,
                 const RESTParameters& networkParams );
-#endif
 
     /**
      * Registers objects to the internal \see co::ObjectMap.
@@ -159,6 +154,11 @@ public:
     VolumeSettingsPtr getVolumeSettings() const;
 
     /**
+     * @return The application parameters.
+     */
+    ConstApplicationParametersPtr getAppParameters() const;
+
+    /**
      * @return The volume rendering parameters.
      */
     ConstVolumeRendererParametersPtr getVRParameters() const;
@@ -168,12 +168,10 @@ public:
      */
     ConstEFPParametersPtr getEFPParameters() const;
 
-#ifdef LIVRE_USE_RESTBRIDGE
     /**
-     * @return The RESTConeector's parameters.
+     * @return The RESTBridge's parameters.
      */
     ConstRESTParametersPtr getRESTParameters() const;
-#endif
 
     virtual ~FrameData();
 
@@ -187,11 +185,10 @@ private:
     CameraSettingsPtr cameraSettingsPtr_;
     VolumeSettingsPtr volumeSettingsPtr_;
 
+    ApplicationParametersPtr appParametersPtr_;
     VolumeRendererParametersPtr vrParametersPtr_;
     EFPParametersPtr prefetchParametersPtr_;
-#ifdef LIVRE_USE_RESTBRIDGE
     RESTParametersPtr restParametersPtr_;
-#endif
 };
 
 }

@@ -42,8 +42,6 @@ void Configuration::parseCommandLine( int32_t argc, char **argv )
             options( descripton ).
             allow_unregistered();
 
-    clp.allow_unregistered( );
-
     boost::program_options::parsed_options filtopts = clp.run( );
     boost::program_options::store( filtopts, programOptionsMap_ );
     boost::program_options::notify( programOptionsMap_ );

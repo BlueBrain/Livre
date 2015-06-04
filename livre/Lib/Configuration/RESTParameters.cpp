@@ -19,15 +19,13 @@
 
 #include <livre/Lib/Configuration/RESTParameters.h>
 
-#include <boost/algorithm/string.hpp>
-
 namespace livre
 {
 
-const std::string HOSTNAME_PARAM = "resthost";
-const std::string PORT_PARAM = "restport";
-const std::string ZEQSCHEMA_PARAM = "zeqschema";
-const std::string USEREST_PARAM = "userest";
+const std::string HOSTNAME_PARAM = "rest-host";
+const std::string PORT_PARAM = "rest-port";
+const std::string ZEQSCHEMA_PARAM = "zeq-schema";
+const std::string USEREST_PARAM = "use-rest";
 
 RESTParameters::RESTParameters()
     : Parameters( "REST Parameters" )

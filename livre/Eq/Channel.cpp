@@ -39,7 +39,6 @@
 #include <livre/Eq/Render/RayCastRenderer.h>
 #include <livre/Eq/FrameGrabber.h>
 
-#include <livre/Lib/Configuration/ApplicationParameters.h>
 #include <livre/core/DashPipeline/DashProcessorOutput.h>
 #include <livre/core/DashPipeline/DashProcessorInput.h>
 #include <livre/Lib/Uploaders/TextureUploadProcessor.h>
