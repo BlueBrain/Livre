@@ -1,7 +1,7 @@
-
-/* Copyright (c) 2007-2011, Stefan Eilemann <eile@equalizergraphics.com>
- *                    2011, Maxim Makhinya  <maxmah@gmail.com>
- *                    2013, Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2007-2015, Stefan Eilemann <eile@equalizergraphics.com>
+ *                          Maxim Makhinya  <maxmah@gmail.com>
+ *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
+ *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -27,6 +27,8 @@
 #include <livre/Eq/types.h>
 #include <livre/core/types.h>
 
+#include <memory>
+
 namespace livre
 {
 
@@ -43,9 +45,17 @@ public:
     Window( eq::Pipe* parent );
 
 private:
+    class Impl;
+    std::unique_ptr< Impl > _impl;
 
-    virtual bool configInit( const eq::uint128_t& initId );
-    virtual bool configInitGL( const eq::uint128_t& initId );
+    bool configInit( const eq::uint128_t& initId ) final;
+    bool configInitGL( const eq::uint128_t& initId ) final;
+    bool configExitGL() final;
+    void frameStart( const eq::uint128_t& frameID,
+                     const uint32_t frameNumber ) final;
+    void frameFinish( const eq::uint128_t& frameID,
+                      const uint32_t frameNumber ) final;
+
 };
 
 }

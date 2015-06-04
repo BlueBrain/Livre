@@ -39,26 +39,22 @@ namespace livre
  * It is derived from GLContextTrait class because some algorithms may need OpenGL
  * to generate the data.
  */
-class DataUploadProcessor : public DashProcessor, public GLContextTrait
+class DataUploadProcessor : public DashProcessor, private GLContextTrait
 {
 public:
-
     /**
      * @param dashTree The dash node hierarchy.
+     * @param shareContext the context which this processors shares against.
+     * @param context the context used by this processor.
      * @param rawDataCache Raw data cache that holds the raw data in the CPU memory.
      * @param textureDataCache Texture data cache holds the data in the CPU memory.
      */
     DataUploadProcessor( DashTreePtr dashTree,
+                         GLContextPtr shareContext,
+                         GLContextPtr context,
                          RawDataCache& rawDataCache,
                          TextureDataCache& textureDataCache );
-
-    /**
-     * @param glWidgetPtr Set the GL window to update.
-     */
-    void setGLWidget( GLWidgetPtr glWidgetPtr );
-
 private:
-
     bool initializeThreadRun_( ) final;
     void runLoop_( ) final;
     void _loadData();
@@ -66,12 +62,12 @@ private:
                                const LoadPriority priority );
 
     DashTreePtr _dashTree;
+    GLContextPtr _shareContext;
     RawDataCache& _rawDataCache;
     TextureDataCache& _textureDataCache;
     uint64_t _currentFrameID;
     void _checkThreadOperation( );
     ThreadOperation _threadOp;
-    GLWidgetPtr _glWidgetPtr;
 };
 
 }

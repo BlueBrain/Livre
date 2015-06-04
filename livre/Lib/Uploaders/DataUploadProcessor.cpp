@@ -23,7 +23,6 @@
 #include <livre/core/Dash/DashTree.h>
 #include <livre/core/Render/Renderer.h>
 #include <livre/core/Render/GLContext.h>
-#include <livre/core/Render/GLWidget.h>
 #include <livre/core/Visitor/RenderNodeVisitor.h>
 #include <livre/Lib/Visitor/DFSTraversal.h>
 
@@ -153,46 +152,38 @@ struct DepthCompare
 };
 
 DataUploadProcessor::DataUploadProcessor( DashTreePtr dashTree,
+                                          GLContextPtr shareContext,
+                                          GLContextPtr context,
                                           RawDataCache& rawDataCache,
                                           TextureDataCache& textureDataCache )
-    : _dashTree( dashTree ),
-      _rawDataCache( rawDataCache ),
-      _textureDataCache( textureDataCache ),
-      _currentFrameID( 0 ),
-      _threadOp( TO_NONE )
+    : GLContextTrait( context )
+    , _dashTree( dashTree )
+    , _shareContext( shareContext )
+    , _rawDataCache( rawDataCache )
+    , _textureDataCache( textureDataCache )
+    , _currentFrameID( 0 )
+    , _threadOp( TO_NONE )
 {
     setDashContext( dashTree->createContext() );
 }
 
-void DataUploadProcessor::setGLWidget( GLWidgetPtr glWidgetPtr )
-{
-    _glWidgetPtr = glWidgetPtr;
-}
-
 bool DataUploadProcessor::initializeThreadRun_()
 {
-    setName( "DataUpload" );
-    if( !DashProcessor::initializeThreadRun_( ))
-        return false;
-
-
-    return true;
+    setName( "DataUp" );
+    return DashProcessor::initializeThreadRun_();
 }
 
 void DataUploadProcessor::runLoop_( )
 {
-    if( _glWidgetPtr && getGLContext() &&
-            livre::GLContext::getCurrent() != glContextPtr_.get( ))
+    LBASSERT( getGLContext( ));
+    if( GLContext::getCurrent() != getGLContext().get( ))
     {
-        _glWidgetPtr->getGLContext()->shareContext( getGLContext( ));
-        glContextPtr_->makeCurrent();
+        _shareContext->shareContext( getGLContext( ));
+        getGLContext()->makeCurrent();
 
         VolumeDataSourcePtr dataSource = _rawDataCache.getDataSource();
         dataSource->initializeGL();
     }
-
-    if( livre::GLContext::getCurrent() != glContextPtr_.get( ))
-        return;
 
     processorInputPtr_->applyAll( 0 );
 

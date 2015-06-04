@@ -41,13 +41,12 @@
 
 #include <livre/core/DashPipeline/DashProcessorOutput.h>
 #include <livre/core/DashPipeline/DashProcessorInput.h>
-#include <livre/Lib/Uploaders/TextureUploadProcessor.h>
-#include <livre/Lib/Uploaders/DataUploadProcessor.h>
 #include <livre/Lib/Render/AvailableSetGenerator.h>
 #include <livre/Lib/Render/RenderView.h>
 
 #include <livre/core/Render/Frustum.h>
 #include <livre/core/Render/GLWidget.h>
+#include <livre/core/Dash/DashRenderStatus.h>
 #include <livre/core/Dash/DashTree.h>
 #include <livre/core/Data/VolumeDataSource.h>
 
@@ -160,23 +159,6 @@ public:
             new RayCastRenderer( _channel->glewGetContext(), nSlices,
                                  dataSource->getVolumeInformation().compCount,
                                  GL_UNSIGNED_BYTE, GL_LUMINANCE8 )));
-    }
-
-    void initializeGLContextAndStartUploaders()
-    {
-        livre::Pipe* pipe = static_cast< livre::Pipe* >( _channel->getPipe( ));
-        Window* wnd = static_cast< Window* >( _channel->getWindow( ));
-
-        _glWidgetPtr->setGLContext( GLContextPtr( new EqContext( wnd )));
-
-        TextureUploadProcessorPtr textureUploadProcessor =
-            pipe->getTextureUploadProcessor();
-        textureUploadProcessor->setGLContext( GLContextPtr( new EqContext( wnd )));
-        textureUploadProcessor->setGLWidget( _glWidgetPtr );
-
-        DataUploadProcessorPtr dataUploadProcessor = pipe->getDataUploadProcessor();
-        dataUploadProcessor->setGLContext( GLContextPtr( new EqContext( wnd )));
-        dataUploadProcessor->setGLWidget( _glWidgetPtr );
     }
 
     const Frustum& initializeLivreFrustum()
@@ -320,7 +302,9 @@ public:
     {
         initializeFrame();
         initializeRenderer();
-        initializeGLContextAndStartUploaders();
+
+        Window* window = static_cast< Window* >( _channel->getWindow( ));
+        _glWidgetPtr->setGLContext( GLContextPtr( new EqContext( window )));
     }
 
     void configExit()
@@ -357,9 +341,6 @@ public:
         DashRenderStatus& renderStatus = node->getDashTree()->getRenderStatus();
         renderStatus.setFrustum( _currentFrustum );
         renderStatus.setFrameID( frameNumber );
-
-        livre::Pipe* pipe = static_cast< livre::Pipe* >( _channel->getPipe( ));
-        pipe->getProcessor()->getProcessorOutput_()->commit( 0 );
     }
 
     void frameReadback( const eq::Frames& frames ) const
