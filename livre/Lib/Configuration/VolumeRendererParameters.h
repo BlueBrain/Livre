@@ -34,31 +34,27 @@ enum RenderStrategy
 
 struct VolumeRendererParameters : public Parameters
 {
-    VolumeRendererParameters( );
+    VolumeRendererParameters();
 
     RenderStrategy renderStrategy; //!< Render strategy
     float screenSpaceError;  //!< Screen space error
     uint32_t maxDataMemoryMB;  //!< Settings for data cache
     uint32_t maxTextureMemoryMB; //!< Settings for texture cache
     uint32_t maxTextureDataMemoryMB; //!< Settings for texture cache
-    uint32_t maxRenderMemoryMB; //!< Maximum render frustum
-    bool skipLoadingEnabled; //!< Skip loading the data when a new frame data request arrives
-    bool disableNormalization; //!< Normalize data
-    bool dropAnimationFrames; //!< Drop animation frames
 
     /**
      * De-serializes the object from input stream.
      * @param dirtyBits The bits for elements can be marked
      * @param is Input stream.
      */
-    virtual void deserialize( co::DataIStream& is, const uint64_t dirtyBits );
+    void deserialize( co::DataIStream& is, const uint64_t dirtyBits ) final;
 
     /**
      * Serializes the object to output stream.
      * @param dirtyBits The bits for elements can be marked
      * @param os Output stream.
      */
-    virtual void serialize( co::DataOStream& os, const uint64_t dirtyBits );
+    void serialize( co::DataOStream& os, const uint64_t dirtyBits ) final;
 
     /**
      * @param volumeRendererParameters The source parameters.
@@ -66,8 +62,7 @@ struct VolumeRendererParameters : public Parameters
     VolumeRendererParameters& operator=( const VolumeRendererParameters& volumeRendererParameters );
 
 protected:
-
-    virtual void initialize_( );
+    void initialize_() final;
 };
 
 }

@@ -23,58 +23,47 @@ namespace livre
 {
 
 const std::string SCREENSPACEERROR_PARAM = "sse";
-const std::string DATACACHEMEM_PARAM = "datacachemem";
-const std::string TEXTUREDATACACHEMEM_PARAM = "texturedatacachemem";
-const std::string TEXTURECACHEMEM_PARAM = "texturecachemem";
-const std::string MAXRENDERMEM_PARAM = "maxrendermem";
+const std::string DATACACHEMEM_PARAM = "data-cache-mem";
+const std::string TEXTURECACHEMEM_PARAM = "texture-cache-mem";
+const std::string TEXTUREDATACACHEMEM_PARAM = "texture-data-cache-mem";
 
 VolumeRendererParameters::VolumeRendererParameters()
-    : Parameters( "Volume Renderer Parameters" ),
-      renderStrategy( RS_ANY_FRAME ),
-      screenSpaceError( 1.0f ),
-      maxDataMemoryMB( 1024u ),
-      maxTextureMemoryMB( 3072u ),
-      maxTextureDataMemoryMB( 8192u ),
-      maxRenderMemoryMB( 1536u ),
-      skipLoadingEnabled( false ),
-      disableNormalization( false ),
-      dropAnimationFrames( false )
+    : Parameters( "Volume Renderer Parameters" )
+    , renderStrategy( RS_ANY_FRAME )
+    , screenSpaceError( 1.0f )
+    , maxDataMemoryMB( 1024u )
+    , maxTextureMemoryMB( 3072u )
+    , maxTextureDataMemoryMB( 8192u )
 {
-    configuration_.addDescription( configGroupName_, SCREENSPACEERROR_PARAM, "Screen space error", screenSpaceError );
+    configuration_.addDescription( configGroupName_, SCREENSPACEERROR_PARAM,
+                                   "Screen space error", screenSpaceError );
     configuration_.addDescription( configGroupName_, DATACACHEMEM_PARAM,
-                                  "Maximum data cache memory (MB)", maxDataMemoryMB );
-    configuration_.addDescription( configGroupName_, "texturecachemem",
-                                  "Maximum texture cache memory (MB)", maxTextureMemoryMB );
+                                   "Maximum data cache memory (MB)",
+                                   maxDataMemoryMB );
+    configuration_.addDescription( configGroupName_, TEXTURECACHEMEM_PARAM,
+                                   "Maximum texture cache memory (MB)",
+                                   maxTextureMemoryMB );
     configuration_.addDescription( configGroupName_, TEXTUREDATACACHEMEM_PARAM,
-                                  "Maximum texture data cache memory (MB)", maxTextureDataMemoryMB );
-    configuration_.addDescription( configGroupName_, MAXRENDERMEM_PARAM, "Maximum render memory",
-                                   maxRenderMemoryMB );
+                                   "Maximum texture data cache memory (MB)",
+                                   maxTextureDataMemoryMB );
 }
 
-void VolumeRendererParameters::deserialize( co::DataIStream &is, const uint64_t dirtyBits LB_UNUSED )
+void VolumeRendererParameters::deserialize( co::DataIStream &is, const uint64_t )
 {
     is >> renderStrategy
        >> screenSpaceError
        >> maxDataMemoryMB
        >> maxTextureMemoryMB
-       >> maxTextureDataMemoryMB
-       >> skipLoadingEnabled
-       >> disableNormalization
-       >> dropAnimationFrames
-       >> maxRenderMemoryMB;
+       >> maxTextureDataMemoryMB;
 }
 
-void VolumeRendererParameters::serialize( co::DataOStream &os, const uint64_t dirtyBits LB_UNUSED )
+void VolumeRendererParameters::serialize( co::DataOStream &os, const uint64_t )
 {
     os << renderStrategy
        << screenSpaceError
        << maxDataMemoryMB
        << maxTextureMemoryMB
-       << maxTextureDataMemoryMB
-       << skipLoadingEnabled
-       << disableNormalization
-       << dropAnimationFrames
-       << maxRenderMemoryMB;
+       << maxTextureDataMemoryMB;
 }
 
 VolumeRendererParameters &VolumeRendererParameters::operator=(
@@ -85,10 +74,6 @@ VolumeRendererParameters &VolumeRendererParameters::operator=(
     maxDataMemoryMB = volumeRendererParameters.maxDataMemoryMB;
     maxTextureMemoryMB = volumeRendererParameters.maxTextureMemoryMB;
     maxTextureDataMemoryMB = volumeRendererParameters.maxTextureDataMemoryMB;
-    skipLoadingEnabled = volumeRendererParameters.skipLoadingEnabled;
-    disableNormalization = volumeRendererParameters.disableNormalization;
-    dropAnimationFrames = volumeRendererParameters.dropAnimationFrames;
-    maxRenderMemoryMB = volumeRendererParameters.maxRenderMemoryMB;
 
     return *this;
 }
@@ -100,7 +85,6 @@ void VolumeRendererParameters::initialize_()
     configuration_.getValue( DATACACHEMEM_PARAM, maxDataMemoryMB );
     configuration_.getValue( TEXTURECACHEMEM_PARAM, maxTextureMemoryMB );
     configuration_.getValue( TEXTUREDATACACHEMEM_PARAM, maxTextureDataMemoryMB );
-    configuration_.getValue( MAXRENDERMEM_PARAM, maxRenderMemoryMB );
 }
 
 } //Livre

@@ -31,16 +31,9 @@ namespace livre
  */
 struct ApplicationParameters : public Parameters
 {
-    ApplicationParameters( );
+    ApplicationParameters();
 
-    std::string logFileName; //<! Log file name.
-    std::string animationPathFileName; //<! Animation path file name.
-    bool animationEnabled; //<! Enable animation
     std::string dataFileName; //<! Data file name.
-    bool captureEnabled; //<! Enable capturing.
-    std::string captureName; //<! Capture file names.
-    std::string capturePath; //<! Capture path.
-    bool debugWindowEnabled; //<! Enable debug window.
     uint32_t maxFrames; //<! Max frames.
     bool isResident; //<! Is the main app resident.
     Vector3f cameraPosition; //<! Camera position in world space.
@@ -51,14 +44,14 @@ struct ApplicationParameters : public Parameters
      * @param dirtyBits The bits for elements can be marked
      * @param is Input stream.
      */
-    virtual void deserialize( co::DataIStream& is, const uint64_t dirtyBits );
+    void deserialize( co::DataIStream& is, const uint64_t dirtyBits ) final;
 
     /**
      * Serializes the object to output stream.
      * @param dirtyBits The bits for elements can be marked
      * @param os Output stream.
      */
-    virtual void serialize( co::DataOStream& os, const uint64_t dirtyBits );
+    void serialize( co::DataOStream& os, const uint64_t dirtyBits ) final;
 
     /**
      * @param parameters The source parameters.
@@ -66,8 +59,7 @@ struct ApplicationParameters : public Parameters
     ApplicationParameters& operator=( const ApplicationParameters& parameters );
 
 protected:
-
-    virtual void initialize_( );
+    void initialize_() final;
 };
 
 }

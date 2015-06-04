@@ -32,52 +32,37 @@ std::istream& operator>>( std::istream& is, vmml::vector<3ul, float>& vec )
 namespace livre
 {
 
-const std::string LOGFILE_PARAM = "logfile";
 const std::string DATAFILE_PARAM = "volume";
-const std::string NUMFRAMES_PARAM = "numframes";
-const std::string CAMERAPOS_PARAM = "camerapos";
+const std::string NUMFRAMES_PARAM = "num-frames";
+const std::string CAMERAPOS_PARAM = "camera-position";
 const std::string SYNC_CAMERA_PARAM = "sync-camera";
 
 ApplicationParameters::ApplicationParameters()
     : Parameters( "Application Parameters" )
-    , animationEnabled( false )
-    , captureEnabled( false )
-    , debugWindowEnabled( false )
     , maxFrames(-1u )
     , isResident( false )
     , cameraPosition( Vector3f( 0, 0, -2.0 ))
     , syncCamera( false )
 {
-    configuration_.addDescription< std::string >( configGroupName_,
-                                                  LOGFILE_PARAM, "Renderlog", "" );
-    configuration_.addDescription< std::string >( configGroupName_,
-                                                  DATAFILE_PARAM, dataFileName );
-    configuration_.addDescription( configGroupName_,
-                                   NUMFRAMES_PARAM,
+    configuration_.addDescription( configGroupName_, DATAFILE_PARAM,
+                                   "URI of volume data source", dataFileName );
+    configuration_.addDescription( configGroupName_, NUMFRAMES_PARAM,
                                    "Maximum nuber of frames", maxFrames );
-    configuration_.addDescription( configGroupName_,
-                                   CAMERAPOS_PARAM,
+    configuration_.addDescription( configGroupName_, CAMERAPOS_PARAM,
                                    "Camera position", cameraPosition );
 #ifdef LIVRE_USE_ZEQ
-    configuration_.addDescription( configGroupName_,
-                                   SYNC_CAMERA_PARAM,
+    configuration_.addDescription( configGroupName_, SYNC_CAMERA_PARAM,
                                    "Synchronize camera with other applications",
                                    syncCamera );
 #endif
 }
 
-void ApplicationParameters::serialize( co::DataOStream &os, const uint64_t dirtyBits )
+void ApplicationParameters::serialize( co::DataOStream &os,
+                                       const uint64_t dirtyBits )
 {
     co::Serializable::serialize( os, dirtyBits );
 
-    os << logFileName
-       << animationPathFileName
-       << animationEnabled
-       << dataFileName
-       << captureEnabled
-       << captureName
-       << capturePath
-       << debugWindowEnabled
+    os << dataFileName
        << maxFrames
        << isResident
        << cameraPosition
@@ -90,14 +75,7 @@ ApplicationParameters& ApplicationParameters::operator=(
     if( this == &parameters )
         return *this;
 
-    logFileName = parameters.logFileName;
-    animationPathFileName = parameters.animationPathFileName;
-    animationEnabled = parameters.animationEnabled;
     dataFileName = parameters.dataFileName;
-    captureEnabled = parameters.captureEnabled;
-    captureName = parameters.captureName;
-    capturePath = parameters.capturePath;
-    debugWindowEnabled = parameters.debugWindowEnabled;
     maxFrames = parameters.maxFrames;
     isResident = parameters.isResident;
     cameraPosition = parameters.cameraPosition;
@@ -111,14 +89,7 @@ void ApplicationParameters::deserialize( co::DataIStream &is,
 {
     co::Serializable::deserialize( is, dirtyBits );
 
-    is >> logFileName
-       >> animationPathFileName
-       >> animationEnabled
-       >> dataFileName
-       >> captureEnabled
-       >> captureName
-       >> capturePath
-       >> debugWindowEnabled
+    is >> dataFileName
        >> maxFrames
        >> isResident
        >> cameraPosition
@@ -127,7 +98,6 @@ void ApplicationParameters::deserialize( co::DataIStream &is,
 
 void ApplicationParameters::initialize_()
 {
-    configuration_.getValue( LOGFILE_PARAM, logFileName );
     configuration_.getValue( DATAFILE_PARAM, dataFileName );
     configuration_.getValue( NUMFRAMES_PARAM, maxFrames );
     configuration_.getValue( CAMERAPOS_PARAM, cameraPosition );
