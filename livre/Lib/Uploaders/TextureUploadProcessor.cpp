@@ -29,7 +29,6 @@
 #include <livre/core/Dash/DashRenderNode.h>
 #include <livre/core/Dash/DashTree.h>
 #include <livre/core/Render/GLContext.h>
-#include <livre/core/Render/GLWidget.h>
 #include <livre/core/Render/Renderer.h>
 #include <livre/core/Render/gl.h>
 
@@ -108,46 +107,37 @@ private:
 };
 
 TextureUploadProcessor::TextureUploadProcessor( DashTreePtr dashTree,
-                                                TextureCache &textureCache )
-    : _dashTree( dashTree ),
-      _textureCache( textureCache ),
-      _currentFrameID( 0 ),
-      _threadOp( TO_NONE ),
-      _firstTimeLoaded( false )
+                                                GLContextPtr shareContext,
+                                                GLContextPtr context,
+                                                const uint32_t maxTextureMemory )
+    : GLContextTrait( context )
+    , _dashTree( dashTree )
+    , _shareContext( shareContext )
+    , _textureCache( GL_LUMINANCE8 )
+    , _currentFrameID( 0 )
+    , _threadOp( TO_NONE )
+    , _firstTimeLoaded( false )
 {
     setDashContext( dashTree->createContext());
-}
-
-void TextureUploadProcessor::setGLWidget( GLWidgetPtr glWidgetPtr )
-{
-    _glWidgetPtr = glWidgetPtr;
+    _textureCache.setMaximumMemory( maxTextureMemory );
 }
 
 bool TextureUploadProcessor::initializeThreadRun_()
 {
-    setName( "TextureUpload" );
-    if( !DashProcessor::initializeThreadRun_( ) )
-        return false;
-
-    return true;
+    setName( "TexUp" );
+    return DashProcessor::initializeThreadRun_();
 }
 
 bool TextureUploadProcessor::onPreCommit_( const uint32_t outputConnection LB_UNUSED )
 {
-    if( !_firstTimeLoaded )
-        return false;
-
-    return true;
+    return _firstTimeLoaded;
 }
 
 void TextureUploadProcessor::onPostCommit_( const uint32_t connection LB_UNUSED,
-                                            const CommitState state LB_UNUSED )
+                                            const CommitState state )
 {
-    if( _glWidgetPtr && state != CS_NOCHANGE )
-        glFinish( );
-
-    if( _glWidgetPtr && state == CS_COMMITED )
-        _glWidgetPtr->update();
+    if( state != CS_NOCHANGE )
+        glFinish();
 }
 
 void TextureUploadProcessor::_loadData()
@@ -187,15 +177,12 @@ void TextureUploadProcessor::_loadData()
 
 void TextureUploadProcessor::runLoop_( )
 {
-    if( _glWidgetPtr && getGLContext() &&
-        livre::GLContext::getCurrent() != glContextPtr_.get( ))
+    LBASSERT( getGLContext( ));
+    if( GLContext::getCurrent() != getGLContext().get( ))
     {
-        _glWidgetPtr->getGLContext()->shareContext( getGLContext( ));
-        glContextPtr_->makeCurrent();
+        _shareContext->shareContext( getGLContext( ));
+        getGLContext()->makeCurrent();
     }
-
-    if( livre::GLContext::getCurrent() != glContextPtr_.get( ))
-        return;
 
     processorInputPtr_->applyAll( 0 );
 #ifdef _ITT_DEBUG_

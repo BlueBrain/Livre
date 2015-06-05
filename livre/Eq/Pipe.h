@@ -33,36 +33,6 @@ public:
     ~Pipe();
 
     /**
-     * @return The texture upload processor.
-     */
-    TextureUploadProcessorPtr getTextureUploadProcessor( );
-
-    /**
-     * @return The const texture upload processor.
-     */
-    ConstTextureUploadProcessorPtr getTextureUploadProcessor( ) const;
-
-    /**
-     * @return The data upload processor.
-     */
-    DataUploadProcessorPtr getDataUploadProcessor( );
-
-    /**
-     * @return The const data upload processor.
-     */
-    ConstDataUploadProcessorPtr getDataUploadProcessor( ) const;
-
-    /**
-     * @return The dash processor that is shared between channels.
-     */
-    DashProcessorPtr getProcessor();
-
-    /**
-     * @return The const dash processor that is shared between channels.
-     */
-    ConstDashProcessorPtr getProcessor() const;
-
-    /**
      * @return The frame data.
      */
     ConstFrameDataPtr getFrameData( ) const;

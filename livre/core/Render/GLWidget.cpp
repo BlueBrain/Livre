@@ -24,6 +24,7 @@ namespace livre
 {
 
 GLWidget::GLWidget()
+    : GLContextTrait( GLContextPtr( ))
 {
 }
 

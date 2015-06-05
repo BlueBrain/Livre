@@ -23,13 +23,14 @@
 namespace livre
 {
 
+GLContextTrait::GLContextTrait( GLContextPtr glContextPtr )
+    : glContextPtr_( glContextPtr )
+{
+}
+
 void GLContextTrait::setGLContext( GLContextPtr glContextPtr )
 {
-    if( onPreSetGLContext_() )
-    {
-        glContextPtr_ = glContextPtr;
-        onSetGLContext_( );
-    }
+    glContextPtr_ = glContextPtr;
 }
 
 ConstGLContextPtr GLContextTrait::getGLContext() const
@@ -40,11 +41,6 @@ ConstGLContextPtr GLContextTrait::getGLContext() const
 GLContextPtr GLContextTrait::getGLContext()
 {
     return glContextPtr_;
-}
-
-bool GLContextTrait::onPreSetGLContext_()
-{
-    return true;
 }
 
 }

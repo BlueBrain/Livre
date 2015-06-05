@@ -25,14 +25,12 @@
 namespace livre
 {
 
-/**
- * The GLProcessor class is based on the \see Processor class. It includes a context based on OpenGL
- */
 class GLContextTrait
 {
 public:
+    GLContextTrait( GLContextPtr glContextPtr );
 
-   virtual ~GLContextTrait() { }
+    virtual ~GLContextTrait() { }
 
     /**
      * Sets the GL context.
@@ -51,23 +49,10 @@ public:
     ConstGLContextPtr getGLContext( ) const;
 
 protected:
-
-    /**
-     * Is called before the dash context is set.
-     * @return Context is not set afterwards if false is returned.
-     */
-    virtual bool onPreSetGLContext_( );
-
-    /**
-     * Is called when the dash context is set.
-     */
-    virtual void onSetGLContext_( ) {}
-
     GLContextPtr glContextPtr_;
-
 };
 
 
 }
 
-#endif // _Processor_h_
+#endif // _GLContextTrait_h_
