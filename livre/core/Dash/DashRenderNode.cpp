@@ -28,8 +28,6 @@ enum DashAttributeType
     DNT_TEXTUREDATA       ,
     DNT_TEXTURE           ,
     DNT_VISIBLE           ,
-    DNT_TEXTURE_REQUESTED ,
-    DNT_DATA_REQUESTED    ,
     DNT_CACHE_MODIFIED
 };
 
@@ -57,16 +55,6 @@ bool DashRenderNode::isVisible( ) const
     return getAttribute_< bool >( DNT_VISIBLE );
 }
 
-bool DashRenderNode::isDataRequested( ) const
-{
-    return getAttribute_< bool >( DNT_DATA_REQUESTED );
-}
-
-bool DashRenderNode::isTextureRequested( ) const
-{
-    return getAttribute_< bool >( DNT_TEXTURE_REQUESTED );
-}
-
 void DashRenderNode::setLODNode( const LODNode& node )
 {
     *(_dashNode->getAttribute( DNT_NODE )) = node;
@@ -85,32 +73,6 @@ void DashRenderNode::setTextureObject( ConstCacheObjectPtr texture )
 void DashRenderNode::setVisible( bool visibility )
 {
     *(_dashNode->getAttribute( DNT_VISIBLE )) = visibility;
-}
-
-void DashRenderNode::setDataRequested( bool isRequested )
-{
-    *(_dashNode->getAttribute( DNT_DATA_REQUESTED )) = isRequested;
-}
-
-void DashRenderNode::setTextureRequested( bool isRequested )
-{
-    *(_dashNode->getAttribute( DNT_TEXTURE_REQUESTED )) = isRequested;
-}
-
-void DashRenderNode::setRequested( RequestType requestType, bool isRequested )
-{
-    switch( requestType )
-    {
-        case DRT_VISIBILE:
-            setVisible( isRequested );
-            break;
-        case DRT_DATA:
-            setDataRequested( isRequested );
-            break;
-        case DRT_TEXTURE:
-            setTextureRequested( isRequested );
-            break;
-    }
 }
 
 void DashRenderNode::initializeDashNode( dash::NodePtr dashNode )
@@ -133,14 +95,6 @@ void DashRenderNode::initializeDashNode( dash::NodePtr dashNode )
     dash::AttributePtr isVisible = new dash::Attribute();
     *isVisible = false;
     dashNode->insert( isVisible );
-
-    dash::AttributePtr isTextureRequested = new dash::Attribute();
-    *isTextureRequested = false;
-    dashNode->insert( isTextureRequested );
-
-    dash::AttributePtr isDataRequested = new dash::Attribute();
-    *isDataRequested = false;
-    dashNode->insert( isDataRequested );
 
     dash::AttributePtr cacheObjectModified = new dash::Attribute();
     *cacheObjectModified = true;

@@ -24,7 +24,6 @@ namespace livre
 
 enum DashAttributeType
 {
-    DNT_TREE_PRIORITY     ,
     DNT_FRAME_ID          ,
     DNT_THREAD_OPERATION  ,
     DNT_FRUSTUM
@@ -33,11 +32,7 @@ enum DashAttributeType
 DashRenderStatus::DashRenderStatus()
     : _dashNode( new dash::Node() )
 {
-    dash::AttributePtr priority = new dash::Attribute();
-    *priority = LP_NONE;
-    _dashNode->insert( priority );
-
-    dash::AttributePtr currentRenderID = new dash::Attribute();
+   dash::AttributePtr currentRenderID = new dash::Attribute();
     *currentRenderID = (uint64_t)0;
     _dashNode->insert( currentRenderID );
 
@@ -48,16 +43,6 @@ DashRenderStatus::DashRenderStatus()
     dash::AttributePtr frustum = new dash::Attribute();
     *frustum = Frustum();
     _dashNode->insert( frustum );
-}
-
-LoadPriority DashRenderStatus::getLoadPriority( ) const
-{
-    return _getAttribute< LoadPriority >( DNT_TREE_PRIORITY );
-}
-
-void DashRenderStatus::setLoadPriority( const LoadPriority priority )
-{
-    *(_dashNode->getAttribute( DNT_TREE_PRIORITY )) = priority;
 }
 
 uint64_t DashRenderStatus::getFrameID( ) const

@@ -33,18 +33,6 @@ namespace livre
 {
 
 /**
- * The LoadPriority enum is used to state the load priority.
- */
-enum LoadPriority
-{
-    LP_NONE, //!< No priority.
-    LP_VISIBLE, //!< Visibles first.
-    LP_TEXTURE, //!< Textures first.
-    LP_DATA, //!< Data first.
-    LP_ALL //!< Load all.
-};
-
-/**
  * The ThreadOperation enum is used to send commands to the threads.
  */
 enum ThreadOperation
@@ -54,7 +42,6 @@ enum ThreadOperation
     TO_EXIT, //!< Exit.
     TO_CONTINUE //!< Resume.
 };
-
 
 /**
  * The DashRenderStatus class enable access to render status between different dash contexts.
@@ -70,17 +57,6 @@ public:
      * @return The dash node.
      */
     dash::NodePtr getDashNode() const { return _dashNode; }
-
-    /**
-     * @return The tree priority ( data, texture data or texture ). Used at data loading stages.
-     */
-    LoadPriority getLoadPriority() const;
-
-    /**
-     * Sets the tree priority ( data, texture data or texture ). Used at data loading stages.
-     * @param priority Tree access priority. It can be data, texture data or texture.
-     */
-    void setLoadPriority( const LoadPriority priority );
 
     /**
      * @return The current frame id.

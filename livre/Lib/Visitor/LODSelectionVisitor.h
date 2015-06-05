@@ -39,11 +39,9 @@ public:
     /**
      * @param dashTree The data structure for dash tree.
      * @param lodFrustum Frustum to be queried.
-     * @param requestType Type of query ( visible, texture data, data ).
      */
     LODSelectionVisitor( DashTreePtr dashTree,
-                         const LODFrustum& lodFrustum,
-                         const RequestType requestType );
+                         const LODFrustum& lodFrustum );
 
     /**
      * Visits the node.
@@ -55,7 +53,6 @@ public:
 private:
 
     const LODFrustum& lodFrustum_;
-    const RequestType requestType_;
 };
 
 }

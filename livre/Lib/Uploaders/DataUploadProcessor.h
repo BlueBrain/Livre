@@ -58,8 +58,6 @@ private:
     bool initializeThreadRun_( ) final;
     void runLoop_( ) final;
     void _loadData();
-    bool _loadPrioritizedData( const Frustum& frustum,
-                               const LoadPriority priority );
 
     DashTreePtr _dashTree;
     GLContextPtr _shareContext;

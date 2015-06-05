@@ -215,7 +215,7 @@ void RenderView::generateRequest_( const Frustum& currentFrustum,
                                     depth,
                                     distances );
     DashTreePtr dashTree = renderSetGenerator.getDashTree();
-    LODSelectionVisitor renderVisitor( dashTree, renderFrustum, DRT_VISIBILE );
+    LODSelectionVisitor renderVisitor( dashTree, renderFrustum );
 
     dfsTraverser_.traverse( volumeInfo.rootNode, renderVisitor );
 }
