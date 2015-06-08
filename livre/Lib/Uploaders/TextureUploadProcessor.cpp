@@ -49,33 +49,23 @@ class TextureLoaderVisitor : public RenderNodeVisitor
 {
 public:
 
-    enum LoadPriority
-    {
-        LP_VISIBLE,
-        LP_TEXTURE
-    };
-
     TextureLoaderVisitor( DashTreePtr dashTree,
                           TextureCache& textureCache,
                           ProcessorInputPtr processorInput,
-                          ProcessorOutputPtr processorOutput,
-                          LoadPriority loadPriority  )
+                          ProcessorOutputPtr processorOutput )
         : RenderNodeVisitor( dashTree ),
           textureCache_( textureCache ),
           processorInput_( processorInput ),
-          processorOutput_( processorOutput ),
-          loadPriority_( loadPriority )
+          processorOutput_( processorOutput )
     {}
 
     void visit( DashRenderNode& renderNode, VisitState& state ) final;
-    void setLoadPriority( LoadPriority loadPriority ) { loadPriority_ = loadPriority; }
 
 private:
 
     TextureCache& textureCache_;
     ProcessorInputPtr processorInput_;
     ProcessorOutputPtr processorOutput_;
-    LoadPriority loadPriority_;
 };
 
 class CollectVisiblesVisitor : public RenderNodeVisitor
@@ -145,30 +135,10 @@ void TextureUploadProcessor::_loadData()
     TextureLoaderVisitor loadVisitor( _dashTree,
                                       _textureCache,
                                       processorInputPtr_,
-                                      processorOutputPtr_,
-                                      TextureLoaderVisitor::LP_VISIBLE );
+                                      processorOutputPtr_ );
 
     DFSTraversal traverser;
     const RootNode& rootNode = _dashTree->getDataSource()->getVolumeInformation().rootNode;
-    const DashRenderStatus& renderStatus = _dashTree->getRenderStatus();
-    switch( renderStatus.getLoadPriority( ))
-    {
-        case LP_ALL:
-        {
-            loadVisitor.setLoadPriority( TextureLoaderVisitor::LP_VISIBLE );
-            traverser.traverse( rootNode, loadVisitor );
-            loadVisitor.setLoadPriority( TextureLoaderVisitor::LP_TEXTURE );
-            break;
-        }
-        case LP_VISIBLE:
-            loadVisitor.setLoadPriority( TextureLoaderVisitor::LP_VISIBLE );
-            break;
-        case LP_TEXTURE:
-            loadVisitor.setLoadPriority( TextureLoaderVisitor::LP_TEXTURE );
-            break;
-        default:
-            break;
-    }
     traverser.traverse( rootNode, loadVisitor );
 
     if( !_firstTimeLoaded )
@@ -233,28 +203,10 @@ void TextureLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state 
     if( !lodNode.isValid() )
         return;
 
-    if( lodNode.getRefLevel() > 0)
-    {
-        switch( loadPriority_ )
-        {
-            case LP_VISIBLE:
-                state.setVisitChild( !renderNode.isVisible() );
-                break;
-            case LP_TEXTURE:
-            {
-                DashRenderNode parentNode( getDashTree()->getParentNode( lodNode.getNodeId( )));
-                state.setVisitChild( !( !renderNode.isTextureRequested() &&
-                                        parentNode.isTextureRequested( )));
-                break;
-            }
-        }
-    }
-
-    if( ( loadPriority_ == LP_VISIBLE && !renderNode.isVisible() ) ||
-        ( loadPriority_ == LP_TEXTURE && !renderNode.isTextureRequested() ) )
-    {
+    if( !renderNode.isVisible())
         return;
-    }
+
+    state.setVisitChild( false );
 
     const ConstCacheObjectPtr texPtr = renderNode.getTextureObject();
     if( texPtr->isLoaded() )
@@ -282,9 +234,7 @@ void TextureLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state 
 #ifdef _ITT_DEBUG_
     __itt_task_end( ittTextureLoadDomain );
 #endif //_ITT_DEBUG_
-
-            if( loadPriority_ == LP_VISIBLE )
-                renderNode.setTextureObject( &lodTexture );
+            renderNode.setTextureObject( &lodTexture );
 
             renderNode.setTextureDataObject( TextureDataObject::getEmptyPtr() );
             processorOutput_->commit( 0 );
@@ -299,11 +249,8 @@ void TextureLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state 
     }
     else
     {
-        if( loadPriority_ == LP_VISIBLE )
-        {
-            renderNode.setTextureObject( &texture );
-            processorOutput_->commit( 0 );
-        }
+        renderNode.setTextureObject( &texture );
+        processorOutput_->commit( 0 );
     }
 
     state.setBreakTraversal( processorInput_->dataWaitingOnInput( 0 ) );

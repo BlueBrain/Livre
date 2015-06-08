@@ -32,17 +32,6 @@
 namespace livre
 {
 
-
-/**
- * The data request type.
- */
-enum RequestType
-{
-    DRT_VISIBILE    = 0x00000001,
-    DRT_DATA        = 0x00000002,
-    DRT_TEXTURE     = 0x00000004
-};
-
 /**
  * The DashRenderNode class is an helper class to access the dash nodes attributes.
  */
@@ -85,18 +74,6 @@ public:
     bool isVisible() const;
 
     /**
-     * @return True, if data for the rendering is requested from disk.
-     * @warning This condition is set from outside of the object.
-     */
-    bool isDataRequested() const;
-
-    /**
-     * @return True, if texture for the rendering is requested.
-     * @warning This condition is set from outside of the object.
-     */
-    bool isTextureRequested() const;
-
-    /**
      * Sets the \see LODNode for the dash node.
      * @param node Sets the \see which is an abstract rendering information ( size of block, position, etcc )
      */
@@ -123,25 +100,6 @@ public:
      * @param visibility If parameter is true, node is visible.
      */
     void setVisible( bool visibility );
-
-    /**
-     * Sets data request for the node.
-     * @param isRequested If parameter is true, node data is requested.
-     */
-    void setDataRequested( bool isRequested );
-
-    /**
-     * Sets data texture request for the node.
-     * @param isRequested If parameter is true, node texture is requested.
-     */
-    void setTextureRequested( bool isRequested );
-
-   /**
-     * Generalizes the set request methods.
-     * @param requestType The request type for @see CacheObject. ( data, texture data or texture )
-     * @param isRequested If parameter is true, the requestType is requested.
-     */
-    void setRequested( RequestType requestType, bool isRequested );
 
     /**
      * Initializes an empty dash node with attributes.

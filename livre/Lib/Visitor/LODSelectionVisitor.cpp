@@ -27,11 +27,9 @@ namespace livre
 {
 
 LODSelectionVisitor::LODSelectionVisitor( DashTreePtr dashTree,
-                                          const LODFrustum& lodFrustum,
-                                          RequestType requestType )
+                                          const LODFrustum& lodFrustum )
     : RenderNodeVisitor( dashTree ),
-      lodFrustum_( lodFrustum ),
-      requestType_( requestType )
+      lodFrustum_( lodFrustum )
 {
 }
 
@@ -44,7 +42,7 @@ void LODSelectionVisitor::visit( DashRenderNode& renderNode, VisitState& state )
 
     const Boxf& worldBox = lodNode.getWorldBox();
 
-    if( !lodFrustum_.boxInFrustum( worldBox ) )
+    if( !lodFrustum_.boxInFrustum( worldBox ))
     {
         renderNode.setVisible( false );
         state.setVisitChild( false );
@@ -53,38 +51,15 @@ void LODSelectionVisitor::visit( DashRenderNode& renderNode, VisitState& state )
 
     const int32_t index = lodNode.getMaxRefLevel() - lodNode.getRefLevel() - 1;
 
-    switch( requestType_ )
-    {
-    case DRT_VISIBILE :
-    {
-        const bool isVisible = lodFrustum_.boxInSubFrustum( worldBox, index );
-        renderNode.setRequested( requestType_, isVisible );
+    const bool isVisible = lodFrustum_.boxInSubFrustum( worldBox, index );
+    renderNode.setVisible( isVisible );
 
-        const ConstCacheObjectPtr texture = renderNode.getTextureObject();
-        if( lodNode.getRefLevel() == 0 &&
-            !texture->isLoaded() )
-            renderNode.setRequested( requestType_, true );
+    const ConstCacheObjectPtr texture = renderNode.getTextureObject();
 
-        state.setVisitChild( !isVisible );
-        break;
-    }
-    case DRT_TEXTURE :
-    {
-        const bool isTextureRequested = lodFrustum_.boxInSubFrustum( worldBox, index );
-        renderNode.setRequested( requestType_, isTextureRequested );
-        DashRenderNode parentNode( getDashTree()->getParentNode( lodNode.getNodeId( )));
-        state.setVisitChild( isTextureRequested || !parentNode.isTextureRequested( ));
-        break;
-    }
-    case DRT_DATA :
-    {
-        const bool isDataRequested = lodFrustum_.boxInSubFrustum( worldBox, index );
-        renderNode.setRequested( requestType_, isDataRequested );
-        DashRenderNode parentNode( getDashTree()->getParentNode( lodNode.getNodeId( )));
-        state.setVisitChild( isDataRequested || !parentNode.isDataRequested( ));
-        break;
-    }
-    }
+    if( lodNode.getRefLevel() == 0 && !texture->isLoaded( ))
+        renderNode.setVisible( true );
+
+    state.setVisitChild( !isVisible );
 }
 
 }
