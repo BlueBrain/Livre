@@ -42,22 +42,15 @@ void LODSelectionVisitor::visit( DashRenderNode& renderNode, VisitState& state )
 
     const Boxf& worldBox = lodNode.getWorldBox();
 
-    if( !lodFrustum_.boxInFrustum( worldBox ))
-    {
-        renderNode.setVisible( false );
-        state.setVisitChild( false );
-        return;
-    }
+    const Plane& nearPlane = lodFrustum_.getFrustum().getWPlane( PL_NEAR );
+    Vector3f vmin, vmax;
+    nearPlane.getNearFarPoints( worldBox, vmin, vmax );
 
-    const int32_t index = lodNode.getMaxRefLevel() - lodNode.getRefLevel() - 1;
+    const uint32_t lod = lodFrustum_.getLODForPoint( vmin );
 
-    const bool isVisible = lodFrustum_.boxInSubFrustum( worldBox, index );
+    const bool isVisible = ( lod <= lodNode.getNodeId().getLevel( ));
+
     renderNode.setVisible( isVisible );
-
-    const ConstCacheObjectPtr texture = renderNode.getTextureObject();
-
-    if( lodNode.getRefLevel() == 0 && !texture->isLoaded( ))
-        renderNode.setVisible( true );
 
     state.setVisitChild( !isVisible );
 }

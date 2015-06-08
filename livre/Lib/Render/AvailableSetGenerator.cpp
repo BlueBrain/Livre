@@ -86,20 +86,15 @@ void VisibleCollectorVisitor::visit( DashRenderNode& renderNode, VisitState& sta
     if( !lodNode.isValid( ))
         return;
 
-    if( lodNode.getRefLevel() == INVALID_LEVEL )
-        return;
-
     const Boxf& worldBox = lodNode.getWorldBox();
 
-    if( !lodFrustum_.getFrustum().boxInFrustum( worldBox) )
-    {
-        state.setVisitChild( false );
-        return;
-    }
+    const Plane& nearPlane = lodFrustum_.getFrustum().getWPlane( PL_NEAR );
+    Vector3f vmin, vmax;
+    nearPlane.getNearFarPoints( worldBox, vmin, vmax );
 
-    const int32_t index = lodNode.getMaxRefLevel() - lodNode.getRefLevel() - 1;
+    const uint32_t lod = lodFrustum_.getLODForPoint( vmin );
 
-    if( lodFrustum_.boxInSubFrustum( worldBox, index ) )
+    if( lod <= lodNode.getNodeId().getLevel( ))
     {
         nodeVector_.push_back( renderNode.getDashNode() );
         state.setVisitChild( false );

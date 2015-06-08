@@ -101,6 +101,11 @@ public:
      */
     Vector4f getPlaneCoeffs() const;
 
+    /*
+     * Near far points of AABB are identified according to plane
+     */
+    void getNearFarPoints( const Boxf& bb, Vector3f& near, Vector3f& far ) const;
+
 private:
 
     // Variables to define a Plane in 3D space a*x + b*y + c*z + d = 0

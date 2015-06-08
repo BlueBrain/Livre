@@ -88,6 +88,12 @@ public:
      */
     float getExpandDistance( const PlaneId planeId ) const;
 
+    /**
+     * @param worldPoint is the point in world space.
+     * @return the lod for a given world point.
+     */
+    uint32_t getLODForPoint( const Vector3f& worldPoint ) const;
+
 private:
 
     Vector3f computeCorner_( const PlaneId planeId0,
