@@ -73,7 +73,7 @@ MemoryUnitPtr MemoryDataSource::getData( const LODNode& node )
                             _volumeInfo.getBytesPerVoxel();
     const Identifier nodeID = node.getNodeId().getId();
     const uint8_t* id = reinterpret_cast< const uint8_t* >( &nodeID );
-    const uint8_t fillValue = id[0] ^ id[1] ^ id[2] ^ id[3];
+    const uint8_t fillValue = ( id[0] ^ id[1] ^ id[2] ^ id[3] ) + 16;
     AllocMemoryUnitPtr memoryUnit( new AllocMemoryUnit );
     memoryUnit->alloc( 1, dataSize );
     ::memset( memoryUnit->getData< uint8_t >(), fillValue, dataSize );

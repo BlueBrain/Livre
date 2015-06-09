@@ -89,4 +89,27 @@ void Plane::set( const float a, const float b, const float c, const float d )
 
 Vector4f Plane::getPlaneCoeffs() const { return Vector4f( a_, b_, c_, d_ ); }
 
+void Plane::getNearFarPoints( const Boxf& bb,
+                              Vector3f& near,
+                              Vector3f& far) const
+{
+    const Vector3f& normal = getNormal();
+    const Vector3f& minPos = bb.getMin();
+    const Vector3f& maxPos = bb.getMax();
+
+    for( size_t i = 0; i < 3; ++i )
+    {
+        if( normal[ i ] >= 0.0 )
+        {
+            near[ i ] = minPos[ i ];
+            far[ i ] = maxPos[ i ];
+        }
+        else
+        {
+            near[ i ] = maxPos[ i ];
+            far[ i ] = minPos[ i ];
+        }
+    }
+}
+
 }

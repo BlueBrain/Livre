@@ -81,8 +81,7 @@ public:
         const LODNode& lodNode = renderNode.getLODNode();
 
         if( !lodNode.isValid() ||
-             lodNode.getRefLevel() == 0 ||
-             !renderNode.isVisible() )
+            !renderNode.isVisible( ))
         {
             return;
         }

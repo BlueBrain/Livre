@@ -64,6 +64,26 @@ LODFrustum::LODFrustum( const Frustum &frustum,
     computeFrustumLODLimits_( );
 }
 
+uint32_t LODFrustum::getLODForPoint( const Vector3f& worldPoint ) const
+{
+    const float t = frustum_.getFrustumLimits( PL_TOP );
+    const float b = frustum_.getFrustumLimits( PL_BOTTOM );
+
+    const float worldSpacePerPixel = (  t - b ) / screenHeight_;
+    const float voxelPerPixel = worldSpacePerVoxel_  / worldSpacePerPixel * screenSpaceError_;
+
+    const float distance = std::abs( frustum_.getWPlane( PL_NEAR ).distance( worldPoint ));
+
+    const float n = frustum_.getFrustumLimits( PL_NEAR );
+    const float voxelPerPixelInDistance = voxelPerPixel * distance / n;
+
+    const float lod = std::min( std::max( std::log2( voxelPerPixelInDistance ), 0.0f ),
+                                (float)nbLODLevels_ - 1 );
+
+    return nbLODLevels_ - lod - 1;
+}
+
+
 const Frustum& LODFrustum::getFrustum( ) const
 {
     return frustum_;
