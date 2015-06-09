@@ -204,7 +204,6 @@ void DataUploadProcessor::_loadData()
     const Frustum& frustum = renderStatus.getFrustum();
     _currentFrameID = renderStatus.getFrameID();
 
-
     DashNodeVector dashNodeList;
     DepthCollectorVisitor depthCollectorVisitor( _dashTree,
                                                  _rawDataCache,
@@ -215,7 +214,7 @@ void DataUploadProcessor::_loadData()
     const RootNode& rootNode = _dashTree->getDataSource()->getVolumeInformation().rootNode;
 
     DFSTraversal traverser;
-    traverser.traverse( rootNode, depthCollectorVisitor );
+    traverser.traverse( rootNode, depthCollectorVisitor, _currentFrameID );
 
     std::sort( dashNodeList.begin( ), dashNodeList.end( ), DepthCompare( frustum ));
     CollectionTraversal collectionTraverser;
@@ -224,9 +223,8 @@ void DataUploadProcessor::_loadData()
                                                             _textureDataCache,
                                                             processorInputPtr_,
                                                             processorOutputPtr_ );
+
     collectionTraverser.traverse( dashNodeList, refLevelDataLoaderVisitor );
-
-
     processorOutputPtr_->commit( 0 );
 
     RawDataLoaderVisitor loadVisitor( _dashTree,
@@ -235,7 +233,7 @@ void DataUploadProcessor::_loadData()
                                       processorInputPtr_,
                                       processorOutputPtr_ );
 
-    traverser.traverse( rootNode, loadVisitor );
+    traverser.traverse( rootNode, loadVisitor, _currentFrameID );
     processorOutputPtr_->commit( 0 );
 }
 

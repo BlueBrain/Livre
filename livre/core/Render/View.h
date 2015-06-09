@@ -40,7 +40,7 @@ struct FrameInfo
     RenderBricks renderBrickList; //!<The textures are guaranteed to be in memory.
     DashNodeVector allNodeList; //!< The list of nodes to be rendered.
     DashNodeVector renderNodeList; //!< The list of nodes to be rendered.
-    DashNodeVector notAvailableRenderNodeList; //<! The unavailable nodes for rendering.
+    DashNodeVector notAvailableRenderNodeList; //!< The unavailable nodes for rendering.
     const Frustum& previousFrustum; //!< The previous frustum.
     const Frustum& currentFrustum; //!< The current frustum.
 };

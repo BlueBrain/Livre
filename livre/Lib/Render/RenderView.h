@@ -25,6 +25,7 @@
 #include <livre/core/Render/Frustum.h>
 #include <livre/core/Dash/DashRenderNode.h>
 #include <livre/Lib/Visitor/DFSTraversal.h>
+#include <livre/Lib/Configuration/ApplicationParameters.h>
 #include <livre/Lib/Configuration/VolumeRendererParameters.h>
 #include <livre/Lib/Configuration/EFPrefetchAlgorithmParameters.h>
 
@@ -38,19 +39,19 @@ namespace livre
 class RenderView : public View
 {
 public:
-
     RenderView( );
 
     /**
      * Sets the rendering parameters
      * @param volumeRendererParameters Volume rendering parameters.
      * @param prefetchAlgorithmParameters Prefetch algorithm parameters.
+     * @param applicationParameters General application parameters.
      */
-    void setParameters(  ConstVolumeRendererParametersPtr volumeRendererParameters,
-                         ConstEFPParametersPtr prefetchAlgorithmParameters );
+    void setParameters( ConstVolumeRendererParametersPtr volumeRendererParameters,
+                        ConstEFPParametersPtr prefetchAlgorithmParameters,
+                        ConstApplicationParametersPtr applicationParameters );
 
 private:
-
     bool onPreRender_( const GLWidget& widget,
                        const FrameInfo& frameInfo,
                        RenderingSetGenerator& renderSetGenerator,
@@ -87,6 +88,8 @@ private:
     VolumeRendererParameters volumeRendererParameters_;
 
     EFPrefetchAlgorithmParameters prefetchAlgorithmParameters_;
+
+    ApplicationParameters applicationParameters_;
 };
 
 }

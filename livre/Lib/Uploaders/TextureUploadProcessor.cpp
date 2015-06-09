@@ -138,7 +138,7 @@ void TextureUploadProcessor::_loadData()
 
     DFSTraversal traverser;
     const RootNode& rootNode = _dashTree->getDataSource()->getVolumeInformation().rootNode;
-    traverser.traverse( rootNode, loadVisitor );
+    traverser.traverse( rootNode, loadVisitor, _currentFrameID );
 
     if( !_firstTimeLoaded )
         _firstTimeLoaded = true;
@@ -167,11 +167,10 @@ void TextureUploadProcessor::runLoop_( )
         DFSTraversal traverser;
         const RootNode& rootNode =
                 _dashTree->getDataSource()->getVolumeInformation().rootNode;
-        traverser.traverse( rootNode, collectVisibles );
+        traverser.traverse( rootNode, collectVisibles, renderStatus.getFrameID( ));
         _textureCache.setProtectList( _protectUnloading );
         _currentFrameID = renderStatus.getFrameID();
     }
-
     _checkThreadOperation();
     _loadData();
     processorOutputPtr_->commit( 0 );

@@ -18,6 +18,7 @@
  */
 
 #include <livre/core/Dash/DashRenderNode.h>
+#include <livre/core/Dash/DashRenderStatus.h>
 #include <livre/core/Dash/DashTree.h>
 #include <livre/core/Render/RenderBrick.h>
 #include <livre/core/Data/VolumeDataSource.h>
@@ -182,7 +183,7 @@ void AvailableSetGenerator::generateRenderingSet( const Frustum& viewFrustum,
                                              allNodesList );
     DFSTraversal dfsTraverser_;
     dfsTraverser_.traverse( getDashTree()->getDataSource()->getVolumeInformation().rootNode,
-                            visibleSelector );
+                            visibleSelector, getDashTree()->getRenderStatus().getFrameID( ));
 
     NodeIdDashNodeMap nodeIdDashNodeMap;
     LoadedTextureCollectVisitor collector( getDashTree(),

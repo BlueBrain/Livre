@@ -28,6 +28,7 @@
 
 #include <livre/core/Render/Frustum.h>
 #include <livre/core/Dash/DashRenderNode.h>
+#include <livre/core/Dash/DashRenderStatus.h>
 #include <livre/core/Dash/DashTree.h>
 #include <livre/core/Render/RenderingSetGenerator.h>
 #include <livre/core/Maths/Maths.h>
@@ -49,16 +50,17 @@ RenderView::RenderView( )
 }
 
 void RenderView::setParameters( ConstVolumeRendererParametersPtr volumeRendererParameters,
-                                ConstEFPParametersPtr prefetchAlgorithmParameters )
+                                ConstEFPParametersPtr prefetchAlgorithmParameters,
+                                ConstApplicationParametersPtr applicationParameters )
 {
     volumeRendererParameters_ = *volumeRendererParameters;
     prefetchAlgorithmParameters_ = *prefetchAlgorithmParameters;
+    applicationParameters_ = *applicationParameters;
 
     const float screenSpaceError = volumeRendererParameters_.screenSpaceError;
     texturePFrustumScreenSpaceError_ = screenSpaceError;
     dataPFrustumScreenSpaceError_ = screenSpaceError;
     visibleFrustumScreenSpaceError_ = screenSpaceError;
-
 }
 
 bool RenderView::onPreRender_( const GLWidget& /*widget*/,
@@ -66,12 +68,19 @@ bool RenderView::onPreRender_( const GLWidget& /*widget*/,
                                RenderingSetGenerator& renderSetGenerator,
                                Frustum& modifiedFrustum )
 {
+    DashRenderStatus& renderStatus = renderSetGenerator.getDashTree()->getRenderStatus();
+
+    const uint32_t nextFrameID =
+        applicationParameters_.animationEnabled ? renderStatus.getFrameID() + 1
+                                                : renderStatus.getFrameID();
+
     switch( volumeRendererParameters_.renderStrategy )
     {
     default:
         LBUNIMPLEMENTED;
         // no break;
     case RS_ANY_FRAME:
+        renderStatus.setFrameID( nextFrameID );
         return true;
     case RS_ITERATED_FULL_FRAME:
         if( !frameInfo.notAvailableRenderNodeList.empty( ))
@@ -81,7 +90,12 @@ bool RenderView::onPreRender_( const GLWidget& /*widget*/,
                                       modifiedFrustum );
         return true;
     case RS_FULL_FRAME:
-        return frameInfo.notAvailableRenderNodeList.empty();
+        if( frameInfo.notAvailableRenderNodeList.empty( ))
+        {
+            renderStatus.setFrameID( nextFrameID );
+            return true;
+        }
+        return false;
     }
 }
 
@@ -194,7 +208,6 @@ void RenderView::generateRequest_( const Frustum& currentFrustum,
                                    RenderingSetGenerator& renderSetGenerator,
                                    const uint32_t windowHeight )
 {
-
     FloatVector distances;
     const float frustumSurfaceDelta = 0.0f;
     distances.resize( PL_FAR + 1, frustumSurfaceDelta );
@@ -217,7 +230,9 @@ void RenderView::generateRequest_( const Frustum& currentFrustum,
     DashTreePtr dashTree = renderSetGenerator.getDashTree();
     LODSelectionVisitor renderVisitor( dashTree, renderFrustum );
 
-    dfsTraverser_.traverse( volumeInfo.rootNode, renderVisitor );
+    DashRenderStatus& renderStatus = dashTree->getRenderStatus();
+    const uint32_t frameId = renderStatus.getFrameID();
+    dfsTraverser_.traverse( volumeInfo.rootNode, renderVisitor, frameId );
 }
 
 }

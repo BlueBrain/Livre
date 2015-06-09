@@ -33,6 +33,7 @@
 #include <livre/core/DashPipeline/DashProcessorInput.h>
 #include <livre/core/DashPipeline/DashProcessorOutput.h>
 
+#include <livre/Lib/Configuration/ApplicationParameters.h>
 #include <livre/Lib/Configuration/VolumeRendererParameters.h>
 
 #include <livre/Lib/Uploaders/DataUploadProcessor.h>
@@ -117,7 +118,13 @@ public:
 
     void initializePipelineProcessors()
     {
+        Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
+        const uint32_t startFrame = pipe->getFrameData()->getAppParameters()->frames.x();
+        const uint32_t maxMemory = pipe->getFrameData()->getVRParameters()->maxTextureMemoryMB;
+
         Node* node = static_cast< Node* >( _window->getNode( ));
+        node->getDashTree()->getRenderStatus().setFrameID( startFrame );
+
         _dashProcessorPtr->setDashContext( node->getDashTree()->createContext( ));
 
         GLContextPtr dataUploadContext( new EqContext( _window ));
@@ -127,8 +134,6 @@ public:
                                                                 node->getRawDataCache(),
                                                                 node->getTextureDataCache( )));
 
-        Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
-        const uint32_t maxMemory = pipe->getFrameData()->getVRParameters()->maxTextureMemoryMB;
         GLContextPtr textureUploadContext( new EqContext( _window ));
         _textureUploadProcessorPtr.reset( new TextureUploadProcessor( node->getDashTree(),
                                                                       _windowContext,
