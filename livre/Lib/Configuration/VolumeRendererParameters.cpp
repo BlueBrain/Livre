@@ -22,21 +22,21 @@
 namespace livre
 {
 
-const std::string SCREENSPACEERROR_PARAM = "sse";
 const std::string DATACACHEMEM_PARAM = "data-cache-mem";
+const std::string SCREENSPACEERROR_PARAM = "sse";
+const std::string SYNCHRONOUSMODE_PARAM = "synchronous";
 const std::string TEXTURECACHEMEM_PARAM = "texture-cache-mem";
 const std::string TEXTUREDATACACHEMEM_PARAM = "texture-data-cache-mem";
 
 VolumeRendererParameters::VolumeRendererParameters()
     : Parameters( "Volume Renderer Parameters" )
     , renderStrategy( RS_ANY_FRAME )
+    , synchronousModeEnabled( false )
     , screenSpaceError( 1.0f )
     , maxDataMemoryMB( 1024u )
     , maxTextureMemoryMB( 3072u )
     , maxTextureDataMemoryMB( 8192u )
 {
-    configuration_.addDescription( configGroupName_, SCREENSPACEERROR_PARAM,
-                                   "Screen space error", screenSpaceError );
     configuration_.addDescription( configGroupName_, DATACACHEMEM_PARAM,
                                    "Maximum data cache memory (MB)",
                                    maxDataMemoryMB );
@@ -46,6 +46,10 @@ VolumeRendererParameters::VolumeRendererParameters()
     configuration_.addDescription( configGroupName_, TEXTUREDATACACHEMEM_PARAM,
                                    "Maximum texture data cache memory (MB)",
                                    maxTextureDataMemoryMB );
+    configuration_.addDescription( configGroupName_, SCREENSPACEERROR_PARAM,
+                                   "Screen space error", screenSpaceError );
+    configuration_.addDescription( configGroupName_, SYNCHRONOUSMODE_PARAM,
+                                   "Enable synchronous mode", synchronousModeEnabled );
 }
 
 void VolumeRendererParameters::deserialize( co::DataIStream &is, const uint64_t )
@@ -80,7 +84,9 @@ VolumeRendererParameters &VolumeRendererParameters::operator=(
 
 void VolumeRendererParameters::initialize_()
 {
-    renderStrategy = RS_ANY_FRAME;
+    configuration_.getValue( SYNCHRONOUSMODE_PARAM, synchronousModeEnabled );
+    if( synchronousModeEnabled )
+        renderStrategy = RS_FULL_FRAME;
     configuration_.getValue( SCREENSPACEERROR_PARAM, screenSpaceError );
     configuration_.getValue( DATACACHEMEM_PARAM, maxDataMemoryMB );
     configuration_.getValue( TEXTURECACHEMEM_PARAM, maxTextureMemoryMB );

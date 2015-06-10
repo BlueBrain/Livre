@@ -37,6 +37,7 @@ struct VolumeRendererParameters : public Parameters
     VolumeRendererParameters();
 
     RenderStrategy renderStrategy; //!< Render strategy
+    bool synchronousModeEnabled; //!< Synchronous mode
     float screenSpaceError;  //!< Screen space error
     uint32_t maxDataMemoryMB;  //!< Settings for data cache
     uint32_t maxTextureMemoryMB; //!< Settings for texture cache
