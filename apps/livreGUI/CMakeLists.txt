@@ -5,6 +5,9 @@
 #
 # This file is part of Livre <https://github.com/BlueBrain/Livre>
 #
+if(NOT Qt5Widgets_FOUND)
+  return()
+endif()
 if(NOT ZEQ_FOUND)
   message(STATUS "Not building GUI due to missing ZeroEQ dependency")
   return()
