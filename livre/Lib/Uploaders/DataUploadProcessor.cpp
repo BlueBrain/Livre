@@ -182,7 +182,7 @@ void DataUploadProcessor::runLoop_( )
         dataSource->initializeGL();
     }
 
-    processorInputPtr_->applyAll( 0 );
+    processorInputPtr_->applyAll( CONNECTION_ID );
 
 #ifdef _ITT_DEBUG_
     __itt_task_begin ( ittDataLoadDomain, __itt_null, __itt_null, ittDataComputationTask );
@@ -227,7 +227,7 @@ void DataUploadProcessor::_loadData()
     collectionTraverser.traverse( dashNodeList, refLevelDataLoaderVisitor );
 
 
-    processorOutputPtr_->commit( 0 );
+    processorOutputPtr_->commit( CONNECTION_ID );
 
     RawDataLoaderVisitor loadVisitor( _dashTree,
                                       _rawDataCache,
@@ -236,7 +236,7 @@ void DataUploadProcessor::_loadData()
                                       processorOutputPtr_ );
 
     traverser.traverse( rootNode, loadVisitor );
-    processorOutputPtr_->commit( 0 );
+    processorOutputPtr_->commit( CONNECTION_ID );
 }
 
 void DataUploadProcessor::_checkThreadOperation()
@@ -247,7 +247,7 @@ void DataUploadProcessor::_checkThreadOperation()
     {
         _threadOp = op;
         renderStatus.setThreadOp( op );
-        processorOutputPtr_->commit( 0 );
+        processorOutputPtr_->commit( CONNECTION_ID );
     }
 
     if( _threadOp == TO_EXIT )
@@ -261,7 +261,7 @@ void RawDataLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state 
     if( !node.isValid() )
         return;
 
-    state.setBreakTraversal( processorInput_->dataWaitingOnInput( 0 ));
+    state.setBreakTraversal( processorInput_->dataWaitingOnInput( CONNECTION_ID ));
 
     if( !renderNode.isVisible())
         return;
@@ -291,7 +291,7 @@ void RawDataLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state 
     if( _clock.getTime64() > 1000 ) // commit once every second
     {
         _clock.reset();
-        processorOutput_->commit( 0 );
+        processorOutput_->commit( CONNECTION_ID );
     }
 #ifdef _ITT_DEBUG_
     __itt_task_end( ittDataLoadDomain );
@@ -323,7 +323,7 @@ void DepthCollectorVisitor::visit( DashRenderNode& renderNode, VisitState& state
     if( textureData.isLoaded() )
     {
         renderNode.setTextureDataObject( &textureData );
-        processorOutput_->commit( 0 );
+        processorOutput_->commit( CONNECTION_ID );
         return;
     }
 
@@ -365,8 +365,8 @@ void DepthSortedDataLoaderVisitor::visit( DashRenderNode& renderNode, VisitState
     }
 #endif //_DEBUG_
 
-    processorOutput_->commit( 0 );
-    state.setBreakTraversal( processorInput_->dataWaitingOnInput( 0 ) );
+    processorOutput_->commit( CONNECTION_ID );
+    state.setBreakTraversal( processorInput_->dataWaitingOnInput( CONNECTION_ID ));
 
 }
 

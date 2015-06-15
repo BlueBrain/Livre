@@ -53,19 +53,23 @@ public:
                           TextureCache& textureCache,
                           ProcessorInputPtr processorInput,
                           ProcessorOutputPtr processorOutput )
-        : RenderNodeVisitor( dashTree ),
-          textureCache_( textureCache ),
-          processorInput_( processorInput ),
-          processorOutput_( processorOutput )
+        : RenderNodeVisitor( dashTree )
+        , textureCache_( textureCache )
+        , processorInput_( processorInput )
+        , processorOutput_( processorOutput )
+        , allDataLoaded_( true ) // be optimistic; will be set to false on first
+                                 // non-loaded data during visit
     {}
 
     void visit( DashRenderNode& renderNode, VisitState& state ) final;
 
-private:
+    bool isAllDataLoaded() const { return allDataLoaded_; }
 
+private:
     TextureCache& textureCache_;
     ProcessorInputPtr processorInput_;
     ProcessorOutputPtr processorOutput_;
+    bool allDataLoaded_;
 };
 
 class CollectVisiblesVisitor : public RenderNodeVisitor
@@ -98,17 +102,18 @@ private:
 TextureUploadProcessor::TextureUploadProcessor( DashTreePtr dashTree,
                                                 GLContextPtr shareContext,
                                                 GLContextPtr context,
-                                                const uint32_t maxTextureMemory )
+                                                ConstVolumeRendererParametersPtr vrParameters )
     : GLContextTrait( context )
     , _dashTree( dashTree )
     , _shareContext( shareContext )
     , _textureCache( GL_LUMINANCE8 )
     , _currentFrameID( 0 )
     , _threadOp( TO_NONE )
-    , _firstTimeLoaded( false )
+    , _allDataLoaded( false )
+    , _vrParameters( vrParameters )
 {
     setDashContext( dashTree->createContext());
-    _textureCache.setMaximumMemory( maxTextureMemory );
+    _textureCache.setMaximumMemory( vrParameters->maxTextureDataMemoryMB );
 }
 
 bool TextureUploadProcessor::initializeThreadRun_()
@@ -119,10 +124,10 @@ bool TextureUploadProcessor::initializeThreadRun_()
 
 bool TextureUploadProcessor::onPreCommit_( const uint32_t outputConnection LB_UNUSED )
 {
-    return _firstTimeLoaded;
+    return _allDataLoaded;
 }
 
-void TextureUploadProcessor::onPostCommit_( const uint32_t connection LB_UNUSED,
+void TextureUploadProcessor::onPostCommit_( const uint32_t outputConnection LB_UNUSED,
                                             const CommitState state )
 {
     if( state != CS_NOCHANGE )
@@ -131,20 +136,20 @@ void TextureUploadProcessor::onPostCommit_( const uint32_t connection LB_UNUSED,
 
 void TextureUploadProcessor::_loadData()
 {
-    TextureLoaderVisitor loadVisitor( _dashTree,
-                                      _textureCache,
-                                      processorInputPtr_,
-                                      processorOutputPtr_ );
+    TextureLoaderVisitor loadVisitor( _dashTree, _textureCache,
+                                      processorInputPtr_, processorOutputPtr_ );
 
     DFSTraversal traverser;
     const RootNode& rootNode = _dashTree->getDataSource()->getVolumeInformation().rootNode;
     traverser.traverse( rootNode, loadVisitor );
 
-    if( !_firstTimeLoaded )
-        _firstTimeLoaded = true;
+    if( _vrParameters->renderStrategy == RS_FULL_FRAME )
+        _allDataLoaded = loadVisitor.isAllDataLoaded();
+    else
+        _allDataLoaded = true;
 }
 
-void TextureUploadProcessor::runLoop_( )
+void TextureUploadProcessor::runLoop_()
 {
     LBASSERT( getGLContext( ));
     if( GLContext::getCurrent() != getGLContext().get( ))
@@ -153,7 +158,7 @@ void TextureUploadProcessor::runLoop_( )
         getGLContext()->makeCurrent();
     }
 
-    processorInputPtr_->applyAll( 0 );
+    processorInputPtr_->applyAll( CONNECTION_ID );
 #ifdef _ITT_DEBUG_
     __itt_task_begin ( ittTextureLoadDomain, __itt_null, __itt_null, ittTextureComputationTask );
 #endif //_ITT_DEBUG_
@@ -174,7 +179,7 @@ void TextureUploadProcessor::runLoop_( )
 
     _checkThreadOperation();
     _loadData();
-    processorOutputPtr_->commit( 0 );
+    processorOutputPtr_->commit( CONNECTION_ID );
 
 #ifdef _ITT_DEBUG_
     __itt_task_end( ittTextureLoadDomain );
@@ -189,7 +194,7 @@ void TextureUploadProcessor::_checkThreadOperation()
     {
         _threadOp = op;
         renderStatus.setThreadOp( op );
-        processorOutputPtr_->commit( 0 );
+        processorOutputPtr_->commit( CONNECTION_ID );
     }
 
     if( _threadOp == TO_EXIT )
@@ -210,9 +215,7 @@ void TextureLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state 
     const ConstCacheObjectPtr texPtr = renderNode.getTextureObject();
     if( texPtr->isLoaded() )
     {
-#ifdef _DEBUG_
         LBVERB << "Texture already commited from dash tree:" << lodNode.getNodeId() << std::endl;
-#endif //_DEBUG_
         return;
     }
 
@@ -236,23 +239,21 @@ void TextureLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state 
             renderNode.setTextureObject( &lodTexture );
 
             renderNode.setTextureDataObject( TextureDataObject::getEmptyPtr() );
-            processorOutput_->commit( 0 );
+            processorOutput_->commit( CONNECTION_ID );
         }
-#ifdef _DEBUG_
         else
         {
+            allDataLoaded_ = false;
             LBVERB << "Texture data not loaded:" << lodNode.getNodeId() << std::endl;
         }
-#endif// _DEBUG_
-
     }
     else
     {
         renderNode.setTextureObject( &texture );
-        processorOutput_->commit( 0 );
+        processorOutput_->commit( CONNECTION_ID );
     }
 
-    state.setBreakTraversal( processorInput_->dataWaitingOnInput( 0 ) );
+    state.setBreakTraversal( processorInput_->dataWaitingOnInput( CONNECTION_ID ) );
 }
 
 }

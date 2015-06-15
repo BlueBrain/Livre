@@ -61,30 +61,6 @@ void RenderView::setParameters( ConstVolumeRendererParametersPtr volumeRendererP
 
 }
 
-bool RenderView::onPreRender_( const GLWidget& /*widget*/,
-                               const FrameInfo& frameInfo,
-                               RenderingSetGenerator& renderSetGenerator,
-                               Frustum& modifiedFrustum )
-{
-    switch( volumeRendererParameters_.renderStrategy )
-    {
-    default:
-        LBUNIMPLEMENTED;
-        // no break;
-    case RS_ANY_FRAME:
-        return true;
-    case RS_ITERATED_FULL_FRAME:
-        if( !frameInfo.notAvailableRenderNodeList.empty( ))
-            generateIteratedFrustum_( renderSetGenerator,
-                                      frameInfo.previousFrustum,
-                                      frameInfo.currentFrustum,
-                                      modifiedFrustum );
-        return true;
-    case RS_FULL_FRAME:
-        return frameInfo.notAvailableRenderNodeList.empty();
-    }
-}
-
 void RenderView::onPostRender_( const bool /*rendered*/,
                                 const GLWidget& widget,
                                 const FrameInfo& frameInfo,
@@ -98,68 +74,6 @@ void RenderView::onPostRender_( const bool /*rendered*/,
 
     const uint32_t windowHeight = pixelViewport.getHeight();
     generateRequest_( frameInfo.currentFrustum, renderSetGenerator, windowHeight );
-}
-
-void RenderView::generateIteratedFrustum_( RenderingSetGenerator& renderSetGenerator,
-                                           const Frustum& previousFrustum,
-                                           const Frustum& currentFrustum,
-                                           Frustum& modifiedFrustum ) const
-{
-    Vector3f prevEyePosition;
-    Matrix3f previousRotationMat;
-
-    maths::getRotationAndEyePositionFromModelView( previousFrustum.getModelViewMatrix(),
-                                                   previousRotationMat,
-                                                   prevEyePosition );
-    Vector3f newEyePosition;
-    Matrix3f newRotationMat;
-
-    maths::getRotationAndEyePositionFromModelView( currentFrustum.getModelViewMatrix(),
-                                                   newRotationMat,
-                                                   newEyePosition );
-
-    const Quaternionf prevRotation( previousRotationMat );
-    const Quaternionf newRotation( newRotationMat );
-
-    const Vector3f difference = newEyePosition - prevEyePosition;
-
-    const float interpolateBegin = 0.9f;
-    const float interpolateEnd = 0.0f;
-    const float interpolateDelta = 0.1f;
-
-    for( float t = interpolateBegin; t >= interpolateEnd ; t+= -interpolateDelta )
-    {
-        t = std::max( t, 0.0f );
-
-        const Quaternionf& interpolatedQuat =
-                Quaternionf::slerp( t, prevRotation, newRotation );
-
-        const Vector3f translation = prevEyePosition + difference * t;
-
-        const Matrix4f& modelViewMatrix =
-                maths::computeModelViewMatrix( interpolatedQuat, translation );
-
-        Frustum iteratedFrustum;
-        iteratedFrustum.initialize( modelViewMatrix, currentFrustum.getProjectionMatrix() );
-
-        RenderBricks renderBrickList;
-        DashNodeVector allNodeList;
-        DashNodeVector renderNodeList;
-        DashNodeVector notAvailableRenderNodeList;
-        renderSetGenerator.generateRenderingSet( iteratedFrustum,
-                                                  allNodeList,
-                                                  renderNodeList,
-                                                  notAvailableRenderNodeList,
-                                                  renderBrickList );
-
-        if( notAvailableRenderNodeList.empty( ))
-        {
-            modifiedFrustum = iteratedFrustum;
-            return;
-        }
-    }
-
-    modifiedFrustum = previousFrustum;
 }
 
 void RenderView::freeTextures_( const DashNodeVector& renderNodeList )

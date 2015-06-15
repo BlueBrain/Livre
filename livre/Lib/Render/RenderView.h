@@ -50,21 +50,10 @@ public:
                          ConstEFPParametersPtr prefetchAlgorithmParameters );
 
 private:
-
-    bool onPreRender_( const GLWidget& widget,
-                       const FrameInfo& frameInfo,
-                       RenderingSetGenerator& renderSetGenerator,
-                       Frustum& modifiedFrustum ) final;
-
     void onPostRender_(  const bool rendered,
                          const GLWidget& widget,
                          const FrameInfo& frameInfo,
                          RenderingSetGenerator& renderSetGenerator ) final;
-
-    void generateIteratedFrustum_( RenderingSetGenerator& renderSetGenerator,
-                                   const Frustum& previousFrustum,
-                                   const Frustum& currentFrustum,
-                                   Frustum& modifiedFrustum ) const;
 
     void generateRequest_( const Frustum& currentFrustum,
                            RenderingSetGenerator& renderSetGenerator,

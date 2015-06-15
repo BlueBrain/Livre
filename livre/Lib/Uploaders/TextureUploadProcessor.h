@@ -42,12 +42,12 @@ public:
      * @param dashTree The dash node hierarchy.
      * @param shareContext the context which this processors shares against.
      * @param context the context used by this processor.
-     * @param maxTextureMemory the maximum memory in MB for texture cache
+     * @param vrParameters the volume rendering parameters.
      */
     TextureUploadProcessor( DashTreePtr dashTree,
                             GLContextPtr shareContext,
                             GLContextPtr context,
-                            const uint32_t maxTextureMemory );
+                            ConstVolumeRendererParametersPtr vrParameters );
 
 private:
     bool onPreCommit_( const uint32_t connection ) final;
@@ -65,7 +65,8 @@ private:
     uint64_t _currentFrameID;
     ThreadOperation _threadOp;
     CacheIdSet _protectUnloading;
-    bool _firstTimeLoaded;
+    bool _allDataLoaded;
+    ConstVolumeRendererParametersPtr _vrParameters;
 };
 
 }

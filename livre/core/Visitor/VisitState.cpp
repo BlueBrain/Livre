@@ -23,9 +23,9 @@ namespace livre
 {
 
 VisitState::VisitState( )
-    : visitChild_( true ),
-      breakVisitTraversal_( false ),
-      visitNeighbours_( true )
+    : visitChild_( true )
+    , breakVisitTraversal_( false )
+    , visitNeighbours_( true )
 {}
 
 bool VisitState::getVisitChild( ) const
