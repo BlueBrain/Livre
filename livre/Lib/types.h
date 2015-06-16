@@ -72,6 +72,8 @@ typedef boost::scoped_ptr< TextureDataCache > TextureDataCachePtr;
 /** Map definitions */
 typedef boost::unordered_map< uint32_t, DataUploadProcessorPtr > DataUploadProcessorPtrMap;
 
+const uint32_t CONNECTION_ID( 0u );
+
 }
 
 #endif // _types_h_

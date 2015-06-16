@@ -99,10 +99,10 @@ protected:
      * @param modifiedFrustum The frustum can be modified before rendering.
      * @return If returned false, the frame is not going to be rendered.
      */
-    virtual bool onPreRender_( const GLWidget& widget,
-                               const FrameInfo& frameInfo,
-                               RenderingSetGenerator& renderSetGenerator,
-                               Frustum& modifiedFrustum ) = 0;
+    virtual bool onPreRender_( const GLWidget& widget LB_UNUSED,
+                               const FrameInfo& frameInfo LB_UNUSED,
+                               RenderingSetGenerator& renderSetGenerator LB_UNUSED,
+                               Frustum& modifiedFrustum LB_UNUSED ) { return true; }
 
     /**
      * Is called after the rendering.

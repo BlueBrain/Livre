@@ -28,7 +28,6 @@ namespace livre
 enum RenderStrategy
 {
     RS_ANY_FRAME, //!< Render with data available
-    RS_ITERATED_FULL_FRAME, //!< Render in between frames between two camera positions for all the needed data
     RS_FULL_FRAME //!< Render for all data at the current camera position, do not skip until it is satisfied
 };
 

@@ -40,7 +40,6 @@
 
 #include <eq/gl.h>
 
-#define CONNECTION_ID 0u
 const uint32_t maxQueueSize = 65536;
 
 namespace livre
@@ -88,14 +87,12 @@ public:
     void frameStart()
     {
         _dashProcessorPtr->getDashContext()->setCurrent();
-
-        if( _dashProcessorPtr->getProcessorInput_()->dataWaitingOnInput( CONNECTION_ID ))
-            _dashProcessorPtr->getProcessorInput_()->applyAll( CONNECTION_ID );
     }
 
     void frameFinish()
     {
-        _dashProcessorPtr->getProcessorOutput_()->commit( 0 );
+        _dashProcessorPtr->getProcessorOutput_()->commit( CONNECTION_ID );
+        _dashProcessorPtr->getProcessorInput_()->applyAll( CONNECTION_ID );
     }
 
     void startUploadProcessors()
@@ -110,7 +107,7 @@ public:
     void stopUploadProcessors()
     {
         // TO_EXIT was set as ThreadOp in Channel::configExit()
-        _dashProcessorPtr->getProcessorOutput_()->commit( 0 );
+        _dashProcessorPtr->getProcessorOutput_()->commit( CONNECTION_ID );
         _textureUploadProcessorPtr->join();
         _dataUploadProcessorPtr->join();
     }
@@ -128,12 +125,11 @@ public:
                                                                 node->getTextureDataCache( )));
 
         Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
-        const uint32_t maxMemory = pipe->getFrameData()->getVRParameters()->maxTextureMemoryMB;
         GLContextPtr textureUploadContext( new EqContext( _window ));
         _textureUploadProcessorPtr.reset( new TextureUploadProcessor( node->getDashTree(),
                                                                       _windowContext,
                                                                       textureUploadContext,
-                                                                      maxMemory ));
+                                                    pipe->getFrameData()->getVRParameters( )));
 
         startUploadProcessors();
     }
