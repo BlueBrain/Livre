@@ -11,4 +11,5 @@ if(QT_VERSION VERSION_LESS 4.8) # WAR C++11 incompatibility
   add_definitions(-DQT_NO_DEBUG)
 endif()
 add_subdirectory(livre)
+add_subdirectory(livreBatch)
 add_subdirectory(livreGUI)
