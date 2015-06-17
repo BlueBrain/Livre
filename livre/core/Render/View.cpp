@@ -54,24 +54,15 @@ const Viewportf& View::getViewport() const
     return viewport_;
 }
 
-void View::render( const GLWidget& widget,
-                   RenderingSetGenerator& renderSetGenerator )
+void View::render( const FrameInfo& frameInfo,
+                   const RenderBricks& renderBricks,
+                   const GLWidget& widget )
 {
     if( !rendererPtr_ )
         return ;
 
-    previousFrustum_ = currentFrustum_;
-    currentFrustum_ = getFrustum();
-
-    FrameInfo frameInfo( currentFrustum_, previousFrustum_ );
-
-    renderSetGenerator.generateRenderingSet( currentFrustum_,
-                                              frameInfo.allNodeList,
-                                              frameInfo.renderNodeList,
-                                              frameInfo.notAvailableRenderNodeList,
-                                              frameInfo.renderBrickList );
 #ifndef LIVRE_DEBUG_RENDERING
-    const size_t all = frameInfo.allNodeList.size();
+    const size_t all = frameInfo.allNodesList.size();
     const size_t haveNot = frameInfo.notAvailableRenderNodeList.size();
     const size_t have = all - haveNot;
 
@@ -80,26 +71,19 @@ void View::render( const GLWidget& widget,
     progress_ += static_cast< unsigned long >( have ) - progress_.count();
 #endif
 
-    Frustum newFrustum = currentFrustum_;
+    onPreRender_( widget, frameInfo );
 
-    const bool continueRendering = onPreRender_( widget, frameInfo,
-                                                 renderSetGenerator,
-                                                 newFrustum );
-    if( continueRendering )
-    {
-        currentFrustum_ = newFrustum;
+     if( !renderBricks.empty( ))
+        rendererPtr_->render( widget,
+                              *this,
+                              frameInfo.currentFrustum,
+                              renderBricks );
 
-        if( !frameInfo.renderBrickList.empty( ))
-            rendererPtr_->render( widget, *this, currentFrustum_,
-                                  frameInfo.renderBrickList );
-    }
-
-    onPostRender_( continueRendering, widget, frameInfo, renderSetGenerator );
+    onPostRender_( widget, frameInfo );
 }
 
-FrameInfo::FrameInfo( const Frustum& cFrustum, const Frustum& pFrustum )
-    : previousFrustum( pFrustum ),
-      currentFrustum( cFrustum )
+FrameInfo::FrameInfo( const Frustum& cFrustum )
+    : currentFrustum( cFrustum )
 {
 }
 

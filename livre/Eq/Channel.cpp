@@ -41,11 +41,16 @@
 
 #include <livre/core/DashPipeline/DashProcessorOutput.h>
 #include <livre/core/DashPipeline/DashProcessorInput.h>
+#include <livre/core/Visitor/RenderNodeVisitor.h>
+#include <livre/Lib/Algorithm/LODFrustum.h>
+#include <livre/Lib/Cache/TextureObject.h>
 #include <livre/Lib/Render/AvailableSetGenerator.h>
 #include <livre/Lib/Render/RenderView.h>
 
+
 #include <livre/core/Render/Frustum.h>
 #include <livre/core/Render/GLWidget.h>
+#include <livre/core/Render/RenderBrick.h>
 #include <livre/core/Dash/DashRenderStatus.h>
 #include <livre/core/Dash/DashTree.h>
 #include <livre/core/Data/VolumeDataSource.h>
@@ -119,6 +124,68 @@ public:
 
     livre::Channel* _channel;
 };
+
+class SelectVisibles : public livre::RenderNodeVisitor
+{
+public:
+
+    SelectVisibles( DashTreePtr dashTree,
+                    const Frustum& frustum,
+                    const float screenSpaceError,
+                    const uint32_t windowHeight );
+
+    void visit( DashRenderNode& renderNode, VisitState& state ) final;
+
+    livre::LODFrustum lodFrustum_;
+};
+
+SelectVisibles::SelectVisibles(
+        DashTreePtr dashTree,
+        const Frustum& frustum,
+        const float screenSpaceError,
+        const uint32_t windowHeight )
+    : RenderNodeVisitor( dashTree )
+{
+    FloatVector distances;
+
+    const float frustumSurfaceDelta = 0.0f;
+    distances.resize( PL_FAR + 1, frustumSurfaceDelta );
+
+    const VolumeInformation& volumeInformation =
+            dashTree->getDataSource()->getVolumeInformation();
+    const float wsPerVoxel = volumeInformation.worldSpacePerVoxel;
+    const float depth = volumeInformation.rootNode.getDepth();
+    const float levelZeroNodeSize = float( volumeInformation.maximumBlockSize[ 0 ] ) *
+                                    volumeInformation.worldSpacePerVoxel;
+
+    lodFrustum_ = LODFrustum( frustum,
+                              screenSpaceError,
+                              windowHeight,
+                              wsPerVoxel,
+                              levelZeroNodeSize,
+                              depth,
+                              distances );
+}
+
+void SelectVisibles::visit( DashRenderNode& renderNode, VisitState& state )
+{
+    const LODNode& lodNode = renderNode.getLODNode();
+    if( !lodNode.isValid( ))
+        return;
+
+    const Boxf& worldBox = lodNode.getWorldBox();
+
+    const Plane& nearPlane = lodFrustum_.getFrustum().getWPlane( PL_NEAR );
+    Vector3f vmin, vmax;
+    nearPlane.getNearFarPoints( worldBox, vmin, vmax );
+
+    const uint32_t lod = lodFrustum_.getLODForPoint( vmin );
+
+    const bool isVisible = (lod <= lodNode.getNodeId().getLevel());
+
+    state.setVisitChild( !isVisible );
+    renderNode.setVisible( isVisible );
+}
 
 const float nearPlane = 0.1f;
 const float farPlane = 15.0f;
@@ -195,9 +262,51 @@ public:
         glScissor( 0, 0, channelPvp.w, channelPvp.h );
     }
 
+    void generateRenderBricks( const DashNodeVector& renderNodeList,
+                               RenderBricks& renderBricks )
+    {
+        BOOST_FOREACH( const dash::NodePtr& dashNode, renderNodeList )
+        {
+            const DashRenderNode dashRenderNode( dashNode );
+            const ConstTextureObjectPtr texture =
+                boost::static_pointer_cast< const TextureObject >(
+                    dashRenderNode.getTextureObject( ));
+
+            RenderBrickPtr renderBrick( new RenderBrick( texture->getLODNode(),
+                                                         texture->getTextureState( )));
+
+            renderBricks.push_back( renderBrick );
+        }
+    }
+
+    void requestData()
+    {
+        Viewporti pixelViewport;
+        const eq::PixelViewport& channelPvp = _channel->getPixelViewport();
+        pixelViewport.set( Vector2f( channelPvp.x, channelPvp.y ),
+                           Vector2f( channelPvp.w, channelPvp.h ));
+
+        livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
+        livre::Window* window = static_cast< livre::Window* >( _channel->getWindow( ));
+        livre::Pipe* pipe = static_cast< livre::Pipe* >( window->getPipe( ));
+        SelectVisibles visitor( node->getDashTree(),
+                                _currentFrustum,
+                                pixelViewport.getHeight(),
+                                pipe->getFrameData()->getVRParameters()->screenSpaceError );
+
+        livre::DFSTraversal traverser;
+        traverser.traverse( node->getDashTree()->getDataSource()->getVolumeInformation().rootNode,
+                            visitor );
+
+        window->commit();
+        window->apply();
+    }
+
     void frameDraw( const eq::uint128_t& )
     {
         applyCamera();
+        initializeLivreFrustum();
+        requestData();
 
         const eq::fabric::Viewport& vp = _channel->getViewport( );
         const Viewportf viewport( Vector2f( vp.x, vp.y ),
@@ -211,6 +320,10 @@ public:
         AvailableSetGenerator generateSet( node->getDashTree(),
                                            pixelViewport.getHeight(),
                                            getFrameData()->getVRParameters()->screenSpaceError );
+
+        FrameInfo frameInfo( _currentFrustum );
+        generateSet.generateRenderingSet( _currentFrustum,
+                                          frameInfo);
 
         EqRenderViewPtr renderViewPtr =
                 boost::static_pointer_cast< EqRenderView >( _renderViewPtr );
@@ -226,7 +339,16 @@ public:
         renderer->initTransferFunction(
                     pipe->getFrameData()->getRenderSettings()->getTransferFunction( ));
 
-        _glWidgetPtr->renderView( _renderViewPtr.get(), generateSet );
+        RenderBricks renderBricks;
+        generateRenderBricks( frameInfo.renderNodeList,
+                              renderBricks );
+
+        renderViewPtr->render( frameInfo,
+                               renderBricks,
+                               *_glWidgetPtr );
+
+        DashRenderStatus& renderStatus = node->getDashTree()->getRenderStatus();
+        renderStatus.setFrameID( renderStatus.getFrameID() + 1 );
     }
 
     void prepareFramesAndSetPvp( const eq::Frames& frames,
@@ -419,7 +541,10 @@ public:
     livre::Channel* const _channel;
 };
 
-const Frustum& EqRenderView::getFrustum() const { return _channel->initializeLivreFrustum(); }
+const Frustum& EqRenderView::getFrustum() const
+{
+    return _channel->initializeLivreFrustum();
+}
 
 }
 

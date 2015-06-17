@@ -64,6 +64,7 @@ class EventHandler;
 class EventHandlerFactory;
 class EventInfo;
 class EventMapper;
+class FrameInfo;
 class Frustum;
 class GLContext;
 class GLSLShaders;

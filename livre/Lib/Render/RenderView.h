@@ -50,14 +50,9 @@ public:
                          ConstEFPParametersPtr prefetchAlgorithmParameters );
 
 private:
-    void onPostRender_(  const bool rendered,
-                         const GLWidget& widget,
-                         const FrameInfo& frameInfo,
-                         RenderingSetGenerator& renderSetGenerator ) final;
 
-    void generateRequest_( const Frustum& currentFrustum,
-                           RenderingSetGenerator& renderSetGenerator,
-                           const uint32_t windowHeight );
+    void onPostRender_( const GLWidget& widget,
+                        const FrameInfo& frameInfo ) final;
 
     void freeTextures_( const DashNodeVector& renderNodeList );
 

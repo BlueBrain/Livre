@@ -20,6 +20,7 @@
 #include <livre/core/Dash/DashRenderNode.h>
 #include <livre/core/Dash/DashTree.h>
 #include <livre/core/Render/RenderBrick.h>
+#include <livre/core/Render/View.h>
 #include <livre/core/Data/VolumeDataSource.h>
 #include <livre/core/Data/VolumeInformation.h>
 #include <livre/core/Visitor/RenderNodeVisitor.h>
@@ -86,20 +87,13 @@ void VisibleCollectorVisitor::visit( DashRenderNode& renderNode, VisitState& sta
     if( !lodNode.isValid( ))
         return;
 
-    const Boxf& worldBox = lodNode.getWorldBox();
+    const bool isVisible = renderNode.isVisible();
 
-    const Plane& nearPlane = lodFrustum_.getFrustum().getWPlane( PL_NEAR );
-    Vector3f vmin, vmax;
-    nearPlane.getNearFarPoints( worldBox, vmin, vmax );
-
-    const uint32_t lod = lodFrustum_.getLODForPoint( vmin );
-
-    if( lod <= lodNode.getNodeId().getLevel( ))
-    {
+    if( isVisible )
         nodeVector_.push_back( renderNode.getDashNode() );
-        state.setVisitChild( false );
-    }
-}
+
+    state.setVisitChild( !isVisible );
+ }
 
 class LoadedTextureCollectVisitor : public RenderNodeVisitor
 {
@@ -170,16 +164,13 @@ AvailableSetGenerator::AvailableSetGenerator( DashTreePtr tree,
 }
 
 void AvailableSetGenerator::generateRenderingSet( const Frustum& viewFrustum,
-                                        DashNodeVector& allNodesList,
-                                        DashNodeVector& renderNodeList,
-                                        DashNodeVector& notAvailableRenderNodeList,
-                                        RenderBricks& renderBrickList )
+                                                  FrameInfo& frameInfo )
 {
     VisibleCollectorVisitor visibleSelector( getDashTree(),
                                              viewFrustum,
                                              _screenSpaceError,
                                              _windowHeight,
-                                             allNodesList );
+                                             frameInfo.allNodesList );
     DFSTraversal dfsTraverser_;
     dfsTraverser_.traverse( getDashTree()->getDataSource()->getVolumeInformation().rootNode,
                             visibleSelector );
@@ -187,33 +178,27 @@ void AvailableSetGenerator::generateRenderingSet( const Frustum& viewFrustum,
     NodeIdDashNodeMap nodeIdDashNodeMap;
     LoadedTextureCollectVisitor collector( getDashTree(),
                                            nodeIdDashNodeMap,
-                                           notAvailableRenderNodeList );
+                                           frameInfo.notAvailableRenderNodeList );
 
     CollectionTraversal colTraverser;
-    colTraverser.traverse( allNodesList, collector );
+    colTraverser.traverse( frameInfo.allNodesList, collector );
 
-    NodeIdDashNodeMap::const_iterator it = nodeIdDashNodeMap.begin();
+    NodeIdDashNodeMap::iterator it = nodeIdDashNodeMap.begin();
     while( it != nodeIdDashNodeMap.end() )
     {
         DashRenderNode childNode( it->second );
-        if( !notAvailableRenderNodeList.empty() &&
+        if( !frameInfo.notAvailableRenderNodeList.empty() &&
              hasParentInMap( childNode, nodeIdDashNodeMap ))
         {
             it = nodeIdDashNodeMap.erase( it );
         }
         else
         {
-            renderNodeList.push_back( it->second );
-
-            const ConstTextureObjectPtr texture =
-                boost::static_pointer_cast< const TextureObject >( childNode.getTextureObject( ));
-
-            RenderBrickPtr renderBrick( new RenderBrick( texture->getLODNode(),
-                                                         texture->getTextureState( )));
-            renderBrickList.push_back( renderBrick );
+            frameInfo.renderNodeList.push_back( it->second );
             ++it;
         }
     }
+
 }
 
 }

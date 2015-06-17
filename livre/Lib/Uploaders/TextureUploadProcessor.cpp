@@ -124,7 +124,9 @@ bool TextureUploadProcessor::initializeThreadRun_()
 
 bool TextureUploadProcessor::onPreCommit_( const uint32_t outputConnection LB_UNUSED )
 {
-    return _allDataLoaded;
+    const bool ret = _allDataLoaded;
+    _allDataLoaded = false;
+    return ret;
 }
 
 void TextureUploadProcessor::onPostCommit_( const uint32_t outputConnection LB_UNUSED,

@@ -89,12 +89,6 @@ public:
         _dashProcessorPtr->getDashContext()->setCurrent();
     }
 
-    void frameFinish()
-    {
-        _dashProcessorPtr->getProcessorOutput_()->commit( CONNECTION_ID );
-        _dashProcessorPtr->getProcessorInput_()->applyAll( CONNECTION_ID );
-    }
-
     void startUploadProcessors()
     {
         if( !_textureUploadProcessorPtr->isRunning( ))
@@ -110,6 +104,16 @@ public:
         _dashProcessorPtr->getProcessorOutput_()->commit( CONNECTION_ID );
         _textureUploadProcessorPtr->join();
         _dataUploadProcessorPtr->join();
+    }
+
+    void commit()
+    {
+        _dashProcessorPtr->getProcessorOutput_()->commit( CONNECTION_ID );
+    }
+
+    void apply()
+    {
+        _dashProcessorPtr->getProcessorInput_()->applyAll( CONNECTION_ID );
     }
 
     void initializePipelineProcessors()
@@ -244,11 +248,14 @@ void Window::frameStart( const eq::uint128_t& frameID,
     eq::Window::frameStart( frameID, frameNumber );
 }
 
-void Window::frameFinish( const eq::uint128_t& frameID,
-                          const uint32_t frameNumber )
+void Window::commit()
 {
-    _impl->frameFinish();
-    eq::Window::frameFinish( frameID, frameNumber );
+    _impl->commit();
+}
+
+void Window::apply()
+{
+    _impl->apply();
 }
 
 }

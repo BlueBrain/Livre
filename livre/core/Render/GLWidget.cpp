@@ -33,11 +33,6 @@ GLWidget::~GLWidget( )
 
 }
 
-void GLWidget::renderView( View* view, RenderingSetGenerator& renderSetGenerator )
-{
-    view->render( *this, renderSetGenerator );
-}
-
 void GLWidget::setViewport( const View* view, Viewporti& viewport  ) const
 {
     const Vector2f window( getWidth(), getHeight() );

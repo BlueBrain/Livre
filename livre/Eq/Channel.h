@@ -42,7 +42,6 @@ public:
      * @param parent Parent window.
      */
     Channel( eq::Window* parent );
-
     ~Channel();
 
 private:

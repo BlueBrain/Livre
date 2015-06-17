@@ -26,7 +26,6 @@ std::istream& operator>>( std::istream& is, vmml::vector<3ul, float>& vec )
 {
     return is >> std::skipws >> vec.x() >> vec.y() >> vec.z();
 }
-
 }
 
 namespace livre

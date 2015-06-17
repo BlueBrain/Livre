@@ -45,16 +45,10 @@ public:
     /**
      * Generates the rendering set according to the given frustum.
      * @param viewFrustum Frustum to query HVD
-     * @param allNodesList The list of nodes expected to be rendered.
-     * @param renderNodeList The list of nodes to be rendered.
-     * @param notAvailableRenderNodeList The nodes which are not available for the frustum query.
-     * @param renderBrickList The list of bricks to be rendered.
+     * @param frameInfo Keeps the frame information
      */
     void generateRenderingSet( const Frustum& viewFrustum,
-                               DashNodeVector& allNodesList,
-                               DashNodeVector& renderNodeList,
-                               DashNodeVector& notAvailableRenderNodeList,
-                               RenderBricks& renderBrickList );
+                               FrameInfo& frameInfo );
 
 private:
 
