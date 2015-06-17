@@ -364,10 +364,7 @@ public:
                                              brickInfo.n_voxels[ 1 ],
                                              brickInfo.n_voxels[ 2 ] );
 
-        lodNode = LODNode( internalNode,
-                           _volumeInfo.rootNode.getDepth(),
-                           blockSize,
-                           worldBox );
+        lodNode = LODNode( internalNode, blockSize, worldBox );
     }
 
     uint32_t _getBrickIndex( const uint32_t x,

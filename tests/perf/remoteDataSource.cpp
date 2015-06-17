@@ -88,7 +88,6 @@ BOOST_AUTO_TEST_CASE( testRemote )
             livre::Boxf worldBox( vmml::Vector3i( 0.f ) ,
                                   vmml::Vector3i( 1.f ));
             livre::LODNode node( livre::NodeId( 0, block ),
-                                 info.rootNode.getDepth() /*maxLevel*/,
                                  block,
                                  worldBox );
             clock.reset();

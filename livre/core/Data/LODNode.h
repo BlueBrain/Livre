@@ -41,24 +41,20 @@ public:
     /**
      * Computes the world position from given information.
      * @param nodeId Unique node id.
-     * @param maxLevel Maximum tree levels.
      * @param blockSize Block size in voxels.
      * @param levelTotalBlockDimensions Total number of blocks in the corresponding tree level.
      */
     LODNode( const NodeId nodeId,
-             const int32_t maxLevel,
              const Vector3i& blockSize,
              const Vector3i& levelTotalBlockDimensions );
 
     /**
      * Computes the world position from given information.
      * @param nodeId Unique node id.
-     * @param maxLevel Maximum tree levels.
      * @param blockSize Block size in voxels.
      * @param worldBox Node position in the world space.
      */
     LODNode( const NodeId nodeId,
-             const int32_t maxLevel,
              const Vector3i& blockSize,
              const Boxf& worldBox );
 
@@ -84,11 +80,6 @@ public:
      * @return The box in world coordinates.
      */
     const Boxf& getWorldBox( ) const { return worldBox_; }
-
-    /**
-     * @return Maximum tree level.
-     */
-    int32_t getMaxRefLevel( ) const { return maxLevel_; }
 
     /**
      * @return The tree level.
@@ -127,7 +118,6 @@ public:
 private:
 
     NodeId nodeId_; //!< Node id.
-    int32_t maxLevel_; //!< Max tree level.
     Vector3i blockSize_; //!< Number of blocks in each dimension.
     Boxui localVoxelBox_; //!< Voxelwise position and dimension in reflevel resolution in model space.
     Boxf worldBox_; //!< World box.
