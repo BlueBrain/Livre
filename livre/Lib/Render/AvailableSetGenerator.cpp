@@ -18,6 +18,7 @@
  */
 
 #include <livre/core/Dash/DashRenderNode.h>
+#include <livre/core/Dash/DashRenderStatus.h>
 #include <livre/core/Dash/DashTree.h>
 #include <livre/core/Render/RenderBrick.h>
 #include <livre/core/Render/View.h>
@@ -173,7 +174,7 @@ void AvailableSetGenerator::generateRenderingSet( const Frustum& viewFrustum,
                                              frameInfo.allNodesList );
     DFSTraversal dfsTraverser_;
     dfsTraverser_.traverse( getDashTree()->getDataSource()->getVolumeInformation().rootNode,
-                            visibleSelector );
+                            visibleSelector, getDashTree()->getRenderStatus().getFrameID( ));
 
     NodeIdDashNodeMap nodeIdDashNodeMap;
     LoadedTextureCollectVisitor collector( getDashTree(),
@@ -183,7 +184,7 @@ void AvailableSetGenerator::generateRenderingSet( const Frustum& viewFrustum,
     CollectionTraversal colTraverser;
     colTraverser.traverse( frameInfo.allNodesList, collector );
 
-    NodeIdDashNodeMap::iterator it = nodeIdDashNodeMap.begin();
+    NodeIdDashNodeMap::const_iterator it = nodeIdDashNodeMap.begin();
     while( it != nodeIdDashNodeMap.end() )
     {
         DashRenderNode childNode( it->second );
@@ -198,7 +199,6 @@ void AvailableSetGenerator::generateRenderingSet( const Frustum& viewFrustum,
             ++it;
         }
     }
-
 }
 
 }

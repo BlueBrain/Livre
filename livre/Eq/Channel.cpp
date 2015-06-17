@@ -193,7 +193,6 @@ const float farPlane = 15.0f;
 class Channel
 {
 public:
-
     Channel( livre::Channel* channel )
           : _renderViewPtr( new EqRenderView( this ))
           , _glWidgetPtr( new EqGlWidget( channel ))
@@ -296,7 +295,7 @@ public:
 
         livre::DFSTraversal traverser;
         traverser.traverse( node->getDashTree()->getDataSource()->getVolumeInformation().rootNode,
-                            visitor );
+                            visitor, node->getDashTree()->getRenderStatus().getFrameID( ));
 
         window->commit();
         window->apply();
@@ -346,9 +345,6 @@ public:
         renderViewPtr->render( frameInfo,
                                renderBricks,
                                *_glWidgetPtr );
-
-        DashRenderStatus& renderStatus = node->getDashTree()->getRenderStatus();
-        renderStatus.setFrameID( renderStatus.getFrameID() + 1 );
     }
 
     void prepareFramesAndSetPvp( const eq::Frames& frames,
@@ -382,7 +378,7 @@ public:
 
     void applyCamera()
     {
-        ConstCameraSettingsPtr cameraSettings = getFrameData( )->getCameraSettings( );
+        ConstCameraSettingsPtr cameraSettings = getFrameData()->getCameraSettings( );
 
         const Matrix4f& cameraRotation = cameraSettings->getCameraRotation( );
         const Matrix4f& modelRotation = cameraSettings->getModelRotation( );
@@ -429,12 +425,6 @@ public:
         _glWidgetPtr->setGLContext( GLContextPtr( new EqContext( window )));
     }
 
-    void configExit()
-    {
-        livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
-        node->getDashTree()->getRenderStatus().setThreadOp( TO_EXIT );
-    }
-
     void addImageListener()
     {
         if( getFrameData( )->getFrameSettings()->getGrabFrame( ))
@@ -457,12 +447,11 @@ public:
             _channel->drawStatistics();
     }
 
-    void frameFinish( const uint32_t frameNumber )
+    void frameFinish()
     {
         livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
         DashRenderStatus& renderStatus = node->getDashTree()->getRenderStatus();
         renderStatus.setFrustum( _currentFrustum );
-        renderStatus.setFrameID( frameNumber );
     }
 
     void frameReadback( const eq::Frames& frames ) const
@@ -471,7 +460,7 @@ public:
         BOOST_FOREACH( eq::Frame* frame, frames )
         {
             frame->disableBuffer( eq::Frame::BUFFER_DEPTH );
-            frame->getFrameData( )->setRange( _drawRange );
+            frame->getFrameData()->setRange( _drawRange );
         }
     }
 
@@ -551,7 +540,6 @@ const Frustum& EqRenderView::getFrustum() const
 Channel::Channel( eq::Window* parent )
         : eq::Channel( parent )
         , _impl( new detail::Channel( this ))
-
 {
 }
 
@@ -569,12 +557,6 @@ bool Channel::configInit( const eq::uint128_t& initId )
     return true;
 }
 
-bool Channel::configExit()
-{
-    _impl->configExit();
-    return eq::Channel::configExit();
-}
-
 void Channel::frameDraw( const lunchbox::uint128_t& frameId )
 {
     _impl->frameDraw( frameId );
@@ -583,7 +565,7 @@ void Channel::frameDraw( const lunchbox::uint128_t& frameId )
 
 void Channel::frameFinish( const eq::uint128_t& frameID, const uint32_t frameNumber )
 {
-    _impl->frameFinish( frameNumber );
+    _impl->frameFinish();
     eq::Channel::frameFinish( frameID, frameNumber );
 }
 

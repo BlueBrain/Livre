@@ -59,11 +59,13 @@ private:
     std::unique_ptr< Impl > _impl;
 
     bool configInit( const eq::uint128_t& initId ) final;
+    bool configExit() final;
     bool configInitGL( const eq::uint128_t& initId ) final;
     bool configExitGL() final;
     void frameStart( const eq::uint128_t& frameID,
                      const uint32_t frameNumber ) final;
-
+    void frameFinish( const eq::uint128_t& frameID,
+                     const uint32_t frameNumber ) final;
 };
 
 }

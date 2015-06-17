@@ -59,17 +59,22 @@ public:
         , processorOutput_( processorOutput )
         , allDataLoaded_( true ) // be optimistic; will be set to false on first
                                  // non-loaded data during visit
+        , synchronous_( false )
     {}
 
     void visit( DashRenderNode& renderNode, VisitState& state ) final;
 
     bool isAllDataLoaded() const { return allDataLoaded_; }
 
+    bool isSynchronous() const { return synchronous_; }
+    void setSynchronous( const bool synchronous ) { synchronous_ = synchronous; }
+
 private:
     TextureCache& textureCache_;
     ProcessorInputPtr processorInput_;
     ProcessorOutputPtr processorOutput_;
     bool allDataLoaded_;
+    bool synchronous_;
 };
 
 class CollectVisiblesVisitor : public RenderNodeVisitor
@@ -125,6 +130,7 @@ bool TextureUploadProcessor::initializeThreadRun_()
 bool TextureUploadProcessor::onPreCommit_( const uint32_t outputConnection LB_UNUSED )
 {
     const bool ret = _allDataLoaded;
+
     _allDataLoaded = false;
     return ret;
 }
@@ -141,9 +147,11 @@ void TextureUploadProcessor::_loadData()
     TextureLoaderVisitor loadVisitor( _dashTree, _textureCache,
                                       processorInputPtr_, processorOutputPtr_ );
 
+    loadVisitor.setSynchronous( _vrParameters->renderStrategy == RS_FULL_FRAME );
+
     DFSTraversal traverser;
     const RootNode& rootNode = _dashTree->getDataSource()->getVolumeInformation().rootNode;
-    traverser.traverse( rootNode, loadVisitor );
+    traverser.traverse( rootNode, loadVisitor, _currentFrameID );
 
     if( _vrParameters->renderStrategy == RS_FULL_FRAME )
         _allDataLoaded = loadVisitor.isAllDataLoaded();
@@ -161,6 +169,8 @@ void TextureUploadProcessor::runLoop_()
     }
 
     processorInputPtr_->applyAll( CONNECTION_ID );
+    _checkThreadOperation();
+
 #ifdef _ITT_DEBUG_
     __itt_task_begin ( ittTextureLoadDomain, __itt_null, __itt_null, ittTextureComputationTask );
 #endif //_ITT_DEBUG_
@@ -174,12 +184,10 @@ void TextureUploadProcessor::runLoop_()
         DFSTraversal traverser;
         const RootNode& rootNode =
                 _dashTree->getDataSource()->getVolumeInformation().rootNode;
-        traverser.traverse( rootNode, collectVisibles );
+        traverser.traverse( rootNode, collectVisibles, renderStatus.getFrameID( ));
         _textureCache.setProtectList( _protectUnloading );
         _currentFrameID = renderStatus.getFrameID();
     }
-
-    _checkThreadOperation();
     _loadData();
     processorOutputPtr_->commit( CONNECTION_ID );
 
@@ -200,7 +208,7 @@ void TextureUploadProcessor::_checkThreadOperation()
     }
 
     if( _threadOp == TO_EXIT )
-        exit( );
+        exit();
 }
 
 void TextureLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state )
@@ -255,7 +263,9 @@ void TextureLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state 
         processorOutput_->commit( CONNECTION_ID );
     }
 
-    state.setBreakTraversal( processorInput_->dataWaitingOnInput( CONNECTION_ID ) );
+    if( !isSynchronous( ))
+        // only in asynchronous mode
+        state.setBreakTraversal( processorInput_->dataWaitingOnInput( CONNECTION_ID ));
 }
 
 }

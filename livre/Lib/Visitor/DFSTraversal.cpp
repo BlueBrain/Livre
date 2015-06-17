@@ -103,14 +103,15 @@ bool DFSTraversal::traverse( const RootNode& rootNode,
 }
 
 void DFSTraversal::traverse( const RootNode& rootNode,
-                             NodeVisitor& visitor )
+                             NodeVisitor& visitor,
+                             const uint32_t frame )
 {
     const Vector3ui& blockSize = rootNode.getBlockSize();
     for( uint32_t x = 0; x < blockSize[0]; ++x )
         for( uint32_t y = 0; y < blockSize[1]; ++y )
             for( uint32_t z = 0; z < blockSize[2]; ++z )
             {
-                _impl->traverse( NodeId( 0, Vector3ui( x, y, z )),
+                _impl->traverse( NodeId( 0, Vector3ui( x, y, z ), frame ),
                                  rootNode.getDepth(),
                                  visitor );
             }

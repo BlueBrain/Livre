@@ -46,7 +46,6 @@ public:
 
 private:
     bool configInit( const eq::uint128_t& initId ) final;
-    bool configExit() final;
 
     void frameDraw( const eq::uint128_t& frameId ) final;
     void frameFinish( const eq::uint128_t&, const uint32_t ) final;

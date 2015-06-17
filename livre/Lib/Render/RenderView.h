@@ -38,7 +38,6 @@ namespace livre
 class RenderView : public View
 {
 public:
-
     RenderView( );
 
     /**

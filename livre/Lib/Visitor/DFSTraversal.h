@@ -57,9 +57,11 @@ public:
      * Traverse the dash node tree starting from the root.
      * @param rootNode  The tree root information.
      * @param visitor Visitor object.
+     * @param frame The temporal position of the node tree.
      */
     void traverse( const RootNode& rootNode,
-                   NodeVisitor& visitor );
+                   NodeVisitor& visitor,
+                   const uint32_t frame );
 
 private:
 
