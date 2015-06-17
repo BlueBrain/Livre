@@ -66,9 +66,7 @@ void VolumeDataSourcePlugin::internalNodeToLODNode(
            << " volume world size " << _volumeInfo.worldSize << std::endl
            << std::endl;
 #endif
-
     lodNode = LODNode( internalNode,
-                       _volumeInfo.rootNode.getDepth(),
                        _volumeInfo.maximumBlockSize - _volumeInfo.overlap * 2,
                        Boxf( boxCoordMin - _volumeInfo.worldSize * 0.5f,
                              boxCoordMax - _volumeInfo.worldSize * 0.5f ));

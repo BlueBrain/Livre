@@ -151,7 +151,6 @@ RemoteInformation deserializeDataSourceData( const ::zeq::Event& event )
 
     LODNodeBuilder builder( fbb );
     builder.add_nodeId( node.getNodeId().getId( ));
-    builder.add_maxRefLevel( node.getMaxRefLevel( ));
     builder.add_blockSize( blockSize );
     builder.add_worldBoxMin( worldBoxMin );
     builder.add_worldBoxMax( worldBoxMax );
@@ -168,7 +167,6 @@ LODNodeSample deserializeDataSample( const ::zeq::Event& event )
     auto data = GetLODNode( event.getData( ));
     sample.second = livre::LODNode(
         NodeId( data->nodeId( )),
-        data->maxRefLevel(),
         _deserializeVector3< int32_t >( data->blockSize( )),
         Boxf( _deserializeVector3< float >( data->worldBoxMin( )),
               _deserializeVector3< float >( data->worldBoxMax( ))));

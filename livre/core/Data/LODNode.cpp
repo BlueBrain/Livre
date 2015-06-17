@@ -26,16 +26,13 @@ namespace livre
 LODNode LODNode::empty = LODNode();
 
 LODNode::LODNode( ) :
-    maxLevel_( INVALID_LEVEL ),
     blockSize_( 0 )
 {}
 
 LODNode::LODNode( const NodeId nodeId,
-                  const int32_t maxLevel,
                   const Vector3i& blockSize,
                   const Vector3i& levelTotalBlockDimensions )
    : nodeId_( nodeId ),
-     maxLevel_( maxLevel ),
      blockSize_( blockSize )
 {
     initialize_( );
@@ -43,11 +40,9 @@ LODNode::LODNode( const NodeId nodeId,
 }
 
 LODNode::LODNode( const NodeId nodeId,
-                  const int32_t maxLevel,
                   const Vector3i& blockSize,
                   const Boxf& worldBox )
    : nodeId_( nodeId ),
-     maxLevel_( maxLevel ),
      blockSize_( blockSize ),
      worldBox_( worldBox )
 {
