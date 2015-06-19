@@ -58,22 +58,12 @@ void RenderView::setParameters( ConstVolumeRendererParametersPtr volumeRendererP
     texturePFrustumScreenSpaceError_ = screenSpaceError;
     dataPFrustumScreenSpaceError_ = screenSpaceError;
     visibleFrustumScreenSpaceError_ = screenSpaceError;
-
 }
 
-void RenderView::onPostRender_( const bool /*rendered*/,
-                                const GLWidget& widget,
-                                const FrameInfo& frameInfo,
-                                RenderingSetGenerator& renderSetGenerator )
+void RenderView::onPostRender_( const GLWidget& widget LB_UNUSED,
+                                const FrameInfo& frameInfo )
 {
-    if( frameInfo.previousFrustum != frameInfo.currentFrustum )
-         freeTextures_( frameInfo.renderNodeList );
-
-    Viewporti pixelViewport;
-    widget.setViewport( this, pixelViewport );
-
-    const uint32_t windowHeight = pixelViewport.getHeight();
-    generateRequest_( frameInfo.currentFrustum, renderSetGenerator, windowHeight );
+    freeTextures_( frameInfo.renderNodeList );
 }
 
 void RenderView::freeTextures_( const DashNodeVector& renderNodeList )
@@ -103,35 +93,4 @@ void RenderView::freeTextures_( const DashNodeVector& renderNodeList )
 
     previousVisibleSet_ = currentSet;
 }
-
-void RenderView::generateRequest_( const Frustum& currentFrustum,
-                                   RenderingSetGenerator& renderSetGenerator,
-                                   const uint32_t windowHeight )
-{
-
-    FloatVector distances;
-    const float frustumSurfaceDelta = 0.0f;
-    distances.resize( PL_FAR + 1, frustumSurfaceDelta );
-
-    const VolumeInformation& volumeInfo =
-            renderSetGenerator.getDashTree()->getDataSource()->getVolumeInformation();
-
-    const float wsPerVoxel = volumeInfo.worldSpacePerVoxel;
-    const float depth = volumeInfo.rootNode.getDepth();
-    const float levelZeroNodeSize = float( volumeInfo.maximumBlockSize[ 0 ] ) *
-                                    volumeInfo.worldSpacePerVoxel;
-
-    const LODFrustum renderFrustum( currentFrustum,
-                                    visibleFrustumScreenSpaceError_,
-                                    windowHeight,
-                                    wsPerVoxel,
-                                    levelZeroNodeSize,
-                                    depth,
-                                    distances );
-    DashTreePtr dashTree = renderSetGenerator.getDashTree();
-    LODSelectionVisitor renderVisitor( dashTree, renderFrustum );
-
-    dfsTraverser_.traverse( volumeInfo.rootNode, renderVisitor );
-}
-
 }

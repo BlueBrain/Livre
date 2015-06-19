@@ -31,6 +31,7 @@
 #include <livre/Lib/Cache/TextureDataCache.h>
 #include <livre/Lib/Configuration/VolumeRendererParameters.h>
 #include <livre/Lib/Uploaders/DataUploadProcessor.h>
+#include <livre/core/Dash/DashRenderStatus.h>
 #include <livre/core/Dash/DashTree.h>
 #include <livre/core/DashPipeline/DashProcessorOutput.h>
 #include <livre/core/Data/VolumeDataSource.h>

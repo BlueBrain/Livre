@@ -44,18 +44,28 @@ public:
      */
     Window( eq::Pipe* parent );
 
+    /**
+     * Commits changes.
+     */
+    void commit();
+
+    /**
+     * Applies all the changes to the context. Blocks until a commit arrives.
+     */
+    void apply();
+
 private:
     class Impl;
     std::unique_ptr< Impl > _impl;
 
     bool configInit( const eq::uint128_t& initId ) final;
+    bool configExit() final;
     bool configInitGL( const eq::uint128_t& initId ) final;
     bool configExitGL() final;
     void frameStart( const eq::uint128_t& frameID,
                      const uint32_t frameNumber ) final;
     void frameFinish( const eq::uint128_t& frameID,
-                      const uint32_t frameNumber ) final;
-
+                     const uint32_t frameNumber ) final;
 };
 
 }

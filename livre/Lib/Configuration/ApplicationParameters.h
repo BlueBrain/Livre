@@ -33,11 +33,12 @@ struct ApplicationParameters : public Parameters
 {
     ApplicationParameters();
 
-    std::string dataFileName; //<! Data file name.
-    uint32_t maxFrames; //<! Max frames.
-    bool isResident; //<! Is the main app resident.
-    Vector3f cameraPosition; //<! Camera position in world space.
-    bool syncCamera; //<! Synchronize camera with other applications using ZEQ
+    std::string dataFileName; //!< Data file name.
+    bool animationEnabled; //!< Enable the animation mode.
+    Vector2i frames; //!< Range of frames to render: 'start end'.
+    bool isResident; //!< Is the main app resident.
+    Vector3f cameraPosition; //!< Camera position in world space.
+    bool syncCamera; //!< Synchronize camera with other applications using ZEQ.
 
     /**
      * De-serializes the object from input stream.

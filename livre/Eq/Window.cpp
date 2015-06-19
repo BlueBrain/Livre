@@ -33,6 +33,7 @@
 #include <livre/core/DashPipeline/DashProcessorInput.h>
 #include <livre/core/DashPipeline/DashProcessorOutput.h>
 
+#include <livre/Lib/Configuration/ApplicationParameters.h>
 #include <livre/Lib/Configuration/VolumeRendererParameters.h>
 
 #include <livre/Lib/Uploaders/DataUploadProcessor.h>
@@ -84,15 +85,27 @@ public:
         releasePipelineProcessors();
     }
 
+    void configExit()
+    {
+        livre::Node* node = static_cast< livre::Node* >( _window->getNode( ));
+        node->getDashTree()->getRenderStatus().setThreadOp( TO_EXIT );
+    }
+
     void frameStart()
     {
         _dashProcessorPtr->getDashContext()->setCurrent();
     }
 
-    void frameFinish()
+    void frameFinish( const uint32_t frameNumber )
     {
-        _dashProcessorPtr->getProcessorOutput_()->commit( CONNECTION_ID );
-        _dashProcessorPtr->getProcessorInput_()->applyAll( CONNECTION_ID );
+        livre::Node* node = static_cast< livre::Node* >( _window->getNode( ));
+        DashRenderStatus& renderStatus = node->getDashTree()->getRenderStatus();
+
+        Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
+        const uint32_t startFrame = pipe->getFrameData()->getAppParameters()->frames.x();
+
+        if( pipe->getFrameData()->getAppParameters()->animationEnabled )
+            renderStatus.setFrameID( frameNumber + startFrame );
     }
 
     void startUploadProcessors()
@@ -106,10 +119,19 @@ public:
 
     void stopUploadProcessors()
     {
-        // TO_EXIT was set as ThreadOp in Channel::configExit()
-        _dashProcessorPtr->getProcessorOutput_()->commit( CONNECTION_ID );
+        commit();
         _textureUploadProcessorPtr->join();
         _dataUploadProcessorPtr->join();
+    }
+
+    void commit()
+    {
+        _dashProcessorPtr->getProcessorOutput_()->commit( CONNECTION_ID );
+    }
+
+    void apply()
+    {
+        _dashProcessorPtr->getProcessorInput_()->applyAll( CONNECTION_ID );
     }
 
     void initializePipelineProcessors()
@@ -205,6 +227,12 @@ bool Window::configInit( const eq::uint128_t& initId )
     return eq::Window::configInit( initId );
 }
 
+bool Window::configExit()
+{
+    _impl->configExit();
+    return eq::Window::configExit();
+}
+
 bool Window::configInitGL( const eq::uint128_t& initId )
 {
     if( !GLEW_ARB_shader_objects )
@@ -247,8 +275,18 @@ void Window::frameStart( const eq::uint128_t& frameID,
 void Window::frameFinish( const eq::uint128_t& frameID,
                           const uint32_t frameNumber )
 {
-    _impl->frameFinish();
+    _impl->frameFinish( frameNumber );
     eq::Window::frameFinish( frameID, frameNumber );
+}
+
+void Window::commit()
+{
+    _impl->commit();
+}
+
+void Window::apply()
+{
+    _impl->apply();
 }
 
 }

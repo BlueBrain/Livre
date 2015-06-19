@@ -27,11 +27,18 @@ std::istream& operator>>( std::istream& is, vmml::vector<3ul, float>& vec )
     return is >> std::skipws >> vec.x() >> vec.y() >> vec.z();
 }
 
+std::istream& operator>>( std::istream& is, vmml::vector<2ul, int>& vec )
+{
+    return is >> std::skipws >> vec.x() >> vec.y();
+}
+
 }
 
 namespace livre
 {
 
+const std::string ANIMATIONENABLED_PARAM = "animation";
+const std::string FRAMES_PARAM = "frames";
 const std::string DATAFILE_PARAM = "volume";
 const std::string NUMFRAMES_PARAM = "num-frames";
 const std::string CAMERAPOS_PARAM = "camera-position";
@@ -39,15 +46,18 @@ const std::string SYNC_CAMERA_PARAM = "sync-camera";
 
 ApplicationParameters::ApplicationParameters()
     : Parameters( "Application Parameters" )
-    , maxFrames(-1u )
+    , animationEnabled( false )
+    , frames( Vector2i( 0, std::numeric_limits<int>::max( )))
     , isResident( false )
     , cameraPosition( Vector3f( 0, 0, -2.0 ))
     , syncCamera( false )
 {
     configuration_.addDescription( configGroupName_, DATAFILE_PARAM,
                                    "URI of volume data source", dataFileName );
-    configuration_.addDescription( configGroupName_, NUMFRAMES_PARAM,
-                                   "Maximum nuber of frames", maxFrames );
+    configuration_.addDescription( configGroupName_, ANIMATIONENABLED_PARAM,
+                                   "Enable animation mode", animationEnabled );
+    configuration_.addDescription( configGroupName_, FRAMES_PARAM,
+                                   "Frames to render 'start end'", frames );
     configuration_.addDescription( configGroupName_, CAMERAPOS_PARAM,
                                    "Camera position", cameraPosition );
 #ifdef LIVRE_USE_ZEQ
@@ -63,7 +73,8 @@ void ApplicationParameters::serialize( co::DataOStream &os,
     co::Serializable::serialize( os, dirtyBits );
 
     os << dataFileName
-       << maxFrames
+       << animationEnabled
+       << frames
        << isResident
        << cameraPosition
        << syncCamera;
@@ -76,7 +87,8 @@ ApplicationParameters& ApplicationParameters::operator=(
         return *this;
 
     dataFileName = parameters.dataFileName;
-    maxFrames = parameters.maxFrames;
+    animationEnabled = parameters.animationEnabled;
+    frames = parameters.frames;
     isResident = parameters.isResident;
     cameraPosition = parameters.cameraPosition;
     syncCamera = parameters.syncCamera;
@@ -90,7 +102,8 @@ void ApplicationParameters::deserialize( co::DataIStream &is,
     co::Serializable::deserialize( is, dirtyBits );
 
     is >> dataFileName
-       >> maxFrames
+       >> animationEnabled
+       >> frames
        >> isResident
        >> cameraPosition
        >> syncCamera;
@@ -99,7 +112,8 @@ void ApplicationParameters::deserialize( co::DataIStream &is,
 void ApplicationParameters::initialize_()
 {
     configuration_.getValue( DATAFILE_PARAM, dataFileName );
-    configuration_.getValue( NUMFRAMES_PARAM, maxFrames );
+    configuration_.getValue( ANIMATIONENABLED_PARAM, animationEnabled );
+    configuration_.getValue( FRAMES_PARAM, frames );
     configuration_.getValue( CAMERAPOS_PARAM, cameraPosition );
     configuration_.getValue( SYNC_CAMERA_PARAM, syncCamera );
 }
