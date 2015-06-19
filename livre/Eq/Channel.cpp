@@ -290,8 +290,8 @@ public:
         livre::Pipe* pipe = static_cast< livre::Pipe* >( window->getPipe( ));
         SelectVisibles visitor( node->getDashTree(),
                                 _currentFrustum,
-                                pixelViewport.getHeight(),
-                                pipe->getFrameData()->getVRParameters()->screenSpaceError );
+                                pipe->getFrameData()->getVRParameters()->screenSpaceError,
+                                pixelViewport.getHeight( ));
 
         livre::DFSTraversal traverser;
         traverser.traverse( node->getDashTree()->getDataSource()->getVolumeInformation().rootNode,

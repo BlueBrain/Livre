@@ -99,7 +99,7 @@ bool Client::_parseArguments( const int32_t argc, char **argv )
 #endif
 
     if( _applicationParameters.dataFileName.empty())
-        _applicationParameters.dataFileName = "mem:///#1024,1024,1024,128";
+        _applicationParameters.dataFileName = "mem:///#4096,4096,4096,32";
 
     return true;
 }
