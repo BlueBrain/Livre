@@ -286,6 +286,9 @@ bool Config::init()
         _impl->currentCanvas = canvases.front();
 
 #ifdef LIVRE_USE_ZEQ
+    if( !servus::Servus::isAvailable( ))
+        return true;
+
     SubscriberPtr subscriber( new zeq::Subscriber( lunchbox::URI( "hbp://" )));
     _impl->subscribers.push_back( subscriber );
     if( _impl->framedata.getAppParameters()->syncCamera )
@@ -298,8 +301,9 @@ bool Config::init()
                                  boost::bind( &detail::Config::onLookupTable1D,
                                               _impl, _1 ));
 #ifdef LIVRE_USE_RESTBRIDGE
-    const std::string subscriberSchema = _impl->framedata.getRESTParameters()->zeqSchema
-                                         + SUBSCRIBER_SCHEMA_SUFFIX;
+    const std::string subscriberSchema =
+        _impl->framedata.getRESTParameters()->zeqSchema +
+        SUBSCRIBER_SCHEMA_SUFFIX;
 #else
     const std::string subscriberSchema = "vwscmd://";
 #endif
@@ -453,7 +457,7 @@ void Config::handleEvents()
          it != _impl->subscribers.end(); ++it )
     {
         while(( *it )->receive( 0 ))
-            ;
+            /*nop*/ ;
     }
 #endif
 }
