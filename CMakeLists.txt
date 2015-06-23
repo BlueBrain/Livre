@@ -26,13 +26,42 @@ set(VERSION_MINOR "4")
 set(VERSION_PATCH "0")
 set(VERSION_ABI 3) # OFF or ABI version
 
-set(PROJECT_namespace livre)
-set(PROJECT_INCLUDE_NAME livre/core)
+set(LIVRE_namespace livre)
+set(LIVRE_INCLUDE_NAME livre/core)
 set(LIVRE_DESCRIPTION "Largescale Interactive Volume Rendering Engine")
 set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)
 
 include(Common)
-include(FindPackages)
+
+common_package(BBPTestData)
+common_package(Boost REQUIRED COMPONENTS filesystem program_options thread
+                                         system regex unit_test_framework)
+common_package(Collage REQUIRED)
+common_package(dash REQUIRED)
+common_package(Equalizer REQUIRED)
+common_package(FlatBuffers)
+common_package(GLEW_MX)
+common_package(LibJpegTurbo)
+common_package(Lunchbox REQUIRED)
+common_package(OpenGL REQUIRED)
+common_package(OpenMP)
+common_package(PNG REQUIRED)
+common_package(Qt5Core REQUIRED)
+common_package(Qt5OpenGL REQUIRED)
+common_package(Qt5Widgets REQUIRED)
+common_package(RESTBridge)
+common_package(Threads REQUIRED)
+common_package(Tuvok)
+common_package(VTune)
+common_package(zeq)
+
+if(ZEQ_FOUND AND FlatBuffers_FOUND)
+  list(APPEND COMMON_PACKAGE_DEFINES LIVRE_USE_REMOTE_DATASOURCE)
+  set(LIVRE_USE_REMOTE_DATASOURCE 1)
+endif()
+
+common_package_post()
+
 include(EqGLLibraries)
 set(LIVRE_DEPENDENT_LIBRARIES vmmlib Lunchbox dash Equalizer)
 

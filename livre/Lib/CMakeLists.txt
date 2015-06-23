@@ -64,7 +64,7 @@ if(LIVRE_USE_REMOTE_DATASOURCE)
   list(APPEND LIVRELIB_LINK_LIBRARIES ${ZEQ_LIBRARIES})
 endif()
 
-set(PROJECT_INCLUDE_NAME livre/Lib)
+set(LIVRELIB_INCLUDE_NAME livre/Lib)
 common_library(LivreLib)
 if(NOT APPLE)
   set_target_properties(LivreLib PROPERTIES LINK_FLAGS "-Wl,--no-undefined")
