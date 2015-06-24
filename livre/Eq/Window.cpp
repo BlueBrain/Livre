@@ -91,13 +91,10 @@ public:
         node->getDashTree()->getRenderStatus().setThreadOp( TO_EXIT );
     }
 
-    void frameStart()
+    void frameStart( const uint32_t frameNumber )
     {
         _dashProcessorPtr->getDashContext()->setCurrent();
-    }
 
-    void frameFinish( const uint32_t frameNumber )
-    {
         livre::Node* node = static_cast< livre::Node* >( _window->getNode( ));
         DashRenderStatus& renderStatus = node->getDashTree()->getRenderStatus();
 
@@ -105,7 +102,11 @@ public:
         const uint32_t startFrame = pipe->getFrameData()->getAppParameters()->frames.x();
 
         if( pipe->getFrameData()->getAppParameters()->animationEnabled )
-            renderStatus.setFrameID( frameNumber + startFrame );
+            renderStatus.setFrameID( startFrame + frameNumber - 1 );
+        else
+            renderStatus.setFrameID( startFrame );
+
+        commit();
     }
 
     void startUploadProcessors()
@@ -268,14 +269,13 @@ bool Window::configExitGL()
 void Window::frameStart( const eq::uint128_t& frameID,
                          const uint32_t frameNumber )
 {
-    _impl->frameStart();
+    _impl->frameStart( frameNumber );
     eq::Window::frameStart( frameID, frameNumber );
 }
 
 void Window::frameFinish( const eq::uint128_t& frameID,
                           const uint32_t frameNumber )
 {
-    _impl->frameFinish( frameNumber );
     eq::Window::frameFinish( frameID, frameNumber );
 }
 
