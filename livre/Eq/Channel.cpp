@@ -559,8 +559,8 @@ bool Channel::configInit( const eq::uint128_t& initId )
 
 void Channel::frameDraw( const lunchbox::uint128_t& frameId )
 {
-    _impl->frameDraw( frameId );
     eq::Channel::frameDraw( frameId );
+    _impl->frameDraw( frameId );
 }
 
 void Channel::frameFinish( const eq::uint128_t& frameID, const uint32_t frameNumber )
@@ -571,8 +571,8 @@ void Channel::frameFinish( const eq::uint128_t& frameID, const uint32_t frameNum
 
 void Channel::frameViewStart( const uint128_t& frameId )
 {
-    _impl->addImageListener();
     eq::Channel::frameViewStart( frameId );
+    _impl->addImageListener();
 }
 
 void Channel::frameViewFinish( const eq::uint128_t &frameID )
@@ -594,8 +594,8 @@ void Channel::frameAssemble( const eq::uint128_t&, const eq::Frames& frames )
 void Channel::frameReadback( const eq::uint128_t& frameId,
                              const eq::Frames& frames )
 {
-    _impl->frameReadback( frames );
     eq::Channel::frameReadback( frameId, frames );
+    _impl->frameReadback( frames );
 }
 
 }
