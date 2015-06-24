@@ -89,14 +89,14 @@ public:
     {
         const LODNode& lodNode = renderNode.getLODNode();
 
-        if( !lodNode.isValid() ||
-            !renderNode.isVisible( ))
-        {
-            return;
-        }
+        if( !renderNode.isInFrustum( ))
+             state.setVisitChild( false );
 
-        currentVisibleSet_.insert( lodNode.getNodeId().getId( ));
-        state.setVisitChild( false );
+        if( renderNode.isVisible( ))
+        {
+            currentVisibleSet_.insert( lodNode.getNodeId().getId( ));
+            state.setVisitChild( false );
+        }
     }
 
 private:
@@ -217,7 +217,14 @@ void TextureLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state 
     if( !lodNode.isValid() )
         return;
 
-    if( !renderNode.isVisible())
+    if( !renderNode.isInFrustum( ))
+    {
+        state.setVisitChild( false );
+        return;
+    }
+
+    const bool isVisible = renderNode.isVisible();
+    if( !isVisible )
         return;
 
     state.setVisitChild( false );

@@ -175,16 +175,23 @@ void SelectVisibles::visit( DashRenderNode& renderNode, VisitState& state )
 
     const Boxf& worldBox = lodNode.getWorldBox();
 
+    const bool isInFrustum = lodFrustum_.getFrustum().boxInFrustum( worldBox );
+    renderNode.setInFrustum( isInFrustum );
+    if( !isInFrustum )
+    {
+        state.setVisitChild( false );
+        return;
+    }
+
     const Plane& nearPlane = lodFrustum_.getFrustum().getWPlane( PL_NEAR );
     Vector3f vmin, vmax;
     nearPlane.getNearFarPoints( worldBox, vmin, vmax );
 
     const uint32_t lod = lodFrustum_.getLODForPoint( vmin );
-
-    const bool isVisible = (lod <= lodNode.getNodeId().getLevel());
+    const bool isVisible = (lod <= lodNode.getNodeId().getLevel( ));
+    renderNode.setVisible( isVisible );
 
     state.setVisitChild( !isVisible );
-    renderNode.setVisible( isVisible );
 }
 
 const float nearPlane = 0.1f;
@@ -597,5 +604,6 @@ void Channel::frameReadback( const eq::uint128_t& frameId,
     eq::Channel::frameReadback( frameId, frames );
     _impl->frameReadback( frames );
 }
+
 
 }

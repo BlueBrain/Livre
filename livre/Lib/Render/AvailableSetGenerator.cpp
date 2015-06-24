@@ -88,12 +88,17 @@ void VisibleCollectorVisitor::visit( DashRenderNode& renderNode, VisitState& sta
     if( !lodNode.isValid( ))
         return;
 
-    const bool isVisible = renderNode.isVisible();
+    if( !renderNode.isInFrustum( ))
+    {
+        state.setVisitChild( false );
+        return;
+    }
 
-    if( isVisible )
+    if( renderNode.isVisible( ))
+    {
         nodeVector_.push_back( renderNode.getDashNode() );
-
-    state.setVisitChild( !isVisible );
+        state.setVisitChild( false );
+    }
  }
 
 class LoadedTextureCollectVisitor : public RenderNodeVisitor

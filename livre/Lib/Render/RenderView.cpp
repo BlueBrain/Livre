@@ -21,7 +21,6 @@
 #include <livre/Lib/Algorithm/LODFrustum.h>
 
 #include <livre/Lib/Cache/TextureObject.h>
-#include <livre/Lib/Visitor/LODSelectionVisitor.h>
 #include <livre/Lib/Configuration/EFPrefetchAlgorithmParameters.h>
 #include <livre/Lib/Algorithm/Optimizer.h>
 #include <livre/Lib/types.h>

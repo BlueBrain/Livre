@@ -28,6 +28,7 @@ enum DashAttributeType
     DNT_TEXTUREDATA       ,
     DNT_TEXTURE           ,
     DNT_VISIBLE           ,
+    DNT_INFRUSTUM         ,
     DNT_CACHE_MODIFIED
 };
 
@@ -50,6 +51,11 @@ ConstCacheObjectPtr DashRenderNode::getTextureObject( ) const
     return getAttribute_< ConstCacheObjectPtr >( DNT_TEXTURE );
 }
 
+bool DashRenderNode::isInFrustum( ) const
+{
+    return getAttribute_< bool >( DNT_INFRUSTUM );
+}
+
 bool DashRenderNode::isVisible( ) const
 {
     return getAttribute_< bool >( DNT_VISIBLE );
@@ -68,6 +74,11 @@ void DashRenderNode::setTextureDataObject( ConstCacheObjectPtr textureData )
 void DashRenderNode::setTextureObject( ConstCacheObjectPtr texture )
 {
     *(_dashNode->getAttribute( DNT_TEXTURE )) = texture;
+}
+
+void DashRenderNode::setInFrustum( bool visibility )
+{
+    *(_dashNode->getAttribute( DNT_INFRUSTUM )) = visibility;
 }
 
 void DashRenderNode::setVisible( bool visibility )
@@ -95,6 +106,10 @@ void DashRenderNode::initializeDashNode( dash::NodePtr dashNode )
     dash::AttributePtr isVisible = new dash::Attribute();
     *isVisible = false;
     dashNode->insert( isVisible );
+
+    dash::AttributePtr isInFrustum = new dash::Attribute();
+    *isInFrustum = true;
+    dashNode->insert( isInFrustum );
 
     dash::AttributePtr cacheObjectModified = new dash::Attribute();
     *cacheObjectModified = true;
