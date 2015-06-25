@@ -35,7 +35,8 @@ struct ApplicationParameters : public Parameters
 
     std::string dataFileName; //!< Data file name.
     bool animationEnabled; //!< Enable the animation mode.
-    Vector2i frames; //!< Range of frames to render: 'start end'.
+    Vector2ui frames; //!< Range of frames to render: 'start end'.
+    uint32_t maxFrames; //!< Max number of frames to render.
     bool isResident; //!< Is the main app resident.
     Vector3f cameraPosition; //!< Camera position in world space.
     bool syncCamera; //!< Synchronize camera with other applications using ZEQ.
