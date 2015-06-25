@@ -185,13 +185,15 @@ int Client::run()
     uint32_t frames = _applicationParameters.frames.y() -_applicationParameters.frames.x() + 1;
 
     clock.reset();
-    frameData.getCameraSettings()->setCameraPosition(
-                _applicationParameters.cameraPosition );
+    frameData.getCameraSettings()->setCameraPosition( _applicationParameters.cameraPosition );
 
-    while( config->isRunning() && frames-- )
+    while( config->isRunning() && frames )
     {
         config->startFrame();
         config->finishFrame();
+
+        if( _applicationParameters.animationEnabled )
+            frames--;
     }
 
     const uint32_t frame = config->finishAllFrames();
