@@ -182,18 +182,15 @@ int Client::run()
                        << std::endl;
 
     // 4. run main loop
-    uint32_t frames = _applicationParameters.frames.y() -_applicationParameters.frames.x() + 1;
+    uint32_t maxFrames = _applicationParameters.maxFrames;
 
     clock.reset();
     frameData.getCameraSettings()->setCameraPosition( _applicationParameters.cameraPosition );
 
-    while( config->isRunning() && frames )
+    while( config->isRunning() && maxFrames-- )
     {
         config->startFrame();
         config->finishFrame();
-
-        if( _applicationParameters.animationEnabled )
-            frames--;
     }
 
     const uint32_t frame = config->finishAllFrames();

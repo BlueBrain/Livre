@@ -91,22 +91,23 @@ public:
         node->getDashTree()->getRenderStatus().setThreadOp( TO_EXIT );
     }
 
-    void frameStart( const uint32_t frameNumber )
+    void frameStart()
     {
         _dashProcessorPtr->getDashContext()->setCurrent();
+    }
 
+    void frameFinish( const uint32_t frameNumber )
+    {
         livre::Node* node = static_cast< livre::Node* >( _window->getNode( ));
         DashRenderStatus& renderStatus = node->getDashTree()->getRenderStatus();
 
         Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
-        const uint32_t startFrame = pipe->getFrameData()->getAppParameters()->frames.x();
-
         if( pipe->getFrameData()->getAppParameters()->animationEnabled )
-            renderStatus.setFrameID( startFrame + frameNumber - 1 );
-        else
-            renderStatus.setFrameID( startFrame );
-
-        commit();
+        {
+            const Vector2ui& animationFrames = pipe->getFrameData()->getAppParameters()->frames;
+            const uint32_t duration = animationFrames.y() - animationFrames.x();
+            renderStatus.setFrameID( animationFrames.x() + ( frameNumber % duration ));
+        }
     }
 
     void startUploadProcessors()
@@ -137,7 +138,13 @@ public:
 
     void initializePipelineProcessors()
     {
+        Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
+        const uint32_t startFrame = pipe->getFrameData()->getAppParameters()->frames.x();
+
         Node* node = static_cast< Node* >( _window->getNode( ));
+        DashRenderStatus& renderStatus = node->getDashTree()->getRenderStatus();
+        renderStatus.setFrameID( startFrame );
+
         _dashProcessorPtr->setDashContext( node->getDashTree()->createContext( ));
 
         GLContextPtr dataUploadContext( new EqContext( _window ));
@@ -147,7 +154,6 @@ public:
                                                                 node->getRawDataCache(),
                                                                 node->getTextureDataCache( )));
 
-        Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
         GLContextPtr textureUploadContext( new EqContext( _window ));
         _textureUploadProcessorPtr.reset( new TextureUploadProcessor( node->getDashTree(),
                                                                       _windowContext,
@@ -269,13 +275,14 @@ bool Window::configExitGL()
 void Window::frameStart( const eq::uint128_t& frameID,
                          const uint32_t frameNumber )
 {
-    _impl->frameStart( frameNumber );
+    _impl->frameStart();
     eq::Window::frameStart( frameID, frameNumber );
 }
 
 void Window::frameFinish( const eq::uint128_t& frameID,
                           const uint32_t frameNumber )
 {
+    _impl->frameFinish( frameNumber );
     eq::Window::frameFinish( frameID, frameNumber );
 }
 
