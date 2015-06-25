@@ -74,6 +74,12 @@ public:
     bool isVisible() const;
 
     /**
+     * @return True, if object is in frustum.
+     * @warning This condition is set from outside of the object.
+     */
+    bool isInFrustum() const;
+
+    /**
      * Sets the \see LODNode for the dash node.
      * @param node Sets the \see which is an abstract rendering information ( size of block, position, etcc )
      */
@@ -100,6 +106,12 @@ public:
      * @param visibility If parameter is true, node is visible.
      */
     void setVisible( bool visibility );
+
+    /**
+     * Sets frustum status of node.
+     * @param visibility If parameter is true, node is visible.
+     */
+    void setInFrustum( bool visibility );
 
     /**
      * Initializes an empty dash node with attributes.

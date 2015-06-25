@@ -28,8 +28,7 @@ set(LIVRELIB_PUBLIC_HEADERS
   Uploaders/DataUploadProcessor.h
   Uploaders/TextureUploadProcessor.h
   Visitor/CollectionTraversal.h
-  Visitor/DFSTraversal.h
-  Visitor/LODSelectionVisitor.h)
+  Visitor/DFSTraversal.h)
 
 set(LIVRELIB_SOURCES
   Algorithm/LODFrustum.cpp
@@ -54,8 +53,7 @@ set(LIVRELIB_SOURCES
   Uploaders/DataUploadProcessor.cpp
   Uploaders/TextureUploadProcessor.cpp
   Visitor/CollectionTraversal.cpp
-  Visitor/DFSTraversal.cpp
-  Visitor/LODSelectionVisitor.cpp)
+  Visitor/DFSTraversal.cpp)
 
 if(LIVRE_USE_REMOTE_DATASOURCE)
   flatbuffers_generate_c_headers(FBS

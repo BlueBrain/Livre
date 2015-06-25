@@ -32,8 +32,8 @@ namespace livre
 struct DistanceOperator
 {
     DistanceOperator( const Frustum& frustum ) : frustum_( frustum ) { }
-    bool operator()( RenderBrickPtr rb1,
-                     RenderBrickPtr rb2 )
+    bool operator()( const RenderBrickPtr& rb1,
+                     const RenderBrickPtr& rb2 )
     {
         const float distance1 = ( frustum_.getModelViewMatrix() *
                                   rb1->getLODNode()->getWorldBox().getCenter() ).length();

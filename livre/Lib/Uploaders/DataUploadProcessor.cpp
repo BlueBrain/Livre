@@ -260,7 +260,14 @@ void RawDataLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state 
 
     state.setBreakTraversal( processorInput_->dataWaitingOnInput( CONNECTION_ID ));
 
-    if( !renderNode.isVisible())
+    if( !renderNode.isInFrustum( ))
+    {
+        state.setVisitChild( false );
+        return;
+    }
+
+    const bool isVisible = renderNode.isVisible();
+    if( !isVisible )
         return;
 
     state.setVisitChild( false );
@@ -302,8 +309,17 @@ void DepthCollectorVisitor::visit( DashRenderNode& renderNode, VisitState& state
     if( !lodNode.isValid() )
         return;
 
+    if( !renderNode.isInFrustum( ))
+    {
+        state.setVisitChild( false );
+        return;
+    }
+
     const bool isVisible = renderNode.isVisible();
-    state.setVisitChild( !isVisible );
+    if( !isVisible )
+        return;
+
+    state.setVisitChild( false );
 
     const ConstCacheObjectPtr texture = renderNode.getTextureObject();
     if( texture->isLoaded( ))
