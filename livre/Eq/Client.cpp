@@ -26,7 +26,6 @@
 #include <livre/core/Data/VolumeDataSource.h>
 
 #include <livre/Lib/Configuration/VolumeRendererParameters.h>
-#include <livre/Lib/Configuration/EFPrefetchAlgorithmParameters.h>
 
 #include <livre/Eq/Client.h>
 #include <livre/Eq/Config.h>
@@ -83,8 +82,7 @@ bool Client::_parseArguments( const int32_t argc, char **argv )
         return false;
     }
     if( !_applicationParameters.initialize( argc, argv ) ||
-        !_rendererParameters.initialize( argc, argv ) ||
-        !_prefetchParameters.initialize( argc, argv ))
+        !_rendererParameters.initialize( argc, argv ))
     {
         LBERROR << "Error parsing command line arguments" << std::endl;
         return false;
@@ -107,7 +105,6 @@ bool Client::_parseArguments( const int32_t argc, char **argv )
 std::string Client::getHelp()
 {
     VolumeRendererParameters vrParameters;
-    EFPrefetchAlgorithmParameters prefetchParameters;
     ApplicationParameters applicationParameters;
 #ifdef LIVRE_USE_RESTBRIDGE
     RESTParameters restParameters;
@@ -115,7 +112,6 @@ std::string Client::getHelp()
 
     Configuration conf;
     conf.addDescription( vrParameters.getConfiguration( ));
-    conf.addDescription( prefetchParameters.getConfiguration( ));
     conf.addDescription( applicationParameters.getConfiguration( ));
 #ifdef LIVRE_USE_RESTBRIDGE
     conf.addDescription( restParameters.getConfiguration( ));
@@ -166,8 +162,9 @@ int Client::run()
     }
 
     FrameData& frameData = config->getFrameData();
-    frameData.setup( _applicationParameters, _rendererParameters,
-                     _prefetchParameters, _restParameters );
+    frameData.setup( _applicationParameters,
+                     _rendererParameters,
+                     _restParameters );
     frameData.getVolumeSettings()->setURI( _applicationParameters.dataFileName);
 
     // 3. init config

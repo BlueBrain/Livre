@@ -6,8 +6,6 @@
 
 set(LIVRELIB_PUBLIC_HEADERS
   types.h
-  Algorithm/LODFrustum.h
-  Algorithm/Optimizer.h
   Animation/CameraPath.h
   Cache/LRUCache.h
   Cache/LRUCachePolicy.h
@@ -19,20 +17,18 @@ set(LIVRELIB_PUBLIC_HEADERS
   Cache/TextureDataObject.h
   Data/MemoryDataSource.h
   Configuration/ApplicationParameters.h
-  Configuration/EFPrefetchAlgorithmParameters.h
   Configuration/RESTParameters.h
   Configuration/VolumeRendererParameters.h
   Render/AvailableSetGenerator.h
-  Render/SliceRenderer.h
   Render/RenderView.h
+  Render/ScreenSpaceLODEvaluator.h
+  Render/SliceRenderer.h
   Uploaders/DataUploadProcessor.h
   Uploaders/TextureUploadProcessor.h
   Visitor/CollectionTraversal.h
   Visitor/DFSTraversal.h)
 
 set(LIVRELIB_SOURCES
-  Algorithm/LODFrustum.cpp
-  Algorithm/Optimizer.cpp
   Animation/CameraPath.cpp
   Cache/LRUCache.cpp
   Cache/LRUCachePolicy.cpp
@@ -44,12 +40,12 @@ set(LIVRELIB_SOURCES
   Cache/TextureDataObject.cpp
   Data/MemoryDataSource.cpp
   Configuration/ApplicationParameters.cpp
-  Configuration/EFPrefetchAlgorithmParameters.cpp
   Configuration/RESTParameters.cpp
   Configuration/VolumeRendererParameters.cpp
   Render/AvailableSetGenerator.cpp
-  Render/SliceRenderer.cpp
   Render/RenderView.cpp
+  Render/ScreenSpaceLODEvaluator.cpp
+  Render/SliceRenderer.cpp
   Uploaders/DataUploadProcessor.cpp
   Uploaders/TextureUploadProcessor.cpp
   Visitor/CollectionTraversal.cpp

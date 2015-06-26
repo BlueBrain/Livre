@@ -41,46 +41,18 @@ class VisibleCollectorVisitor : public RenderNodeVisitor
 public:
 
     VisibleCollectorVisitor( DashTreePtr dashTree,
-                             const Frustum& frustum,
-                             const float screenSpaceError,
-                             const uint32_t windowHeight,
                              DashNodeVector& nodeVector );
 
     void visit( DashRenderNode& renderNode, VisitState& state ) final;
-
-    LODFrustum lodFrustum_;
     DashNodeVector& nodeVector_;
 };
 
 VisibleCollectorVisitor::VisibleCollectorVisitor(
         DashTreePtr dashTree,
-        const Frustum& frustum,
-        const float screenSpaceError,
-        const uint32_t windowHeight,
         DashNodeVector& nodeVector )
     : RenderNodeVisitor( dashTree ),
       nodeVector_( nodeVector )
-{
-    FloatVector distances;
-
-    const float frustumSurfaceDelta = 0.0f;
-    distances.resize( PL_FAR + 1, frustumSurfaceDelta );
-
-    const VolumeInformation& volumeInformation =
-            dashTree->getDataSource()->getVolumeInformation();
-    const float wsPerVoxel = volumeInformation.worldSpacePerVoxel;
-    const float depth = volumeInformation.rootNode.getDepth();
-    const float levelZeroNodeSize = float( volumeInformation.maximumBlockSize[ 0 ] ) *
-                                    volumeInformation.worldSpacePerVoxel;
-
-    lodFrustum_ = LODFrustum( frustum,
-                              screenSpaceError,
-                              windowHeight,
-                              wsPerVoxel,
-                              levelZeroNodeSize,
-                              depth,
-                              distances );
-}
+{ }
 
 void VisibleCollectorVisitor::visit( DashRenderNode& renderNode, VisitState& state )
 {
@@ -160,22 +132,15 @@ bool hasParentInMap( DashRenderNode& childRenderNode,
     return false;
 }
 
-AvailableSetGenerator::AvailableSetGenerator( DashTreePtr tree,
-                          const uint32_t windowHeight,
-                          const float screenSpaceError )
-    : RenderingSetGenerator( tree ),
-      _windowHeight( windowHeight ),
-      _screenSpaceError( screenSpaceError )
+AvailableSetGenerator::AvailableSetGenerator( DashTreePtr tree )
+    : RenderingSetGenerator( tree )
 {
 }
 
-void AvailableSetGenerator::generateRenderingSet( const Frustum& viewFrustum,
+void AvailableSetGenerator::generateRenderingSet( const Frustum&,
                                                   FrameInfo& frameInfo )
 {
     VisibleCollectorVisitor visibleSelector( getDashTree(),
-                                             viewFrustum,
-                                             _screenSpaceError,
-                                             _windowHeight,
                                              frameInfo.allNodesList );
     DFSTraversal dfsTraverser_;
     dfsTraverser_.traverse( getDashTree()->getDataSource()->getVolumeInformation().rootNode,

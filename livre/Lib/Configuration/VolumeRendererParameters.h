@@ -41,6 +41,8 @@ struct VolumeRendererParameters : public Parameters
     uint32_t maxDataMemoryMB;  //!< Settings for data cache
     uint32_t maxTextureMemoryMB; //!< Settings for texture cache
     uint32_t maxTextureDataMemoryMB; //!< Settings for texture cache
+    uint32_t minDepth; //!< Minimum level of detail
+    uint32_t maxDepth; //!< Maximum level of detail
 
     /**
      * De-serializes the object from input stream.
@@ -59,7 +61,7 @@ struct VolumeRendererParameters : public Parameters
     /**
      * @param volumeRendererParameters The source parameters.
      */
-    VolumeRendererParameters& operator=( const VolumeRendererParameters& volumeRendererParameters );
+    VolumeRendererParameters& operator=( const VolumeRendererParameters& params );
 
 protected:
     void initialize_() final;
