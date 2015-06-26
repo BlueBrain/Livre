@@ -300,6 +300,10 @@ bool Config::init()
     subscriber->registerHandler( zeq::hbp::EVENT_LOOKUPTABLE1D,
                                  boost::bind( &detail::Config::onLookupTable1D,
                                               _impl, _1 ));
+
+    if( !_impl->framedata.getRESTParameters()->useRESTBridge )
+        return true;
+
 #ifdef LIVRE_USE_RESTBRIDGE
     const std::string subscriberSchema =
         _impl->framedata.getRESTParameters()->zeqSchema +
