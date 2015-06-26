@@ -38,25 +38,30 @@ namespace
 
 MemoryDataSource::MemoryDataSource( const VolumeDataSourcePluginData& initData )
 {
+    _volumeInfo.overlap = Vector3ui( 4 );
+
     std::vector< std::string > parameters;
     boost::algorithm::split( parameters, initData.getURI().getFragment(),
                              boost::is_any_of( "," ));
-    if( parameters.size() < 4 )
-        LBTHROW( std::runtime_error( "Missing parameters." ));
-
-    _volumeInfo.overlap = Vector3ui( 4 );
-
-    try
+    if( parameters.size() < 4 ) // use defaults
     {
-        using boost::lexical_cast;
-        _volumeInfo.voxels[ 0 ] = lexical_cast< uint32_t >( parameters[ 0 ] );
-        _volumeInfo.voxels[ 1 ] = lexical_cast< uint32_t >( parameters[ 1 ] );
-        _volumeInfo.voxels[ 2 ] = lexical_cast< uint32_t >( parameters[ 2 ] );
-        const Vector3ui blockSize( lexical_cast< uint32_t >( parameters[ 3 ] ));
-        _volumeInfo.maximumBlockSize = blockSize + _volumeInfo.overlap * 2;
+        _volumeInfo.voxels = Vector3ui( 4096 );
+        _volumeInfo.maximumBlockSize = Vector3ui(32) + _volumeInfo.overlap * 2;
     }
-    catch( boost::bad_lexical_cast& except )
-         LBTHROW( std::runtime_error( except.what() ));
+    else
+    {
+        try
+        {
+            using boost::lexical_cast;
+            _volumeInfo.voxels[ 0 ] = lexical_cast< uint32_t >( parameters[0] );
+            _volumeInfo.voxels[ 1 ] = lexical_cast< uint32_t >( parameters[1] );
+            _volumeInfo.voxels[ 2 ] = lexical_cast< uint32_t >( parameters[2] );
+            const Vector3ui blockSize( lexical_cast< uint32_t >(parameters[3]));
+            _volumeInfo.maximumBlockSize = blockSize + _volumeInfo.overlap * 2;
+        }
+        catch( boost::bad_lexical_cast& except )
+            LBTHROW( std::runtime_error( except.what() ));
+    }
 
     if(!fillRegularVolumeInfo( _volumeInfo  ))
         LBTHROW( std::runtime_error( "Cannot setup the regular tree" ));

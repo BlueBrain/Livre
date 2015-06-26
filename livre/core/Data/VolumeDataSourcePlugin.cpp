@@ -57,15 +57,13 @@ void VolumeDataSourcePlugin::internalNodeToLODNode(
     boxCoordMin = boxCoordMin / bricksInRefLevel[index];
     boxCoordMax = boxCoordMax / bricksInRefLevel[index];
 
-#ifdef LIVRE_DEBUG_RENDERING
-    LBINFO << " Internal Node to LOD Node" << std::endl
+    LBVERB << " Internal Node to LOD Node" << std::endl
            << " Node Id " << internalNode
            << " BricksInRefLevel " << bricksInRefLevel << std::endl
            << " lBoxCoordMin " << boxCoordMin << std::endl
            << " lBoxCoordMax " << boxCoordMax << std::endl
            << " volume world size " << _volumeInfo.worldSize << std::endl
            << std::endl;
-#endif
     lodNode = LODNode( internalNode,
                        _volumeInfo.maximumBlockSize - _volumeInfo.overlap * 2,
                        Boxf( boxCoordMin - _volumeInfo.worldSize * 0.5f,
