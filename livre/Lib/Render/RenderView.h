@@ -26,7 +26,6 @@
 #include <livre/core/Dash/DashRenderNode.h>
 #include <livre/Lib/Visitor/DFSTraversal.h>
 #include <livre/Lib/Configuration/VolumeRendererParameters.h>
-#include <livre/Lib/Configuration/EFPrefetchAlgorithmParameters.h>
 
 namespace livre
 {
@@ -45,8 +44,7 @@ public:
      * @param volumeRendererParameters Volume rendering parameters.
      * @param prefetchAlgorithmParameters Prefetch algorithm parameters.
      */
-    void setParameters(  ConstVolumeRendererParametersPtr volumeRendererParameters,
-                         ConstEFPParametersPtr prefetchAlgorithmParameters );
+    void setParameters(  ConstVolumeRendererParametersPtr volumeRendererParameters );
 
 private:
 
@@ -56,20 +54,9 @@ private:
     void freeTextures_( const DashNodeVector& renderNodeList );
 
     DashNodeSet previousVisibleSet_;
-
     DFSTraversal dfsTraverser_;
-
-    float visibleFrustumScreenSpaceError_;
-
-    float texturePFrustumScreenSpaceError_;
-
-    float dataPFrustumScreenSpaceError_;
-
-    FloatVector prefetchDistanceRatios_;
-
     VolumeRendererParameters volumeRendererParameters_;
 
-    EFPrefetchAlgorithmParameters prefetchAlgorithmParameters_;
 };
 
 }

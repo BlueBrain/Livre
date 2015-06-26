@@ -36,7 +36,6 @@ enum SerializationMapIds
     SMI_VOLUME_SETTINGS,
     SMI_CLIENT_PARAMETERS,
     SMI_VR_PARAMETERS,
-    SMI_EFP_PARAMETERS,
     SMI_REST_PARAMETERS
 };
 
@@ -59,7 +58,6 @@ public:
     /** Set up the parameters. */
     void setup( const ClientParameters& clientParams,
                 const VolumeRendererParameters& rendererParams,
-                const EFPrefetchAlgorithmParameters& prefetchParams,
                 const RESTParameters& networkParams );
 
     /**
@@ -164,11 +162,6 @@ public:
     ConstVolumeRendererParametersPtr getVRParameters() const;
 
     /**
-     * @return The expanded frustum algorithm parameters.
-     */
-    ConstEFPParametersPtr getEFPParameters() const;
-
-    /**
      * @return The RESTBridge's parameters.
      */
     ConstRESTParametersPtr getRESTParameters() const;
@@ -187,7 +180,6 @@ private:
 
     ClientParametersPtr clientParametersPtr_;
     VolumeRendererParametersPtr vrParametersPtr_;
-    EFPParametersPtr prefetchParametersPtr_;
     RESTParametersPtr restParametersPtr_;
 };
 

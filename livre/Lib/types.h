@@ -47,9 +47,6 @@ typedef boost::shared_ptr< const ClientParameters > ConstClientParametersPtr;
 typedef boost::shared_ptr< VolumeRendererParameters > VolumeRendererParametersPtr;
 typedef boost::shared_ptr< const VolumeRendererParameters > ConstVolumeRendererParametersPtr;
 
-typedef boost::shared_ptr< EFPrefetchAlgorithmParameters > EFPParametersPtr;
-typedef boost::shared_ptr< const EFPrefetchAlgorithmParameters > ConstEFPParametersPtr;
-
 typedef boost::shared_ptr< RESTParameters > RESTParametersPtr;
 typedef boost::shared_ptr< const RESTParameters > ConstRESTParametersPtr;
 
