@@ -27,6 +27,8 @@ const std::string SCREENSPACEERROR_PARAM = "sse";
 const std::string SYNCHRONOUSMODE_PARAM = "synchronous";
 const std::string TEXTURECACHEMEM_PARAM = "texture-cache-mem";
 const std::string TEXTUREDATACACHEMEM_PARAM = "texture-data-cache-mem";
+const std::string MINDEPTH_PARAM = "min-depth";
+const std::string MAXDEPTH_PARAM = "max-depth";
 
 VolumeRendererParameters::VolumeRendererParameters()
     : Parameters( "Volume Renderer Parameters" )
@@ -36,6 +38,8 @@ VolumeRendererParameters::VolumeRendererParameters()
     , maxDataMemoryMB( 1024u )
     , maxTextureMemoryMB( 3072u )
     , maxTextureDataMemoryMB( 8192u )
+    , minDepth( 0 )
+    , maxDepth( ( NODEID_LEVEL_BITS << 1 ) + 1 )
 {
     configuration_.addDescription( configGroupName_, DATACACHEMEM_PARAM,
                                    "Maximum data cache memory (MB)",
@@ -50,6 +54,10 @@ VolumeRendererParameters::VolumeRendererParameters()
                                    "Screen space error", screenSpaceError );
     configuration_.addDescription( configGroupName_, SYNCHRONOUSMODE_PARAM,
                                    "Enable synchronous mode", synchronousModeEnabled );
+    configuration_.addDescription( configGroupName_, MINDEPTH_PARAM,
+                                   "Sets minimum level of detail", minDepth );
+    configuration_.addDescription( configGroupName_, MAXDEPTH_PARAM,
+                                   "Sets maximum level of detail", maxDepth );
 }
 
 void VolumeRendererParameters::deserialize( co::DataIStream &is, const uint64_t )
@@ -58,7 +66,9 @@ void VolumeRendererParameters::deserialize( co::DataIStream &is, const uint64_t 
        >> screenSpaceError
        >> maxDataMemoryMB
        >> maxTextureMemoryMB
-       >> maxTextureDataMemoryMB;
+       >> maxTextureDataMemoryMB
+       >> minDepth
+       >> maxDepth;
 }
 
 void VolumeRendererParameters::serialize( co::DataOStream &os, const uint64_t )
@@ -67,7 +77,9 @@ void VolumeRendererParameters::serialize( co::DataOStream &os, const uint64_t )
        << screenSpaceError
        << maxDataMemoryMB
        << maxTextureMemoryMB
-       << maxTextureDataMemoryMB;
+       << maxTextureDataMemoryMB
+       << minDepth
+       << maxDepth;
 }
 
 VolumeRendererParameters &VolumeRendererParameters::operator=(
@@ -78,7 +90,8 @@ VolumeRendererParameters &VolumeRendererParameters::operator=(
     maxDataMemoryMB = volumeRendererParameters.maxDataMemoryMB;
     maxTextureMemoryMB = volumeRendererParameters.maxTextureMemoryMB;
     maxTextureDataMemoryMB = volumeRendererParameters.maxTextureDataMemoryMB;
-
+    minDepth = volumeRendererParameters.minDepth;
+    maxDepth = volumeRendererParameters.maxDepth;
     return *this;
 }
 
@@ -91,6 +104,8 @@ void VolumeRendererParameters::initialize_()
     configuration_.getValue( DATACACHEMEM_PARAM, maxDataMemoryMB );
     configuration_.getValue( TEXTURECACHEMEM_PARAM, maxTextureMemoryMB );
     configuration_.getValue( TEXTUREDATACACHEMEM_PARAM, maxTextureDataMemoryMB );
+    configuration_.getValue( MINDEPTH_PARAM, minDepth );
+    configuration_.getValue( MAXDEPTH_PARAM, maxDepth );
 }
 
 } //Livre

@@ -25,7 +25,6 @@
 #include <livre/Eq/Settings/CameraSettings.h>
 #include <livre/Eq/Settings/VolumeSettings.h>
 #include <livre/Lib/Configuration/VolumeRendererParameters.h>
-#include <livre/Lib/Configuration/EFPrefetchAlgorithmParameters.h>
 #include <livre/Lib/Configuration/RESTParameters.h>
 
 namespace livre
@@ -70,9 +69,6 @@ public:
             break;
         case SMI_VR_PARAMETERS:
             object = new VolumeRendererParameters();
-            break;
-        case SMI_EFP_PARAMETERS:
-            object = new EFPrefetchAlgorithmParameters();
             break;
         case SMI_REST_PARAMETERS:
             object = new RESTParameters();
@@ -132,8 +128,6 @@ FrameData::FrameData( )
                          ( objectFactoryPtr_->createObject( SMI_APP_PARAMETERS ) ) )
     , vrParametersPtr_( static_cast< VolumeRendererParameters* >
                       ( objectFactoryPtr_->createObject( SMI_VR_PARAMETERS ) ) )
-    , prefetchParametersPtr_( static_cast< EFPrefetchAlgorithmParameters* >
-                            ( objectFactoryPtr_->createObject( SMI_EFP_PARAMETERS ) ) )
     , restParametersPtr_( static_cast< RESTParameters* >
                            ( objectFactoryPtr_->createObject( SMI_REST_PARAMETERS ) ) )
 {
@@ -148,7 +142,6 @@ void FrameData::registerObjects( )
     LBCHECK( registerObject( objectMapPtr_, volumeSettingsPtr_, SMI_VOLUME_SETTINGS ) );
     LBCHECK( registerObject( objectMapPtr_, appParametersPtr_, SMI_APP_PARAMETERS ) );
     LBCHECK( registerObject( objectMapPtr_, vrParametersPtr_, SMI_VR_PARAMETERS ) );
-    LBCHECK( registerObject( objectMapPtr_, prefetchParametersPtr_, SMI_EFP_PARAMETERS ) );
 #ifdef LIVRE_USE_RESTBRIDGE
     LBCHECK( registerObject( objectMapPtr_, restParametersPtr_, SMI_REST_PARAMETERS ) );
 #endif
@@ -163,7 +156,6 @@ void FrameData::deregisterObjects( )
     LBCHECK( deregisterObject( objectMapPtr_, volumeSettingsPtr_ ) );
     LBCHECK( deregisterObject( objectMapPtr_, appParametersPtr_ ) );
     LBCHECK( deregisterObject( objectMapPtr_, vrParametersPtr_ ) );
-    LBCHECK( deregisterObject( objectMapPtr_, prefetchParametersPtr_ ) );
 #ifdef LIVRE_USE_RESTBRIDGE
     LBCHECK( deregisterObject( objectMapPtr_, restParametersPtr_ ) );
 #endif
@@ -202,10 +194,6 @@ void FrameData::mapObjects( )
                         vrParametersPtr_,
                         SMI_VR_PARAMETERS ) );
 
-    LBCHECK( mapObject( objectMapPtr_,
-                        objectFactoryPtr_,
-                        prefetchParametersPtr_,
-                        SMI_EFP_PARAMETERS ) );
 #ifdef LIVRE_USE_RESTBRIDGE
     LBCHECK( mapObject( objectMapPtr_,
                         objectFactoryPtr_,
@@ -223,7 +211,6 @@ void FrameData::unmapObjects( )
     LBCHECK( objectMapPtr_->unmap( volumeSettingsPtr_.get() ) );
     LBCHECK( objectMapPtr_->unmap( appParametersPtr_.get() ) );
     LBCHECK( objectMapPtr_->unmap( vrParametersPtr_.get() ) );
-    LBCHECK( objectMapPtr_->unmap( prefetchParametersPtr_.get() ) );
 #ifdef LIVRE_USE_RESTBRIDGE
     LBCHECK( objectMapPtr_->unmap( restParametersPtr_.get() ) );
 #endif
@@ -238,12 +225,10 @@ void FrameData::initialize( eq::Config* eqConfig )
 
 void FrameData::setup( const ApplicationParameters& appParams,
                        const VolumeRendererParameters& rendererParams,
-                       const EFPrefetchAlgorithmParameters& prefetchParams,
                        const RESTParameters& restParams )
 {
     *appParametersPtr_ = appParams;
     *vrParametersPtr_ = rendererParams;
-    *prefetchParametersPtr_ = prefetchParams;
     *restParametersPtr_ = restParams;
 }
 
@@ -275,11 +260,6 @@ ConstApplicationParametersPtr FrameData::getAppParameters() const
 ConstVolumeRendererParametersPtr FrameData::getVRParameters() const
 {
     return vrParametersPtr_;
-}
-
-ConstEFPParametersPtr FrameData::getEFPParameters() const
-{
-    return prefetchParametersPtr_;
 }
 
 ConstRESTParametersPtr FrameData::getRESTParameters() const

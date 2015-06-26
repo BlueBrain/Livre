@@ -26,7 +26,6 @@
 
 #include <livre/Eq/types.h>
 #include <livre/Lib/Configuration/ApplicationParameters.h>
-#include <livre/Lib/Configuration/EFPrefetchAlgorithmParameters.h>
 #include <livre/Lib/Configuration/VolumeRendererParameters.h>
 #include <livre/Lib/Configuration/RESTParameters.h>
 
@@ -79,7 +78,6 @@ protected:
 private:
     ApplicationParameters _applicationParameters;
     VolumeRendererParameters _rendererParameters;
-    EFPrefetchAlgorithmParameters _prefetchParameters;
     RESTParameters _restParameters;
 
     /**

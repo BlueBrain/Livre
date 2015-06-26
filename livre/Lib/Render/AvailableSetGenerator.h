@@ -38,9 +38,7 @@ public:
      * @param windowHeight View height in pixels.
      * @param screenSpaceError Screen space error in pixels.
      */
-    AvailableSetGenerator( DashTreePtr tree,
-                           const uint32_t windowHeight,
-                           const float screenSpaceError );
+    AvailableSetGenerator( DashTreePtr tree);
 
     /**
      * Generates the rendering set according to the given frustum.
@@ -50,10 +48,6 @@ public:
     void generateRenderingSet( const Frustum& viewFrustum,
                                FrameInfo& frameInfo );
 
-private:
-
-    const uint32_t _windowHeight;
-    const float _screenSpaceError;
 };
 
 
