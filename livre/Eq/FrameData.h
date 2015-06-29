@@ -34,7 +34,7 @@ enum SerializationMapIds
     SMI_RENDER_SETTINGS,
     SMI_CAMERA_SETTINGS,
     SMI_VOLUME_SETTINGS,
-    SMI_APP_PARAMETERS,
+    SMI_CLIENT_PARAMETERS,
     SMI_VR_PARAMETERS,
     SMI_EFP_PARAMETERS,
     SMI_REST_PARAMETERS
@@ -57,7 +57,7 @@ public:
     void initialize( eq::Config* eqConfig );
 
     /** Set up the parameters. */
-    void setup( const ApplicationParameters& appParams,
+    void setup( const ClientParameters& clientParams,
                 const VolumeRendererParameters& rendererParams,
                 const EFPrefetchAlgorithmParameters& prefetchParams,
                 const RESTParameters& networkParams );
@@ -154,9 +154,9 @@ public:
     VolumeSettingsPtr getVolumeSettings() const;
 
     /**
-     * @return The application parameters.
+     * @return The client parameters.
      */
-    ConstApplicationParametersPtr getAppParameters() const;
+    ConstClientParametersPtr getClientParameters() const;
 
     /**
      * @return The volume rendering parameters.
@@ -185,7 +185,7 @@ private:
     CameraSettingsPtr cameraSettingsPtr_;
     VolumeSettingsPtr volumeSettingsPtr_;
 
-    ApplicationParametersPtr appParametersPtr_;
+    ClientParametersPtr clientParametersPtr_;
     VolumeRendererParametersPtr vrParametersPtr_;
     EFPParametersPtr prefetchParametersPtr_;
     RESTParametersPtr restParametersPtr_;

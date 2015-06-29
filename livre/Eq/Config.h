@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2006-2014, Stefan Eilemann <eile@equalizergraphics.com>
+/* Copyright (c) 2006-2015, Stefan Eilemann <eile@equalizergraphics.com>
  *                          Maxim Makhinya  <maxmah@gmail.com>
  *                          David Steiner   <steiner@ifi.uzh.ch>
  *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
@@ -48,6 +48,12 @@ public:
     /** @return The per-frame data. */
     const FrameData& getFrameData() const;
 
+    /** @return the application configuration parameters */
+    const ApplicationParameters& getApplicationParameters() const;
+
+    /** @return the application configuration parameters */
+    ApplicationParameters& getApplicationParameters();
+
     /**
      * mapFrameData Maps the init data.
      */
@@ -56,18 +62,18 @@ public:
     /**
      * Unmaps the init data.
      */
-    void unmapFrameData( );
+    void unmapFrameData();
 
     /**
      * Resets camera.
      */
-    void resetCamera( );
+    void resetCamera();
 
     /**
      * Initializes the config.
      * @return True if initalization is successful.
      */
-    virtual bool init();
+    bool init();
 
     /**
      * Is called on every frame start.
@@ -79,19 +85,19 @@ public:
      * Exits.
      * @return True if can exit cleanly.
      */
-    virtual bool exit( );
+    bool exit() final;
 
     /**
      * switchCanvas_ Switches to next canvas.
      * @return True if operations succeeds.
      */
-    bool switchCanvas_( );
+    bool switchCanvas_();
 
     /**
      * Switches to next view.
      * @return True if operations succeeds.
      */
-    bool switchView_( );
+    bool switchView_();
 
     /**
      * Switches to view canvas.
@@ -111,14 +117,14 @@ public:
     void handleEvents() override;
 
 private:
-
     virtual ~Config();
     bool handleEvent( const eq::ConfigEvent* event ) override;
     bool handleEvent( eq::EventICommand command ) override;
 
-    bool registerFrameData_( );
-    bool deregisterFrameData_();
-    void initializeEvents_( );
+    bool _registerFrameData();
+    bool _deregisterFrameData();
+    void _initEvents();
+    void _initZeroEQ();
 
     detail::Config* const _impl;
 };

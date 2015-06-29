@@ -64,8 +64,6 @@ private:
     bool configExitGL() final;
     void frameStart( const eq::uint128_t& frameID,
                      const uint32_t frameNumber ) final;
-    void frameFinish( const eq::uint128_t& frameID,
-                     const uint32_t frameNumber ) final;
 };
 
 }

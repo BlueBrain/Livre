@@ -1,7 +1,6 @@
-
-/* Copyright (c) 2006-2014, Stefan Eilemann <eile@equalizergraphics.com>
- *               2007-2011, Maxim Makhinya  <maxmah@gmail.com>
- *               2012,      David Steiner   <steiner@ifi.uzh.ch>
+/* Copyright (c) 2006-2015, Stefan Eilemann <eile@equalizergraphics.com>
+ *                          Maxim Makhinya  <maxmah@gmail.com>
+ *                          David Steiner   <steiner@ifi.uzh.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -131,9 +130,9 @@ public:
             _vwsPublisher->publish( vocEvent );
         }
         else if( eventType == zeq::vocabulary::EVENT_EXIT )
-        {
-            onExit();
-        }
+            config->stopRunning();
+        else if( eventType == zeq::hbp::EVENT_FRAME )
+            publishFrame();
     }
 
     // Generic camera (from REST) in meters
@@ -181,14 +180,35 @@ public:
         renderSettings->setTransferFunction( transferFunction );
     }
 
-    void publishExitedEvent()
+    void onFrame( const zeq::Event& event )
+    {
+        const zeq::hbp::data::Frame& frame =
+            zeq::hbp::deserializeFrame( event );
+
+        FrameSettingsPtr frameSettings = framedata.getFrameSettings();
+        ApplicationParameters& params = config->getApplicationParameters();
+
+        params.frames.x() = frame.start;
+        frameSettings->setFrameNumber( frame.current );
+        params.frames.y() = frame.end;
+        params.animation = frame.delta;
+    }
+
+    void publishExit()
     {
         _vwsPublisher->publish( zeq::Event( zeq::vocabulary::EVENT_EXIT ));
     }
 
-    void onExit()
+    void publishFrame()
     {
-        config->stopRunning();
+        FrameSettingsPtr frameSettings = framedata.getFrameSettings();
+        const ApplicationParameters& params =config->getApplicationParameters();
+        _publisher.publish( zeq::hbp::serializeFrame(
+                                zeq::hbp::data::Frame(
+                                    params.frames.x(),
+                                    frameSettings->getFrameNumber(),
+                                    params.frames.y(),
+                                    params.animation )));
     }
 
     Subscribers subscribers;
@@ -224,6 +244,16 @@ const FrameData& Config::getFrameData() const
     return _impl->framedata;
 }
 
+const ApplicationParameters& Config::getApplicationParameters() const
+{
+    return static_cast<const Client&>( *getClient()).getApplicationParameters();
+}
+
+ApplicationParameters& Config::getApplicationParameters()
+{
+    return static_cast< Client& >( *getClient()).getApplicationParameters();
+}
+
 void Config::mapFrameData( const eq::uint128_t& initId )
 {
     _impl->framedata.map( this, initId );
@@ -248,91 +278,54 @@ void Config::resetCamera( )
 
 bool Config::init()
 {
-#ifdef LIVRE_USE_RESTBRIDGE
-    const std::string publisherSchema = _impl->framedata.getRESTParameters()->zeqSchema
-                                        + PUBLISHER_SCHEMA_SUFFIX;
-
-    _impl->_vwsPublisher.reset( new zeq::Publisher( lunchbox::URI( publisherSchema ) ) );
-
-    if( _impl->framedata.getRESTParameters()->useRESTBridge )
-    {
-        _impl->_restBridge.reset( new restbridge::RestBridge(
-                                            _impl->framedata.getRESTParameters()->hostName,
-                                            _impl->framedata.getRESTParameters()->port ) );
-        _impl->_restBridge->run(  _impl->framedata.getRESTParameters()->zeqSchema );
-    }
-#elif LIVRE_USE_ZEQ
-    _impl->_vwsPublisher.reset( new zeq::Publisher( lunchbox::URI( "vwsresp://" ) ) );
-#endif
-
+    _initZeroEQ();
     resetCamera();
-    initializeEvents_();
+    _initEvents();
+    FrameSettingsPtr frameSettings = _impl->framedata.getFrameSettings();
+    const ApplicationParameters& params = getApplicationParameters();
+    frameSettings->setFrameNumber( params.frames.x( ));
+
     _impl->framedata.registerObjects();
 
-    if( !registerFrameData_( ))
+    if( !_registerFrameData( ))
         return false;
 
-    if( !eq::Config::init( _impl->framedata.getID( ) ) )
+    if( !eq::Config::init( _impl->framedata.getID( )))
     {
         _impl->framedata.deregisterObjects();
-        deregisterFrameData_();
+        _deregisterFrameData();
         return false;
     }
 
     const eq::Canvases& canvases = getCanvases();
-    if( canvases.empty( ))
-        _impl->currentCanvas = 0;
-    else
-        _impl->currentCanvas = canvases.front();
-
-#ifdef LIVRE_USE_ZEQ
-    if( !servus::Servus::isAvailable( ))
-        return true;
-
-    SubscriberPtr subscriber( new zeq::Subscriber( lunchbox::URI( "hbp://" )));
-    _impl->subscribers.push_back( subscriber );
-    if( _impl->framedata.getAppParameters()->syncCamera )
-    {
-        subscriber->registerHandler( zeq::hbp::EVENT_CAMERA,
-                                     boost::bind( &detail::Config::onHBPCamera,
-                                                 _impl, _1 ));
-    }
-    subscriber->registerHandler( zeq::hbp::EVENT_LOOKUPTABLE1D,
-                                 boost::bind( &detail::Config::onLookupTable1D,
-                                              _impl, _1 ));
-
-    if( !_impl->framedata.getRESTParameters()->useRESTBridge )
-        return true;
-
-#ifdef LIVRE_USE_RESTBRIDGE
-    const std::string subscriberSchema =
-        _impl->framedata.getRESTParameters()->zeqSchema +
-        SUBSCRIBER_SCHEMA_SUFFIX;
-#else
-    const std::string subscriberSchema = "vwscmd://";
-#endif
-    SubscriberPtr vwsSubscriber(
-                new zeq::Subscriber( lunchbox::URI( subscriberSchema )));
-    _impl->subscribers.push_back( vwsSubscriber );
-    vwsSubscriber->registerHandler( zeq::hbp::EVENT_CAMERA,
-                                    boost::bind( &detail::Config::onCamera,
-                                                 _impl, _1 ));
-    vwsSubscriber->registerHandler( zeq::vocabulary::EVENT_REQUEST,
-                                    boost::bind( &detail::Config::onRequest,
-                                                 _impl, _1 ));
-#endif
+    _impl->currentCanvas = canvases.empty() ? 0 : canvases.front();
     return true;
 }
 
-uint32_t Config::startFrame( )
+uint32_t Config::startFrame()
 {
+    FrameSettingsPtr frameSettings = _impl->framedata.getFrameSettings();
+    const ApplicationParameters& params = getApplicationParameters();
+    const uint32_t start = params.frames.x();
+    const uint32_t current = frameSettings->getFrameNumber() > start ?
+                                 frameSettings->getFrameNumber() : start;
+    const uint32_t end = params.frames.y() > current ?
+                             params.frames.y() : current;
+    const int32_t delta = params.animation;
+    // avoid overflow condition:
+    const uint32_t interval = end-start == 0xFFFFFFFFu ?
+                                  0xFFFFFFFFu : end - start + 1;
+    const uint32_t frame = ((current-start+delta) % interval) + start;
+    frameSettings->setFrameNumber( frame );
+
     const eq::uint128_t& version = _impl->framedata.commit();
-    _impl->framedata.getFrameSettings()->setGrabFrame( false );
+    frameSettings->setGrabFrame( false );
 #ifdef LIVRE_USE_ZEQ
     if( _impl->_heartbeatClock.getTimef() >= DEFAULT_HEARTBEAT_TIME )
     {
         _impl->_heartbeatClock.reset();
-        _impl->_vwsPublisher->publish( zeq::Event( zeq::vocabulary::EVENT_HEARTBEAT ) );
+        _impl->_vwsPublisher->publish(
+            zeq::Event( zeq::vocabulary::EVENT_HEARTBEAT ));
     }
 #endif
     return eq::Config::startFrame( version );
@@ -343,10 +336,10 @@ bool Config::exit()
     bool ret = eq::Config::exit();
     // cppcheck-suppress unreachableCode
     _impl->framedata.deregisterObjects();
-    if( !deregisterFrameData_() )
+    if( !_deregisterFrameData() )
         ret = false;
 #ifdef LIVRE_USE_RESTBRIDGE
-    _impl->publishExitedEvent();
+    _impl->publishExit();
 #endif
 
     return ret;
@@ -537,17 +530,79 @@ bool Config::handleEvent( eq::EventICommand command )
     return eq::Config::handleEvent( command );
 }
 
-bool Config::registerFrameData_()
+bool Config::_registerFrameData()
 {
     return _impl->framedata.registerToConfig_( this );
 }
 
-bool Config::deregisterFrameData_()
+bool Config::_deregisterFrameData()
 {
     return _impl->framedata.deregisterFromConfig_( this );
 }
 
-void Config::initializeEvents_()
+void Config::_initZeroEQ()
+{
+#ifdef LIVRE_USE_ZEQ
+#  ifdef LIVRE_USE_RESTBRIDGE
+    const std::string schema = _impl->framedata.getRESTParameters()->zeqSchema +
+                               PUBLISHER_SCHEMA_SUFFIX;
+
+    _impl->_vwsPublisher.reset( new zeq::Publisher( lunchbox::URI( schema )));
+
+    if( _impl->framedata.getRESTParameters()->useRESTBridge )
+    {
+        _impl->_restBridge.reset(
+            new restbridge::RestBridge(
+                _impl->framedata.getRESTParameters()->hostName,
+                _impl->framedata.getRESTParameters()->port ));
+        _impl->_restBridge->run(
+            _impl->framedata.getRESTParameters()->zeqSchema );
+    }
+
+#  else
+    _impl->_vwsPublisher.reset( new zeq::Publisher(
+                                    lunchbox::URI( "vwsresp://" )));
+#  endif
+
+    if( !servus::Servus::isAvailable( ))
+        return;
+
+    SubscriberPtr subscriber( new zeq::Subscriber( lunchbox::URI( "hbp://" )));
+    _impl->subscribers.push_back( subscriber );
+    if( getApplicationParameters().syncCamera )
+    {
+        subscriber->registerHandler( zeq::hbp::EVENT_CAMERA,
+                                     boost::bind( &detail::Config::onHBPCamera,
+                                                 _impl, _1 ));
+    }
+    subscriber->registerHandler( zeq::hbp::EVENT_LOOKUPTABLE1D,
+                                 boost::bind( &detail::Config::onLookupTable1D,
+                                              _impl, _1 ));
+    subscriber->registerHandler( zeq::hbp::EVENT_FRAME,
+                                 boost::bind( &detail::Config::onFrame,
+                                              _impl, _1 ));
+#  ifdef LIVRE_USE_RESTBRIDGE
+    if( !_impl->framedata.getRESTParameters()->useRESTBridge )
+        return;
+
+    const std::string subscriberSchema =
+        _impl->framedata.getRESTParameters()->zeqSchema +
+        SUBSCRIBER_SCHEMA_SUFFIX;
+
+    SubscriberPtr vwsSubscriber(
+                new zeq::Subscriber( lunchbox::URI( subscriberSchema )));
+    _impl->subscribers.push_back( vwsSubscriber );
+    vwsSubscriber->registerHandler( zeq::hbp::EVENT_CAMERA,
+                                    boost::bind( &detail::Config::onCamera,
+                                                 _impl, _1 ));
+    vwsSubscriber->registerHandler( zeq::vocabulary::EVENT_REQUEST,
+                                    boost::bind( &detail::Config::onRequest,
+                                                 _impl, _1 ));
+#  endif
+#endif
+}
+
+void Config::_initEvents()
 {
     _impl->eventMapper.registerEvent( EVENT_CHANNEL_POINTER );
     _impl->eventMapper.registerEvent( EVENT_KEYBOARD );

@@ -65,8 +65,8 @@ public:
         case SMI_VOLUME_SETTINGS:
             object = new VolumeSettings();
             break;
-        case SMI_APP_PARAMETERS:
-            object = new ApplicationParameters();
+        case SMI_CLIENT_PARAMETERS:
+            object = new ClientParameters();
             break;
         case SMI_VR_PARAMETERS:
             object = new VolumeRendererParameters();
@@ -128,8 +128,8 @@ FrameData::FrameData( )
                         ( objectFactoryPtr_->createObject( SMI_CAMERA_SETTINGS ) ) )
     , volumeSettingsPtr_( static_cast< VolumeSettings* >
                         ( objectFactoryPtr_->createObject( SMI_VOLUME_SETTINGS ) ) )
-    , appParametersPtr_( static_cast< ApplicationParameters* >
-                         ( objectFactoryPtr_->createObject( SMI_APP_PARAMETERS ) ) )
+    , clientParametersPtr_( static_cast< ClientParameters* >
+                         ( objectFactoryPtr_->createObject( SMI_CLIENT_PARAMETERS ) ) )
     , vrParametersPtr_( static_cast< VolumeRendererParameters* >
                       ( objectFactoryPtr_->createObject( SMI_VR_PARAMETERS ) ) )
     , prefetchParametersPtr_( static_cast< EFPrefetchAlgorithmParameters* >
@@ -146,7 +146,7 @@ void FrameData::registerObjects( )
     LBCHECK( registerObject( objectMapPtr_, renderSettingsPtr_, SMI_RENDER_SETTINGS ) );
     LBCHECK( registerObject( objectMapPtr_, cameraSettingsPtr_, SMI_CAMERA_SETTINGS ) );
     LBCHECK( registerObject( objectMapPtr_, volumeSettingsPtr_, SMI_VOLUME_SETTINGS ) );
-    LBCHECK( registerObject( objectMapPtr_, appParametersPtr_, SMI_APP_PARAMETERS ) );
+    LBCHECK( registerObject( objectMapPtr_, clientParametersPtr_, SMI_CLIENT_PARAMETERS ) );
     LBCHECK( registerObject( objectMapPtr_, vrParametersPtr_, SMI_VR_PARAMETERS ) );
     LBCHECK( registerObject( objectMapPtr_, prefetchParametersPtr_, SMI_EFP_PARAMETERS ) );
 #ifdef LIVRE_USE_RESTBRIDGE
@@ -161,7 +161,7 @@ void FrameData::deregisterObjects( )
     LBCHECK( deregisterObject( objectMapPtr_, renderSettingsPtr_ ) );
     LBCHECK( deregisterObject( objectMapPtr_, cameraSettingsPtr_ ) );
     LBCHECK( deregisterObject( objectMapPtr_, volumeSettingsPtr_ ) );
-    LBCHECK( deregisterObject( objectMapPtr_, appParametersPtr_ ) );
+    LBCHECK( deregisterObject( objectMapPtr_, clientParametersPtr_ ) );
     LBCHECK( deregisterObject( objectMapPtr_, vrParametersPtr_ ) );
     LBCHECK( deregisterObject( objectMapPtr_, prefetchParametersPtr_ ) );
 #ifdef LIVRE_USE_RESTBRIDGE
@@ -194,8 +194,8 @@ void FrameData::mapObjects( )
 
     LBCHECK( mapObject( objectMapPtr_,
                         objectFactoryPtr_,
-                        appParametersPtr_,
-                        SMI_APP_PARAMETERS ) );
+                        clientParametersPtr_,
+                        SMI_CLIENT_PARAMETERS ) );
 
     LBCHECK( mapObject( objectMapPtr_,
                         objectFactoryPtr_,
@@ -221,7 +221,7 @@ void FrameData::unmapObjects( )
     LBCHECK( objectMapPtr_->unmap( renderSettingsPtr_.get() ) );
     LBCHECK( objectMapPtr_->unmap( cameraSettingsPtr_.get() ) );
     LBCHECK( objectMapPtr_->unmap( volumeSettingsPtr_.get() ) );
-    LBCHECK( objectMapPtr_->unmap( appParametersPtr_.get() ) );
+    LBCHECK( objectMapPtr_->unmap( clientParametersPtr_.get() ) );
     LBCHECK( objectMapPtr_->unmap( vrParametersPtr_.get() ) );
     LBCHECK( objectMapPtr_->unmap( prefetchParametersPtr_.get() ) );
 #ifdef LIVRE_USE_RESTBRIDGE
@@ -236,12 +236,12 @@ void FrameData::initialize( eq::Config* eqConfig )
     objectMapPtr_.reset( new co::ObjectMap( *eqConfig, *objectFactoryPtr_ ) );
 }
 
-void FrameData::setup( const ApplicationParameters& appParams,
+void FrameData::setup( const ClientParameters& clientParams,
                        const VolumeRendererParameters& rendererParams,
                        const EFPrefetchAlgorithmParameters& prefetchParams,
                        const RESTParameters& restParams )
 {
-    *appParametersPtr_ = appParams;
+    *clientParametersPtr_ = clientParams;
     *vrParametersPtr_ = rendererParams;
     *prefetchParametersPtr_ = prefetchParams;
     *restParametersPtr_ = restParams;
@@ -267,9 +267,9 @@ VolumeSettingsPtr FrameData::getVolumeSettings() const
     return volumeSettingsPtr_;
 }
 
-ConstApplicationParametersPtr FrameData::getAppParameters() const
+ConstClientParametersPtr FrameData::getClientParameters() const
 {
-    return appParametersPtr_;
+    return clientParametersPtr_;
 }
 
 ConstVolumeRendererParametersPtr FrameData::getVRParameters() const
