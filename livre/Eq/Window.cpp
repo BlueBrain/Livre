@@ -68,6 +68,10 @@ public:
             return;
         }
         _windowContext.reset( new EqContext( _window ));
+    }
+
+    void configInit()
+    {
         initializePipelineProcessors();
         initializePipelineConnections();
     }
@@ -217,8 +221,13 @@ bool Window::configInit( const eq::uint128_t& initId )
 {
     // Enforce alpha channel, since we need one for rendering
     setIAttribute( eq::WindowSettings::IATTR_PLANES_ALPHA, 8 );
+    if( eq::Window::configInit( initId ))
+    {
+        _impl->configInit();
+        return true;
+    }
 
-    return eq::Window::configInit( initId );
+    return false;
 }
 
 bool Window::configExit()

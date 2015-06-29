@@ -118,12 +118,12 @@ TextureUploadProcessor::TextureUploadProcessor( DashTreePtr dashTree,
     , _vrParameters( vrParameters )
 {
     setDashContext( dashTree->createContext());
-    _textureCache.setMaximumMemory( vrParameters->maxTextureDataMemoryMB );
 }
 
 bool TextureUploadProcessor::initializeThreadRun_()
 {
     setName( "TexUp" );
+     _textureCache.setMaximumMemory( _vrParameters->maxTextureMemoryMB );
     return DashProcessor::initializeThreadRun_();
 }
 
