@@ -86,7 +86,7 @@ class LivreBatch(object):
         values['start'] = start
         values['end'] = end
         values['num_frames'] = end - start + 1
-        values['image'] = "{slurm[output_dir]}/{slurm[job_name]}{idx}".format(**values)
+        values['image'] = "{slurm[output_dir]}/{slurm[job_name]}{idx}_".format(**values)
 
         sbatch_script = '\n'.join((
             "#!/bin/bash",
@@ -142,7 +142,7 @@ class LivreBatch(object):
 
         livre_dict = self.dict[SECTION_LIVRE]
         start_frame = livre_dict[LIVRE_STARTFRAME]
-        end_frame = livre_dict[LIVRE_ENDFRAME]
+        end_frame = livre_dict[LIVRE_ENDFRAME] + 1
         batch_size = livre_dict[LIVRE_MAXFRAMES]
 
         num_frames = end_frame - start_frame
@@ -159,7 +159,7 @@ class LivreBatch(object):
         idx = 0
         for batch_start in range(start_frame, end_frame, batch_size):
             start = batch_start
-            end = min(batch_start + batch_size, end_frame)
+            end = min(batch_start + batch_size - 1, end_frame)
 
             sbatch_script = self._build_sbatch_script(idx, start, end)
             idx += 1
