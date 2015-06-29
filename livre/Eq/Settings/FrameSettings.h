@@ -1,7 +1,7 @@
 
-/* Copyright (c) 2006-2011, Stefan Eilemann <eile@equalizergraphics.com>
- *               2007-2011, Maxim Makhinya  <maxmah@gmail.com>
- *                    2013, Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2006-2015, Stefan Eilemann <eile@equalizergraphics.com>
+ *                          Maxim Makhinya  <maxmah@gmail.com>
+ *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -33,7 +33,7 @@ namespace livre
 {
 
 /**
- * @brief The FrameSettings class enables/disables help, statistics, recording. Changes view and also toogles the
+ * The FrameSettings class enables/disables help, statistics, recording. Changes view and also toogles the
  * screen shot.
  */
 class FrameSettings : public co::Serializable
@@ -41,37 +41,48 @@ class FrameSettings : public co::Serializable
 public:
 
     /**
-     * @brief FrameSettings constructor.
+     * FrameSettings constructor.
      */
     FrameSettings();
 
     /**
-     * @brief reset Resets the variables.
+     * Resets the variables.
      */
     void reset();
 
     /**
-     * @brief toggleHelp Toggles the help.
+     * Toggles the help.
      */
     void toggleHelp();
 
     /**
-     * @brief toggleRecording Toggles the recording.
+     * Toggles the recording.
      */
     void toggleRecording();
 
     /**
-     * @brief toggleStatistics Toggles the statictics.
+     * Toggles the statictics.
      */
     void toggleStatistics();
 
+    /** Set the frame number of the current frame. */
+    void setFrameNumber( uint32_t frame );
+
+    /** @return the current frame number to render. */
+    uint32_t getFrameNumber() const { return frameNumber_; }
+
     /**
-     * @brief makeScreenshot Screen shots the current frame.
+     * Screen shots the current frame.
      */
     void makeScreenshot();
 
     /**
-     * @brief setCurrentViewId Set the current view id.
+     * @return Returns the screen shot number.
+     */
+    uint32_t getScreenshotNumber() const;
+
+    /**
+     * Set the current view id.
      * @param id The view id.
      */
     void setCurrentViewId( const eq::uint128_t& id );
@@ -92,17 +103,12 @@ public:
     bool getStatistics() const;
 
     /**
-     * @return Returns the screen shot number.
-     */
-    uint32_t getScreenshotNumber() const;
-
-    /**
      * @return Returns the current view id.
      */
     eq::uint128_t getCurrentViewId() const;
 
     /**
-     * @brief setGrabFrame enable/disable the frame grabbing for the current frame.
+     * Enable/disable the frame grabbing for the current frame.
      * @param setValue the bolean value for enabling/disabling frame grabbing.
      */
     void setGrabFrame( const bool setValue );
@@ -117,11 +123,12 @@ private:
     virtual void serialize( co::DataOStream& os, const uint64_t dirtyBits );
     virtual void deserialize( co::DataIStream& is, const uint64_t dirtyBits );
 
+    eq::uint128_t currentViewId_;
+    uint32_t frameNumber_;
+    uint32_t screenShot_;
     bool recording_;
     bool statistics_;
     bool help_;
-    uint32_t screenShot_;
-    eq::uint128_t currentViewId_;
     bool grabFrame_;
 };
 

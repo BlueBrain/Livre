@@ -1,5 +1,6 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                          Stefan.Eilemann@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -20,8 +21,8 @@
 #ifndef _ApplicationParameters_h_
 #define _ApplicationParameters_h_
 
+#include <livre/Lib/Configuration/ClientParameters.h>
 #include <livre/core/mathTypes.h>
-#include <livre/core/Configuration/Parameters.h>
 
 namespace livre
 {
@@ -29,38 +30,21 @@ namespace livre
 /**
  * The ApplicationParameters struct keeps the parameters for main application.
  */
-struct ApplicationParameters : public Parameters
+struct ApplicationParameters : public ClientParameters
 {
     ApplicationParameters();
 
-    std::string dataFileName; //!< Data file name.
-    bool animationEnabled; //!< Enable the animation mode.
+    Vector3f cameraPosition; //!< Camera position in world space.
     Vector2ui frames; //!< Range of frames to render: 'start end'.
     uint32_t maxFrames; //!< Max number of frames to render.
+    int32_t animation; //!< animation forward/backward speed
     bool isResident; //!< Is the main app resident.
-    Vector3f cameraPosition; //!< Camera position in world space.
     bool syncCamera; //!< Synchronize camera with other applications using ZEQ.
 
-    /**
-     * De-serializes the object from input stream.
-     * @param dirtyBits The bits for elements can be marked
-     * @param is Input stream.
-     */
-    void deserialize( co::DataIStream& is, const uint64_t dirtyBits ) final;
-
-    /**
-     * Serializes the object to output stream.
-     * @param dirtyBits The bits for elements can be marked
-     * @param os Output stream.
-     */
-    void serialize( co::DataOStream& os, const uint64_t dirtyBits ) final;
-
-    /**
-     * @param parameters The source parameters.
-     */
+    /** @param parameters The source parameters. */
     ApplicationParameters& operator=( const ApplicationParameters& parameters );
 
-protected:
+private:
     void initialize_() final;
 };
 

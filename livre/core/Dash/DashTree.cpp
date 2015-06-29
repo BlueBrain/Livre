@@ -34,9 +34,7 @@ namespace detail
 
 class DashTree : public boost::noncopyable
 {
-
 public:
-
     DashTree( ConstVolumeDataSourcePtr dataSource )
         : _dataSource( dataSource ),
           _localContext( dash::Context::getMain( ))

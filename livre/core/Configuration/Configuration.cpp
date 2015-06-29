@@ -84,7 +84,7 @@ const ProgramOptionsDescriptionMap &Configuration::getDescriptionMap_( ) const
     return descriptionMap_;
 }
 
-std::ostream& operator<<( std::ostream& os, Configuration& configuration )
+std::ostream& operator<<( std::ostream& os, const Configuration& configuration )
 {
     for( ProgramOptionsDescriptionMap::const_iterator it = configuration.descriptionMap_.begin();
          it != configuration.descriptionMap_.end(); ++it )

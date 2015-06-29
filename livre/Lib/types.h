@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -35,13 +35,14 @@ class TextureDataObject;
 class TextureObject;
 class TextureUploadProcessor;
 struct ApplicationParameters;
+struct ClientParameters;
 struct EFPrefetchAlgorithmParameters;
 struct VolumeRendererParameters;
 struct RESTParameters;
 
 /** SmartPtr definitions */
-typedef boost::shared_ptr< ApplicationParameters > ApplicationParametersPtr;
-typedef boost::shared_ptr< const ApplicationParameters > ConstApplicationParametersPtr;
+typedef boost::shared_ptr< ClientParameters > ClientParametersPtr;
+typedef boost::shared_ptr< const ClientParameters > ConstClientParametersPtr;
 
 typedef boost::shared_ptr< VolumeRendererParameters > VolumeRendererParametersPtr;
 typedef boost::shared_ptr< const VolumeRendererParameters > ConstVolumeRendererParametersPtr;

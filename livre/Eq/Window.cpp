@@ -26,6 +26,7 @@
 #include <livre/Eq/Node.h>
 #include <livre/Eq/Pipe.h>
 #include <livre/Eq/Render/EqContext.h>
+#include <livre/Eq/Settings/FrameSettings.h>
 
 #include <livre/core/Dash/DashTree.h>
 #include <livre/core/DashPipeline/DashConnection.h>
@@ -33,7 +34,6 @@
 #include <livre/core/DashPipeline/DashProcessorInput.h>
 #include <livre/core/DashPipeline/DashProcessorOutput.h>
 
-#include <livre/Lib/Configuration/ApplicationParameters.h>
 #include <livre/Lib/Configuration/VolumeRendererParameters.h>
 
 #include <livre/Lib/Uploaders/DataUploadProcessor.h>
@@ -94,20 +94,13 @@ public:
     void frameStart()
     {
         _dashProcessorPtr->getDashContext()->setCurrent();
-    }
-
-    void frameFinish( const uint32_t frameNumber )
-    {
         livre::Node* node = static_cast< livre::Node* >( _window->getNode( ));
         DashRenderStatus& renderStatus = node->getDashTree()->getRenderStatus();
 
         Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
-        if( pipe->getFrameData()->getAppParameters()->animationEnabled )
-        {
-            const Vector2ui& animationFrames = pipe->getFrameData()->getAppParameters()->frames;
-            const uint32_t duration = animationFrames.y() - animationFrames.x();
-            renderStatus.setFrameID( animationFrames.x() + ( frameNumber % duration ));
-        }
+
+        renderStatus.setFrameID(
+            pipe->getFrameData()->getFrameSettings()->getFrameNumber( ));
     }
 
     void startUploadProcessors()
@@ -138,28 +131,22 @@ public:
 
     void initializePipelineProcessors()
     {
-        Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
-        const uint32_t startFrame = pipe->getFrameData()->getAppParameters()->frames.x();
-
         Node* node = static_cast< Node* >( _window->getNode( ));
-        DashRenderStatus& renderStatus = node->getDashTree()->getRenderStatus();
-        renderStatus.setFrameID( startFrame );
-
-        _dashProcessorPtr->setDashContext( node->getDashTree()->createContext( ));
+        DashTreePtr dashTree = node->getDashTree();
+        _dashProcessorPtr->setDashContext( dashTree->createContext( ));
 
         GLContextPtr dataUploadContext( new EqContext( _window ));
-        _dataUploadProcessorPtr.reset( new DataUploadProcessor( node->getDashTree(),
-                                                                _windowContext,
-                                                                dataUploadContext,
-                                                                node->getRawDataCache(),
-                                                                node->getTextureDataCache( )));
+        _dataUploadProcessorPtr.reset(
+            new DataUploadProcessor( dashTree, _windowContext,
+                                     dataUploadContext, node->getRawDataCache(),
+                                     node->getTextureDataCache( )));
 
         GLContextPtr textureUploadContext( new EqContext( _window ));
-        _textureUploadProcessorPtr.reset( new TextureUploadProcessor( node->getDashTree(),
-                                                                      _windowContext,
-                                                                      textureUploadContext,
-                                                    pipe->getFrameData()->getVRParameters( )));
-
+        Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
+        _textureUploadProcessorPtr.reset(
+            new TextureUploadProcessor( dashTree, _windowContext,
+                                        textureUploadContext,
+                                        pipe->getFrameData()->getVRParameters( )));
         startUploadProcessors();
     }
 
@@ -277,13 +264,6 @@ void Window::frameStart( const eq::uint128_t& frameID,
 {
     _impl->frameStart();
     eq::Window::frameStart( frameID, frameNumber );
-}
-
-void Window::frameFinish( const eq::uint128_t& frameID,
-                          const uint32_t frameNumber )
-{
-    _impl->frameFinish( frameNumber );
-    eq::Window::frameFinish( frameID, frameNumber );
 }
 
 void Window::commit()

@@ -52,8 +52,8 @@ public:
                          const std::string& shortDesc,
                          const std::string& longDesc )
     {
-
-        getGroup_( groupName ).add_options( )( shortDesc.c_str(), longDesc.c_str() );
+        getGroup_( groupName ).add_options( )( shortDesc.c_str(),
+                                               longDesc.c_str( ));
     }
 
     /**
@@ -68,21 +68,20 @@ public:
                          const std::string& shortDesc,
                          const std::string& longDesc )
     {
-
-        getGroup_( groupName ).add_options( )
-                ( shortDesc.c_str(),
-                  boost::program_options::value< T >(),
-                  longDesc.c_str() );
+        getGroup_( groupName ).add_options( ) ( shortDesc.c_str(),
+                                           boost::program_options::value< T >(),
+                                                longDesc.c_str() );
     }
 
     /**
-     * Adds description for a dictionary item.
+     * Add description for a dictionary item.
      * @param groupName The item group.
      * @param shortDesc Short description.
      * @param longDesc Long description.
      * @param defaultValue Add default value to parameter.
-     * @warning Before file parsing and/or command line parsing descriptions should be added. The bool type
-     * specialization is different and in the cpp file.
+     * @warning Before file parsing and/or command line parsing descriptions
+     * should be added. The bool type specialization is different and in the cpp
+     * file.
      */
     template< class T >
     void addDescription( const std::string& groupName,
@@ -90,11 +89,33 @@ public:
                          const std::string& longDesc,
                          T defaultValue )
     {
+        getGroup_( groupName ).add_options( )( shortDesc.c_str(),
+            boost::program_options::value< T >()->default_value( defaultValue ),
+                                               longDesc.c_str() );
+    }
 
-        getGroup_( groupName ).add_options( )
-                ( shortDesc.c_str(),
-                  boost::program_options::value< T >()->default_value( defaultValue ),
-                  longDesc.c_str() );
+    /**
+     * Add description for a dictionary item.
+     * @param groupName The item group.
+     * @param shortDesc Short description.
+     * @param longDesc Long description.
+     * @param defaultValue Default value for parameter (arg not given).
+     * @param implicitValue Implicit value for paramter (arg with no value)
+     * @warning Before file parsing and/or command line parsing descriptions
+     * should be added. The bool type specialization is different and in the cpp
+     * file.
+     */
+    template< class T >
+    void addDescription( const std::string& groupName,
+                         const std::string& shortDesc,
+                         const std::string& longDesc,
+                         T defaultValue, T implicitValue )
+    {
+        getGroup_( groupName ).add_options( )( shortDesc.c_str(),
+                                           boost::program_options::value< T >()
+                                               ->default_value( defaultValue )
+                                               ->implicit_value( implicitValue),
+                                               longDesc.c_str() );
     }
 
     // Specialization for boolean parameters
@@ -103,10 +124,9 @@ public:
                          const std::string& longDesc,
                          bool defaultValue )
     {
-       getGroup_( groupName ).add_options( )
-                 ( shortDesc.c_str(),
-                 boost::program_options::bool_switch()->default_value( defaultValue ),
-                 longDesc.c_str() );
+        getGroup_( groupName ).add_options( )( shortDesc.c_str(),
+           boost::program_options::bool_switch()->default_value( defaultValue ),
+                                               longDesc.c_str() );
     }
 
     /**
@@ -131,7 +151,7 @@ public:
     template< class T >
     bool getValue( const std::string& key, T& value  ) const
     {
-        if( !programOptionsMap_.count( key ) )
+        if( !programOptionsMap_.count( key ))
             return false;
 
         value = programOptionsMap_[ key ].as< T >( );
@@ -168,17 +188,16 @@ public:
      * Prints description map for parameters.
      * @return the output stream.
      */
-    friend std::ostream& operator<<( std::ostream& ostream, Configuration& configuration );
+    friend std::ostream& operator<<( std::ostream& ostream,
+                                     const Configuration& configuration );
 
 private:
+    ProgramOptionsMap programOptionsMap_;
+    ProgramOptionsDescriptionMap descriptionMap_;
 
     ProgramOptionsDescription& getGroup_( const std::string& groupName );
-
-    void processDescriptionMap_( ProgramOptionsDescription& description , bool doNotProcessHidden = false) const;
-
-    ProgramOptionsMap programOptionsMap_;
-
-    ProgramOptionsDescriptionMap descriptionMap_;
+    void processDescriptionMap_( ProgramOptionsDescription& description ,
+                                 bool doNotProcessHidden = false ) const;
 };
 
 

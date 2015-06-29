@@ -69,6 +69,11 @@ public:
      */
     int32_t run();
 
+    const ApplicationParameters& getApplicationParameters() const
+        { return _applicationParameters; }
+    ApplicationParameters& getApplicationParameters()
+        { return _applicationParameters; }
+
 protected:
 
     /**
