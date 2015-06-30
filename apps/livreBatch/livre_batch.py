@@ -32,6 +32,8 @@ LIVRE_LAYOUT = 'eq_layout'
 LIVRE_SSE = 'sse'
 LIVRE_WIDTH = 'width'
 LIVRE_HEIGHT = 'height'
+LIVRE_CAMERA_POSITION = 'camera_position'
+LIVRE_CAMERA_LOOKAT = 'camera_lookat'
 LIVRE_STARTFRAME = 'start_frame'
 LIVRE_ENDFRAME = 'end_frame'
 LIVRE_MAXFRAMES = 'max_frames'
@@ -72,6 +74,8 @@ class LivreBatch(object):
                 LIVRE_SSE: 1,
                 LIVRE_WIDTH: 1920,
                 LIVRE_HEIGHT: 1200,
+                LIVRE_CAMERA_POSITION: "0 0 2",
+                LIVRE_CAMERA_LOOKAT: "0 0 0",
                 LIVRE_STARTFRAME: 0,
                 LIVRE_ENDFRAME: 100,
                 LIVRE_MAXFRAMES: 50}}
@@ -105,7 +109,9 @@ class LivreBatch(object):
             "module load BBP/viz/latest",
             "livre --eq-layout {livre[eq_layout]} --volume {livre[volume]} "\
             "--sse {livre[sse]} --synchronous --animation "\
-            "--frames \"{start} {end}\" --num-frames {num_frames}")).format(**values)
+            "--frames \"{start} {end}\" --num-frames {num_frames} "\
+            "--camera-position \"{livre[camera_position]}\" "\
+            "--camera-lookat \"{livre[camera_lookat]}\" ")).format(**values)
 
         if self.verbose:
             print sbatch_script
