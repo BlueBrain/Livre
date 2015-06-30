@@ -59,6 +59,8 @@ public:
 
     DashContextPtr createContext()
     {
+        WriteLock writeLock( _mutex );
+        _localContext.commit();
         DashContextPtr ctx( new dash::Context( ));
         dashContexts.push_back( ctx );
         _localContext.map( _renderStatus->getDashNode(), *dashContexts.back() );
