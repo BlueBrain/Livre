@@ -30,15 +30,12 @@
 
 namespace livre
 {
-
 /**
- * @brief The CameraSettings class is the information sent from app node to the clients for camera operations
+ * The CameraSettings class is the information sent from app node to the clients for camera operations
  */
 class CameraSettings : public co::Serializable
 {
-
 public:
-
     /**
      * CameraInfo constructor.
      */
@@ -48,6 +45,12 @@ public:
      * Resets the camera state.
      */
     void reset();
+
+    /**
+     * Sets the initial camera position, used also when reset() is called.
+     * @param position camera position in world space.
+     */
+    void setInitialCameraPosition( const Vector3f& position );
 
     /**
      * Spins the camera around ( x, y )
@@ -96,10 +99,16 @@ public:
     void setCameraPosition( const Vector3f& position );
 
     /**
+     * Sets the camera orientation, defined by a lookAt vector.
+     * @param lookAt the reference point position to orient the camera to.
+     */
+    void setCameraLookAt( const Vector3f& lookAt );
+
+    /**
      * Sets the modelviewmatrix.
      * @param modelviewMatrix
      */
-    void setModelviewMatrix( const Matrix4f& modelviewMatrix );
+    void setModelViewMatrix( const Matrix4f& modelViewMatrix );
 
     /**
      * @return true if pilot mode is on.
@@ -151,6 +160,8 @@ private:
 
     virtual void serialize( co::DataOStream& os, const uint64_t dirtyBits );
     virtual void deserialize( co::DataIStream& is, const uint64_t dirtyBits );
+
+    Vector3f initialCameraPosition_;
 
     Matrix4f cameraRotation_;
     Matrix4f modelRotation_;

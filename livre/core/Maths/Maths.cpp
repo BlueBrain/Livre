@@ -50,13 +50,12 @@ void matrixToEulerAngles( const Matrix3f& rotationMatrix, float& roll, float& pi
     }
 }
 
-
-void getRotationAndEyePositionFromModelView( const Matrix4f& modelviewMatrix,
+void getRotationAndEyePositionFromModelView( const Matrix4f& modelViewMatrix,
                                                    Matrix3f& rotationMatrix,
                                                    Vector3f& eye )
 {
     Matrix4f iMv;
-    modelviewMatrix.inverse( iMv );
+    modelViewMatrix.inverse( iMv );
     iMv.get_sub_matrix( rotationMatrix, 0, 0 );
     iMv.get_translation( eye );
 }
@@ -66,19 +65,37 @@ Matrix4f computeModelViewMatrix( const Matrix3f& rotationMatrix, const Vector3f&
     Matrix4f rotationTranspose = Matrix4f::IDENTITY;
     rotationTranspose.set_sub_matrix( rotationMatrix, 0, 0 );
     rotationTranspose = transpose( rotationTranspose );
-    Matrix4f modelviewMatrix = Matrix4f::IDENTITY;
-    modelviewMatrix.set_translation( -eye );
-    return rotationTranspose * modelviewMatrix;
+
+    Matrix4f modelViewMatrix = Matrix4f::IDENTITY;
+    modelViewMatrix.set_translation( -eye );
+    return rotationTranspose * modelViewMatrix;
 }
 
-Matrix4f computeModelViewMatrix( const Matrix4f& rotationMatrix, const Vector3f& eye )
+Matrix4f computeModelViewMatrix( const Vector3f& eye, const Vector3f& center )
 {
-    Matrix4f rotationTranspose = rotationMatrix;
-    rotationTranspose.set_translation( Vector3f( 0.0 ) );
-    rotationTranspose = transpose( rotationMatrix );
-    Matrix4f modelviewMatrix = Matrix4f::IDENTITY;
-    modelviewMatrix.set_translation( -eye );
-    return rotationTranspose * modelviewMatrix;
+    const Vector3f zAxis = vmml::normalize( center + eye );
+
+    // Avoid Gimbal lock effect when looking upwards/downwards
+    Vector3f up( Vector3f::UP );
+    const float angle = zAxis.dot( up );
+    if( 1.f - std::abs( angle ) < 0.0001f )
+    {
+        Vector3f right( Vector3f::RIGHT );
+        if( angle > 0 ) // Looking downwards
+            right = Vector3f::LEFT;
+        up = up.rotate( 0.01f, right );
+        up.normalize();
+    }
+
+    const Vector3f xAxis = vmml::normalize( up.cross( zAxis ));
+    const Vector3f yAxis = zAxis.cross( xAxis );
+
+    Matrix3f rotationMatrix = Matrix4f::IDENTITY;
+    rotationMatrix.set_column( 0, xAxis );
+    rotationMatrix.set_column( 1, yAxis );
+    rotationMatrix.set_column( 2, zAxis );
+
+    return computeModelViewMatrix( rotationMatrix, eye );
 }
 
 Matrix4f computeModelViewMatrix( const Quaternionf& quat, const Vector3f& eye )
@@ -115,7 +132,5 @@ Vector3f computePointOnLine( const Vector3f& p0, const Vector3f& p1, float t )
     return ret;
 }
 
-
 }
-
 }

@@ -37,11 +37,11 @@ void matrixToEulerAngles( const Matrix3f& rotationMatrix, float& roll, float& pi
 
 /**
  * Extracts rotation and eye position from model view matrix.
- * @param modelviewMatrix is the 4x4 modelview matrix.
+ * @param modelViewMatrix is the 4x4 modelview matrix.
  * @param rotationMatrix returns 3x3 rotation matrix.
  * @param eye returns 3 element eye vector in world space.
  */
-void getRotationAndEyePositionFromModelView( const Matrix4f& modelviewMatrix,
+void getRotationAndEyePositionFromModelView( const Matrix4f& modelViewMatrix,
                                                    Matrix3f& rotationMatrix,
                                                    Vector3f& eye );
 /**
@@ -53,13 +53,12 @@ void getRotationAndEyePositionFromModelView( const Matrix4f& modelviewMatrix,
 Matrix4f computeModelViewMatrix( const Matrix3f& rotationMatrix, const Vector3f& eye );
 
 /**
- * Computes model view matrix from rotation matrix and eye vector in world space.
- * @param rotationMatrix 4x4 homogenus matrix.
+ * Computes model view matrix from eye vector and lookAt position in world space.
  * @param eye vector in world space.
+ * @param center orientation center as lookAt vector in world space.
  * @return return 4x4 model view matrix.
  */
-Matrix4f computeModelViewMatrix( const Matrix4f& rotationMatrix, const Vector3f& eye );
-
+Matrix4f computeModelViewMatrix( const Vector3f& eye, const Vector3f& center );
 /**
  * computeModelViewMatrix computes the model view matrix from a quaternion.
  * @param quat is the quaternion.

@@ -39,19 +39,26 @@ namespace livre
 {
 
 CameraSettings::CameraSettings()
+    : initialCameraPosition_( Vector3f( 0.f, 0.f, 2.f ))
+    , cameraRotation_( Matrix4f::IDENTITY )
+    , modelRotation_( Matrix4f::IDENTITY )
+    , cameraPosition_( initialCameraPosition_ )
+    , cameraSpin_( 0.f )
+    , cameraTranslation_( 0.f )
+    , pilotMode_( false )
 {
-    reset();
 }
 
 void CameraSettings::reset()
 {
     pilotMode_ = false;
-    cameraPosition_ = Vector3f::ZERO;
-    cameraPosition_.z() = -2.f;
+    cameraPosition_ = initialCameraPosition_;
     cameraRotation_ = Matrix4f::IDENTITY;
     modelRotation_ = Matrix4f::IDENTITY;
     cameraSpin_ = 0.f;
     cameraTranslation_ = 0.f;
+
+    setCameraLookAt( Vector3f::ZERO );
 
     setDirty( DIRTY_ALL );
 }
@@ -85,45 +92,37 @@ void CameraSettings::spinCamera( const float x, const float y )
     cameraRotation_.pre_rotate_x( x );
     cameraRotation_.pre_rotate_y( y );
 
-    cameraSpin_ = sqrt( x*x + y*y );
+    cameraSpin_ = std::sqrt( x*x + y*y );
 
     setDirty( DIRTY_ALL );
 }
-
 
 void CameraSettings::spinModel( const float x, const float y, const float z )
 {
     if( x == 0.f && y == 0.f && z == 0.f && cameraSpin_ == 0.f )
         return;
 
-    modelRotation_.pre_rotate_x( x );
-    modelRotation_.pre_rotate_y( y );
-    modelRotation_.pre_rotate_z( z );
+    Matrix4f matInverse;
+    cameraRotation_.inverse( matInverse );
+    Vector4f shift = matInverse * Vector4f( x, y, z, 1 );
+    modelRotation_.pre_rotate_x( shift.x( ));
+    modelRotation_.pre_rotate_y( shift.y( ));
+    modelRotation_.pre_rotate_z( shift.z( ));
 
-    cameraSpin_ = sqrt( x*x + y*y + z*z );
+    cameraSpin_ = std::sqrt( x*x + y*y + z*z );
 
     setDirty( DIRTY_ALL );
 }
-
 
 void CameraSettings::moveCamera( const float x, const float y, const float z )
 {
     Vector3f oldPos = cameraPosition_;
 
-    if( pilotMode_ )
-    {
-        Matrix4f matInverse;
-        cameraRotation_.inverse( matInverse );
-        Vector4f shift = matInverse * Vector4f( x, y, z, 1 );
+    Matrix4f matInverse;
+    cameraRotation_.inverse( matInverse );
+    Vector4f shift = matInverse * Vector4f( x, y, z, 1 );
+    cameraPosition_ += shift;
 
-        cameraPosition_ += shift;
-    }
-    else
-    {
-        cameraPosition_.x() += x;
-        cameraPosition_.y() += y;
-        cameraPosition_.z() += z;
-    }
     oldPos -= cameraPosition_;
 
     cameraTranslation_ = oldPos.length();
@@ -131,13 +130,17 @@ void CameraSettings::moveCamera( const float x, const float y, const float z )
     setDirty( DIRTY_ALL );
 }
 
-
 void CameraSettings::resetCameraSpin()
 {
     cameraSpin_ = 0.f;
     setDirty( DIRTY_ALL );
 }
 
+void CameraSettings::setInitialCameraPosition( const Vector3f& position )
+{
+    initialCameraPosition_ = position;
+    setCameraPosition( position );
+}
 
 void CameraSettings::setCameraPosition( const Vector3f& position )
 {
@@ -171,6 +174,11 @@ void CameraSettings::setCameraRotation( const Vector3f& rotation )
     setDirty( DIRTY_ALL );
 }
 
+void CameraSettings::setCameraLookAt( const Vector3f& lookAt )
+{
+    setModelViewMatrix( maths::computeModelViewMatrix( cameraPosition_, lookAt ));
+}
+
 void CameraSettings::setModelRotation( const Vector3f& rotation )
 {
     modelRotation_ = Matrix4f::IDENTITY;
@@ -181,13 +189,13 @@ void CameraSettings::setModelRotation( const Vector3f& rotation )
     setDirty( DIRTY_ALL );
 }
 
-void livre::CameraSettings::setModelviewMatrix( const Matrix4f& modelviewMatrix )
+void livre::CameraSettings::setModelViewMatrix( const Matrix4f& modelViewMatrix )
 {
     Matrix3f rotationMatrix;
-    maths::getRotationAndEyePositionFromModelView( modelviewMatrix,
-                                                         rotationMatrix,
-                                                         cameraPosition_ );
-    if( pilotMode_)
+    maths::getRotationAndEyePositionFromModelView( modelViewMatrix,
+                                                   rotationMatrix,
+                                                   cameraPosition_ );
+    if( pilotMode_ )
     {
         cameraPosition_ = -cameraPosition_;
         Matrix3f transpose = Matrix4f::IDENTITY;
@@ -202,7 +210,7 @@ void livre::CameraSettings::setModelviewMatrix( const Matrix4f& modelviewMatrix 
         modelRotation_ = inverseRotation;
         modelRotation_( 3, 3 ) = 1;
         cameraPosition_ = inverseRotation * -cameraPosition_;
-        cameraRotation_ =  Matrix4f::IDENTITY;
+        cameraRotation_ = Matrix4f::IDENTITY;
     }
 
     setDirty( DIRTY_ALL );

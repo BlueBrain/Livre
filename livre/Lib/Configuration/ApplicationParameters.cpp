@@ -42,10 +42,12 @@ const std::string ANIMATION_PARAM = "animation";
 const std::string FRAMES_PARAM = "frames";
 const std::string NUMFRAMES_PARAM = "num-frames";
 const std::string CAMERAPOS_PARAM = "camera-position";
+const std::string CAMERALOOKAT_PARAM = "camera-lookat";
 const std::string SYNC_CAMERA_PARAM = "sync-camera";
 
 ApplicationParameters::ApplicationParameters()
-    : cameraPosition( Vector3f( 0, 0, -2.0 ))
+    : cameraPosition( Vector3f( 0, 0, 2.0 ))
+    , cameraLookAt( Vector3f( 0, 0, 0 ))
     , frames( Vector2ui( 0, std::numeric_limits<Vector2ui::value_type>::max( )))
     , maxFrames( 0xFFFFFFFFu )
     , animation( 0 )
@@ -60,6 +62,8 @@ ApplicationParameters::ApplicationParameters()
                                    "Maximum nuber of frames to render", maxFrames );
     configuration_.addDescription( configGroupName_, CAMERAPOS_PARAM,
                                    "Camera position", cameraPosition );
+    configuration_.addDescription( configGroupName_, CAMERALOOKAT_PARAM,
+                                   "Camera orientation", cameraLookAt );
     configuration_.addDescription( configGroupName_, SYNC_CAMERA_PARAM,
                                    "Synchronize camera with other applications",
                                    syncCamera );
@@ -73,6 +77,7 @@ ApplicationParameters& ApplicationParameters::operator = (
 
     ClientParameters::operator = ( parameters );
     cameraPosition = parameters.cameraPosition;
+    cameraLookAt = parameters.cameraLookAt;
     frames = parameters.frames;
     maxFrames = parameters.maxFrames;
     animation = parameters.animation;
@@ -89,6 +94,7 @@ void ApplicationParameters::initialize_()
     configuration_.getValue( FRAMES_PARAM, frames );
     configuration_.getValue( NUMFRAMES_PARAM, maxFrames );
     configuration_.getValue( CAMERAPOS_PARAM, cameraPosition );
+    configuration_.getValue( CAMERALOOKAT_PARAM, cameraLookAt );
     configuration_.getValue( SYNC_CAMERA_PARAM, syncCamera );
 }
 
