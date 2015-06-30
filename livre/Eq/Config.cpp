@@ -140,10 +140,10 @@ public:
     {
         LBASSERT( event.getType() == zeq::hbp::EVENT_CAMERA );
         const std::vector< float >& matrix = zeq::hbp::deserializeCamera(event);
-        Matrix4f modelviewMatrix;
-        modelviewMatrix.set( matrix.begin(), matrix.end(), false );
+        Matrix4f modelViewMatrix;
+        modelViewMatrix.set( matrix.begin(), matrix.end(), false );
         CameraSettingsPtr cameraSettings = framedata.getCameraSettings();
-        cameraSettings->setModelviewMatrix( modelviewMatrix );
+        cameraSettings->setModelViewMatrix( modelViewMatrix );
     }
 
     // HBP 'micron' camera from other brain applications
@@ -156,20 +156,20 @@ public:
         const Vector3f circuitSize = volumeBBox.getDimension();
         const float isotropicScale = circuitSize.find_max();
 
-        Matrix4f modelviewMatrix;
-        modelviewMatrix.set( matrix.begin(), matrix.end(), false );
+        Matrix4f modelViewMatrix;
+        modelViewMatrix.set( matrix.begin(), matrix.end(), false );
 
         Matrix3f rotation;
         Vector3f eyePos;
-        maths::getRotationAndEyePositionFromModelView( modelviewMatrix,
+        maths::getRotationAndEyePositionFromModelView( modelViewMatrix,
                                                        rotation,
                                                        eyePos );
 
         eyePos = ( eyePos - circuitCenter ) / isotropicScale;
-        modelviewMatrix = maths::computeModelViewMatrix( rotation, eyePos );
+        modelViewMatrix = maths::computeModelViewMatrix( rotation, eyePos );
 
         CameraSettingsPtr cameraSettings = framedata.getCameraSettings();
-        cameraSettings->setModelviewMatrix( modelviewMatrix );
+        cameraSettings->setModelViewMatrix( modelViewMatrix );
     }
 
     void onLookupTable1D( const zeq::Event& event )

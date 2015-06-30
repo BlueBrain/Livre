@@ -35,6 +35,7 @@ struct ApplicationParameters : public ClientParameters
     ApplicationParameters();
 
     Vector3f cameraPosition; //!< Camera position in world space.
+    Vector3f cameraLookAt; //!< Camera orientation (lookAt vector) in world space.
     Vector2ui frames; //!< Range of frames to render: 'start end'.
     uint32_t maxFrames; //!< Max number of frames to render.
     int32_t animation; //!< animation forward/backward speed
