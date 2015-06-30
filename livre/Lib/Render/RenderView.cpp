@@ -18,12 +18,7 @@
  */
 
 #include <livre/Lib/Render/RenderView.h>
-#include <livre/Lib/Algorithm/LODFrustum.h>
-
 #include <livre/Lib/Cache/TextureObject.h>
-#include <livre/Lib/Configuration/EFPrefetchAlgorithmParameters.h>
-#include <livre/Lib/Algorithm/Optimizer.h>
-#include <livre/Lib/types.h>
 
 #include <livre/core/Render/Frustum.h>
 #include <livre/core/Dash/DashRenderNode.h>
@@ -38,28 +33,15 @@ namespace livre
 {
 
 RenderView::RenderView( )
-    : visibleFrustumScreenSpaceError_( 0 )
-    , texturePFrustumScreenSpaceError_( 0 )
-    , dataPFrustumScreenSpaceError_( 0 )
 {
-    const float frustumSurfaceDelta = 1.0f;
-    prefetchDistanceRatios_.resize( PL_FAR + 1, frustumSurfaceDelta );
-    prefetchDistanceRatios_[ PL_NEAR ] = 0.1f;
 }
 
-void RenderView::setParameters( ConstVolumeRendererParametersPtr volumeRendererParameters,
-                                ConstEFPParametersPtr prefetchAlgorithmParameters )
+void RenderView::setParameters( ConstVolumeRendererParametersPtr vrParams )
 {
-    volumeRendererParameters_ = *volumeRendererParameters;
-    prefetchAlgorithmParameters_ = *prefetchAlgorithmParameters;
-
-    const float screenSpaceError = volumeRendererParameters_.screenSpaceError;
-    texturePFrustumScreenSpaceError_ = screenSpaceError;
-    dataPFrustumScreenSpaceError_ = screenSpaceError;
-    visibleFrustumScreenSpaceError_ = screenSpaceError;
+    volumeRendererParameters_ = *vrParams;
 }
 
-void RenderView::onPostRender_( const GLWidget& widget LB_UNUSED,
+void RenderView::onPostRender_( const GLWidget&,
                                 const FrameInfo& frameInfo )
 {
     freeTextures_( frameInfo.renderNodeList );

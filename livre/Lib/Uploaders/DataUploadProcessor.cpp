@@ -33,7 +33,6 @@
 #include <livre/Lib/Cache/RawDataObject.h>
 #include <livre/Lib/Cache/TextureDataObject.h>
 #include <livre/Lib/Configuration/VolumeRendererParameters.h>
-#include <livre/Lib/Configuration/EFPrefetchAlgorithmParameters.h>
 #include <livre/Lib/Visitor/CollectionTraversal.h>
 #include <livre/Lib/Cache/LRUCachePolicy.h>
 #include <livre/Lib/Visitor/CollectionTraversal.h>

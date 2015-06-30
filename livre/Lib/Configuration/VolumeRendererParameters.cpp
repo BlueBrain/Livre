@@ -26,7 +26,9 @@ const std::string DATACACHEMEM_PARAM = "data-cache-mem";
 const std::string SCREENSPACEERROR_PARAM = "sse";
 const std::string SYNCHRONOUSMODE_PARAM = "synchronous";
 const std::string TEXTURECACHEMEM_PARAM = "texture-cache-mem";
-const std::string TEXTUREDATACACHEMEM_PARAM = "texture-data-cache-mem";
+const std::string TEXTUREDATACACHEMEM_PARAM = "texturedata-cache-mem";
+const std::string MINLOD_PARAM = "min-lod";
+const std::string MAXLOD_PARAM = "max-lod";
 
 VolumeRendererParameters::VolumeRendererParameters()
     : Parameters( "Volume Renderer Parameters" )
@@ -36,20 +38,30 @@ VolumeRendererParameters::VolumeRendererParameters()
     , maxDataMemoryMB( 1024u )
     , maxTextureMemoryMB( 3072u )
     , maxTextureDataMemoryMB( 8192u )
+    , minLOD( 0 )
+    , maxLOD( ( NODEID_LEVEL_BITS << 1 ) + 1 )
 {
     configuration_.addDescription( configGroupName_, DATACACHEMEM_PARAM,
-                                   "Maximum data cache memory (MB)",
+                                   "Maximum data cache memory (MB) - "
+                                   "caches the raw data read from I/O in system memory",
                                    maxDataMemoryMB );
     configuration_.addDescription( configGroupName_, TEXTURECACHEMEM_PARAM,
-                                   "Maximum texture cache memory (MB)",
+                                   "Maximum texture cache memory (MB) - "
+                                   "caches the texture data on GPU memory",
                                    maxTextureMemoryMB );
     configuration_.addDescription( configGroupName_, TEXTUREDATACACHEMEM_PARAM,
-                                   "Maximum texture data cache memory (MB)",
+                                   "Maximum texture data cache memory (MB) - "
+                                   "caches the data that has been converted into internal texture "
+                                   "format in system memory",
                                    maxTextureDataMemoryMB );
     configuration_.addDescription( configGroupName_, SCREENSPACEERROR_PARAM,
                                    "Screen space error", screenSpaceError );
     configuration_.addDescription( configGroupName_, SYNCHRONOUSMODE_PARAM,
                                    "Enable synchronous mode", synchronousModeEnabled );
+    configuration_.addDescription( configGroupName_, MINLOD_PARAM,
+                                   "Minimum level of detail", minLOD );
+    configuration_.addDescription( configGroupName_, MAXLOD_PARAM,
+                                   "Maximum level of detail", maxLOD );
 }
 
 void VolumeRendererParameters::deserialize( co::DataIStream &is, const uint64_t )
@@ -58,7 +70,9 @@ void VolumeRendererParameters::deserialize( co::DataIStream &is, const uint64_t 
        >> screenSpaceError
        >> maxDataMemoryMB
        >> maxTextureMemoryMB
-       >> maxTextureDataMemoryMB;
+       >> maxTextureDataMemoryMB
+       >> minLOD
+       >> maxLOD;
 }
 
 void VolumeRendererParameters::serialize( co::DataOStream &os, const uint64_t )
@@ -67,7 +81,9 @@ void VolumeRendererParameters::serialize( co::DataOStream &os, const uint64_t )
        << screenSpaceError
        << maxDataMemoryMB
        << maxTextureMemoryMB
-       << maxTextureDataMemoryMB;
+       << maxTextureDataMemoryMB
+       << minLOD
+       << maxLOD;
 }
 
 VolumeRendererParameters &VolumeRendererParameters::operator=(
@@ -78,7 +94,8 @@ VolumeRendererParameters &VolumeRendererParameters::operator=(
     maxDataMemoryMB = volumeRendererParameters.maxDataMemoryMB;
     maxTextureMemoryMB = volumeRendererParameters.maxTextureMemoryMB;
     maxTextureDataMemoryMB = volumeRendererParameters.maxTextureDataMemoryMB;
-
+    minLOD = volumeRendererParameters.minLOD;
+    maxLOD = volumeRendererParameters.maxLOD;
     return *this;
 }
 
@@ -91,6 +108,8 @@ void VolumeRendererParameters::initialize_()
     configuration_.getValue( DATACACHEMEM_PARAM, maxDataMemoryMB );
     configuration_.getValue( TEXTURECACHEMEM_PARAM, maxTextureMemoryMB );
     configuration_.getValue( TEXTUREDATACACHEMEM_PARAM, maxTextureDataMemoryMB );
+    configuration_.getValue( MINLOD_PARAM, minLOD );
+    configuration_.getValue( MAXLOD_PARAM, maxLOD );
 }
 
 } //Livre
