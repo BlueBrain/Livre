@@ -45,7 +45,7 @@ uint32_t ScreenSpaceLODEvaluator::getLODForPoint( const Frustum& frustum,
     const float b = frustum.getFrustumLimits( PL_BOTTOM );
 
     const float worldSpacePerPixel = (  t - b ) / _windowHeight;
-    const float voxelPerPixel = _worldSpacePerVoxel  / worldSpacePerPixel * _screenSpaceError;
+    const float voxelPerPixel = worldSpacePerPixel  / _worldSpacePerVoxel * _screenSpaceError;
 
     const float distance = std::abs( frustum.getWPlane( PL_NEAR ).distance( worldCoord ));
 
@@ -58,8 +58,7 @@ uint32_t ScreenSpaceLODEvaluator::getLODForPoint( const Frustum& frustum,
     const uint32_t lod = std::min( std::max( std::log2( voxelPerPixelInDistance ), 0.0f ),
                                    (float)volumeDepth - 1 );
 
-    return livre::maths::clamp( uint32_t( volumeDepth - lod - 1 ),
-                                minLOD, maxLOD );
+    return livre::maths::clamp( volumeDepth - lod - 1, minLOD, maxLOD );
 
 }
 
