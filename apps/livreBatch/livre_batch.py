@@ -41,6 +41,19 @@ LIVRE_MAXFRAMES = 'max_frames'
 EXAMPLE_JSON = 'example.json'
 
 
+def find_livre():
+    """
+    Search for livre executable in PATH and return result
+    """
+
+    from distutils import spawn
+    livre_path = spawn.find_executable("livre")
+    if not livre_path:
+        print "Cannot find livre executable in PATH"
+        return False
+    print "Using livre executable '{0}'".format(livre_path)
+    return True
+
 class LivreBatch(object):
     """
     Submits sbatch jobs performing rendering using Livre by using a
@@ -106,7 +119,6 @@ class LivreBatch(object):
             "export EQ_WINDOW_IATTR_HINT_WIDTH={livre[width]}",
             "export EQ_WINDOW_IATTR_HINT_HEIGHT={livre[height]}",
             "export EQ_CHANNEL_SATTR_DUMP_IMAGE={image}",
-            "module load BBP/viz/latest",
             "livre --eq-layout {livre[eq_layout]} --volume {livre[volume]} "\
             "--sse {livre[sse]} --synchronous --animation "\
             "--frames \"{start} {end}\" --num-frames {num_frames} "\
@@ -209,6 +221,9 @@ def main():
         exit()
 
     if not livre_batch.read_config(args.config):
+        exit()
+
+    if not find_livre():
         exit()
 
     livre_batch.submit_jobs()
