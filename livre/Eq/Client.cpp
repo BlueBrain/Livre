@@ -180,9 +180,9 @@ int Client::run()
 
     // 4. run main loop
     uint32_t maxFrames = _applicationParameters.maxFrames;
-    frameData.getCameraSettings()->setInitialCameraPosition(
+    frameData.getCameraSettings()->setDefaultCameraPosition(
         _applicationParameters.cameraPosition );
-    frameData.getCameraSettings()->setCameraLookAt(
+    frameData.getCameraSettings()->setDefaultCameraLookAt(
         _applicationParameters.cameraLookAt );
 
     clock.reset();
