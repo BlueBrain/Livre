@@ -126,6 +126,7 @@ typedef boost::shared_ptr< VolumeDataSource > VolumeDataSourcePtr;
 typedef boost::shared_ptr< const VolumeDataSource > ConstVolumeDataSourcePtr;
 typedef boost::shared_ptr< TexturePool > TexturePoolPtr;
 typedef boost::shared_ptr< DashTree > DashTreePtr;
+typedef boost::shared_ptr< const DashTree > ConstDashTreePtr;
 typedef boost::shared_ptr< EventHandler > EventHandlerPtr;
 typedef boost::shared_ptr< EventHandlerFactory > EventHandlerFactoryPtr;
 typedef boost::shared_ptr< EventMapper > EventMapperPtr;

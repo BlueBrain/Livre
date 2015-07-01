@@ -620,5 +620,15 @@ void Channel::frameReadback( const eq::uint128_t& frameId,
     _impl->frameReadback( frames );
 }
 
+std::string Channel::getDumpImageFileName() const
+{
+    const livre::Node* node = static_cast< const livre::Node* >( getNode( ));
+    ConstDashTreePtr dashTree = node->getDashTree();
+    std::stringstream filename;
+    filename << std::setw( 5 ) << std::setfill('0')
+             << dashTree->getRenderStatus().getFrameID() << ".png";
+    return filename.str();
+}
+
 
 }

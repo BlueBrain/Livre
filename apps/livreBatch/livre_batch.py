@@ -93,17 +93,16 @@ class LivreBatch(object):
                 LIVRE_ENDFRAME: 100,
                 LIVRE_MAXFRAMES: 50}}
 
-    def _build_sbatch_script(self, idx, start, end):
+    def _build_sbatch_script(self, start, end):
         """
         Build sbatch script for a certain frame range
         """
 
         values = self.dict
-        values['idx'] = idx
         values['start'] = start
         values['end'] = end
         values['num_frames'] = end - start + 1
-        values['image'] = "{slurm[output_dir]}/{slurm[job_name]}{idx}_".format(**values)
+        values['image'] = "{slurm[output_dir]}/{slurm[job_name]}_".format(**values)
 
         sbatch_script = '\n'.join((
             "#!/bin/bash",
@@ -174,15 +173,15 @@ class LivreBatch(object):
         print "Create {0} job(s) with {1} frame(s) each".format(num_jobs,
                                                                 batch_size)
 
-        idx = 0
+        idx = 1
         for batch_start in range(start_frame, end_frame, batch_size):
             start = batch_start
             end = min(batch_start + batch_size - 1, end_frame)
 
-            sbatch_script = self._build_sbatch_script(idx, start, end)
-            idx += 1
+            sbatch_script = self._build_sbatch_script(start, end)
             print "Submit job {0} for frames {1} to {2}...".format(idx, start,
                                                                    end)
+            idx += 1
             if not self.dry_run:
                 sbatch = subprocess.Popen(['sbatch'], stdin=subprocess.PIPE)
                 sbatch.communicate(input=sbatch_script)

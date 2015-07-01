@@ -61,7 +61,12 @@ public:
     /**
      * @return The dash tree.
      */
-    DashTreePtr getDashTree( );
+    DashTreePtr getDashTree();
+
+    /**
+     * @return The dash tree.
+     */
+    ConstDashTreePtr getDashTree() const;
 
 private:
     bool configInit( const eq::uint128_t& initId ) final;
