@@ -17,6 +17,9 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
 
 include(GitExternal)
 include(SubProject)
+if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+  git_subproject(Tuvok https://github.com/BlueBrain/Tuvok.git bbp)
+endif()
 
 set(VERSION_MAJOR "0")
 set(VERSION_MINOR "3")
