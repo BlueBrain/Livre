@@ -304,6 +304,8 @@ bool Config::init()
 
 uint32_t Config::startFrame()
 {
+    const eq::uint128_t& version = _impl->framedata.commit();
+
     FrameSettingsPtr frameSettings = _impl->framedata.getFrameSettings();
     const ApplicationParameters& params = getApplicationParameters();
     const uint32_t start = params.frames.x();
@@ -318,7 +320,6 @@ uint32_t Config::startFrame()
     const uint32_t frame = ((current-start+delta) % interval) + start;
     frameSettings->setFrameNumber( frame );
 
-    const eq::uint128_t& version = _impl->framedata.commit();
     frameSettings->setGrabFrame( false );
 #ifdef LIVRE_USE_ZEQ
     if( _impl->_heartbeatClock.getTimef() >= DEFAULT_HEARTBEAT_TIME )
