@@ -73,7 +73,7 @@ Matrix4f computeModelViewMatrix( const Matrix3f& rotationMatrix, const Vector3f&
 
 Matrix4f computeModelViewMatrix( const Vector3f& eye, const Vector3f& center )
 {
-    const Vector3f zAxis = vmml::normalize( center + eye );
+    const Vector3f zAxis = vmml::normalize( eye - center );
 
     // Avoid Gimbal lock effect when looking upwards/downwards
     Vector3f up( Vector3f::UP );

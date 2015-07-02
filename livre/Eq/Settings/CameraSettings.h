@@ -50,7 +50,13 @@ public:
      * Sets the initial camera position, used also when reset() is called.
      * @param position camera position in world space.
      */
-    void setInitialCameraPosition( const Vector3f& position );
+    void setDefaultCameraPosition( const Vector3f& position );
+
+    /**
+     * Sets the initial camera lookAt, used also when reset() is called.
+     * @param lookAt camera lookAt vector in world space.
+     */
+    void setDefaultCameraLookAt( const Vector3f& lookAt );
 
     /**
      * Spins the camera around ( x, y )
@@ -161,7 +167,8 @@ private:
     virtual void serialize( co::DataOStream& os, const uint64_t dirtyBits );
     virtual void deserialize( co::DataIStream& is, const uint64_t dirtyBits );
 
-    Vector3f initialCameraPosition_;
+    Vector3f defaultCameraPosition_;
+    Vector3f defaultCameraLookAt_;
 
     Matrix4f cameraRotation_;
     Matrix4f modelRotation_;

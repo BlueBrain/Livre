@@ -39,10 +39,11 @@ namespace livre
 {
 
 CameraSettings::CameraSettings()
-    : initialCameraPosition_( Vector3f( 0.f, 0.f, 2.f ))
+    : defaultCameraPosition_( Vector3f( 0.f, 0.f, 2.f ))
+    , defaultCameraLookAt_( Vector3f::ZERO )
     , cameraRotation_( Matrix4f::IDENTITY )
     , modelRotation_( Matrix4f::IDENTITY )
-    , cameraPosition_( initialCameraPosition_ )
+    , cameraPosition_( defaultCameraPosition_ )
     , cameraSpin_( 0.f )
     , cameraTranslation_( 0.f )
     , pilotMode_( false )
@@ -52,13 +53,13 @@ CameraSettings::CameraSettings()
 void CameraSettings::reset()
 {
     pilotMode_ = false;
-    cameraPosition_ = initialCameraPosition_;
+    cameraPosition_ = defaultCameraPosition_;
     cameraRotation_ = Matrix4f::IDENTITY;
     modelRotation_ = Matrix4f::IDENTITY;
     cameraSpin_ = 0.f;
     cameraTranslation_ = 0.f;
 
-    setCameraLookAt( Vector3f::ZERO );
+    setCameraLookAt( defaultCameraLookAt_ );
 
     setDirty( DIRTY_ALL );
 }
@@ -136,10 +137,16 @@ void CameraSettings::resetCameraSpin()
     setDirty( DIRTY_ALL );
 }
 
-void CameraSettings::setInitialCameraPosition( const Vector3f& position )
+void CameraSettings::setDefaultCameraPosition( const Vector3f& position )
 {
-    initialCameraPosition_ = position;
+    defaultCameraPosition_ = position;
     setCameraPosition( position );
+}
+
+void CameraSettings::setDefaultCameraLookAt( const Vector3f& lookAt )
+{
+    defaultCameraLookAt_ = lookAt;
+    setCameraLookAt( lookAt );
 }
 
 void CameraSettings::setCameraPosition( const Vector3f& position )
