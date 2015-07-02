@@ -304,11 +304,18 @@ bool Config::init()
 
 uint32_t Config::startFrame()
 {
+    // Set current frame (start/end may have changed)
     FrameSettingsPtr frameSettings = _impl->framedata.getFrameSettings();
     const ApplicationParameters& params = getApplicationParameters();
     const uint32_t start = params.frames.x();
     const uint32_t current = frameSettings->getFrameNumber() > start ?
                                  frameSettings->getFrameNumber() : start;
+
+    frameSettings->setFrameNumber( current );
+    const eq::uint128_t& version = _impl->framedata.commit();
+
+    // reset data and advance current frame
+    frameSettings->setGrabFrame( false );
     const uint32_t end = params.frames.y() > current ?
                              params.frames.y() : current;
     const int32_t delta = params.animation;
@@ -318,8 +325,6 @@ uint32_t Config::startFrame()
     const uint32_t frame = ((current-start+delta) % interval) + start;
     frameSettings->setFrameNumber( frame );
 
-    const eq::uint128_t& version = _impl->framedata.commit();
-    frameSettings->setGrabFrame( false );
 #ifdef LIVRE_USE_ZEQ
     if( _impl->_heartbeatClock.getTimef() >= DEFAULT_HEARTBEAT_TIME )
     {
