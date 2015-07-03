@@ -97,6 +97,7 @@ bool Client::initLocal( const int argc, char** argv )
     if( !_parseArguments( argc, argv ))
         return false;
     VolumeDataSource::loadPlugins(); //initLocal on render clients never returns
+    addActiveLayout( "Simple" ); // prefer single GPU layout by default
     return eq::Client::initLocal( argc, argv );
 }
 
