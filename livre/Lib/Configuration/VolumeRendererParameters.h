@@ -25,18 +25,11 @@
 namespace livre
 {
 
-enum RenderStrategy
-{
-    RS_ANY_FRAME, //!< Render with data available
-    RS_FULL_FRAME //!< Render for all data at the current camera position, do not skip until it is satisfied
-};
-
 struct VolumeRendererParameters : public Parameters
 {
     VolumeRendererParameters();
 
-    RenderStrategy renderStrategy; //!< Render strategy
-    bool synchronousModeEnabled; //!< Synchronous mode
+    bool synchronousMode; //!< Synchronous mode
     float screenSpaceError;  //!< Screen space error
     uint32_t maxDataMemoryMB;  //!< Settings for data cache
     uint32_t maxTextureMemoryMB; //!< Settings for texture cache

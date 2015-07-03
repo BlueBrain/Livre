@@ -22,9 +22,9 @@ if(CMAKE_SYSTEM_NAME MATCHES "Linux")
 endif()
 
 set(VERSION_MAJOR "0")
-set(VERSION_MINOR "3")
+set(VERSION_MINOR "4")
 set(VERSION_PATCH "0")
-set(VERSION_ABI 2) # OFF or ABI version
+set(VERSION_ABI 3) # OFF or ABI version
 
 set(PROJECT_namespace livre)
 set(PROJECT_INCLUDE_NAME livre/core)

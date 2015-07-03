@@ -55,7 +55,7 @@ bool ChannelPointerHandler::operator ()( EqEventInfo& eqEventInfo )
         case eq::Event::CHANNEL_POINTER_BUTTON_PRESS:
         {
             const eq::uint128_t& viewID = event->data.context.view.identifier;
-            return config->switchToViewCanvas_( viewID );
+            return config->switchToViewCanvas( viewID );
         }
 
         case eq::Event::CHANNEL_POINTER_BUTTON_RELEASE:

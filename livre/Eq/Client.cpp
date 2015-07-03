@@ -149,10 +149,7 @@ int Client::run()
 
     clock.reset();
     while( config->isRunning() && maxFrames-- )
-    {
-        config->startFrame();
-        config->finishFrame();
-    }
+        config->frame();
 
     const uint32_t frame = config->finishAllFrames();
     const float    time  = clock.getTimef();
