@@ -55,6 +55,20 @@ public:
 
 int main( const int argc, char** argv )
 {
+    for( int i = 1; i < argc; ++i )
+    {
+        if( std::string( "--help" ) == argv[i] )
+        {
+            std::cout << livre::Client::getHelp() << std::endl;
+            return EXIT_SUCCESS;
+        }
+        if( std::string( "--version" ) == argv[i] )
+        {
+            std::cout << livre::Client::getVersion() << std::endl;
+            return EXIT_SUCCESS;
+        }
+    }
+
     // Equalizer initialization
     NodeFactory nodeFactory;
     livre::initErrors( );
@@ -69,7 +83,7 @@ int main( const int argc, char** argv )
     }
 
     // 2. initialization of local client node
-    livre::ClientPtr client = new livre::Client( );
+    livre::ClientPtr client = new livre::Client();
     if( !client->initLocal( argc, argv ))
     {
         LBERROR << "Can't init client" << std::endl;
@@ -85,11 +99,11 @@ int main( const int argc, char** argv )
     // 5. cleanup and exit
     client->exitLocal();
     // cppcheck-suppress unreachableCode
-    LBASSERTINFO( client->getRefCount( ) == 1, "Client still referenced by " <<
-                  client->getRefCount( ) - 1 );
+    LBASSERTINFO( client->getRefCount() == 1, "Client still referenced by " <<
+                  client->getRefCount() - 1 );
 
-    eq::exit( );
+    eq::exit();
     // cppcheck-suppress unreachableCode
-    livre::exitErrors( );
+    livre::exitErrors();
     return ret;
 }

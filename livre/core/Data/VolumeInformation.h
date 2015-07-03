@@ -90,7 +90,7 @@ struct VolumeInformation
     Vector3f minPos;
 
     /**
-     * The minimum position of a volume.
+     * The maximum position of a volume.
      */
     Vector3f maxPos;
 
