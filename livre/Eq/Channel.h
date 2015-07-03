@@ -53,6 +53,7 @@ private:
     void frameViewFinish( const eq::uint128_t &frameID ) final;
     void frameAssemble( const eq::uint128_t&, const eq::Frames& ) final;
     void frameReadback( const eq::uint128_t&, const eq::Frames& ) final;
+    std::string getDumpImageFileName() const final;
 
     detail::Channel* _impl;
 };

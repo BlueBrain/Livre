@@ -184,6 +184,11 @@ DashTreePtr Node::getDashTree()
     return _impl->_dashTreePtr;
 }
 
+ConstDashTreePtr Node::getDashTree() const
+{
+    return _impl->_dashTreePtr;
+}
+
 void Node::frameStart( const eq::uint128_t &frameId, const uint32_t frameNumber)
 {
     if( !isApplicationNode() )
