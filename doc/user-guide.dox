@@ -1,7 +1,7 @@
 /**
 @page User_Guide User Guide
 
-@section TABLE_OF_CONTENTS Table of Contents
+@section TABLE_OF_CONTENTS_User_guide Table of Contents
 -# @ref GENERAL_INFORMATION
     -# @ref Overview
 -# @ref INSTALLATION
@@ -44,9 +44,12 @@ executables and libraries.
 
 After a successful build and installation, the following executables will be available:
 
-- livre ( The command line render application )
-- livreGUI ( Transfer function editor )
-- TuvokDataConverter ( @ref TuvokDataConverter )
+- livre (The command line render application)
+- livre_batch.py (Python script to launch livre in batch mode using sbatch to
+                  render images on cluster nodes.
+                  Usage: livre_batch.py --config file.config)
+- livreGUI (Transfer function editor)
+- TuvokDataConverter (@ref TuvokDataConverter)
 
 @section GETTING_STARTED Getting Started
 
@@ -61,10 +64,10 @@ The volume renderer is executed through the command line. To test if the volume 
 or not, you can simply execute :
 
 \code
-livre --volume mem://1024,1024,1024,32
+livre [--volume mem://1024,1024,512,32]
 \endcode
 
-which will render an in memory test volume data structure. Here 1024,1024 and 1024 are the width,
+which will render an in memory test volume data structure. Here 1024, 1024 and 512 are the width,
 height and length of the volume in voxels, respectively. 32 is the block size and "mem://" is the
 scheme to generate in memory volume. You should be getting an image like below:
 
@@ -74,21 +77,48 @@ The command line parameters are shown below:
 
 \code
 Application Parameters
-  --volume URL
+  --volume arg                          URI of volume data source
+  --animation [=arg(=1)] (=0)           Enable animation mode (optional frame
+                                        delta for animation speed, use
+                                        --animation=-<int> for reverse
+                                        animation)
+  --frames arg (=[0 4294967295])
+                                        Frames to render 'start end'
+  --num-frames arg (=4294967295)        Maximum nuber of frames to render
+  --camera-position arg (=[0 0 2])
+                                        Camera position
+  --camera-lookat arg (=[0 0 0])
+                                        Camera orientation
+  --sync-camera                         Synchronize camera with other
+                                        applications
+
+REST Parameters
+  --rest-host arg (=localhost)          RESTBridge's http hostname
+  --rest-port arg (=4020)               RESTBridge's http port
+  --zeq-schema arg (=rest)              RESTBridge's internal zeq schema
+  --use-rest                            Use RESTBridge
 
 Volume Renderer Parameters
-  --sse arg (=1)                    Screen space error
-  --datacachemem arg (=1024)        Maximum data cache memory (MB)
-  --texturecachemem arg (=3072)     Maximum texture cache memory (MB)
-  --texturedatacachemem arg (=8192) Maximum texture data cache memory (MB)
-  --maxrendermem arg (=1536)        Maximum render memory
+  --data-cache-mem arg (=1024)          Maximum data cache memory (MB) - caches
+                                        the raw data read from I/O in system
+                                        memory
+  --texture-cache-mem arg (=3072)       Maximum texture cache memory (MB) -
+                                        caches the texture data on GPU memory
+  --texturedata-cache-mem arg (=8192)   Maximum texture data cache memory (MB) -
+                                        caches the data that has been converted
+                                        into internal texture format in system
+                                        memory
+  --sse arg (=4)                        Screen space error
+  --synchronous                         Enable synchronous mode
+  --min-lod arg (=0)                    Minimum level of detail
+  --max-lod arg (=9)                    Maximum level of detail
 \endcode
 
 The important parameters are :
 
-- "--volume" ( URL of the volume )
-- "--sse" ( Quality of the rendering, the lower the value, the higher the quality. If value is 1,
-1 pixel is 1 voxel, for lower quality values should be larger than 1 )
+- "--volume" URL of the volume
+- "--sse" Quality of the rendering, the lower the value, the higher the quality. If value is 1,
+1 pixel is 1 voxel, for lower quality values should be larger than 1 (4 by default)
 
 @subsection LivreGUI Transfer function editor
 

@@ -28,7 +28,7 @@ namespace livre
 {
 
 /**
- * Generates random, in-memory volume data.
+ * Generates in-memory volume data.
  *
  * Parses URIs in the form:   mem:///#1024,1024,1024,32
  */

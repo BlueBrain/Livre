@@ -1,8 +1,8 @@
 /**
 @page Tuvok_Tool Tuvok Volume Data Generation
 
-@section TABLE_OF_CONTENTS Table of Contents
--# @ref GENERAL_INFORMATION
+@section TABLE_OF_CONTENTS_Tuvok Table of Contents
+-# @ref GENERAL_INFORMATION_Tuvok
 -# @ref PIPELINE
     -# @ref Fiji
     -# @ref TuvokDataConverter
@@ -11,7 +11,7 @@
 <hr>
 @endhtmlonly
 
-@section GENERAL_INFORMATION General Information
+@section GENERAL_INFORMATION_Tuvok General Information
 
 Out-of-core volume rendering algorithms require the volume data to be pre-processed before
 visualization. Tuvok volume format (UVF) is an out-of-core format and is supported by Livre.
@@ -19,11 +19,11 @@ visualization. Tuvok volume format (UVF) is an out-of-core format and is support
 @section PIPELINE Pipeline
 
 Tuvok library provides the "TuvokDataConverter" tool for pre-processing the NRRD
-( Nearly Raw Raster Data ) format, therefore the data to be visualized should be first converted to
+(Nearly Raw Raster Data) format, therefore the data to be visualized should be first converted to
 NRRD format.
 
 Generally data is either tiff slices or raw format, both can be read and converted to NRRD by the
-"Fiji" ( http://fiji.sc/Fiji ) tool. Then, the resulting NRRD volumes can be converted to UVF
+"Fiji" (http://fiji.sc/Fiji) tool. Then, the resulting NRRD volumes can be converted to UVF
 format.
 
 @subsection Fiji Fiji
@@ -48,8 +48,8 @@ you can directly use the 16 bit data using the "Convert to 8-bit Grayscale".
 
 After a successful import, you can export your volume to NRRD format using the
 "File->Save as->Nrrd..." menu option. A "raw volume" means that, the data has no format attached to
-it. So, before importing any raw volume user should be aware of the per data item format ( 8bit,
-16bit, signed, unsigned, float etc, endianness ), the width, height and length of the volume.
+it. So, before importing any raw volume user should be aware of the per data item format (8bit,
+16bit, signed, unsigned, float etc, endianness), the width, height and length of the volume.
 
 To import the raw volumes in Fiji, "File->Import->Raw..." menu item should be selected. After
 choosing your raw volume through the file browser the following dialog will be presented.
@@ -151,7 +151,6 @@ but less data reading -
 - "-c" for maximum brick size. A smaller brick size can increase the complexity of the out-of-core
 data structure, while bigger bricks may increase the loading times. If for ex: the volume is
 1024x1024x1024 in size, selecting a 32 size block will cause a 5 deep out-of-core tree, where
-algorithms can be slower when camera is close to the object - this still has to be improved )
-
+algorithms can be slower when camera is close to the object (this still has to be improved)
 
 */

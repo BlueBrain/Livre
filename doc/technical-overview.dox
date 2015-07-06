@@ -1,7 +1,7 @@
 
 /**
 @page Technical_Overview Technical Overview
-@section TABLE_OF_CONTENTS Table of Contents
+@section TABLE_OF_CONTENTS_Technical_overview Table of Contents
 -# @ref Technical_Features
 -# @ref Architecture
     -# @ref Render_Thread
@@ -16,24 +16,26 @@
 
 @section Technical_Features Technical Features
 
-The Livre is an out-of-core rendering engine that has the following features:
+Livre is an out-of-core rendering engine that has the following features:
 
-- Distributed rendering using Equalizer library ( https://github.com/Eyescale/Equalizer )
-( Sort-first is implemented, sort-last is in progress )
+- Distributed rendering using Equalizer library (https://github.com/Eyescale/Equalizer)
+(Sort-first is implemented, sort-last is in progress)
 
 - Lock-free data sharing using DASH library (https://github.com/BlueBrain/dash)
 
-- Octree based out-of-core rendering.
--- Visualisation of pre-processed UVF format
-( [source code](https://github.com/SCIInstitute/Tuvok.git) ) volume data sets.
--- Real-time voxelisation and visualisation of surface meshes using OpenGL 4.2 extensions.
--- Real-time voxelisation and visualisation of blue brain morphologies.
--- Real-time voxelisation and visualisation of local-field potentials in BBP circuit.
--- Multi-node, multi-gpu rendering ( Currently only sort-first rendering )
+- Octree based out-of-core rendering
+- Visualisation of pre-processed UVF format.
+  ([source code](https://github.com/SCIInstitute/Tuvok.git)) volume data sets.
+- Real-time voxelisation of different data sources (surface meshes, BBP morphologies,
+  local-field potentials, etc) through the use of plugins.
+
+@image html livre_datasource.png "Livre rendering using an external data source"
+
+- Multi-node, multi-gpu rendering (currently only sort-first rendering).
 
 @image html LOD.png "Octree structure [2]"
 
-- Error based LOD selection and rendering quality.
+- Error-based LOD selection and rendering quality.
 
 @image html ViewLOD.png "View-based LOD selection [2]"
 
@@ -45,7 +47,7 @@ The architecture can be summarized with the picture below:
 
 @image html DataFlow.png
 
-For each thread, DASH library provides different views of data. And, because of its tree structure,
+For each thread, the DASH library provides different views of data. And, because of its tree structure,
 the volume octree can be represented using the DASH tree. The changes are then propagated between
 threads.
 
@@ -58,28 +60,28 @@ the required nodes.
 @subsection GPU_Thread GPU upload thread
 
 - Uploading the data to the GPU, and modifying the tree.
-- Sending results to rendering thread.
+- Sending results to the rendering thread.
 - Maintaining the GPU cache.
 
 @subsection Data_Thread Data thread
 
 - Uploading the data to CPU memory from disk/network etc and modifying the tree.
 - Sending results to the GPU thread.
-- Mainitaining the main memory cache.
+- Maintaining the main memory cache.
 
 @subsection Livre_Library Livre library
 
-Livre is composed of 6 main libraries:
-- core : Collection of base classes for Cache, Dash based pipeline, Visitors and Rendering.
-- Lib : Collection of implementations of classes for Cache such as "Data Cache", "Texture Cache"
+Livre is composed of 3 main libraries:
+- core: Collection of base classes for Cache, Dash based pipeline, Visitors and Rendering.
+- Eq: Collection of implementations of classes for Equalizer classes.
+- Lib: Collection of implementations of classes for Cache such as "Data Cache", "Texture Cache"
 and Rendering.
-- Eq : Collection of implementations of classes for Equalizer classes.
-- bbpsdkvox : Collection of implementations of classes for morphology voxelization.
-- fivox : Collection of implementations of classes for local-field potential voxelisation and
-visualization.
-- meshvox : Collection of implementations of classes for mesh voxelisation and visualization.
 
-And, additionally, there is the UVF library for supporting pre-processed UVF volume data sets.
+Additionally, there are 3 different data sources that make use of the VolumeDataSourcePlugin
+to support the following types of data sets:
+- remote: Proxy for a remote ZeroEQ-based data source service.
+- UVF: Supports pre-processed UVF volume data sets.
+- memory (livre/Lib/Data/MemoryDataSource): Generates in-memory volume data.
 
 @section References References
 
