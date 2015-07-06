@@ -22,10 +22,7 @@
 #include <eq/eq.h>
 
 #include <livre/core/version.h>
-#include <livre/core/Configuration/Configuration.h>
 #include <livre/core/Data/VolumeDataSource.h>
-
-#include <livre/Lib/Configuration/VolumeRendererParameters.h>
 
 #include <livre/Eq/Client.h>
 #include <livre/Eq/Config.h>
@@ -33,30 +30,8 @@
 #include <livre/Eq/Settings/VolumeSettings.h>
 #include <livre/Eq/Settings/CameraSettings.h>
 
-#include <lunchbox/clock.h>
-
 namespace livre
 {
-namespace
-{
-static bool _hasParameter( int32_t argc, char** argv, const char* param )
-{
-    ProgramOptionsDescription description;
-    description.add_options()( param, param );
-
-    boost::program_options::command_line_parser clp =
-            boost::program_options::command_line_parser(
-                argc, argv ).options( description ).allow_unregistered();
-
-    ProgramOptionsMap programOptionsMap;
-
-    boost::program_options::parsed_options filtopts = clp.run();
-    boost::program_options::store( filtopts, programOptionsMap );
-    boost::program_options::notify( programOptionsMap );
-
-    return programOptionsMap.count( param );
-}
-}
 
 Client::Client()
 {
@@ -69,18 +44,6 @@ Client::~Client()
 
 bool Client::_parseArguments( const int32_t argc, char **argv )
 {
-    if( _hasParameter( argc, argv, "help" ))
-    {
-        std::cout << getHelp() << std::endl;
-        return false;
-    }
-
-    // If version is queried using --version is given as a parameter.
-    if( _hasParameter( argc, argv, "version" ))
-    {
-        std::cout << getVersion() << std::endl;
-        return false;
-    }
     if( !_applicationParameters.initialize( argc, argv ) ||
         !_rendererParameters.initialize( argc, argv ))
     {
@@ -119,24 +82,23 @@ std::string Client::getHelp()
 
     std::stringstream os;
     os << conf;
-
     return os.str();
 }
 
 std::string Client::getVersion()
 {
     std::stringstream os;
-    os << "Version " << Version::getString() << std::endl;
+    os << "Livre version " << Version::getString() << std::endl;
     return os.str();
 }
 
 bool Client::initLocal( const int argc, char** argv )
 {
-    VolumeDataSource::loadPlugins(); //initLocal on render clients never returns
-    if( !_parseArguments( argc, argv ) || !eq::Client::initLocal( argc, argv ))
+    if( !_parseArguments( argc, argv ))
         return false;
-
-    return true;
+    VolumeDataSource::loadPlugins(); //initLocal on render clients never returns
+    addActiveLayout( "Simple" ); // prefer single GPU layout by default
+    return eq::Client::initLocal( argc, argv );
 }
 
 int Client::run()

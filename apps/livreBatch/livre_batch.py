@@ -6,6 +6,7 @@ Launch livre in batch mode using sbatch to render images on cluster nodes.
 """
 
 import argparse
+import glob
 import json
 import math
 import os
@@ -102,7 +103,6 @@ class LivreBatch(object):
         values['start'] = start
         values['end'] = end
         values['num_frames'] = end - start + 1
-        values['image'] = "{slurm[output_dir]}/{slurm[job_name]}_".format(**values)
 
         sbatch_script = '\n'.join((
             "#!/bin/bash",
@@ -150,31 +150,85 @@ class LivreBatch(object):
         if not volume:
             print "Error: Need valid volume URI"
             return False
+
+        self.dict['image'] = "{slurm[output_dir]}/{slurm[job_name]}_".format(**self.dict)
+
         return True
 
     def submit_jobs(self):
         """
-        Submit jobs from frame range specified in configuration
+        Submit jobs from frame range specified in configuration, but checks
+        for existing frames/images in output directory to submit jobs only for
+        missing frames.
         """
 
         livre_dict = self.dict[SECTION_LIVRE]
         start_frame = livre_dict[LIVRE_STARTFRAME]
-        end_frame = livre_dict[LIVRE_ENDFRAME] + 1
-        batch_size = livre_dict[LIVRE_MAXFRAMES]
-
-        num_frames = end_frame - start_frame
-        num_jobs = int(math.ceil(float(num_frames) / float(batch_size)))
-        batch_size = int(math.ceil(float(num_frames) / float(num_jobs)))
+        end_frame = livre_dict[LIVRE_ENDFRAME]
 
         outdir = self.dict[SECTION_SLURM][SLURM_OUTPUTDIR]
         if not os.path.exists(outdir):
             os.makedirs(outdir)
 
+        # look for already rendered frames
+        img_prefix = self.dict['image']
+        files = glob.glob('{0}*.png'.format(img_prefix))
+        found_frames = set(int(x[len(img_prefix):-4]) for x in files)
+
+        if not found_frames:
+            ranges = [(start_frame, end_frame)]
+        else:
+            # find missing frames
+            ideal_range = set(range(start_frame, end_frame))
+            missing_frames = list(ideal_range - found_frames)
+            missing_frames.sort()
+
+            if not missing_frames:
+                print "No missing frames found, no jobs will be submitted."
+                return
+            print "Found {0} missing frames".format(len(missing_frames))
+
+            def _calc_ranges(i):
+                """
+                http://stackoverflow.com/questions/4628333/converting-a-list-of-integers-into-range-in-python
+                """
+                from itertools import groupby
+                for a, b in groupby(enumerate(i), lambda(x, y): y - x):
+                    b = list(b)
+                    yield b[0][1], b[-1][1]
+            ranges = _calc_ranges(missing_frames)
+
+        # Submit job(s) for range(s)
+        idx = 1
+        for sub_range in ranges:
+            idx += self._submit_jobs_for_range(idx, sub_range[0], sub_range[1])
+
+        if self.dry_run:
+            print "{0} job(s) not submitted (dry run)\n".format(idx-1)
+        else:
+            print "{0} job(s) submitted, find outputs in {1}\n".format(idx-1,
+                                                                       outdir)
+        return
+
+
+    def _submit_jobs_for_range(self, idx, start_frame, end_frame):
+        """
+        Submit batch jobs for a range of frames. Does rebalancing of maximum
+        frames per job, according to max frames from configuration and given
+        frame range.
+        """
+
+        livre_dict = self.dict[SECTION_LIVRE]
+        batch_size = livre_dict[LIVRE_MAXFRAMES]
+        num_frames = end_frame - start_frame + 1
+        num_jobs = int(math.ceil(float(num_frames) / float(batch_size)))
+        batch_size = int(math.ceil(float(num_frames) / float(num_jobs)))
+
         print "Create {0} job(s) with {1} frame(s) each".format(num_jobs,
                                                                 batch_size)
 
-        idx = 1
-        for batch_start in range(start_frame, end_frame, batch_size):
+        # python range has exclusive end, but we need the last frame
+        for batch_start in range(start_frame, end_frame + 1, batch_size):
             start = batch_start
             end = min(batch_start + batch_size - 1, end_frame)
 
@@ -186,10 +240,7 @@ class LivreBatch(object):
                 sbatch = subprocess.Popen(['sbatch'], stdin=subprocess.PIPE)
                 sbatch.communicate(input=sbatch_script)
 
-        if self.dry_run:
-            print "No jobs submitted (dry run)"
-        else:
-            print "Job(s) submitted, find outputs in {0}".format(outdir)
+        return num_jobs
 
 
 def main():

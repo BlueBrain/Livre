@@ -21,6 +21,7 @@
 
 #include <livre/Eq/Window.h>
 
+#include <livre/core/version.h>
 #include <livre/Eq/Error.h>
 #include <livre/Eq/FrameData.h>
 #include <livre/Eq/Node.h>
@@ -219,6 +220,10 @@ Window::Window( eq::Pipe *parent )
 
 bool Window::configInit( const eq::uint128_t& initId )
 {
+    std::stringstream windowTitle;
+    windowTitle << "Livre " << Version::getString();
+    setName( windowTitle.str( ));
+
     // Enforce alpha channel, since we need one for rendering
     setIAttribute( eq::WindowSettings::IATTR_PLANES_ALPHA, 8 );
     if( eq::Window::configInit( initId ))
