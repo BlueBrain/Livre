@@ -1,5 +1,7 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                          Stefan.Eilemann@epfl.ch
+ *
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -21,9 +23,8 @@
 #define _mathTypes_h_
 
 #include <livre/core/types.h>
-#include <lunchbox/lunchbox.h>
 #include <eq/fabric/vmmlib.h>
-#include <vmmlib/aabb.hpp>
+#include <lunchbox/lunchbox.h>
 
 namespace livre
 {
@@ -58,6 +59,7 @@ typedef vmml::vector< 4, uint32_t > Vector4ui; //!< A four-component integer vec
 using eq::fabric::Vector2f; //!< A two-component float vector.
 using eq::fabric::Vector3f; //!< A three-component float vector.
 using eq::fabric::Vector3d; //!< A three-component double vector.
+using eq::fabric::Vector4d; //!< A four-component double vector.
 using eq::fabric::Vector4f; //!< A four-component float vector.
 
 /**
@@ -75,9 +77,8 @@ typedef vmml::quaternion< float > Quaternionf; //!< Float quaternion.
 /**
  * Viewport definitions
  */
-template< class T > class Viewport;
-typedef Viewport< float > Viewportf;
-typedef Viewport< int32_t > Viewporti;
+typedef vmml::Vector4i PixelViewport;
+typedef vmml::Vector4f Viewport;
 
 /**
  * Other definitions

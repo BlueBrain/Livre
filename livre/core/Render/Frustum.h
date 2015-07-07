@@ -164,7 +164,8 @@ public:
 
 private:
 
-    void computeFrustumVertices_( Vector3f frustumVertices[], Vector3f frustumNormals[] ) const;
+    void computeFrustumVertices_( Vector3f frustumVertices[],
+                                  Vector3f frustumNormals[] ) const;
 
     void computeLimitsFromProjectionMatrix_( );
 

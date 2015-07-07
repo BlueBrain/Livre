@@ -30,7 +30,8 @@
 #include <livre/core/Dash/DashTree.h>
 #include <livre/core/Render/GLContext.h>
 #include <livre/core/Render/Renderer.h>
-#include <livre/core/Render/gl.h>
+
+#include <eq/gl.h>
 
 namespace livre
 {

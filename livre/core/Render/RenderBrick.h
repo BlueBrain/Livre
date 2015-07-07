@@ -50,14 +50,13 @@ public:
     /**
      * Computes the screen coordinates of an LOD block.
      * @param frustum The frustum information for model view, projection matrices.
-     * @param pixelViewPort The pixel viewport.
+     * @param pvp The pixel viewport.
      * @param minScreenPos Returns minimum screen pos of the LOD block.
      * @param maxScreenPos Returns maximum screen pos of the LOD block.
      */
-    void getScreenCoordinates( const Frustum& frustum,
-                               const Viewporti& pixelViewPort,
-                               Vector2i& minScreenPos,
-                               Vector2i& maxScreenPos ) const;
+    void getScreenCoordinates( const Frustum& frustum, const PixelViewport& pvp,
+                               Vector2i& minScreenPos, Vector2i& maxScreenPos )
+        const;
 
     /**
      * Renders the faces of a RenderBrick.

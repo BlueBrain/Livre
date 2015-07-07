@@ -17,22 +17,48 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/* gluProject code used in getScreenCoordinates():
+ *
+ * SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008)
+ * Copyright (C) 1991-2000 Silicon Graphics, Inc. All Rights Reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice including the dates of first publication and
+ * either this permission notice or a reference to
+ * http://oss.sgi.com/projects/FreeB/
+ * shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * SILICON GRAPHICS, INC. BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF
+ * OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * Except as contained in this notice, the name of Silicon Graphics, Inc.
+ * shall not be used in advertising or otherwise to promote the sale, use or
+ * other dealings in this Software without prior written authorization from
+ * Silicon Graphics, Inc.
+ */
 #include "RenderBrick.h"
-#include "gl.h"
 
 #include <livre/core/Render/Frustum.h>
 #include <livre/core/Data/LODNode.h>
-#include <livre/core/Render/Viewport.h>
-
-#ifdef __APPLE__
-#  pragma clang diagnostic ignored "-Wdeprecated" // gluProject
-#endif
+#include <eq/gl.h>
 
 namespace livre
 {
 
 
-RenderBrick::RenderBrick( ConstLODNodePtr lodNodePtr, ConstTextureStatePtr textureState )
+RenderBrick::RenderBrick( ConstLODNodePtr lodNodePtr,
+                          ConstTextureStatePtr textureState )
     : LODNodeTrait( lodNodePtr ),
       textureState_( textureState )
 {
@@ -44,7 +70,7 @@ ConstTextureStatePtr RenderBrick::getTextureState() const
 }
 
 void RenderBrick::getScreenCoordinates( const Frustum& frustum,
-                                        const Viewporti& pixelViewPort,
+                                        const PixelViewport& pvp,
                                         Vector2i& minScreenPos,
                                         Vector2i& maxScreenPos ) const
 {
@@ -61,45 +87,50 @@ void RenderBrick::getScreenCoordinates( const Frustum& frustum,
     double xMin = -xMax;
     double yMin = -yMax;
 
-    Vector4i pvp;
-    pvp[ 0 ] = pixelViewPort.getPosition()[ 0 ];
-    pvp[ 1 ] = pixelViewPort.getPosition()[ 1 ];
-    pvp[ 2 ] = pixelViewPort.getSize()[ 0 ];
-    pvp[ 3 ] = pixelViewPort.getSize()[ 1 ];
-
     for( int32_t i = 0; i < 2; ++i )
     {
         for( int32_t j = 0; j < 2; ++j )
         {
             for( int32_t k = 0; k < 2; ++k )
             {
-                double xProj, yProj, zProj;
-                const Matrix4d mv = frustum.getModelViewMatrix();
-                const Matrix4d proj = frustum.getProjectionMatrix();
-                gluProject( x[ i ], y[ j ], z[ k ],
-                            mv.array,
-                            proj.array,
-                            pvp.array,
-                            &xProj, &yProj, &zProj );
+                // based on gluProject code from SGI implementation
+                const Matrix4d& mv = frustum.getModelViewMatrix();
+                const Matrix4d& proj = frustum.getProjectionMatrix();
 
-                if( xProj > xMax )
-                    xMax = xProj;
-                if( yProj > yMax )
-                    yMax = yProj;
+                Vector4d in( x[ i ], y[ j ], z[ k ], 1.0 );
+                Vector4d out = mv * in;
+                in = proj * out;
 
-                if( xProj < xMin )
-                    xMin = xProj;
-                if( yProj < yMin )
-                    yMin = yProj;
+                if( in.w() == 0.0 )
+                    continue;
+                in.normalize();
+
+                /* Map x, y and z to range 0-1 */
+                in[0] = in[0] * 0.5 + 0.5;
+                in[1] = in[1] * 0.5 + 0.5;
+                in[2] = in[2] * 0.5 + 0.5;
+
+                /* Map x,y to viewport */
+                in[0] = in[0] * pvp[2] + pvp[0];
+                in[1] = in[1] * pvp[3] + pvp[1];
+
+                if( in[0] > xMax )
+                    xMax = in[0];
+                if( in[1] > yMax )
+                    yMax = in[1];
+
+                if( in[0] < xMin )
+                    xMin = in[0];
+                if( in[1] < yMin )
+                    yMin = in[1];
             }
         }
     }
 
-    xMin = std::max( (int)floor( xMin + 0.5 ), pvp[ 0 ] );
-    yMin = std::max( (int)floor( yMin + 0.5 ), pvp[ 1 ] );
-
-    xMax = std::min( (int)floor( xMax + 0.5 ), pvp[ 2 ] );
-    yMax = std::min( (int)floor( yMax + 0.5 ), pvp[ 3 ] );
+    xMin = std::max( (int)floor( xMin + 0.5 ), pvp[0] );
+    yMin = std::max( (int)floor( yMin + 0.5 ), pvp[1] );
+    xMax = std::min( (int)floor( xMax + 0.5 ), pvp[0] + pvp[2] );
+    yMax = std::min( (int)floor( yMax + 0.5 ), pvp[1] + pvp[3] );
 
     minScreenPos = Vector2i( xMin, yMin  );
     maxScreenPos = Vector2i( xMax, yMax  );

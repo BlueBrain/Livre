@@ -93,6 +93,7 @@ struct TextureState;
 struct VolumeInformation;
 
 using lunchbox::uint128_t;
+using lunchbox::Strings;
 
 typedef uint64_t Identifier;
 typedef Identifier CacheId;
@@ -184,7 +185,6 @@ typedef std::vector< NodeId > NodeIds;
  */
 typedef std::vector< ConstCacheObjectPtr > ConstCacheObjectPtrVector;
 typedef std::vector< RenderBrickPtr > RenderBricks;
-typedef std::vector< std::string > StringVector;
 typedef std::vector< VolumeDataSourcePtr > VolumeDataSourcePtrVector;
 typedef std::vector< TexturePoolPtr > TexturePoolPtrVector;
 typedef std::vector< DashTreePtr > DashTreePtrVector;

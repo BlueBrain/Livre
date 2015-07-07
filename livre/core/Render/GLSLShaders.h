@@ -24,10 +24,6 @@
 
 #include <livre/core/types.h>
 
-#ifdef GL3_PROTOTYPES
-#  include <eq/gl.h>
-#endif
-
 namespace livre
 {
 
@@ -41,26 +37,29 @@ struct ShaderData
     std::string vShader;
     std::string fShader;
     std::string gShader;
-    StringVector paths;
-    StringVector glslCodes;
+    Strings paths;
+    Strings glslCodes;
 
-    ShaderData( std::string shaderV = "", std::string shaderF = "", std::string shaderG = "",
-                StringVector glslPaths = StringVector(), StringVector codesGlsl = StringVector() )
-        :vShader(shaderV), fShader(shaderF), gShader(shaderG), paths(glslPaths), glslCodes(codesGlsl) {}
+    ShaderData( std::string shaderV = "", std::string shaderF = "",
+                std::string shaderG = "", Strings glslPaths = Strings(),
+                Strings codesGlsl = Strings( ))
+        : vShader(shaderV)
+        , fShader(shaderF)
+        , gShader(shaderG)
+        , paths(glslPaths)
+        , glslCodes(codesGlsl)
+    {}
 };
 
 /**
- * The GLSLShaders class is used to load vertex, fragment and geometry shaders with glsl's include directive support.
+ * Loads vertex, fragment and geometry shaders with GLSL include directive
+ * support.
  */
 class GLSLShaders
 {
 public:
-
     GLSLShaders();
-
     ~GLSLShaders();
-
-    typedef unsigned Handle;
 
     /**
      * Load shaders from strings with glsl's include directive support.
@@ -69,9 +68,9 @@ public:
      */
     int loadShaders(const ShaderData& shaderData);
 
-    /**
-     * @return The OpenGL handle of the shaders.
-     */
+    typedef unsigned Handle;
+
+    /** @return The OpenGL handle of the shaders. */
     Handle getProgram() const;
 
     /**
@@ -82,19 +81,19 @@ public:
     static bool checkOpenGLExtension( const std::string& extensionName );
 
 private:
+    Handle _program;
 
-    Handle loadShader_( const std::string& shader, const StringVector& paths,
-                        const StringVector& glslCodes, const unsigned shaderType );
+    int _load( GLSLShaders::Handle& handle, const std::string& shader,
+               const Strings& paths, const Strings& glslCodes,
+               unsigned shaderType );
 
-    void printLog_( Handle shader, const std::string &type );
+    void _printShaderLog( Handle shader );
+    void _printProgramLog( Handle program );
 
-    int cleanupOnError_( Handle shader1, Handle shader2 = 0, Handle shader3 = 0 );
+    int cleanupOnError_( Handle shader1, Handle shader2 = 0,
+                         Handle shader3 = 0 );
 
     std::string readShaderFile_( const std::string &shaderFile ) const;
-
-    Handle program_;
-
-    bool shadersLoaded_;
 };
 
 }

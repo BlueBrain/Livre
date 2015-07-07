@@ -1,7 +1,7 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Maxim Makhinya
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
- *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+ *                          Maxim Makhinya
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -20,72 +20,85 @@
  */
 
 #include "GLSLShaders.h"
-#include "gl.h"
 
+#include <eq/gl.h>
 #include <lunchbox/debug.h>
 #include <fstream>
 
 namespace livre
 {
-
 GLSLShaders::GLSLShaders()
-    : program_( 0 )
-    , shadersLoaded_( false )
+    : _program( 0 )
 {}
 
 
 GLSLShaders::~GLSLShaders()
 {
-    if( !shadersLoaded_ )
-        return;
-
-    if( program_ )
-        glDeleteObjectARB( program_ );
+    if( _program )
+        glDeleteProgram( _program );
 }
 
 
 GLSLShaders::Handle GLSLShaders::getProgram() const
 {
-    return program_;
+    return _program;
 }
 
-void GLSLShaders::printLog_( GLhandleARB shader, const std::string &type )
+void GLSLShaders::_printShaderLog( const Handle shader )
 {
-    GLint length;
-    glGetObjectParameterivARB( shader, GL_OBJECT_INFO_LOG_LENGTH_ARB,
-                               &length );
+    GLint length = 0;
+    glGetShaderiv( shader, GL_INFO_LOG_LENGTH, &length );
     if( length <= 1 )
+    {
+        LBERROR << "Shader compile failed, but log is empty" << std::endl;
         return;
-
-    std::vector< GLcharARB > log;
+    }
+    std::string log;
     log.resize( length );
 
-    GLint written;
-    glGetInfoLogARB( shader, length, &written, &log[0] );
-    LBERROR << "Shader error: " << type << &log[0] << std::endl;
+    glGetShaderInfoLog( shader, length, 0, &log[0] );
+    LBERROR << "Shader error: " << log << std::endl;
 }
 
-GLSLShaders::Handle GLSLShaders::loadShader_(
-    const std::string& shader, const StringVector& paths,
-    const StringVector& glslCodes LB_UNUSED, const GLenum shaderType )
+void GLSLShaders::_printProgramLog( const Handle program )
 {
-    GLhandleARB handle = glCreateShaderObjectARB( shaderType );
-    std::vector<const char*> pathsChar( paths.size() );
-
-    const char* cstr;
-    cstr = shader.c_str();
-
-    glShaderSourceARB( handle, 1, &cstr, 0 );
-
-    if(paths.empty())
+    GLint length = 0;
+    glGetProgramiv( program, GL_INFO_LOG_LENGTH, &length );
+    if( length <= 1 )
     {
-        glCompileShaderARB( handle );
+        LBERROR << "Shader program link failed, but log is empty" << std::endl;
+        return;
     }
+    std::string log;
+    log.resize( length );
+
+    glGetProgramInfoLog( program, length, 0, &log[0] );
+    LBERROR << "Program error: " << log << std::endl;
+}
+
+int GLSLShaders::_load( GLSLShaders::Handle& handle, const std::string& shader,
+                        const Strings& paths,
+                        const Strings& glslCodes LB_UNUSED,
+                        const unsigned shaderType )
+{
+    handle = glCreateShader( shaderType );
+    if( !handle )
+    {
+        LBDEBUG << "glCreateShader failed" << std::endl;
+        return glGetError();
+    }
+
+    const char* cstr = shader.c_str();
+    glShaderSource( handle, 1, &cstr, 0 );
+
+    if( paths.empty( ))
+        glCompileShader( handle );
     else
     {
 #ifdef GL3_PROTOTYPES
         if( checkOpenGLExtension( "GL_ARB_shading_language_include" ) )
         {
+            std::vector< const char* > pathsChar( paths.size() );
             for( size_t i = 0; i < paths.size() ; i++ )
             {
                 glNamedStringARB( GL_SHADER_INCLUDE_ARB, -1, paths[i].c_str(),
@@ -93,60 +106,30 @@ GLSLShaders::Handle GLSLShaders::loadShader_(
                 pathsChar[i] = paths[i].c_str();
             }
             glCompileShaderIncludeARB( (GLuint)handle, paths.size(),
-                                           &pathsChar[0], NULL );
+                                       &pathsChar[0], 0 );
         }
         else
 #endif
-        {
-            LBERROR<<" Error: GL_ARB_shading_language_include is not supported. Sorry..." <<std::endl;
-        }
+            LBERROR << "GL_ARB_shading_language_include not supported"
+                    << std::endl;
     }
+    const int ret = glGetError();
 
     GLint status;
-    glGetObjectParameterivARB( handle,
-                               GL_OBJECT_COMPILE_STATUS_ARB,
-                               &status );
-    if( status != GL_FALSE )
-        return handle;
-
-    printLog_( handle, "Compiling" );
-    LBVERB << " Shader text -----------" << cstr
-           << std::endl << "-----------" << std::endl;
+    glGetShaderiv( handle, GL_COMPILE_STATUS, &status );
+    if( status == GL_FALSE )
+    {
+        _printShaderLog( handle );
+        glDeleteShader( handle );
+        handle = 0;
+    }
 
 #ifdef GL3_PROTOTYPES
     for( size_t i = 0; i < paths.size(); i++ )
-    {
-        glDeleteNamedStringARB(-1, paths[i].c_str());
-    }
+        glDeleteNamedStringARB( -1, paths[i].c_str( ));
 #endif
 
-    glDeleteObjectARB( handle );
-    return 0;
-}
-
-
-int GLSLShaders::cleanupOnError_( GLhandleARB shader1, GLhandleARB shader2,
-                                  GLhandleARB shader3 )
-{
-    if( shader1 )
-        glDeleteObjectARB( shader1 );
-
-    if( shader2 )
-        glDeleteObjectARB( shader2 );
-
-    if( shader3 )
-        glDeleteObjectARB( shader3 );
-
-    if( program_ )
-    {
-        glDeleteObjectARB( program_ );
-        program_ = 0;
-    }
-
-    const int glError = glGetError();
-    if( glError == GL_NO_ERROR )
-        return GL_INVALID_OPERATION; // most likely cause!?
-    return glError;
+    return ret;
 }
 
 std::string GLSLShaders::readShaderFile_( const std::string &shaderFile ) const
@@ -158,65 +141,99 @@ std::string GLSLShaders::readShaderFile_( const std::string &shaderFile ) const
     return shaderStr.str();
 }
 
+namespace
+{
+void _deleteShader( const GLSLShaders::Handle shader )
+{
+    if( shader )
+        glDeleteShader( shader );
+}
+
+int _glError( const int error = glGetError( ))
+{
+    if( error == GL_NO_ERROR )
+        return EQ_UNKNOWN_GL_ERROR;
+    return error;
+}
+}
+
 int GLSLShaders::loadShaders( const ShaderData& shaderData )
 {
-    if( shadersLoaded_ )
-        return true;
+    if( _program )
+        return GL_NO_ERROR;
 
-    program_ = glCreateProgramObjectARB();
-    if( !program_ )
-        return cleanupOnError_( 0 );
+    glGetError(); // reset
+    LBASSERT( glCreateProgram );
+    const Handle program = glCreateProgram();
+    if( program == 0 )
+    {
+        LBDEBUG << "glCreateProgram failed" << std::endl;
+        return _glError();
+    }
 
-    GLhandleARB vertexShader=0;
+    Handle vertexShader = 0;
     if( !shaderData.vShader.empty() )
     {
-        vertexShader = loadShader_( shaderData.vShader, shaderData.paths,
-                                    shaderData.glslCodes,
-                                    GL_VERTEX_SHADER_ARB );
+        const int error = _load( vertexShader, shaderData.vShader,
+                                 shaderData.paths, shaderData.glslCodes,
+                                 GL_VERTEX_SHADER );
         if( !vertexShader )
-            return cleanupOnError_( vertexShader );
-
-        glAttachObjectARB( program_, vertexShader );
+        {
+            glDeleteProgram( program );
+            return _glError( error );
+        }
+        glAttachShader( program, vertexShader );
     }
 
-    GLhandleARB fragmentShader=0;
+    Handle fragmentShader = 0;
     if(!shaderData.fShader.empty())
     {
-        fragmentShader = loadShader_( shaderData.fShader, shaderData.paths,
-                                      shaderData.glslCodes,
-                                      GL_FRAGMENT_SHADER_ARB );
+        const int error = _load( fragmentShader, shaderData.fShader,
+                                 shaderData.paths, shaderData.glslCodes,
+                                 GL_FRAGMENT_SHADER );
         if( !fragmentShader )
-            return cleanupOnError_( vertexShader );
-
-        glAttachObjectARB( program_, fragmentShader );
+        {
+            _deleteShader( vertexShader );
+            glDeleteProgram( program );
+            return _glError( error );
+        }
+        glAttachShader( program, fragmentShader );
     }
 
-    GLhandleARB geometryShader=0;
+    Handle geometryShader = 0;
 #ifdef GL3_PROTOTYPES
     if(!shaderData.gShader.empty())
     {
-        geometryShader = loadShader_( shaderData.gShader, shaderData.paths,
-                                      shaderData.glslCodes,
-                                      GL_GEOMETRY_SHADER_ARB );
+        const int error = _load( geometryShader, shaderData.gShader,
+                                 shaderData.paths, shaderData.glslCodes,
+                                 GL_GEOMETRY_SHADER );
         if( !geometryShader )
-            return cleanupOnError_( vertexShader, fragmentShader );
-
-        glAttachObjectARB( program_, geometryShader );
+        {
+            _deleteShader( fragmentShader );
+            _deleteShader( vertexShader );
+            glDeleteProgram( program );
+            return _glError( error );
+        }
+        glAttachShader( program, geometryShader );
     }
 #endif
 
-    glLinkProgramARB( program_ );
+    glLinkProgram( program );
+    const int error = glGetError();
 
     GLint status;
-    glGetObjectParameterivARB( program_, GL_OBJECT_LINK_STATUS_ARB,
-                               &status );
+    glGetProgramiv( program, GL_LINK_STATUS, &status );
     if( status == GL_FALSE )
     {
-        printLog_( program_, "Linking" );
-        return cleanupOnError_( vertexShader, fragmentShader, geometryShader );
+        _printProgramLog( program );
+        _deleteShader( geometryShader );
+        _deleteShader( fragmentShader );
+        _deleteShader( vertexShader );
+        glDeleteProgram( program );
+        return _glError( error );
     }
 
-    shadersLoaded_ = true;
+    _program = program;
     return GL_NO_ERROR;
 }
 
