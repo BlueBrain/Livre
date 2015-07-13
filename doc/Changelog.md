@@ -1,6 +1,11 @@
 Changelog {#Changelog}
 =========
 
+## Release 0.4 (git master) {Release040}
+
+* [#75](https://github.com/BlueBrain/Livre/pull/75):
+  Separate ZeroEQ communication to class zeq::Communicator
+
 ## Release 0.3 (2015-07-07) {Release030}
 
 * [#37](https://github.com/BlueBrain/Livre/pull/37):

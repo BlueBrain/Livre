@@ -85,11 +85,11 @@ bool KeyboardHandler::operator ()( EqEventInfo& eqEventInfo )
             return true;
 
         case 'l':
-            config->switchLayout_( 1 );
+            config->switchLayout( 1 );
             return true;
 
         case 'L':
-            config->switchLayout_( -1 );
+            config->switchLayout( -1 );
             return true;
 
         case 'm':
@@ -105,13 +105,13 @@ bool KeyboardHandler::operator ()( EqEventInfo& eqEventInfo )
         case 'c':
         case 'C':
         {
-            return  config->switchCanvas_();
+            return config->switchCanvas();
         }
 
         case 'v':
         case 'V':
         {
-            return config->switchView_();
+            return config->switchView();
         }
 
         default:

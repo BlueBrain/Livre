@@ -147,13 +147,13 @@ void TextureUploadProcessor::_loadData()
     TextureLoaderVisitor loadVisitor( _dashTree, _textureCache,
                                       processorInputPtr_, processorOutputPtr_ );
 
-    loadVisitor.setSynchronous( _vrParameters->renderStrategy == RS_FULL_FRAME );
+    loadVisitor.setSynchronous( _vrParameters->synchronousMode );
 
     DFSTraversal traverser;
     const RootNode& rootNode = _dashTree->getDataSource()->getVolumeInformation().rootNode;
     traverser.traverse( rootNode, loadVisitor, _currentFrameID );
 
-    if( _vrParameters->renderStrategy == RS_FULL_FRAME )
+    if( _vrParameters->synchronousMode )
         _allDataLoaded = loadVisitor.isAllDataLoaded();
     else
         _allDataLoaded = true;

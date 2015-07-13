@@ -32,8 +32,7 @@ const std::string MAXLOD_PARAM = "max-lod";
 
 VolumeRendererParameters::VolumeRendererParameters()
     : Parameters( "Volume Renderer Parameters" )
-    , renderStrategy( RS_ANY_FRAME )
-    , synchronousModeEnabled( false )
+    , synchronousMode( false )
     , screenSpaceError( 4.0f )
     , maxDataMemoryMB( 1024u )
     , maxTextureMemoryMB( 3072u )
@@ -57,7 +56,7 @@ VolumeRendererParameters::VolumeRendererParameters()
     configuration_.addDescription( configGroupName_, SCREENSPACEERROR_PARAM,
                                    "Screen space error", screenSpaceError );
     configuration_.addDescription( configGroupName_, SYNCHRONOUSMODE_PARAM,
-                                   "Enable synchronous mode", synchronousModeEnabled );
+                                   "Enable synchronous mode", synchronousMode );
     configuration_.addDescription( configGroupName_, MINLOD_PARAM,
                                    "Minimum level of detail", minLOD );
     configuration_.addDescription( configGroupName_, MAXLOD_PARAM,
@@ -66,8 +65,8 @@ VolumeRendererParameters::VolumeRendererParameters()
 
 void VolumeRendererParameters::deserialize( co::DataIStream &is, const uint64_t )
 {
-    is >> renderStrategy
-       >> screenSpaceError
+    is >> screenSpaceError
+       >> synchronousMode
        >> maxDataMemoryMB
        >> maxTextureMemoryMB
        >> maxTextureDataMemoryMB
@@ -77,8 +76,8 @@ void VolumeRendererParameters::deserialize( co::DataIStream &is, const uint64_t 
 
 void VolumeRendererParameters::serialize( co::DataOStream &os, const uint64_t )
 {
-    os << renderStrategy
-       << screenSpaceError
+    os << screenSpaceError
+       << synchronousMode
        << maxDataMemoryMB
        << maxTextureMemoryMB
        << maxTextureDataMemoryMB
@@ -87,35 +86,33 @@ void VolumeRendererParameters::serialize( co::DataOStream &os, const uint64_t )
 }
 
 VolumeRendererParameters &VolumeRendererParameters::operator=(
-        const VolumeRendererParameters &volumeRendererParameters )
+        const VolumeRendererParameters &rhs )
 {
-    renderStrategy = volumeRendererParameters.renderStrategy;
-    screenSpaceError = volumeRendererParameters.screenSpaceError;
-    maxDataMemoryMB = volumeRendererParameters.maxDataMemoryMB;
-    maxTextureMemoryMB = volumeRendererParameters.maxTextureMemoryMB;
-    maxTextureDataMemoryMB = volumeRendererParameters.maxTextureDataMemoryMB;
-    minLOD = volumeRendererParameters.minLOD;
-    maxLOD = volumeRendererParameters.maxLOD;
+    if( this == &rhs )
+        return *this;
+
+    screenSpaceError = rhs.screenSpaceError;
+    synchronousMode = rhs.synchronousMode;
+    maxDataMemoryMB = rhs.maxDataMemoryMB;
+    maxTextureMemoryMB = rhs.maxTextureMemoryMB;
+    maxTextureDataMemoryMB = rhs.maxTextureDataMemoryMB;
+    minLOD = rhs.minLOD;
+    maxLOD = rhs.maxLOD;
+    setDirty( DIRTY_ALL );
+
     return *this;
 }
 
 void VolumeRendererParameters::initialize_()
 {
-    configuration_.getValue( SYNCHRONOUSMODE_PARAM, synchronousModeEnabled );
-    if( synchronousModeEnabled )
-        renderStrategy = RS_FULL_FRAME;
+    configuration_.getValue( SYNCHRONOUSMODE_PARAM, synchronousMode );
     configuration_.getValue( SCREENSPACEERROR_PARAM, screenSpaceError );
     configuration_.getValue( DATACACHEMEM_PARAM, maxDataMemoryMB );
     configuration_.getValue( TEXTURECACHEMEM_PARAM, maxTextureMemoryMB );
     configuration_.getValue( TEXTUREDATACACHEMEM_PARAM, maxTextureDataMemoryMB );
     configuration_.getValue( MINLOD_PARAM, minLOD );
     configuration_.getValue( MAXLOD_PARAM, maxLOD );
+    setDirty( DIRTY_ALL );
 }
 
 } //Livre
-
-namespace lunchbox
-{
-template<> inline void byteswap( livre::RenderStrategy& value )
-    { byteswap( reinterpret_cast< uint32_t& >( value )); }
-}
