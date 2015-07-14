@@ -29,6 +29,7 @@ const std::string TEXTURECACHEMEM_PARAM = "texture-cache-mem";
 const std::string TEXTUREDATACACHEMEM_PARAM = "texturedata-cache-mem";
 const std::string MINLOD_PARAM = "min-lod";
 const std::string MAXLOD_PARAM = "max-lod";
+const std::string SAMPLESPERRAY_PARAM = "samples-per-ray";
 
 VolumeRendererParameters::VolumeRendererParameters()
     : Parameters( "Volume Renderer Parameters" )
@@ -39,6 +40,7 @@ VolumeRendererParameters::VolumeRendererParameters()
     , maxTextureDataMemoryMB( 8192u )
     , minLOD( 0 )
     , maxLOD( ( NODEID_LEVEL_BITS << 1 ) + 1 )
+    , samplesPerRay( 512u )
 {
     configuration_.addDescription( configGroupName_, DATACACHEMEM_PARAM,
                                    "Maximum data cache memory (MB) - "
@@ -61,6 +63,8 @@ VolumeRendererParameters::VolumeRendererParameters()
                                    "Minimum level of detail", minLOD );
     configuration_.addDescription( configGroupName_, MAXLOD_PARAM,
                                    "Maximum level of detail", maxLOD );
+    configuration_.addDescription( configGroupName_, SAMPLESPERRAY_PARAM,
+                                   "Number of samples per ray", samplesPerRay );
 }
 
 void VolumeRendererParameters::deserialize( co::DataIStream &is, const uint64_t )
@@ -71,7 +75,8 @@ void VolumeRendererParameters::deserialize( co::DataIStream &is, const uint64_t 
        >> maxTextureMemoryMB
        >> maxTextureDataMemoryMB
        >> minLOD
-       >> maxLOD;
+       >> maxLOD
+       >> samplesPerRay;
 }
 
 void VolumeRendererParameters::serialize( co::DataOStream &os, const uint64_t )
@@ -82,7 +87,8 @@ void VolumeRendererParameters::serialize( co::DataOStream &os, const uint64_t )
        << maxTextureMemoryMB
        << maxTextureDataMemoryMB
        << minLOD
-       << maxLOD;
+       << maxLOD
+       << samplesPerRay;
 }
 
 VolumeRendererParameters &VolumeRendererParameters::operator=(
@@ -98,6 +104,7 @@ VolumeRendererParameters &VolumeRendererParameters::operator=(
     maxTextureDataMemoryMB = rhs.maxTextureDataMemoryMB;
     minLOD = rhs.minLOD;
     maxLOD = rhs.maxLOD;
+    samplesPerRay = rhs.samplesPerRay;
     setDirty( DIRTY_ALL );
 
     return *this;
@@ -112,6 +119,7 @@ void VolumeRendererParameters::initialize_()
     configuration_.getValue( TEXTUREDATACACHEMEM_PARAM, maxTextureDataMemoryMB );
     configuration_.getValue( MINLOD_PARAM, minLOD );
     configuration_.getValue( MAXLOD_PARAM, maxLOD );
+    configuration_.getValue( SAMPLESPERRAY_PARAM, samplesPerRay );
     setDirty( DIRTY_ALL );
 }
 
