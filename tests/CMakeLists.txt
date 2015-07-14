@@ -9,9 +9,8 @@ if(NOT LIVRE_USE_REMOTE_DATASOURCE)
 endif()
 
 # Libraries to link the tests executables with
-set(TEST_LIBRARIES LivreLib LivreEq ${Boost_LIBRARIES})
-set(LIVRE_OPTIONAL_LIBRARIES LivreBBPSDKVox LivreFivox LivreUVF LivreRemote
-  LivreMeshVox LivreBBIC)
+set(TEST_LIBRARIES LivreCore LivreLib LivreEq ${Boost_LIBRARIES})
+set(LIVRE_OPTIONAL_LIBRARIES LivreUVF LivreRemote)
 foreach(LIVRE_OPTIONAL_LIBRARY ${LIVRE_OPTIONAL_LIBRARIES})
   if(TARGET ${LIVRE_OPTIONAL_LIBRARY})
     list(APPEND TEST_LIBRARIES ${LIVRE_OPTIONAL_LIBRARY})
@@ -24,4 +23,6 @@ if(CMAKE_COMPILER_IS_GNUCXX_PURE)
   set(perf_remoteDataSource_LINK_LIBRARIES "-Wl,--no-as-needed")
 endif()
 include(CommonCTest)
+
+add_subdirectory(core)
 install_files(share/Livre/tests FILES ${TEST_FILES} COMPONENT examples)

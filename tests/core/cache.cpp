@@ -17,13 +17,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define BOOST_TEST_MODULE CacheTests
+#define BOOST_TEST_MODULE LibCore
 
 #include <boost/test/unit_test.hpp>
 
-#include "ValidCacheObject.h"
-#include "CacheObjectObserver.h"
-#include "Cache.h"
+#include "Cache/ValidCacheObject.h"
+#include "Cache/CacheObjectObserver.h"
+#include "Cache/Cache.h"
 
 namespace ut = boost::unit_test;
 

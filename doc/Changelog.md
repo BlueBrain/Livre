@@ -3,6 +3,9 @@ Changelog {#Changelog}
 
 ## Release 0.4 (git master) {Release040}
 
+* [#78](https://github.com/BlueBrain/Livre/pull/78):
+  New command line parameter to load a transfer function from file (".1dt" file
+  extension, based on the format used by ImageVis3D)
 * [#75](https://github.com/BlueBrain/Livre/pull/75):
   Separate ZeroEQ communication to class zeq::Communicator
 

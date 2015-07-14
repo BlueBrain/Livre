@@ -28,6 +28,7 @@
 #include <livre/Eq/FrameData.h>
 #include <livre/Eq/Settings/CameraSettings.h>
 #include <livre/Eq/Settings/FrameSettings.h>
+#include <livre/Eq/Settings/RenderSettings.h>
 #include <livre/core/Events/EventMapper.h>
 #include <livre/core/Maths/Maths.h>
 
@@ -162,6 +163,10 @@ bool Config::init()
     FrameSettingsPtr frameSettings = _impl->framedata.getFrameSettings();
     const ApplicationParameters& params = getApplicationParameters();
     frameSettings->setFrameNumber( params.frames.x( ));
+
+    RenderSettingsPtr renderSettings = _impl->framedata.getRenderSettings();
+    const TransferFunction1Dc& tf( _impl->framedata.getVRParameters()->transferFunction );
+    renderSettings->setTransferFunction( tf );
 
     _impl->framedata.registerObjects();
 

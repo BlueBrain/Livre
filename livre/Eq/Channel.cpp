@@ -331,8 +331,7 @@ public:
         AvailableSetGenerator generateSet( node->getDashTree( ));
 
         FrameInfo frameInfo( _currentFrustum );
-        generateSet.generateRenderingSet( _currentFrustum,
-                                          frameInfo);
+        generateSet.generateRenderingSet( _currentFrustum, frameInfo);
 
         EqRenderViewPtr renderViewPtr =
                 boost::static_pointer_cast< EqRenderView >( _renderViewPtr );
@@ -343,17 +342,14 @@ public:
                 boost::static_pointer_cast< RayCastRenderer >(
                     renderViewPtr->getRenderer( ));
 
-        const livre::Pipe* pipe = static_cast< const livre::Pipe* >( _channel->getPipe());
+        const livre::Pipe* pipe = static_cast< const livre::Pipe* >( _channel->getPipe( ));
         renderer->initTransferFunction(
-                    pipe->getFrameData()->getRenderSettings()->getTransferFunction( ));
+            pipe->getFrameData()->getRenderSettings()->getTransferFunction( ));
 
         RenderBricks renderBricks;
-        generateRenderBricks( frameInfo.renderNodeList,
-                              renderBricks );
+        generateRenderBricks( frameInfo.renderNodeList, renderBricks );
 
-        renderViewPtr->render( frameInfo,
-                               renderBricks,
-                               *_glWidgetPtr );
+        renderViewPtr->render( frameInfo, renderBricks, *_glWidgetPtr );
     }
 
     void prepareFramesAndSetPvp( const eq::Frames& frames,

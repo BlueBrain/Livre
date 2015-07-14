@@ -22,6 +22,9 @@
 #include <co/dataIStream.h>
 #include <co/dataOStream.h>
 
+#include <fstream>
+#include <iterator>
+
 #define DEFAULT_COLOR1_DENSITY 128u
 #define DEFAULT_COLOR2_DENSITY 255u
 #define DEFAULT_COLOR1_ALPHA 0.39f
@@ -34,6 +37,13 @@ namespace livre
 {
 namespace
 {
+enum SamplePointsType
+{
+    UINT8,
+    FLOAT,
+    DEFAULT = FLOAT
+};
+
 FloatVector create2ColorTF( const uint32_t surfaceColorPos,
                             const float surfaceColorAlpha,
                             const float solidColorAlpha, const size_t size,
@@ -86,12 +96,58 @@ FloatVector createDefault2ColorTF()
                            DEFAULT_COLOR2_RGB );
 }
 
+SamplePointsType readTransferFunction( const std::string& file,
+                                       FloatVector& transferFunction )
+{
+    transferFunction = createDefault2ColorTF();
+    if( file.empty( ))
+    {
+        LBWARN << "Using default transfer function" << std::endl;
+        return DEFAULT;
+    }
+    if( file.substr( file.find_last_of(".") + 1 ) != "1dt" )
+    {
+        LBWARN << "Wrong transfer function file format: " << file
+               << ", it must be '.1dt'. Using default transfer function"
+               << std::endl;
+        return DEFAULT;
+    }
+
+    std::ifstream ifs( file );
+    if( !ifs.is_open( ))
+    {
+        LBWARN << "The specified transfer function file: " << file
+               << ", could not be opened. Using default transfer function"
+               << std::endl;
+        return DEFAULT;
+    }
+
+    std::string line, val;
+    std::getline( ifs, line );
+    const std::string& formatStr = line.substr( line.find(' ') + 1 );
+    const SamplePointsType format = formatStr == "uint8" ? UINT8 : DEFAULT;
+
+    const size_t numValues = atoi( line.c_str( )) * TF_NCHANNELS;
+    if( !numValues )
+    {
+        LBWARN << "Wrong format in transfer function file: " << file
+               << ", the number of values must be specified. "
+               << "Using default transfer function" << std::endl;
+        return DEFAULT;
+    }
+    transferFunction.resize( numValues );
+    size_t i = 0;
+    while( ifs >> val && i < numValues )
+        transferFunction[i++] = atof( val.c_str( ));
+
+    return format;
+}
 }
 
 template<> void TransferFunction1D< uint8_t >::reset()
 {
     const FloatVector defaultTF = createDefault2ColorTF();
-    const float maxVal = std::numeric_limits< uint8_t >::max( );
+    const float maxVal = std::numeric_limits< uint8_t >::max();
     const size_t size = defaultTF.size();
 
     rgba_.resize( size );
@@ -138,5 +194,20 @@ void TransferFunction1D< float >::createCustomTF_( const uint32_t size )
         rgba_[ i * TF_NCHANNELS + 2 ] = 1.0f;
         rgba_[ i * TF_NCHANNELS + 3 ] = 0.08f;
     }
+}
+
+template<>
+void TransferFunction1D< uint8_t >::createTfFromFile_( const std::string& file )
+{
+    FloatVector transferFunction;
+    const SamplePointsType& format = readTransferFunction( file, transferFunction );
+    const size_t size = transferFunction.size();
+    rgba_.resize( size );
+
+    const uint8_t maxVal = std::numeric_limits< uint8_t >::max();
+    const uint8_t conversionFactor = format == UINT8 ? 1u : maxVal;
+
+    for( size_t i = 0; i < size; ++i )
+        rgba_[i] = conversionFactor * transferFunction[i];
 }
 }
