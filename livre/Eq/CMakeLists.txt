@@ -28,7 +28,7 @@ if(ZEQ_FOUND)
 endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-overloaded-virtual")
-set(PROJECT_INCLUDE_NAME livre/Eq)
+set(LIVREEQ_INCLUDE_NAME livre/Eq)
 
 common_library(LivreEq)
 if(NOT APPLE)

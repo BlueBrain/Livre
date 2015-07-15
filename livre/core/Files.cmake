@@ -5,7 +5,6 @@
 #
 
 set(LIVRECORE_PUBLIC_HEADERS
-  ${COMMON_INCLUDES}
   Data/LODNode.h
   Data/NodeId.h
   Data/MemoryUnit.h
@@ -112,5 +111,4 @@ set(LIVRECORE_SOURCES
   Util/ThreadClock.cpp
   Util/Utilities.cpp
   Visitor/RenderNodeVisitor.cpp
-  Visitor/VisitState.cpp
-  ${COMMON_SOURCES})
+  Visitor/VisitState.cpp)
