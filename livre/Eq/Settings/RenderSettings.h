@@ -39,8 +39,7 @@ class RenderSettings : public co::Serializable
     {
         DIRTY_TF = co::Serializable::DIRTY_CUSTOM << 0u,
         DIRTY_RENDERER_TYPE = co::Serializable::DIRTY_CUSTOM << 1u,
-        DIRTY_DEPTH = co::Serializable::DIRTY_CUSTOM << 2u,
-        DIRTY_SAMPLES = co::Serializable::DIRTY_CUSTOM << 3u
+        DIRTY_DEPTH = co::Serializable::DIRTY_CUSTOM << 2u
     };
 
 public:
@@ -68,12 +67,6 @@ public:
     void setRendererType( const RendererType rendererType );
 
     /**
-     * @brief setNumberOfSamples Sets the sample count for the renderer.
-     * @param nbOfSamples Number of samples
-     */
-    void setNumberOfSamples( const uint32_t nbOfSamples );
-
-    /**
      * @return Returns the transfer function.
      */
     const TransferFunction1D< uint8_t >& getTransferFunction( ) const;
@@ -92,11 +85,6 @@ public:
      * @return Returns the maximum rendering depth.
      */
     uint8_t getMaxTreeDepth( ) const;
-
-    /**
-     * @return Returns the nbOfSamples
-     */
-    uint32_t getNumberOfSamples( ) const;
 
     /**
      * @brief adjustQuality Adjusts the quality.
@@ -122,7 +110,6 @@ private:
     TransferFunction1Dc transferFunction_;
     RendererType rendererType_;
     uint8_t depth_;
-    uint32_t nSamples_;
 };
 
 }

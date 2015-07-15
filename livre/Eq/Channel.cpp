@@ -225,7 +225,7 @@ public:
     void initializeRenderer()
     {
         const uint32_t nSlices =
-            getFrameData()->getRenderSettings()->getNumberOfSamples();
+            getFrameData()->getVRParameters()->samplesPerRay;
         ConstVolumeDataSourcePtr dataSource =
             static_cast< livre::Node* >( _channel->getNode( ))->getDashTree()->getDataSource();
 

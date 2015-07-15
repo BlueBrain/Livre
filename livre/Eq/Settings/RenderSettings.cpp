@@ -26,15 +26,12 @@ template<> inline void byteswap( livre::RendererType& value )
     { byteswap( reinterpret_cast< uint32_t& >( value )); }
 }
 
-#define N_SAMPLES 512
-
 namespace livre
 {
 
 RenderSettings::RenderSettings( )
     : rendererType_( RT_RAYCAST ),
-      depth_( 0 ),
-      nSamples_( N_SAMPLES )
+      depth_( 0 )
 {
     setDirty( DIRTY_RENDERER_TYPE );
 }
@@ -66,12 +63,6 @@ void RenderSettings::setRendererType( const RendererType rendererType )
 {
     rendererType_ = rendererType;
     setDirty( DIRTY_RENDERER_TYPE );
-}
-
-void RenderSettings::setNumberOfSamples( const uint32_t nbOfSamples )
-{
-    nSamples_ = nbOfSamples;
-    setDirty( DIRTY_SAMPLES );
 }
 
 void RenderSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
@@ -113,11 +104,6 @@ void RenderSettings::setMaxTreeDepth( const uint8_t depth )
 uint8_t RenderSettings::getMaxTreeDepth( ) const
 {
     return depth_;
-}
-
-uint32_t RenderSettings::getNumberOfSamples( ) const
-{
-    return nSamples_;
 }
 
 }
