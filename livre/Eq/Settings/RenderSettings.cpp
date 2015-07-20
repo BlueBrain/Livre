@@ -36,7 +36,7 @@ RenderSettings::RenderSettings( )
     setDirty( DIRTY_RENDERER_TYPE );
 }
 
-const TransferFunction1D< uint8_t> &RenderSettings::getTransferFunction( ) const
+const TransferFunction1D< uint8_t>& RenderSettings::getTransferFunction( ) const
 {
     return transferFunction_;
 }
@@ -51,7 +51,6 @@ void RenderSettings::resetTransferFunction( )
     transferFunction_.reset( );
     setDirty( DIRTY_TF );
 }
-
 
 void RenderSettings::setTransferFunction( const TransferFunction1Dc& tf )
 {
@@ -79,7 +78,6 @@ void RenderSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
     co::Serializable::serialize( os, dirtyBits );
 }
 
-
 void RenderSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits )
 {
     if( dirtyBits & DIRTY_TF )
@@ -92,7 +90,6 @@ void RenderSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits 
         is >> depth_;
 
     co::Serializable::deserialize( is, dirtyBits );
-
 }
 
 void RenderSettings::setMaxTreeDepth( const uint8_t depth )

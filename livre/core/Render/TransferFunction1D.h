@@ -52,6 +52,18 @@ public:
     TransferFunction1D( const uint32_t size ) { createCustomTF_( size ); }
 
     /**
+     * Load transfer function from an ASCII "1dt" file. The content of the file
+     * consists of a first line with the number of sample points in the transfer
+     * function and their format, and then all the values in 'R G B A' format.
+     * Currently both float [0.0f, 1.0f] and 8-bit unsigned integers [0, 255]
+     * values are supported. If the format is unspecified, float is used.
+     * If the file extension or format is not supported or the file could not be
+     * opened, a default transfer function is generated.
+     * @param file Path to the transfer function file.
+     */
+    TransferFunction1D( const std::string& file ) { createTfFromFile_( file ); }
+
+    /**
      * Copy a transfer function.
      * @param tf The transfer function to be copied.
      */
@@ -67,18 +79,27 @@ public:
         : rgba_( rgba )
     {}
 
+    TransferFunction1D& operator=( const TransferFunction1D< T >& rhs )
+    {
+        if( this == &rhs )
+            return *this;
+
+        rgba_ = rhs.rgba_;
+        return *this;
+    }
+
     /**
      * Resets the transfer function with default parameters.
      */
     void reset();
 
     /**
-     * @return The RGBA data vector. The data array is rgba_[] = { R, G, B, A, R, G, B, A, R .... }.
+     * @return The RGBA data vector. The data array is rgba_[] = { R, G, B, A, R, G, B, A, R ... }.
      */
     std::vector< T >& getData() { return rgba_; }
 
     /**
-     * @return The RGBA data vector. The data array is rgba_[] = { R, G, B, A, R, G, B, A, R .... }.
+     * @return The RGBA data vector. The data array is rgba_[] = { R, G, B, A, R, G, B, A, R ... }.
      */
     const std::vector< T >& getData() const { return rgba_; }
 
@@ -94,6 +115,8 @@ private:
     friend co::DataIStream& operator>>( co::DataIStream& is, TransferFunction1D< U >& tf );
 
     void createCustomTF_( const uint32_t size );
+
+    void createTfFromFile_( const std::string& file );
 };
 
 /**

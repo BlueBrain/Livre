@@ -37,6 +37,7 @@ struct VolumeRendererParameters : public Parameters
     uint32_t minLOD; //!< Minimum level of detail
     uint32_t maxLOD; //!< Maximum level of detail
     uint32_t samplesPerRay; //!< Number of samples per ray
+    std::string transferFunction; //!< Path to transfer function file
 
     /**
      * De-serializes the object from input stream.
