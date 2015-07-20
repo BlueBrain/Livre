@@ -105,6 +105,12 @@ void RenderBrick::getScreenCoordinates( const Frustum& frustum,
                     continue;
                 in.normalize();
 
+                const double perspCorr = 1.0 / in.w();
+
+                in[0] *= perspCorr;
+                in[1] *= perspCorr;
+                in[2] *= perspCorr;
+
                 /* Map x, y and z to range 0-1 */
                 in[0] = in[0] * 0.5 + 0.5;
                 in[1] = in[1] * 0.5 + 0.5;
