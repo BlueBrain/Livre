@@ -23,8 +23,9 @@
 
 #include <livre/core/Data/LODNode.h>
 #include <livre/core/Data/VolumeDataSource.h>
-#include <livre/core/Render/gl.h>
 #include <livre/core/Render/Renderer.h>
+
+#include <eq/gl.h>
 
 namespace livre
 {

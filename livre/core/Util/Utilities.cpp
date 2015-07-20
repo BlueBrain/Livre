@@ -21,7 +21,7 @@
 #define _utility_h_
 
 #include <livre/core/Util/Utilities.h>
-#include <livre/core/Render/gl.h>
+#include <eq/gl.h>
 
 namespace livre
 {

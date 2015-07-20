@@ -39,7 +39,7 @@ void View::setRenderer( RendererPtr rendererPtr )
     rendererPtr_ = rendererPtr;
 }
 
-void View::setViewport( const Viewportf& viewport )
+void View::setViewport( const Viewport& viewport )
 {
     viewport_ = viewport;
 }
@@ -49,7 +49,7 @@ RendererPtr View::getRenderer() const
     return rendererPtr_;
 }
 
-const Viewportf& View::getViewport() const
+const Viewport& View::getViewport() const
 {
     return viewport_;
 }

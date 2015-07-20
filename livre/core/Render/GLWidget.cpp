@@ -1,5 +1,6 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                          Stefan.Eilemann@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -33,14 +34,13 @@ GLWidget::~GLWidget( )
 
 }
 
-void GLWidget::setViewport( const View* view, Viewporti& viewport  ) const
+Viewport GLWidget::getViewport( const View& view  ) const
 {
     const Vector2f window( getWidth(), getHeight() );
+    const Vector2i& pos = view.getViewport().get_sub_vector< 2 >() * window;
+    const Vector2i& size = view.getViewport().get_sub_vector< 2 >( 2 ) * window;
 
-    const Vector2i pos = view->getViewport().getPosition() * window;
-    const Vector2i size = view->getViewport().getSize() * window;
-
-    viewport.set( pos, size );
+    return Viewport( pos.x(), pos.y(), size.x(), size.y( ));
 }
 
 }

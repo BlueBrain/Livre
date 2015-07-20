@@ -18,7 +18,6 @@
  */
 
 #include "TransferFunction1D.h"
-#include "gl.h"
 
 #include <co/dataIStream.h>
 #include <co/dataOStream.h>

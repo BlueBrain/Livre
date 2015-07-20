@@ -63,7 +63,6 @@ set(LIVRECORE_HEADERS
   Render/TextureState.h
   Render/TransferFunction1D.h
   Render/View.h
-  Render/Viewport.h
   Util/ThreadClock.h
   Visitor/NodeVisitor.h
   Visitor/RenderNodeVisitor.h

@@ -18,9 +18,9 @@
  */
 
 #include "TexturePool.h"
-#include "gl.h"
 
 #include <livre/core/defines.h>
+#include <eq/gl.h>
 
 namespace livre
 {
@@ -29,10 +29,10 @@ TexturePool::TexturePool( const Vector3i& maxBlockSize,
                           const GLint internalFormat,
                           const GLenum format,
                           const GLenum gpuDataType )
-    : maxBlockSize_( maxBlockSize ),
-      internalFormat_( internalFormat ),
-      format_( format ),
-      gpuDataType_( gpuDataType )
+    : maxBlockSize_( maxBlockSize )
+    , internalFormat_( internalFormat )
+    , format_( format )
+    , gpuDataType_( gpuDataType )
 {
 }
 
@@ -48,8 +48,8 @@ void TexturePool::generateTexture( TextureStatePtr textureState )
     else
     {
         glGenTextures( 1, &textureState->textureId );
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        textureState->bind( );
+        glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+        textureState->bind();
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

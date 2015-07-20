@@ -1,5 +1,6 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                          Stefan.Eilemann@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -26,22 +27,15 @@
 namespace livre
 {
 
-/**
- * RenderWidget class is the base class for renderWidgets, that has the information of the
- * window of rendering.
- */
+/** Base class for render widgets */
 class GLWidget : public GLContextTrait
 {
 public:
-
-    virtual void setViewport( const View* view, Viewporti& viewport ) const;
+    virtual Viewport getViewport( const View& view ) const;
 
     virtual uint32_t getX( ) const = 0;
-
     virtual uint32_t getY( ) const = 0;
-
     virtual uint32_t getHeight( ) const = 0;
-
     virtual uint32_t getWidth( ) const = 0;
 
     virtual void update( ) { }

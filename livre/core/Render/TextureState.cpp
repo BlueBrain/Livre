@@ -18,9 +18,9 @@
  */
 
 #include "TextureState.h"
-#include "gl.h"
 
 #include <livre/core/defines.h>
+#include <eq/gl.h>
 
 namespace livre
 {
@@ -34,16 +34,17 @@ TextureState::TextureState()
 {
 }
 
-void TextureState::bind( ) const
+void TextureState::bind() const
 {
-    LBASSERT( textureId != INVALID_TEXTURE_ID );
+    LBASSERTINFO( textureId != INVALID_TEXTURE_ID,
+                  "GL error: " << glGetError( ));
+    if( textureId == INVALID_TEXTURE_ID )
+        return;
 
     glBindTexture( GL_TEXTURE_3D, textureId );
     const GLenum glErr = glGetError();
     if ( glErr != GL_NO_ERROR )
-    {
-        LBERROR << "Error binding the texture into GPU, error number : "  << glErr << std::endl;
-    }
+        LBERROR << "Error binding texture: "  << glErr << std::endl;
 }
 
 }

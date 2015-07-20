@@ -18,12 +18,12 @@
  */
 
 #include "Renderer.h"
-#include "gl.h"
 
 #include <livre/core/Render/TexturePoolFactory.h>
 #include <livre/core/Render/Frustum.h>
 #include <livre/core/Render/RenderBrick.h>
 #include <livre/core/Data/LODNode.h>
+#include <eq/gl.h>
 
 namespace livre
 {

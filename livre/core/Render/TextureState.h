@@ -31,15 +31,13 @@ namespace livre
  */
 struct TextureState
 {
-
 public:
-
-    TextureState( );
+    TextureState();
 
     /**
      * OpenGL bind() the texture.
      */
-    void bind( ) const;
+    void bind() const;
 
     Vector3f textureCoordsMin; //!< Minimum texture coordinates in the maximum texture block in \see TexturePool.
     Vector3f textureCoordsMax; //!< Maximum texture coordinates in the maximum texture block in \see TexturePool.

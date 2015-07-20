@@ -71,11 +71,11 @@ private:
                                Vector2i& screenPos );
 
 
-    EqTexturePtr framebufferTempTexturePtr_;
-    GLSLShadersPtr shadersPtr_;
-    uint32_t nSamples_;
-    uint32_t transferFunctionTexture_;
-    std::vector< uint32_t > usedTextures_[2]; // last, current frame
+    EqTexturePtr _framebufferTexture;
+    GLSLShadersPtr _shaders;
+    uint32_t _nSamples;
+    uint32_t _transferFunctionTexture;
+    std::vector< uint32_t > _usedTextures[2]; // last, current frame
 };
 
 }

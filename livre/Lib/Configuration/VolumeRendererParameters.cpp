@@ -34,10 +34,17 @@ const std::string SAMPLESPERRAY_PARAM = "samples-per-ray";
 VolumeRendererParameters::VolumeRendererParameters()
     : Parameters( "Volume Renderer Parameters" )
     , synchronousMode( false )
+#ifdef __i386__
+    , screenSpaceError( 8.0f )
+    , maxDataMemoryMB( 128u )
+    , maxTextureMemoryMB( 512u )
+    , maxTextureDataMemoryMB( 1024u )
+#else
     , screenSpaceError( 4.0f )
     , maxDataMemoryMB( 1024u )
     , maxTextureMemoryMB( 3072u )
     , maxTextureDataMemoryMB( 8192u )
+#endif
     , minLOD( 0 )
     , maxLOD( ( NODEID_LEVEL_BITS << 1 ) + 1 )
     , samplesPerRay( 512u )
@@ -116,7 +123,7 @@ void VolumeRendererParameters::initialize_()
     configuration_.getValue( SCREENSPACEERROR_PARAM, screenSpaceError );
     configuration_.getValue( DATACACHEMEM_PARAM, maxDataMemoryMB );
     configuration_.getValue( TEXTURECACHEMEM_PARAM, maxTextureMemoryMB );
-    configuration_.getValue( TEXTUREDATACACHEMEM_PARAM, maxTextureDataMemoryMB );
+    configuration_.getValue( TEXTUREDATACACHEMEM_PARAM, maxTextureDataMemoryMB);
     configuration_.getValue( MINLOD_PARAM, minLOD );
     configuration_.getValue( MAXLOD_PARAM, maxLOD );
     configuration_.getValue( SAMPLESPERRAY_PARAM, samplesPerRay );

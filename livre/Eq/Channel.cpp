@@ -19,12 +19,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <eq/channel.h>
-#include <eq/frameData.h>
-#include <eq/compositor.h>
-#include <eq/image.h>
-#include <eq/gl.h>
-
 #include <livre/Eq/FrameData.h>
 #include <livre/Eq/Settings/FrameSettings.h>
 #include <livre/Eq/Channel.h>
@@ -55,9 +49,8 @@
 #include <livre/core/Dash/DashTree.h>
 #include <livre/core/Data/VolumeDataSource.h>
 
-#include <eq/fabric/viewport.h>
-#include <eq/fabric/pixelViewport.h>
-#include <eq/fabric/range.h>
+#include <eq/eq.h>
+#include <eq/gl.h>
 
 namespace livre
 {
@@ -94,12 +87,11 @@ public:
         : _channel( channel )
     {}
 
-    void setViewport( const View*,
-                      Viewporti& viewport ) const final
+    Viewport getViewport( const View& ) const final
     {
         const eq::PixelViewport& channelPvp = _channel->getPixelViewport();
-        viewport.set( Vector2f( channelPvp.x, channelPvp.y ),
-                      Vector2f( channelPvp.w, channelPvp.h ) );
+        return Viewport( channelPvp.x, channelPvp.y,
+                         channelPvp.w, channelPvp.h );
     }
 
     uint32_t getX() const
@@ -288,10 +280,9 @@ public:
 
     void requestData()
     {
-        Viewporti pixelViewport;
         const eq::PixelViewport& channelPvp = _channel->getPixelViewport();
-        pixelViewport.set( Vector2f( channelPvp.x, channelPvp.y ),
-                           Vector2f( channelPvp.w, channelPvp.h ));
+        const Viewport pixelViewport( channelPvp.x, channelPvp.y,
+                                      channelPvp.w, channelPvp.h );
 
         livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
         livre::Window* window = static_cast< livre::Window* >( _channel->getWindow( ));
@@ -311,7 +302,7 @@ public:
 
         SelectVisibles visitor( dashTree,
                                 _currentFrustum,
-                                pixelViewport.getHeight( ),
+                                pixelViewport[3],
                                 screenSpaceError,
                                 worldSpacePerVoxel,
                                 volumeDepth,
@@ -333,12 +324,8 @@ public:
         requestData();
 
         const eq::fabric::Viewport& vp = _channel->getViewport( );
-        const Viewportf viewport( Vector2f( vp.x, vp.y ),
-                                  Vector2f( vp.w, vp.h ));
+        const Viewport viewport( vp.x, vp.y, vp.w, vp.h );
         _renderViewPtr->setViewport( viewport );
-
-        Viewporti pixelViewport;
-        _glWidgetPtr->setViewport( _renderViewPtr.get( ), pixelViewport );
 
         livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
         AvailableSetGenerator generateSet( node->getDashTree( ));

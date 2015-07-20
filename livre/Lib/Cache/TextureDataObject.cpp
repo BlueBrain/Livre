@@ -23,10 +23,11 @@
 
 #include <livre/core/Data/LODNode.h>
 #include <livre/core/Data/VolumeDataSource.h>
-#include <livre/core/Render/gl.h>
 
-namespace livre {
+#include <eq/gl.h>
 
+namespace livre
+{
 TextureDataObject::TextureDataObject( )
     : rawDataObject_( RawDataObject::getEmptyPtr() )
 {

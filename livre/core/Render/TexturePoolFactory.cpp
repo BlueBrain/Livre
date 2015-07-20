@@ -18,9 +18,9 @@
  */
 
 #include "TexturePoolFactory.h"
-#include "gl.h"
 
 #include <livre/core/Render/TexturePool.h>
+#include <eq/gl.h>
 
 namespace livre
 {
