@@ -69,6 +69,14 @@ public:
         _publisher.publish( ::zeq::hbp::serializeCamera( matrix ));
     }
 
+    void publishCamera()
+    {
+        const auto cameraSettings = _config.getFrameData().getCameraSettings();
+        const Matrix4f& modelView = cameraSettings->getModelViewMatrix();
+        const FloatVector matrix( modelView.begin(), modelView.end( ));
+        _vwsPublisher->publish( ::zeq::hbp::serializeCamera( matrix ));
+    }
+
     void publishExit()
     {
         _vwsPublisher->publish( ::zeq::Event( ::zeq::vocabulary::EVENT_EXIT ));
@@ -220,6 +228,8 @@ private:
 
     void _setupRequests()
     {
+        _requests[::zeq::hbp::EVENT_CAMERA] =
+                std::bind( &Impl::publishCamera, this );
         _requests[::zeq::hbp::EVENT_FRAME] =
                 std::bind( &Impl::publishFrame, this );
         _requests[::zeq::hbp::EVENT_LOOKUPTABLE1D] =
@@ -261,7 +271,10 @@ private:
                                                  this, std::placeholders::_1 ));
     vwsSubscriber->registerHandler( ::zeq::hbp::EVENT_FRAME,
                                     std::bind( &Impl::onFrame,
-                                              this, std::placeholders::_1 ));
+                                               this, std::placeholders::_1 ));
+    vwsSubscriber->registerHandler( ::zeq::hbp::EVENT_LOOKUPTABLE1D,
+                                    std::bind( &Impl::onLookupTable1D,
+                                               this, std::placeholders::_1 ));
 
 #else
     _vwsPublisher.reset( new ::zeq::Publisher( servus::URI( "vwsresp://" )));
