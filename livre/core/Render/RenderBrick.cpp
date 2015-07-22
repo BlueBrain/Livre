@@ -105,30 +105,25 @@ void RenderBrick::getScreenCoordinates( const Frustum& frustum,
                     continue;
                 in.normalize();
 
-                const double perspCorr = 1.0 / in.w();
-
-                in[0] *= perspCorr;
-                in[1] *= perspCorr;
-                in[2] *= perspCorr;
-
-                /* Map x, y and z to range 0-1 */
-                in[0] = in[0] * 0.5 + 0.5;
-                in[1] = in[1] * 0.5 + 0.5;
-                in[2] = in[2] * 0.5 + 0.5;
+                /* The perspective correction is done in the constructor */
+                Vector3d in3( in );  
+ 
+                /* Map x, y and z to range 0-1 */ 
+                in3 = in3 * 0.5 + 0.5;
 
                 /* Map x,y to viewport */
-                in[0] = in[0] * pvp[2] + pvp[0];
-                in[1] = in[1] * pvp[3] + pvp[1];
+                in3[0] = in3[0] * pvp[2] + pvp[0];
+                in3[1] = in3[1] * pvp[3] + pvp[1];
 
-                if( in[0] > xMax )
-                    xMax = in[0];
-                if( in[1] > yMax )
-                    yMax = in[1];
+                if( in3[0] > xMax )
+                    xMax = in3[0];
+                if( in3[1] > yMax )
+                    yMax = in3[1];
 
-                if( in[0] < xMin )
-                    xMin = in[0];
-                if( in[1] < yMin )
-                    yMin = in[1];
+                if( in3[0] < xMin )
+                    xMin = in3[0];
+                if( in3[1] < yMin )
+                    yMin = in3[1];
             }
         }
     }
