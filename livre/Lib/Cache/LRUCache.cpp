@@ -43,7 +43,8 @@ void LRUCache::clearProtectList( )
 
 void LRUCache::setMaximumMemory( const uint32_t maxMemoryInMBytes )
 {
-    cachePolicy_.setMaximumMemory(  maxMemoryInMBytes );
+    cachePolicy_.setMaximumMemory( maxMemoryInMBytes );
+    getStatistics().setMaximumMemory( maxMemoryInMBytes * LB_1MB );
 }
 
 void LRUCache::setCleanupRatio( float cleanUpRatio )

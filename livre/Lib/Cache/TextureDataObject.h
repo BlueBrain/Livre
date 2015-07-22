@@ -1,5 +1,6 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -21,107 +22,65 @@
 #define _TextureDataObject_h_
 
 #include <livre/Lib/types.h>
-#include <livre/Lib/Cache/RawDataObject.h>
 
-#include <livre/core/Data/VolumeDataSource.h>
-#include <livre/core/Data/LODNodeTrait.h>
-#include <livre/core/Data/MemoryUnit.h>
-#include <livre/core/Maths/Quantizer.h>
+#include <livre/core/Cache/CacheObject.h> // base class
+#include <livre/core/Data/LODNodeTrait.h> // base class
 
 namespace livre
 {
 
 /**
- * The TextureDataObject class holds the quantized/formatted data for the GPU. It decreases the amount of
- * processing while data is dropped from GPU and re-uploaded to GPU.
+ * The TextureDataObject class gets raw data from the volume data source and
+ * stores the quantized/formatted data for the GPU.
  */
 class TextureDataObject : public CacheObject, public LODNodeTrait
 {
-    friend class TextureDataCache;
-
 public:
+    ~TextureDataObject();
 
-    TextureDataObject( );
-
-    virtual ~TextureDataObject( );
-
-    /**
-     * @return The cache id.
-     */
-    virtual CacheId getCacheID() const;
-
-    /**
-     * @return True if two data object has the same cache id.
-     */
+    /** @return True if two data object has the same cache id. */
     bool operator==( const TextureDataObject& data ) const;
 
-   /**
-     * @return The data size.
-     */
-    uint32_t getDataSize( ) const;
+    /** @return The data source. */
+    ConstVolumeDataSourcePtr getDataSource() const;
 
-    /**
-     * @return The memory usage.
-     */
-    virtual uint32_t getCacheSize( ) const;
+    /** @return The GPU data type */
+    uint32_t getGPUDataType() const;
 
-    /**
-     * @return The data source.
-     */
-    ConstVolumeDataSourcePtr getDataSource( ) const;
+    /** @return A pointer to the data or 0 if no data is loaded. */
+    const void* getDataPtr() const;
 
-    /**
-     * Sets the raw data source.
-     * @param rawDataObject livre::RawDataObject.
-     */
-    void setRawData( ConstRawDataObjectPtr rawDataObject );
-
-    /**
-     * @return The GPU data type
-     */
-    uint32_t getGPUDataType( ) const;
-
-    /**
-     * @param destData Returns the data into the vector. Destination data should be empty.
-     */
-    template< class T >
-    void getData( std::vector< T >& destData ) const
-    {
-        getUnconst_()->updateLastUsedWithCurrentTime_( );
-        data_->getData< T >( destData );
-    }
-
-    /**
-     * @return A pointer to the data. If there is no data, NULL ptr is returned.
-     */
-    template< class T >
-    const T* getDataPtr( ) const
-    {
-        getUnconst_()->updateLastUsedWithCurrentTime_( );
-        return data_->getData< T >();
-    }
-
-    /**
-     * @return An empty data object ptr.
-     */
+    /** @return An empty data object ptr. */
     static TextureDataObject* getEmptyPtr();
 
 private:
+    friend class TextureDataCache;
+    TextureDataObject();
+    TextureDataObject( VolumeDataSourcePtr dataSourcePtr,
+                       ConstLODNodePtr lodNodePtr, uint32_t gpuDataType );
 
-    TextureDataObject( uint32_t gpuDataType );
-
-    bool load_( );
-    void unload_( );
-
-    bool isLoaded_( ) const;
-    bool isValid_( ) const;
-
-    const RawDataObject& getRawDataObject_( ) const;
+    bool load_() final;
+    void unload_() final;
+    bool isLoaded_() const final;
+    bool isValid_() const final;
+    uint32_t getCacheSize() const final;
+    CacheId getCacheID() const final;
 
     template< class T >
-    void setTextureData_( bool quantize, bool normalize );
+    void setTextureData_( bool quantize );
 
-    ConstRawDataObjectPtr rawDataObject_;
+    uint32_t getDataSize_() const;
+    uint32_t getRawDataSize_() const;
+
+    /**
+     * Quantizes data into the given format with T.
+     * @param rawData The raw data from the data source to quantize
+     * @param formattedData The quantized data is dumped into the vector.
+     */
+    template< class T >
+    void getQuantizedData_( const T* rawData,
+                            std::vector< T >& formattedData ) const;
+
     AllocMemoryUnitPtr data_;
     ConstVolumeDataSourcePtr dataSourcePtr_;
     uint32_t gpuDataType_;

@@ -1,5 +1,6 @@
 /* Copyright (c) 2011-2015, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -31,9 +32,8 @@ struct VolumeRendererParameters : public Parameters
 
     bool synchronousMode; //!< Synchronous mode
     float screenSpaceError;  //!< Screen space error
-    uint32_t maxDataMemoryMB;  //!< Settings for data cache
-    uint32_t maxTextureMemoryMB; //!< Settings for texture cache
-    uint32_t maxTextureDataMemoryMB; //!< Settings for texture cache
+    uint32_t maxGPUCacheMemoryMB; //!< Max memory for texture cache
+    uint32_t maxCPUCacheMemoryMB; //!< Max memory for data cache
     uint32_t minLOD; //!< Minimum level of detail
     uint32_t maxLOD; //!< Maximum level of detail
     uint32_t samplesPerRay; //!< Number of samples per ray

@@ -1,5 +1,6 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -18,6 +19,8 @@
  */
 
 #include <livre/core/Cache/CacheStatistics.h>
+#include <livre/core/Cache/CacheObject.h>
+#include <livre/core/Util/ThreadClock.h>
 
 namespace livre
 {
@@ -77,12 +80,13 @@ struct CacheStatistics::LoadInfo
 
 CacheStatistics::CacheStatistics( const std::string& statisticsName,
                                   const uint32_t queueSize )
-    : totalBlockCount_( 0 ),
-      totalMemoryUsed_( 0 ),
-      statisticsName_( statisticsName ),
-      cacheHit_( 0 ),
-      cacheMiss_( 0 ),
-      queueSize_( queueSize )
+    : totalBlockCount_( 0 )
+    , totalMemoryUsed_( 0 )
+    , statisticsName_( statisticsName )
+    , maxMemory_( 0 )
+    , cacheHit_( 0 )
+    , cacheMiss_( 0 )
+    , queueSize_( queueSize )
 {
 }
 
@@ -100,8 +104,8 @@ void CacheStatistics::onLoaded_( const CacheObject& cacheObject )
    LoadInfoPtr previous;
    ioQueue_.getBack( previous );
    ioQueue_.push( LoadInfoPtr( new LoadInfo( *previous, LoadInfo::OP_LOAD,
-                                             cacheObject.getCacheSize( ),
-                                             cacheObject.getLoadTime() ) ) );
+                                             cacheObject.getCacheSize(),
+                                             cacheObject.getLoadTime( ))));
 }
 
 void CacheStatistics::onPreUnload_( const CacheObject& cacheObject )
@@ -114,20 +118,22 @@ void CacheStatistics::onPreUnload_( const CacheObject& cacheObject )
 
     LoadInfoPtr previous;
     ioQueue_.getBack( previous );
-    ioQueue_.push( LoadInfoPtr( new LoadInfo( *previous, LoadInfo::OP_UNLOAD, cacheObject.getCacheSize() ) ) );
+    ioQueue_.push( LoadInfoPtr( new LoadInfo( *previous, LoadInfo::OP_UNLOAD,
+                                              cacheObject.getCacheSize( ))));
 }
 
 std::ostream& operator<<( std::ostream& stream, const CacheStatistics& cacheStatistics )
 {
-    stream << std::setiosflags( std::ios::fixed )
-           << std::setprecision( 3 ) << "Total Block Count (" << cacheStatistics.statisticsName_ << "): "
+    stream << cacheStatistics.statisticsName_ << std::endl;
+    stream << "  Total Used Memory: "
+           << cacheStatistics.totalMemoryUsed_ / LB_1MB << "/"
+           << cacheStatistics.maxMemory_  / LB_1MB << "MB" << std::endl;
+    stream << "  Total Block Count: "
            << cacheStatistics.totalBlockCount_ << std::endl;
-    stream << std::setprecision( 3 ) << "Cache hit (" << cacheStatistics.statisticsName_ << "): "
+    stream << "  Cache hits: "
            << cacheStatistics.cacheHit_ << std::endl;
-    stream << std::setprecision( 3 ) << "Cache miss (" << cacheStatistics.statisticsName_ << "): "
+    stream << "  Cache misses: "
            << cacheStatistics.cacheMiss_ << std::endl;
-    stream <<  "Total Used Memory (" << cacheStatistics.statisticsName_ << "): "
-           << cacheStatistics.totalMemoryUsed_ / ( 1024.0 * 1024.0 );
 
     return stream;
 }

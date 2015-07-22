@@ -1,6 +1,6 @@
-
 /* Copyright (c) 2011-2015, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -91,6 +91,11 @@ bool VolumeDataSource::initializeGL()
 }
 
 MemoryUnitPtr VolumeDataSource::getData( const LODNode& node )
+{
+    return _impl->plugin->getData( node );
+}
+
+ConstMemoryUnitPtr VolumeDataSource::getData( const LODNode& node ) const
 {
     return _impl->plugin->getData( node );
 }

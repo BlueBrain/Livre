@@ -19,8 +19,9 @@
 
 #include <livre/core/defines.h>
 #include <livre/core/Cache/Cache.h>
-#include <livre/core/Cache/CacheStatistics.h>
+#include <livre/core/Cache/CacheObject.h>
 #include <livre/core/Cache/CachePolicy.h>
+#include <livre/core/Cache/CacheStatistics.h>
 
 #define CACHE_LOG_SIZE 1000000
 

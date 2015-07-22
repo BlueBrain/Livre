@@ -1,5 +1,6 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -26,6 +27,7 @@
 #include <livre/Lib/Visitor/DFSTraversal.h>
 
 #include <livre/core/Visitor/RenderNodeVisitor.h>
+#include <livre/core/Data/VolumeDataSource.h>
 #include <livre/core/Dash/DashRenderNode.h>
 #include <livre/core/Dash/DashTree.h>
 #include <livre/core/Render/GLContext.h>
@@ -121,10 +123,15 @@ TextureUploadProcessor::TextureUploadProcessor( DashTreePtr dashTree,
     setDashContext( dashTree->createContext());
 }
 
+const TextureCache& TextureUploadProcessor::getTextureCache() const
+{
+    return _textureCache;
+}
+
 bool TextureUploadProcessor::initializeThreadRun_()
 {
     setName( "TexUp" );
-     _textureCache.setMaximumMemory( _vrParameters->maxTextureMemoryMB );
+    _textureCache.setMaximumMemory( _vrParameters->maxGPUCacheMemoryMB );
     return DashProcessor::initializeThreadRun_();
 }
 

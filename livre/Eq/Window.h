@@ -38,21 +38,17 @@ namespace livre
 class Window : public eq::Window
 {
 public:
-
-    /**
-     * @param parent The pipe that owns the window.
-     */
+    /** @param parent The pipe that owns the window. */
     Window( eq::Pipe* parent );
 
-    /**
-     * Commits changes.
-     */
+    /** Commits changes. */
     void commit();
 
-    /**
-     * Applies all the changes to the context. Blocks until a commit arrives.
-     */
+    /** Applies all the changes to the context. Blocks until a commit arrives.*/
     void apply();
+
+    /** @return The texture data cache. */
+    const TextureCache& getTextureCache() const;
 
 private:
     class Impl;

@@ -63,7 +63,7 @@ void AllocMemoryUnit::alloc( const uint32_t allocSizePerElement,
                              const uint32_t dataSize )
 {
     LB_TS_THREAD( thread_ );
-    _rawData.resize( allocSizePerElement * dataSize );
+    _rawData.reset( allocSizePerElement * dataSize );
 }
 
 void AllocMemoryUnit::release()

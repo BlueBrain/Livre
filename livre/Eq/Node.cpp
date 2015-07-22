@@ -1,6 +1,8 @@
 
-/* Copyright (c) 2011, Maxim Makhinya <maxmah@gmail.com>
- *               2012, David Steiner  <steiner@ifi.uzh.ch>
+/* Copyright (c) 2011-2015, Maxim Makhinya <maxmah@gmail.com>
+ *                          David Steiner <steiner@ifi.uzh.ch>
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -27,7 +29,6 @@
 #include <livre/Eq/Event.h>
 
 #include <livre/Eq/Settings/VolumeSettings.h>
-#include <livre/Lib/Cache/RawDataCache.h>
 #include <livre/Lib/Cache/TextureDataCache.h>
 #include <livre/Lib/Configuration/VolumeRendererParameters.h>
 #include <livre/Lib/Uploaders/DataUploadProcessor.h>
@@ -52,18 +53,15 @@ public:
         : _config( static_cast< livre::Config* >( node->getConfig( )))
     {}
 
-    void initializeCaches()
+    void initializeCache()
     {
-        _rawDataCachePtr.reset( new livre::RawDataCache( ));
-        _textureDataCachePtr .reset( new livre::TextureDataCache( GL_UNSIGNED_BYTE ));
-        _rawDataCachePtr->setDataSource( _dataSourcePtr );
+        _textureDataCachePtr.reset(
+               new livre::TextureDataCache( _dataSourcePtr, GL_UNSIGNED_BYTE ));
 
         ConstVolumeRendererParametersPtr vrRenderParametersPtr =
                 _config->getFrameData().getVRParameters();
-        _rawDataCachePtr->setMaximumMemory(
-                        vrRenderParametersPtr->maxDataMemoryMB );
         _textureDataCachePtr->setMaximumMemory(
-                    vrRenderParametersPtr->maxTextureDataMemoryMB );
+                    vrRenderParametersPtr->maxCPUCacheMemoryMB );
     }
 
     bool initializeVolume()
@@ -96,13 +94,13 @@ public:
         if( !initializeVolume( ))
             return false;
 
-        initializeCaches();
+        initializeCache();
         return true;
     }
 
     void configExit()
     {
-        releaseCaches();
+        releaseCache();
         releaseVolume();
     }
 
@@ -112,14 +110,12 @@ public:
         _dashTreePtr.reset();
     }
 
-    void releaseCaches()
+    void releaseCache()
     {
         _textureDataCachePtr.reset();
-        _rawDataCachePtr.reset();
     }
 
     livre::Config* const _config;
-    RawDataCachePtr _rawDataCachePtr;
     TextureDataCachePtr _textureDataCachePtr;
     VolumeDataSourcePtr _dataSourcePtr;
     DashTreePtr _dashTreePtr;
@@ -167,11 +163,6 @@ bool Node::configExit()
     }
 
     return eq::Node::configExit();
-}
-
-RawDataCache& Node::getRawDataCache()
-{
-    return *_impl->_rawDataCachePtr;
 }
 
 TextureDataCache& Node::getTextureDataCache()

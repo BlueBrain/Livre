@@ -9,8 +9,6 @@ set(LIVRELIB_PUBLIC_HEADERS
   Animation/CameraPath.h
   Cache/LRUCache.h
   Cache/LRUCachePolicy.h
-  Cache/RawDataCache.h
-  Cache/RawDataObject.h
   Cache/TextureCache.h
   Cache/TextureDataCache.h
   Cache/TextureObject.h
@@ -32,8 +30,6 @@ set(LIVRELIB_SOURCES
   Animation/CameraPath.cpp
   Cache/LRUCache.cpp
   Cache/LRUCachePolicy.cpp
-  Cache/RawDataCache.cpp
-  Cache/RawDataObject.cpp
   Cache/TextureCache.cpp
   Cache/TextureDataCache.cpp
   Cache/TextureObject.cpp

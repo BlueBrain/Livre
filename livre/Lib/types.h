@@ -1,5 +1,6 @@
 /* Copyright (c) 2011-2015, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -26,8 +27,6 @@ namespace livre
 {
 
 class DataUploadProcessor;
-class RawDataCache;
-class RawDataObject;
 class RenderNodeVisitor;
 class TextureCache;
 class TextureDataCache;
@@ -57,14 +56,11 @@ typedef boost::shared_ptr< const DataUploadProcessor > ConstDataUploadProcessorP
 typedef boost::shared_ptr< const TextureUploadProcessor > ConstTextureUploadProcessorPtr;
 typedef boost::shared_ptr< const DashProcessor > ConstDashProcessorPtr;
 
-typedef boost::intrusive_ptr< const RawDataObject > ConstRawDataObjectPtr;
 typedef boost::intrusive_ptr< const TextureDataObject > ConstTextureDataObjectPtr;
 typedef boost::intrusive_ptr< const TextureObject > ConstTextureObjectPtr;
-typedef boost::intrusive_ptr< RawDataObject > RawDataObjectPtr;
 typedef boost::intrusive_ptr< TextureDataObject > TextureDataObjectPtr;
 typedef boost::intrusive_ptr< TextureObject > TextureObjectPtr;
 
-typedef boost::scoped_ptr< RawDataCache > RawDataCachePtr;
 typedef boost::scoped_ptr< TextureDataCache > TextureDataCachePtr;
 
 /** Map definitions */

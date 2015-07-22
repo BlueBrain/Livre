@@ -1,6 +1,6 @@
-
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
  *                          Ahmet.Bilgili@epfl.ch
+ *                          Daniel.Nachbaur@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -46,13 +46,11 @@ public:
      * @param dashTree The dash node hierarchy.
      * @param shareContext the context which this processors shares against.
      * @param context the context used by this processor.
-     * @param rawDataCache Raw data cache that holds the raw data in the CPU memory.
      * @param textureDataCache Texture data cache holds the data in the CPU memory.
      */
     DataUploadProcessor( DashTreePtr dashTree,
                          GLContextPtr shareContext,
                          GLContextPtr context,
-                         RawDataCache& rawDataCache,
                          TextureDataCache& textureDataCache );
 private:
     bool initializeThreadRun_( ) final;
@@ -61,7 +59,6 @@ private:
 
     DashTreePtr _dashTree;
     GLContextPtr _shareContext;
-    RawDataCache& _rawDataCache;
     TextureDataCache& _textureDataCache;
     uint64_t _currentFrameID;
     void _checkThreadOperation( );
