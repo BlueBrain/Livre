@@ -3,7 +3,9 @@ Changelog {#Changelog}
 
 # Release 0.4 (git master) {#Release040}
 
-* [#84](https://github.com/BlueBrain/Livre/pull/79):
+* [#84](https://github.com/BlueBrain/Livre/pull/84):
+  Cache statistics are printed when showing statistics (press 's' key)
+* [#84](https://github.com/BlueBrain/Livre/pull/84):
   Fix [#73](https://github.com/BlueBrain/Livre/issues/73): Merge data- and
   textureDataCache, commandline options for changing the cache sizes are now
   --gpu-cache-mem (instead of --texture-cache-mem) and --cpu-cache-mem (instead

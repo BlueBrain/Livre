@@ -227,8 +227,8 @@ bool TextureDataObject::load_( )
 void TextureDataObject::unload_( )
 {
     data_->release();
-    LBDEBUG << "Texture Data released: " << lodNodePtr_->getNodeId()
-            << std::endl;
+    LBVERB << "Texture Data released: " << lodNodePtr_->getNodeId()
+           << std::endl;
 }
 
 }

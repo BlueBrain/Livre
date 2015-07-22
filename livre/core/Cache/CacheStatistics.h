@@ -1,5 +1,6 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -20,9 +21,9 @@
 #ifndef _CacheStatistics_h_
 #define _CacheStatistics_h_
 
-#include <livre/core/Util/ThreadClock.h>
 #include <livre/core/Cache/CacheObjectObserver.h>
-#include <livre/core/Cache/CacheObject.h>
+#include <lunchbox/atomic.h>
+#include <lunchbox/mtQueue.h>
 
 namespace livre
 {
@@ -32,7 +33,6 @@ namespace livre
 class CacheStatistics : public CacheObjectObserver
 {
 public:
-
     /**
      * @return Total number of objects in the corresponding \see Cache.
      */
@@ -46,16 +46,22 @@ public:
     /**
      * @param statisticsName The name of the statistics.
      */
-    void setStatisticsName( const std::string& statisticsName ) { statisticsName_ = statisticsName; }
+    void setStatisticsName( const std::string& statisticsName )
+        { statisticsName_ = statisticsName; }
+
+    /** @param Maximum memory in bytes used by the associated cache. */
+    void setMaximumMemory( const uint32_t maxMemory )
+        { maxMemory_ = maxMemory; }
 
     /**
      * @param stream Output stream.
      * @param cacheStatistics Input \see CacheStatistics
      * @return The output stream.
      */
-    friend std::ostream& operator<<( std::ostream& stream, const CacheStatistics& cacheStatistics );
+    friend std::ostream& operator<<( std::ostream& stream,
+                                     const CacheStatistics& cacheStatistics );
 
-    virtual ~CacheStatistics();
+    ~CacheStatistics();
 
 private:
 
@@ -64,16 +70,17 @@ private:
     CacheStatistics( const std::string& statisticsName = "Cache Statistics",
                      const uint32_t queueSize = 1000000 );
 
-    virtual void onLoaded_( const CacheObject& cacheObject );
-    virtual void onPreUnload_( const CacheObject& cacheObject );
+    void onLoaded_( const CacheObject& cacheObject ) final;
+    void onPreUnload_( const CacheObject& cacheObject ) final;
 
-    virtual void onCacheMiss_( const CacheObject& cacheObject LB_UNUSED ) { ++cacheMiss_; }
-    virtual void onCacheHit_( const CacheObject& cacheObject LB_UNUSED ) { ++cacheHit_; }
+    void onCacheMiss_( const CacheObject& ) final { ++cacheMiss_; }
+    void onCacheHit_( const CacheObject& ) final { ++cacheHit_; }
 
     lunchbox::Atomic< uint32_t > totalBlockCount_;
     lunchbox::Atomic< uint32_t > totalMemoryUsed_;
 
     std::string statisticsName_;
+    uint32_t maxMemory_;
 
     lunchbox::Atomic< uint32_t > cacheHit_;
     lunchbox::Atomic< uint32_t > cacheMiss_;

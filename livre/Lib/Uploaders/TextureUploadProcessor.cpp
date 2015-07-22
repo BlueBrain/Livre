@@ -123,6 +123,11 @@ TextureUploadProcessor::TextureUploadProcessor( DashTreePtr dashTree,
     setDashContext( dashTree->createContext());
 }
 
+const TextureCache& TextureUploadProcessor::getTextureCache() const
+{
+    return _textureCache;
+}
+
 bool TextureUploadProcessor::initializeThreadRun_()
 {
     setName( "TexUp" );

@@ -2,6 +2,7 @@
 /* Copyright (c) 2006-2015, Stefan Eilemann <eile@equalizergraphics.com>
  *                          Maxim Makhinya <maxmah@gmail.com>
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -19,35 +20,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/Eq/FrameData.h>
-#include <livre/Eq/Settings/FrameSettings.h>
 #include <livre/Eq/Channel.h>
-#include <livre/Eq/Pipe.h>
-#include <livre/Eq/Node.h>
-#include <livre/Eq/Window.h>
-#include <livre/Eq/Error.h>
 #include <livre/Eq/Config.h>
-#include <livre/Eq/Settings/CameraSettings.h>
-#include <livre/Eq/Settings/RenderSettings.h>
+#include <livre/Eq/Error.h>
+#include <livre/Eq/FrameData.h>
+#include <livre/Eq/FrameGrabber.h>
+#include <livre/Eq/Node.h>
+#include <livre/Eq/Pipe.h>
 #include <livre/Eq/Render/EqContext.h>
 #include <livre/Eq/Render/RayCastRenderer.h>
-#include <livre/Eq/FrameGrabber.h>
+#include <livre/Eq/Settings/CameraSettings.h>
+#include <livre/Eq/Settings/FrameSettings.h>
+#include <livre/Eq/Settings/RenderSettings.h>
+#include <livre/Eq/Window.h>
 
-#include <livre/core/DashPipeline/DashProcessorOutput.h>
+#include <livre/core/Dash/DashRenderStatus.h>
+#include <livre/core/Dash/DashTree.h>
 #include <livre/core/DashPipeline/DashProcessorInput.h>
+#include <livre/core/DashPipeline/DashProcessorOutput.h>
+#include <livre/core/Data/VolumeDataSource.h>
+#include <livre/core/Render/Frustum.h>
+#include <livre/core/Render/GLWidget.h>
+#include <livre/core/Render/RenderBrick.h>
 #include <livre/core/Visitor/RenderNodeVisitor.h>
+
+#include <livre/Lib/Cache/TextureCache.h>
+#include <livre/Lib/Cache/TextureDataCache.h>
 #include <livre/Lib/Cache/TextureObject.h>
 #include <livre/Lib/Render/AvailableSetGenerator.h>
 #include <livre/Lib/Render/RenderView.h>
 #include <livre/Lib/Render/ScreenSpaceLODEvaluator.h>
-
-
-#include <livre/core/Render/Frustum.h>
-#include <livre/core/Render/GLWidget.h>
-#include <livre/core/Render/RenderBrick.h>
-#include <livre/core/Dash/DashRenderStatus.h>
-#include <livre/core/Dash/DashTree.h>
-#include <livre/core/Data/VolumeDataSource.h>
 
 #include <eq/eq.h>
 #include <eq/gl.h>
@@ -449,7 +451,58 @@ public:
 
         FrameSettingsPtr frameSettingsPtr = getFrameData()->getFrameSettings();
         if( frameSettingsPtr->getStatistics( ))
+        {
             _channel->drawStatistics();
+            drawCacheStatistics();
+        }
+    }
+
+    void drawCacheStatistics()
+    {
+        glLogicOp( GL_XOR );
+        glEnable( GL_COLOR_LOGIC_OP );
+        glDisable( GL_LIGHTING );
+        glDisable( GL_DEPTH_TEST );
+
+        glColor3f( 1.f, 1.f, 1.f );
+
+        const eq::PixelViewport& pvp = _channel->getPixelViewport();
+        const eq::Viewport& vp = _channel->getViewport();
+        const float height = pvp.h / vp.h;
+
+        glMatrixMode( GL_PROJECTION );
+        glLoadIdentity();
+        _channel->applyScreenFrustum();
+        glMatrixMode( GL_MODELVIEW );
+
+        livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
+        std::ostringstream dataStr;
+        dataStr << node->getTextureDataCache().getStatistics();
+        float y = height/2;
+        _drawText( dataStr.str(), y );
+
+        Window* window = static_cast< Window* >( _channel->getWindow( ));
+        std::ostringstream textureStr;
+        textureStr << window->getTextureCache().getStatistics();
+        y = height/4;
+        _drawText( textureStr.str(), y );
+    }
+
+    void _drawText( std::string text, float y )
+    {
+        const eq::util::BitmapFont* font = _channel->getWindow()->getSmallFont();
+        for( size_t pos = text.find( '\n' ); pos != std::string::npos;
+             pos = text.find( '\n' ))
+        {
+            glRasterPos3f( 10.f, y, 0.99f );
+
+            font->draw( text.substr( 0, pos ));
+            text = text.substr( pos + 1 );
+            y -= 16.f;
+        }
+        // last line
+        glRasterPos3f( 10.f, y, 0.99f );
+        font->draw( text );
     }
 
     void frameFinish()
@@ -582,7 +635,9 @@ void Channel::frameViewStart( const uint128_t& frameId )
 
 void Channel::frameViewFinish( const eq::uint128_t &frameID )
 {
+    setupAssemblyState();
     _impl->frameViewFinish();
+    resetAssemblyState();
     eq::Channel::frameViewFinish( frameID );
     _impl->removeImageListener();
 }

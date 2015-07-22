@@ -49,6 +49,9 @@ public:
                             GLContextPtr context,
                             ConstVolumeRendererParametersPtr vrParameters );
 
+    /** @return the texture cache */
+    const TextureCache& getTextureCache() const;
+
 private:
     bool onPreCommit_( const uint32_t connection ) final;
     void onPostCommit_( const uint32_t connection, const CommitState state ) final;

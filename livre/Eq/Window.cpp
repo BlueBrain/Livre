@@ -290,4 +290,9 @@ void Window::apply()
     _impl->apply();
 }
 
+const TextureCache& Window::getTextureCache() const
+{
+    return _impl->_textureUploadProcessorPtr->getTextureCache();
+}
+
 }
