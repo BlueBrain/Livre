@@ -484,11 +484,10 @@ public:
         Window* window = static_cast< Window* >( _channel->getWindow( ));
         std::ostringstream textureStr;
         textureStr << window->getTextureCache().getStatistics();
-        y = height/4;
         _drawText( textureStr.str(), y );
     }
 
-    void _drawText( std::string text, float y )
+    void _drawText( std::string text, float& y )
     {
         const eq::util::BitmapFont* font = _channel->getWindow()->getSmallFont();
         for( size_t pos = text.find( '\n' ); pos != std::string::npos;

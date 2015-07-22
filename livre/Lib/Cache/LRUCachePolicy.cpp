@@ -55,13 +55,13 @@ void LRUCachePolicy::setCleanupRatio( float cleanUpRatio )
 
 bool LRUCachePolicy::willPolicyBeActivated( const Cache& cache ) const
 {
-    const uint32_t currentMemorySize = cache.getStatistics().getUsedMemory() / LB_1MB;
+    const uint32_t currentMemorySize = cache.getStatistics().getUsedMemory();
     return currentMemorySize >= maxMemoryInMBytes_;
 }
 
 bool LRUCachePolicy::isPolicySatisfied( const Cache& cache ) const
 {
-    const uint32_t currentMemorySize = cache.getStatistics().getUsedMemory() / LB_1MB;
+    const uint32_t currentMemorySize = cache.getStatistics().getUsedMemory();
     return currentMemorySize < ( 1.0f - cleanUpRatio_ ) * maxMemoryInMBytes_;
 }
 
