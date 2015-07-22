@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -18,7 +18,6 @@
  */
 
 #include <livre/Lib/Cache/TextureCache.h>
-#include <livre/Lib/Cache/RawDataObject.h>
 #include <livre/Lib/Cache/TextureDataObject.h>
 #include <livre/Lib/Cache/TextureObject.h>
 

@@ -18,16 +18,17 @@
 
 @subsection Overview Overview
 
-Livre is a out-of-core volume rendering engine depending Equalizer and OpenGL for rendering, and
-Tuvok library for data management.
+Livre is a out-of-core volume rendering engine depending Equalizer and OpenGL
+for rendering, and Tuvok library for data management.
 
 @section INSTALLATION Installation
 
 @subsection Setup Setup
 
-Livre, currently doesn't have Ubuntu or Redhat packages. It should be build from the source code at
-github.(The compiler should support the C++11 - minimum g++ 4.6 - to compile the project because of
-the Tuvok library dependency). The basic building procedure is as below:
+Livre, currently doesn't have Ubuntu or Redhat packages. It should be build from
+the source code at github.(The compiler should support the C++11 - minimum g++
+4.6 - to compile the project because of the Tuvok library dependency). The basic
+building procedure is as below:
 
 \code
 $ git clone https://github.com/BlueBrain/Livre.git
@@ -39,10 +40,11 @@ $ make
 $ make install
 \endcode
 
-The above commands will fetch the necessary packages and build the dependencies, and install the
-executables and libraries.
+The above commands will fetch the necessary packages and build the dependencies,
+and install the executables and libraries.
 
-After a successful build and installation, the following executables will be available:
+After a successful build and installation, the following executables will be
+available:
 
 - livre (The command line render application)
 - livre_batch.py (Python script to launch livre in batch mode using sbatch to
@@ -55,21 +57,23 @@ After a successful build and installation, the following executables will be ava
 
 @subsection Pre-processing_Tools Volume pre-processing tools
 
-The volumetric data should be pre-processed in order to visualize in Livre. More information about
-the pipeline of preprocessing can be found at @ref Tuvok_Tool tools page.
+The volumetric data should be pre-processed in order to visualize in Livre. More
+information about the pipeline of preprocessing can be found at
+@ref Tuvok_Tool tools page.
 
 @subsection Livre Livre
 
-The volume renderer is executed through the command line. To test if the volume renderer is working
-or not, you can simply execute :
+The volume renderer is executed through the command line. To test if the volume
+renderer is working, you can simply execute :
 
 \code
-livre [--volume mem://1024,1024,512,32]
+livre --volume mem://1024,1024,512,32
 \endcode
 
-which will render an in memory test volume data structure. Here 1024, 1024 and 512 are the width,
-height and length of the volume in voxels, respectively. 32 is the block size and "mem://" is the
-scheme to generate in memory volume. You should be getting an image like below:
+which will render an in memory test volume data structure. Here 1024, 1024 and
+512 are the width, height and length of the volume in voxels, respectively. 32
+is the block size and "mem://" is the scheme to generate in memory volume. You
+should be getting an image like below:
 
 @image html livre.png "Livre"
 
@@ -82,60 +86,61 @@ Application Parameters
                                         delta for animation speed, use
                                         --animation=-<int> for reverse
                                         animation)
-  --frames arg (=[0 4294967295])
+  --frames arg (=[          0 4294967295 ])
                                         Frames to render 'start end'
   --num-frames arg (=4294967295)        Maximum nuber of frames to render
-  --camera-position arg (=[0 0 2])
+  --camera-position arg (=[          0          0          2 ])
                                         Camera position
-  --camera-lookat arg (=[0 0 0])
+  --camera-lookat arg (=[          0          0          0 ])
                                         Camera orientation
   --sync-camera                         Synchronize camera with other
                                         applications
 
 REST Parameters
-  --rest-host arg (=localhost)          RESTBridge's http hostname
-  --rest-port arg (=4020)               RESTBridge's http port
-  --zeq-schema arg (=rest)              RESTBridge's internal zeq schema
-  --use-rest                            Use RESTBridge
+  --rest-host arg (=localhost) RESTBridge's http hostname
+  --rest-port arg (=4020)      RESTBridge's http port
+  --zeq-schema arg (=rest)     RESTBridge's internal zeq schema
+  --use-rest                   Use RESTBridge
 
 Volume Renderer Parameters
-  --data-cache-mem arg (=1024)          Maximum data cache memory (MB) - caches
-                                        the raw data read from I/O in system
-                                        memory
-  --texture-cache-mem arg (=3072)       Maximum texture cache memory (MB) -
-                                        caches the texture data on GPU memory
-  --texturedata-cache-mem arg (=8192)   Maximum texture data cache memory (MB) -
-                                        caches the data that has been converted
-                                        into internal texture format in system
-                                        memory
-  --sse arg (=4)                        Screen space error
-  --synchronous                         Enable synchronous mode
-  --min-lod arg (=0)                    Minimum level of detail
-  --max-lod arg (=9)                    Maximum level of detail
+  --gpu-cache-mem arg (=3072)  Maximum GPU cache memory (MB) - caches the
+                               texture data in GPU memory
+  --cpu-cache-mem arg (=8192)  Maximum CPU cache memory (MB) - caches the
+                               volume data in CPU memory
+  --sse arg (=4)               Screen space error
+  --synchronous                Enable synchronous mode
+  --min-lod arg (=0)           Minimum level of detail
+  --max-lod arg (=9)           Maximum level of detail
+  --samples-per-ray arg (=512) Number of samples per ray
+  --transfer-function arg      Path to transfer function file
 \endcode
 
 The important parameters are :
 
 - "--volume" URL of the volume
-- "--sse" Quality of the rendering, the lower the value, the higher the quality. If value is 1,
-1 pixel is 1 voxel, for lower quality values should be larger than 1 (4 by default)
+- "--sse" Quality of the rendering, the lower the value, the higher the quality.
+  If value is 1, 1 pixel is 1 voxel, for lower quality values should be bigger
+  than 1 (4 by default).
 
 @subsection LivreGUI Transfer function editor
 
-Transfer function editor helps the users to attach different colors and opacities to voxel values.
-The "livreGUI" is the main application for editing the transfer function. It can connect the "livre
-"application remotely and can modify the colors. Each color channel can be modified separately.
-The starting dialog is as below:
+Transfer function editor helps the users to attach different colors and
+opacities to voxel values. The "livreGUI" is the main application for editing
+the transfer function. It can connect the "livre "application remotely and can
+modify the colors. Each color channel can be modified separately. The starting
+dialog is as below:
 
 @image html MainWindow.png "Main Window"
 
-For connection, hit the connect button and enter the hostname where "livre" application is running.
+For connection, hit the connect button and enter the hostname where "livre"
+application is running.
 
 @image html Connection.png "Connection Dialog"
 
-After successfull connection, you can open the transfer function editor. In the plot area x axis
-represents the values of voxel and the y axis represents the opacity values. Each color channel can
-be modified seperately by selecting the channel from the color channels.
+After successfull connection, you can open the transfer function editor. In the
+plot area x axis represents the values of voxel and the y axis represents the
+opacity values. Each color channel can be modified seperately by selecting the
+channel from the color channels.
 
 @image html TransferFunctionEditor.png "Transfer Function Editor"
 

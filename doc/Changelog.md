@@ -1,15 +1,20 @@
 Changelog {#Changelog}
 =========
 
-## Release 0.4 (git master) {Release040}
+# Release 0.4 (git master) {#Release040}
 
+* [#84](https://github.com/BlueBrain/Livre/pull/79):
+  Fix [#73](https://github.com/BlueBrain/Livre/issues/73): Merge data- and
+  textureDataCache, commandline options for changing the cache sizes are now
+  --gpu-cache-mem (instead of --texture-cache-mem) and --cpu-cache-mem (instead
+  of --data-cache-mem and --texturedata-cache-mem)
 * [#78](https://github.com/BlueBrain/Livre/pull/78):
   New command line parameter to load a transfer function from file (".1dt" file
   extension, based on the format used by ImageVis3D)
 * [#75](https://github.com/BlueBrain/Livre/pull/75):
   Separate ZeroEQ communication to class zeq::Communicator
 
-## Release 0.3 (2015-07-07) {Release030}
+# Release 0.3 (2015-07-07) {#Release030}
 
 * [#37](https://github.com/BlueBrain/Livre/pull/37):
   New command line option to enable synchronous mode (wait until every block has
@@ -17,14 +22,17 @@ Changelog {#Changelog}
 * [#33](https://github.com/BlueBrain/Livre/pull/33):
   New command line option to enable ZeroEQ camera synchronization
 * [#44](https://github.com/BlueBrain/Livre/pull/44):
-  New command line option to specify a range of frames to render from the command line
+  New command line option to specify a range of frames to render from the
+  command line
 * [#57](https://github.com/BlueBrain/Livre/pull/57):
-  New command line parameter to set the camera lookAt vector to define its orientation
+  New command line parameter to set the camera lookAt vector to define its
+  orientation
 * New command line parameter to set camera position
 * [#17](https://github.com/BlueBrain/Livre/pull/17):
   New command line parameters for RESTBridge (hostname, port, ZeroEQ schema)
 * [#53](https://github.com/BlueBrain/Livre/pull/53):
-  New command line parameters to specify the minimum and maximum levels of detail to render
+  New command line parameters to specify the minimum and maximum levels of
+  detail to render
 * New heartbeat messaging mechanism
 * [#43](https://github.com/BlueBrain/Livre/pull/43):
   New livre_batch.py script for offline image series rendering
@@ -44,7 +52,8 @@ Changelog {#Changelog}
 * Fix broken memory mapped reading in UVF
 * Fix GLEW_MX linking
 * [#45](https://github.com/BlueBrain/Livre/pull/45):
-  Fix the "Empty servus implementation" exception that was raised when zeroconf wasn not available
+  Fix the "Empty servus implementation" exception that was raised when zeroconf
+  was not available
 * [#58](https://github.com/BlueBrain/Livre/pull/58):
   Fix the LOD computation based on the screen height
 * [#33](https://github.com/BlueBrain/Livre/pull/33):
@@ -53,14 +62,16 @@ Changelog {#Changelog}
   Graceful exit when ZeroEQ EXIT event is received
 * Improve glslshader/raycastrenderer error handling and API
 * [#28](https://github.com/BlueBrain/Livre/pull/28):
-  Improve performance and memory usage through a new implicit, flat octree implementation
+  Improve performance and memory usage through a new implicit, flat octree
+  implementation
 * [#48](https://github.com/BlueBrain/Livre/pull/48):
   Improve rendering performance through frustum culling
 * Optimization: use lunchbox::Buffer instead of std::vector in MemoryUnit and
   MemoryDataSource (+35% speed in remote datasource test)
 * [#34](https://github.com/BlueBrain/Livre/pull/34):
-  Refactor the code to setup the data and texture UploadProcessors, removing race
-  conditions and fixing crashes (at exit and with multiple local GPUs) in the process
+  Refactor the code to setup the data and texture UploadProcessors, removing
+  race conditions and fixing crashes (at exit and with multiple local GPUs) in
+  the process
 * [#35](https://github.com/BlueBrain/Livre/pull/35)
   [#36](https://github.com/BlueBrain/Livre/pull/36):
   Several fixes in the tree creation and the LOD-selection algorithm
@@ -70,9 +81,9 @@ Changelog {#Changelog}
   Use one GPU by default
 * Use ZeroEQ for the transfer function editor GUI
 * [#70](https://github.com/BlueBrain/Livre/pull/70):
-  Window title has been improved to show the application name and its version number
+  Window title has been improved to show the application name and its version
+  number
 
-
-## Release 0.2 (2014-10-15) {Release020}
+# Release 0.2 (2014-10-15) {#Release020}
 
 * BBP internal release

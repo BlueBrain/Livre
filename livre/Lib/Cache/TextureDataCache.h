@@ -1,5 +1,6 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -27,17 +28,19 @@ namespace livre
 {
 
 /**
- * The TextureDataCache class is to keep the quantized/modified data for the GPU uploading later. Therefore
- * it decreases the amount of processing while data is dropped from GPU and re-uploaded to GPU.
+ * The TextureDataCache class stores the quantized/modified data for GPU
+ * uploading. Therefore it decreases the amount of processing while data is
+ * dropped from GPU and re-uploaded to GPU.
  */
 class TextureDataCache : public LRUCache
 {
 public:
 
     /**
+     * @param volumeDataSource The source where the volume data should be loaded from
      * @param type The type of the data for the GPU.
      */
-    TextureDataCache( const uint32_t type );
+    TextureDataCache( VolumeDataSourcePtr volumeDataSource, uint32_t type );
 
     /**
      * @param cacheID The cacheId of the node.
@@ -52,6 +55,9 @@ public:
      */
     TextureDataObject& getNodeTextureData( const CacheId cacheID );
 
+    /** @return the data source. */
+    VolumeDataSourcePtr getDataSource();
+
     /**
      * @return The GPU data type.
      */
@@ -61,8 +67,8 @@ private:
 
     CacheObject *generateCacheObjectFromID_( const CacheId cacheID );
 
+    VolumeDataSourcePtr volumeDataSourcePtr_;
     const uint32_t type_;
-
 };
 
 }

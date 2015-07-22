@@ -143,7 +143,7 @@ public:
         GLContextPtr dataUploadContext( new EqContext( _window ));
         _dataUploadProcessorPtr.reset(
             new DataUploadProcessor( dashTree, _windowContext,
-                                     dataUploadContext, node->getRawDataCache(),
+                                     dataUploadContext,
                                      node->getTextureDataCache( )));
 
         GLContextPtr textureUploadContext( new EqContext( _window ));

@@ -1,5 +1,6 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -28,9 +29,7 @@
 
 #include <livre/Lib/Uploaders/DataUploadProcessor.h>
 #include <livre/core/DashPipeline/DashProcessorInput.h>
-#include <livre/Lib/Cache/RawDataCache.h>
 #include <livre/Lib/Cache/TextureDataCache.h>
-#include <livre/Lib/Cache/RawDataObject.h>
 #include <livre/Lib/Cache/TextureDataObject.h>
 #include <livre/Lib/Configuration/VolumeRendererParameters.h>
 #include <livre/Lib/Visitor/CollectionTraversal.h>
@@ -47,16 +46,13 @@ __itt_string_handle* ittDataComputationTask = __itt_string_handle_create("Data l
 __itt_string_handle* ittDataLoadTask = __itt_string_handle_create("Data loading task");
 #endif // _ITT_DEBUG_
 
-class RawDataLoaderVisitor : public RenderNodeVisitor
+class DataLoaderVisitor : public RenderNodeVisitor
 {
 public:
-    RawDataLoaderVisitor( DashTreePtr dashTree,
-                          RawDataCache& rawDataCache,
-                          TextureDataCache& textureDataCache,
-                          ProcessorInputPtr processorInput,
-                          ProcessorOutputPtr processorOutput )
+    DataLoaderVisitor( DashTreePtr dashTree, TextureDataCache& textureDataCache,
+                       ProcessorInputPtr processorInput,
+                       ProcessorOutputPtr processorOutput )
         : RenderNodeVisitor( dashTree ),
-          rawDataCache_( rawDataCache ),
           textureDataCache_( textureDataCache ),
           processorInput_( processorInput ),
           processorOutput_( processorOutput )
@@ -65,7 +61,6 @@ public:
     void visit( DashRenderNode& renderNode, VisitState& state );
 
 private:
-    RawDataCache& rawDataCache_;
     TextureDataCache& textureDataCache_;
     ProcessorInputPtr processorInput_;
     ProcessorOutputPtr processorOutput_;
@@ -77,12 +72,10 @@ class DepthCollectorVisitor : public RenderNodeVisitor
 public:
 
     DepthCollectorVisitor( DashTreePtr dashTree,
-                           RawDataCache& rawDataCache,
                            TextureDataCache& textureDataCache,
                            ProcessorOutputPtr processorOutput,
                            DashNodeVector& refLevelCollection )
         : RenderNodeVisitor( dashTree ),
-          rawDataCache_( rawDataCache ),
           textureDataCache_( textureDataCache ),
           processorOutput_( processorOutput ),
           refLevelCollection_( refLevelCollection )
@@ -90,8 +83,6 @@ public:
     void visit( DashRenderNode& node, VisitState& state ) final;
 
 private:
-
-    RawDataCache& rawDataCache_;
     TextureDataCache& textureDataCache_;
     ProcessorOutputPtr processorOutput_;
     DashNodeVector& refLevelCollection_;
@@ -101,12 +92,10 @@ class DepthSortedDataLoaderVisitor : public RenderNodeVisitor
 {
 public:
     DepthSortedDataLoaderVisitor( DashTreePtr dashTree,
-                                  RawDataCache& rawDataCache,
                                   TextureDataCache& textureDataCache,
                                   ProcessorInputPtr processorInput,
                                   ProcessorOutputPtr processorOutput )
         : RenderNodeVisitor( dashTree ),
-          rawDataCache_( rawDataCache ),
           textureDataCache_( textureDataCache ),
           processorInput_( processorInput ),
           processorOutput_( processorOutput )
@@ -115,8 +104,6 @@ public:
     void visit( DashRenderNode& renderNode, VisitState& state ) final;
 
 private:
-
-    RawDataCache& rawDataCache_;
     TextureDataCache& textureDataCache_;
     ProcessorInputPtr processorInput_;
     ProcessorOutputPtr processorOutput_;
@@ -150,12 +137,10 @@ struct DepthCompare
 DataUploadProcessor::DataUploadProcessor( DashTreePtr dashTree,
                                           GLContextPtr shareContext,
                                           GLContextPtr context,
-                                          RawDataCache& rawDataCache,
                                           TextureDataCache& textureDataCache )
     : GLContextTrait( context )
     , _dashTree( dashTree )
     , _shareContext( shareContext )
-    , _rawDataCache( rawDataCache )
     , _textureDataCache( textureDataCache )
     , _currentFrameID( 0 )
     , _threadOp( TO_NONE )
@@ -177,7 +162,7 @@ void DataUploadProcessor::runLoop_( )
         _shareContext->shareContext( getGLContext( ));
         getGLContext()->makeCurrent();
 
-        VolumeDataSourcePtr dataSource = _rawDataCache.getDataSource();
+        VolumeDataSourcePtr dataSource = _textureDataCache.getDataSource();
         dataSource->initializeGL();
     }
 
@@ -205,7 +190,6 @@ void DataUploadProcessor::_loadData()
 
     DashNodeVector dashNodeList;
     DepthCollectorVisitor depthCollectorVisitor( _dashTree,
-                                                 _rawDataCache,
                                                  _textureDataCache,
                                                  processorOutputPtr_,
                                                  dashNodeList );
@@ -218,18 +202,14 @@ void DataUploadProcessor::_loadData()
     std::sort( dashNodeList.begin( ), dashNodeList.end( ), DepthCompare( frustum ));
     CollectionTraversal collectionTraverser;
     DepthSortedDataLoaderVisitor refLevelDataLoaderVisitor( _dashTree,
-                                                            _rawDataCache,
                                                             _textureDataCache,
                                                             processorInputPtr_,
                                                             processorOutputPtr_ );
     collectionTraverser.traverse( dashNodeList, refLevelDataLoaderVisitor );
     processorOutputPtr_->commit( CONNECTION_ID );
 
-    RawDataLoaderVisitor loadVisitor( _dashTree,
-                                      _rawDataCache,
-                                      _textureDataCache,
-                                      processorInputPtr_,
-                                      processorOutputPtr_ );
+    DataLoaderVisitor loadVisitor( _dashTree, _textureDataCache,
+                                   processorInputPtr_, processorOutputPtr_ );
 
     traverser.traverse( rootNode, loadVisitor, _currentFrameID );
     processorOutputPtr_->commit( CONNECTION_ID );
@@ -250,7 +230,7 @@ void DataUploadProcessor::_checkThreadOperation()
         exit();
 }
 
-void RawDataLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state )
+void DataLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state )
 {
     const LODNode& node = renderNode.getLODNode();
 
@@ -284,12 +264,8 @@ void RawDataLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state 
     __itt_task_begin( ittDataLoadDomain, __itt_null, __itt_null,
                       ittDataLoadTask );
 #endif //_ITT_DEBUG_
-    RawDataObject& lodData = rawDataCache_.getNodeData( node.getNodeId().getId( ));
-    lodData.cacheLoad( );
-
     TextureDataObject& textureData =
         textureDataCache_.getNodeTextureData( node.getNodeId().getId( ));
-    textureData.setRawData( &lodData );
     textureData.cacheLoad( );
     if( _clock.getTime64() > 1000 ) // commit once every second
     {
@@ -329,7 +305,6 @@ void DepthCollectorVisitor::visit( DashRenderNode& renderNode, VisitState& state
         return;
 
     // Triggers creation of the cache object.
-    rawDataCache_.getNodeData( lodNode.getNodeId().getId( ));
     TextureDataObject& textureData =
             textureDataCache_.getNodeTextureData( lodNode.getNodeId().getId( ));
     if( textureData.isLoaded() )
@@ -349,16 +324,9 @@ void DepthSortedDataLoaderVisitor::visit( DashRenderNode& renderNode, VisitState
 #ifdef _ITT_DEBUG_
     __itt_task_begin( ittDataLoadDomain, __itt_null, __itt_null, ittDataLoadTask );
 #endif //_ITT_DEBUG_
-
-    RawDataObject& lodData =
-            static_cast< const RawDataCache& >( rawDataCache_ ).getNodeData(
-                lodNode.getNodeId().getId( ));
-    lodData.cacheLoad( );
-
     TextureDataObject& textureData =
             static_cast< const TextureDataCache& >
             ( textureDataCache_ ).getNodeTextureData( lodNode.getNodeId().getId( ));
-    textureData.setRawData( &lodData );
     textureData.cacheLoad();
 
 #ifdef _ITT_DEBUG_

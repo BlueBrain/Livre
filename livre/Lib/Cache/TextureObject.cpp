@@ -226,7 +226,7 @@ bool TextureObject::loadTextureToGPU_( ) const
                      voxSizeVec[0], voxSizeVec[1], voxSizeVec[2],
                      textureState_->texturePoolPtr->getFormat() ,
                      textureState_->texturePoolPtr->getGPUDataType(),
-                     getTextureDataObject_().getDataPtr< void >() );
+                     getTextureDataObject_().getDataPtr( ));
 
     // Something went wrong with loading the data
     // TODO: Log message

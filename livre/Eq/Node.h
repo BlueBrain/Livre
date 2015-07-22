@@ -49,11 +49,6 @@ public:
     ~Node();
 
     /**
-     * @return The raw data cache.
-     */
-    RawDataCache& getRawDataCache();
-
-    /**
      * @return The texture data cache.
      */
     TextureDataCache& getTextureDataCache();

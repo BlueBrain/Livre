@@ -119,15 +119,16 @@ void CacheStatistics::onPreUnload_( const CacheObject& cacheObject )
 
 std::ostream& operator<<( std::ostream& stream, const CacheStatistics& cacheStatistics )
 {
-    stream << std::setiosflags( std::ios::fixed )
-           << std::setprecision( 3 ) << "Total Block Count (" << cacheStatistics.statisticsName_ << "): "
+    const size_t indent = 2;
+    stream << cacheStatistics.statisticsName_ << std::endl;
+    stream << std::setw( indent ) << "Total Used Memory: "
+           << cacheStatistics.totalMemoryUsed_ / LB_1MB << "MB" << std::endl;
+    stream << std::setw( indent ) << "Total Block Count: "
            << cacheStatistics.totalBlockCount_ << std::endl;
-    stream << std::setprecision( 3 ) << "Cache hit (" << cacheStatistics.statisticsName_ << "): "
+    stream << std::setw( indent ) << "Cache hits: "
            << cacheStatistics.cacheHit_ << std::endl;
-    stream << std::setprecision( 3 ) << "Cache miss (" << cacheStatistics.statisticsName_ << "): "
+    stream << std::setw( indent ) << "Cache misses: "
            << cacheStatistics.cacheMiss_ << std::endl;
-    stream <<  "Total Used Memory (" << cacheStatistics.statisticsName_ << "): "
-           << cacheStatistics.totalMemoryUsed_ / ( 1024.0 * 1024.0 );
 
     return stream;
 }

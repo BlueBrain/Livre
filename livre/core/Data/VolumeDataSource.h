@@ -70,6 +70,9 @@ public:
      */
     MemoryUnitPtr getData( const LODNode& node );
 
+    /** @copydoc getData( const LODNode& node ) */
+    ConstMemoryUnitPtr getData( const LODNode& node ) const;
+
     /**
      * @param nodeId The nodeId to get the node for.
      * @return The LODNode for the ID or 0 if not found.

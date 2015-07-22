@@ -1,5 +1,6 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -22,11 +23,10 @@
 namespace livre
 {
 
-const std::string DATACACHEMEM_PARAM = "data-cache-mem";
 const std::string SCREENSPACEERROR_PARAM = "sse";
 const std::string SYNCHRONOUSMODE_PARAM = "synchronous";
-const std::string TEXTURECACHEMEM_PARAM = "texture-cache-mem";
-const std::string TEXTUREDATACACHEMEM_PARAM = "texturedata-cache-mem";
+const std::string GPUCACHEMEM_PARAM = "gpu-cache-mem";
+const std::string CPUCACHEMEM_PARAM = "cpu-cache-mem";
 const std::string MINLOD_PARAM = "min-lod";
 const std::string MAXLOD_PARAM = "max-lod";
 const std::string SAMPLESPERRAY_PARAM = "samples-per-ray";
@@ -37,33 +37,26 @@ VolumeRendererParameters::VolumeRendererParameters()
     , synchronousMode( false )
 #ifdef __i386__
     , screenSpaceError( 8.0f )
-    , maxDataMemoryMB( 128u )
-    , maxTextureMemoryMB( 512u )
-    , maxTextureDataMemoryMB( 1024u )
+    , maxGPUCacheMemoryMB( 512u )
+    , maxCPUCacheMemoryMB( 1024u )
 #else
     , screenSpaceError( 4.0f )
-    , maxDataMemoryMB( 1024u )
-    , maxTextureMemoryMB( 3072u )
-    , maxTextureDataMemoryMB( 8192u )
+    , maxGPUCacheMemoryMB( 3072u )
+    , maxCPUCacheMemoryMB( 8192u )
 #endif
     , minLOD( 0 )
     , maxLOD( ( NODEID_LEVEL_BITS << 1 ) + 1 )
     , samplesPerRay( 512u )
-    , transferFunction( "" )
+    , transferFunction()
 {
-    configuration_.addDescription( configGroupName_, DATACACHEMEM_PARAM,
-                                   "Maximum data cache memory (MB) - "
-                                   "caches the raw data read from I/O in system memory",
-                                   maxDataMemoryMB );
-    configuration_.addDescription( configGroupName_, TEXTURECACHEMEM_PARAM,
-                                   "Maximum texture cache memory (MB) - "
-                                   "caches the texture data on GPU memory",
-                                   maxTextureMemoryMB );
-    configuration_.addDescription( configGroupName_, TEXTUREDATACACHEMEM_PARAM,
-                                   "Maximum texture data cache memory (MB) - "
-                                   "caches the data that has been converted into internal texture "
-                                   "format in system memory",
-                                   maxTextureDataMemoryMB );
+    configuration_.addDescription( configGroupName_, GPUCACHEMEM_PARAM,
+                                   "Maximum GPU cache memory (MB) - "
+                                   "caches the texture data in GPU memory",
+                                   maxGPUCacheMemoryMB );
+    configuration_.addDescription( configGroupName_, CPUCACHEMEM_PARAM,
+                                   "Maximum CPU cache memory (MB) - "
+                                   "caches the volume data in CPU memory",
+                                   maxCPUCacheMemoryMB );
     configuration_.addDescription( configGroupName_, SCREENSPACEERROR_PARAM,
                                    "Screen space error", screenSpaceError );
     configuration_.addDescription( configGroupName_, SYNCHRONOUSMODE_PARAM,
@@ -82,9 +75,8 @@ void VolumeRendererParameters::deserialize( co::DataIStream &is, const uint64_t 
 {
     is >> screenSpaceError
        >> synchronousMode
-       >> maxDataMemoryMB
-       >> maxTextureMemoryMB
-       >> maxTextureDataMemoryMB
+       >> maxGPUCacheMemoryMB
+       >> maxCPUCacheMemoryMB
        >> minLOD
        >> maxLOD
        >> samplesPerRay
@@ -95,9 +87,8 @@ void VolumeRendererParameters::serialize( co::DataOStream &os, const uint64_t )
 {
     os << screenSpaceError
        << synchronousMode
-       << maxDataMemoryMB
-       << maxTextureMemoryMB
-       << maxTextureDataMemoryMB
+       << maxGPUCacheMemoryMB
+       << maxCPUCacheMemoryMB
        << minLOD
        << maxLOD
        << samplesPerRay
@@ -112,9 +103,8 @@ VolumeRendererParameters &VolumeRendererParameters::operator=(
 
     screenSpaceError = rhs.screenSpaceError;
     synchronousMode = rhs.synchronousMode;
-    maxDataMemoryMB = rhs.maxDataMemoryMB;
-    maxTextureMemoryMB = rhs.maxTextureMemoryMB;
-    maxTextureDataMemoryMB = rhs.maxTextureDataMemoryMB;
+    maxGPUCacheMemoryMB = rhs.maxGPUCacheMemoryMB;
+    maxCPUCacheMemoryMB = rhs.maxCPUCacheMemoryMB;
     minLOD = rhs.minLOD;
     maxLOD = rhs.maxLOD;
     samplesPerRay = rhs.samplesPerRay;
@@ -128,9 +118,8 @@ void VolumeRendererParameters::initialize_()
 {
     configuration_.getValue( SYNCHRONOUSMODE_PARAM, synchronousMode );
     configuration_.getValue( SCREENSPACEERROR_PARAM, screenSpaceError );
-    configuration_.getValue( DATACACHEMEM_PARAM, maxDataMemoryMB );
-    configuration_.getValue( TEXTURECACHEMEM_PARAM, maxTextureMemoryMB );
-    configuration_.getValue( TEXTUREDATACACHEMEM_PARAM, maxTextureDataMemoryMB);
+    configuration_.getValue( GPUCACHEMEM_PARAM, maxGPUCacheMemoryMB );
+    configuration_.getValue( CPUCACHEMEM_PARAM, maxCPUCacheMemoryMB);
     configuration_.getValue( MINLOD_PARAM, minLOD );
     configuration_.getValue( MAXLOD_PARAM, maxLOD );
     configuration_.getValue( SAMPLESPERRAY_PARAM, samplesPerRay );
