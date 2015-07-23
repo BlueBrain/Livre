@@ -131,7 +131,15 @@ public:
 
     void apply()
     {
-        _dashProcessorPtr->getProcessorInput_()->applyAll( CONNECTION_ID );
+        Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
+        ProcessorInputPtr input = _dashProcessorPtr->getProcessorInput_();
+
+        // #75: only wait for data in synchronous mode
+        if( pipe->getFrameData()->getVRParameters()->synchronousMode ||
+            input->dataWaitingOnInput( CONNECTION_ID ))
+        {
+            input->applyAll( CONNECTION_ID );
+        }
     }
 
     void initializePipelineProcessors()

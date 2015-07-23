@@ -3,6 +3,9 @@ Changelog {#Changelog}
 
 # Release 0.4 (git master) {#Release040}
 
+* [#90](https://github.com/BlueBrain/Livre/pull/90):
+  Fix [#75](https://github.com/BlueBrain/Livre/issues/73):
+  Do not block application while waiting for data in asynchronous mode
 * [#86](https://github.com/BlueBrain/Livre/pull/86):
   Removed obsolete limitation to open only regular power-of-two volumes
 * [#84](https://github.com/BlueBrain/Livre/pull/84):
