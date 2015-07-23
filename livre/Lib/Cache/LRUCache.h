@@ -47,9 +47,9 @@ public:
 
     /**
      * Sets the maximum memory.
-     * @param maxMemoryInMBytes Maximum memory in MB.
+     * @param maxMemoryInBytes Maximum memory in bytes.
      */
-    void setMaximumMemory( const uint32_t maxMemoryInMBytes );
+    void setMaximumMemory( const size_t maxMemoryInBytes );
 
     /**
      * Sets the clean up ratio.

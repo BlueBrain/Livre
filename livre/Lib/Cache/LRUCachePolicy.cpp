@@ -34,7 +34,7 @@ struct LastUsedOrderOperator
 };
 
 LRUCachePolicy::LRUCachePolicy()
-    : maxMemoryInMBytes_( 0 ),
+    : maxMemoryInBytes_( 0 ),
       cleanUpRatio_( 1.0 )
 {}
 
@@ -43,9 +43,9 @@ void LRUCachePolicy::setProtectList( const CacheIdSet& protectUnloadingList )
     protectUnloadingList_ = protectUnloadingList;
 }
 
-void LRUCachePolicy::setMaximumMemory( const uint32_t maxMemoryInMBytes )
+void LRUCachePolicy::setMaximumMemory( const size_t maxMemoryInBytes )
 {
-    maxMemoryInMBytes_ = maxMemoryInMBytes;
+    maxMemoryInBytes_ = maxMemoryInBytes;
 }
 
 void LRUCachePolicy::setCleanupRatio( float cleanUpRatio )
@@ -55,14 +55,14 @@ void LRUCachePolicy::setCleanupRatio( float cleanUpRatio )
 
 bool LRUCachePolicy::willPolicyBeActivated( const Cache& cache ) const
 {
-    const uint32_t currentMemorySize = cache.getStatistics().getUsedMemory();
-    return currentMemorySize >= maxMemoryInMBytes_;
+    const size_t usedMemoryInBytes = cache.getStatistics().getUsedMemory();
+    return usedMemoryInBytes >= maxMemoryInBytes_;
 }
 
 bool LRUCachePolicy::isPolicySatisfied( const Cache& cache ) const
 {
-    const uint32_t currentMemorySize = cache.getStatistics().getUsedMemory();
-    return currentMemorySize < ( 1.0f - cleanUpRatio_ ) * maxMemoryInMBytes_;
+    const size_t usedMemoryInBytes = cache.getStatistics().getUsedMemory();
+    return usedMemoryInBytes < ( 1.0f - cleanUpRatio_ ) * maxMemoryInBytes_;
 }
 
 void LRUCachePolicy::apply_( const Cache& cache LB_UNUSED,
@@ -71,9 +71,8 @@ void LRUCachePolicy::apply_( const Cache& cache LB_UNUSED,
 {
     modifiedObjectList.reserve( cacheObjectList.size() );
 
-    uint32_t i = 0;
     for( std::vector< CacheObject *>::const_iterator it = cacheObjectList.begin();
-         it != cacheObjectList.end(); ++i, ++it )
+         it != cacheObjectList.end(); ++it )
     {
         CacheObject* cacheObject = *it;
         const CacheIdSet::const_iterator& itCacheObject =

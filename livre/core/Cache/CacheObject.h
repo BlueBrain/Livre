@@ -61,7 +61,7 @@ public:
     void cacheUnload( );
 
     /**
-     * @return The cache size of the object.
+     * @return The memory size of the object in bytes.
      */
     virtual uint32_t getCacheSize( ) const = 0;
 

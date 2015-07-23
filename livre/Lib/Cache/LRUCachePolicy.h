@@ -57,9 +57,9 @@ public:
 
     /**
      * Sets the maximum memory.
-     * @param maxMemoryInMBytes Maximum memory in MB.
+     * @param maxMemoryInBytes Maximum memory in bytes.
      */
-    void setMaximumMemory( const uint32_t maxMemoryInMBytes );
+    void setMaximumMemory( const size_t maxMemoryInBytes );
 
     /**
      * Sets the clean up ratio.
@@ -73,7 +73,7 @@ private:
                          const std::vector< CacheObject * >& cacheObjectList,
                          std::vector< CacheObject * >& modifiedObjectList );
 
-    uint32_t maxMemoryInMBytes_;
+    size_t maxMemoryInBytes_;
     float cleanUpRatio_;
 
     CacheIdSet protectUnloadingList_;
