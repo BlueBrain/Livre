@@ -42,14 +42,14 @@ const Plane& Frustum::getMVPlane( const PlaneId id ) const
 
 bool Frustum::boxInFrustum( const Boxf &worldBox ) const
 {
-    for (uint32_t i = 0; i < 6; i++)
-    {
-        if( !wPlanes_[ i ].intersectOrUnder( worldBox ) )
-        {
-            return false;
-        }
-    }
-    return true;
+    const Vector3f& min = worldBox.getMin();
+    const Vector3f& max = worldBox.getMax();
+    const Vector2f x( min[0], max[0] );
+    const Vector2f y( min[1], max[1] );
+    const Vector2f z( min[2], max[2] );
+
+    const vmml::Visibility vis = vmmlFrustumCuller_.test_aabb( x, y, z );
+    return vis != vmml::VISIBILITY_NONE;
 }
 
 bool Frustum::isInitialized( ) const
@@ -151,8 +151,10 @@ void Frustum::initialize( const Matrix4f& modelViewMatrix,
     viewDir_[ 2 ] = column[ 2 ];
 
     // Meaningful for only symmetric frusta
-    fovx_ = std::atan( std::abs( vmmlFrustum_.array[ PL_LEFT ] ) / fabs( vmmlFrustum_.array[ PL_NEAR ] ) ) * 2.0f;
-    fovy_ = std::atan( std::abs( vmmlFrustum_.array[ PL_TOP ] ) / fabs( vmmlFrustum_.array[ PL_NEAR ] ) ) * 2.0f;
+    fovx_ = std::atan( std::abs( vmmlFrustum_.array[ PL_LEFT ] )
+                        / std::abs( vmmlFrustum_.array[ PL_NEAR ] ) ) * 2.0f;
+    fovy_ = std::atan( std::abs( vmmlFrustum_.array[ PL_TOP ] )
+                        / std::abs( vmmlFrustum_.array[ PL_NEAR ] ) ) * 2.0f;
     isInitialized_ = true;
 }
 
@@ -183,8 +185,10 @@ void Frustum::initialize( const Matrix4f &modelViewMatrix,
     initializePlaneCenters_( );
 
     // Meaningful for only symmetric frusta
-    fovx_ = std::atan( std::abs( vmmlFrustum_.array[ PL_LEFT ] ) / fabs( vmmlFrustum_.array[ PL_NEAR ] ) ) * 2.0f;
-    fovy_ = std::atan( std::abs( vmmlFrustum_.array[ PL_TOP ] ) / fabs( vmmlFrustum_.array[ PL_NEAR ] ) ) * 2.0f;
+    fovx_ = std::atan( std::abs( vmmlFrustum_.array[ PL_LEFT ] ) /
+                       std::abs( vmmlFrustum_.array[ PL_NEAR ] ) ) * 2.0f;
+    fovy_ = std::atan( std::abs( vmmlFrustum_.array[ PL_TOP ] ) /
+                       std::abs( vmmlFrustum_.array[ PL_NEAR ] ) ) * 2.0f;
     isInitialized_ = true;
 }
 
@@ -238,7 +242,8 @@ void Frustum::initializePlaneCenters_()
     planeCenters_[ PL_BOTTOM ] = planeCenters_[ PL_BOTTOM ] / planeCenters_[ PL_BOTTOM ][ 3 ];
 }
 
-void Frustum::computeFrustumVertices_( Vector3f frustumVertices[], Vector3f frustumNormals[] ) const
+void Frustum::computeFrustumVertices_( Vector3f frustumVertices[],
+                                       Vector3f frustumNormals[] ) const
 {
     float farLeft;
     float farRight;
@@ -300,22 +305,34 @@ void Frustum::computeFrustumVertices_( Vector3f frustumVertices[], Vector3f frus
     frustumVertices[7][2] = -f;
 
     // compute normals
-    frustumNormals[0] = (frustumVertices[5] - frustumVertices[1]).cross(frustumVertices[2] - frustumVertices[1]);
+    frustumNormals[0] = (frustumVertices[5]
+            - frustumVertices[1]).cross(frustumVertices[2]
+            - frustumVertices[1]);
     frustumNormals[0].normalize();
 
-    frustumNormals[1] = (frustumVertices[3] - frustumVertices[0]).cross(frustumVertices[4] - frustumVertices[0]);
+    frustumNormals[1] = (frustumVertices[3]
+            - frustumVertices[0]).cross(frustumVertices[4]
+            - frustumVertices[0]);
     frustumNormals[1].normalize();
 
-    frustumNormals[2] = (frustumVertices[6] - frustumVertices[2]).cross(frustumVertices[3] - frustumVertices[2]);
+    frustumNormals[2] = (frustumVertices[6]
+            - frustumVertices[2]).cross(frustumVertices[3]
+            - frustumVertices[2]);
     frustumNormals[2].normalize();
 
-    frustumNormals[3] = (frustumVertices[4] - frustumVertices[0]).cross(frustumVertices[1] - frustumVertices[0]);
+    frustumNormals[3] = (frustumVertices[4]
+            - frustumVertices[0]).cross(frustumVertices[1]
+            - frustumVertices[0]);
     frustumNormals[3].normalize();
 
-    frustumNormals[4] = (frustumVertices[1] - frustumVertices[0]).cross(frustumVertices[3] - frustumVertices[0]);
+    frustumNormals[4] = (frustumVertices[1]
+            - frustumVertices[0]).cross(frustumVertices[3]
+            - frustumVertices[0]);
     frustumNormals[4].normalize();
 
-    frustumNormals[5] = (frustumVertices[7] - frustumVertices[4]).cross(frustumVertices[5] - frustumVertices[4]);
+    frustumNormals[5] = (frustumVertices[7]
+            - frustumVertices[4]).cross(frustumVertices[5]
+            - frustumVertices[4]);
     frustumNormals[5].normalize();
 }
 

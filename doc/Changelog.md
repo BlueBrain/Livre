@@ -17,6 +17,9 @@ Changelog {#Changelog}
   extension, based on the format used by ImageVis3D)
 * [#75](https://github.com/BlueBrain/Livre/pull/75):
   Separate ZeroEQ communication to class zeq::Communicator
+* [#88](https://github.com/BlueBrain/Livre/pull/88):
+  Fix [LIV-157)](https://bbpteam.epfl.ch/project/issues/browse/LIV-157)
+  rendering of overlapping LOD nodes from different levels
 
 # Release 0.3 (2015-07-07) {#Release030}
 

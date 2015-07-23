@@ -166,43 +166,25 @@ private:
 
     void computeFrustumVertices_( Vector3f frustumVertices[],
                                   Vector3f frustumNormals[] ) const;
-
     void computeLimitsFromProjectionMatrix_( );
-
     void initializePlanes_( const Matrix4f &matrix, Plane *planes );
-
     void initialize_( );
-
     void initializePlaneCenters_( );
 
     Plane wPlanes_[ 6 ];
-
     Plane mvPlanes_[ 6 ];
-
     Matrix4f mvpMatrix_;
-
     Matrix4f modelViewMatrix_;
-
     Matrix4f invModelViewMatrix_;
-
     Matrix4f projectionMatrix_;
-
     Matrix4f invProjectionMatrix_;
-
     bool isInitialized_;
-
     float fovy_;
-
     float fovx_;
-
     Vector3f eye_;
-
     Vector3f viewDir_;
-
     Vector4f planeCenters_[ 6 ];
-
     Frustumf vmmlFrustum_;
-
     FrustumCullerf vmmlFrustumCuller_;
 };
 
