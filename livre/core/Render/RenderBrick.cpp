@@ -51,6 +51,7 @@
 
 #include <livre/core/Render/Frustum.h>
 #include <livre/core/Data/LODNode.h>
+#include <livre/core/Maths/Maths.h>
 #include <eq/gl.h>
 
 namespace livre
@@ -128,10 +129,14 @@ void RenderBrick::getScreenCoordinates( const Frustum& frustum,
         }
     }
 
-    xMin = std::max( (int)floor( xMin + 0.5 ), pvp[0] );
-    yMin = std::max( (int)floor( yMin + 0.5 ), pvp[1] );
-    xMax = std::min( (int)floor( xMax + 0.5 ), pvp[0] + pvp[2] );
-    yMax = std::min( (int)floor( yMax + 0.5 ), pvp[1] + pvp[3] );
+    xMin = maths::clamp( xMin + 0.5, (double)pvp[0],
+                                     (double)pvp[0] + (double)pvp[2] );
+    yMin = maths::clamp( yMin + 0.5, (double)pvp[1],
+                                     (double)pvp[1] + (double)pvp[3] );
+    xMax = maths::clamp( xMax + 0.5, (double)pvp[0],
+                                     (double)pvp[0] + (double)pvp[2] );
+    yMax = maths::clamp( yMax + 0.5, (double)pvp[1],
+                                     (double)pvp[1] + (double)pvp[3] );
 
     minScreenPos = Vector2i( xMin, yMin  );
     maxScreenPos = Vector2i( xMax, yMax  );

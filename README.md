@@ -26,8 +26,6 @@ any other issue with this release.
 
 * [#62](https://github.com/BlueBrain/Livre/issues/62):
   Missing bricks in first frame after load_equalizer change
-* [LIV-157](https://bbpteam.epfl.ch/project/issues/browse/LIV-157):
-  Livre renders overlapping LOD nodes from different levels
 
 ## About
 

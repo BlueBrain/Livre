@@ -66,19 +66,7 @@ Vector3f Plane::getNormal( ) const
 
 Vector3f Plane::getAbsNormal( ) const
 {
-    return Vector3f( fabs( a_ ), fabs( b_ ), fabs( c_ ) );
-}
-
-bool Plane::intersectOrUnder(const Boxf& bb) const
-{
-    const Vector3f halfExtents = bb.getDimension() * 0.5f;
-    const Vector3f& center = bb.getCenter( );
-
-    const float distToCenter =  center.dot( getNormal() );
-    const float radius = halfExtents.dot( getAbsNormal() );
-
-    const float dMax = distToCenter + radius;
-    return dMax >= -d_;
+    return Vector3f( std::abs( a_ ), std::abs( b_ ), std::abs( c_ ) );
 }
 
 void Plane::set( const float a, const float b, const float c, const float d )

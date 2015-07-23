@@ -153,20 +153,30 @@ void AvailableSetGenerator::generateRenderingSet( const Frustum&,
     CollectionTraversal colTraverser;
     colTraverser.traverse( frameInfo.allNodesList, collector );
 
-    NodeIdDashNodeMap::const_iterator it = nodeIdDashNodeMap.begin();
-    while( it != nodeIdDashNodeMap.end() )
+    if( !frameInfo.notAvailableRenderNodeList.empty( ))
     {
-        DashRenderNode childNode( it->second );
-        if( !frameInfo.notAvailableRenderNodeList.empty() &&
-             hasParentInMap( childNode, nodeIdDashNodeMap ))
+        NodeIdDashNodeMap::const_iterator it = nodeIdDashNodeMap.begin();
+        size_t previousMapSize = 0;
+        do
         {
-            it = nodeIdDashNodeMap.erase( it );
+            previousMapSize = nodeIdDashNodeMap.size();
+            while( it != nodeIdDashNodeMap.end( ))
+            {
+                DashRenderNode childNode( it->second );
+                if( hasParentInMap( childNode, nodeIdDashNodeMap ))
+                    it = nodeIdDashNodeMap.erase( it );
+                else
+                    ++it;
+            }
         }
-        else
-        {
-            frameInfo.renderNodeList.push_back( it->second );
-            ++it;
-        }
+        while( previousMapSize != nodeIdDashNodeMap.size( ));
+    }
+
+    frameInfo.renderNodeList.reserve( nodeIdDashNodeMap.size( ));
+    for( NodeIdDashNodeMap::const_iterator it = nodeIdDashNodeMap.begin();
+         it != nodeIdDashNodeMap.end(); ++it )
+    {
+        frameInfo.renderNodeList.push_back( it->second );
     }
 }
 

@@ -44,7 +44,6 @@ set(LIVRECORE_HEADERS
   Events/EventHandlerFactory.h
   Events/EventInfo.h
   Events/EventMapper.h
-  Maths/BinarySearch.h
   Maths/Maths.h
   Maths/Plane.h
   Maths/Quantizer.h
