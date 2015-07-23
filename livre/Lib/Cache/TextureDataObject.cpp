@@ -40,7 +40,7 @@ TextureDataObject::TextureDataObject()
 
 TextureDataObject::TextureDataObject( VolumeDataSourcePtr dataSourcePtr,
                                       ConstLODNodePtr lodNodePtr,
-                                      const uint32_t gpuDataType)
+                                      const uint32_t gpuDataType )
     : CacheObject()
     , LODNodeTrait( lodNodePtr )
     , data_( new AllocMemoryUnit( ))
@@ -57,7 +57,7 @@ TextureDataObject::~TextureDataObject()
 
 TextureDataObject* TextureDataObject::getEmptyPtr()
 {
-    static boost::shared_ptr< TextureDataObject > data( new TextureDataObject() );
+    static boost::shared_ptr< TextureDataObject > data( new TextureDataObject( ));
     return data.get();
 }
 
@@ -119,7 +119,8 @@ void TextureDataObject::setTextureData_( const bool quantize )
 {
     getUnconst_()->updateLastUsedWithCurrentTime_();
 
-    const T* rawData = dataSourcePtr_->getData( *lodNodePtr_ )->getData< T >();
+    ConstMemoryUnitPtr data = dataSourcePtr_->getData( *lodNodePtr_ );
+    const T* rawData = data->getData< T >();
     if( quantize )
     {
         std::vector< T > textureData;
@@ -127,7 +128,7 @@ void TextureDataObject::setTextureData_( const bool quantize )
         data_->allocAndSetData( textureData );
     }
     else
-        data_->allocAndSetData( rawData, getRawDataSize_() * sizeof( T ));
+        data_->allocAndSetData( rawData, getRawDataSize_( ));
 }
 
 template< class T >
