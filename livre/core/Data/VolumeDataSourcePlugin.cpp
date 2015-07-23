@@ -70,37 +70,9 @@ void VolumeDataSourcePlugin::internalNodeToLODNode(
                              boxCoordMax - _volumeInfo.worldSize * 0.5f ));
 }
 
-bool isPowerOfTwo( const uint32_t x )
-{
-    return ( x != 0 ) && ( ( x & ( x - 1 ) ) == 0 );
-}
-
-bool checkCompatibility( const Vector3ui& volumeDim,
-                         const Vector3ui& blockSize )
-{
-    if( volumeDim.x() % blockSize.x() )
-        return false;
-    if( volumeDim.y() % blockSize.y() )
-        return false;
-    if( volumeDim.z() % blockSize.z() )
-        return false;
-
-    if( !isPowerOfTwo( volumeDim.x() / blockSize.x() ) )
-        return false;
-    if( !isPowerOfTwo( volumeDim.y() / blockSize.y() ) )
-        return false;
-    if( !isPowerOfTwo( volumeDim.z() / blockSize.z() ) )
-        return false;
-
-    return true;
-}
-
 bool fillRegularVolumeInfo( VolumeInformation& info )
 {
     const Vector3ui& blockSize = info.maximumBlockSize - info.overlap * 2;
-    if( !checkCompatibility( info.voxels, blockSize ))
-        return false;
-
     const float maxDim = float( info.voxels.find_max( ));
 
     info.maximumBlockSize = blockSize + info.overlap * 2;
@@ -126,7 +98,5 @@ bool fillRegularVolumeInfo( VolumeInformation& info )
                                blocksSize );
     return true;
 }
-
-
 
 }
