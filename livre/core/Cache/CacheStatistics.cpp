@@ -44,7 +44,7 @@ struct CacheStatistics::LoadInfo
 
     LoadInfo(  const LoadInfo& previous,
                Operation operation,
-               const uint32_t cSize,
+               const size_t cSize,
                const float lTime = 0.0f )
         : op( operation ), cacheSize( cSize ), loadTime( lTime )
     {
@@ -72,18 +72,18 @@ struct CacheStatistics::LoadInfo
 
     Operation op;
     double time;
-    uint32_t cacheSize;
-    uint32_t cumulativeCacheSize;
-    uint32_t cumulativeNbNodes;
+    size_t cacheSize;
+    size_t cumulativeCacheSize;
+    size_t cumulativeNbNodes;
     double loadTime;
 };
 
 CacheStatistics::CacheStatistics( const std::string& statisticsName,
-                                  const uint32_t queueSize )
-    : totalBlockCount_( 0 )
-    , totalMemoryUsed_( 0 )
-    , statisticsName_( statisticsName )
-    , maxMemory_( 0 )
+                                  const size_t queueSize )
+    : statisticsName_( statisticsName )
+    , usedMemoryInBytes_( 0 )
+    , maxMemoryInBytes_( 0 )
+    , blockCount_( 0 )
     , cacheHit_( 0 )
     , cacheMiss_( 0 )
     , queueSize_( queueSize )
@@ -92,8 +92,8 @@ CacheStatistics::CacheStatistics( const std::string& statisticsName,
 
 void CacheStatistics::onLoaded_( const CacheObject& cacheObject )
 {
-   ++totalBlockCount_;
-   totalMemoryUsed_ += cacheObject.getCacheSize() / LB_1MB;
+   ++blockCount_;
+   usedMemoryInBytes_ += cacheObject.getCacheSize();
 
    if( ioQueue_.empty() )
        ioQueue_.push( LoadInfoPtr( new LoadInfo()) );
@@ -110,8 +110,8 @@ void CacheStatistics::onLoaded_( const CacheObject& cacheObject )
 
 void CacheStatistics::onPreUnload_( const CacheObject& cacheObject )
 {
-    --totalBlockCount_;
-    totalMemoryUsed_ -= cacheObject.getCacheSize() / LB_1MB;
+    --blockCount_;
+    usedMemoryInBytes_ -= cacheObject.getCacheSize();
 
     if( ioQueue_.getSize() == queueSize_ )
         ioQueue_.pop( );
@@ -125,11 +125,12 @@ void CacheStatistics::onPreUnload_( const CacheObject& cacheObject )
 std::ostream& operator<<( std::ostream& stream, const CacheStatistics& cacheStatistics )
 {
     stream << cacheStatistics.statisticsName_ << std::endl;
-    stream << "  Total Used Memory: "
-           << cacheStatistics.totalMemoryUsed_ << "/"
-           << cacheStatistics.maxMemory_ << "MB" << std::endl;
-    stream << "  Total Block Count: "
-           << cacheStatistics.totalBlockCount_ << std::endl;
+    stream << "  Used Memory: "
+           << (cacheStatistics.usedMemoryInBytes_ + LB_1MB - 1) / LB_1MB << "/"
+           << (cacheStatistics.maxMemoryInBytes_ + LB_1MB - 1) / LB_1MB << "MB"
+           << std::endl;
+    stream << "  Block Count: "
+           << cacheStatistics.blockCount_ << std::endl;
     stream << "  Cache hits: "
            << cacheStatistics.cacheHit_ << std::endl;
     stream << "  Cache misses: "

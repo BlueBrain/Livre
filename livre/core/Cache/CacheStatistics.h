@@ -22,7 +22,6 @@
 #define _CacheStatistics_h_
 
 #include <livre/core/Cache/CacheObjectObserver.h>
-#include <lunchbox/atomic.h>
 #include <lunchbox/mtQueue.h>
 
 namespace livre
@@ -34,14 +33,14 @@ class CacheStatistics : public CacheObjectObserver
 {
 public:
     /**
-     * @return Total number of objects in the corresponding \see Cache.
+     * @return Number of objects in the corresponding \see Cache.
      */
-    uint32_t getBlockCount( ) const { return totalBlockCount_; }
+    size_t getBlockCount() const { return blockCount_; }
 
     /**
-     * @return Total memory in MB used by the \see Cache.
+     * @return Used memory in bytes used by the \see Cache.
      */
-    uint32_t getUsedMemory( ) const { return totalMemoryUsed_; }
+    size_t getUsedMemory() const { return usedMemoryInBytes_; }
 
     /**
      * @param statisticsName The name of the statistics.
@@ -49,9 +48,9 @@ public:
     void setStatisticsName( const std::string& statisticsName )
         { statisticsName_ = statisticsName; }
 
-    /** @param Maximum memory in MB used by the associated cache. */
-    void setMaximumMemory( const uint32_t maxMemory )
-        { maxMemory_ = maxMemory; }
+    /** @param Maximum memory in bytes used by the associated cache. */
+    void setMaximumMemory( const size_t maxMemoryInBytes )
+        { maxMemoryInBytes_ = maxMemoryInBytes; }
 
     /**
      * @param stream Output stream.
@@ -68,7 +67,7 @@ private:
     friend class Cache;
 
     CacheStatistics( const std::string& statisticsName,
-                     const uint32_t queueSize );
+                     const size_t queueSize );
 
     void onLoaded_( const CacheObject& cacheObject ) final;
     void onPreUnload_( const CacheObject& cacheObject ) final;
@@ -76,21 +75,19 @@ private:
     void onCacheMiss_( const CacheObject& ) final { ++cacheMiss_; }
     void onCacheHit_( const CacheObject& ) final { ++cacheHit_; }
 
-    lunchbox::Atomic< uint32_t > totalBlockCount_;
-    lunchbox::Atomic< uint32_t > totalMemoryUsed_;
-
     std::string statisticsName_;
-    uint32_t maxMemory_;
-
-    lunchbox::Atomic< uint32_t > cacheHit_;
-    lunchbox::Atomic< uint32_t > cacheMiss_;
+    size_t usedMemoryInBytes_;
+    size_t maxMemoryInBytes_;
+    size_t blockCount_;
+    size_t cacheHit_;
+    size_t cacheMiss_;
 
     struct LoadInfo;
     typedef boost::shared_ptr< LoadInfo > LoadInfoPtr;
     typedef lunchbox::MTQueue< LoadInfoPtr > LoadInfoPtrQueue;
 
     LoadInfoPtrQueue ioQueue_;
-    const uint32_t queueSize_;
+    const size_t queueSize_;
 };
 
 }

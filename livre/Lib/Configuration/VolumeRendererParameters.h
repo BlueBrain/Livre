@@ -32,8 +32,8 @@ struct VolumeRendererParameters : public Parameters
 
     bool synchronousMode; //!< Synchronous mode
     float screenSpaceError;  //!< Screen space error
-    uint32_t maxGPUCacheMemoryMB; //!< Max memory for texture cache
-    uint32_t maxCPUCacheMemoryMB; //!< Max memory for data cache
+    size_t maxGPUCacheMemoryMB; //!< Max memory for texture cache
+    size_t maxCPUCacheMemoryMB; //!< Max memory for data cache
     uint32_t minLOD; //!< Minimum level of detail
     uint32_t maxLOD; //!< Maximum level of detail
     uint32_t samplesPerRay; //!< Number of samples per ray

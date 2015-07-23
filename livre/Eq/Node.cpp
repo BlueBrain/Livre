@@ -61,7 +61,7 @@ public:
         ConstVolumeRendererParametersPtr vrRenderParametersPtr =
                 _config->getFrameData().getVRParameters();
         _textureDataCachePtr->setMaximumMemory(
-                    vrRenderParametersPtr->maxCPUCacheMemoryMB );
+                    vrRenderParametersPtr->maxCPUCacheMemoryMB * LB_1MB );
     }
 
     bool initializeVolume()

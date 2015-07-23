@@ -131,7 +131,7 @@ const TextureCache& TextureUploadProcessor::getTextureCache() const
 bool TextureUploadProcessor::initializeThreadRun_()
 {
     setName( "TexUp" );
-    _textureCache.setMaximumMemory( _vrParameters->maxGPUCacheMemoryMB );
+    _textureCache.setMaximumMemory( _vrParameters->maxGPUCacheMemoryMB * LB_1MB );
     return DashProcessor::initializeThreadRun_();
 }
 
