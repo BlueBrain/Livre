@@ -78,7 +78,7 @@ public:
                    lodSize[2] >= MINIMUM_NUMBEROF_NODES  );
 
             const UINTVECTOR3 tuvokBricksInRootLod =
-                    _uvfDataSetPtr->GetBrickLayout( depth, 0 );
+                    _uvfDataSetPtr->GetBrickLayout( depth - 1, 0 );
 
             _volumeInfo.rootNode =
                     RootNode( depth, Vector3ui( tuvokBricksInRootLod[0],
