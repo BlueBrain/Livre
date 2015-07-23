@@ -39,7 +39,7 @@ public:
     uint32_t getBlockCount( ) const { return totalBlockCount_; }
 
     /**
-     * @return Total memory used by the \see Cache.
+     * @return Total memory in MB used by the \see Cache.
      */
     uint32_t getUsedMemory( ) const { return totalMemoryUsed_; }
 
@@ -49,7 +49,7 @@ public:
     void setStatisticsName( const std::string& statisticsName )
         { statisticsName_ = statisticsName; }
 
-    /** @param Maximum memory in bytes used by the associated cache. */
+    /** @param Maximum memory in MB used by the associated cache. */
     void setMaximumMemory( const uint32_t maxMemory )
         { maxMemory_ = maxMemory; }
 
@@ -67,8 +67,8 @@ private:
 
     friend class Cache;
 
-    CacheStatistics( const std::string& statisticsName = "Cache Statistics",
-                     const uint32_t queueSize = 1000000 );
+    CacheStatistics( const std::string& statisticsName,
+                     const uint32_t queueSize );
 
     void onLoaded_( const CacheObject& cacheObject ) final;
     void onPreUnload_( const CacheObject& cacheObject ) final;

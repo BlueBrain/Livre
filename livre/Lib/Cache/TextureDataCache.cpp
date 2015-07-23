@@ -35,7 +35,7 @@ TextureDataCache::TextureDataCache( VolumeDataSourcePtr volumeDataSourcePtr,
     : volumeDataSourcePtr_( volumeDataSourcePtr )
     , type_( type )
 {
-    statisticsPtr_->setStatisticsName( "Texture data cache statistics");
+    statisticsPtr_->setStatisticsName( "Data cache CPU");
 }
 
 CacheObject* TextureDataCache::generateCacheObjectFromID_( const CacheId cacheID )

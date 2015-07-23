@@ -33,7 +33,7 @@ namespace livre
 TextureCache::TextureCache( const GLint internalTextureFormat )
     : texturePoolFactory_( internalTextureFormat )
 {
-    statisticsPtr_->setStatisticsName( "Texture cache statistics");
+    statisticsPtr_->setStatisticsName( "Texture cache GPU");
 }
 
 CacheObject *TextureCache::generateCacheObjectFromID_( const CacheId cacheID LB_UNUSED )
