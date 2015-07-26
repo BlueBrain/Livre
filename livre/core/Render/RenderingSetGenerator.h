@@ -20,6 +20,7 @@
 #ifndef _RenderingSetGenerator_h_
 #define _RenderingSetGenerator_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <livre/core/dashTypes.h>
 
@@ -37,9 +38,9 @@ public:
     /**
      * @param tree This parameter set the Dash Tree of Hierarchical Volume Data ( HVD ).
      */
-    explicit RenderingSetGenerator( DashTreePtr tree );
+    LIVRECORE_API explicit RenderingSetGenerator( DashTreePtr tree );
 
-    virtual ~RenderingSetGenerator();
+    LIVRECORE_API virtual ~RenderingSetGenerator();
 
     /**
      * Generates the rendering set according to the given frustum.
@@ -52,7 +53,7 @@ public:
     /**
      * @return Get dash tree.
      */
-    DashTreePtr getDashTree();
+    LIVRECORE_API DashTreePtr getDashTree();
 
 private:
     DashTreePtr _tree;

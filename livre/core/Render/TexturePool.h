@@ -20,6 +20,7 @@
 #ifndef _TexturePool_h_
 #define _TexturePool_h_
 
+#include <livre/core/api.h>
 #include <livre/core/Render/TextureState.h>
 #include <livre/core/types.h>
 
@@ -39,34 +40,34 @@ public:
     /**
      * @return The OpenGL GPU internal format of the texture data.
      */
-    int32_t getInternalFormat() const;
+    LIVRECORE_API int32_t getInternalFormat() const;
 
     /**
      * @return The OpenGL format of the texture data kept in memory. Channel count etc.
      */
-    uint32_t getGPUDataType() const;
+    LIVRECORE_API uint32_t getGPUDataType() const;
 
     /**
      * @return The OpenGL data type of the texture data.
      */
-    uint32_t getFormat() const;
+    LIVRECORE_API uint32_t getFormat() const;
 
     /**
      * @return The maximum texture block size in voxels.
      */
-    const Vector3i& getMaxBlockSize( ) const;
+    LIVRECORE_API const Vector3i& getMaxBlockSize( ) const;
 
    /**
      * Generates / uses a preallocated a 3D OpenGL texture based on OpenGL parameters.
      * @param textureState The destination state is filled with needed information.
      */
-    void generateTexture( TextureStatePtr textureState );
+    LIVRECORE_API void generateTexture( TextureStatePtr textureState );
 
     /**
      * Releases a texture slot.
      * @param textureState The destination state is filled with needed information.
      */
-    void releaseTexture( TextureStatePtr textureState );
+    LIVRECORE_API void releaseTexture( TextureStatePtr textureState );
 
 private:
     TexturePool( const Vector3i& maxBlockSize,

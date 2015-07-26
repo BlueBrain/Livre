@@ -23,6 +23,7 @@
 #include <boost/program_options.hpp>
 #include <boost/program_options/options_description.hpp>
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 
 namespace livre
@@ -38,8 +39,7 @@ typedef std::map< std::string, ProgramOptionsDescription > ProgramOptionsDescrip
 class Configuration
 {
 public:
-
-     Configuration( );
+     LIVRECORE_API Configuration( );
 
     /**
      * Adds description for a dictionary item.
@@ -48,9 +48,9 @@ public:
      * @param longDesc Long description.
      * @warning Before file parsing and/or command line parsing descriptions should be added
      */
-    void addDescription( const std::string& groupName,
-                         const std::string& shortDesc,
-                         const std::string& longDesc )
+    LIVRECORE_API void addDescription( const std::string& groupName,
+                                   const std::string& shortDesc,
+                                   const std::string& longDesc )
     {
         getGroup_( groupName ).add_options( )( shortDesc.c_str(),
                                                longDesc.c_str( ));
@@ -134,13 +134,13 @@ public:
      * @param argc Number of arguments.
      * @param argv Arguments array.
      */
-    void parseCommandLine( int32_t argc, char **argv );
+    LIVRECORE_API void parseCommandLine( int32_t argc, char **argv );
 
     /**
      * Parses a config file.
      * @param configFile Config file name.
      */
-    void parseConfigFile( const std::string& configFile );
+    LIVRECORE_API void parseConfigFile( const std::string& configFile );
 
     /**
      * Gets the value of a key from the disctionary.
@@ -163,7 +163,7 @@ public:
      * @param key Key to the value in the dictionary.
      * @return True if key is in the dictionary.
      */
-    bool getValue( const std::string& key ) const
+    LIVRECORE_API bool getValue( const std::string& key ) const
     {
         return programOptionsMap_.count( key );
     }
@@ -171,31 +171,31 @@ public:
     /**
      * @return True if dictionary is empty.
      */
-    bool empty( ) const { return descriptionMap_.empty(); }
+    LIVRECORE_API bool empty( ) const { return descriptionMap_.empty(); }
 
     /**
      * Adds global parameters ( help, config file ... to global configuration )
      * @param config Configuration that has the description.
      */
-    void addDescription(const Configuration& config );
+    LIVRECORE_API void addDescription(const Configuration& config );
 
     /**
      * @return The description map.
      */
-    const ProgramOptionsDescriptionMap& getDescriptionMap_( ) const;
+    LIVRECORE_API const ProgramOptionsDescriptionMap& getDescriptionMap_( ) const;
 
     /**
      * Prints description map for parameters.
      * @return the output stream.
      */
-    friend std::ostream& operator<<( std::ostream& ostream,
-                                     const Configuration& configuration );
+    LIVRECORE_API friend std::ostream& operator<<( std::ostream& ostream,
+                                                   const Configuration& configuration );
 
 private:
     ProgramOptionsMap programOptionsMap_;
     ProgramOptionsDescriptionMap descriptionMap_;
 
-    ProgramOptionsDescription& getGroup_( const std::string& groupName );
+    LIVRECORE_API ProgramOptionsDescription& getGroup_( const std::string& groupName );
     void processDescriptionMap_( ProgramOptionsDescription& description ,
                                  bool doNotProcessHidden = false ) const;
 };

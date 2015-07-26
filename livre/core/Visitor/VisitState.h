@@ -20,8 +20,9 @@
 #ifndef _VisitState_h_
 #define _VisitState_h_
 
-#include <string>
+#include <livre/core/api.h>
 #include <livre/core/Data/LODNode.h>
+#include <string>
 
 namespace livre
 {
@@ -30,43 +31,40 @@ namespace livre
  */
 class VisitState
 {
-
 public:
-
-     VisitState( );
+    LIVRECORE_API VisitState();
 
     /**
      * @return True, if children should be visited.
      */
-    bool getVisitChild( ) const;
+    LIVRECORE_API bool getVisitChild( ) const;
 
     /**
      * @return True, if traversal should be broken.
      */
-    bool getBreakTraversal( ) const;
+    LIVRECORE_API bool getBreakTraversal( ) const;
 
     /**
      * @return True, if neigbours should be visited.
      */
-    bool getVisitNeighbours( ) const;
+    LIVRECORE_API bool getVisitNeighbours( ) const;
 
     /**
      * @param visitChild If true, informs the callee, not to visit children.
      */
-    void setVisitChild( const bool visitChild );
+    LIVRECORE_API void setVisitChild( const bool visitChild );
 
     /**
      * @param breakVisitTraversal If true, traversal is broken.
      */
-    void setBreakTraversal( const bool breakVisitTraversal );
+    LIVRECORE_API void setBreakTraversal( const bool breakVisitTraversal );
 
     /**
      * @param visitNeighbours If false, neighbours won't be visited by the callee.
      */
-    void setVisitNeighbours( const bool visitNeighbours );
+    LIVRECORE_API void setVisitNeighbours( const bool visitNeighbours );
 
 protected:
-
     bool visitChild_;
     bool breakVisitTraversal_;
     bool visitNeighbours_;

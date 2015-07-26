@@ -21,6 +21,7 @@
 #ifndef _Error_h_
 #define _Error_h_
 
+#include <livre/Eq/api.h>
 #include <livre/Eq/types.h>
 
 namespace livre
@@ -41,12 +42,12 @@ enum Error
 /**
  * Set up livre-specific error codes.
  */
-void initErrors();
+LIVREEQ_API void initErrors();
 
 /**
  * Clear livre-specific error codes.
  */
-void exitErrors();
+LIVREEQ_API void exitErrors();
 
 }
 #endif // _Error_h_

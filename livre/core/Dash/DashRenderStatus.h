@@ -22,6 +22,7 @@
 
 #include <dash/dash.h>
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 
 #include <livre/core/Visitor/VisitState.h>
@@ -48,51 +49,48 @@ enum ThreadOperation
  */
 class DashRenderStatus : public boost::noncopyable
 {
-
 public:
-
-    DashRenderStatus();
+    LIVRECORE_API DashRenderStatus();
 
     /**
      * @return The dash node.
      */
-    dash::NodePtr getDashNode() const { return _dashNode; }
+    LIVRECORE_API dash::NodePtr getDashNode() const { return _dashNode; }
 
     /**
      * @return The current frame id.
      */
-    uint64_t getFrameID() const;
+    LIVRECORE_API uint64_t getFrameID() const;
 
     /**
      * Sets the frame id of the node.
      * @param frameId The id for the rendered frame.
      */
-    void setFrameID( const uint64_t frameId );
+    LIVRECORE_API void setFrameID( const uint64_t frameId );
 
     /**
      * @return The current rendering frustum.
      */
-    Frustum getFrustum() const;
+    LIVRECORE_API Frustum getFrustum() const;
 
     /**
      * Sets the current rendering frustum.
      * @param frustum Current rendering frustum.
      */
-    void setFrustum( const Frustum& frustum );
+    LIVRECORE_API void setFrustum( const Frustum& frustum );
 
     /**
      * @return The thread command issued.
      */
-    ThreadOperation getThreadOp() const;
+    LIVRECORE_API ThreadOperation getThreadOp() const;
 
     /**
      * Issues a thread command ( stop, pause, continue etc ). Helpful for pipeline.
      * @param op Thread operation to be issued.
      */
-    void setThreadOp( const ThreadOperation op );
+    LIVRECORE_API void setThreadOp( const ThreadOperation op );
 
 private:
-
     template< class T >
     T _getAttribute( const uint32_t nodeType ) const;
 

@@ -22,6 +22,7 @@
 #ifndef _GLSLShaders_h_
 #define _GLSLShaders_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 
 namespace livre
@@ -58,27 +59,27 @@ struct ShaderData
 class GLSLShaders
 {
 public:
-    GLSLShaders();
-    ~GLSLShaders();
+    LIVRECORE_API GLSLShaders();
+    LIVRECORE_API ~GLSLShaders();
 
     /**
      * Load shaders from strings with glsl's include directive support.
      * @param shaderData The data needed to compile the shader.
      * @return The OpenGL error, or GL_NO_ERROR on success
      */
-    int loadShaders(const ShaderData& shaderData);
+    LIVRECORE_API int loadShaders(const ShaderData& shaderData);
 
     typedef unsigned Handle;
 
     /** @return The OpenGL handle of the shaders. */
-    Handle getProgram() const;
+    LIVRECORE_API Handle getProgram() const;
 
     /**
      * Check if an OpenGL extension is available.
      * @param extensionName The name of the extension to be checked.
      * @return True or false.
      */
-    static bool checkOpenGLExtension( const std::string& extensionName );
+    LIVRECORE_API bool checkOpenGLExtension( const std::string& extensionName );
 
 private:
     Handle _program;

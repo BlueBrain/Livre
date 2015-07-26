@@ -9,6 +9,7 @@
 #define _Pipe_h_
 
 #include <eq/pipe.h>
+#include <livre/Eq/api.h>
 #include <livre/Eq/types.h>
 
 namespace livre
@@ -25,12 +26,11 @@ class Pipe;
 class Pipe : public eq::Pipe
 {
 public:
-
     /**
      * @param parent Parent node that owns the pipe.
      */
-    Pipe( eq::Node* parent );
-    ~Pipe();
+    LIVREEQ_API Pipe( eq::Node* parent );
+    LIVREEQ_API ~Pipe();
 
     /**
      * @return The frame data.

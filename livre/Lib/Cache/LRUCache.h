@@ -20,6 +20,7 @@
 #ifndef _LRUCache_h_
 #define _LRUCache_h_
 
+#include <livre/Lib/api.h>
 #include <livre/core/Cache/Cache.h>
 #include <livre/Lib/Cache/LRUCachePolicy.h>
 
@@ -33,37 +34,34 @@ namespace livre
 class LRUCache : public Cache
 {
 public:
-
     /**
      * Sets a list of node ids to be protected from unloading.
      * @param protectUnloadingList The set of node ids.
      */
-    void setProtectList( const CacheIdSet& protectUnloadingList );
+    LIVRE_API void setProtectList( const CacheIdSet& protectUnloadingList );
 
     /**
      * Clears the list of node ids to be protected.
      */
-    void clearProtectList( );
+    LIVRE_API void clearProtectList( );
 
     /**
      * Sets the maximum memory.
      * @param maxMemoryInBytes Maximum memory in bytes.
      */
-    void setMaximumMemory( const size_t maxMemoryInBytes );
+    LIVRE_API void setMaximumMemory( const size_t maxMemoryInBytes );
 
     /**
      * Sets the clean up ratio.
      * @param cleanUpRatio Once the policy is activated, ( 1.0 - cleanUpRatio ) can be cleaned.
      */
-    void setCleanupRatio( float cleanUpRatio );
+    LIVRE_API void setCleanupRatio( float cleanUpRatio );
 
 protected:
-
-     LRUCache( );
+    LIVRE_API LRUCache();
 
 private:
-
-    void onLoaded_( const CacheObject &cacheObject );
+    LIVRE_API void onLoaded_( const CacheObject &cacheObject );
     LRUCachePolicy cachePolicy_;
 };
 

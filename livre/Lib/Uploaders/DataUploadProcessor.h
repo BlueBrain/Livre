@@ -23,6 +23,7 @@
 
 #include <lunchbox/clock.h>
 
+#include <livre/Lib/api.h>
 #include <livre/Lib/Visitor/DFSTraversal.h>
 #include <livre/Lib/types.h>
 
@@ -48,10 +49,10 @@ public:
      * @param context the context used by this processor.
      * @param textureDataCache Texture data cache holds the data in the CPU memory.
      */
-    DataUploadProcessor( DashTreePtr dashTree,
-                         GLContextPtr shareContext,
-                         GLContextPtr context,
-                         TextureDataCache& textureDataCache );
+    LIVRE_API DataUploadProcessor( DashTreePtr dashTree,
+                                   GLContextPtr shareContext,
+                                   GLContextPtr context,
+                                   TextureDataCache& textureDataCache );
 private:
     bool initializeThreadRun_( ) final;
     void runLoop_( ) final;

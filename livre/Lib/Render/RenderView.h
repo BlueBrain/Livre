@@ -20,6 +20,7 @@
 #ifndef _RenderView_h_
 #define _RenderView_h_
 
+#include <livre/Lib/api.h>
 #include <livre/Lib/types.h>
 #include <livre/core/Render/View.h>
 #include <livre/core/Render/Frustum.h>
@@ -37,17 +38,17 @@ namespace livre
 class RenderView : public View
 {
 public:
-    RenderView();
+    LIVRE_API RenderView();
 
     /**
      * Sets the rendering parameters
      * @param volumeRendererParameters Volume rendering parameters.
      */
-    void setParameters( ConstVolumeRendererParametersPtr volumeRendererParameters );
+    LIVRE_API void setParameters( ConstVolumeRendererParametersPtr volumeRendererParameters );
 
 private:
-    void onPostRender_( const GLWidget& widget,
-                        const FrameInfo& frameInfo ) final;
+    LIVRE_API void onPostRender_( const GLWidget& widget,
+                                  const FrameInfo& frameInfo ) final;
 
     void freeTextures_( const DashNodeVector& renderNodeList );
 

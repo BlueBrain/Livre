@@ -20,6 +20,7 @@
 #ifndef _TextureState_h_
 #define _TextureState_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <livre/core/mathTypes.h>
 
@@ -32,12 +33,12 @@ namespace livre
 struct TextureState
 {
 public:
-    TextureState();
+    LIVRECORE_API TextureState();
 
     /**
      * OpenGL bind() the texture.
      */
-    void bind() const;
+    LIVRECORE_API void bind() const;
 
     Vector3f textureCoordsMin; //!< Minimum texture coordinates in the maximum texture block in \see TexturePool.
     Vector3f textureCoordsMax; //!< Maximum texture coordinates in the maximum texture block in \see TexturePool.
@@ -46,7 +47,6 @@ public:
     TexturePoolPtr texturePoolPtr;
 
     uint32_t textureId; //!< The OpenGL texture id.
-
 };
 
 }

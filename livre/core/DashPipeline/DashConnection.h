@@ -20,6 +20,7 @@
 #ifndef _DashConnection_h_
 #define _DashConnection_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <livre/core/dashTypes.h>
 #include <livre/core/Pipeline/Connection.h>
@@ -35,26 +36,24 @@ namespace livre
 class DashConnection : public Connection< dash::Commit >
 {
 public:
-
     /**
      * @param maxSize Maximum size of queue.
      */
-    DashConnection( const uint32_t maxSize );
+    LIVRECORE_API DashConnection( const uint32_t maxSize );
 
     /**
      * Sets the source context.
      * @param contextPtr Source context.
      */
-    void setSourceContext( DashContextPtr contextPtr );
+    LIVRECORE_API void setSourceContext( DashContextPtr contextPtr );
 
     /**
      * Sets the destination context.
      * @param contextPtr Destination context.
      */
-    void setDestinationContext( DashContextPtr contextPtr );
+    LIVRECORE_API void setDestinationContext( DashContextPtr contextPtr );
 
 private:
-
     DashContextPtr sourceContextPtr_;
 
     DashContextPtr destinationContextPtr_;

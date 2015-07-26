@@ -21,6 +21,7 @@
 #ifndef _VolumeRendererParameters_h_
 #define _VolumeRendererParameters_h_
 
+#include <livre/Lib/api.h>
 #include <livre/core/Configuration/Parameters.h>
 
 namespace livre
@@ -28,7 +29,7 @@ namespace livre
 
 struct VolumeRendererParameters : public Parameters
 {
-    VolumeRendererParameters();
+    LIVRE_API VolumeRendererParameters();
 
     bool synchronousMode; //!< Synchronous mode
     float screenSpaceError;  //!< Screen space error
@@ -56,7 +57,7 @@ struct VolumeRendererParameters : public Parameters
     /**
      * @param volumeRendererParameters The source parameters.
      */
-    VolumeRendererParameters& operator=( const VolumeRendererParameters& params );
+    LIVRE_API VolumeRendererParameters& operator=( const VolumeRendererParameters& params );
 
 protected:
     void initialize_() final;

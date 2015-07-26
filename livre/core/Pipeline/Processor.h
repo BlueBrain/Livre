@@ -20,6 +20,7 @@
 #ifndef _Processor_h_
 #define _Processor_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <livre/core/lunchboxTypes.h>
 #include <livre/core/dashTypes.h>
@@ -41,16 +42,15 @@ class Processor : public lunchbox::Thread
     friend class ProcessorOutput;
 
 public:
+    LIVRECORE_API Processor();
 
-    Processor( );
-
-    virtual ~Processor( );
+    LIVRECORE_API virtual ~Processor();
 
     /**
      * @return The \see ProcessorInput object that is responsible for receiving data from the incoming
      * connections and delivering data.
      */
-    ProcessorInputPtr getProcessorInput_( ) { return processorInputPtr_; }
+    LIVRECORE_API ProcessorInputPtr getProcessorInput_( ) { return processorInputPtr_; }
 
    /**
      * @return The \see ProcessorInput object that is responsible for receiving data from the incoming
@@ -69,7 +69,7 @@ public:
      * @warning Casts the object to the right Connection type. If returned object is not type T, an empty
      * shared_ptr is returned.
      */
-    ProcessorOutputPtr getProcessorOutput_( ) { return processorOutputPtr_; }
+    LIVRECORE_API ProcessorOutputPtr getProcessorOutput_( ) { return processorOutputPtr_; }
 
     /**
      * @return The \see ProcessorInput object that is responsible for receiving data from the incoming
@@ -114,12 +114,12 @@ protected:
     virtual void onPostApply_( const uint32_t connection LB_UNUSED, const bool applySuccessful LB_UNUSED ) { }
 
     /** The parent thread waits for this to finish when start() is invoked. */
-    bool init() override;
+    LIVRECORE_API bool init() override;
 
     /**
      * Is called when start() method is invoked for the thread.
      */
-    void run( );
+    LIVRECORE_API void run() override;
 
     /**
      * Is called in case any initialization is needed before starting the infinite loop.

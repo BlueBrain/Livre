@@ -20,6 +20,7 @@
 #ifndef _DashContextTrait_h_
 #define _DashContextTrait_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <livre/core/dashTypes.h>
 
@@ -32,19 +33,18 @@ namespace livre
 class DashContextTrait
 {
 public:
-
     /**
      * Sets the dash context.
      * @param dashContextPtr context ptr.
      */
-    void setDashContext( DashContextPtr dashContextPtr );
+    LIVRECORE_API void setDashContext( DashContextPtr dashContextPtr );
 
     /**
      * @return The dash context.
      */
-    DashContextPtr getDashContext( );
+    LIVRECORE_API DashContextPtr getDashContext( );
 
-    virtual ~DashContextTrait() {}
+    LIVRECORE_API virtual ~DashContextTrait() {}
 
 private:
 

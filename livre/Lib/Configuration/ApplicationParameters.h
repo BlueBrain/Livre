@@ -22,6 +22,7 @@
 #define _ApplicationParameters_h_
 
 #include <livre/Lib/Configuration/ClientParameters.h>
+#include <livre/Lib/api.h>
 #include <livre/core/mathTypes.h>
 
 namespace livre
@@ -32,7 +33,7 @@ namespace livre
  */
 struct ApplicationParameters : public ClientParameters
 {
-    ApplicationParameters();
+    LIVRE_API ApplicationParameters();
 
     Vector3f cameraPosition; //!< Camera position in world space.
     Vector3f cameraLookAt; //!< Camera orientation (lookAt vector) in world space.
@@ -43,7 +44,7 @@ struct ApplicationParameters : public ClientParameters
     bool syncCamera; //!< Synchronize camera with other applications using ZEQ.
 
     /** @param parameters The source parameters. */
-    ApplicationParameters& operator=( const ApplicationParameters& parameters );
+    LIVRE_API ApplicationParameters& operator=( const ApplicationParameters& parameters );
 
 private:
     void initialize_() final;

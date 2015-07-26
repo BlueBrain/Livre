@@ -21,6 +21,7 @@
 #define _Frustum_h_
 
 
+#include <livre/core/api.h>
 #include <livre/core/mathTypes.h>
 #include <livre/core/types.h>
 #include <livre/core/Maths/Plane.h>
@@ -48,41 +49,39 @@ enum PlaneId
  */
 class Frustum
 {
-
 public:
-
-    Frustum( );
+    LIVRECORE_API Frustum();
 
     /**
      * @param id The plane id.
      * @return The frustum plane information in world coordinates.
      */
-    const Plane& getWPlane( const PlaneId id ) const;
+    LIVRECORE_API const Plane& getWPlane( const PlaneId id ) const;
 
     /**
      * @param id The plane id.
      * @return The frustum plane information in modelview coordinates.
      */
-    const Plane& getMVPlane( const PlaneId id ) const;
+    LIVRECORE_API const Plane& getMVPlane( const PlaneId id ) const;
 
     /**
      * @param worldBox AABB box.
      * @return True if box is intersecting or in the frustum.
      */
-    bool boxInFrustum( const Boxf &worldBox ) const;
+    LIVRECORE_API bool boxInFrustum( const Boxf &worldBox ) const;
 
     /**
      * @return True if Frustum is initialized
      */
-    bool isInitialized( ) const;
+    LIVRECORE_API bool isInitialized( ) const;
 
     /**
      * Initializes the Frustum parameters from the modelview and projection matrices.
      * @param modelViewMatrix 4x4 modelview matrix.
      * @param projectionMatrix 4x4 projection matrix,
      */
-    void initialize(const Matrix4f& modelViewMatrix,
-                    const Matrix4f& projectionMatrix );
+    LIVRECORE_API void initialize(const Matrix4f& modelViewMatrix,
+                              const Matrix4f& projectionMatrix );
 
     /**
      * Initializes the Frustum parameters from the modelview matrix and plane distances to eye.
@@ -94,72 +93,72 @@ public:
      * @param n near plane distance.
      * @param f far plane distance.
      */
-    void initialize( const Matrix4f& modelViewMatrix,
-                     float l, float r,
-                     float b, float t,
-                     float n, float f );
+    LIVRECORE_API void initialize( const Matrix4f& modelViewMatrix,
+                               float l, float r,
+                               float b, float t,
+                               float n, float f );
     /**
      * Resets the Frustum.
      */
-    void reset( );
+    LIVRECORE_API void reset( );
 
     /**
      * @return The modelview matrix.
      */
-    const Matrix4f& getModelViewMatrix( ) const;
+    LIVRECORE_API const Matrix4f& getModelViewMatrix( ) const;
 
     /**
      * @return The projection matrix.
      */
-    const Matrix4f& getProjectionMatrix( ) const;
+    LIVRECORE_API const Matrix4f& getProjectionMatrix( ) const;
 
     /**
      * @return The inverse modelview matrix.
      */
-    const Matrix4f& getInvModelViewMatrix( ) const;
+    LIVRECORE_API const Matrix4f& getInvModelViewMatrix( ) const;
 
     /**
      * @return The inverse projection matrix.
      */
-    const Matrix4f& getInvProjectionMatrix( ) const;
+    LIVRECORE_API const Matrix4f& getInvProjectionMatrix( ) const;
 
     /**
      * @return The modelview projection matrix.
      */
-    const Matrix4f& getModelViewProjectionMatrix( ) const;
+    LIVRECORE_API const Matrix4f& getModelViewProjectionMatrix( ) const;
 
     /**
      * @return The FOV in radians, only meaningful if frustum is symmetric.
      */
-    float getFOV( ) const;
+    LIVRECORE_API float getFOV( ) const;
 
     /**
      * @param planeId The plane to get the distance of.
      * @return The plane distance to eye.
      */
-    float getFrustumLimits( const PlaneId planeId ) const;
+    LIVRECORE_API float getFrustumLimits( const PlaneId planeId ) const;
 
     /**
      * @return The eye coordinates in world space.
      */
-    const Vector3f& getEyeCoords( ) const;
+    LIVRECORE_API const Vector3f& getEyeCoords( ) const;
 
     /**
      * @return The viewing direction in world space.
      */
-    const Vector3f& getViewDir( ) const;
+    LIVRECORE_API const Vector3f& getViewDir( ) const;
 
     /**
      * @param planeId The plane id.
      * @return The given plane center in world space.
      */
-    const Vector4f& getPlaneCenter( const PlaneId planeId ) const;
+    LIVRECORE_API const Vector4f& getPlaneCenter( const PlaneId planeId ) const;
 
     /** @return True if the two frustums are the same. */
-    bool operator == ( const Frustum& frustum ) const;
+    LIVRECORE_API bool operator == ( const Frustum& frustum ) const;
 
     /** @return True if the two frustums are not the same. */
-    bool operator != ( const Frustum& frustum ) const
+    LIVRECORE_API bool operator != ( const Frustum& frustum ) const
         { return !(*this == frustum); }
 
 private:

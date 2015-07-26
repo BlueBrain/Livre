@@ -20,6 +20,7 @@
 #ifndef _Plane_h_
 #define _Plane_h_
 
+#include <livre/core/api.h>
 #include <livre/core/mathTypes.h>
 
 namespace livre
@@ -31,14 +32,13 @@ namespace livre
 class Plane
 {
 public:
-
-    Plane( );
+    LIVRECORE_API Plane();
 
     /**
      * @param params normal vector and d value of plane. The normalization is run on the normal and value are
      * modified accordingly.
      */
-    Plane( const Vector4f& params );
+    LIVRECORE_API Plane( const Vector4f& params );
 
     /**
      * Plane defined by implicit ax + by + cz + d = 0 equation.
@@ -47,45 +47,45 @@ public:
      * @param c Plane equation parameter.
      * @param d Plane equation parameter.
      */
-    Plane( float a, float b, float c, float d );
+    LIVRECORE_API Plane( float a, float b, float c, float d );
 
     /**
      * Translates plane in the normal direction for a given distance.
      * @param distance parameter.
      * @return A new plane translated.
      */
-    Plane translate( float distance ) const;
+    LIVRECORE_API Plane translate( float distance ) const;
 
     /**
      * @param pnt is the point to compute the distance.
      * @return The shortest distance of a point to the plane.
      */
-    float distance( const Vector3f& pnt ) const;
+    LIVRECORE_API float distance( const Vector3f& pnt ) const;
 
     /**
      * @return The d parameter of the plane ( distance to origin ).
      */
-    float getd( ) const;
+    LIVRECORE_API float getd( ) const;
 
     /**
      * Normalizes the plane normal, and changes the d value as well.
      */
-    void normalize( );
+    LIVRECORE_API void normalize( );
 
     /**
      * @return The normal of the plane.
      */
-    Vector3f getNormal( ) const;
+    LIVRECORE_API Vector3f getNormal( ) const;
 
     /**
      * @return The normal of the plane. Each value of the normal vector is pozitive.
      */
-    Vector3f getAbsNormal( ) const;
+    LIVRECORE_API Vector3f getAbsNormal( ) const;
 
     /**
      * @return True if a box is completely under a plane.
      */
-    bool intersectOrUnder( const Boxf& bb ) const;
+    LIVRECORE_API bool intersectOrUnder( const Boxf& bb ) const;
 
     /**
      * Sets the parameters of the plane. Normalizes the plane normal, and changes the d value as well.
@@ -94,17 +94,17 @@ public:
      * @param c Plane normal z value.
      * @param d Plane normal d value.
      */
-    void set( const float a, const float b, const float c, const float d );
+    LIVRECORE_API void set( const float a, const float b, const float c, const float d );
 
     /**
      * @return The plane parameters.
      */
-    Vector4f getPlaneCoeffs() const;
+    LIVRECORE_API Vector4f getPlaneCoeffs() const;
 
     /*
      * Near far points of AABB are identified according to plane
      */
-    void getNearFarPoints( const Boxf& bb, Vector3f& near, Vector3f& far ) const;
+    LIVRECORE_API void getNearFarPoints( const Boxf& bb, Vector3f& near, Vector3f& far ) const;
 
 private:
 

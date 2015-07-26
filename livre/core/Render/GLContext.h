@@ -20,6 +20,7 @@
 #ifndef _GLContext_h_
 #define _GLContext_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <livre/core/lunchboxTypes.h>
 #include <boost/enable_shared_from_this.hpp>
@@ -33,16 +34,15 @@ namespace livre
 class GLContext : public boost::enable_shared_from_this< GLContext >
 {
 public:
+    LIVRECORE_API GLContext();
 
-    GLContext( );
-
-    virtual ~GLContext( );
+    LIVRECORE_API virtual ~GLContext();
 
     /**
      * Shares the current context with the given context.
      * @param dstContextPtr The destination context to share the context with. It is also added to the list.
      */
-    void shareContext( GLContextPtr dstContextPtr );
+    LIVRECORE_API void shareContext( GLContextPtr dstContextPtr );
 
     /**
      * Makes the context current.
@@ -57,7 +57,7 @@ public:
     /**
      * Gets the current context
      */
-    static const GLContext* getCurrent();
+    LIVRECORE_API static const GLContext* getCurrent();
 
     /**
      * Set a global glew context to used it whenever OpenGL function pointers
@@ -66,10 +66,10 @@ public:
      * As there is only a single glew context managed by this class, this won't
      * work in a multi GPU scenario where per GPU glew contexts are required.
      */
-    static void glewSetContext( const GLEWContext* );
+    LIVRECORE_API static void glewSetContext( const GLEWContext* );
 
     /** @return the global glew context, @see glewSetContext */
-    static const GLEWContext* glewGetContext();
+    LIVRECORE_API static const GLEWContext* glewGetContext();
 
 protected:
 

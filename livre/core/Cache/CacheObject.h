@@ -20,6 +20,7 @@
 #ifndef _CacheObject_h_
 #define _CacheObject_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <livre/core/lunchboxTypes.h>
 #include <livre/core/Util/ThreadClock.h>
@@ -35,13 +36,11 @@ namespace livre
 
 class CacheObject
 {
-
 public:
-
     /**
      * @return True if the object is valid.
      */
-    bool isValid( ) const;
+    LIVRECORE_API bool isValid( ) const;
 
     /**
      * @return The unique cache id.
@@ -52,13 +51,13 @@ public:
      * Loads the object to cache ( if the reference count is more than 1, it is not unloaded ).
      * Function is thread safe for loading.
      */
-    void cacheLoad( );
+    LIVRECORE_API void cacheLoad( );
 
     /**
      * Unloads the object from the memory, if there are not any references. Function is threadsafe
      * for unloading.
      */
-    void cacheUnload( );
+    LIVRECORE_API void cacheUnload( );
 
     /**
      * @return The memory size of the object in bytes.
@@ -68,34 +67,34 @@ public:
     /**
      * @return The last time object is used.
      */
-    double getLastUsed( ) const;
+    LIVRECORE_API double getLastUsed( ) const;
 
     /**
      * @return The last time object is loaded.
      */
-    double getLoadTime( ) const;
+    LIVRECORE_API double getLoadTime( ) const;
 
     /**
      * @return The object is unloadable, where \see Cache cannot unload it.
      */
-    bool isUnloadable( ) const;
+    LIVRECORE_API bool isUnloadable( ) const;
 
     /**
      * @return The object is loaded in cache. The function is thread safe.
      */
-    bool isLoaded( ) const;
+    LIVRECORE_API bool isLoaded( ) const;
 
     /**
      * setUnloadable Sets the objects unloadablity.
      * @param unloadable If true, object can not be unloaded.
      */
-    void setUnloadable( bool unloadable );
+    LIVRECORE_API void setUnloadable( bool unloadable );
 
     /**
      * getReferenceCount_ Should not be called by user. The function is threadsafe.
      * @return The number of references to CacheObject.
      */
-    uint32_t getReferenceCount_( ) const;
+    LIVRECORE_API uint32_t getReferenceCount_( ) const;
 
     /**
      * updateLastUsed_ Should not be called by user.
@@ -106,33 +105,33 @@ public:
     /**
      * updateLastUsedWithCurrentTime_ Updates the last used time with current time.
      */
-    void updateLastUsedWithCurrentTime_( );
+    LIVRECORE_API void updateLastUsedWithCurrentTime_( );
 
     /**
      * resetLastUsed_ Resets the last used time to 0.
      */
     void resetLastUsed_( );
 
-    virtual ~CacheObject() { }
+    LIVRECORE_API virtual ~CacheObject() { }
 
     /**
      * Register an observer for operations done on the object.
      * @param observer The observer to add.
      */
-    void registerObserver( CacheObjectObserver* observer );
+    LIVRECORE_API void registerObserver( CacheObjectObserver* observer );
 
     /**
      * Unregisters an observer from the object
      * @param observer The observer to remove.
      */
-    void unregisterObserver( CacheObjectObserver* observer );
+    LIVRECORE_API void unregisterObserver( CacheObjectObserver* observer );
 
 protected:
 
     friend class Cache;
     friend class CacheStatistics;
 
-    CacheObject( );
+    LIVRECORE_API CacheObject();
 
     /**
      * Implemented by the derived class, for loading data to memory. Thread safety is satisfied for
@@ -163,9 +162,8 @@ protected:
     CacheObject* getUnconst_( ) const { return const_cast< CacheObject * >( this ); }
 
 private:
-
-    void increaseReference_( );
-    void decreaseReference_( );
+    LIVRECORE_API void increaseReference_( );
+    LIVRECORE_API void decreaseReference_( );
 
     friend void intrusive_ptr_add_ref( CacheObject *object ) { object->increaseReference_( ); }
     friend void intrusive_ptr_release( CacheObject *object ) { object->decreaseReference_( ); }

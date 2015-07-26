@@ -21,6 +21,7 @@
 #define _DashTree_h_
 
 #include <boost/noncopyable.hpp>
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <livre/core/dashTypes.h>
 
@@ -38,40 +39,39 @@ namespace detail
 class DashTree : public boost::noncopyable
 {
 public:
-
-    DashTree( ConstVolumeDataSourcePtr dataSource );
-    ~DashTree();
+    LIVRECORE_API DashTree( ConstVolumeDataSourcePtr dataSource );
+    LIVRECORE_API ~DashTree();
 
     /**
      * @return Returns the data source
      */
-    ConstVolumeDataSourcePtr getDataSource( ) const;
+    LIVRECORE_API ConstVolumeDataSourcePtr getDataSource( ) const;
 
     /**
      * Creates a new context, registers it and maps its data to already registered contexts.
      * @return Returns a new dash context
      */
-    DashContextPtr createContext();
+    LIVRECORE_API DashContextPtr createContext();
 
     /**
      * @return The render status of the dash tree.
      */
-    const DashRenderStatus& getRenderStatus() const;
+    LIVRECORE_API const DashRenderStatus& getRenderStatus() const;
 
     /**
      * @return The render status of the dash tree.
      */
-    DashRenderStatus& getRenderStatus();
+    LIVRECORE_API DashRenderStatus& getRenderStatus();
 
     /**
      * @return parent of the render node. If there is no parent empty NodePtr is returned.
      */
-    const dash::NodePtr getParentNode( const NodeId& nodeId );
+    LIVRECORE_API const dash::NodePtr getParentNode( const NodeId& nodeId );
 
     /**
      * @return a node by its nodeId, creates a new one if it does not exist.
      */
-    dash::NodePtr getDashNode( const NodeId& nodeId );
+    LIVRECORE_API dash::NodePtr getDashNode( const NodeId& nodeId );
 
 private:
     detail::DashTree* _impl;

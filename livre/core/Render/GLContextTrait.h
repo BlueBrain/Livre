@@ -20,6 +20,7 @@
 #ifndef _GLContextTrait_h_
 #define _GLContextTrait_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 
 namespace livre
@@ -28,25 +29,25 @@ namespace livre
 class GLContextTrait
 {
 public:
-    GLContextTrait( GLContextPtr glContextPtr );
+    LIVRECORE_API GLContextTrait( GLContextPtr glContextPtr );
 
-    virtual ~GLContextTrait() { }
+    LIVRECORE_API virtual ~GLContextTrait() { }
 
     /**
      * Sets the GL context.
      * @param glContextPtr context ptr.
      */
-    void setGLContext( GLContextPtr glContextPtr );
+    LIVRECORE_API void setGLContext( GLContextPtr glContextPtr );
 
     /**
      * @return The GL context.
      */
-    GLContextPtr getGLContext( );
+    LIVRECORE_API GLContextPtr getGLContext( );
 
     /**
      * @return The GL context.
      */
-    ConstGLContextPtr getGLContext( ) const;
+    LIVRECORE_API ConstGLContextPtr getGLContext( ) const;
 
 protected:
     GLContextPtr glContextPtr_;

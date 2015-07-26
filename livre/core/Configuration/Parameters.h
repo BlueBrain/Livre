@@ -20,6 +20,7 @@
 #ifndef _Parameters_h_
 #define _Parameters_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <livre/core/lunchboxTypes.h>
 #include <livre/core/Configuration/Configuration.h>
@@ -38,15 +39,14 @@ namespace livre
 class Parameters : public co::Serializable
 {
 public:
-
-    virtual ~Parameters( );
+    LIVRECORE_API virtual ~Parameters( );
 
     /**
      * Initializes parameters from a filename.
      * @param filename The config file name.
      * @return True if file can be parsed.
      */
-    bool initialize( const std::string& filename );
+    LIVRECORE_API bool initialize( const std::string& filename );
 
     /**
      * Initializes parameters from arguments.
@@ -54,24 +54,23 @@ public:
      * @param argv Argument list.
      * @return True if arguments can be parsed.
      */
-    bool initialize( const int32_t argc, char **argv );
+    LIVRECORE_API bool initialize( const int32_t argc, char **argv );
 
     /**
      * @return The parameter name.
      */
-    const std::string& getParameterName( ) const;
+    LIVRECORE_API const std::string& getParameterName( ) const;
 
     /**
      * @return The configuration of parameters.
      */
-    const Configuration& getConfiguration( ) const;
+    LIVRECORE_API const Configuration& getConfiguration( ) const;
 
 protected:
-
     /**
      * @param configGroupName Configuration group name.
      */
-    Parameters( const std::string& configGroupName );
+    LIVRECORE_API Parameters( const std::string& configGroupName );
 
     /**
      * Initializes member variables from configuration variables.

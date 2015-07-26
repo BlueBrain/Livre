@@ -20,6 +20,7 @@
 #ifndef _DashProcessorOutput_h_
 #define _DashProcessorOutput_h_
 
+#include <livre/core/api.h>
 #include <livre/Lib/types.h>
 #include <livre/core/dashTypes.h>
 #include <livre/core/Pipeline/ProcessorOutput.h>
@@ -36,34 +37,32 @@ typedef std::vector< dash::Commit > CommitVector;
 class DashProcessorOutput : public ProcessorOutput, protected DashContextTrait
 {
 public:
-
     /**
      * @param processor Adds DashProcessorOutput to the destination processor for connections.
      */
-    DashProcessorOutput( DashProcessor& processor );
+    LIVRECORE_API DashProcessorOutput( DashProcessor& processor );
 
     /**
      * Adds a connection.
      * @param connectionId Connection id.
      * @param connection The connection between processors.
      */
-    bool addConnection( const uint32_t connectionId, DashConnectionPtr connection );
+    LIVRECORE_API bool addConnection( const uint32_t connectionId, DashConnectionPtr connection );
 
     /**
      * Removes a connection.
      * @param connectionId Connection id.
      * @return True if connection exists and can be removed.
      */
-    bool removeConnection( const uint32_t connectionId );
+    LIVRECORE_API bool removeConnection( const uint32_t connectionId );
 
     /**
      * @param connectionId Connection id.
      * @return The connection. If id is not valid, connection is empty.
      */
-    DashConnectionPtr getConnection( const uint32_t connectionId );
+    LIVRECORE_API DashConnectionPtr getConnection( const uint32_t connectionId );
 
 private:
-
     virtual CommitState commit_( const uint32_t outputConnection );
 
     DashConnectionPtrMap connectionMap_;

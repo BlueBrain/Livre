@@ -21,6 +21,7 @@
 #define _DashProcessor_h_
 
 #include <dash/dash.h>
+#include <livre/core/api.h>
 #include <livre/core/Pipeline/Processor.h>
 #include <livre/core/Dash/DashContextTrait.h>
 
@@ -35,37 +36,33 @@ namespace livre
 class DashProcessor : public Processor, public DashContextTrait
 {
 public:
-
-    DashProcessor( );
+    LIVRECORE_API DashProcessor();
 
 protected:
+    /**
+     * Checks whether connection is valid.
+     * @param connection connection id
+     * @return False if connection is not valid
+     */
+    LIVRECORE_API bool onPreApply_( const uint32_t connection );
 
     /**
      * Checks whether connection is valid.
      * @param connection connection id
      * @return False if connection is not valid
      */
-    bool onPreApply_( const uint32_t connection );
-
-    /**
-     * Checks whether connection is valid.
-     * @param connection connection id
-     * @return False if connection is not valid
-     */
-    bool onPreCommit_( const uint32_t connection );
+    LIVRECORE_API bool onPreCommit_( const uint32_t connection );
 
     /**
      * Is executed when the dash context is set.
      */
-    virtual void onSetDashContext_( );
-
+    LIVRECORE_API virtual void onSetDashContext_();
 
     /**
      * Initializes the dash context for thread.
      * @return True if thread initialization is successfull.
      */
-    virtual bool initializeThreadRun_( );
-
+    LIVRECORE_API virtual bool initializeThreadRun_( );
 };
 
 }

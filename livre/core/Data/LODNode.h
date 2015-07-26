@@ -20,6 +20,7 @@
 #ifndef _LODNode_h_
 #define _LODNode_h_
 
+#include <livre/core/api.h>
 #include <livre/core/Data/NodeId.h>
 #include <livre/core/mathTypes.h>
 
@@ -32,11 +33,10 @@ namespace livre
 class LODNode
 {
 public:
-
     /**
      * Constructs an invalid LODNode.
      */
-    LODNode();
+    LIVRECORE_API LODNode();
 
     /**
      * Computes the world position from given information.
@@ -44,9 +44,9 @@ public:
      * @param blockSize Block size in voxels.
      * @param levelTotalBlockDimensions Total number of blocks in the corresponding tree level.
      */
-    LODNode( const NodeId nodeId,
-             const Vector3i& blockSize,
-             const Vector3i& levelTotalBlockDimensions );
+    LIVRECORE_API LODNode( const NodeId nodeId,
+                       const Vector3i& blockSize,
+                       const Vector3i& levelTotalBlockDimensions );
 
     /**
      * Computes the world position from given information.
@@ -54,9 +54,9 @@ public:
      * @param blockSize Block size in voxels.
      * @param worldBox Node position in the world space.
      */
-    LODNode( const NodeId nodeId,
-             const Vector3i& blockSize,
-             const Boxf& worldBox );
+    LIVRECORE_API LODNode( const NodeId nodeId,
+                       const Vector3i& blockSize,
+                       const Boxf& worldBox );
 
     /**
      * Get the absolute node position wrt its level.
@@ -66,49 +66,49 @@ public:
      *
      * @return Blockwise position level resolution.
      */
-    Vector3i getAbsolutePosition() const { return nodeId_.getPosition(); }
+    LIVRECORE_API Vector3i getAbsolutePosition() const { return nodeId_.getPosition(); }
 
     /** @return the relative node position in normalized coordinates. */
-    Vector3f getRelativePosition() const;
+    LIVRECORE_API Vector3f getRelativePosition() const;
 
     /**
      * @return Voxel extents in reflevel resolution.
      */
-    const Boxui& getVoxelBox( ) const { return localVoxelBox_; }
+    LIVRECORE_API const Boxui& getVoxelBox( ) const { return localVoxelBox_; }
 
     /**
      * @return The box in world coordinates.
      */
-    const Boxf& getWorldBox( ) const { return worldBox_; }
+    LIVRECORE_API const Boxf& getWorldBox( ) const { return worldBox_; }
 
     /**
      * @return The tree level.
      */
-    int32_t getRefLevel( ) const { return nodeId_.getLevel(); }
+    LIVRECORE_API int32_t getRefLevel( ) const { return nodeId_.getLevel(); }
 
     /**
      * @return The unique node id.
      */
-    NodeId getNodeId( ) const { return nodeId_; }
+    LIVRECORE_API NodeId getNodeId( ) const { return nodeId_; }
 
-    const Vector3i& getBlockSize() const { return blockSize_; } //!< @internal
+    LIVRECORE_API const Vector3i& getBlockSize() const { return blockSize_; } //!< @internal
 
     /**
      * @return True if node is valid.
      */
-    bool isValid( ) const { return nodeId_.isValid(); }
+    LIVRECORE_API bool isValid( ) const { return nodeId_.isValid(); }
 
     /**
      * @param node The node to compare.
      * @return True if nodeId's are same.
      */
-    bool operator==( const LODNode& node ) const {  return nodeId_ == node.nodeId_; }
+    LIVRECORE_API bool operator==( const LODNode& node ) const {  return nodeId_ == node.nodeId_; }
 
     /**
      * @param parentNode Parent node.
      * @return True if the node is parent.
      */
-    bool isParent( const LODNode& parentNode ) const;
+    LIVRECORE_API bool isParent( const LODNode& parentNode ) const;
 
     /**
      * Single empty node.

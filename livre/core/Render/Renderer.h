@@ -20,6 +20,7 @@
 #ifndef _Renderer_h_
 #define _Renderer_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <livre/core/Render/TexturePool.h>
 #include <livre/core/Render/TextureState.h>
@@ -41,34 +42,33 @@ public:
      * @param frustum The frustum to render the list of bricks.
      * @param brickList The list of render bricks.
      */
-    void render( const GLWidget& glWidget,
-                 const View& view,
-                 const Frustum& frustum,
-                 const RenderBricks& brickList );
+    LIVRECORE_API void render( const GLWidget& glWidget,
+                           const View& view,
+                           const Frustum& frustum,
+                           const RenderBricks& brickList );
 
     /**
      * @return The OpenGL GPU internal format of the texture data.
      */
-    int32_t getInternalFormat() const;
+    LIVRECORE_API int32_t getInternalFormat() const;
 
     /**
      * @return The OpenGL format of the texture data kept in memory. Channel count etc.
      */
-    uint32_t getGPUDataType() const;
+    LIVRECORE_API uint32_t getGPUDataType() const;
 
     /**
      * @return The OpenGL data type of the texture data.
      */
-    uint32_t getFormat() const;
+    LIVRECORE_API uint32_t getFormat() const;
 
 protected:
-
     /**
      * Orders the render bricks front to back ( default ).
      * @param bricks The list of bricks to be ordered.
      * @param frustum The frustum to order the bricks for.
      */
-    virtual void order_( RenderBricks& bricks, const Frustum& frustum ) const;
+    LIVRECORE_API virtual void order_( RenderBricks& bricks, const Frustum& frustum ) const;
 
     /**
      * Is called on start of each rendering.
@@ -89,10 +89,10 @@ protected:
      * @param frustum The frustum to order the bricks for.
      * @param brickList The list of ordered bricks.
     */
-    virtual void onFrameRender_( const GLWidget& glWidget,
-                                 const View& view,
-                                 const Frustum& frustum,
-                                 const RenderBricks& brickList );
+    LIVRECORE_API virtual void onFrameRender_( const GLWidget& glWidget,
+                                           const View& view,
+                                           const Frustum& frustum,
+                                           const RenderBricks& brickList );
 
     /**
      * Is called on end of each rendering.
@@ -123,11 +123,11 @@ protected:
      * @param gpuDataType The OpenGL data type.
      * @param internalFormat The OpenGL internal format.
      */
-    Renderer( const uint32_t nComponents,
-              const uint32_t gpuDataType,
-              const int32_t internalFormat );
+    LIVRECORE_API Renderer( const uint32_t nComponents,
+                        const uint32_t gpuDataType,
+                        const int32_t internalFormat );
 
-    virtual ~Renderer( );
+    LIVRECORE_API virtual ~Renderer();
 
 private:
     uint32_t gpuDataType_;

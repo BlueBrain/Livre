@@ -22,6 +22,7 @@
 
 #include <lunchbox/clock.h>
 
+#include <livre/core/api.h>
 #include <livre/core/mathTypes.h>
 #include <livre/core/defines.h>
 #include <livre/core/Data/MemoryUnit.h>
@@ -38,51 +39,48 @@ namespace detail
 class VolumeDataSource : boost::noncopyable
 {
 public:
-
     /**
      * VolumeDataSource constructor.
      * @param uri Initialization URI. The volume data source is generated accordingly
      * @param accessMode The access mode.
      */
-    VolumeDataSource( const lunchbox::URI& uri,
-                      const AccessMode accessMode = MODE_READ );
+    LIVRECORE_API VolumeDataSource( const lunchbox::URI& uri,
+                                const AccessMode accessMode = MODE_READ );
 
-    ~VolumeDataSource();
+    LIVRECORE_API ~VolumeDataSource();
 
     /** Load all plugin DSOs. */
-    static void loadPlugins();
+    LIVRECORE_API static void loadPlugins();
 
     /** Unload all plugin DSOs. */
-    static void unloadPlugins();
+    LIVRECORE_API static void unloadPlugins();
 
     /**
      * @return The volume information.
      */
-    const VolumeInformation& getVolumeInformation() const;
+    LIVRECORE_API const VolumeInformation& getVolumeInformation() const;
 
     /** Initializes the GL specific functions. */
-    bool initializeGL();
+    LIVRECORE_API bool initializeGL();
 
     /**
      * Read the data for a given node.
      * @param node LODNode to be read.
      * @return The memory block containing the data for the node.
      */
-    MemoryUnitPtr getData( const LODNode& node );
+    LIVRECORE_API MemoryUnitPtr getData( const LODNode& node );
 
     /** @copydoc getData( const LODNode& node ) */
-    ConstMemoryUnitPtr getData( const LODNode& node ) const;
+    LIVRECORE_API ConstMemoryUnitPtr getData( const LODNode& node ) const;
 
     /**
      * @param nodeId The nodeId to get the node for.
      * @return The LODNode for the ID or 0 if not found.
      */
-    ConstLODNodePtr getNode( const NodeId nodeId ) const;
+    LIVRECORE_API ConstLODNodePtr getNode( const NodeId nodeId ) const;
 
 private:
-
     detail::VolumeDataSource* _impl;
-
 };
 
 }

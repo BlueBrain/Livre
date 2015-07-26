@@ -41,7 +41,6 @@ GLSLShaders::~GLSLShaders()
         glDeleteProgram( _program );
 }
 
-
 GLSLShaders::Handle GLSLShaders::getProgram() const
 {
     return _program;

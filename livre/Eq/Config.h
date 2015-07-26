@@ -24,6 +24,7 @@
 #define _Config_h_
 
 #include <livre/core/mathTypes.h>
+#include <livre/Eq/api.h>
 #include <livre/Eq/types.h>
 #include <eq/config.h> // base class
 
@@ -38,7 +39,7 @@ public:
     /**
      * @param parent Parent server object.
      */
-    Config( eq::ServerPtr parent );
+    LIVREEQ_API Config( eq::ServerPtr parent );
 
     /** @return The per-frame data. */
     FrameData& getFrameData();
@@ -117,7 +118,7 @@ public:
     Matrix4f convertFromHBPCamera( const Matrix4f& modelViewMatrix ) const;
 
 private:
-    virtual ~Config();
+    LIVREEQ_API virtual ~Config();
     bool handleEvent( const eq::ConfigEvent* event ) final;
     bool handleEvent( eq::EventICommand command ) final;
     void handleEvents() final;

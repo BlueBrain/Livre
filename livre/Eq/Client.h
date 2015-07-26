@@ -24,6 +24,7 @@
 
 #include <eq/client.h>
 
+#include <livre/Eq/api.h>
 #include <livre/Eq/types.h>
 #include <livre/Lib/Configuration/ApplicationParameters.h>
 #include <livre/Lib/Configuration/VolumeRendererParameters.h>
@@ -43,19 +44,18 @@ enum LogTopics
 class Client : public eq::Client
 {
 public:
-
-    Client();
-    virtual ~Client();
+    LIVREEQ_API Client();
+    LIVREEQ_API virtual ~Client();
 
     /**
      * @return Help string
      */
-    static std::string getHelp();
+    LIVREEQ_API static std::string getHelp();
 
     /**
      * @return Version string
      */
-    static std::string getVersion();
+    LIVREEQ_API static std::string getVersion();
 
     /** @override eq::Client::initLocal() */
     bool initLocal( const int argc, char** argv ) override;
@@ -66,7 +66,7 @@ public:
      * @param argv Argument list.
      * @return The exit code.
      */
-    int32_t run();
+    LIVREEQ_API int32_t run();
 
     const ApplicationParameters& getApplicationParameters() const
         { return _applicationParameters; }

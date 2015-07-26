@@ -54,6 +54,7 @@ public:
 
     boost::scoped_ptr< VolumeDataSourcePlugin > plugin;
 };
+
 }
 
 VolumeDataSource::VolumeDataSource( const lunchbox::URI& uri,

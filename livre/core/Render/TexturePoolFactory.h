@@ -20,6 +20,7 @@
 #ifndef _TexturePoolGroup_h_
 #define _TexturePoolGroup_h_
 
+#include <livre/core/api.h>
 #include <livre/core/mathTypes.h>
 
 namespace livre
@@ -31,13 +32,11 @@ namespace livre
  */
 class TexturePoolFactory
 {
-
 public:
-
     /**
      * @param internalFormat Internal OpenGL format for the texture, which defines the memory usage of a texture.
      */
-    TexturePoolFactory( const int32_t internalFormat );
+    LIVRECORE_API TexturePoolFactory( const int32_t internalFormat );
 
     /**
      * Generates/Retrieves a texture pool for the given format.
@@ -46,9 +45,9 @@ public:
      * @param gpuDataType Returns the OpenGL data type of the texture data.
      * @return The texture pool with given parameters.
      */
-    TexturePoolPtr findTexturePool( const Vector3i& maxBlockSize,
-                                    const uint32_t format,
-                                    const uint32_t gpuDataType );
+    LIVRECORE_API TexturePoolPtr findTexturePool( const Vector3i& maxBlockSize,
+                                                  const uint32_t format,
+                                                  const uint32_t gpuDataType );
 private:
 
     const int32_t internalFormat_;
