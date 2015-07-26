@@ -62,6 +62,6 @@ endif()
 
 set(LIVRELIB_INCLUDE_NAME livre/Lib)
 common_library(LivreLib)
-if(NOT APPLE)
+if(CMAKE_COMPILER_IS_GNUCXX_PURE)
   set_target_properties(LivreLib PROPERTIES LINK_FLAGS "-Wl,--no-undefined")
 endif()

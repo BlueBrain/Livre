@@ -69,19 +69,18 @@ public:
     void releaseTexture( TextureStatePtr textureState );
 
 private:
+    TexturePool( const Vector3i& maxBlockSize,
+                 const int internalFormat,
+                 const uint32_t format,
+                 const uint32_t gpuDataType );
 
-     TexturePool( const Vector3i& maxBlockSize,
-                  const int internalFormat,
-                  const uint32_t format,
-                  const uint32_t gpuDataType );
+    std::vector< uint32_t > textureStack_;
 
-     std::vector< uint32_t > textureStack_;
+    const Vector3i maxBlockSize_;
 
-     const Vector3i maxBlockSize_;
-
-     const int32_t internalFormat_;
-     const uint32_t format_;
-     const uint32_t gpuDataType_;
+    const int32_t internalFormat_;
+    const uint32_t format_;
+    const uint32_t gpuDataType_;
 };
 
 

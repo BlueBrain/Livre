@@ -69,12 +69,15 @@ public:
             return;
         }
         _windowContext.reset( new EqContext( _window ));
+
+        GLContext::glewSetContext( _window->glewGetContext( ));
     }
 
     void configInit()
     {
         initializePipelineProcessors();
         initializePipelineConnections();
+        startUploadProcessors();
     }
 
     void configExitGL()
@@ -110,11 +113,18 @@ public:
 
     void startUploadProcessors()
     {
+#ifdef _MSC_VER
+        // https://www.opengl.org/discussion_boards/showthread.php/152648-wglShareLists-failing
+        LBCHECK( wglMakeCurrent( 0,0 ));
+#endif
         if( !_textureUploadProcessorPtr->isRunning( ))
             _textureUploadProcessorPtr->start();
 
         if( !_dataUploadProcessorPtr->isRunning( ))
             _dataUploadProcessorPtr->start();
+#ifdef _MSC_VER
+        _window->makeCurrent( false );
+#endif
     }
 
     void stopUploadProcessors()
@@ -160,7 +170,6 @@ public:
             new TextureUploadProcessor( dashTree, _windowContext,
                                         textureUploadContext,
                                         pipe->getFrameData()->getVRParameters( )));
-        startUploadProcessors();
     }
 
     void releasePipelineProcessors()
@@ -229,7 +238,7 @@ Window::Window( eq::Pipe *parent )
 bool Window::configInit( const eq::uint128_t& initId )
 {
     std::stringstream windowTitle;
-    windowTitle << "Livre " << Version::getString();
+    windowTitle << "Livre " << livrecore::Version::getString();
     setName( windowTitle.str( ));
 
     // Enforce alpha channel, since we need one for rendering

@@ -132,6 +132,8 @@ bool TextureUploadProcessor::initializeThreadRun_()
 {
     setName( "TexUp" );
     _textureCache.setMaximumMemory( _vrParameters->maxGPUCacheMemoryMB * LB_1MB );
+    LBASSERT( getGLContext( ));
+    _shareContext->shareContext( getGLContext( ));
     return DashProcessor::initializeThreadRun_();
 }
 
@@ -169,12 +171,8 @@ void TextureUploadProcessor::_loadData()
 
 void TextureUploadProcessor::runLoop_()
 {
-    LBASSERT( getGLContext( ));
     if( GLContext::getCurrent() != getGLContext().get( ))
-    {
-        _shareContext->shareContext( getGLContext( ));
         getGLContext()->makeCurrent();
-    }
 
     processorInputPtr_->applyAll( CONNECTION_ID );
     _checkThreadOperation();

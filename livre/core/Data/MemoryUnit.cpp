@@ -30,12 +30,12 @@ MemoryUnit::~MemoryUnit()
     // release(); is virtual and can't be called from dtor
 }
 
-ConstMemoryUnit::ConstMemoryUnit( const uint8_t* ptr, const uint32_t size )
+ConstMemoryUnit::ConstMemoryUnit( const uint8_t* ptr, const size_t size )
     : ptr_( ptr ), size_( size )
 {
 }
 
-uint32_t ConstMemoryUnit::getMemSize() const
+size_t ConstMemoryUnit::getMemSize() const
 {
     return size_;
 }
@@ -49,18 +49,18 @@ const uint8_t* ConstMemoryUnit::getData_() const
 AllocMemoryUnit::AllocMemoryUnit()
 {}
 
-uint32_t AllocMemoryUnit::getMemSize() const
+size_t AllocMemoryUnit::getMemSize() const
 {
     return _rawData.getSize();
 }
 
-uint32_t AllocMemoryUnit::getAllocSize() const
+size_t AllocMemoryUnit::getAllocSize() const
 {
     return _rawData.getMaxSize();
 }
 
-void AllocMemoryUnit::alloc( const uint32_t allocSizePerElement,
-                             const uint32_t dataSize )
+void AllocMemoryUnit::alloc( const size_t allocSizePerElement,
+                             const size_t dataSize )
 {
     LB_TS_THREAD( thread_ );
     _rawData.reset( allocSizePerElement * dataSize );

@@ -43,8 +43,8 @@ public:
      * @param allocSizePerElement Allocation size per element of the array.
      * @param dataSize Number of elements in the array.
      */
-    virtual void alloc( const uint32_t allocSizePerElement LB_UNUSED,
-                        const uint32_t dataSize LB_UNUSED ) = 0;
+    virtual void alloc( const size_t allocSizePerElement LB_UNUSED,
+                        const size_t dataSize LB_UNUSED ) = 0;
 
     /** Release memory */
     virtual void release() = 0;
@@ -60,10 +60,10 @@ public:
     /**
      * @return The size of the memory accessed.
      */
-    virtual uint32_t getMemSize() const = 0;
+    virtual size_t getMemSize() const = 0;
 
     /** @return The allocated heap size. */
-    virtual uint32_t getAllocSize() const = 0;
+    virtual size_t getAllocSize() const = 0;
 
 protected:
     /** @return The unsigned char memory ptr to data */
@@ -78,11 +78,11 @@ class NoMemoryUnit : public MemoryUnit
 {
 public:
     virtual ~NoMemoryUnit() {}
-    void alloc( const uint32_t, const uint32_t ) final { LBDONTCALL; }
+    void alloc( const size_t, const size_t ) final { LBDONTCALL; }
     void release() final {}
 
-    uint32_t getMemSize() const final { return 0; }
-    uint32_t getAllocSize() const final { return 0; }
+    size_t getMemSize() const final { return 0; }
+    size_t getAllocSize() const final { return 0; }
 
 private:
     const uint8_t* getData_() const final { LBDONTCALL; return 0; }
@@ -95,19 +95,19 @@ private:
 class ConstMemoryUnit : public MemoryUnit
 {
 public:
-    ConstMemoryUnit( const uint8_t* ptr, const uint32_t size );
+    ConstMemoryUnit( const uint8_t* ptr, const size_t size );
 
 protected:
-    uint32_t getMemSize() const final;
-    uint32_t getAllocSize() const final { return getMemSize(); }
+    size_t getMemSize() const final;
+    size_t getAllocSize() const final { return getMemSize(); }
     const uint8_t* getData_() const final;
     uint8_t* getData_() final { LBDONTCALL; return 0; }
 
-    void alloc( const uint32_t, const uint32_t ) final { LBDONTCALL; }
+    void alloc( const size_t, const size_t ) final { LBDONTCALL; }
     void release() final {}
 
     const uint8_t* const ptr_;
-    const uint32_t size_;
+    const size_t size_;
 };
 
 /**
@@ -124,7 +124,7 @@ public:
      * @param size Number of the elements in the source data ptr.
      */
     template< class T >
-    void allocAndSetData( const T* sourceData, const uint32_t size )
+    void allocAndSetData( const T* sourceData, const size_t size )
     {
         alloc( sizeof( T ), size );
         ::memcpy( _rawData.getData(), sourceData, size * sizeof( T ) );
@@ -145,14 +145,14 @@ public:
      * @param allocSizePerElement Allocation size per element of the array.
      * @param dataSize Number of elements in the array.
      */
-    void alloc( const uint32_t allocSizePerElement, const uint32_t dataSize )
+    void alloc( const size_t allocSizePerElement, const size_t dataSize )
         final;
 
     /** Release memory. */
     void release() final;
 
-    uint32_t getMemSize() const final;
-    uint32_t getAllocSize() const final;
+    size_t getMemSize() const final;
+    size_t getAllocSize() const final;
 
 private:
     const uint8_t* getData_() const final;

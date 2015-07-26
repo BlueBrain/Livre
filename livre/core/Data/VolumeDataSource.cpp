@@ -66,7 +66,7 @@ void VolumeDataSource::loadPlugins()
 {
     unloadPlugins();
     _plugins = detail::VolumeDataSource::PluginFactory::getInstance().load(
-        LIVRE_VERSION_ABI, lunchbox::getLibraryPaths(), "Livre.*Source" );
+        LIVRECORE_VERSION_ABI, lunchbox::getLibraryPaths(), "Livre.*Source" );
 }
 
 void VolumeDataSource::unloadPlugins()

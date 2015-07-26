@@ -63,7 +63,7 @@ public:
     /**
      * @return The memory size of the object in bytes.
      */
-    virtual uint32_t getCacheSize( ) const = 0;
+    virtual size_t getCacheSize( ) const = 0;
 
     /**
      * @return The last time object is used.

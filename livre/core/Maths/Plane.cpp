@@ -77,6 +77,9 @@ void Plane::set( const float a, const float b, const float c, const float d )
 
 Vector4f Plane::getPlaneCoeffs() const { return Vector4f( a_, b_, c_, d_ ); }
 
+#undef far
+#undef near
+
 void Plane::getNearFarPoints( const Boxf& bb,
                               Vector3f& near,
                               Vector3f& far) const

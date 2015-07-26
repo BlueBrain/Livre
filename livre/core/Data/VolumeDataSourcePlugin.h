@@ -21,6 +21,7 @@
 #ifndef _VolumeDataSourcePlugin_h_
 #define _VolumeDataSourcePlugin_h_
 
+#include <livre/core/api.h>
 #include <livre/core/Data/NodeId.h>
 #include <livre/core/Data/VolumeInformation.h>
 
@@ -121,5 +122,13 @@ std::string lexical_cast( const livre::VolumeDataSourcePluginData& data )
     return lexical_cast< std::string >( data.getURI( ));
 }
 }
+
+// http://stackoverflow.com/questions/1566963/singleton-in-a-dll
+#ifdef _MSC_VER
+#  include <lunchbox/pluginFactory.h>
+   template class LIVRECORE_API
+   lunchbox::PluginFactory< livre::VolumeDataSourcePlugin,
+                            livre::VolumeDataSourcePluginData >;
+#endif
 
 #endif // _VolumeDataSourcePlugin_h_

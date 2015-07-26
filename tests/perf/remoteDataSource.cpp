@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE( testRemote )
     lunchbox::Strings result;
     try
     {
-        for( size_t i = 32; i < 1024; i = i << 1 )
+        for( uint32_t i = 32; i < 1024; i = i << 1 )
         {
             lunchbox::Clock clock;
             livre::VolumeDataSource dataSource(
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE( testRemote )
 
             const livre::VolumeInformation& info =
                 dataSource.getVolumeInformation();
-            const vmml::Vector3i block( i );
+            const vmml::Vector3ui block( i );
             livre::Boxf worldBox( vmml::Vector3i( 0.f ) ,
                                   vmml::Vector3i( 1.f ));
             livre::LODNode node( livre::NodeId( 0, block ),

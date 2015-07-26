@@ -59,7 +59,7 @@ bool ProcessorOutput::isBlocked( const uint32_t outputConnection /* =0 */ ) cons
     return it->second;
 }
 
-uint32_t ProcessorOutput::getNumberOfConnections() const
+size_t ProcessorOutput::getNumberOfConnections() const
 {
     return blockedMap_.size();
 }

@@ -24,8 +24,8 @@
 #include <boost/test/unit_test.hpp>
 #include <fstream>
 
-const std::string& tfDir = lunchbox::getExecutablePath() +
-                               "/../share/Livre/examples/";
+const std::string& tfDir = lunchbox::getRootPath() +
+                               "/share/Livre/examples/";
 
 BOOST_AUTO_TEST_CASE( testTransferFunction )
 {

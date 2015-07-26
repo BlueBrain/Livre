@@ -60,7 +60,7 @@ void LODNode::computeWorldBox_( const Vector3ui &levelTotalBlockDimensions )
     Vector3f lBoxCoordMin( getAbsolutePosition( ));
     Vector3f lBoxCoordMax( lBoxCoordMin + Vector3i( 1 ));
 
-    uint32_t index = levelTotalBlockDimensions.find_max_index( );
+    const size_t index = levelTotalBlockDimensions.find_max_index();
 
     lBoxCoordMin = lBoxCoordMin / levelTotalBlockDimensions[index];
     lBoxCoordMax = lBoxCoordMax / levelTotalBlockDimensions[index];
