@@ -32,6 +32,9 @@ set(LIVRE_DESCRIPTION "Largescale Interactive Volume Rendering Engine")
 set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)
 
 include(Common)
+if(NOT MSVC) # cppnetlib does not build on Windows
+  git_subproject(RESTBridge https://github.com/BlueBrain/RESTBridge.git f427fab)
+endif()
 
 common_package(BBPTestData)
 common_package(Boost REQUIRED COMPONENTS filesystem program_options thread
