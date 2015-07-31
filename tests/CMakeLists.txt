@@ -5,7 +5,7 @@
 include(InstallFiles)
 
 if(NOT LIVRE_USE_REMOTE_DATASOURCE)
-  list(APPEND EXCLUDE_FROM_TESTS Lib/events.cpp)
+  list(APPEND EXCLUDE_FROM_TESTS lib/events.cpp)
 endif()
 
 # Libraries to link the tests executables with
@@ -19,7 +19,7 @@ endforeach()
 
 # Create and install all the tests
 if(CMAKE_COMPILER_IS_GNUCXX_PURE)
-  set(Data_dataSource_LINK_LIBRARIES "-Wl,--no-as-needed")
+  set(data_dataSource_LINK_LIBRARIES "-Wl,--no-as-needed")
   set(perf_remoteDataSource_LINK_LIBRARIES "-Wl,--no-as-needed")
 endif()
 include(CommonCTest)

@@ -20,11 +20,11 @@
 
 #include "dataSource.h"
 
-#include <livre/core/Data/LODNode.h>
-#include <livre/core/Dash/DashRenderNode.h>
-#include <livre/core/Data/MemoryUnit.h>
+#include <livre/core/data/LODNode.h>
+#include <livre/core/dash/DashRenderNode.h>
+#include <livre/core/data/MemoryUnit.h>
 
-#include <livre/Lib/zeq/events.h>
+#include <livre/lib/zeq/events.h>
 
 #include <zeq/event.h>
 #include <zeq/publisher.h>

@@ -21,9 +21,9 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "Cache/ValidCacheObject.h"
-#include "Cache/CacheObjectObserver.h"
-#include "Cache/Cache.h"
+#include "cache/ValidCacheObject.h"
+#include "cache/CacheObjectObserver.h"
+#include "cache/Cache.h"
 
 namespace ut = boost::unit_test;
 

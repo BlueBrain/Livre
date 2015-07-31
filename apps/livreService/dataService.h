@@ -20,9 +20,9 @@
 #ifndef LIVRE_DATASERVICE_H
 #define LIVRE_DATASERVICE_H
 
-#include <livre/core/Data/LODNode.h>
-#include <livre/core/Data/VolumeDataSource.h>
-#include <livre/Lib/zeq/events.h>
+#include <livre/core/data/LODNode.h>
+#include <livre/core/data/VolumeDataSource.h>
+#include <livre/lib/zeq/events.h>
 #include <zeq/zeq.h>
 #include <lunchbox/stdExt.h>
 

@@ -15,37 +15,37 @@ set(LIVREGUI_HEADERS
   types.h
   AppSettings.h
   Controller.h
-  Editor/TransferFunctionEditor.h
-  Editor/GraphCore/AnchorGraphCore.h
-  Editor/GraphCore/DoubleGaussGraphCore.h
-  Editor/GraphCore/GaussGraphCore.h
-  Editor/GraphCore/TransferFunctionGraphCore.h
-  Editor/Graphs/AnchorGraph.h
-  Editor/Graphs/TransferFunctionGraph.h)
+  editor/TransferFunctionEditor.h
+  editor/graphcore/AnchorGraphCore.h
+  editor/graphcore/DoubleGaussGraphCore.h
+  editor/graphcore/GaussGraphCore.h
+  editor/graphcore/TransferFunctionGraphCore.h
+  editor/graphs/AnchorGraph.h
+  editor/graphs/TransferFunctionGraph.h)
 
 set(LIVREGUI_MOC_HEADERS
-  Editor/TransferFunctionEditor.h
-  Editor/Graphs/AnchorGraph.h
-  Editor/Graphs/TransferFunctionGraph.h)
+  editor/TransferFunctionEditor.h
+  editor/graphs/AnchorGraph.h
+  editor/graphs/TransferFunctionGraph.h)
 
 set(LIVREGUI_SOURCES
   Controller.cpp
-  LivreGUI.cpp
-  Editor/TransferFunctionEditor.cpp
-  Editor/GraphCore/AnchorGraphCore.cpp
-  Editor/GraphCore/DoubleGaussGraphCore.cpp
-  Editor/GraphCore/GaussGraphCore.cpp
-  Editor/GraphCore/TransferFunctionGraphCore.cpp
-  Editor/Graphs/AnchorGraph.cpp
-  Editor/Graphs/TransferFunctionGraph.cpp)
+  livreGUI.cpp
+  editor/TransferFunctionEditor.cpp
+  editor/graphcore/AnchorGraphCore.cpp
+  editor/graphcore/DoubleGaussGraphCore.cpp
+  editor/graphcore/GaussGraphCore.cpp
+  editor/graphcore/TransferFunctionGraphCore.cpp
+  editor/graphs/AnchorGraph.cpp
+  editor/graphs/TransferFunctionGraph.cpp)
 
 set(LIVREGUI_RESOURCES resources/resources.qrc)
-set(LIVREGUI_UI_FORMS Editor/gui/TransferFunctionEditor.ui)
+set(LIVREGUI_UI_FORMS editor/gui/TransferFunctionEditor.ui)
 
 list(APPEND CPPCHECK_EXTRA_ARGS
-  --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/Editor/Graphs/moc_AnchorGraph.cxx
-  --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/Editor/Graphs/moc_TransferFunctionGraph.cxx
-  --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/Editor/moc_TransferFunctionEditor.cxx
+  --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/editor/graphs/moc_AnchorGraph.cxx
+  --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/editor/graphs/moc_TransferFunctionGraph.cxx
+  --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/editor/moc_TransferFunctionEditor.cxx
   --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/moc_MainWindow.cxx)
 
 add_definitions(${QT_DEFINITIONS} "-DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED" )

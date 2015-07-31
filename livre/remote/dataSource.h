@@ -21,7 +21,7 @@
 #define LIVRE_REMOTE_DATASOURCE_H
 
 #include <livre/core/mathTypes.h>
-#include <livre/core/Data/VolumeDataSourcePlugin.h>
+#include <livre/core/data/VolumeDataSourcePlugin.h>
 
 namespace livre
 {
