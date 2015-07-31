@@ -468,25 +468,30 @@ public:
 
         glColor3f( 1.f, 1.f, 1.f );
 
-        const eq::PixelViewport& pvp = _channel->getPixelViewport();
-        const eq::Viewport& vp = _channel->getViewport();
-        const float height = pvp.h / vp.h;
-
         glMatrixMode( GL_PROJECTION );
         glLoadIdentity();
         _channel->applyScreenFrustum();
         glMatrixMode( GL_MODELVIEW );
 
         livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
-        std::ostringstream dataStr;
-        dataStr << node->getTextureDataCache().getStatistics();
-        float y = height/2;
-        _drawText( dataStr.str(), y );
+        std::ostringstream os;
+        os << node->getTextureDataCache().getStatistics();
+        float y = 180;
+        _drawText( os.str(), y );
 
         Window* window = static_cast< Window* >( _channel->getWindow( ));
-        std::ostringstream textureStr;
-        textureStr << window->getTextureCache().getStatistics();
-        _drawText( textureStr.str(), y );
+        os.str("");
+        os << window->getTextureCache().getStatistics();
+        _drawText( os.str(), y );
+
+        ConstVolumeDataSourcePtr dataSource = static_cast< livre::Node* >(
+            _channel->getNode( ))->getDashTree()->getDataSource();
+        const VolumeInformation& info = dataSource->getVolumeInformation();
+
+        os.str("");
+        os << "Total resolution " << info.voxels << std::endl
+           << "Block resolution " << info.maximumBlockSize;
+        _drawText( os.str( ), y );
     }
 
     void _drawText( std::string text, float& y )
