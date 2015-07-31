@@ -124,6 +124,9 @@ void CacheStatistics::onPreUnload_( const CacheObject& cacheObject )
 
 std::ostream& operator<<( std::ostream& stream, const CacheStatistics& cacheStatistics )
 {
+    const int hits = int(
+        100.f * float( cacheStatistics.cacheHit_ ) /
+        float( cacheStatistics.cacheHit_ + cacheStatistics.cacheMiss_ ));
     stream << cacheStatistics.statisticsName_ << std::endl;
     stream << "  Used Memory: "
            << (cacheStatistics.usedMemoryInBytes_ + LB_1MB - 1) / LB_1MB << "/"
@@ -132,7 +135,7 @@ std::ostream& operator<<( std::ostream& stream, const CacheStatistics& cacheStat
     stream << "  Block Count: "
            << cacheStatistics.blockCount_ << std::endl;
     stream << "  Cache hits: "
-           << cacheStatistics.cacheHit_ << std::endl;
+           << cacheStatistics.cacheHit_ << " (" << hits << "%)" << std::endl;
     stream << "  Cache misses: "
            << cacheStatistics.cacheMiss_ << std::endl;
 
