@@ -84,8 +84,8 @@ public:
      * @param internalNode Internal node.
      * @param lodNode Destination lod node.
      */
-    virtual void internalNodeToLODNode( const NodeId internalNode,
-                                        LODNode& lodNode ) const;
+    LIVRECORE_API virtual void internalNodeToLODNode( const NodeId internalNode,
+                                                      LODNode& lodNode ) const;
 
     /**
      * @param nodeId The nodeId to get the node for.
@@ -110,7 +110,7 @@ protected:
  * A helper function to fill up a regular volume tree.
  * @return False if it fails to initialize volume
  */
-bool fillRegularVolumeInfo( VolumeInformation& info );
+LIVRECORE_API bool fillRegularVolumeInfo( VolumeInformation& info );
 
 }
 

@@ -17,6 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <livre/core/Maths/Plane.h>
 
@@ -33,7 +34,7 @@ namespace maths
  * @param pitch return pitch angle in radians.
  * @param yaw return yaw angle in radians.
  */
-void matrixToEulerAngles( const Matrix3f& rotationMatrix, float& roll, float& pitch, float& yaw );
+LIVRECORE_API void matrixToEulerAngles( const Matrix3f& rotationMatrix, float& roll, float& pitch, float& yaw );
 
 /**
  * Extracts rotation and eye position from model view matrix.
@@ -41,16 +42,16 @@ void matrixToEulerAngles( const Matrix3f& rotationMatrix, float& roll, float& pi
  * @param rotationMatrix returns 3x3 rotation matrix.
  * @param eye returns 3 element eye vector in world space.
  */
-void getRotationAndEyePositionFromModelView( const Matrix4f& modelViewMatrix,
-                                                   Matrix3f& rotationMatrix,
-                                                   Vector3f& eye );
+LIVRECORE_API void getRotationAndEyePositionFromModelView( const Matrix4f& modelViewMatrix,
+                                                           Matrix3f& rotationMatrix,
+                                                           Vector3f& eye );
 /**
  * Computes model view matrix from rotation matrix and eye vector in world space.
  * @param rotationMatrix 3x3 rotation matrix.
  * @param eye vector in world space.
  * @return return 4x4 model view matrix.
  */
-Matrix4f computeModelViewMatrix( const Matrix3f& rotationMatrix, const Vector3f& eye );
+LIVRECORE_API Matrix4f computeModelViewMatrix( const Matrix3f& rotationMatrix, const Vector3f& eye );
 
 /**
  * Computes model view matrix from eye vector and lookAt position in world space.
@@ -58,14 +59,14 @@ Matrix4f computeModelViewMatrix( const Matrix3f& rotationMatrix, const Vector3f&
  * @param center orientation center as lookAt vector in world space.
  * @return return 4x4 model view matrix.
  */
-Matrix4f computeModelViewMatrix( const Vector3f& eye, const Vector3f& center );
+LIVRECORE_API Matrix4f computeModelViewMatrix( const Vector3f& eye, const Vector3f& center );
 /**
  * computeModelViewMatrix computes the model view matrix from a quaternion.
  * @param quat is the quaternion.
  * @param eye vector in world space.
  * @return The model view matrix.
  */
-Matrix4f computeModelViewMatrix( const Quaternionf& quat, const Vector3f& eye );
+LIVRECORE_API Matrix4f computeModelViewMatrix( const Quaternionf& quat, const Vector3f& eye );
 
 /**
  * Computes intersection between three planes.
@@ -75,7 +76,7 @@ Matrix4f computeModelViewMatrix( const Quaternionf& quat, const Vector3f& eye );
  * @return The intersection point.
  * @warning Parallel planes are not checked.
  */
-Vector3f computePlaneIntersection( const Plane& plane0, const Plane& plane1, const Plane& plane2 );
+LIVRECORE_API Vector3f computePlaneIntersection( const Plane& plane0, const Plane& plane1, const Plane& plane2 );
 
 /**
  * Computes a point bewteen two points, on the parametric value t [ 0..1 ]
@@ -84,7 +85,7 @@ Vector3f computePlaneIntersection( const Plane& plane0, const Plane& plane1, con
  * @param t parametric value [ 0..1 ]
  * @return The point.
  */
-Vector3f computePointOnLine( const Vector3f& p0, const Vector3f& p1, float t );
+LIVRECORE_API Vector3f computePointOnLine( const Vector3f& p0, const Vector3f& p1, float t );
 
 /**
  * Clamps a number between limits.

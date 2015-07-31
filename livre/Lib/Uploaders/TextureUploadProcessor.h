@@ -21,6 +21,7 @@
 #ifndef _TextureLoadProcessor_h_
 #define _TextureLoadProcessor_h_
 
+#include <livre/Lib/api.h>
 #include <livre/Lib/types.h>
 
 #include <livre/core/DashPipeline/DashProcessor.h>
@@ -44,13 +45,13 @@ public:
      * @param context the context used by this processor.
      * @param vrParameters the volume rendering parameters.
      */
-    TextureUploadProcessor( DashTreePtr dashTree,
-                            GLContextPtr shareContext,
-                            GLContextPtr context,
-                            ConstVolumeRendererParametersPtr vrParameters );
+    LIVRE_API TextureUploadProcessor( DashTreePtr dashTree,
+                                      GLContextPtr shareContext,
+                                      GLContextPtr context,
+                                      ConstVolumeRendererParametersPtr vrParameters );
 
     /** @return the texture cache */
-    const TextureCache& getTextureCache() const;
+    LIVRE_API const TextureCache& getTextureCache() const;
 
 private:
     bool onPreCommit_( const uint32_t connection ) final;

@@ -20,6 +20,7 @@
 #ifndef _TextureObject_h_
 #define _TextureObject_h_
 
+#include <livre/Lib/api.h>
 #include <livre/Lib/types.h>
 #include <livre/core/mathTypes.h>
 #include <livre/core/Data/LODNodeTrait.h>
@@ -36,19 +37,19 @@ class TextureObject : public CacheObject, public LODNodeTrait
     friend class TextureCache;
 
 public:
-    TextureObject();
+    LIVRE_API TextureObject();
 
-    virtual ~TextureObject( );
+    LIVRE_API virtual ~TextureObject( );
 
     /**
      * @return True if two data object has the same cache id.
      */
-    bool operator==( const TextureObject& texture ) const;
+    LIVRE_API bool operator==( const TextureObject& texture ) const;
 
     /**
      * @return The cache id.
      */
-    CacheId getCacheID() const;
+    LIVRE_API CacheId getCacheID() const;
 
     /**
      * @return The GPU memory usage.
@@ -58,23 +59,23 @@ public:
     /**
      * @return The texture type.
      */
-    uint32_t getTextureType() const;
+    LIVRE_API uint32_t getTextureType() const;
 
     /**
      * @return The texture state.
      */
-    TextureStatePtr getTextureState( );
+    LIVRE_API TextureStatePtr getTextureState( );
 
     /**
      * @return The texture state ( const ).
      */
-    ConstTextureStatePtr getTextureState( ) const;
+    LIVRE_API ConstTextureStatePtr getTextureState( ) const;
 
     /**
      * Sets the texture data object for data retrieval.
      * @param lodTextureData livre::TextureDataObject.
      */
-    void setTextureDataObject( ConstTextureDataObjectPtr lodTextureData );
+    LIVRE_API void setTextureDataObject( ConstTextureDataObjectPtr lodTextureData );
 
     /**
      * @return An empty data object ptr.

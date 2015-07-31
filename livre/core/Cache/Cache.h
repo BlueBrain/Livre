@@ -20,6 +20,7 @@
 #ifndef _Cache_h_
 #define _Cache_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <livre/core/lunchboxTypes.h>
 #include <livre/core/Cache/CacheObjectObserver.h>
@@ -50,47 +51,46 @@ public:
      * @param cacheObjectID The object cache id to be queried.
      * @return The cache object from cache, if object is not in the list it is created with given cache id.
      */
-    CacheObjectPtr getObjectFromCache( const CacheId cacheObjectID );
+    LIVRECORE_API CacheObjectPtr getObjectFromCache( const CacheId cacheObjectID );
 
     /**
      * Applies a policy to the cache.
      * @param cachePolicy The policy to be applied to cache.
      * @return The state for the cache policy application.
      */
-    ApplyResult applyPolicy( CachePolicy& cachePolicy ) const;
+    LIVRECORE_API ApplyResult applyPolicy( CachePolicy& cachePolicy ) const;
 
     /**
      * @return The number of cache objects managed ( not the number of loaded objects ).
      */
-    size_t getNumberOfCacheObjects( ) const;
+    LIVRECORE_API size_t getNumberOfCacheObjects( ) const;
 
     /**
      * @return Statistics.
      */
-    CacheStatistics& getStatistics( );
+    LIVRECORE_API CacheStatistics& getStatistics( );
 
     /**
      * @return Statistics.
      */
-    const CacheStatistics& getStatistics( ) const;
+    LIVRECORE_API const CacheStatistics& getStatistics( ) const;
 
 protected:
+    LIVRECORE_API Cache();
 
-    Cache( );
-
-    virtual ~Cache( );
+    LIVRECORE_API virtual ~Cache( );
 
     /**
      * @param cacheObjectID The object cache id to be queried.
      * @return The cache object from cache, if object is not in the list it is created.
      */
-    CacheObjectPtr getObjectFromCache_( const CacheId cacheObjectID );
+    LIVRECORE_API CacheObjectPtr getObjectFromCache_( const CacheId cacheObjectID );
 
     /**
      * @param cacheObjectID The object cache id to be queried.
      * @return The cache object from cache, if object is not in the list an invalid cache object is returned.
      */
-    CacheObjectPtr getObjectFromCache_( const CacheId cacheObjectID ) const;
+    LIVRECORE_API CacheObjectPtr getObjectFromCache_( const CacheId cacheObjectID ) const;
 
     /**
      * @param cacheID The derived class allocates an \see CacheObject with the given ID

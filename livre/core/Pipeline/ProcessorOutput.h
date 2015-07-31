@@ -20,6 +20,7 @@
 #ifndef _ProcessorOutput_h_
 #define _ProcessorOutput_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 
 namespace livre
@@ -41,30 +42,29 @@ enum CommitState
 class ProcessorOutput
 {
 public:
+    LIVRECORE_API ProcessorOutput( Processor& processor );
 
-    ProcessorOutput( Processor& processor );
-
-    virtual ~ProcessorOutput( );
+    LIVRECORE_API virtual ~ProcessorOutput( );
 
     /**
      * Sends commits to the given \see Connection object.
      * @param outputConnection Output connection id.
      * @return The state of the commit.
      */
-    CommitState commit( const uint32_t outputConnection );
+    LIVRECORE_API CommitState commit( const uint32_t outputConnection );
 
     /**
      * Blocks the connection, no operation is allowed after the blocking.
      * @param block Blocking flag, if true connection is blocked.
      * @param inputConnection Connection number.
      */
-    void setBlocked( const bool block, const uint32_t inputConnection );
+    LIVRECORE_API void setBlocked( const bool block, const uint32_t inputConnection );
 
     /**
      * @param inputConnection Connection number.
      * @return True if the connection is blocked.
      */
-    bool isBlocked( const uint32_t inputConnection ) const;
+    LIVRECORE_API bool isBlocked( const uint32_t inputConnection ) const;
 
     /**
      * @return The number of connections.

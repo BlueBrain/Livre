@@ -22,6 +22,7 @@
 #ifndef _Node_h_
 #define _Node_h_
 
+#include <livre/Eq/api.h>
 #include <livre/core/Dash/DashContextTrait.h>
 #include <livre/Lib/types.h>
 #include <eq/node.h>
@@ -41,12 +42,11 @@ class Node;
 class Node : public eq::Node, public DashContextTrait
 {
 public:
-
     /**
      * @param parent Parent config that owns the Node.
      */
-    Node( eq::Config* parent );
-    ~Node();
+    LIVREEQ_API Node( eq::Config* parent );
+    LIVREEQ_API ~Node();
 
     /**
      * @return The texture data cache.

@@ -20,6 +20,7 @@
 #ifndef _ClientParameters_h_
 #define _ClientParameters_h_
 
+#include <livre/Lib/api.h>
 #include <livre/core/mathTypes.h>
 #include <livre/core/Configuration/Parameters.h>
 
@@ -30,7 +31,7 @@ namespace livre
  */
 struct ClientParameters : public Parameters
 {
-    ClientParameters();
+    LIVRE_API ClientParameters();
 
     std::string dataFileName; //!< Data file name.
 
@@ -51,7 +52,7 @@ struct ClientParameters : public Parameters
     /**
      * @param parameters The source parameters.
      */
-    ClientParameters& operator=( const ClientParameters& parameters );
+    LIVRE_API ClientParameters& operator=( const ClientParameters& parameters );
 
 protected:
     void initialize_() override;

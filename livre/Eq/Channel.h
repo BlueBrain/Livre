@@ -22,6 +22,7 @@
 #ifndef _Channel_h_
 #define _Channel_h_
 
+#include <livre/Eq/api.h>
 #include <eq/channel.h>
 
 namespace livre
@@ -41,8 +42,8 @@ public:
     /**
      * @param parent Parent window.
      */
-    Channel( eq::Window* parent );
-    ~Channel();
+    LIVREEQ_API Channel( eq::Window* parent );
+    LIVREEQ_API ~Channel();
 
 private:
     bool configInit( const eq::uint128_t& initId ) final;

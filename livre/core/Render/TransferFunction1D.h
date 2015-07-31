@@ -23,6 +23,7 @@
 #include <co/dataIStream.h>
 #include <co/dataOStream.h>
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <livre/core/mathTypes.h>
 
@@ -38,7 +39,6 @@ namespace livre
 template< class T  >
 class TransferFunction1D
 {
-
 public:
     /**
      * Create the transfer function with default parameters.
@@ -91,7 +91,7 @@ public:
     /**
      * Resets the transfer function with default parameters.
      */
-    void reset();
+    LIVRECORE_API void reset();
 
     /**
      * @return The RGBA data vector. The data array is rgba_[] = { R, G, B, A, R, G, B, A, R ... }.
@@ -114,9 +114,9 @@ private:
     template <typename U>
     friend co::DataIStream& operator>>( co::DataIStream& is, TransferFunction1D< U >& tf );
 
-    void createCustomTF_( const uint32_t size );
+    LIVRECORE_API void createCustomTF_( const uint32_t size );
 
-    void createTfFromFile_( const std::string& file );
+    LIVRECORE_API void createTfFromFile_( const std::string& file );
 };
 
 /**

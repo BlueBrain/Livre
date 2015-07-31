@@ -20,6 +20,7 @@
 #ifndef _LODNodeTrait_h_
 #define _LODNodeTrait_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 
 namespace livre
@@ -31,20 +32,18 @@ namespace livre
 class LODNodeTrait
 {
 public:
-
     /**
      * @return \see LODNode.
      */
-    ConstLODNodePtr getLODNode( ) const;
+    LIVRECORE_API ConstLODNodePtr getLODNode() const;
 
 protected:
-
-    LODNodeTrait( );
+    LIVRECORE_API LODNodeTrait();
 
     /**
      * @param lodNodePtr the livre::LODNode.
      */
-    LODNodeTrait( ConstLODNodePtr lodNodePtr );
+    LIVRECORE_API LODNodeTrait( ConstLODNodePtr lodNodePtr );
 
 
     ConstLODNodePtr lodNodePtr_; //!< LODNode pointer

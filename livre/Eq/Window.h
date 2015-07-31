@@ -24,6 +24,7 @@
 
 #include <eq/window.h>
 
+#include <livre/Eq/api.h>
 #include <livre/Eq/types.h>
 #include <livre/core/types.h>
 
@@ -39,7 +40,7 @@ class Window : public eq::Window
 {
 public:
     /** @param parent The pipe that owns the window. */
-    Window( eq::Pipe* parent );
+    LIVREEQ_API Window( eq::Pipe* parent );
 
     /** Commits changes. */
     void commit();

@@ -20,6 +20,7 @@
 #ifndef _RESTParameters_h_
 #define _RESTParameters_h_
 
+#include <livre/Lib/api.h>
 #include <livre/core/mathTypes.h>
 #include <livre/core/Configuration/Parameters.h>
 
@@ -31,7 +32,7 @@ namespace livre
  */
 struct RESTParameters : public Parameters
 {
-    RESTParameters( );
+    LIVRE_API RESTParameters( );
 
     std::string hostName; //<! hostname for RESTBridge.
     uint16_t port; //<! port for RESTBridge.
@@ -55,7 +56,7 @@ struct RESTParameters : public Parameters
     /**
      * @param parameters The source parameters.
      */
-    RESTParameters& operator=( const RESTParameters& parameters );
+    LIVRE_API RESTParameters& operator=( const RESTParameters& parameters );
 
 protected:
 

@@ -20,6 +20,7 @@
 #ifndef _MemoryUnit_h_
 #define _MemoryUnit_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <lunchbox/buffer.h> // member
 #include <lunchbox/thread.h> // LB_TS_VAR
@@ -34,9 +35,9 @@ namespace livre
 class MemoryUnit
 {
 public:
-    MemoryUnit();
+    LIVRECORE_API MemoryUnit();
 
-    virtual ~MemoryUnit();
+    LIVRECORE_API virtual ~MemoryUnit();
 
     /**
      * Allocate memory.
@@ -116,7 +117,7 @@ protected:
 class AllocMemoryUnit : public MemoryUnit, public boost::noncopyable
 {
 public:
-    AllocMemoryUnit();
+    LIVRECORE_API AllocMemoryUnit();
 
     /**
      * Allocates and sets the data from the given ptr, with given size
@@ -145,14 +146,14 @@ public:
      * @param allocSizePerElement Allocation size per element of the array.
      * @param dataSize Number of elements in the array.
      */
-    void alloc( const size_t allocSizePerElement, const size_t dataSize )
-        final;
+    LIVRECORE_API void alloc( const size_t allocSizePerElement,
+                              const size_t dataSize ) final;
 
     /** Release memory. */
-    void release() final;
+    LIVRECORE_API void release() final;
 
-    size_t getMemSize() const final;
-    size_t getAllocSize() const final;
+    LIVRECORE_API size_t getMemSize() const final;
+    LIVRECORE_API size_t getAllocSize() const final;
 
 private:
     const uint8_t* getData_() const final;

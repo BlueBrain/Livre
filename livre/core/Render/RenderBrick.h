@@ -20,6 +20,7 @@
 #ifndef _RenderBrick_h_
 #define _RenderBrick_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <livre/core/Data/LODNode.h>
 #include <livre/core/Data/LODNodeTrait.h>
@@ -35,17 +36,16 @@ namespace livre
 class RenderBrick : public LODNodeTrait
 {
 public:
-
     /**
      * @param lodNodePtr livre::LODNode is used for spatial information of rendered block.
      * @param textureState TextureState is used to hold the information of OpenGL texture and coordinates.
      */
-    RenderBrick( ConstLODNodePtr lodNodePtr, ConstTextureStatePtr textureState);
+    LIVRECORE_API RenderBrick( ConstLODNodePtr lodNodePtr, ConstTextureStatePtr textureState);
 
     /**
      * @return The information of OpenGL texture and coordinates.
      */
-    ConstTextureStatePtr getTextureState() const;
+    LIVRECORE_API ConstTextureStatePtr getTextureState() const;
 
     /**
      * Computes the screen coordinates of an LOD block.
@@ -54,19 +54,19 @@ public:
      * @param minScreenPos Returns minimum screen pos of the LOD block.
      * @param maxScreenPos Returns maximum screen pos of the LOD block.
      */
-    void getScreenCoordinates( const Frustum& frustum, const PixelViewport& pvp,
-                               Vector2i& minScreenPos, Vector2i& maxScreenPos )
-        const;
+    LIVRECORE_API void getScreenCoordinates( const Frustum& frustum,
+                                             const PixelViewport& pvp,
+                                             Vector2i& minScreenPos,
+                                             Vector2i& maxScreenPos ) const;
 
     /**
      * Renders the faces of a RenderBrick.
      * @param front Only draw front faces.
      * @param back Only draw back faces.
      */
-    void drawBrick( bool front, bool back ) const;
+    LIVRECORE_API void drawBrick( bool front, bool back ) const;
 
 private:
-
     ConstTextureStatePtr textureState_;
 };
 

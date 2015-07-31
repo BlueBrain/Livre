@@ -22,6 +22,7 @@
 
 #include <dash/dash.h>
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 
 #include <livre/core/Visitor/VisitState.h>
@@ -37,53 +38,51 @@ namespace livre
  */
 class DashRenderNode
 {
-
 public:
-
     /**
      * @param dashNode The dash node to access.
      */
-    DashRenderNode( dash::NodePtr dashNode );
+    LIVRECORE_API DashRenderNode( dash::NodePtr dashNode );
 
     /**
      * @return The dash node.
      */
-    dash::NodePtr getDashNode( ) const { return _dashNode; }
+    LIVRECORE_API dash::NodePtr getDashNode( ) const { return _dashNode; }
 
     /**
      * @return The LODNode.
      */
-    const LODNode& getLODNode( ) const;
+    LIVRECORE_API const LODNode& getLODNode( ) const;
 
     /**
      * @return \see TextureDataObject, if not initialized in the tree, the returned object
      * is \see EmptyCacheObject.
      */
-    ConstCacheObjectPtr getTextureDataObject() const;
+    LIVRECORE_API ConstCacheObjectPtr getTextureDataObject() const;
 
     /**
      * @return \see TextureObject, if not initialized in the tree, the returned object is
      * \see EmptyCacheObject.
      */
-    ConstCacheObjectPtr getTextureObject() const;
+    LIVRECORE_API ConstCacheObjectPtr getTextureObject() const;
 
     /**
      * @return True, if object is visible.
      * @warning This condition is set from outside of the object.
      */
-    bool isVisible() const;
+    LIVRECORE_API bool isVisible() const;
 
     /**
      * @return True, if object is in frustum.
      * @warning This condition is set from outside of the object.
      */
-    bool isInFrustum() const;
+    LIVRECORE_API bool isInFrustum() const;
 
     /**
      * Sets the \see LODNode for the dash node.
      * @param node Sets the \see which is an abstract rendering information ( size of block, position, etcc )
      */
-    void setLODNode( const LODNode& node );
+    LIVRECORE_API void setLODNode( const LODNode& node );
 
     /**
      * Sets the texture data object.
@@ -91,7 +90,7 @@ public:
      * given the reference count decreases
      * for the corresponding \see CacheObject, therefore \see Cache can clean the object.
      */
-    void setTextureDataObject( ConstCacheObjectPtr textureData );
+    LIVRECORE_API void setTextureDataObject( ConstCacheObjectPtr textureData );
 
     /**
      * Sets the texture object.
@@ -99,19 +98,19 @@ public:
      * the reference count decreases
      * for the corresponding \see CacheObject, therefore \see Cache can clean the object.
      */
-    void setTextureObject( ConstCacheObjectPtr texture );
+    LIVRECORE_API void setTextureObject( ConstCacheObjectPtr texture );
 
     /**
      * Sets visibilty of node.
      * @param visibility If parameter is true, node is visible.
      */
-    void setVisible( bool visibility );
+    LIVRECORE_API void setVisible( bool visibility );
 
     /**
      * Sets frustum status of node.
      * @param visibility If parameter is true, node is visible.
      */
-    void setInFrustum( bool visibility );
+    LIVRECORE_API void setInFrustum( bool visibility );
 
     /**
      * Initializes an empty dash node with attributes.

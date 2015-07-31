@@ -21,6 +21,7 @@
 #ifndef _TextureDataCache_h_
 #define _TextureDataCache_h_
 
+#include <livre/Lib/api.h>
 #include <livre/Lib/types.h>
 #include <livre/Lib/Cache/LRUCache.h>
 
@@ -35,25 +36,24 @@ namespace livre
 class TextureDataCache : public LRUCache
 {
 public:
-
     /**
      * @param volumeDataSource The source where the volume data should be loaded from
      * @param type The type of the data for the GPU.
      */
-    TextureDataCache( VolumeDataSourcePtr volumeDataSource, uint32_t type );
+    LIVRE_API TextureDataCache( VolumeDataSourcePtr volumeDataSource, uint32_t type );
 
     /**
      * @param cacheID The cacheId of the node.
      * @return A valid cache object if id is valid or data source includes the information for cache id.
      * If there is not, the object is constructed.
      */
-    TextureDataObject& getNodeTextureData( const CacheId cacheID ) const;
+    LIVRE_API TextureDataObject& getNodeTextureData( const CacheId cacheID ) const;
 
     /**
      * @param cacheID The cacheId of the node.
      * @return A valid cache object if id is valid or data source includes the information for cache id.
      */
-    TextureDataObject& getNodeTextureData( const CacheId cacheID );
+    LIVRE_API TextureDataObject& getNodeTextureData( const CacheId cacheID );
 
     /** @return the data source. */
     VolumeDataSourcePtr getDataSource();
@@ -61,10 +61,9 @@ public:
     /**
      * @return The GPU data type.
      */
-    uint32_t getTextureType( ) const { return type_; }
+    LIVRE_API uint32_t getTextureType( ) const { return type_; }
 
 private:
-
     CacheObject *generateCacheObjectFromID_( const CacheId cacheID );
 
     VolumeDataSourcePtr volumeDataSourcePtr_;

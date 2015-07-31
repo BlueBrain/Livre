@@ -20,6 +20,7 @@
 #ifndef _NodeId_h_
 #define _NodeId_h_
 
+#include <livre/core/api.h>
 #include <livre/core/defines.h>
 #include <livre/core/types.h>
 #include <livre/core/mathTypes.h>
@@ -48,17 +49,16 @@ class NodeId
     };
 
 public:
-
     /**
      * Constructs an invalid NodeId
      */
-    NodeId();
+    LIVRECORE_API NodeId();
 
     /**
      * Constructs a LOD identifier
      * @param identifier Identifier number of the node
      */
-    explicit NodeId( const Identifier& identifier );
+    LIVRECORE_API explicit NodeId( const Identifier& identifier );
 
     /**
      * Constructs a LOD identifier
@@ -66,51 +66,51 @@ public:
      * @param position Position in the current level of octree
      * @param frame The temporal coordinate of the volume
      */
-    NodeId( const uint32_t level,
-            const Vector3ui& position,
-            const uint32_t frame = 0 );
+    LIVRECORE_API NodeId( const uint32_t level,
+                      const Vector3ui& position,
+                      const uint32_t frame = 0 );
 
-    uint32_t getLevel() const  { return _level; } //!< The octree level
-    uint32_t getFrame() const { return _frame; } //!< Temporal position
-    bool isRoot() const { return _level == 0; } //!< Is one of the root nodes
-    Vector3ui getPosition() const; //!< Return position in current level of octree
-    NodeIds getParents() const; //!< Return all parents
-    NodeId getParent() const; //!< Return direct parent
-    bool isParent( const NodeId& parentNodeId ) const; //!< Is parentNodeId my parent
-    bool isChild( const NodeId& childNodeId ) const; //!< Is childNodeId my child
-    bool isValid() const { return _level != INVALID_LEVEL; } //!< Is valid node id
-    NodeIds getChildren() const; //!< Returns children.
-    NodeId getRoot() const; //!< Return root node
-    NodeIds getSiblings() const; //<! Return siblings
-    NodeIds getChildrenAtLevel( const uint32_t level ) const; //<! Returns children at level
-    Identifier getId() const { return _id; } //<! Returns the unique identifier
+    LIVRECORE_API uint32_t getLevel() const  { return _level; } //!< The octree level
+    LIVRECORE_API uint32_t getFrame() const { return _frame; } //!< Temporal position
+    LIVRECORE_API bool isRoot() const { return _level == 0; } //!< Is one of the root nodes
+    LIVRECORE_API Vector3ui getPosition() const; //!< Return position in current level of octree
+    LIVRECORE_API NodeIds getParents() const; //!< Return all parents
+    LIVRECORE_API NodeId getParent() const; //!< Return direct parent
+    LIVRECORE_API bool isParent( const NodeId& parentNodeId ) const; //!< Is parentNodeId my parent
+    LIVRECORE_API bool isChild( const NodeId& childNodeId ) const; //!< Is childNodeId my child
+    LIVRECORE_API bool isValid() const { return _level != INVALID_LEVEL; } //!< Is valid node id
+    LIVRECORE_API NodeIds getChildren() const; //!< Returns children.
+    LIVRECORE_API NodeId getRoot() const; //!< Return root node
+    LIVRECORE_API NodeIds getSiblings() const; //<! Return siblings
+    LIVRECORE_API NodeIds getChildrenAtLevel( const uint32_t level ) const; //<! Returns children at level
+    LIVRECORE_API Identifier getId() const { return _id; } //<! Returns the unique identifier
 
     /**
      * @param node The node which is compared against
      * @return true if two nodes have the same id
      */
-    bool operator==( const NodeId& node ) const
+    LIVRECORE_API bool operator==( const NodeId& node ) const
         {  return _id == node._id; }
 
     /**
      * @param id The identifier which is compared against
      * @return true if the nodes have the same id
      */
-    bool operator==( const Identifier id ) const
+    LIVRECORE_API bool operator==( const Identifier id ) const
         { return _id == id; }
 
     /**
      * @param node The node which is compared against
      * @return false if two nodes have the same id
      */
-    bool operator!=( const NodeId& node ) const
+    LIVRECORE_API bool operator!=( const NodeId& node ) const
         { return _id != node._id; }
 
     /**
      * @param id The identifier which is compared against
      * @return false if two nodes have the same id
      */
-    bool operator!=( const Identifier id ) const
+    LIVRECORE_API bool operator!=( const Identifier id ) const
         { return _id != id; } //<! Checks equality of the node
 };
 

@@ -21,6 +21,7 @@
 #ifndef _DFSTraversal_h_
 #define _DFSTraversal_h_
 
+#include <livre/Lib/api.h>
 #include <livre/core/types.h>
 #include <livre/core/dashTypes.h>
 #include <livre/core/Visitor/NodeVisitor.h>
@@ -38,9 +39,8 @@ namespace detail
 class DFSTraversal
 {
 public:
-
-    DFSTraversal();
-    ~DFSTraversal();
+    LIVRE_API DFSTraversal();
+    LIVRE_API ~DFSTraversal();
 
     /**
      * Traverse the dash node tree starting from the given node.
@@ -49,9 +49,9 @@ public:
      * @param visitor Visitor object.
      * @return Returns true if traversal is completed, without being broken.
      */
-    bool traverse( const RootNode& rootNode,
-                   const NodeId& node,
-                   NodeVisitor& visitor );
+    LIVRE_API bool traverse( const RootNode& rootNode,
+                             const NodeId& node,
+                             NodeVisitor& visitor );
 
     /**
      * Traverse the dash node tree starting from the root.
@@ -59,12 +59,11 @@ public:
      * @param visitor Visitor object.
      * @param frame The temporal position of the node tree.
      */
-    void traverse( const RootNode& rootNode,
-                   NodeVisitor& visitor,
-                   const uint32_t frame );
+    LIVRE_API void traverse( const RootNode& rootNode,
+                             NodeVisitor& visitor,
+                             const uint32_t frame );
 
 private:
-
     detail::DFSTraversal* _impl;
 };
 

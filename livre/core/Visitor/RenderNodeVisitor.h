@@ -20,6 +20,7 @@
 #ifndef _RenderNodeVisitor_h_
 #define _RenderNodeVisitor_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <livre/core/Visitor/NodeVisitor.h>
 
@@ -36,11 +37,9 @@ class RenderNodeVisitor;
 */
 class RenderNodeVisitor : public NodeVisitor
 {
-
 public:
-
-    RenderNodeVisitor( DashTreePtr dashTree );
-    ~RenderNodeVisitor();
+    LIVRECORE_API RenderNodeVisitor( DashTreePtr dashTree );
+    LIVRECORE_API ~RenderNodeVisitor();
 
     /**
      * @see NodeVisitor::onVisitBegin
@@ -79,16 +78,16 @@ public:
     /**
      * @return Returns the dash tree
      */
-    DashTreePtr getDashTree();
+    LIVRECORE_API DashTreePtr getDashTree();
 
 private:
-    void onVisitBegin( const NodeId& nodeId, const VisitState& state ) final;
-    void onVisitEnd( const NodeId& nodeId, const VisitState& state ) final;
-    void onVisitChildrenBegin( const NodeId& nodeId,
-                               const VisitState& state) final;
-    void onVisitChildrenEnd( const NodeId& nodeId,
-                             const VisitState& state ) final;
-    void visit( const NodeId& nodeId, VisitState& state ) final;
+    LIVRECORE_API void onVisitBegin( const NodeId& nodeId, const VisitState& state ) final;
+    LIVRECORE_API void onVisitEnd( const NodeId& nodeId, const VisitState& state ) final;
+    LIVRECORE_API void onVisitChildrenBegin( const NodeId& nodeId,
+                                             const VisitState& state) final;
+    LIVRECORE_API void onVisitChildrenEnd( const NodeId& nodeId,
+                                           const VisitState& state ) final;
+    LIVRECORE_API void visit( const NodeId& nodeId, VisitState& state ) final;
 
     detail::RenderNodeVisitor* _impl;
 };

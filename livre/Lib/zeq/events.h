@@ -20,6 +20,7 @@
 #ifndef _livreEvents_h_
 #define _livreEvents_h_
 
+#include <livre/Lib/api.h>
 #include <livre/core/types.h>
 #include <lunchbox/uint128_t.h>
 #include <zeq/types.h>
@@ -35,10 +36,10 @@ static const lunchbox::uint128_t EVENT_DATASOURCE_DATA(
     lunchbox::make_uint128( "livre::zeq::DataSourceDataEvent" ));
 
 /** Serialize a data source event. */
-::zeq::Event serializeDataSource( const lunchbox::URI& uri );
+LIVRE_API ::zeq::Event serializeDataSource( const lunchbox::URI& uri );
 
 /** Deserialize a data source event. */
-lunchbox::URI deserializeDataSource( const ::zeq::Event& event );
+LIVRE_API lunchbox::URI deserializeDataSource( const ::zeq::Event& event );
 
 
 /**
@@ -53,10 +54,10 @@ typedef std::pair< lunchbox::uint128_t,
                    livre::VolumeInformation > RemoteInformation;
 
 /** Serialize information of a data source. */
-::zeq::Event serializeDataSourceData( const RemoteInformation& );
+LIVRE_API ::zeq::Event serializeDataSourceData( const RemoteInformation& );
 
 /** Deserialize information of a data source. */
-RemoteInformation deserializeDataSourceData( const ::zeq::Event& );
+LIVRE_API RemoteInformation deserializeDataSourceData( const ::zeq::Event& );
 
 
 /**
@@ -65,22 +66,22 @@ RemoteInformation deserializeDataSourceData( const ::zeq::Event& );
 typedef std::pair< lunchbox::uint128_t, LODNode > LODNodeSample;
 
 /** Serialize the request for the data of one node. */
-::zeq::Event serializeDataSample( const uint128_t& id,
-                                  const livre::LODNode& node );
+LIVRE_API ::zeq::Event serializeDataSample( const uint128_t& id,
+                                            const livre::LODNode& node );
 
 /** Deserialize the request for the data of one node. */
-LODNodeSample deserializeDataSample( const ::zeq::Event& event );
+LIVRE_API LODNodeSample deserializeDataSample( const ::zeq::Event& event );
 
 
 /** Serialize the response for the data of one node. */
-::zeq::Event serializeDataSampleData( const uint128_t& id,
-                                      const MemoryUnitPtr data );
+LIVRE_API ::zeq::Event serializeDataSampleData( const uint128_t& id,
+                                                const MemoryUnitPtr data );
 
 /** Deserialized data for one node. Valid until given event is disposed. */
 typedef std::pair< const uint8_t*, size_t > LODNodeSampleData;
 
 /** Deserialize the request for the data of one node. */
-LODNodeSampleData deserializeDataSampleData( const ::zeq::Event& event );
+LIVRE_API LODNodeSampleData deserializeDataSampleData( const ::zeq::Event& event );
 
 }
 }

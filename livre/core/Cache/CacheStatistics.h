@@ -21,6 +21,7 @@
 #ifndef _CacheStatistics_h_
 #define _CacheStatistics_h_
 
+#include <livre/core/api.h>
 #include <livre/core/Cache/CacheObjectObserver.h>
 #include <lunchbox/mtQueue.h>
 
@@ -57,7 +58,7 @@ public:
      * @param cacheStatistics Input \see CacheStatistics
      * @return The output stream.
      */
-    friend std::ostream& operator<<( std::ostream& stream,
+    LIVRECORE_API friend std::ostream& operator<<( std::ostream& stream,
                                      const CacheStatistics& cacheStatistics );
 
     ~CacheStatistics();

@@ -20,6 +20,7 @@
 #ifndef _DashProcessorInput_h_
 #define _DashProcessorInput_h_
 
+#include <livre/core/api.h>
 #include <livre/Lib/types.h>
 #include <livre/core/dashTypes.h>
 #include <livre/core/Pipeline/ProcessorInput.h>
@@ -33,13 +34,11 @@ namespace livre
  */
 class DashProcessorInput : public ProcessorInput, protected DashContextTrait
 {
-
 public:
-
     /**
      * @param processor Adds DashProcessorInput to the destination processor for connections.
      */
-    DashProcessorInput( DashProcessor& processor );
+    LIVRECORE_API DashProcessorInput( DashProcessor& processor );
 
     /**
      * Adds a connection.
@@ -47,23 +46,22 @@ public:
      * @param connection The connection between processors.
      * @return True if the connection can be added with the id.
      */
-    bool addConnection( const uint32_t connectionId, DashConnectionPtr connection );
+    LIVRECORE_API bool addConnection( const uint32_t connectionId, DashConnectionPtr connection );
 
     /**
      * Removes a connection.
      * @param connectionId Connection id.
      * @return True if connection exists and can be removed.
      */
-    bool removeConnection( const uint32_t connectionId );
+    LIVRECORE_API bool removeConnection( const uint32_t connectionId );
 
     /**
      * @param connectionId Connection id.
      * @return The connection. If id is not valid, connection is empty.
      */
-    DashConnectionPtr getConnection( const uint32_t connectionId );
+    LIVRECORE_API DashConnectionPtr getConnection( const uint32_t connectionId );
 
 private:
-
     bool dataWaitingOnInput_( const uint32_t inputConnection ) const;
     bool apply_( const uint32_t inputConnection );
     bool applyAllTimed_( const uint32_t inputConnection, const uint32_t timeMs  );

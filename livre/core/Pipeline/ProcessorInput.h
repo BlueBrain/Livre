@@ -20,6 +20,7 @@
 #ifndef _ProcessorInput_h_
 #define _ProcessorInput_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 
 namespace livre
@@ -34,19 +35,18 @@ namespace livre
 class ProcessorInput
 {
 public:
-
     /**
      * @param processor Processor, which the input belonging to.
      */
-    ProcessorInput( Processor& processor );
+    LIVRECORE_API ProcessorInput( Processor& processor );
 
-    virtual ~ProcessorInput();
+    LIVRECORE_API virtual ~ProcessorInput();
 
     /**
      * @param inputConnection Connection number.
      * @return True if data is waiting on input, false if connection is blocked.
      */
-    bool dataWaitingOnInput( const uint32_t inputConnection ) const;
+    LIVRECORE_API bool dataWaitingOnInput( const uint32_t inputConnection ) const;
 
     /**
      * Applies the oldest and single change to the context. Blocks until a commit arrives.
@@ -54,7 +54,7 @@ public:
      * @return True if apply is successful. If result is false, either connection is blocked or commit is
      * empty.
      */
-    bool apply( const uint32_t inputConnection );
+    LIVRECORE_API bool apply( const uint32_t inputConnection );
 
     /**
      * Applies all the changes to the context. Blocks until a commit arrives.
@@ -62,7 +62,7 @@ public:
      * @return True if apply is successful. If result is false, either connection is blocked or commit is
      * empty.
      */
-    bool applyAll( const uint32_t inputConnection );
+    LIVRECORE_API bool applyAll( const uint32_t inputConnection );
 
     /**
      * Applies all the changes to the context. Waits for an commit to arrive
@@ -73,20 +73,20 @@ public:
      * @return True if apply is successful. If result is false, either connection is blocked, commit is
      * empty or waiting time is over without any activity.
      */
-    bool applyAllTimed( const uint32_t inputConnection, const uint32_t timeMs );
+    LIVRECORE_API bool applyAllTimed( const uint32_t inputConnection, const uint32_t timeMs );
 
     /**
      * Blocks the connection, no operation is allowed after the blocking.
      * @param block Blocking flag, if true connection is blocked.
      * @param inputConnection Connection number.
      */
-    void setBlocked( const bool block, const uint32_t inputConnection );
+    LIVRECORE_API void setBlocked( const bool block, const uint32_t inputConnection );
 
     /**
      * @param inputConnection Connection number.
      * @return True if the connection is blocked.
      */
-    bool isBlocked( const uint32_t inputConnection ) const;
+    LIVRECORE_API bool isBlocked( const uint32_t inputConnection ) const;
 
     /**
      * @return The number of connections.

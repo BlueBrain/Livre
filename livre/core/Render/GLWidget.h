@@ -21,6 +21,7 @@
 #ifndef _GLWidget_h_
 #define _GLWidget_h_
 
+#include <livre/core/api.h>
 #include <livre/core/mathTypes.h>
 #include <livre/core/Render/GLContextTrait.h>
 
@@ -41,10 +42,9 @@ public:
     virtual void update( ) { }
 
 protected:
+    LIVRECORE_API GLWidget( );
 
-    GLWidget( );
-
-    virtual ~GLWidget( );
+    LIVRECORE_API virtual ~GLWidget( );
 };
 
 }
