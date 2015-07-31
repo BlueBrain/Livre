@@ -18,7 +18,8 @@
  */
 
 #define BOOST_TEST_MODULE LibCore
-#include <livre/core/Render/TransferFunction1D.h>
+
+#include <livre/core/render/TransferFunction1D.h>
 
 #include <boost/numeric/conversion/cast.hpp>
 #include <boost/test/unit_test.hpp>

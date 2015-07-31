@@ -23,7 +23,7 @@
 #ifndef _Controller_h_
 #define _Controller_h_
 
-#include <livre/core/Render/TransferFunction1D.h>
+#include <livre/core/render/TransferFunction1D.h>
 #include <zeq/zeq.h>
 
 namespace livre

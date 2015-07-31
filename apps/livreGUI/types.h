@@ -21,7 +21,7 @@
 #define _GuiTypes_h_
 
 #include <livre/core/lunchboxTypes.h>
-#include <livre/Eq/types.h>
+#include <livre/eq/types.h>
 
 namespace livre
 {
