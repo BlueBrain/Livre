@@ -81,7 +81,7 @@ bool TextureDataObject::isValid_( ) const
     return lodNodePtr_->isValid();
 }
 
-uint32_t TextureDataObject::getDataSize_() const
+size_t TextureDataObject::getDataSize_() const
 {
     if( !isValid() )
         return 0;
@@ -90,7 +90,7 @@ uint32_t TextureDataObject::getDataSize_() const
     return voxSizeVec[0] * voxSizeVec[1] * voxSizeVec[2];
 }
 
-uint32_t TextureDataObject::getCacheSize() const
+size_t TextureDataObject::getCacheSize() const
 {
     if( !isValid() )
         return 0;
@@ -138,7 +138,7 @@ void TextureDataObject::getQuantizedData_( const T* rawData,
     const VolumeInformation& volumeInfo = dataSourcePtr_->getVolumeInformation();
     const uint32_t compCount = volumeInfo.compCount;
     const DataType dataType = volumeInfo.dataType;
-    const uint32_t dataSize = getRawDataSize_();
+    const size_t dataSize = getRawDataSize_();
 
     formattedData.resize( dataSize );
 
@@ -201,7 +201,7 @@ void TextureDataObject::getQuantizedData_( const T* rawData,
     }
 }
 
-uint32_t TextureDataObject::getRawDataSize_() const
+size_t TextureDataObject::getRawDataSize_() const
 {
     const VolumeInformation& volumeInfo = dataSourcePtr_->getVolumeInformation();
     return getDataSize_() * volumeInfo.compCount * volumeInfo.getBytesPerVoxel();

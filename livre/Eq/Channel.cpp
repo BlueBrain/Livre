@@ -66,9 +66,7 @@ namespace detail
 class EqRenderView : public RenderView
 {
 public:
-    EqRenderView( Channel* channel )
-        : _channel( channel )
-    {}
+    EqRenderView( Channel* channel );
 
     const Frustum& getFrustum() const final;
 
@@ -196,9 +194,9 @@ class Channel
 {
 public:
     Channel( livre::Channel* channel )
-          : _renderViewPtr( new EqRenderView( this ))
+          : _channel( channel )
+          , _renderViewPtr( new EqRenderView( this ))
           , _glWidgetPtr( new EqGlWidget( channel ))
-          , _channel( channel )
     {}
 
     void initializeFrame()
@@ -223,10 +221,9 @@ public:
         ConstVolumeDataSourcePtr dataSource =
             static_cast< livre::Node* >( _channel->getNode( ))->getDashTree()->getDataSource();
 
-        _renderViewPtr->setRenderer( RendererPtr(
-            new RayCastRenderer( _channel->glewGetContext(), nSlices,
-                                 dataSource->getVolumeInformation().compCount,
-                                 GL_UNSIGNED_BYTE, GL_LUMINANCE8 )));
+        _renderViewPtr->setRenderer( RendererPtr( new RayCastRenderer( nSlices,
+                                  dataSource->getVolumeInformation().compCount,
+                                  GL_UNSIGNED_BYTE, GL_LUMINANCE8 )));
     }
 
     const Frustum& initializeLivreFrustum()
@@ -432,6 +429,11 @@ public:
         _glWidgetPtr->setGLContext( GLContextPtr( new EqContext( window )));
     }
 
+    void configExit()
+    {
+        _renderViewPtr.reset();
+    }
+
     void addImageListener()
     {
         if( getFrameData( )->getFrameSettings()->getGrabFrame( ))
@@ -578,14 +580,19 @@ public:
         }
     }
 
+    livre::Channel* const _channel;
     eq::Range _drawRange;
     eq::Frame _frame;
     Frustum _currentFrustum;
     ViewPtr _renderViewPtr;
     GLWidgetPtr _glWidgetPtr;
     FrameGrabber _frameGrabber;
-    livre::Channel* const _channel;
 };
+
+EqRenderView::EqRenderView( Channel* channel )
+    : RenderView()
+    , _channel( channel )
+{}
 
 const Frustum& EqRenderView::getFrustum() const
 {
@@ -612,6 +619,12 @@ bool Channel::configInit( const eq::uint128_t& initId )
 
     _impl->configInit();
     return true;
+}
+
+bool Channel::configExit()
+{
+    _impl->configExit();
+    return eq::Channel::configExit();
 }
 
 void Channel::frameDraw( const lunchbox::uint128_t& frameId )

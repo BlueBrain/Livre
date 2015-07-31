@@ -16,10 +16,6 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
   ${CMAKE_SOURCE_DIR}/CMake/common)
 
 include(GitExternal)
-include(SubProject)
-if(CMAKE_SYSTEM_NAME MATCHES "Linux")
-  git_subproject(Tuvok https://github.com/BlueBrain/Tuvok.git bbp)
-endif()
 
 set(VERSION_MAJOR "0")
 set(VERSION_MINOR "4")
@@ -40,6 +36,10 @@ if(APPLE) # WAR otherwise MacPorts X11 (/opt/local) is preferred
   list(REMOVE_ITEM CMAKE_SYSTEM_PREFIX_PATH /opt/local)
   link_directories(/opt/X11/lib /usr/X11R6/lib)
   include_directories(SYSTEM /opt/X11/include /usr/X11R6/include)
+endif()
+
+if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+  git_subproject(Tuvok https://github.com/BlueBrain/Tuvok.git bbp)
 endif()
 
 common_package(BBPTestData)
@@ -74,6 +74,7 @@ common_package_post()
 include(EqGLLibraries)
 set(LIVRE_DEPENDENT_LIBRARIES vmmlib Lunchbox dash Equalizer)
 
+add_definitions(-DBOOST_PROGRAM_OPTIONS_DYN_LINK) # Fix for windows and shared boost.
 add_subdirectory(livre)
 add_subdirectory(apps)
 add_subdirectory(tests)

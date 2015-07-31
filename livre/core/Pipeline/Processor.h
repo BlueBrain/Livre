@@ -113,6 +113,9 @@ protected:
      */
     virtual void onPostApply_( const uint32_t connection LB_UNUSED, const bool applySuccessful LB_UNUSED ) { }
 
+    /** The parent thread waits for this to finish when start() is invoked. */
+    bool init() override;
+
     /**
      * Is called when start() method is invoked for the thread.
      */

@@ -37,17 +37,15 @@ namespace livre
 class RenderView : public View
 {
 public:
-    RenderView( );
+    RenderView();
 
     /**
      * Sets the rendering parameters
      * @param volumeRendererParameters Volume rendering parameters.
-     * @param prefetchAlgorithmParameters Prefetch algorithm parameters.
      */
-    void setParameters(  ConstVolumeRendererParametersPtr volumeRendererParameters );
+    void setParameters( ConstVolumeRendererParametersPtr volumeRendererParameters );
 
 private:
-
     void onPostRender_( const GLWidget& widget,
                         const FrameInfo& frameInfo ) final;
 
@@ -56,10 +54,9 @@ private:
     DashNodeSet previousVisibleSet_;
     DFSTraversal dfsTraverser_;
     VolumeRendererParameters volumeRendererParameters_;
-
 };
 
 }
 
 
-#endif // _VaporView_h_
+#endif // _RenderView_h_

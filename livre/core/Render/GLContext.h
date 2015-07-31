@@ -22,6 +22,7 @@
 
 #include <livre/core/types.h>
 #include <livre/core/lunchboxTypes.h>
+#include <boost/enable_shared_from_this.hpp>
 
 namespace livre
 {
@@ -58,6 +59,18 @@ public:
      */
     static const GLContext* getCurrent();
 
+    /**
+     * Set a global glew context to used it whenever OpenGL function pointers
+     * need to be resolved (Windows only).
+     *
+     * As there is only a single glew context managed by this class, this won't
+     * work in a multi GPU scenario where per GPU glew contexts are required.
+     */
+    static void glewSetContext( const GLEWContext* );
+
+    /** @return the global glew context, @see glewSetContext */
+    static const GLEWContext* glewGetContext();
+
 protected:
 
    /**
@@ -67,8 +80,8 @@ protected:
     virtual void shareContext_( GLContext* srcSharedContext ) = 0;
 
 private:
-
     GLContextPtr parent_;
+    static const GLEWContext* _glewContext;
 };
 
 }

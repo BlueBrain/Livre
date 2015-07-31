@@ -23,6 +23,7 @@
 #include <livre/core/Render/TransferFunction1D.h>
 #include <livre/core/Data/LODNode.h>
 #include <livre/core/Maths/Maths.h>
+#include <livre/core/Render/GLContext.h>
 #include <livre/core/Render/GLWidget.h>
 #include <livre/core/Render/View.h>
 
@@ -35,6 +36,9 @@
 
 namespace livre
 {
+
+#define glewGetContext() GLContext::glewGetContext()
+
 namespace
 {
 std::string where( const char* file, const int line )
@@ -44,17 +48,15 @@ std::string where( const char* file, const int line )
 }
 }
 
-RayCastRenderer::RayCastRenderer( const GLEWContext* glewContext,
-                                  const uint32_t samples,
+RayCastRenderer::RayCastRenderer( const uint32_t samples,
                                   const uint32_t componentCount,
                                   const GLenum gpuDataType,
                                   const GLint internalFormat )
     : Renderer( componentCount, gpuDataType, internalFormat )
     , _framebufferTexture(
-        new eq::util::Texture( GL_TEXTURE_RECTANGLE_ARB, glewContext ))
+        new eq::util::Texture( GL_TEXTURE_RECTANGLE_ARB, glewGetContext( )))
     , _nSamples( samples )
     , _transferFunctionTexture( 0 )
-
 {
     TransferFunction1D< unsigned char > transferFunction;
     initTransferFunction( transferFunction );
@@ -94,7 +96,7 @@ void RayCastRenderer::initTransferFunction(
     glBindTexture( GL_TEXTURE_1D, _transferFunctionTexture );
 
     const UInt8Vector& transferFunctionData = transferFunction.getData();
-    glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA, transferFunctionData.size()/4u, 0,
+    glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA, GLsizei(transferFunctionData.size()/4u), 0,
                    GL_RGBA, GL_UNSIGNED_BYTE, &transferFunctionData[ 0 ] );
 }
 

@@ -38,8 +38,8 @@ namespace livre
 template < class T, class U >
 void unsignedQuantize( const T* srcData,
                        U* dstData,
-                       const uint32_t count,
-                       const uint32_t compCount,
+                       const size_t count,
+                       const size_t compCount,
                        const Vector3f& min,
                        const Vector3f& max )
 {
@@ -47,9 +47,9 @@ void unsignedQuantize( const T* srcData,
     const Vector3f range = max - min;
 
     #pragma omp parallel for schedule( dynamic, 65536 )
-    for( uint32_t i = 0; i < count; ++i )
+    for( int64_t i = 0; i < int64_t(count); ++i )
     {
-        for( uint32_t j = 0; j < compCount; ++j )
+        for( size_t j = 0; j < compCount; ++j )
         {
             dstData[ i + j ] = ( (float)srcData[ i + j ] - min[ j ] ) / range[ j ] * dataTypeMax;
         }
@@ -68,8 +68,8 @@ void unsignedQuantize( const T* srcData,
 template < class T, class U >
 void signedQuantize( const T* srcData,
                      U* dstData,
-                     const uint32_t count,
-                     const uint32_t compCount,
+                     const size_t count,
+                     const size_t compCount,
                      const Vector3f& min,
                      const Vector3f& max )
 {
@@ -77,9 +77,9 @@ void signedQuantize( const T* srcData,
     const Vector3f range = max - min;
 
     #pragma omp parallel for schedule( dynamic, 65536 )
-    for( uint32_t i = 0; i < count; ++i )
+    for( int64_t i = 0; i < int64_t(count); ++i )
     {
-        for( uint32_t j = 0; j < compCount; ++j )
+        for( size_t j = 0; j < compCount; ++j )
         {
             dstData[ i + j ] = 2.0 * ( ( (float)srcData[ i + j ] - min[ j ] ) / range[ j ] - 0.5 ) * dataTypeMax;
         }

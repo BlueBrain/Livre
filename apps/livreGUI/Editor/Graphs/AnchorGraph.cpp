@@ -57,7 +57,7 @@ void AnchorGraph::paint_( QPainter &painter )
     for ( uint32_t i = 0; i < transferFunctionPtr_->getNumChannels( ); ++i )
     {
         painter.setPen( colors_[ i ] );
-        paintCurve_( painter, static_cast< ColorChannel >( i ), tfData.size( ) / transferFunctionPtr_->getNumChannels( ) );
+        paintCurve_( painter, static_cast< ColorChannel >( i ), uint32_t( tfData.size( )) / transferFunctionPtr_->getNumChannels( ) );
         paintAnchors_( painter, static_cast< ColorChannel >( i ) );
     }
 }

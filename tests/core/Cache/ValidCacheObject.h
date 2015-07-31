@@ -43,7 +43,7 @@ public:
 
     virtual livre::CacheId getCacheID() const { return cacheId_; }
 
-    virtual uint32_t getCacheSize( ) const { return CACHE_SIZE; }
+    size_t getCacheSize( ) const final { return CACHE_SIZE; }
 
 private:
 

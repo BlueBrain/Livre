@@ -52,7 +52,7 @@ void VolumeDataSourcePlugin::internalNodeToLODNode(
     Vector3f boxCoordMin = localBlockPos.getMin();
     Vector3f boxCoordMax = localBlockPos.getMax();
 
-    const uint32_t index = bricksInRefLevel.find_max_index( );
+    const size_t index = bricksInRefLevel.find_max_index();
 
     boxCoordMin = boxCoordMin / bricksInRefLevel[index];
     boxCoordMax = boxCoordMax / bricksInRefLevel[index];

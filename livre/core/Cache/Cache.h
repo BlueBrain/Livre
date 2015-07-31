@@ -62,7 +62,7 @@ public:
     /**
      * @return The number of cache objects managed ( not the number of loaded objects ).
      */
-    uint32_t getNumberOfCacheObjects( ) const;
+    size_t getNumberOfCacheObjects( ) const;
 
     /**
      * @return Statistics.

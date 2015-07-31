@@ -63,14 +63,14 @@ private:
     void unload_() final;
     bool isLoaded_() const final;
     bool isValid_() const final;
-    uint32_t getCacheSize() const final;
+    size_t getCacheSize() const final;
     CacheId getCacheID() const final;
 
     template< class T >
     void setTextureData_( bool quantize );
 
-    uint32_t getDataSize_() const;
-    uint32_t getRawDataSize_() const;
+    size_t getDataSize_() const;
+    size_t getRawDataSize_() const;
 
     /**
      * Quantizes data into the given format with T.

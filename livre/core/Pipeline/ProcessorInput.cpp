@@ -96,7 +96,7 @@ bool ProcessorInput::isBlocked( const uint32_t inputConnection /* =0 */) const
     return it->second;
 }
 
-uint32_t ProcessorInput::getNumberOfConnections() const
+size_t ProcessorInput::getNumberOfConnections() const
 {
     return blockedMap_.size();
 }

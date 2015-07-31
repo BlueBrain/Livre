@@ -62,13 +62,14 @@ void View::render( const FrameInfo& frameInfo,
         return ;
 
 #ifndef LIVRE_DEBUG_RENDERING
-    const size_t all = frameInfo.allNodesList.size();
-    const size_t haveNot = frameInfo.notAvailableRenderNodeList.size();
-    const size_t have = all - haveNot;
+    const unsigned long all = static_cast< unsigned long >( frameInfo.allNodesList.size( ));
+    const unsigned long haveNot =
+        static_cast< unsigned long >( frameInfo.notAvailableRenderNodeList.size( ));
+    const unsigned long have = all - haveNot;
 
     if( progress_.expected_count() != all )
         progress_.restart( all );
-    progress_ += static_cast< unsigned long >( have ) - progress_.count();
+    progress_ += have - progress_.count();
 #endif
 
     onPreRender_( widget, frameInfo );

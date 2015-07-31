@@ -123,7 +123,7 @@ void Cache::unloadCacheObjectsWithPolicy_( CachePolicy& cachePolicy,
     }
 }
 
-uint32_t Cache::getNumberOfCacheObjects( ) const
+size_t Cache::getNumberOfCacheObjects( ) const
 {
     ReadLock readLock( mutex_ );
     return cacheMap_.size( );

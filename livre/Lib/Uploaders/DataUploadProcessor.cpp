@@ -151,6 +151,8 @@ DataUploadProcessor::DataUploadProcessor( DashTreePtr dashTree,
 bool DataUploadProcessor::initializeThreadRun_()
 {
     setName( "DataUp" );
+    LBASSERT( getGLContext( ));
+    _shareContext->shareContext( getGLContext( ));
     return DashProcessor::initializeThreadRun_();
 }
 
@@ -159,7 +161,6 @@ void DataUploadProcessor::runLoop_( )
     LBASSERT( getGLContext( ));
     if( GLContext::getCurrent() != getGLContext().get( ))
     {
-        _shareContext->shareContext( getGLContext( ));
         getGLContext()->makeCurrent();
 
         VolumeDataSourcePtr dataSource = _textureDataCache.getDataSource();

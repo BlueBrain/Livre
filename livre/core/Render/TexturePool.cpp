@@ -20,10 +20,13 @@
 #include "TexturePool.h"
 
 #include <livre/core/defines.h>
+#include <livre/core/Render/GLContext.h>
 #include <eq/gl.h>
 
 namespace livre
 {
+
+#define glewGetContext() GLContext::glewGetContext()
 
 TexturePool::TexturePool( const Vector3i& maxBlockSize,
                           const GLint internalFormat,

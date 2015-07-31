@@ -29,11 +29,13 @@ Processor::Processor()
 Processor::~Processor( )
 {}
 
+bool Processor::init()
+{
+    return initializeThreadRun_();
+}
+
 void Processor::run()
 {
-    if( !initializeThreadRun_( ) )
-        return;
-
     while( isRunning() )
         runLoop_( );
 }

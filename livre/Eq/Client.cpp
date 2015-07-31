@@ -88,7 +88,7 @@ std::string Client::getHelp()
 std::string Client::getVersion()
 {
     std::stringstream os;
-    os << "Livre version " << Version::getString() << std::endl;
+    os << "Livre version " << livrecore::Version::getString() << std::endl;
     return os.str();
 }
 

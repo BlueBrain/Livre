@@ -69,7 +69,7 @@ public:
     /**
      * @return The number of connections.
      */
-    uint32_t getNumberOfConnections() const;
+    size_t getNumberOfConnections() const;
 
 protected:
 

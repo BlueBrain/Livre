@@ -27,7 +27,8 @@ namespace livre
 {
 
 EqContext::EqContext( Window* const window )
-    : window_( window )
+    : GLContext()
+    , window_( window )
     , systemWindow_( 0 )
 {
 }

@@ -24,6 +24,8 @@
 namespace livre
 {
 
+const GLEWContext* GLContext::_glewContext = 0;
+
 void dontCleanup( livre::GLContext* )
 {}
 
@@ -50,6 +52,14 @@ const GLContext* GLContext::getCurrent()
     return perThreadContext_.get();
 }
 
+void GLContext::glewSetContext( const GLEWContext* context )
+{
+    _glewContext = context;
+}
 
+const GLEWContext* GLContext::glewGetContext()
+{
+    return _glewContext;
+}
 
 }

@@ -36,16 +36,14 @@ class RayCastRenderer : public Renderer
 public:
 
     /**
-     * @param glewContext Glew context.
      * @param samples Number of samples per ray.
      * @param componentCount Component count of rendering.
      * @param gpuDataType Data type of the texture data source.
      * @param internalFormat Internal format of the texture in GPU memory.
      */
-    RayCastRenderer( const GLEWContext* glewContext, const uint32_t samples,
-                     const uint32_t componentCount, const uint32_t gpuDataType,
-                     const int32_t internalFormat );
-    ~RayCastRenderer( );
+    RayCastRenderer( const uint32_t samples, const uint32_t componentCount,
+                     const uint32_t gpuDataType, const int32_t internalFormat );
+    ~RayCastRenderer();
 
     /**
      * Modifies the transfer function.

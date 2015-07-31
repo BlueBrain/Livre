@@ -36,8 +36,7 @@ class TextureObject : public CacheObject, public LODNodeTrait
     friend class TextureCache;
 
 public:
-
-    TextureObject( );
+    TextureObject();
 
     virtual ~TextureObject( );
 
@@ -54,7 +53,7 @@ public:
     /**
      * @return The GPU memory usage.
      */
-    uint32_t getCacheSize( ) const;
+    size_t getCacheSize( ) const override;
 
     /**
      * @return The texture type.
@@ -83,7 +82,6 @@ public:
     static TextureObject* getEmptyPtr();
 
 private:
-
     TextureObject( TextureCachePtr textureCachePtr );
 
     const TextureDataObject& getTextureDataObject_( ) const;

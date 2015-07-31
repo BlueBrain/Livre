@@ -21,12 +21,15 @@
 
 #include "GLSLShaders.h"
 
+#include <livre/core/Render/GLContext.h>
 #include <eq/gl.h>
 #include <lunchbox/debug.h>
 #include <fstream>
 
 namespace livre
 {
+#define glewGetContext() GLContext::glewGetContext()
+
 GLSLShaders::GLSLShaders()
     : _program( 0 )
 {}
@@ -105,7 +108,7 @@ int GLSLShaders::_load( GLSLShaders::Handle& handle, const std::string& shader,
                                  -1, glslCodes[i].c_str() );
                 pathsChar[i] = paths[i].c_str();
             }
-            glCompileShaderIncludeARB( (GLuint)handle, paths.size(),
+            glCompileShaderIncludeARB( (GLuint)handle, GLsizei(paths.size()),
                                        &pathsChar[0], 0 );
         }
         else
@@ -143,12 +146,6 @@ std::string GLSLShaders::readShaderFile_( const std::string &shaderFile ) const
 
 namespace
 {
-void _deleteShader( const GLSLShaders::Handle shader )
-{
-    if( shader )
-        glDeleteShader( shader );
-}
-
 int _glError( const int error = glGetError( ))
 {
     if( error == GL_NO_ERROR )
@@ -254,6 +251,12 @@ bool GLSLShaders::checkOpenGLExtension( const std::string& extensionName
     }
 #endif
     return false;
+}
+
+void GLSLShaders::_deleteShader( const GLSLShaders::Handle shader )
+{
+    if( shader )
+        glDeleteShader( shader );
 }
 
 }

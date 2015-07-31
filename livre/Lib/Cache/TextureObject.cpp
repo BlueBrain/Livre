@@ -24,6 +24,7 @@
 #include <livre/core/Data/LODNode.h>
 #include <livre/core/Data/VolumeDataSource.h>
 #include <livre/core/Data/VolumeDataSource.h>
+#include <livre/core/Render/GLContext.h>
 #include <livre/core/Render/Renderer.h>
 #include <livre/core/Render/TexturePool.h>
 
@@ -32,26 +33,27 @@
 namespace livre
 {
 
-TextureObject::TextureObject( )
-    : lodTextureData_( TextureDataObject::getEmptyPtr() )
+#define glewGetContext() GLContext::glewGetContext()
+
+TextureObject::TextureObject()
+    : lodTextureData_( TextureDataObject::getEmptyPtr( ))
 {
 }
 
 TextureObject::TextureObject( TextureCachePtr textureCachePtr )
-   : textureCachePtr_( textureCachePtr ),
-     textureState_( new TextureState( ) ),
-     lodTextureData_( TextureDataObject::getEmptyPtr() )
+   : textureCachePtr_( textureCachePtr )
+   , textureState_( new TextureState( ))
+   , lodTextureData_( TextureDataObject::getEmptyPtr( ))
 {
 }
 
 TextureObject::~TextureObject()
 {
-
 }
 
 TextureObject* TextureObject::getEmptyPtr()
 {
-    static boost::shared_ptr< TextureObject > texture( new TextureObject() );
+    static boost::shared_ptr< TextureObject > texture( new TextureObject );
     return texture.get();
 }
 
@@ -176,7 +178,7 @@ GLenum TextureObject::getTextureType() const
     return textureState_->texturePoolPtr->getGPUDataType();
 }
 
-uint32_t TextureObject::getCacheSize( ) const
+size_t TextureObject::getCacheSize( ) const
 {
     if( !isValid() )
         return 0;

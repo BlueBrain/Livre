@@ -205,6 +205,8 @@ void FrameData::mapObjects( )
 
 void FrameData::unmapObjects( )
 {
+    if( !objectMapPtr_ )
+        return;
     LBCHECK( objectMapPtr_->unmap( frameSettingsPtr_.get() ) );
     LBCHECK( objectMapPtr_->unmap( renderSettingsPtr_.get() ) );
     LBCHECK( objectMapPtr_->unmap( cameraSettingsPtr_.get() ) );
@@ -291,7 +293,8 @@ bool FrameData::map( eq::Config* config, const eq::uint128_t& uuid )
 
 void FrameData::unmap( eq::Config* config )
 {
-    config->unmapObject( objectMapPtr_.get() );
+    if( objectMapPtr_ )
+        config->unmapObject( objectMapPtr_.get() );
 }
 
 bool FrameData::registerToConfig_( eq::Config* config )
