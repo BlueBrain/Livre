@@ -71,7 +71,7 @@ private:
                      const size_t queueSize );
 
     void onLoaded_( const CacheObject& cacheObject ) final;
-    void onPreUnload_( const CacheObject& cacheObject ) final;
+    void onUnload_( const CacheObject& cacheObject ) final;
 
     void onCacheMiss_( const CacheObject& ) final { ++cacheMiss_; }
     void onCacheHit_( const CacheObject& ) final { ++cacheHit_; }

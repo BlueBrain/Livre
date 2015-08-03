@@ -29,17 +29,14 @@ namespace test
 class CacheObjectObserver : public livre::CacheObjectObserver
 {
 public:
-
     CacheObjectObserver()
         : unloaded_( false )
     {}
 
-    virtual void onUnloaded_( const livre::CacheObject& ) { unloaded_ = true; }
-
+    void onUnload_( const livre::CacheObject& ) final { unloaded_ = true; }
     bool isUnloaded( ) const { return unloaded_; }
 
 private:
-
     bool unloaded_;
 
 };

@@ -34,53 +34,39 @@ class CacheObjectObserver
     friend class CacheObject;
 
 protected:
-
     /**
-     * Notifies the \see CacheObserver before loading.
-     * @param cacheObject The \see CacheObject that notifies.
-     * @param continueLoading If false loading can be stopped.
-     */
-    virtual void onPreLoad_( const CacheObject& cacheObject LB_UNUSED,  bool& continueLoading LB_UNUSED ) { }
-
-    /**
-     * Notifies the \see CacheObserver after loading.
-     * @param cacheObject The \see CacheObject that notifies.
+     * Notifies the CacheObserver after loading.
+     * @param cacheObject The CacheObject that notifies.
      */
     virtual void onLoaded_( const CacheObject& cacheObject LB_UNUSED ) { }
 
     /**
-     * Notifies the \see CacheObserver before unloading.
-     * @param cacheObject The \see CacheObject that notifies.
+     * Notifies the CacheObserver before unloading.
+     * @param cacheObject The CacheObject that notifies.
      */
-    virtual void onPreUnload_( const CacheObject& cacheObject LB_UNUSED ) { }
+    virtual void onUnload_( const CacheObject& cacheObject LB_UNUSED ) { }
 
     /**
-     * Notifies the \see CacheObserver after unloading.
-     * @param cacheObject The \see CacheObject that notifies.
-     */
-    virtual void onUnloaded_( const CacheObject& cacheObject LB_UNUSED ) { }
-
-    /**
-     * Notifies the \see CacheObserver on increase of reference count.
-     * @param cacheObject The \see CacheObject that notifies.
+     * Notifies the CacheObserver on increase of reference count.
+     * @param cacheObject The CacheObject that notifies.
      */
     virtual void onReferenced_( const CacheObject& cacheObject LB_UNUSED ) { }
 
     /**
-     * Notifies the \see CacheObserver on decrease of reference count.
-     * @param cacheObject The \see CacheObject that notifies.
+     * Notifies the CacheObserver on decrease of reference count.
+     * @param cacheObject The CacheObject that notifies.
      */
     virtual void onUnreferenced_( const CacheObject& cacheObject LB_UNUSED ) { }
 
     /**
-     * Notifies the \see CacheObserver if object is in \see Cache
-     * @param cacheObject The \see CacheObject that notifies.
+     * Notifies the CacheObserver if object is in Cache
+     * @param cacheObject The CacheObject that notifies.
      */
     virtual void onCacheHit_( const CacheObject& cacheObject LB_UNUSED ) { }
 
     /**
-     * Notifies notify the \see CacheObserver if object is not in \see Cache
-     * @param cacheObject The \see CacheObject that notifies.
+     * Notifies notify the CacheObserver if object is not in Cache
+     * @param cacheObject The CacheObject that notifies.
      */
     virtual void onCacheMiss_( const CacheObject& cacheObject LB_UNUSED ) { }
 

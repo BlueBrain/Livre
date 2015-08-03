@@ -108,7 +108,7 @@ void CacheStatistics::onLoaded_( const CacheObject& cacheObject )
                                              cacheObject.getLoadTime( ))));
 }
 
-void CacheStatistics::onPreUnload_( const CacheObject& cacheObject )
+void CacheStatistics::onUnload_( const CacheObject& cacheObject )
 {
     --blockCount_;
     usedMemoryInBytes_ -= cacheObject.getCacheSize();

@@ -86,6 +86,12 @@ public:
      */
     uint32_t frame();
 
+    /** @return true if an event required a redraw. */
+    bool needRedraw();
+
+    /** Request a new frame to be rendered. */
+    void postRedraw();
+
     /**
      * switchCanvas_ Switches to next canvas.
      * @return True if operations succeeds.
@@ -117,11 +123,12 @@ public:
      */
     Matrix4f convertFromHBPCamera( const Matrix4f& modelViewMatrix ) const;
 
+    void handleEvents() final;
+    bool handleEvent( eq::EventICommand command ) final;
+
 private:
     LIVREEQ_API virtual ~Config();
     bool handleEvent( const eq::ConfigEvent* event ) final;
-    bool handleEvent( eq::EventICommand command ) final;
-    void handleEvents() final;
 
     bool _registerFrameData();
     bool _deregisterFrameData();

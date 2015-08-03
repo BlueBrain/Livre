@@ -1,20 +1,18 @@
 Changelog {#Changelog}
 =========
 
-# Release 0.4 (git master) {#Release040}
+# master {#master}
 
-* [#90](https://github.com/BlueBrain/Livre/pull/90):
-  Fix [#75](https://github.com/BlueBrain/Livre/issues/73):
-  Do not block application while waiting for data in asynchronous mode
+* [#101](https://github.com/BlueBrain/Livre/pull/101):
+  Implement event-driven rendering
+* [#75](https://github.com/BlueBrain/Livre/issues/73):
+  Fix blocked application while waiting for data in asynchronous mode
 * [#86](https://github.com/BlueBrain/Livre/pull/86):
   Removed obsolete limitation to open only regular power-of-two volumes
 * [#84](https://github.com/BlueBrain/Livre/pull/84):
   Cache statistics are printed when showing statistics (press 's' key)
-* [#84](https://github.com/BlueBrain/Livre/pull/84):
-  Fix [#73](https://github.com/BlueBrain/Livre/issues/73): Merge data- and
-  textureDataCache, commandline options for changing the cache sizes are now
-  --gpu-cache-mem (instead of --texture-cache-mem) and --cpu-cache-mem (instead
-  of --data-cache-mem and --texturedata-cache-mem)
+* [#73](https://github.com/BlueBrain/Livre/issues/73):
+  Merge dataCache and textureDataCache
 * [#78](https://github.com/BlueBrain/Livre/pull/78):
   New command line parameter to load a transfer function from file (".1dt" file
   extension, based on the format used by ImageVis3D)

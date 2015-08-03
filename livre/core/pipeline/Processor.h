@@ -43,7 +43,6 @@ class Processor : public lunchbox::Thread
 
 public:
     LIVRECORE_API Processor();
-
     LIVRECORE_API virtual ~Processor();
 
     /**
