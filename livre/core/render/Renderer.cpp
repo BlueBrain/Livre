@@ -31,7 +31,7 @@ namespace livre
 // Sort helper funtion for sorting the textures with their distances to viewpoint
 struct DistanceOperator
 {
-    DistanceOperator( const Frustum& frustum ) : frustum_( frustum ) { }
+    explicit DistanceOperator( const Frustum& frustum ) : frustum_( frustum ) { }
     bool operator()( const RenderBrickPtr& rb1,
                      const RenderBrickPtr& rb2 )
     {

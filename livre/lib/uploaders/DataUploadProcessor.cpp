@@ -112,7 +112,7 @@ private:
 // Sort helper function for sorting the textures to load the front texture data first
 struct DepthCompare
 {
-    DepthCompare( const Frustum& frustum )
+    explicit DepthCompare( const Frustum& frustum )
         : frustum_( frustum ) { }
 
     bool operator()( dash::NodePtr node1,

@@ -33,7 +33,7 @@ namespace detail
 class Pipe
 {
 public:
-    Pipe( livre::Pipe* pipe )
+    explicit Pipe( livre::Pipe* pipe )
         : _pipe( pipe )
         , _frameDataPtr( new FrameData( ))
     {}

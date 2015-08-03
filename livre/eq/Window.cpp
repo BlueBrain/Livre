@@ -50,7 +50,7 @@ namespace livre
 class Window::Impl
 {
 public:
-    Impl( Window* window )
+    explicit Impl( Window* window )
         : _window( window )
         , _dashProcessorPtr( new DashProcessor( ))
     {}

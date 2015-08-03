@@ -50,7 +50,7 @@ namespace zeq
 class Communicator::Impl
 {
 public:
-    Impl( Config& config )
+    explicit Impl( Config& config )
         : _publisher( servus::URI( "hbp://" ))
         , _vwsPublisher()
         , _config( config )

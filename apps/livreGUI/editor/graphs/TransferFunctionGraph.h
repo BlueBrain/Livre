@@ -49,7 +49,7 @@ public:
     /**
      * @param parentWgt Parent widget.
      */
-    TransferFunctionGraph( QWidget *parentWgt = 0 );
+    explicit TransferFunctionGraph( QWidget *parentWgt = 0 );
 
     virtual ~TransferFunctionGraph( );
 

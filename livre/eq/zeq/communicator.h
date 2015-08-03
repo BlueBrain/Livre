@@ -34,7 +34,7 @@ namespace zeq
 class Communicator
 {
 public:
-    Communicator( Config& config );
+    explicit Communicator( Config& config );
     ~Communicator();
 
     /**

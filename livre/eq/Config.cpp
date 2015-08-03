@@ -43,7 +43,7 @@ namespace livre
 class Config::Impl
 {
 public:
-    Impl( Config* config_ )
+    explicit Impl( Config* config_ )
         : config( config_ )
         , currentCanvas( 0 )
         , eventMapper( EventHandlerFactoryPtr( new EqEventHandlerFactory ))
@@ -165,7 +165,7 @@ bool Config::init()
     frameSettings->setFrameNumber( params.frames.x( ));
 
     RenderSettingsPtr renderSettings = _impl->framedata.getRenderSettings();
-    const TransferFunction1Dc& tf( _impl->framedata.getVRParameters()->transferFunction );
+    const TransferFunction1Dc tf( _impl->framedata.getVRParameters()->transferFunction );
     renderSettings->setTransferFunction( tf );
 
     _impl->framedata.registerObjects();
@@ -218,7 +218,6 @@ uint32_t Config::frame()
 bool Config::exit()
 {
     bool ret = eq::Config::exit();
-    // cppcheck-suppress unreachableCode
     _impl->framedata.deregisterObjects();
     if( !_deregisterFrameData() )
         ret = false;

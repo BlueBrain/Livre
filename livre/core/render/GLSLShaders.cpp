@@ -252,6 +252,7 @@ bool GLSLShaders::checkOpenGLExtension( const std::string& extensionName
     return false;
 }
 
+// cppcheck-suppress passedByValue
 void GLSLShaders::_deleteShader( const GLSLShaders::Handle shader )
 {
     if( shader )

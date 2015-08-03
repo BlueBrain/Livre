@@ -44,7 +44,7 @@ class DataSource : public VolumeDataSourcePlugin
 {
 public:
     DataSource();
-    DataSource( const VolumeDataSourcePluginData& initData );
+    explicit DataSource( const VolumeDataSourcePluginData& initData );
     virtual ~DataSource();
 
     MemoryUnitPtr getData( const LODNode& node ) final;

@@ -22,11 +22,8 @@
 #ifndef _CameraSettings_h_
 #define _CameraSettings_h_
 
-#include <livre/lib/types.h>
 #include <livre/core/mathTypes.h>
-
 #include <co/serializable.h>
-#include <lunchbox/thread.h>
 
 namespace livre
 {
@@ -74,23 +71,12 @@ public:
     void spinModel( const float x, const float y, const float z );
 
     /**
-     * Sets the rotation of the model.
-     * @param rotation Rotation in x, y an z angles.
-     */
-    void setModelRotation( const Vector3f& rotation );
-
-    /**
      * Moves the camera to (x,y,z) amount.
      * @param x x amount.
      * @param y y amount.
      * @param z z amount.
      */
     void moveCamera( const float x, const float y, const float z );
-
-    /**
-     * Resets the spin of camera.
-     */
-    void resetCameraSpin();
 
     /**
      * Sets the camera rotation.
@@ -122,15 +108,9 @@ public:
     bool getPilotMode() const;
 
     /**
-     * Sets the pilot mode.
-     * @param pilotMode Pilot mode toggle.
-     */
-    void setPilotMode( bool pilotMode );
-
-    /**
      * Inverts the pilot mode.
      */
-    void togglePilotMode( );
+    void togglePilotMode();
 
     /**
      * @return camera rotation matrix.
@@ -148,24 +128,13 @@ public:
     const Vector3f& getCameraPosition() const { return cameraPosition_; }
 
     /**
-     * @return the amount of spin.
-     */
-    float getCameraSpin() const { return cameraSpin_; }
-
-    /**
-     * @return the translation length for the last position.
-     */
-    float getCameraTranslation() const { return cameraTranslation_; }
-
-    /**
      * @return the modelview matrix is computed using the model and camera matrix.
      */
     Matrix4f getModelViewMatrix() const;
 
 private:
-
-    virtual void serialize( co::DataOStream& os, const uint64_t dirtyBits );
-    virtual void deserialize( co::DataIStream& is, const uint64_t dirtyBits );
+    void serialize( co::DataOStream& os, const uint64_t dirtyBits ) final;
+    void deserialize( co::DataIStream& is, const uint64_t dirtyBits ) final;
 
     Vector3f defaultCameraPosition_;
     Vector3f defaultCameraLookAt_;
@@ -173,9 +142,6 @@ private:
     Matrix4f cameraRotation_;
     Matrix4f modelRotation_;
     Vector3f cameraPosition_;
-
-    float cameraSpin_;
-    float cameraTranslation_;
 
     bool pilotMode_;
 };

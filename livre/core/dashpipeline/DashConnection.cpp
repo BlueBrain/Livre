@@ -26,7 +26,7 @@ class DashReceiver: public Receiver< dash::Commit >
 {
 public:
 
-    DashReceiver( lunchbox::MTQueue< dash::Commit >& queue ) : queue_( queue ) { }
+    explicit DashReceiver( lunchbox::MTQueue< dash::Commit >& queue ) : queue_( queue ) { }
     virtual dash::Commit pop( ) { return queue_.pop(); }
     virtual void popAll( std::vector< dash::Commit >& result  ) { queue_.tryPop( queue_.getSize( ), result ); }
     virtual bool timedPop( const unsigned timeout, dash::Commit& commit ) { return queue_.timedPop( timeout, commit ); }
@@ -40,7 +40,7 @@ protected:
 class DashSender: public Sender< dash::Commit >
 {
 public:
-    DashSender( lunchbox::MTQueue< dash::Commit >& queue ) : queue_( queue ) { }
+    explicit DashSender( lunchbox::MTQueue< dash::Commit >& queue ) : queue_( queue ) { }
     virtual void push( dash::Commit& commit ) { queue_.push( commit ); }
     virtual void push( const std::vector< dash::Commit >& commits ) { queue_.push( commits ); }
     virtual void clear( ) { queue_.clear(); }
