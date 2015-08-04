@@ -54,6 +54,13 @@ public:
     LIVRECORE_API CacheObjectPtr getObjectFromCache( const CacheId cacheObjectID );
 
     /**
+     * @param cacheObjectID The object cache id to be queried.
+     * @return The cache object from cache, if object is not in the list an empty cache
+     * object is returned.
+     */
+    LIVRECORE_API CacheObjectPtr getObjectFromCache( const CacheId cacheObjectID ) const;
+
+    /**
      * Applies a policy to the cache.
      * @param cachePolicy The policy to be applied to cache.
      * @return The state for the cache policy application.

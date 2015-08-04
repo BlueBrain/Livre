@@ -33,6 +33,11 @@ CacheObjectPtr Cache::getObjectFromCache( const CacheId cacheObjectID )
     return getObjectFromCache_( cacheObjectID );
 }
 
+CacheObjectPtr Cache::getObjectFromCache( const CacheId cacheObjectID ) const
+{
+    return getObjectFromCache_( cacheObjectID );
+}
+
 Cache::ApplyResult Cache::applyPolicy( CachePolicy& cachePolicy ) const
 {
     ReadLock readLock( mutex_, boost::try_to_lock );

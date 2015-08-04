@@ -112,6 +112,20 @@ public:
      */
     LIVRECORE_API bool operator!=( const Identifier id ) const
         { return _id != id; } //<! Checks equality of the node
+
+    /**
+     * @param id The identifier which is compared against
+     * @return true if id is smaller
+     */
+    LIVRECORE_API bool operator<( const NodeId& node ) const
+        { return _id < node._id; } //<! Checks equality of the node
+
+    /**
+     * @param id The identifier which is compared against
+     * @return true if id is smaller
+     */
+    LIVRECORE_API bool operator<( const Identifier id ) const
+        { return _id < id; } //<! Checks equality of the node
 };
 
 /**

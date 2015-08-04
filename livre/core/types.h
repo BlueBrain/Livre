@@ -185,11 +185,10 @@ typedef std::vector< NodeId > NodeIds;
 /**
  * Vector definitions for complex types
  */
-typedef std::vector< ConstCacheObjectPtr > ConstCacheObjectPtrVector;
+typedef std::vector< CacheObjectPtr > CacheObjects;
+typedef std::vector< ConstCacheObjectPtr > ConstCacheObjects;
 typedef std::vector< RenderBrickPtr > RenderBricks;
-typedef std::vector< VolumeDataSourcePtr > VolumeDataSourcePtrVector;
-typedef std::vector< TexturePoolPtr > TexturePoolPtrVector;
-typedef std::vector< DashTreePtr > DashTreePtrVector;
+typedef std::vector< TexturePoolPtr > TexturePools;
 
 /**
  * Map definitions
@@ -197,6 +196,7 @@ typedef std::vector< DashTreePtr > DashTreePtrVector;
 typedef boost::unordered_map< NodeId, LODNodePtr > NodeIDLODNodePtrMap;
 typedef boost::unordered_map< NodeId, dash::NodePtr > NodeIDDashNodePtrMap;
 typedef boost::unordered_map< CacheId, CacheObjectPtr > CacheMap;
+typedef boost::unordered_map< CacheId, ConstCacheObjectPtr > ConstCacheMap;
 typedef boost::unordered_map< uint32_t, bool > BoolMap;
 typedef boost::unordered_map< uint32_t, EventHandlerPtr > EventHandlerPtrMap;
 typedef boost::unordered_map< uint32_t, DashConnectionPtr > DashConnectionPtrMap;

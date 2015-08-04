@@ -243,8 +243,8 @@ void DataLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state )
         return;
     }
 
-    const bool isVisible = renderNode.isVisible();
-    if( !isVisible )
+    const bool isLODVisible = renderNode.isLODVisible();
+    if( !isLODVisible )
         return;
 
     state.setVisitChild( false );
@@ -288,8 +288,8 @@ void DepthCollectorVisitor::visit( DashRenderNode& renderNode, VisitState& state
         return;
     }
 
-    const bool isVisible = renderNode.isVisible();
-    if( !isVisible )
+    const bool isLODVisible = renderNode.isLODVisible();
+    if( !isLODVisible )
         return;
 
     state.setVisitChild( false );

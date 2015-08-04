@@ -70,7 +70,7 @@ public:
      * @return True, if object is visible.
      * @warning This condition is set from outside of the object.
      */
-    LIVRECORE_API bool isVisible() const;
+    LIVRECORE_API bool isLODVisible() const;
 
     /**
      * @return True, if object is in frustum.

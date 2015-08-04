@@ -19,6 +19,7 @@
 
 #include <livre/lib/render/RenderView.h>
 #include <livre/lib/cache/TextureObject.h>
+#include <livre/lib/visitor/DFSTraversal.h>
 
 #include <livre/core/render/Frustum.h>
 #include <livre/core/dash/DashRenderNode.h>
@@ -32,46 +33,55 @@
 namespace livre
 {
 
-RenderView::RenderView( )
+struct RenderView::Impl
+{
+    Impl( ConstDashTreePtr dashTree )
+        : _dashTree( dashTree )
+    {}
+
+    void freeTexture( const NodeId& nodeId )
+    {
+        dash::NodePtr dashNode = _dashTree->getDashNode( nodeId );
+        if( !dashNode )
+            return;
+
+        DashRenderNode renderNode( dashNode );
+        if( renderNode.getLODNode().getRefLevel() != 0 )
+            renderNode.setTextureObject( TextureObject::getEmptyPtr( ));
+    }
+
+    void freeTextures( const FrameInfo& frameInfo )
+    {
+        BOOST_FOREACH( const ConstCacheObjectPtr& cacheObject,
+                       frameInfo.renderNodes )
+        {
+            const NodeId nodeId(cacheObject->getCacheID( ));
+            freeTexture( nodeId );
+        }
+
+        BOOST_FOREACH( const NodeId& nodeId, frameInfo.allNodes )
+            freeTexture( nodeId );
+    }
+
+    ConstDashTreePtr _dashTree;
+
+};
+
+RenderView::RenderView( ConstDashTreePtr dashTree )
+    : _impl( new RenderView::Impl( dashTree ))
 {
 }
 
-void RenderView::setParameters( ConstVolumeRendererParametersPtr vrParams )
+RenderView::~RenderView()
 {
-    volumeRendererParameters_ = *vrParams;
+    delete _impl;
 }
 
 void RenderView::onPostRender_( const GLWidget&,
                                 const FrameInfo& frameInfo )
 {
-    freeTextures_( frameInfo.renderNodeList );
+    _impl->freeTextures( frameInfo );
 }
 
-void RenderView::freeTextures_( const DashNodeVector& renderNodeList )
-{
-    DashNodeSet currentSet;
-    for( DashNodeVector::const_iterator it = renderNodeList.begin();
-         it != renderNodeList.end(); ++it )
-    {
-        dash::NodePtr node = *it;
-        currentSet.insert( node );
-    }
 
-    DashNodeSet cleanSet;
-    std::set_difference( previousVisibleSet_.begin(),
-                         previousVisibleSet_.end(),
-                         currentSet.begin(),
-                         currentSet.end(),
-                         std::inserter( cleanSet, cleanSet.begin( )));
-
-    // Unreference not needed textures
-    for( DashNodeSet::iterator it = cleanSet.begin(); it != cleanSet.end(); ++it )
-    {
-        DashRenderNode renderNode( *it );
-        if( renderNode.getLODNode().getRefLevel() != 0 )
-            renderNode.setTextureObject( TextureObject::getEmptyPtr( ));
-    }
-
-    previousVisibleSet_ = currentSet;
-}
 }
