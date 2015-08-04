@@ -60,7 +60,7 @@ public:
         , _config( config )
     {}
 
-    void onPostCommit_( const uint32_t connection, const CommitState state )
+    void onPostCommit_( uint32_t connection, CommitState state ) final
     {
         TextureUploadProcessor::onPostCommit_( connection, state );
         if( needRedraw( ))

@@ -41,7 +41,7 @@ public:
     LIVRE_API AvailableSetGenerator( DashTreePtr tree,
                                      const TextureCache& textureCache );
 
-    ~ AvailableSetGenerator();
+    LIVRE_API ~AvailableSetGenerator();
 
     /**
      * Generates the rendering set according to the given frustum.

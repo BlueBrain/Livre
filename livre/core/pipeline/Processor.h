@@ -89,28 +89,28 @@ protected:
      * @param connection Connection number.
      * @return False if commit is abandoned.
      */
-    virtual bool onPreCommit_( const uint32_t connection LB_UNUSED ) { return true; }
+    virtual bool onPreCommit_( uint32_t connection LB_UNUSED ) { return true; }
 
     /**
      * Is called after commiting.
      * @param connection Connection number.
      * @param state State of the commit. \see livre::CommitState
      */
-    virtual void onPostCommit_( const uint32_t connection LB_UNUSED, const CommitState state LB_UNUSED ) { }
+    virtual void onPostCommit_( uint32_t connection LB_UNUSED, CommitState state LB_UNUSED ) { }
 
     /**
      * Is called after applying changes.
      * @param connection Connection number.
      * @return False if apply is abandoned.
      */
-    virtual bool onPreApply_( const uint32_t connection LB_UNUSED ) { return true; }
+    virtual bool onPreApply_( uint32_t connection LB_UNUSED ) { return true; }
 
     /**
      * Is called after changes are applied.
      * @param connection Connection number.
      * @param applySuccessful True if apply is successfull on connection.
      */
-    virtual void onPostApply_( const uint32_t connection LB_UNUSED, const bool applySuccessful LB_UNUSED ) { }
+    virtual void onPostApply_( uint32_t connection LB_UNUSED, bool applySuccessful LB_UNUSED ) { }
 
     /** The parent thread waits for this to finish when start() is invoked. */
     LIVRECORE_API bool init() override;
