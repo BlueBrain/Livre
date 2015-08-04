@@ -34,10 +34,8 @@ TexturePoolPtr TexturePoolFactory::findTexturePool( const Vector3i& maxBlockSize
                                                     const GLenum format,
                                                     const GLenum gpuDataType )
 {
-    for( TexturePoolPtrVector::iterator it = texturePoolList_.begin();
-         it != texturePoolList_.end(); ++it )
+    BOOST_FOREACH( TexturePoolPtr& pool, texturePools_  )
     {
-        TexturePoolPtr pool = *it;
         if( maxBlockSize == pool->getMaxBlockSize() &&
            format == pool->getFormat() &&
             gpuDataType == pool->getGPUDataType() )
@@ -50,7 +48,7 @@ TexturePoolPtr TexturePoolFactory::findTexturePool( const Vector3i& maxBlockSize
                                            internalFormat_,
                                            format,
                                            gpuDataType ) );
-    texturePoolList_.push_back( pool );
+    texturePools_.push_back( pool );
     return pool;
 }
 

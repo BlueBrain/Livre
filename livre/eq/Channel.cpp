@@ -50,6 +50,7 @@
 #include <livre/lib/render/AvailableSetGenerator.h>
 #include <livre/lib/render/RenderView.h>
 #include <livre/lib/render/ScreenSpaceLODEvaluator.h>
+#include <livre/lib/visitor/DFSTraversal.h>
 
 #include <eq/eq.h>
 #include <eq/gl.h>
@@ -66,8 +67,8 @@ namespace detail
 class EqRenderView : public RenderView
 {
 public:
-    explicit EqRenderView( Channel* channel );
 
+    EqRenderView( Channel* channel, ConstDashTreePtr dashTree );
     const Frustum& getFrustum() const final;
 
 private:
@@ -181,10 +182,10 @@ void SelectVisibles::visit( DashRenderNode& renderNode, VisitState& state )
                                                        _volumeDepth,
                                                        vmin );
 
-    const bool isVisible = (lod <= lodNode.getNodeId().getLevel( ));
-    renderNode.setVisible( isVisible );
+    const bool isLODVisible = (lod <= lodNode.getNodeId().getLevel( ));
+    renderNode.setVisible( isLODVisible );
 
-    state.setVisitChild( !isVisible );
+    state.setVisitChild( !isLODVisible );
 }
 
 const float nearPlane = 0.1f;
@@ -195,7 +196,6 @@ class Channel
 public:
     explicit Channel( livre::Channel* channel )
           : _channel( channel )
-          , _renderViewPtr( new EqRenderView( this ))
           , _glWidgetPtr( new EqGlWidget( channel ))
     {}
 
@@ -218,9 +218,15 @@ public:
     {
         const uint32_t nSlices =
             getFrameData()->getVRParameters()->samplesPerRay;
-        ConstVolumeDataSourcePtr dataSource =
-            static_cast< livre::Node* >( _channel->getNode( ))->getDashTree()->getDataSource();
 
+        const livre::Node* node =
+                static_cast< livre::Node* >( _channel->getNode( ));
+
+        ConstDashTreePtr dashTree = node->getDashTree();
+
+        ConstVolumeDataSourcePtr dataSource = dashTree->getDataSource();
+
+        _renderViewPtr.reset( new EqRenderView( this, dashTree ));
         _renderViewPtr->setRenderer( RendererPtr( new RayCastRenderer( nSlices,
                                   dataSource->getVolumeInformation().compCount,
                                   GL_UNSIGNED_BYTE, GL_LUMINANCE8 )));
@@ -260,19 +266,17 @@ public:
         glScissor( 0, 0, channelPvp.w, channelPvp.h );
     }
 
-    void generateRenderBricks( const DashNodeVector& renderNodeList,
+    void generateRenderBricks( const ConstCacheObjects& renderNodes,
                                RenderBricks& renderBricks )
     {
-        BOOST_FOREACH( const dash::NodePtr& dashNode, renderNodeList )
+        renderBricks.reserve( renderNodes.size( ));
+        BOOST_FOREACH( const ConstCacheObjectPtr& cacheObject, renderNodes )
         {
-            const DashRenderNode dashRenderNode( dashNode );
             const ConstTextureObjectPtr texture =
-                boost::static_pointer_cast< const TextureObject >(
-                    dashRenderNode.getTextureObject( ));
+                boost::static_pointer_cast< const TextureObject >( cacheObject );
 
             RenderBrickPtr renderBrick( new RenderBrick( texture->getLODNode(),
                                                          texture->getTextureState( )));
-
             renderBricks.push_back( renderBrick );
         }
     }
@@ -327,15 +331,15 @@ public:
         _renderViewPtr->setViewport( viewport );
 
         livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
-        AvailableSetGenerator generateSet( node->getDashTree( ));
+        livre::Window* window = static_cast< livre::Window* >( _channel->getWindow( ));
+        AvailableSetGenerator generateSet( node->getDashTree( ),
+                                           window->getTextureCache( ));
 
         FrameInfo frameInfo( _currentFrustum );
         generateSet.generateRenderingSet( _currentFrustum, frameInfo);
 
         EqRenderViewPtr renderViewPtr =
                 boost::static_pointer_cast< EqRenderView >( _renderViewPtr );
-
-        renderViewPtr->setParameters( getFrameData()->getVRParameters( ));
 
         RayCastRendererPtr renderer =
                 boost::static_pointer_cast< RayCastRenderer >(
@@ -346,7 +350,7 @@ public:
             pipe->getFrameData()->getRenderSettings()->getTransferFunction( ));
 
         RenderBricks renderBricks;
-        generateRenderBricks( frameInfo.renderNodeList, renderBricks );
+        generateRenderBricks( frameInfo.renderNodes, renderBricks );
 
         renderViewPtr->render( frameInfo, renderBricks, *_glWidgetPtr );
     }
@@ -594,8 +598,9 @@ public:
     FrameGrabber _frameGrabber;
 };
 
-EqRenderView::EqRenderView( Channel* channel )
-    : RenderView()
+EqRenderView::EqRenderView( Channel* channel,
+                            ConstDashTreePtr dashTree )
+    : RenderView( dashTree )
     , _channel( channel )
 {}
 

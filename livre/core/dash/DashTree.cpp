@@ -76,20 +76,27 @@ public:
         return getDashNode( parentNodeId ) ;
     }
 
+    dash::NodePtr getDashNode( const NodeId& nodeId) const
+    {
+        ReadLock readLock( _mutex );
+        NodeIDDashNodePtrMap::const_iterator it = _dashNodeMap.find( nodeId );
+        return it == _dashNodeMap.end() ? dash::NodePtr() : it->second;
+    }
+
     dash::NodePtr getDashNode( const NodeId& nodeId )
     {
         // "Double-Checked Locking" idiom is used below.
         LBASSERT( &_localContext != &dash::Context::getCurrent() );
         ReadLock readLock( _mutex );
         NodeIDDashNodePtrMap::const_iterator it = _dashNodeMap.find( nodeId );
-        if( it != _dashNodeMap.end() )
+        if( it != _dashNodeMap.end( ))
             return it->second;
 
         readLock.unlock();
 
         WriteLock writeLock( _mutex );
         it = _dashNodeMap.find( nodeId );
-        if( it != _dashNodeMap.end() )
+        if( it != _dashNodeMap.end( ))
             return it->second;
 
         dash::Context& prevCtx = dash::Context::getCurrent();
@@ -158,6 +165,11 @@ const dash::NodePtr DashTree::getParentNode( const NodeId& nodeId )
 dash::NodePtr DashTree::getDashNode( const NodeId& nodeId )
 {
     return _impl->getDashNode( nodeId ) ;
+}
+
+dash::NodePtr DashTree::getDashNode( const NodeId& nodeId) const
+{
+     return _impl->getDashNode( nodeId ) ;
 }
 
 }

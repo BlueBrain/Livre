@@ -73,6 +73,11 @@ public:
      */
     LIVRECORE_API dash::NodePtr getDashNode( const NodeId& nodeId );
 
+    /**
+     * @return a node by its nodeId, returns an empty node if there is no nodeId.
+     */
+    LIVRECORE_API dash::NodePtr getDashNode( const NodeId& nodeId ) const;
+
 private:
     detail::DashTree* _impl;
 };

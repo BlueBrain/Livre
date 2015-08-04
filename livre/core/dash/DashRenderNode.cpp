@@ -27,7 +27,7 @@ enum DashAttributeType
     DNT_NODE              ,
     DNT_TEXTUREDATA       ,
     DNT_TEXTURE           ,
-    DNT_VISIBLE           ,
+    DNT_LODVISIBLE           ,
     DNT_INFRUSTUM         ,
     DNT_CACHE_MODIFIED
 };
@@ -56,9 +56,9 @@ bool DashRenderNode::isInFrustum( ) const
     return getAttribute_< bool >( DNT_INFRUSTUM );
 }
 
-bool DashRenderNode::isVisible( ) const
+bool DashRenderNode::isLODVisible( ) const
 {
-    return getAttribute_< bool >( DNT_VISIBLE );
+    return getAttribute_< bool >( DNT_LODVISIBLE );
 }
 
 void DashRenderNode::setLODNode( const LODNode& node )
@@ -83,7 +83,7 @@ void DashRenderNode::setInFrustum( bool visibility )
 
 void DashRenderNode::setVisible( bool visibility )
 {
-    *(_dashNode->getAttribute( DNT_VISIBLE )) = visibility;
+    *(_dashNode->getAttribute( DNT_LODVISIBLE )) = visibility;
 }
 
 void DashRenderNode::initializeDashNode( dash::NodePtr dashNode )
@@ -103,9 +103,9 @@ void DashRenderNode::initializeDashNode( dash::NodePtr dashNode )
     *texture = lodTexture;
     dashNode->insert( texture );
 
-    dash::AttributePtr isVisible = new dash::Attribute();
-    *isVisible = false;
-    dashNode->insert( isVisible );
+    dash::AttributePtr isLODVisible = new dash::Attribute();
+    *isLODVisible = false;
+    dashNode->insert( isLODVisible );
 
     dash::AttributePtr isInFrustum = new dash::Attribute();
     *isInFrustum = true;

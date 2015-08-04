@@ -62,9 +62,9 @@ void View::render( const FrameInfo& frameInfo,
         return ;
 
 #ifndef LIVRE_DEBUG_RENDERING
-    const unsigned long all = static_cast< unsigned long >( frameInfo.allNodesList.size( ));
+    const unsigned long all = static_cast< unsigned long >( frameInfo.allNodes.size( ));
     const unsigned long haveNot =
-        static_cast< unsigned long >( frameInfo.notAvailableRenderNodeList.size( ));
+        static_cast< unsigned long >( frameInfo.notAvailableRenderNodes.size( ));
     const unsigned long have = all - haveNot;
 
     if( progress_.expected_count() != all )

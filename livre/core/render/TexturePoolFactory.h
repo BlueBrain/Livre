@@ -51,7 +51,7 @@ public:
 private:
 
     const int32_t internalFormat_;
-    std::vector< TexturePoolPtr > texturePoolList_;
+    TexturePools texturePools_;
 };
 
 

@@ -22,6 +22,7 @@
 
 #include <livre/core/render/RenderingSetGenerator.h>
 #include <livre/lib/api.h>
+#include <livre/lib/types.h>
 
 namespace livre
 {
@@ -35,10 +36,12 @@ class AvailableSetGenerator : public RenderingSetGenerator
 public:
     /**
      * @param tree The initialized dash tree with the volume.
-     * @param windowHeight View height in pixels.
-     * @param screenSpaceError Screen space error in pixels.
+     * @param texture cache
      */
-    LIVRE_API AvailableSetGenerator( DashTreePtr tree);
+    LIVRE_API AvailableSetGenerator( DashTreePtr tree,
+                                     const TextureCache& textureCache );
+
+    ~ AvailableSetGenerator();
 
     /**
      * Generates the rendering set according to the given frustum.
@@ -47,6 +50,11 @@ public:
      */
     LIVRE_API void generateRenderingSet( const Frustum& viewFrustum,
                                          FrameInfo& frameInfo );
+
+private:
+
+    struct Impl;
+    Impl* _impl;
 };
 
 

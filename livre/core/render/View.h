@@ -21,6 +21,7 @@
 #define _View_h_
 
 #include <livre/core/api.h>
+#include <livre/core/cache/CacheObject.h>
 #include <livre/core/dashTypes.h>
 #include <livre/core/mathTypes.h>
 #include <livre/core/lunchboxTypes.h>
@@ -36,9 +37,9 @@ namespace livre
 struct FrameInfo
 {
     LIVRECORE_API FrameInfo( const Frustum& cFrustum );
-    DashNodeVector allNodesList; //!< The list of nodes to be rendered.
-    DashNodeVector renderNodeList; //!< The list of nodes to be rendered.
-    DashNodeVector notAvailableRenderNodeList; //!< The unavailable nodes for rendering.
+    NodeIds allNodes; //!< The list of nodes to be rendered.
+    NodeIds notAvailableRenderNodes; //!< The unavailable nodes for rendering.
+    ConstCacheObjects renderNodes; //!< The list of nodes to be rendered.
     const Frustum& currentFrustum; //!< The current frustum.
 };
 

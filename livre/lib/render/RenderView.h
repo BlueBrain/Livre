@@ -25,7 +25,6 @@
 #include <livre/core/render/View.h>
 #include <livre/core/render/Frustum.h>
 #include <livre/core/dash/DashRenderNode.h>
-#include <livre/lib/visitor/DFSTraversal.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 
 namespace livre
@@ -38,23 +37,15 @@ namespace livre
 class RenderView : public View
 {
 public:
-    LIVRE_API RenderView();
-
-    /**
-     * Sets the rendering parameters
-     * @param volumeRendererParameters Volume rendering parameters.
-     */
-    LIVRE_API void setParameters( ConstVolumeRendererParametersPtr volumeRendererParameters );
+    LIVRE_API RenderView( ConstDashTreePtr dashTree );
+    LIVRE_API ~RenderView();
 
 private:
     LIVRE_API void onPostRender_( const GLWidget& widget,
                                   const FrameInfo& frameInfo ) final;
 
-    void freeTextures_( const DashNodeVector& renderNodeList );
-
-    DashNodeSet previousVisibleSet_;
-    DFSTraversal dfsTraverser_;
-    VolumeRendererParameters volumeRendererParameters_;
+    struct Impl;
+    Impl* _impl;
 };
 
 }
