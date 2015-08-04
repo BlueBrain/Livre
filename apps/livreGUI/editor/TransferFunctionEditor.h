@@ -55,7 +55,7 @@ public:
     /**
      * @param parentWgt Parent widget.
      */
-    TransferFunctionEditor( QWidget *parentWgt = 0 );
+    explicit TransferFunctionEditor( QWidget *parentWgt = 0 );
      ~TransferFunctionEditor( );
 
     /**

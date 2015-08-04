@@ -30,7 +30,7 @@ namespace detail
 class RenderNodeVisitor
 {
 public:
-    RenderNodeVisitor(  DashTreePtr dashTree )
+    explicit RenderNodeVisitor( DashTreePtr dashTree )
         : _dashTree( dashTree )
     {}
 

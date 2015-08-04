@@ -66,7 +66,7 @@ namespace detail
 class EqRenderView : public RenderView
 {
 public:
-    EqRenderView( Channel* channel );
+    explicit EqRenderView( Channel* channel );
 
     const Frustum& getFrustum() const final;
 
@@ -83,7 +83,7 @@ typedef boost::shared_ptr< EqRenderView > EqRenderViewPtr;
 class EqGlWidget : public GLWidget
 {
 public:
-    EqGlWidget( livre::Channel* channel )
+    explicit EqGlWidget( livre::Channel* channel )
         : _channel( channel )
     {}
 
@@ -193,7 +193,7 @@ const float farPlane = 15.0f;
 class Channel
 {
 public:
-    Channel( livre::Channel* channel )
+    explicit Channel( livre::Channel* channel )
           : _channel( channel )
           , _renderViewPtr( new EqRenderView( this ))
           , _glWidgetPtr( new EqGlWidget( channel ))

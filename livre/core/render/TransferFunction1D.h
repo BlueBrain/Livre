@@ -49,7 +49,7 @@ public:
      * Create a transfer function.
      * @param size The number of samples in the transfer function.
      */
-    TransferFunction1D( const uint32_t size ) { createCustomTF_( size ); }
+    explicit TransferFunction1D( const uint32_t size ) { createCustomTF_( size ); }
 
     /**
      * Load transfer function from an ASCII "1dt" file. The content of the file
@@ -61,13 +61,13 @@ public:
      * opened, a default transfer function is generated.
      * @param file Path to the transfer function file.
      */
-    TransferFunction1D( const std::string& file ) { createTfFromFile_( file ); }
+    explicit TransferFunction1D( const std::string& file ) { createTfFromFile_( file ); }
 
     /**
      * Copy a transfer function.
      * @param tf The transfer function to be copied.
      */
-    TransferFunction1D( const TransferFunction1D< T >& tf )
+    explicit TransferFunction1D( const TransferFunction1D< T >& tf )
         : rgba_( tf.rgba_ )
     {}
 
@@ -75,7 +75,7 @@ public:
      * Create a transfer function.
      * @param rgba A std::vector with samples of the transfer function.
      */
-    TransferFunction1D( const std::vector< T >& rgba )
+    explicit TransferFunction1D( const std::vector< T >& rgba )
         : rgba_( rgba )
     {}
 

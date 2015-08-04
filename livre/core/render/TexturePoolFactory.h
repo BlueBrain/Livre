@@ -36,7 +36,7 @@ public:
     /**
      * @param internalFormat Internal OpenGL format for the texture, which defines the memory usage of a texture.
      */
-    LIVRECORE_API TexturePoolFactory( const int32_t internalFormat );
+    LIVRECORE_API explicit TexturePoolFactory( const int32_t internalFormat );
 
     /**
      * Generates/Retrieves a texture pool for the given format.

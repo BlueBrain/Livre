@@ -36,7 +36,7 @@ static const std::string port = boost::lexical_cast< std::string >(
 class DataService : public lunchbox::Thread
 {
 public:
-    DataService( const lunchbox::URI& uri )
+    explicit DataService( const lunchbox::URI& uri )
         : _service(( uri.findQuery( "bind" ) == uri.queryEnd() ?
                      std::string( "127.0.0.1" ) :
                      uri.findQuery( "bind" )->second ) + ":" + port )

@@ -49,7 +49,7 @@ namespace detail
 class Node
 {
 public:
-    Node( livre::Node* node )
+    explicit Node( livre::Node* node )
         : _config( static_cast< livre::Config* >( node->getConfig( )))
     {}
 
