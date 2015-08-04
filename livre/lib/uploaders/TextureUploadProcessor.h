@@ -53,9 +53,12 @@ public:
     /** @return the texture cache */
     LIVRE_API const TextureCache& getTextureCache() const;
 
+protected:
+    bool onPreCommit_( uint32_t connection ) override;
+    void onPostCommit_( uint32_t connection, CommitState state ) override;
+    bool needRedraw() const { return _needRedraw; }
+
 private:
-    bool onPreCommit_( const uint32_t connection ) final;
-    void onPostCommit_( const uint32_t connection, const CommitState state ) final;
     bool initializeThreadRun_( ) final;
     void runLoop_( ) final;
 
@@ -69,8 +72,9 @@ private:
     uint64_t _currentFrameID;
     ThreadOperation _threadOp;
     CacheIdSet _protectUnloading;
-    bool _allDataLoaded;
     ConstVolumeRendererParametersPtr _vrParameters;
+    bool _allDataLoaded;
+    bool _needRedraw;
 };
 
 }

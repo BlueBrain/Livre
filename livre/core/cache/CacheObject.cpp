@@ -73,15 +73,9 @@ void CacheObject::decreaseReference_( )
              it != commonInfoPtr_->getObservers().end();
              ++it )
         {
-            (*it)->onPreUnload_( *this );
+            (*it)->onUnload_( *this );
         }
-        unload_( );
-        for( CacheObjectObserverSet::iterator it = commonInfoPtr_->getObservers().begin();
-                                it != commonInfoPtr_->getObservers().end();
-                                ++it )
-        {
-            (*it)->onUnloaded_( *this );
-        }
+        unload_();
     }
 
     for( CacheObjectObserverSet::iterator it = commonInfoPtr_->getObservers().begin();
@@ -116,23 +110,11 @@ void CacheObject::cacheLoad()
     if( isLoaded_( ) )
         return;
 
-    bool continueLoading = true;
-    for( CacheObjectObserverSet::iterator it = commonInfoPtr_->getObservers().begin();
-         it != commonInfoPtr_->getObservers().end();
-         ++it )
-    {
-        (*it)->onPreLoad_( *this, continueLoading );
-    }
-
-    if( !continueLoading )
+    const float start = ThreadClock::getClock().getTimef( );
+    if( !load_( ))
         return;
 
-    float loadingStart = ThreadClock::getClock().getTimef( );
-
-    if( !load_( ) )
-        return;
-
-    commonInfoPtr_->loadTime = ThreadClock::getClock().getTimef( ) - loadingStart;
+    commonInfoPtr_->loadTime = ThreadClock::getClock().getTimef() - start;
 
     for( CacheObjectObserverSet::iterator it = commonInfoPtr_->getObservers().begin();
          it != commonInfoPtr_->getObservers().end();
@@ -160,19 +142,11 @@ void CacheObject::cacheUnload( )
          it != commonInfoPtr_->getObservers().end();
          ++it )
     {
-        (*it)->onPreUnload_( *this );
+        (*it)->onUnload_( *this );
     }
 
     unload_( );
-
     resetLastUsed_();
-
-    for( CacheObjectObserverSet::iterator it = commonInfoPtr_->getObservers().begin();
-         it != commonInfoPtr_->getObservers().end();
-         ++it )
-    {
-        (*it)->onUnloaded_( *this );
-    }
 }
 
 double CacheObject::getLastUsed( ) const

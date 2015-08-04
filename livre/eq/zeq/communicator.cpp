@@ -168,6 +168,7 @@ public:
         modelViewMatrix.set( matrix.begin(), matrix.end(), false );
         auto cameraSettings = _config.getFrameData().getCameraSettings();
         cameraSettings->setModelViewMatrix( modelViewMatrix );
+        _config.postRedraw();
     }
 
     // HBP 'micron' camera from other brain applications
@@ -181,6 +182,7 @@ public:
                 _config.convertFromHBPCamera( modelViewMatrixMicron );
         auto cameraSettings = _config.getFrameData().getCameraSettings();
         cameraSettings->setModelViewMatrix( modelViewMatrix );
+        _config.postRedraw();
     }
 
     void onLookupTable1D( const ::zeq::Event& event )
@@ -189,6 +191,7 @@ public:
             ::zeq::hbp::deserializeLookupTable1D( event ));
         auto renderSettings = _config.getFrameData().getRenderSettings();
         renderSettings->setTransferFunction( transferFunction );
+        _config.postRedraw();
     }
 
     void onFrame( const ::zeq::Event& event )
@@ -202,30 +205,30 @@ public:
         frameSettings->setFrameNumber( frame.current );
         params.frames.y() = frame.end;
         params.animation = frame.delta;
+        _config.postRedraw();
     }
 
     void requestImageJPEG()
     {
         _config.getFrameData().getFrameSettings()->setGrabFrame( true );
+        _config.postRedraw();
     }
 
     void requestExit()
     {
         _config.stopRunning();
+        _config.postRedraw();
     }
 
     void handleEvents()
     {
         // Receiving all queued events from all receivers without blocking.
         for( auto subscriber : subscribers )
-        {
             while( subscriber->receive( 0 ))
                 /*nop*/ ;
-        }
     }
 
 private:
-
     void _setupRequests()
     {
         _requests[::zeq::hbp::EVENT_CAMERA] =

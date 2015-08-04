@@ -149,7 +149,26 @@ int Client::run()
 
     clock.reset();
     while( config->isRunning() && maxFrames-- )
+    {
         config->frame();
+        while( !config->needRedraw( )) // wait for an event requiring redraw
+        {
+            if( hasCommands( )) // execute non-critical pending commands
+            {
+                processCommand();
+                config->handleEvents(); // non-blocking
+            }
+            else  // no pending commands, block on user event
+            {
+                // Poll ZeroEq subscribers at least every 100 ms in handleEvents
+                const eq::EventICommand& event = config->getNextEvent( 100 );
+                if( event.isValid( ))
+                    config->handleEvent( event );
+                config->handleEvents(); // non-blocking
+            }
+        }
+        config->handleEvents(); // process all pending events
+    }
 
     const uint32_t frame = config->finishAllFrames();
     const float    time  = clock.getTimef();

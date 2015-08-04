@@ -48,6 +48,7 @@ public:
         , currentCanvas( 0 )
         , eventMapper( EventHandlerFactoryPtr( new EqEventHandlerFactory ))
         , volumeBBox( Boxf::makeUnitBox( ))
+        , redraw( true )
     {}
 
     void publishModelView()
@@ -100,6 +101,7 @@ public:
 #ifdef LIVRE_USE_ZEQ
     std::unique_ptr< zeq::Communicator > communicator;
 #endif
+    bool redraw;
 };
 
 Config::Config( eq::ServerPtr parent )
@@ -208,11 +210,22 @@ uint32_t Config::frame()
     const uint32_t frameNumber = ((current-start+delta) % interval) + start;
     frameSettings->setFrameNumber( frameNumber );
 
-#ifdef LIVRE_USE_ZEQ
-    _impl->communicator->publishHeartbeat();
-#endif
+    _impl->redraw = false;
     eq::Config::startFrame( version );
     return eq::Config::finishFrame();
+}
+
+bool Config::needRedraw()
+{
+    return _impl->redraw;
+}
+
+void Config::postRedraw()
+{
+    _impl->redraw = true;
+    eq::MessagePump* pump = getMessagePump();
+    if( pump )
+        pump->postWakeup();
 }
 
 bool Config::exit()
@@ -228,7 +241,7 @@ bool Config::exit()
     return ret;
 }
 
-bool Config::switchCanvas( )
+bool Config::switchCanvas()
 {
     FrameSettingsPtr frameSettings = _impl->framedata.getFrameSettings();
 
@@ -330,9 +343,9 @@ bool Config::switchToViewCanvas( const eq::uint128_t& viewID )
 void Config::handleEvents()
 {
     eq::Config::handleEvents();
-
 #ifdef LIVRE_USE_ZEQ
     _impl->communicator->handleEvents();
+    _impl->communicator->publishHeartbeat();
 #endif
 }
 
@@ -354,24 +367,24 @@ bool Config::handleEvent( const eq::ConfigEvent* event )
 
     switch( event->data.type )
     {
-        case eq::Event::KEY_PRESS:
-        {
-            if( _impl->eventMapper.handleEvent( EVENT_KEYBOARD, eventInfo ) )
-                hasEvent = true;
-            break;
-        }
-        case eq::Event::CHANNEL_POINTER_BUTTON_PRESS:
-        case eq::Event::CHANNEL_POINTER_BUTTON_RELEASE:
-        case eq::Event::CHANNEL_POINTER_MOTION:
-        case eq::Event::CHANNEL_POINTER_WHEEL:
-        {
-            if( _impl->eventMapper.handleEvent( EVENT_CHANNEL_POINTER, eventInfo ))
-               hasEvent = true;
-            break;
-        }
+    case eq::Event::KEY_PRESS:
+    {
+        if( _impl->eventMapper.handleEvent( EVENT_KEYBOARD, eventInfo ))
+            hasEvent = true;
+        break;
+    }
+    case eq::Event::CHANNEL_POINTER_BUTTON_PRESS:
+    case eq::Event::CHANNEL_POINTER_BUTTON_RELEASE:
+    case eq::Event::CHANNEL_POINTER_MOTION:
+    case eq::Event::CHANNEL_POINTER_WHEEL:
+    {
+        if( _impl->eventMapper.handleEvent( EVENT_CHANNEL_POINTER, eventInfo ))
+            hasEvent = true;
+        break;
+    }
 
-        default:
-            break;
+    default:
+        break;
     }
 
     if( hasEvent )
@@ -380,34 +393,36 @@ bool Config::handleEvent( const eq::ConfigEvent* event )
         if( _impl->framedata.getCameraSettings()->getModelViewMatrix() != oldModelViewMatrix )
             _impl->publishModelView();
 #endif
+        _impl->redraw = true;
         return true;
     }
 
-
-    return eq::Config::handleEvent( event );
+    _impl->redraw |= eq::Config::handleEvent( event );
+    return _impl->redraw;
 }
 
 bool Config::handleEvent( eq::EventICommand command )
 {
     switch( command.getEventType( ))
     {
-        case VOLUME_BOUNDING_BOX:
-            _impl->volumeBBox = command.read< Boxf >();
-            return false;
+    case VOLUME_BOUNDING_BOX:
+        _impl->volumeBBox = command.read< Boxf >();
+        return false;
 #ifdef LIVRE_USE_ZEQ
-        case GRAB_IMAGE:
-        {
-            const uint64_t dataSize = command.read< uint64_t >();
-            const uint8_t* dataPtr =
-                    reinterpret_cast< const uint8_t* >( command.getRemainingBuffer( dataSize ) );
+    case GRAB_IMAGE:
+    {
+        const uint64_t dataSize = command.read< uint64_t >();
+        const uint8_t* dataPtr =
+            reinterpret_cast< const uint8_t* >( command.getRemainingBuffer( dataSize ) );
 
-            _impl->communicator->publishImageJPEG( dataPtr, dataSize );
-            return false;
-        }
+        _impl->communicator->publishImageJPEG( dataPtr, dataSize );
+        return false;
+    }
 #endif
     }
 
-    return eq::Config::handleEvent( command );
+    _impl->redraw |= eq::Config::handleEvent( command );
+    return _impl->redraw;
 }
 
 bool Config::_registerFrameData()

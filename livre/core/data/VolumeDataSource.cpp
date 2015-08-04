@@ -49,8 +49,7 @@ public:
                       const AccessMode accessMode )
         : plugin( PluginFactory::getInstance().create(
                       VolumeDataSourcePluginData( uri, accessMode )))
-    {
-    }
+    {}
 
     boost::scoped_ptr< VolumeDataSourcePlugin > plugin;
 };

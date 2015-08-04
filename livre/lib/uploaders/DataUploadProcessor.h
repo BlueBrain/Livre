@@ -53,6 +53,7 @@ public:
                                    GLContextPtr shareContext,
                                    GLContextPtr context,
                                    TextureDataCache& textureDataCache );
+
 private:
     bool initializeThreadRun_( ) final;
     void runLoop_( ) final;

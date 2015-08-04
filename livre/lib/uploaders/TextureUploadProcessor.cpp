@@ -51,33 +51,35 @@ __itt_string_handle* ittTextureLoadTask = __itt_string_handle_create("Texture lo
 class TextureLoaderVisitor : public RenderNodeVisitor
 {
 public:
-
     TextureLoaderVisitor( DashTreePtr dashTree,
                           TextureCache& textureCache,
                           ProcessorInputPtr processorInput,
-                          ProcessorOutputPtr processorOutput )
+                          ProcessorOutputPtr processorOutput,
+                          bool& needRedraw )
         : RenderNodeVisitor( dashTree )
-        , textureCache_( textureCache )
-        , processorInput_( processorInput )
-        , processorOutput_( processorOutput )
-        , allDataLoaded_( true ) // be optimistic; will be set to false on first
-                                 // non-loaded data during visit
-        , synchronous_( false )
+        , _cache( textureCache )
+        , _input( processorInput )
+        , _output( processorOutput )
+        , _allLoaded( true ) // be optimistic; will be set to false on first
+                             // non-loaded data during visit
+        , _synchronous( false )
+        , _needRedraw( needRedraw )
     {}
 
     void visit( DashRenderNode& renderNode, VisitState& state ) final;
 
-    bool isAllDataLoaded() const { return allDataLoaded_; }
+    bool isAllDataLoaded() const { return _allLoaded; }
 
-    bool isSynchronous() const { return synchronous_; }
-    void setSynchronous( const bool synchronous ) { synchronous_ = synchronous; }
+    bool isSynchronous() const { return _synchronous; }
+    void setSynchronous( const bool synchronous ) { _synchronous = synchronous;}
 
 private:
-    TextureCache& textureCache_;
-    ProcessorInputPtr processorInput_;
-    ProcessorOutputPtr processorOutput_;
-    bool allDataLoaded_;
-    bool synchronous_;
+    TextureCache& _cache;
+    ProcessorInputPtr _input;
+    ProcessorOutputPtr _output;
+    bool _allLoaded;
+    bool _synchronous;
+    bool& _needRedraw;
 };
 
 class CollectVisiblesVisitor : public RenderNodeVisitor
@@ -103,7 +105,6 @@ public:
     }
 
 private:
-
     CacheIdSet& currentVisibleSet_;
 };
 
@@ -117,8 +118,9 @@ TextureUploadProcessor::TextureUploadProcessor( DashTreePtr dashTree,
     , _textureCache( GL_LUMINANCE8 )
     , _currentFrameID( 0 )
     , _threadOp( TO_NONE )
-    , _allDataLoaded( false )
     , _vrParameters( vrParameters )
+    , _allDataLoaded( false )
+    , _needRedraw( false )
 {
     setDashContext( dashTree->createContext());
 }
@@ -145,7 +147,7 @@ bool TextureUploadProcessor::onPreCommit_( const uint32_t outputConnection LB_UN
     return ret;
 }
 
-void TextureUploadProcessor::onPostCommit_( const uint32_t outputConnection LB_UNUSED,
+void TextureUploadProcessor::onPostCommit_( const uint32_t,
                                             const CommitState state )
 {
     if( state != CS_NOCHANGE )
@@ -155,7 +157,8 @@ void TextureUploadProcessor::onPostCommit_( const uint32_t outputConnection LB_U
 void TextureUploadProcessor::_loadData()
 {
     TextureLoaderVisitor loadVisitor( _dashTree, _textureCache,
-                                      processorInputPtr_, processorOutputPtr_ );
+                                      processorInputPtr_, processorOutputPtr_,
+                                      _needRedraw );
 
     loadVisitor.setSynchronous( _vrParameters->synchronousMode );
 
@@ -171,6 +174,7 @@ void TextureUploadProcessor::_loadData()
 
 void TextureUploadProcessor::runLoop_()
 {
+    _needRedraw = false;
     if( GLContext::getCurrent() != getGLContext().get( ))
         getGLContext()->makeCurrent();
 
@@ -220,7 +224,7 @@ void TextureUploadProcessor::_checkThreadOperation()
 void TextureLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state )
 {
     const LODNode& lodNode = renderNode.getLODNode();
-    if( !lodNode.isValid() )
+    if( !lodNode.isValid( ))
         return;
 
     if( !renderNode.isInFrustum( ))
@@ -236,49 +240,49 @@ void TextureLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state 
     state.setVisitChild( false );
 
     const ConstCacheObjectPtr texPtr = renderNode.getTextureObject();
-    if( texPtr->isLoaded() )
+    if( texPtr->isLoaded( ))
+        return;
+
+    TextureObject& texture = _cache.getNodeTexture( lodNode.getNodeId().getId( ));
+    if( texture.isLoaded() )
     {
-        LBVERB << "Texture already commited from dash tree:" << lodNode.getNodeId() << std::endl;
+        renderNode.setTextureObject( &texture );
+        _output->commit( CONNECTION_ID );
         return;
     }
-
-    TextureObject& texture = textureCache_.getNodeTexture( lodNode.getNodeId().getId( ));
-    if( !texture.isLoaded() )
+    else
     {
         const ConstCacheObjectPtr textureData = renderNode.getTextureDataObject();
-        if( textureData->isLoaded() )
+        if( textureData->isLoaded( ))
         {
 #ifdef _ITT_DEBUG_
-    __itt_task_begin ( ittTextureLoadDomain, __itt_null, __itt_null, ittTextureLoadTask );
+            __itt_task_begin ( ittTextureLoadDomain, __itt_null, __itt_null,
+                               ittTextureLoadTask );
 #endif //_ITT_DEBUG_
-            TextureObject& lodTexture = textureCache_.getNodeTexture( lodNode.getNodeId().getId( ));
+            TextureObject& lodTexture = _cache.getNodeTexture( lodNode.getNodeId().getId( ));
             lodTexture.setTextureDataObject(
                             static_cast< const TextureDataObject * >( textureData.get() ) );
-            lodTexture.cacheLoad( );
+            lodTexture.cacheLoad();
 
 #ifdef _ITT_DEBUG_
-    __itt_task_end( ittTextureLoadDomain );
+            __itt_task_end( ittTextureLoadDomain );
 #endif //_ITT_DEBUG_
             renderNode.setTextureObject( &lodTexture );
 
             renderNode.setTextureDataObject( TextureDataObject::getEmptyPtr() );
-            processorOutput_->commit( CONNECTION_ID );
+            _output->commit( CONNECTION_ID );
+            _needRedraw = true;
         }
         else
         {
-            allDataLoaded_ = false;
+            _allLoaded = false;
             LBVERB << "Texture data not loaded:" << lodNode.getNodeId() << std::endl;
         }
-    }
-    else
-    {
-        renderNode.setTextureObject( &texture );
-        processorOutput_->commit( CONNECTION_ID );
     }
 
     if( !isSynchronous( ))
         // only in asynchronous mode
-        state.setBreakTraversal( processorInput_->dataWaitingOnInput( CONNECTION_ID ));
+        state.setBreakTraversal( _input->dataWaitingOnInput( CONNECTION_ID ));
 }
 
 }

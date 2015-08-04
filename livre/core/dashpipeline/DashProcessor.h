@@ -44,14 +44,14 @@ protected:
      * @param connection connection id
      * @return False if connection is not valid
      */
-    LIVRECORE_API bool onPreApply_( const uint32_t connection );
+    LIVRECORE_API bool onPreApply_( const uint32_t connection ) override;
 
     /**
      * Checks whether connection is valid.
      * @param connection connection id
      * @return False if connection is not valid
      */
-    LIVRECORE_API bool onPreCommit_( const uint32_t connection );
+    LIVRECORE_API bool onPreCommit_( const uint32_t connection ) override;
 
     /**
      * Is executed when the dash context is set.

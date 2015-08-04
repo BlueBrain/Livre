@@ -489,7 +489,10 @@ public:
         const VolumeInformation& info = dataSource->getVolumeInformation();
 
         os.str("");
-        os << "Total resolution " << info.voxels << std::endl
+        os << "Total resolution " << info.voxels  << " depth "
+           << lunchbox::getIndexOfLastBit( info.voxels.x() /
+                                           info.maximumBlockSize.x( ))
+           << std::endl
            << "Block resolution " << info.maximumBlockSize;
         _drawText( os.str( ), y );
     }

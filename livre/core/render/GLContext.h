@@ -35,24 +35,23 @@ class GLContext : public boost::enable_shared_from_this< GLContext >
 {
 public:
     LIVRECORE_API GLContext();
-
     LIVRECORE_API virtual ~GLContext();
 
     /**
      * Shares the current context with the given context.
-     * @param dstContextPtr The destination context to share the context with. It is also added to the list.
+     * @param dstContextPtr The destination context to share the context with
      */
     LIVRECORE_API void shareContext( GLContextPtr dstContextPtr );
 
     /**
      * Makes the context current.
      */
-    virtual void makeCurrent( ) = 0;
+    virtual void makeCurrent() = 0;
 
     /**
      * Clears the current context.
      */
-    virtual void doneCurrent( ) = 0;
+    virtual void doneCurrent() = 0;
 
     /**
      * Gets the current context

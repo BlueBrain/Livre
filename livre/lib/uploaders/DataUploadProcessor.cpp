@@ -53,39 +53,38 @@ public:
                        ProcessorInputPtr processorInput,
                        ProcessorOutputPtr processorOutput )
         : RenderNodeVisitor( dashTree ),
-          textureDataCache_( textureDataCache ),
-          processorInput_( processorInput ),
-          processorOutput_( processorOutput )
+          _cache( textureDataCache ),
+          _input( processorInput ),
+          _output( processorOutput )
     {}
 
     void visit( DashRenderNode& renderNode, VisitState& state );
 
 private:
-    TextureDataCache& textureDataCache_;
-    ProcessorInputPtr processorInput_;
-    ProcessorOutputPtr processorOutput_;
+    TextureDataCache& _cache;
+    ProcessorInputPtr _input;
+    ProcessorOutputPtr _output;
     lunchbox::Clock _clock;
 };
 
 class DepthCollectorVisitor : public RenderNodeVisitor
 {
 public:
-
     DepthCollectorVisitor( DashTreePtr dashTree,
                            TextureDataCache& textureDataCache,
                            ProcessorOutputPtr processorOutput,
                            DashNodeVector& refLevelCollection )
         : RenderNodeVisitor( dashTree ),
-          textureDataCache_( textureDataCache ),
-          processorOutput_( processorOutput ),
-          refLevelCollection_( refLevelCollection )
+          _cache( textureDataCache ),
+          _output( processorOutput ),
+          _collection( refLevelCollection )
     {}
     void visit( DashRenderNode& node, VisitState& state ) final;
 
 private:
-    TextureDataCache& textureDataCache_;
-    ProcessorOutputPtr processorOutput_;
-    DashNodeVector& refLevelCollection_;
+    TextureDataCache& _cache;
+    ProcessorOutputPtr _output;
+    DashNodeVector& _collection;
 };
 
 class DepthSortedDataLoaderVisitor : public RenderNodeVisitor
@@ -95,18 +94,17 @@ public:
                                   TextureDataCache& textureDataCache,
                                   ProcessorInputPtr processorInput,
                                   ProcessorOutputPtr processorOutput )
-        : RenderNodeVisitor( dashTree ),
-          textureDataCache_( textureDataCache ),
-          processorInput_( processorInput ),
-          processorOutput_( processorOutput )
+        : RenderNodeVisitor( dashTree )
+        , _cache( textureDataCache )
+        , _input( processorInput )
+        , _output( processorOutput )
     {}
 
     void visit( DashRenderNode& renderNode, VisitState& state ) final;
-
 private:
-    TextureDataCache& textureDataCache_;
-    ProcessorInputPtr processorInput_;
-    ProcessorOutputPtr processorOutput_;
+    TextureDataCache& _cache;
+    ProcessorInputPtr _input;
+    ProcessorOutputPtr _output;
 };
 
 // Sort helper function for sorting the textures to load the front texture data first
@@ -124,11 +122,10 @@ struct DepthCompare
         const LODNode& lodNode1 = renderNode1.getLODNode();
         const LODNode& lodNode2 = renderNode2.getLODNode();
 
-        const float depth1 =
-                ( frustum_.getEyeCoords() - lodNode1.getWorldBox().getCenter( )).length();
-        const float depth2 =
-                ( frustum_.getEyeCoords() - lodNode2.getWorldBox().getCenter( )).length();
-
+        const float depth1 = ( frustum_.getEyeCoords() -
+                               lodNode1.getWorldBox().getCenter( )).length();
+        const float depth2 = ( frustum_.getEyeCoords() -
+                               lodNode2.getWorldBox().getCenter( )).length();
         return  depth1 < depth2;
     }
     const Frustum& frustum_;
@@ -156,7 +153,7 @@ bool DataUploadProcessor::initializeThreadRun_()
     return DashProcessor::initializeThreadRun_();
 }
 
-void DataUploadProcessor::runLoop_( )
+void DataUploadProcessor::runLoop_()
 {
     LBASSERT( getGLContext( ));
     if( GLContext::getCurrent() != getGLContext().get( ))
@@ -173,8 +170,8 @@ void DataUploadProcessor::runLoop_( )
     __itt_task_begin ( ittDataLoadDomain, __itt_null, __itt_null, ittDataComputationTask );
 #endif //_ITT_DEBUG_
 
-    _checkThreadOperation( );
-    _loadData( );
+    _checkThreadOperation();
+    _loadData();
 
 #ifdef _ITT_DEBUG_
     __itt_task_end( ittDataLoadDomain );
@@ -200,13 +197,13 @@ void DataUploadProcessor::_loadData()
     DFSTraversal traverser;
     traverser.traverse( rootNode, depthCollectorVisitor, _currentFrameID );
 
-    std::sort( dashNodeList.begin( ), dashNodeList.end( ), DepthCompare( frustum ));
+    std::sort( dashNodeList.begin( ), dashNodeList.end( ),
+               DepthCompare( frustum ));
     CollectionTraversal collectionTraverser;
-    DepthSortedDataLoaderVisitor refLevelDataLoaderVisitor( _dashTree,
-                                                            _textureDataCache,
-                                                            processorInputPtr_,
-                                                            processorOutputPtr_ );
-    collectionTraverser.traverse( dashNodeList, refLevelDataLoaderVisitor );
+    DepthSortedDataLoaderVisitor dataLoader( _dashTree, _textureDataCache,
+                                             processorInputPtr_,
+                                             processorOutputPtr_ );
+    collectionTraverser.traverse( dashNodeList, dataLoader );
     processorOutputPtr_->commit( CONNECTION_ID );
 
     DataLoaderVisitor loadVisitor( _dashTree, _textureDataCache,
@@ -238,7 +235,7 @@ void DataLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state )
     if( !node.isValid() )
         return;
 
-    state.setBreakTraversal( processorInput_->dataWaitingOnInput( CONNECTION_ID ));
+    state.setBreakTraversal( _input->dataWaitingOnInput( CONNECTION_ID ));
 
     if( !renderNode.isInFrustum( ))
     {
@@ -256,7 +253,7 @@ void DataLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state )
     if( texture->isLoaded( ))
         return;
 
-    const TextureDataObject& tData = textureDataCache_.getNodeTextureData(
+    const TextureDataObject& tData = _cache.getNodeTextureData(
                                          node.getNodeId().getId( ));
     if( tData.isLoaded( ))
         return;
@@ -266,12 +263,12 @@ void DataLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state )
                       ittDataLoadTask );
 #endif //_ITT_DEBUG_
     TextureDataObject& textureData =
-        textureDataCache_.getNodeTextureData( node.getNodeId().getId( ));
+        _cache.getNodeTextureData( node.getNodeId().getId( ));
     textureData.cacheLoad( );
     if( _clock.getTime64() > 1000 ) // commit once every second
     {
         _clock.reset();
-        processorOutput_->commit( CONNECTION_ID );
+        _output->commit( CONNECTION_ID );
     }
 #ifdef _ITT_DEBUG_
     __itt_task_end( ittDataLoadDomain );
@@ -307,27 +304,29 @@ void DepthCollectorVisitor::visit( DashRenderNode& renderNode, VisitState& state
 
     // Triggers creation of the cache object.
     TextureDataObject& textureData =
-            textureDataCache_.getNodeTextureData( lodNode.getNodeId().getId( ));
+            _cache.getNodeTextureData( lodNode.getNodeId().getId( ));
     if( textureData.isLoaded() )
     {
         renderNode.setTextureDataObject( &textureData );
-        processorOutput_->commit( CONNECTION_ID );
+        _output->commit( CONNECTION_ID );
         return;
     }
 
-    refLevelCollection_.push_back( renderNode.getDashNode());
+    _collection.push_back( renderNode.getDashNode());
 }
 
-void DepthSortedDataLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state )
+void DepthSortedDataLoaderVisitor::visit( DashRenderNode& renderNode,
+                                          VisitState& state )
 {
     const LODNode& lodNode = renderNode.getLODNode();
 
 #ifdef _ITT_DEBUG_
-    __itt_task_begin( ittDataLoadDomain, __itt_null, __itt_null, ittDataLoadTask );
+    __itt_task_begin( ittDataLoadDomain, __itt_null, __itt_null,
+                      ittDataLoadTask );
 #endif //_ITT_DEBUG_
     TextureDataObject& textureData =
             static_cast< const TextureDataCache& >
-            ( textureDataCache_ ).getNodeTextureData( lodNode.getNodeId().getId( ));
+            ( _cache ).getNodeTextureData( lodNode.getNodeId().getId( ));
     textureData.cacheLoad();
 
 #ifdef _ITT_DEBUG_
@@ -346,8 +345,8 @@ void DepthSortedDataLoaderVisitor::visit( DashRenderNode& renderNode, VisitState
     }
 #endif //_DEBUG_
 
-    processorOutput_->commit( CONNECTION_ID );
-    state.setBreakTraversal( processorInput_->dataWaitingOnInput( CONNECTION_ID ));
+    _output->commit( CONNECTION_ID );
+    state.setBreakTraversal( _input->dataWaitingOnInput( CONNECTION_ID ));
 
 }
 
