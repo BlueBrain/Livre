@@ -54,13 +54,13 @@ public:
     LIVRE_API const TextureCache& getTextureCache() const;
 
 protected:
-    bool onPreCommit_( uint32_t connection ) override;
-    void onPostCommit_( uint32_t connection, CommitState state ) override;
+    LIVRE_API bool onPreCommit_( uint32_t connection ) override;
+    LIVRE_API void onPostCommit_( uint32_t connection, CommitState state ) override;
     bool needRedraw() const { return _needRedraw; }
 
 private:
-    bool initializeThreadRun_( ) final;
-    void runLoop_( ) final;
+    LIVRE_API bool initializeThreadRun_( ) final;
+    LIVRE_API void runLoop_( ) final;
 
     void _loadData();
     void _checkThreadOperation( );
