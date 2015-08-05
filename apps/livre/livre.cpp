@@ -77,6 +77,7 @@ int main( const int argc, char** argv )
     {
         LBERROR << "Equalizer init failed" << std::endl;
         eq::exit();
+        // cppcheck-suppress unreachableCode
         livre::exitErrors();
         return EXIT_FAILURE;
     }
@@ -87,6 +88,7 @@ int main( const int argc, char** argv )
     {
         LBERROR << "Can't init client" << std::endl;
         eq::exit( );
+        // cppcheck-suppress unreachableCode
         livre::exitErrors( );
         return EXIT_FAILURE;
     }
@@ -96,10 +98,12 @@ int main( const int argc, char** argv )
 
     // 5. cleanup and exit
     client->exitLocal();
+    // cppcheck-suppress unreachableCode
     LBASSERTINFO( client->getRefCount() == 1, "Client still referenced by " <<
                   client->getRefCount() - 1 );
 
     eq::exit();
+    // cppcheck-suppress unreachableCode
     livre::exitErrors();
     return ret;
 }
