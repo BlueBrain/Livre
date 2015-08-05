@@ -80,17 +80,18 @@ uint8_t* FrameGrabber::_encodeJpeg( const uint32_t width LB_UNUSED,
 #endif
 }
 
-void FrameGrabber::notifyNewImage( eq::Channel& channel, const eq::Image& image )
+void FrameGrabber::notifyNewImage( eq::Channel& channel,
+                                   const eq::Image& image )
 {
-    const uint64_t rawDataSize = image.getPixelDataSize( eq::Frame::BUFFER_COLOR );
-    const uint8_t* rawData = image.getPixelPointer( eq::Frame::BUFFER_COLOR );
+    const uint64_t size = image.getPixelDataSize( eq::Frame::BUFFER_COLOR );
+    const uint8_t* data = image.getPixelPointer( eq::Frame::BUFFER_COLOR );
     const eq::PixelViewport& pvp = image.getPixelViewport();
     const eq::Viewport& vp = channel.getViewport();
 
     const uint32_t width = pvp.w / vp.w;
     const uint32_t height = pvp.h / vp.h;
-    unsigned long jpegSize = rawDataSize;
-    uint8_t* jpegData = _encodeJpeg( width, height, rawData, jpegSize );
+    unsigned long jpegSize = size;
+    uint8_t* jpegData = _encodeJpeg( width, height, data, jpegSize );
 
     if( !jpegData )
     {
@@ -98,7 +99,8 @@ void FrameGrabber::notifyNewImage( eq::Channel& channel, const eq::Image& image 
         LBERROR << "Returning an empty jpeg image" << std::endl;
     }
     channel.getConfig()->sendEvent( GRAB_IMAGE )
-        << jpegSize << co::Array< const uint8_t > ( jpegData, jpegSize );
+        << uint64_t( jpegSize ) << co::Array< const uint8_t >( jpegData,
+                                                               jpegSize );
 #ifdef LIVRE_USE_LIBJPEGTURBO
     tjFree(jpegData);
 #endif

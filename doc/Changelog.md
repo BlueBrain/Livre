@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # master {#master}
 
+* [#105](https://github.com/BlueBrain/Livre/pull/105):
+  Fix 32 bit issue with REST jpeg image request
 * [#101](https://github.com/BlueBrain/Livre/pull/101):
   Implement event-driven rendering
 * [#75](https://github.com/BlueBrain/Livre/issues/73):
