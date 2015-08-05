@@ -217,7 +217,7 @@ uint32_t Config::frame()
 
 bool Config::needRedraw()
 {
-    return _impl->redraw;
+    return _impl->redraw || getApplicationParameters().animation != 0;
 }
 
 void Config::postRedraw()
