@@ -230,7 +230,7 @@ void Config::postRedraw()
 
 bool Config::exit()
 {
-    bool ret = eq::Config::exit();
+    bool ret = eq::Config::exit(); // cppcheck-suppress unreachableCode
     _impl->framedata.deregisterObjects();
     if( !_deregisterFrameData() )
         ret = false;
