@@ -68,7 +68,8 @@ VolumeRendererParameters::VolumeRendererParameters()
     configuration_.addDescription( configGroupName_, SAMPLESPERRAY_PARAM,
                                    "Number of samples per ray", samplesPerRay );
     configuration_.addDescription( configGroupName_, TRANSFERFUNCTION_PARAM,
-                                   "Path to transfer function file", transferFunction );
+                                ".1dt transfer function file (from ImageVis3D)",
+                                   transferFunction );
 }
 
 void VolumeRendererParameters::deserialize( co::DataIStream &is, const uint64_t )
