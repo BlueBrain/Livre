@@ -94,7 +94,7 @@ private:
     int cleanupOnError_( Handle shader1, Handle shader2 = 0,
                          Handle shader3 = 0 );
 
-    void _deleteShader( const GLSLShaders::Handle shader );
+    void _deleteShader( GLSLShaders::Handle shader );
 
     std::string readShaderFile_( const std::string &shaderFile ) const;
 };

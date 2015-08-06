@@ -4,6 +4,9 @@
 # This file is part of Livre <https://github.com/BlueBrain/Livre>
 #
 
+list(APPEND CPPCHECK_EXTRA_ARGS
+  --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/*_generated.h)
+
 set(LIVRELIB_PUBLIC_HEADERS
   types.h
   animation/CameraPath.h
