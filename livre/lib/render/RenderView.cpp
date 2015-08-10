@@ -35,9 +35,7 @@ namespace livre
 
 struct RenderView::Impl
 {
-    Impl( ConstDashTreePtr dashTree )
-        : _dashTree( dashTree )
-    {}
+    explicit Impl( ConstDashTreePtr dashTree ) : _dashTree( dashTree ) {}
 
     void freeTexture( const NodeId& nodeId )
     {
