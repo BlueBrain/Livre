@@ -147,16 +147,11 @@ SelectVisibles::SelectVisibles( DashTreePtr dashTree,
                                 const uint32_t minLOD,
                                 const uint32_t maxLOD )
     : RenderNodeVisitor( dashTree )
-      , _lodEvaluator( windowHeight,
-                       screenSpaceError,
-                       worldSpacePerVoxel,
-                       minLOD,
-                       maxLOD )
-      , _frustum( frustum )
-      , _volumeDepth( volumeDepth )
-{
-
-}
+    , _lodEvaluator( windowHeight, screenSpaceError, worldSpacePerVoxel,
+                     minLOD, maxLOD )
+    , _frustum( frustum )
+    , _volumeDepth( volumeDepth )
+{}
 
 void SelectVisibles::visit( DashRenderNode& renderNode, VisitState& state )
 {
@@ -165,7 +160,6 @@ void SelectVisibles::visit( DashRenderNode& renderNode, VisitState& state )
         return;
 
     const Boxf& worldBox = lodNode.getWorldBox();
-
     const bool isInFrustum = _frustum.boxInFrustum( worldBox );
     renderNode.setInFrustum( isInFrustum );
     if( !isInFrustum )
@@ -178,13 +172,11 @@ void SelectVisibles::visit( DashRenderNode& renderNode, VisitState& state )
     Vector3f vmin, vmax;
     nearPlane.getNearFarPoints( worldBox, vmin, vmax );
 
-    const uint32_t lod = _lodEvaluator.getLODForPoint( _frustum,
-                                                       _volumeDepth,
-                                                       vmin );
+    const uint32_t lod =
+        _lodEvaluator.getLODForPoint( _frustum, _volumeDepth, vmin );
 
     const bool isLODVisible = (lod <= lodNode.getNodeId().getLevel( ));
     renderNode.setVisible( isLODVisible );
-
     state.setVisitChild( !isLODVisible );
 }
 
@@ -303,15 +295,9 @@ public:
         const float worldSpacePerVoxel = volInfo.worldSpacePerVoxel;
         const uint32_t volumeDepth = volInfo.rootNode.getDepth();
 
-        SelectVisibles visitor( dashTree,
-                                _currentFrustum,
-                                pixelViewport[3],
-                                screenSpaceError,
-                                worldSpacePerVoxel,
-                                volumeDepth,
-                                minLOD,
-                                maxLOD );
-
+        SelectVisibles visitor( dashTree, _currentFrustum, pixelViewport[3],
+                                screenSpaceError, worldSpacePerVoxel,
+                                volumeDepth, minLOD, maxLOD );
         livre::DFSTraversal traverser;
         traverser.traverse( volInfo.rootNode,
                             visitor, dashTree->getRenderStatus().getFrameID( ));
@@ -336,11 +322,10 @@ public:
                                            window->getTextureCache( ));
 
         FrameInfo frameInfo( _currentFrustum );
-        generateSet.generateRenderingSet( _currentFrustum, frameInfo);
+        generateSet.generateRenderingSet( _currentFrustum, frameInfo );
 
         EqRenderViewPtr renderViewPtr =
                 boost::static_pointer_cast< EqRenderView >( _renderViewPtr );
-
         RayCastRendererPtr renderer =
                 boost::static_pointer_cast< RayCastRenderer >(
                     renderViewPtr->getRenderer( ));
@@ -480,7 +465,7 @@ public:
         livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
         std::ostringstream os;
         os << node->getTextureDataCache().getStatistics();
-        float y = 180;
+        float y = 200;
         _drawText( os.str(), y );
 
         Window* window = static_cast< Window* >( _channel->getWindow( ));
@@ -491,13 +476,26 @@ public:
         ConstVolumeDataSourcePtr dataSource = static_cast< livre::Node* >(
             _channel->getNode( ))->getDashTree()->getDataSource();
         const VolumeInformation& info = dataSource->getVolumeInformation();
+        Vector3f voxelSize = info.boundingBox.getDimension() / info.voxels;
+        std::string unit = "m";
+        if( voxelSize.x() < 0.000001f )
+        {
+            unit = "um";
+            voxelSize *= 1000000;
+        }
+        if( voxelSize.x() < 0.001f )
+        {
+            unit = "mm";
+            voxelSize *= 1000;
+        }
 
         os.str("");
         os << "Total resolution " << info.voxels  << " depth "
            << lunchbox::getIndexOfLastBit( info.voxels.x() /
                                            info.maximumBlockSize.x( ))
            << std::endl
-           << "Block resolution " << info.maximumBlockSize;
+           << "Block resolution " << info.maximumBlockSize << std::endl
+           << unit << "/voxel " << voxelSize;
         _drawText( os.str( ), y );
     }
 
