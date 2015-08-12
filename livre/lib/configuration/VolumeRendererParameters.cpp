@@ -37,8 +37,8 @@ VolumeRendererParameters::VolumeRendererParameters()
     , synchronousMode( false )
 #ifdef __i386__
     , screenSpaceError( 8.0f )
-    , maxGPUCacheMemoryMB( 512u )
-    , maxCPUCacheMemoryMB( 1024u )
+    , maxGPUCacheMemoryMB( 384u )
+    , maxCPUCacheMemoryMB( 768u )
 #else
     , screenSpaceError( 4.0f )
     , maxGPUCacheMemoryMB( 3072u )

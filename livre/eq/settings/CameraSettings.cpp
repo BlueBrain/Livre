@@ -29,7 +29,7 @@ namespace livre
 {
 
 CameraSettings::CameraSettings()
-    : defaultCameraPosition_( Vector3f( 0.f, 0.f, 2.f ))
+    : defaultCameraPosition_( Vector3f( 0.f, 0.f, 1.f ))
     , defaultCameraLookAt_( Vector3f::ZERO )
     , cameraRotation_( Matrix4f::IDENTITY )
     , modelRotation_( Matrix4f::IDENTITY )
