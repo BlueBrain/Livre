@@ -20,16 +20,17 @@
 #include <livre/core/dash/DashRenderNode.h>
 #include <livre/core/dash/DashRenderStatus.h>
 #include <livre/core/dash/DashTree.h>
-#include <livre/core/render/RenderBrick.h>
-#include <livre/core/render/View.h>
 #include <livre/core/data/VolumeDataSource.h>
 #include <livre/core/data/VolumeInformation.h>
+#include <livre/core/render/FrameInfo.h>
+#include <livre/core/render/RenderBrick.h>
+#include <livre/core/render/View.h>
 #include <livre/core/visitor/RenderNodeVisitor.h>
+#include <livre/lib/cache/TextureCache.h>
+#include <livre/lib/cache/TextureObject.h>
 #include <livre/lib/render/AvailableSetGenerator.h>
 #include <livre/lib/visitor/CollectionTraversal.h>
 #include <livre/lib/visitor/DFSTraversal.h>
-#include <livre/lib/cache/TextureObject.h>
-#include <livre/lib/cache/TextureCache.h>
 
 namespace livre
 {

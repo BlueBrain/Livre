@@ -34,16 +34,6 @@
 #include <livre/eq/settings/RenderSettings.h>
 #include <livre/eq/Window.h>
 
-#include <livre/core/dash/DashRenderStatus.h>
-#include <livre/core/dash/DashTree.h>
-#include <livre/core/dashpipeline/DashProcessorInput.h>
-#include <livre/core/dashpipeline/DashProcessorOutput.h>
-#include <livre/core/data/VolumeDataSource.h>
-#include <livre/core/render/Frustum.h>
-#include <livre/core/render/GLWidget.h>
-#include <livre/core/render/RenderBrick.h>
-#include <livre/core/visitor/RenderNodeVisitor.h>
-
 #include <livre/lib/cache/TextureCache.h>
 #include <livre/lib/cache/TextureDataCache.h>
 #include <livre/lib/cache/TextureObject.h>
@@ -51,6 +41,17 @@
 #include <livre/lib/render/RenderView.h>
 #include <livre/lib/render/ScreenSpaceLODEvaluator.h>
 #include <livre/lib/visitor/DFSTraversal.h>
+
+#include <livre/core/dash/DashRenderStatus.h>
+#include <livre/core/dash/DashTree.h>
+#include <livre/core/dashpipeline/DashProcessorInput.h>
+#include <livre/core/dashpipeline/DashProcessorOutput.h>
+#include <livre/core/data/VolumeDataSource.h>
+#include <livre/core/render/FrameInfo.h>
+#include <livre/core/render/Frustum.h>
+#include <livre/core/render/GLWidget.h>
+#include <livre/core/render/RenderBrick.h>
+#include <livre/core/visitor/RenderNodeVisitor.h>
 
 #include <eq/eq.h>
 #include <eq/gl.h>
@@ -189,6 +190,7 @@ public:
     explicit Channel( livre::Channel* channel )
           : _channel( channel )
           , _glWidgetPtr( new EqGlWidget( channel ))
+          , _frameInfo( _currentFrustum )
     {}
 
     void initializeFrame()
@@ -321,8 +323,8 @@ public:
         AvailableSetGenerator generateSet( node->getDashTree( ),
                                            window->getTextureCache( ));
 
-        FrameInfo frameInfo( _currentFrustum );
-        generateSet.generateRenderingSet( _currentFrustum, frameInfo );
+        _frameInfo.clear();
+        generateSet.generateRenderingSet( _currentFrustum, _frameInfo );
 
         EqRenderViewPtr renderViewPtr =
                 boost::static_pointer_cast< EqRenderView >( _renderViewPtr );
@@ -335,9 +337,8 @@ public:
             pipe->getFrameData()->getRenderSettings()->getTransferFunction( ));
 
         RenderBricks renderBricks;
-        generateRenderBricks( frameInfo.renderNodes, renderBricks );
-
-        renderViewPtr->render( frameInfo, renderBricks, *_glWidgetPtr );
+        generateRenderBricks( _frameInfo.renderNodes, renderBricks );
+        renderViewPtr->render( _frameInfo, renderBricks, *_glWidgetPtr );
     }
 
     void prepareFramesAndSetPvp( const eq::Frames& frames,
@@ -464,8 +465,12 @@ public:
 
         livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
         std::ostringstream os;
-        os << node->getTextureDataCache().getStatistics();
-        float y = 200;
+        const size_t all = _frameInfo.allNodes.size();
+        const size_t missing = _frameInfo.notAvailableRenderNodes.size();
+        const float done = all > 0 ? float( all - missing ) / float( all ) : 0;
+        os << node->getTextureDataCache().getStatistics() << "  "
+           << int( 100.f * done + .5f ) << "% loaded" << std::endl;
+        float y = 220;
         _drawText( os.str(), y );
 
         Window* window = static_cast< Window* >( _channel->getWindow( ));
@@ -597,6 +602,7 @@ public:
     ViewPtr _renderViewPtr;
     GLWidgetPtr _glWidgetPtr;
     FrameGrabber _frameGrabber;
+    FrameInfo _frameInfo;
 };
 
 EqRenderView::EqRenderView( Channel* channel,

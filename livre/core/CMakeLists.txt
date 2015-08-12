@@ -52,6 +52,7 @@ set(LIVRECORE_HEADERS
   pipeline/Processor.h
   pipeline/ProcessorInput.h
   pipeline/ProcessorOutput.h
+  render/FrameInfo.h
   render/Frustum.h
   render/GLContextTrait.h
   render/GLWidget.h
@@ -94,6 +95,7 @@ set(LIVRECORE_SOURCES
   pipeline/Processor.cpp
   pipeline/ProcessorInput.cpp
   pipeline/ProcessorOutput.cpp
+  render/FrameInfo.cpp
   render/Frustum.cpp
   render/GLContext.cpp
   render/GLSLShaders.cpp
