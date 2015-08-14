@@ -19,8 +19,8 @@ endforeach()
 
 # Create and install all the tests
 if(CMAKE_COMPILER_IS_GNUCXX_PURE)
-  set(data_dataSource_LINK_LIBRARIES "-Wl,--no-as-needed")
-  set(perf_remoteDataSource_LINK_LIBRARIES "-Wl,--no-as-needed")
+  set(data-dataSource_LINK_LIBRARIES "-Wl,--no-as-needed")
+  set(perf-remoteDataSource_LINK_LIBRARIES "-Wl,--no-as-needed")
 endif()
 include(CommonCTest)
 

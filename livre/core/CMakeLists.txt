@@ -114,8 +114,9 @@ set(LIVRECORE_SOURCES
   visitor/RenderNodeVisitor.cpp
   visitor/VisitState.cpp)
 
-set(LIVRECORE_LINK_LIBRARIES ${EQUALIZER_LIBRARY} ${COLLAGE_LIBRARIES}
-  ${DASH_LIBRARIES} ${Boost_LIBRARIES} ${GLEW_MX_LIBRARIES})
+set(LIVRECORE_LINK_LIBRARIES
+  PUBLIC ${Boost_LIBRARIES} dash Collage Equalizer Lunchbox vmmlib
+  PRIVATE ${GLEW_MX_LIBRARIES})
 
 set(LIVRECORE_INCLUDE_NAME livre/core)
 set(LIVRECORE_NAMESPACE livrecore)

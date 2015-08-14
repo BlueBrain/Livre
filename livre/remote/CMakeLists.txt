@@ -10,7 +10,7 @@ endif()
 
 set(LIVREREMOTE_HEADERS dataSource.h)
 set(LIVREREMOTE_SOURCES dataSource.cpp)
-set(LIVREREMOTE_LINK_LIBRARIES LivreLib ${ZEQ_LIBRARIES})
+set(LIVREREMOTE_LINK_LIBRARIES PUBLIC LivreLib PRIVATE zeq)
 set(LIVREREMOTE_INCLUDE_NAME livre/remote)
 
 common_library(LivreRemote)

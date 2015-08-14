@@ -50,7 +50,7 @@ set(LIVRELIB_SOURCES
   visitor/CollectionTraversal.cpp
   visitor/DFSTraversal.cpp)
 
-set(LIVRELIB_LINK_LIBRARIES LivreCore ${VTUNE_LIBRARIES})
+set(LIVRELIB_LINK_LIBRARIES PUBLIC LivreCore PRIVATE ${VTUNE_LIBRARIES})
 
 if(LIVRE_USE_REMOTE_DATASOURCE)
   flatbuffers_generate_c_headers(FBS
@@ -60,7 +60,7 @@ if(LIVRE_USE_REMOTE_DATASOURCE)
     zeq/volumeInformation.fbs)
   list(APPEND LIVRELIB_HEADERS zeq/events.h)
   list(APPEND LIVRELIB_SOURCES zeq/events.cpp ${FBS_OUTPUTS})
-  list(APPEND LIVRELIB_LINK_LIBRARIES ${ZEQ_LIBRARIES})
+  list(APPEND LIVRELIB_LINK_LIBRARIES PUBLIC zeq)
 endif()
 
 set(LIVRELIB_INCLUDE_NAME livre/lib)
