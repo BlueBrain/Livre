@@ -24,8 +24,10 @@
 #define _Controller_h_
 
 #include <livre/core/render/TransferFunction1D.h>
-#include <zeq/zeq.h>
-
+#include <zeq/types.h>
+#ifdef LIVRE_USE_ISC
+#   include <isc/types.h>
+#endif
 namespace livre
 {
 
@@ -35,6 +37,7 @@ namespace livre
 class Controller
 {
 public:
+
     Controller( );
     ~Controller( );
 
@@ -45,6 +48,29 @@ public:
      * @return True if connection is successful.
      */
     bool connect( const std::string &hostname, const uint16_t port );
+
+    /**
+     * @param uri Publisher uri
+     * @return If there is no publisher with the given uri a new publisher is
+     * registered and returned, if there is registered publisher is returned.
+     */
+    zeq::Publisher* getPublisher( const servus::URI& uri );
+
+    /**
+     * @param uri Subscriber uri
+     * @return If there is no subscriber with the given uri a new subscriber is
+     * registered and returned, if there is registered subscriber is returned.
+     */
+    zeq::Subscriber* getSubscriber( const servus::URI& uri );
+
+#ifdef LIVRE_USE_ISC
+    /**
+     * @param uri Simulator uri
+     * @return If there is no simulator with the given uri a new simulator is
+     * registered and returned, if there is registered simulator is returned.
+     */
+    isc::Simulator* getSimulator( const servus::URI& uri );
+#endif
 
     /**
      * Updates the transfer function.
@@ -58,11 +84,10 @@ public:
     TransferFunction1DfPtr getTransferFunction() const;
 
 private:
-    TransferFunction1DfPtr _transferFunction;
-    zeq::Publisher _publisher;
+
+    struct Impl;
+    Impl* _impl;
 };
 
 }
-
-
 #endif  // MASS_VOL__GUI_CONTROLLER_H

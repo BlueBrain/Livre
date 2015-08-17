@@ -54,7 +54,8 @@ const Viewport& View::getViewport() const
     return viewport_;
 }
 
-void View::render( const FrameInfo& frameInfo, const RenderBricks& bricks,
+void View::render( const FrameInfo& frameInfo,
+                   const RenderBricks& bricks,
                    const GLWidget& widget )
 {
     if( !rendererPtr_ )

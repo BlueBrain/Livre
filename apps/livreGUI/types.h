@@ -22,6 +22,7 @@
 
 #include <livre/core/lunchboxTypes.h>
 #include <livre/eq/types.h>
+#include <livreGUI/qtTypes.h>
 
 namespace livre
 {
@@ -52,6 +53,10 @@ typedef boost::shared_ptr< GaussGraphCore > GaussGraphCorePtr;
 typedef boost::shared_ptr< const GaussGraphCore > ConstGaussGraphCorePtr;
 typedef boost::shared_ptr< TransferFunctionGraphCore > GraphCorePtr;
 typedef boost::shared_ptr< const TransferFunctionGraphCore > ConstGraphCorePtr;
+
+typedef std::vector< std::string > Strings;
+typedef std::pair< std::string, QVariant > Property;
+typedef std::vector< Property > PropertyList;
 
 }
 

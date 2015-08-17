@@ -35,5 +35,10 @@ class QShortcut;
 class QSlider;
 class QSplitter;
 class QTableView;
+class QVariant;
+class QModelIndex;
+class QItemSelection;
+class QStyleOptionViewItem;
+class QAbstractItemView;
 
 #endif // _QtTypes_h_

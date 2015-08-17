@@ -148,8 +148,11 @@ SelectVisibles::SelectVisibles( DashTreePtr dashTree,
                                 const uint32_t minLOD,
                                 const uint32_t maxLOD )
     : RenderNodeVisitor( dashTree )
-    , _lodEvaluator( windowHeight, screenSpaceError, worldSpacePerVoxel,
-                     minLOD, maxLOD )
+    , _lodEvaluator( windowHeight,
+                     screenSpaceError,
+                     worldSpacePerVoxel,
+                     minLOD,
+                     maxLOD )
     , _frustum( frustum )
     , _volumeDepth( volumeDepth )
 {}
@@ -297,9 +300,15 @@ public:
         const float worldSpacePerVoxel = volInfo.worldSpacePerVoxel;
         const uint32_t volumeDepth = volInfo.rootNode.getDepth();
 
-        SelectVisibles visitor( dashTree, _currentFrustum, pixelViewport[3],
-                                screenSpaceError, worldSpacePerVoxel,
-                                volumeDepth, minLOD, maxLOD );
+        SelectVisibles visitor( dashTree,
+                                _currentFrustum,
+                                pixelViewport[3],
+                                screenSpaceError,
+                                worldSpacePerVoxel,
+                                volumeDepth,
+                                minLOD,
+                                maxLOD );
+
         livre::DFSTraversal traverser;
         traverser.traverse( volInfo.rootNode,
                             visitor, dashTree->getRenderStatus().getFrameID( ));
