@@ -18,15 +18,15 @@
  */
 
 #include <livre/core/render/View.h>
+#include <livre/core/render/FrameInfo.h>
+#include <livre/core/render/GLWidget.h>
 #include <livre/core/render/Renderer.h>
 #include <livre/core/render/RenderingSetGenerator.h>
-#include <livre/core/render/GLWidget.h>
 
 namespace livre
 {
 
 View::View()
-    : progress_( 8 ) // 8: expected # of bricks
 {
 }
 
@@ -54,38 +54,17 @@ const Viewport& View::getViewport() const
     return viewport_;
 }
 
-void View::render( const FrameInfo& frameInfo,
-                   const RenderBricks& renderBricks,
+void View::render( const FrameInfo& frameInfo, const RenderBricks& bricks,
                    const GLWidget& widget )
 {
     if( !rendererPtr_ )
         return ;
 
-#ifndef LIVRE_DEBUG_RENDERING
-    const unsigned long all = static_cast< unsigned long >( frameInfo.allNodes.size( ));
-    const unsigned long haveNot =
-        static_cast< unsigned long >( frameInfo.notAvailableRenderNodes.size( ));
-    const unsigned long have = all - haveNot;
-
-    if( progress_.expected_count() != all )
-        progress_.restart( all );
-    progress_ += have - progress_.count();
-#endif
-
     onPreRender_( widget, frameInfo );
 
-     if( !renderBricks.empty( ))
-        rendererPtr_->render( widget,
-                              *this,
-                              frameInfo.currentFrustum,
-                              renderBricks );
+     if( !bricks.empty( ))
+        rendererPtr_->render( widget, *this, frameInfo.currentFrustum, bricks );
 
     onPostRender_( widget, frameInfo );
 }
-
-FrameInfo::FrameInfo( const Frustum& cFrustum )
-    : currentFrustum( cFrustum )
-{
-}
-
 }

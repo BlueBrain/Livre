@@ -21,14 +21,15 @@
 #include <livre/lib/cache/TextureObject.h>
 #include <livre/lib/visitor/DFSTraversal.h>
 
-#include <livre/core/render/Frustum.h>
 #include <livre/core/dash/DashRenderNode.h>
 #include <livre/core/dash/DashTree.h>
-#include <livre/core/render/RenderingSetGenerator.h>
-#include <livre/core/maths/maths.h>
 #include <livre/core/data/VolumeDataSource.h>
 #include <livre/core/data/VolumeInformation.h>
+#include <livre/core/maths/maths.h>
+#include <livre/core/render/FrameInfo.h>
+#include <livre/core/render/Frustum.h>
 #include <livre/core/render/GLWidget.h>
+#include <livre/core/render/RenderingSetGenerator.h>
 
 namespace livre
 {

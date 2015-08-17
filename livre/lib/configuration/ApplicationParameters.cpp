@@ -46,9 +46,9 @@ const std::string CAMERALOOKAT_PARAM = "camera-lookat";
 const std::string SYNC_CAMERA_PARAM = "sync-camera";
 
 ApplicationParameters::ApplicationParameters()
-    : cameraPosition( Vector3f( 0, 0, 2.0 ))
-    , cameraLookAt( Vector3f( 0, 0, 0 ))
-    , frames( Vector2ui( 0, std::numeric_limits<Vector2ui::value_type>::max( )))
+    : cameraPosition( 0, 0, 1 )
+    , cameraLookAt( 0, 0, 0 )
+    , frames( 0, std::numeric_limits<Vector2ui::value_type>::max( ))
     , maxFrames( 0xFFFFFFFFu )
     , animation( 0 )
     , isResident( false )

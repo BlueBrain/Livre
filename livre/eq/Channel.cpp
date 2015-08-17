@@ -34,16 +34,6 @@
 #include <livre/eq/settings/RenderSettings.h>
 #include <livre/eq/Window.h>
 
-#include <livre/core/dash/DashRenderStatus.h>
-#include <livre/core/dash/DashTree.h>
-#include <livre/core/dashpipeline/DashProcessorInput.h>
-#include <livre/core/dashpipeline/DashProcessorOutput.h>
-#include <livre/core/data/VolumeDataSource.h>
-#include <livre/core/render/Frustum.h>
-#include <livre/core/render/GLWidget.h>
-#include <livre/core/render/RenderBrick.h>
-#include <livre/core/visitor/RenderNodeVisitor.h>
-
 #include <livre/lib/cache/TextureCache.h>
 #include <livre/lib/cache/TextureDataCache.h>
 #include <livre/lib/cache/TextureObject.h>
@@ -51,6 +41,17 @@
 #include <livre/lib/render/RenderView.h>
 #include <livre/lib/render/ScreenSpaceLODEvaluator.h>
 #include <livre/lib/visitor/DFSTraversal.h>
+
+#include <livre/core/dash/DashRenderStatus.h>
+#include <livre/core/dash/DashTree.h>
+#include <livre/core/dashpipeline/DashProcessorInput.h>
+#include <livre/core/dashpipeline/DashProcessorOutput.h>
+#include <livre/core/data/VolumeDataSource.h>
+#include <livre/core/render/FrameInfo.h>
+#include <livre/core/render/Frustum.h>
+#include <livre/core/render/GLWidget.h>
+#include <livre/core/render/RenderBrick.h>
+#include <livre/core/visitor/RenderNodeVisitor.h>
 
 #include <eq/eq.h>
 #include <eq/gl.h>
@@ -147,16 +148,11 @@ SelectVisibles::SelectVisibles( DashTreePtr dashTree,
                                 const uint32_t minLOD,
                                 const uint32_t maxLOD )
     : RenderNodeVisitor( dashTree )
-      , _lodEvaluator( windowHeight,
-                       screenSpaceError,
-                       worldSpacePerVoxel,
-                       minLOD,
-                       maxLOD )
-      , _frustum( frustum )
-      , _volumeDepth( volumeDepth )
-{
-
-}
+    , _lodEvaluator( windowHeight, screenSpaceError, worldSpacePerVoxel,
+                     minLOD, maxLOD )
+    , _frustum( frustum )
+    , _volumeDepth( volumeDepth )
+{}
 
 void SelectVisibles::visit( DashRenderNode& renderNode, VisitState& state )
 {
@@ -165,7 +161,6 @@ void SelectVisibles::visit( DashRenderNode& renderNode, VisitState& state )
         return;
 
     const Boxf& worldBox = lodNode.getWorldBox();
-
     const bool isInFrustum = _frustum.boxInFrustum( worldBox );
     renderNode.setInFrustum( isInFrustum );
     if( !isInFrustum )
@@ -178,13 +173,11 @@ void SelectVisibles::visit( DashRenderNode& renderNode, VisitState& state )
     Vector3f vmin, vmax;
     nearPlane.getNearFarPoints( worldBox, vmin, vmax );
 
-    const uint32_t lod = _lodEvaluator.getLODForPoint( _frustum,
-                                                       _volumeDepth,
-                                                       vmin );
+    const uint32_t lod =
+        _lodEvaluator.getLODForPoint( _frustum, _volumeDepth, vmin );
 
     const bool isLODVisible = (lod <= lodNode.getNodeId().getLevel( ));
     renderNode.setVisible( isLODVisible );
-
     state.setVisitChild( !isLODVisible );
 }
 
@@ -197,6 +190,7 @@ public:
     explicit Channel( livre::Channel* channel )
           : _channel( channel )
           , _glWidgetPtr( new EqGlWidget( channel ))
+          , _frameInfo( _currentFrustum )
     {}
 
     void initializeFrame()
@@ -303,15 +297,9 @@ public:
         const float worldSpacePerVoxel = volInfo.worldSpacePerVoxel;
         const uint32_t volumeDepth = volInfo.rootNode.getDepth();
 
-        SelectVisibles visitor( dashTree,
-                                _currentFrustum,
-                                pixelViewport[3],
-                                screenSpaceError,
-                                worldSpacePerVoxel,
-                                volumeDepth,
-                                minLOD,
-                                maxLOD );
-
+        SelectVisibles visitor( dashTree, _currentFrustum, pixelViewport[3],
+                                screenSpaceError, worldSpacePerVoxel,
+                                volumeDepth, minLOD, maxLOD );
         livre::DFSTraversal traverser;
         traverser.traverse( volInfo.rootNode,
                             visitor, dashTree->getRenderStatus().getFrameID( ));
@@ -335,12 +323,11 @@ public:
         AvailableSetGenerator generateSet( node->getDashTree( ),
                                            window->getTextureCache( ));
 
-        FrameInfo frameInfo( _currentFrustum );
-        generateSet.generateRenderingSet( _currentFrustum, frameInfo);
+        _frameInfo.clear();
+        generateSet.generateRenderingSet( _currentFrustum, _frameInfo );
 
         EqRenderViewPtr renderViewPtr =
                 boost::static_pointer_cast< EqRenderView >( _renderViewPtr );
-
         RayCastRendererPtr renderer =
                 boost::static_pointer_cast< RayCastRenderer >(
                     renderViewPtr->getRenderer( ));
@@ -350,9 +337,8 @@ public:
             pipe->getFrameData()->getRenderSettings()->getTransferFunction( ));
 
         RenderBricks renderBricks;
-        generateRenderBricks( frameInfo.renderNodes, renderBricks );
-
-        renderViewPtr->render( frameInfo, renderBricks, *_glWidgetPtr );
+        generateRenderBricks( _frameInfo.renderNodes, renderBricks );
+        renderViewPtr->render( _frameInfo, renderBricks, *_glWidgetPtr );
     }
 
     void prepareFramesAndSetPvp( const eq::Frames& frames,
@@ -479,8 +465,12 @@ public:
 
         livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
         std::ostringstream os;
-        os << node->getTextureDataCache().getStatistics();
-        float y = 180;
+        const size_t all = _frameInfo.allNodes.size();
+        const size_t missing = _frameInfo.notAvailableRenderNodes.size();
+        const float done = all > 0 ? float( all - missing ) / float( all ) : 0;
+        os << node->getTextureDataCache().getStatistics() << "  "
+           << int( 100.f * done + .5f ) << "% loaded" << std::endl;
+        float y = 220;
         _drawText( os.str(), y );
 
         Window* window = static_cast< Window* >( _channel->getWindow( ));
@@ -491,13 +481,26 @@ public:
         ConstVolumeDataSourcePtr dataSource = static_cast< livre::Node* >(
             _channel->getNode( ))->getDashTree()->getDataSource();
         const VolumeInformation& info = dataSource->getVolumeInformation();
+        Vector3f voxelSize = info.boundingBox.getDimension() / info.voxels;
+        std::string unit = "m";
+        if( voxelSize.x() < 0.000001f )
+        {
+            unit = "um";
+            voxelSize *= 1000000;
+        }
+        if( voxelSize.x() < 0.001f )
+        {
+            unit = "mm";
+            voxelSize *= 1000;
+        }
 
         os.str("");
         os << "Total resolution " << info.voxels  << " depth "
            << lunchbox::getIndexOfLastBit( info.voxels.x() /
                                            info.maximumBlockSize.x( ))
            << std::endl
-           << "Block resolution " << info.maximumBlockSize;
+           << "Block resolution " << info.maximumBlockSize << std::endl
+           << unit << "/voxel " << voxelSize;
         _drawText( os.str( ), y );
     }
 
@@ -599,6 +602,7 @@ public:
     ViewPtr _renderViewPtr;
     GLWidgetPtr _glWidgetPtr;
     FrameGrabber _frameGrabber;
+    FrameInfo _frameInfo;
 };
 
 EqRenderView::EqRenderView( Channel* channel,

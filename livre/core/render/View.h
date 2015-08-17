@@ -21,31 +21,14 @@
 #define _View_h_
 
 #include <livre/core/api.h>
-#include <livre/core/cache/CacheObject.h>
 #include <livre/core/dashTypes.h>
 #include <livre/core/mathTypes.h>
 #include <livre/core/lunchboxTypes.h>
-#include <livre/core/render/Frustum.h>
-#include <boost/progress.hpp>
 
 namespace livre
 {
 
-/**
- * The FrameInfo struct keeps the frame information.
- */
-struct FrameInfo
-{
-    LIVRECORE_API FrameInfo( const Frustum& cFrustum );
-    NodeIds allNodes; //!< The list of nodes to be rendered.
-    NodeIds notAvailableRenderNodes; //!< The unavailable nodes for rendering.
-    ConstCacheObjects renderNodes; //!< The list of nodes to be rendered.
-    const Frustum& currentFrustum; //!< The current frustum.
-};
-
-/**
- * The View class is a viewport on the rendering widgets frame buffer.
- */
+/** A viewport on the rendering widgets frame buffer. */
 class View
 {
 public:
@@ -110,8 +93,6 @@ protected:
     Viewport viewport_; //!< The normalized viewport.
 
 private:
-
-    boost::progress_display progress_;
 };
 
 }

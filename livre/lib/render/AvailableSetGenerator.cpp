@@ -20,16 +20,17 @@
 #include <livre/core/dash/DashRenderNode.h>
 #include <livre/core/dash/DashRenderStatus.h>
 #include <livre/core/dash/DashTree.h>
-#include <livre/core/render/RenderBrick.h>
-#include <livre/core/render/View.h>
 #include <livre/core/data/VolumeDataSource.h>
 #include <livre/core/data/VolumeInformation.h>
+#include <livre/core/render/FrameInfo.h>
+#include <livre/core/render/RenderBrick.h>
+#include <livre/core/render/View.h>
 #include <livre/core/visitor/RenderNodeVisitor.h>
+#include <livre/lib/cache/TextureCache.h>
+#include <livre/lib/cache/TextureObject.h>
 #include <livre/lib/render/AvailableSetGenerator.h>
 #include <livre/lib/visitor/CollectionTraversal.h>
 #include <livre/lib/visitor/DFSTraversal.h>
-#include <livre/lib/cache/TextureObject.h>
-#include <livre/lib/cache/TextureCache.h>
 
 namespace livre
 {
@@ -37,9 +38,7 @@ namespace livre
 class VisibleCollectorVisitor : public RenderNodeVisitor
 {
 public:
-
-    VisibleCollectorVisitor( DashTreePtr dashTree,
-                             NodeIds& nodeIds )
+    VisibleCollectorVisitor( DashTreePtr dashTree, NodeIds& nodeIds )
         : RenderNodeVisitor( dashTree ),
           _nodeIds( nodeIds )
     {}
@@ -63,6 +62,7 @@ public:
         }
     }
 
+private:
     NodeIds& _nodeIds;
 };
 
@@ -87,10 +87,8 @@ struct AvailableSetGenerator::Impl
         return false;
     }
 
-    void collectLoadedTextures(
-                const NodeId& nodeId,
-                ConstCacheMap& cacheMap,
-                NodeIds& notAvailableRenderNodes )
+    void collectLoadedTextures( const NodeId& nodeId, ConstCacheMap& cacheMap,
+                                NodeIds& notAvailableRenderNodes )
     {
         NodeId current = nodeId;
         while( current.isValid( ))
@@ -98,7 +96,7 @@ struct AvailableSetGenerator::Impl
             const NodeId& currentNodeId = current;
             const ConstTextureObjectPtr texture =
                 boost::static_pointer_cast< const TextureObject >(
-                        _textureCache.getObjectFromCache( currentNodeId.getId( )));
+                     _textureCache.getObjectFromCache( currentNodeId.getId( )));
 
             if( texture && texture->isLoaded( ))
             {
@@ -106,31 +104,31 @@ struct AvailableSetGenerator::Impl
                 break;
             }
 
-            current = currentNodeId.isRoot() ? NodeId() : currentNodeId.getParent();
+            current = currentNodeId.isRoot() ? NodeId() :
+                                               currentNodeId.getParent();
         }
 
         if( nodeId != current )
             notAvailableRenderNodes.push_back( nodeId );
     }
 
-    void generateRenderingSet( const Frustum&,
-                               FrameInfo& frameInfo )
+    void generateRenderingSet( const Frustum&, FrameInfo& frameInfo )
     {
         VisibleCollectorVisitor visibleSelector( _dashTree,
                                                  frameInfo.allNodes );
-        DFSTraversal dfsTraverser_;
+        DFSTraversal dfsTraverser;
         const RootNode& rootNode =
                 _dashTree->getDataSource()->getVolumeInformation().rootNode;
 
-        dfsTraverser_.traverse( rootNode,
-                                visibleSelector,
-                                _dashTree->getRenderStatus().getFrameID( ));
+        dfsTraverser.traverse( rootNode, visibleSelector,
+                               _dashTree->getRenderStatus().getFrameID( ));
 
         ConstCacheMap cacheMap;
-        BOOST_FOREACH( const NodeId& nodeId, frameInfo.allNodes )
-            collectLoadedTextures( nodeId,
-                                   cacheMap,
+        for( const NodeId& nodeId : frameInfo.allNodes )
+        {
+            collectLoadedTextures( nodeId, cacheMap,
                                    frameInfo.notAvailableRenderNodes );
+        }
 
         if( !frameInfo.notAvailableRenderNodes.empty( ))
         {
