@@ -2,6 +2,6 @@
 git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git 1fe5273)
 git_subproject(Lunchbox https://github.com/Eyescale/Lunchbox.git a452ade)
 git_subproject(dash https://github.com/BlueBrain/dash.git bdbb912)
-git_subproject(zeq https://github.com/HBPVis/zeq.git 612e230)
+git_subproject(zeq https://github.com/HBPVis/zeq.git acaadb1)
 git_subproject(Collage https://github.com/Eyescale/Collage.git 26c3b09)
 git_subproject(Equalizer https://github.com/Eyescale/Equalizer.git 32c6ab3)
