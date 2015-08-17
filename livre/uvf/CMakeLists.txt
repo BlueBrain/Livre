@@ -18,7 +18,7 @@ set( LIVRE_UVF_INCLUDES ${TUVOK_INCLUDE_DIR} )
 
 include_directories( ${LIVRE_UVF_INCLUDES} )
 add_library( LivreUVF SHARED ${LIVRE_UVF_SOURCES} )
-target_link_libraries( LivreUVF ${LIVRE_UVF_TARGET_LIBRARIES} )
+target_link_libraries( LivreUVF PRIVATE ${LIVRE_UVF_TARGET_LIBRARIES} )
 set_target_properties( LivreUVF PROPERTIES VERSION ${VERSION} SOVERSION ${VERSION_ABI} )
 set_target_properties( LivreUVF PROPERTIES COMPILE_FLAGS "${LIVRE_UVF_COMPILE_FLAGS}" )
 if(NOT APPLE)
