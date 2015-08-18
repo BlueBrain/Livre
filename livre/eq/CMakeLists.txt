@@ -23,7 +23,11 @@ if(ZEQ_FOUND)
   list(APPEND LIVREEQ_HEADERS zeq/communicator.h)
   list(APPEND LIVREEQ_SOURCES zeq/communicator.cpp)
   list(APPEND LIVREEQ_LINK_LIBRARIES
-    PRIVATE zeq zeqHBP RESTBridge ${LibJpegTurbo_LIBRARIES})
+    PRIVATE zeq zeqHBP ${LibJpegTurbo_LIBRARIES})
+endif()
+
+if(RESTBRIDGE_FOUND)
+  list(APPEND LIVREEQ_LINK_LIBRARIES PRIVATE RESTBridge)
 endif()
 
 if(NOT MSVC)
