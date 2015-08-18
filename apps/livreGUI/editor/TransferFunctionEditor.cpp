@@ -33,9 +33,10 @@
 namespace livre
 {
 
-TransferFunctionEditor::TransferFunctionEditor( QWidget* parentWgt )
+TransferFunctionEditor::TransferFunctionEditor( Controller& controller,
+                                                QWidget* parentWgt )
     : QWidget( parentWgt )
-    , controller_( new Controller )
+    , controller_( controller )
 {
     ui_.setupUi( this );
     setWindowFlags( (windowFlags( ) ^ Qt::Dialog) | Qt::Window);
@@ -48,7 +49,7 @@ TransferFunctionEditor::~TransferFunctionEditor( )
 void TransferFunctionEditor::updateCurve( const bool immediate )
 {
     if( ui_.previewCheckBox_->isChecked() && immediate )
-        controller_->publishTransferFunction();
+        controller_.publishTransferFunction();
 }
 
 void TransferFunctionEditor::closeEvent( QCloseEvent* closeEvt )
@@ -98,7 +99,7 @@ void TransferFunctionEditor::connectGraph_()
 void TransferFunctionEditor::initializeGraph_( )
 {
     transferFunctionGraphPtr_->setTransferFunction(
-        controller_->getTransferFunction( ));
+        controller_.getTransferFunction( ));
     transferFunctionGraphPtr_->setStateR( true );
     transferFunctionGraphPtr_->setStateG( true );
     transferFunctionGraphPtr_->setStateB( true );

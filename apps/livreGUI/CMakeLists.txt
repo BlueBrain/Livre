@@ -42,6 +42,36 @@ set(LIVREGUI_SOURCES
 set(LIVREGUI_RESOURCES resources/resources.qrc)
 set(LIVREGUI_UI_FORMS editor/gui/TransferFunctionEditor.ui)
 
+set(LIVREGUI_LINK_LIBRARIES LivreCore LivreEq Qt5::Widgets)
+
+if(ZEQ_FOUND)
+list(APPEND zeq zeqHBP)
+endif()
+
+if(ISC_FOUND)
+list(APPEND LIVREGUI_HEADERS
+      stimuliController/nestData.h
+      stimuliController/GeneratorModel.h
+      stimuliController/GeneratorPropertiesModel.h
+      stimuliController/PropertyEditDelegate.h
+      stimuliController/StimuliController.h)
+list(APPEND LIVREGUI_MOC_HEADERS
+      stimuliController/GeneratorModel.h
+      stimuliController/GeneratorPropertiesModel.h
+      stimuliController/PropertyEditDelegate.h
+      stimuliController/StimuliController.h)
+list(APPEND LIVREGUI_SOURCES
+      stimuliController/nestData.cpp
+      stimuliController/GeneratorModel.cpp
+      stimuliController/GeneratorPropertiesModel.cpp
+      stimuliController/PropertyEditDelegate.cpp
+      stimuliController/StimuliController.cpp)
+list(APPEND LIVREGUI_UI_FORMS stimuliController/gui/StimuliController.ui)
+list(APPEND LIVREGUI_LINK_LIBRARIES ISC)
+list(APPEND CPPCHECK_EXTRA_ARGS
+    --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/stimuliController/moc_StimuliController.cxx)
+endif()
+
 list(APPEND CPPCHECK_EXTRA_ARGS
   --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/editor/graphs/moc_AnchorGraph.cxx
   --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/editor/graphs/moc_TransferFunctionGraph.cxx
@@ -49,6 +79,5 @@ list(APPEND CPPCHECK_EXTRA_ARGS
   --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/moc_MainWindow.cxx)
 
 add_definitions(${QT_DEFINITIONS} "-DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED" )
-set(LIVREGUI_LINK_LIBRARIES LivreCore LivreEq Qt5::Widgets zeq zeqHBP)
 
 common_application(livreGUI MACOSX_BUNDLE)

@@ -21,26 +21,42 @@
 
 #include <livreGUI/AppSettings.h>
 #include <livreGUI/editor/TransferFunctionEditor.h>
+#include <livreGUI/Controller.h>
+
+#ifdef LIVRE_USE_ISC
+#include <livreGUI/stimuliController/StimuliController.h>
+#endif
 
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QMainWindow>
+#include <QTabWidget>
 
 QT_USE_NAMESPACE
 
 int main( int argc, char *argv[] )
 {
     QApplication app( argc, argv );
+    livre::Controller controller;
 
     Q_INIT_RESOURCE( resources );
 
     app.setAttribute( Qt::AA_DontCreateNativeWidgetSiblings );
     livre::setCoreSettingsNames( );
 
+    QTabWidget* tabWidget = new QTabWidget;
+
+    tabWidget->addTab( new livre::TransferFunctionEditor(controller),
+                       "Transfer Function Editor");
+
+#ifdef LIVRE_USE_ISC
+    tabWidget->addTab(new livre::StimuliController(controller),
+                      "Simulation Controller");
+#endif
+
     QMainWindow window;
-    livre::TransferFunctionEditor* editor = new livre::TransferFunctionEditor;
-    window.setCentralWidget( editor );
-    window.resize( QDesktopWidget().availableGeometry( &window ).size() * 0.5 );
+    window.setCentralWidget( tabWidget );
+    window.resize( QDesktopWidget().availableGeometry( &window ).size() );
     window.show();
 
     return app.exec();

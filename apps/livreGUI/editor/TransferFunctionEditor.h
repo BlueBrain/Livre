@@ -53,9 +53,11 @@ public:
     };
 
     /**
+     * @param controller The GUI connection to zeq world.
      * @param parentWgt Parent widget.
      */
-    explicit TransferFunctionEditor( QWidget *parentWgt = 0 );
+     TransferFunctionEditor( Controller& controller,
+                             QWidget *parentWgt = 0 );
      ~TransferFunctionEditor( );
 
     /**
@@ -120,7 +122,7 @@ private:
     void showEvent( QShowEvent* showEvent );
 
     QAction* quitAction_;
-    ControllerPtr controller_;
+    Controller& controller_;
 
     QPoint position_;
     TransferFunctionGraphPtr transferFunctionGraphPtr_;
