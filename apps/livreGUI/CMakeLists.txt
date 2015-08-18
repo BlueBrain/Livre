@@ -15,6 +15,7 @@ set(LIVREGUI_HEADERS
   types.h
   AppSettings.h
   Controller.h
+  animationController/AnimationController.h
   editor/TransferFunctionEditor.h
   editor/graphcore/AnchorGraphCore.h
   editor/graphcore/DoubleGaussGraphCore.h
@@ -24,6 +25,7 @@ set(LIVREGUI_HEADERS
   editor/graphs/TransferFunctionGraph.h)
 
 set(LIVREGUI_MOC_HEADERS
+  animationController/AnimationController.h
   editor/TransferFunctionEditor.h
   editor/graphs/AnchorGraph.h
   editor/graphs/TransferFunctionGraph.h)
@@ -31,6 +33,7 @@ set(LIVREGUI_MOC_HEADERS
 set(LIVREGUI_SOURCES
   Controller.cpp
   livreGUI.cpp
+  animationController/AnimationController.cpp
   editor/TransferFunctionEditor.cpp
   editor/graphcore/AnchorGraphCore.cpp
   editor/graphcore/DoubleGaussGraphCore.cpp
@@ -40,7 +43,9 @@ set(LIVREGUI_SOURCES
   editor/graphs/TransferFunctionGraph.cpp)
 
 set(LIVREGUI_RESOURCES resources/resources.qrc)
-set(LIVREGUI_UI_FORMS editor/gui/TransferFunctionEditor.ui)
+set(LIVREGUI_UI_FORMS
+  editor/gui/TransferFunctionEditor.ui
+  animationController/gui/AnimationController.ui)
 
 set(LIVREGUI_LINK_LIBRARIES LivreCore LivreEq Qt5::Widgets)
 
@@ -73,6 +78,8 @@ list(APPEND CPPCHECK_EXTRA_ARGS
 endif()
 
 list(APPEND CPPCHECK_EXTRA_ARGS
+  --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/animationController/moc_AnimationController.cxx
+  --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/editor/graphs/moc_AnimationEditor.cxx
   --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/editor/graphs/moc_AnchorGraph.cxx
   --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/editor/graphs/moc_TransferFunctionGraph.cxx
   --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/editor/moc_TransferFunctionEditor.cxx
