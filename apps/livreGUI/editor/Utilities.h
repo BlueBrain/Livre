@@ -1,6 +1,6 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
- *                     Philipp Schlegel <schlegel@ifi.uzh.ch>
+/* Copyright (c) 2015, EPFL/Blue Brain Project
+ *                     Marwan Abdellah <marwan.abdellah@epfl.ch>
+ *                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -18,12 +18,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "TransferFunctionGraphCore.h"
+#ifndef _Utilities_h_
+#define _Utilities_h_
+
+#include <QtWidgets>
 
 namespace livre
 {
 
-TransferFunctionGraphCore::TransferFunctionGraphCore() {}
-TransferFunctionGraphCore::~TransferFunctionGraphCore() {}
+inline static bool xLessThan( const QPointF &p1, const QPointF &p2 )
+{
+    return p1.x() < p2.x();
+}
 
 }
+
+#endif // _Utilities_h_
+

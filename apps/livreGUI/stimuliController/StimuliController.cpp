@@ -201,10 +201,8 @@ public:
     isc::Simulator* _simulator;
     zeq::Subscriber* _subscriber;
     Ui_stimuliController& _ui;
-    boost::mutex _hbpConnectionMutex;
     StimuliController* _stimuliController;
     Controller& _controller;
-    boost::thread _pollThread;
     std::vector<uint32_t> _selectedIds;
 };
 

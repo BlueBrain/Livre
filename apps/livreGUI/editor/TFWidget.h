@@ -1,6 +1,6 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
- *                     Philipp Schlegel <schlegel@ifi.uzh.ch>
+/* Copyright (c) 2015, EPFL/Blue Brain Project
+ *                     Marwan Abdellah <marwan.abdellah@epfl.ch>
+ *                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -18,36 +18,38 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _TransferFunctionGraphCore_h_
-#define _TransferFunctionGraphCore_h_
+#ifndef _TFWidget_h_
+#define _TFWidget_h_
+
+#include <QGroupBox>
 
 namespace livre
 {
 
 /**
- * The ColorChannel definitions
+ * This class contains the logic to draw checkers patterns. It's a QWidget.
+ * ColorMapWidget and GradientRenderer are inheriting from thid class.
  */
-enum ColorChannel
+class TFWidget : public QWidget
 {
-    CC_RED,
-    CC_GREEN,
-    CC_BLUE,
-    CC_ALPHA
-};
+    Q_OBJECT
 
-/**
- * The abstract operation class for \see livre::TransferFunctionGraph widgets.
- */
-class TransferFunctionGraphCore
-{
 public:
 
-    TransferFunctionGraphCore( );
+    /**
+     * The constructor of TFWidget
+     * @param parent The parent widget.
+     */
+    TFWidget( QWidget* parent );
 
-    virtual ~TransferFunctionGraphCore( );
+protected:
 
+    void _createCheckersBackground();
+
+    QImage _shade;
+    QLinearGradient _gradient;
 };
 
 }
 
-#endif // _TransferFunctionGraphCore_h_
+#endif // _TFWidget_h_

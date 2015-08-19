@@ -72,17 +72,6 @@ public:
     isc::Simulator* getSimulator( const servus::URI& uri );
 #endif
 
-    /**
-     * Updates the transfer function.
-     * @return True if connection was established.
-     */
-    void publishTransferFunction( );
-
-    /**
-     * @return The transfer function.
-     */
-    TransferFunction1DfPtr getTransferFunction() const;
-
 private:
 
     struct Impl;

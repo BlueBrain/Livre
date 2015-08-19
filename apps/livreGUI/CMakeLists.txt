@@ -1,7 +1,8 @@
-#
 # Copyright (c) 2011-2015, EPFL/Blue Brain Project
 #                          David Steiner <steiner@ifi.uzh.ch>
 #                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+#                          Marwan Abdellah <marwan.abdellah@epfl.ch>
+#                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
 #
 # This file is part of Livre <https://github.com/BlueBrain/Livre>
 #
@@ -15,38 +16,33 @@ set(LIVREGUI_HEADERS
   types.h
   AppSettings.h
   Controller.h
+  editor/ColorMapWidget.h
+  editor/GradientRenderer.h
+  editor/HoverPoints.h
+  editor/TFWidget.h
   editor/TransferFunctionEditor.h
-  editor/graphcore/AnchorGraphCore.h
-  editor/graphcore/DoubleGaussGraphCore.h
-  editor/graphcore/GaussGraphCore.h
-  editor/graphcore/TransferFunctionGraphCore.h
-  editor/graphs/AnchorGraph.h
-  editor/graphs/TransferFunctionGraph.h)
+  editor/Utilities.h)
 
 set(LIVREGUI_MOC_HEADERS
-  editor/TransferFunctionEditor.h
-  editor/graphs/AnchorGraph.h
-  editor/graphs/TransferFunctionGraph.h)
+  editor/ColorMapWidget.h
+  editor/GradientRenderer.h
+  editor/HoverPoints.h
+  editor/TFWidget.h
+  editor/TransferFunctionEditor.h)
 
 set(LIVREGUI_SOURCES
   Controller.cpp
   livreGUI.cpp
-  editor/TransferFunctionEditor.cpp
-  editor/graphcore/AnchorGraphCore.cpp
-  editor/graphcore/DoubleGaussGraphCore.cpp
-  editor/graphcore/GaussGraphCore.cpp
-  editor/graphcore/TransferFunctionGraphCore.cpp
-  editor/graphs/AnchorGraph.cpp
-  editor/graphs/TransferFunctionGraph.cpp)
+  editor/ColorMapWidget.cpp
+  editor/GradientRenderer.cpp
+  editor/HoverPoints.cpp
+  editor/TFWidget.cpp
+  editor/TransferFunctionEditor.cpp)
 
 set(LIVREGUI_RESOURCES resources/resources.qrc)
 set(LIVREGUI_UI_FORMS editor/gui/TransferFunctionEditor.ui)
 
-set(LIVREGUI_LINK_LIBRARIES LivreCore LivreEq Qt5::Widgets)
-
-if(ZEQ_FOUND)
-list(APPEND zeq zeqHBP)
-endif()
+set(LIVREGUI_LINK_LIBRARIES LivreCore LivreEq Qt5::Widgets zeq zeqHBP)
 
 if(ISC_FOUND)
 list(APPEND LIVREGUI_HEADERS
@@ -73,10 +69,7 @@ list(APPEND CPPCHECK_EXTRA_ARGS
 endif()
 
 list(APPEND CPPCHECK_EXTRA_ARGS
-  --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/editor/graphs/moc_AnchorGraph.cxx
-  --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/editor/graphs/moc_TransferFunctionGraph.cxx
-  --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/editor/moc_TransferFunctionEditor.cxx
-  --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/moc_MainWindow.cxx)
+    --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/moc_MainWindow.cxx)
 
 add_definitions(${QT_DEFINITIONS} "-DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED" )
 

@@ -50,13 +50,13 @@ int main( int argc, char *argv[] )
                        "Transfer Function Editor");
 
 #ifdef LIVRE_USE_ISC
-    tabWidget->addTab(new livre::StimuliController(controller),
-                      "Simulation Controller");
+    tabWidget->addTab( new livre::StimuliController(controller),
+                       "Simulation Controller" );
 #endif
 
     QMainWindow window;
     window.setCentralWidget( tabWidget );
-    window.resize( QDesktopWidget().availableGeometry( &window ).size() );
+    window.resize( QDesktopWidget().availableGeometry( &window ).size() / 2.0f );
     window.show();
 
     return app.exec();
