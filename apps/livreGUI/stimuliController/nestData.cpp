@@ -152,7 +152,7 @@ std::string getJSON( const PropertyList& list )
         const std::string name = property.first;
         const QVariant& var = property.second;
 
-        jsonStr << " \"" << name << "\" : ";
+        jsonStr << '"' << name << '"' << " : ";
         switch( var.type( ))
         {
             case QVariant::Double:
@@ -179,8 +179,14 @@ std::string getJSON( const PropertyList& list )
                 jsonStr << " [ ";
                 BOOST_FOREACH( const QVariant& v, varList )
                 {
-
-                    jsonStr << var.toDouble();
+                    if( v.type() == QVariant::Double )
+                    {
+                        jsonStr << v.toDouble();
+                    }
+                    else if( v.type() == QVariant::String )
+                    {
+                        jsonStr << '"' << v.toString().toStdString() << '"';
+                    }
                     if( v != varList.back( ))
                         jsonStr << " , ";
                 }
@@ -188,7 +194,7 @@ std::string getJSON( const PropertyList& list )
                 break;
             }
             default:
-                jsonStr << "\"" << var.toString().toStdString() << "\"";
+                jsonStr << '"' << var.toString().toStdString() << '"';
                 break;
         }
 
