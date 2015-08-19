@@ -50,8 +50,7 @@ struct Controller::Impl
 #endif
 
     Impl()
-        : _transferFunction( new TransferFunction1Df())
-        , _subscriberPoll( boost::bind( &Impl::pollSubscribers, this ))
+        : _subscriberPoll( boost::bind( &Impl::pollSubscribers, this ))
         , _continuePolling( true )
 
     {}
@@ -134,29 +133,12 @@ struct Controller::Impl
         }
     }
 
-    void publishTransferFunction( )
-    {
-        UInt8Vector rgbai;
-        const FloatVector& rgbaf = _transferFunction->getData();
-        rgbai.resize( rgbaf.size(), 0 );
-
-        for( uint32_t i = 0; i < rgbaf.size( ); ++i )
-        {
-            rgbai[ i ] = uint8_t( rgbaf[ i ] *
-                                  std::numeric_limits< uint8_t >::max( ));
-        }
-        zeq::Publisher *publisher = getPublisher( servus::URI( "hbp://" ));
-        publisher->publish( zeq::hbp::serializeLookupTable1D( rgbai ));
-    }
-
     PublisherMap _publisherMap;
     SubscriberMap _subscriberMap;
 
 #ifdef LIVRE_USE_ISC
     SimulatorMap _simulatorMap;
 #endif
-
-    TransferFunction1DfPtr _transferFunction;
 
     boost::mutex _subscriberMutex;
     boost::thread _subscriberPoll;
@@ -193,15 +175,5 @@ isc::Simulator* Controller::getSimulator( const servus::URI& uri )
     return _impl->getSimulator( uri );
 }
 #endif
-
-void Controller::publishTransferFunction( )
-{
-    _impl->publishTransferFunction();
-}
-
-TransferFunction1DfPtr Controller::getTransferFunction() const
-{
-    return _impl->_transferFunction;
-}
 
 }

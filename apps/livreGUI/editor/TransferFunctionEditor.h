@@ -1,9 +1,6 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
- *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
- *                          Maxim Makhinya <maxmah@gmail.com>
- *                          Philipp Schlegel <schlegel@ifi.uzh.ch>
- *                          David Steiner <steiner@ifi.uzh.ch>
- *                          Stefan.Eilemann@epfl.ch
+/* Copyright (c) 2015, EPFL/Blue Brain Project
+ *                     Marwan Abdellah <marwan.abdellah@epfl.ch>
+ *                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -24,112 +21,70 @@
 #ifndef _TransferFunctionEditor_h_
 #define _TransferFunctionEditor_h_
 
-#ifndef Q_MOC_RUN
-#  include <livre/core/render/TransferFunction1D.h>
-#  include <livreGUI/ui_TransferFunctionEditor.h>
-#  include <livreGUI/editor/graphcore/TransferFunctionGraphCore.h>
-#  include <livreGUI/editor/graphs/TransferFunctionGraph.h>
-#  include <livreGUI/editor/TransferFunctionEditor.h>
-#endif // Q_MOC_RUN
+#include <QMainWindow>
+#include <livreGUI/editor/ColorMapWidget.h>
+#include <livreGUI/editor/GradientRenderer.h>
+#include <QResizeEvent>
+#include <livreGUI/Controller.h>
 
-#include <QWidget>
+#include <zeq/publisher.h>
 
+namespace Ui
+{
+class TransferFunctionEditor;
+}
 namespace livre
 {
 
 /**
- * TransferFunctionEditor is the dialog for editing the transfer function.
- **/
-class TransferFunctionEditor : public QWidget
+ * This contains all the widget for the transfert function editor.
+ */
+class TransferFunctionEditor: public QWidget
 {
     Q_OBJECT
 
 public:
 
-    enum GraphType
-    {
-        GT_GAUSS,
-        GT_DOUBLEGAUSS
-    };
+    /**
+     * Constructor of TransferFunctionEditor.
+     * @param conroller The controller used to receive/publish transfer fuction
+     * data.
+     * @param tfParentWidget Parent widget.
+     */
+    explicit TransferFunctionEditor( livre::Controller& conroller, QWidget* tfParentWidget = 0 );
+    ~TransferFunctionEditor();
 
     /**
-     * @param controller The GUI connection to zeq world.
-     * @param parentWgt Parent widget.
+     * Set the gradient stops for colormap
+     * @param stops The gradient stops.
      */
-     TransferFunctionEditor( Controller& controller,
-                             QWidget *parentWgt = 0 );
-     ~TransferFunctionEditor( );
+    void setColorMapStops( const QGradientStops& stops );
 
-    /**
-     * Sets the transfer function.
-     * @param Transfer function.
-     */
-    void setTransferFunction( TransferFunction1DfPtr transferFunctionPtr );
+signals:
+    void gradientStopsChanged( const QGradientStops& stops );
 
-    /**
-     * Sets the histogram.
-     * @param histogram Histogram vector.
-     */
-    void setHistogram( const UInt8Vector& histogram );
+private Q_SLOTS:
 
-    /**
-     * @return The graph type.
-     */
-    GraphType getGraphType( ) const;
-
-    /**
-     * Sets the graph type.
-     * @param graph The graph type.
-     */
-    void setGraphType( const GraphType graphType );
-
-    /**
-     * @return The transfer function graph.
-     */
-    TransferFunctionGraphPtr getGraph( ) const;
-
-    /**
-     * Enables/disables a channel.
-     * @param channel Channel to enable.
-     * @param enabled If true channel is enabled.
-     */
-    void toggleChannel( const ColorChannel channel, bool enabled );
-
-public Q_SLOTS:
-
-    /**
-     * Updates the curve.
-     * @param immediate If immediate is true, curve is updated immediately.
-     */
-    void updateCurve( const bool immediate = true );
-
-
-protected Q_SLOTS:
-
-    /**
-     * Changes graph to the given type.
-     * @param graphTypei The graphtype.
-     */
-    void changeGraph( int graphTypei );
+    void _clear();
+    void _setDefault();
+    void _pointsUpdated();
+    void _connect();
+    void _disconnect();
 
 private:
 
-    void initializeGraph_( );
-    void createAndConnectGraph_(const GraphType graphType);
-    void connectGraph_();
+    void _publishTransfertFunction();
 
-    void closeEvent( QCloseEvent *closeEvt );
-    void showEvent( QShowEvent* showEvent );
-
-    QAction* quitAction_;
-    Controller& controller_;
-
-    QPoint position_;
-    TransferFunctionGraphPtr transferFunctionGraphPtr_;
-    Ui_transferFunctionEditor_ ui_;
-    FloatVector rgba_;
-    UInt8Vector histogram_;
+    livre::Controller& _controller;
+    Ui::TransferFunctionEditor *ui;
+    zeq::Publisher* _publisher;
+    ColorMapWidget* _redWidget;
+    ColorMapWidget* _greenWidget;
+    ColorMapWidget* _blueWidget;
+    ColorMapWidget* _alphaWidget;
+    GradientRenderer* _gradientRenderer;
 };
 
 }
-#endif
+
+#endif // _TransferFunctionEditor_h_
