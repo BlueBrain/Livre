@@ -74,11 +74,16 @@ struct StimuliController::Impl
 
         QItemSelectionModel* selectionModel = _ui.tblGenerators->selectionModel();
         const QModelIndex& ind = selectionModel->currentIndex();
+        if( !ind.isValid( ))
+            return;
+
         const Strings& generators = getGenerators();
         const std::string& generator = generators[ ind.row() ];
 
         PropertyList properties = model->getProperties( );
-        properties.push_back( std::make_pair("model", QString(generator.c_str())));
+        QVariantList _list;
+        _list.push_back( QVariant(QString(generator.c_str( ))));
+        properties.push_back( std::make_pair("model", _list ));
 
         const std::string& json = getJSON( properties );
         if( json.empty( ))
@@ -96,6 +101,9 @@ struct StimuliController::Impl
     {
         QItemSelectionModel* selectionModel = _ui.tblGenerators->selectionModel();
         const QModelIndex& ind = selectionModel->currentIndex();
+        if( !ind.isValid( ))
+            return;
+
         const Strings& generators = getGenerators();
         const PropertyList& prop = getGeneratorProperties( generators[ ind.row() ] );
         GeneratorPropertiesModel* model =
@@ -111,7 +119,6 @@ struct StimuliController::Impl
             const QString& uriStr = _ui.txtISCURL->text();
             const servus::URI uri( uriStr.toStdString( ));
             _simulator =  _controller.getSimulator( uri );
-            _ui.btnInjectStimulus->setEnabled( true );
             _ui.btnConnectISC->setEnabled( false );
             _ui.btnDisconnectISC->setEnabled( true );
         }
@@ -141,6 +148,14 @@ struct StimuliController::Impl
     void updateCellIdsTextBox( const std::vector<uint32_t>& cellIds )
     {
         _selectedIds = cellIds;
+
+        QItemSelectionModel* selectionModel = _ui.tblGenerators->selectionModel();
+        const QModelIndex& ind = selectionModel->currentIndex();
+
+        _ui.btnInjectStimulus->setEnabled( _simulator &&
+                                           !_selectedIds.empty( )
+                                           && ind.isValid( ));
+
         std::stringstream str;
         BOOST_FOREACH( const uint32_t gid, _selectedIds )
             str << gid << " ,";
@@ -215,9 +230,11 @@ StimuliController::StimuliController( Controller& controller,
 
     _ui.setupUi( this );
     _ui.txtCellIds->setReadOnly( true );
-    _ui.tblGenerators->setModel( new GeneratorModel( _ui.tblGenerators ));
+    GeneratorModel *generatorModel = new GeneratorModel( _ui.tblGenerators );
+    _ui.tblGenerators->setModel( generatorModel );
     _ui.tblGenerators->setColumnWidth( 0, 300 );
     _ui.tblGenerators->setSelectionMode( QAbstractItemView::SingleSelection );
+    _ui.tblGenerators->setSelectionBehavior( QAbstractItemView::SelectRows );
 
     PropertyEditDelegate* editorDelegate =
             new PropertyEditDelegate( _ui.tblGeneratorProperties );
@@ -255,6 +272,8 @@ StimuliController::StimuliController( Controller& controller,
     connect( this, SIGNAL(updateCellIdsTextBox(std::vector<uint32_t>)),
              this, SLOT(_updateCellIdsTextBox(std::vector<uint32_t>)),
              Qt::QueuedConnection );
+
+    _ui.tblGenerators->selectRow( 0 );
 }
 
 StimuliController::~StimuliController( )

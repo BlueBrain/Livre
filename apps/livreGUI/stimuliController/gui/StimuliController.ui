@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>stimuliController</class>
  <widget class="QWidget" name="stimuliController">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -81,7 +84,7 @@
      <item>
       <widget class="QLineEdit" name="txtISCURL">
        <property name="text">
-        <string>isc://</string>
+        <string>isc-nesteer://</string>
        </property>
       </widget>
      </item>
@@ -132,6 +135,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="btnInjectStimulus">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Inject Stimulus</string>
          </property>
