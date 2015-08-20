@@ -73,11 +73,11 @@ private Q_SLOTS:
 
 private:
 
-    void _publishTransfertFunction();
+    void _publishTransferFunction();
 
     livre::Controller& _controller;
     Ui::TransferFunctionEditor *ui;
-    zeq::Publisher* _publisher;
+    bool _isConnected;
     ColorMapWidget* _redWidget;
     ColorMapWidget* _greenWidget;
     ColorMapWidget* _blueWidget;

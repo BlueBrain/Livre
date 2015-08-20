@@ -33,6 +33,10 @@ namespace livre
 
 /**
  * Controls communication between the GUI and the rendering application.
+ * TODO: If registering to events becomes more complex ( i.e. Same event is
+ * registered by two different objects on the same uri ), we would need
+ * this class to multiplex the events.
+ * TODO: The widgets for connection can be provided by this interface.
  */
 class Controller
 {
@@ -47,21 +51,39 @@ public:
      * @param port Port of the host to connect.
      * @return True if connection is successful.
      */
-    bool connect( const std::string &hostname, const uint16_t port );
+    bool connect( const std::string& hostname,
+                  uint16_t port );
 
     /**
-     * @param uri Publisher uri
-     * @return If there is no publisher with the given uri a new publisher is
-     * registered and returned, if there is registered publisher is returned.
+     * @param uri Publisher uri. If there is no publisher with the given uri
+     * a new publisher is registered and returned, if there is registered
+     * publisher is returned.
+     * @param event the serialized event to publish
+     * @return true if publish was successful
      */
-    zeq::Publisher* getPublisher( const servus::URI& uri );
+    bool publish( const servus::URI& uri,
+                  const zeq::Event& event );
 
     /**
-     * @param uri Subscriber uri
-     * @return If there is no subscriber with the given uri a new subscriber is
-     * registered and returned, if there is registered subscriber is returned.
+     * @param uri Subscriber uri. If there is no subscriber with the
+     * given uri a new subscriber is registered, if there is registered
+     * it will be used.
+     * @param event the event type of interest
+     * @param func the callback function on receive of event
+     * @return true if callback could be registered
+     *
      */
-    zeq::Subscriber* getSubscriber( const servus::URI& uri );
+    bool registerHandler( const servus::URI& uri,
+                          const servus::uint128_t& event,
+                          const zeq::EventFunc& func );
+
+    /**
+     * @param uri Subscriber uri.
+     * @param event the event type of interest
+     * @return true if callback could be deregistered
+     */
+    bool deregisterHandler( const servus::URI& uri,
+                            const servus::uint128_t& event );
 
 #ifdef LIVRE_USE_ISC
     /**

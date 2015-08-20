@@ -102,15 +102,36 @@ struct Controller::Impl
         return map[ uriStr ];
     }
 
+    zeq::Subscriber* getSubscriber( const servus::URI& uri )
+    {
+        return getObject<zeq::Subscriber>( _subscriberMap, uri );
+    }
+
+    bool registerHandler( const servus::URI& uri,
+                          const servus::uint128_t& event,
+                          const zeq::EventFunc& func )
+    {
+        ScopedLock lock( _subscriberMutex );
+        zeq::Subscriber* subscriber = getSubscriber( uri );
+        return subscriber->registerHandler( event, func );
+    }
+
+    bool deregisterHandler( const servus::URI& uri,
+                            const servus::uint128_t& event )
+    {
+        ScopedLock lock( _subscriberMutex );
+        zeq::Subscriber* subscriber = getSubscriber( uri );
+        return subscriber->deregisterHandler( event );
+    }
+
     zeq::Publisher* getPublisher( const servus::URI& uri )
     {
         return getObject<zeq::Publisher>( _publisherMap, uri );
     }
 
-    zeq::Subscriber* getSubscriber( const servus::URI& uri )
+    bool publish( const servus::URI& uri, const zeq::Event& event )
     {
-        ScopedLock lock( _subscriberMutex );
-        return getObject<zeq::Subscriber>( _subscriberMap, uri );
+        return getPublisher( uri )->publish( event );
     }
 
 #ifdef LIVRE_USE_ISC
@@ -122,6 +143,10 @@ struct Controller::Impl
 
     void pollSubscribers()
     {
+        /* Polling can be done through the QTimer object ( will simplify
+           locking issues ), which is part of the main loop, but this class
+           has no Qt dependency, currently we are using regular threads.
+        */
         while( _continuePolling )
         {
             ScopedLock lock( _subscriberMutex );
@@ -159,14 +184,23 @@ bool Controller::connect( const std::string& hostname,
     return _impl->connect( hostname, port );
 }
 
-zeq::Publisher* Controller::getPublisher( const servus::URI& uri )
+bool Controller::publish( const servus::URI& uri,
+                          const zeq::Event& event )
 {
-    return _impl->getPublisher( uri );
+    return _impl->publish( uri, event );
 }
 
-zeq::Subscriber* Controller::getSubscriber( const servus::URI& uri )
+bool Controller::registerHandler( const servus::URI& uri,
+                                  const uint128_t& event,
+                                  const zeq::EventFunc& func )
 {
-    return _impl->getSubscriber( uri );
+     return _impl->registerHandler( uri, event, func );
+}
+
+bool Controller::deregisterHandler( const servus::URI& uri,
+                                    const servus::uint128_t& event )
+{
+    return _impl->deregisterHandler( uri, event );
 }
 
 #ifdef LIVRE_USE_ISC

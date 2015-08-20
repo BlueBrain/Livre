@@ -97,7 +97,7 @@ public:
      * @param xPosition Position of the mouse cursor on the x-axis.
      * @return An uint containing RGBA 8-bits values.
      */
-    uint getColorAtPoint(const int xPosition );
+    uint32_t getColorAtPoint(const int xPosition );
 
     /**
      * Return curve's values.

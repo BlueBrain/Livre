@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, EPFL/Blue Brain Project
+﻿/* Copyright (c) 2015, EPFL/Blue Brain Project
  *                     Marwan Abdellah <marwan.abdellah@epfl.ch>
  *                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
@@ -29,12 +29,8 @@ ColorMapWidget::ColorMapWidget( const ShadeType type, QWidget* colorMapParentWid
     , _shadeType( type )
 {
     // Add checkers background for the alpha widget.
-    if ( _shadeType == ARGB_SHADE )
-    {
-        _createCheckersBackground();
-    }
-    else
-        setAttribute( Qt::WA_NoBackground );
+    _shadeType == ARGB_SHADE ? _createCheckersBackground()
+                             : setAttribute( Qt::WA_NoBackground );
 
     QPolygonF points;
     points << QPointF( 0, sizeHint().height())
@@ -56,7 +52,7 @@ QPolygonF ColorMapWidget::getPoints() const
     return _hoverPoints->points();
 }
 
-uint ColorMapWidget::getColorAtPoint( const int xPosition )
+uint32_t ColorMapWidget::getColorAtPoint( const int xPosition )
 {
     _generateShade();
 
@@ -76,7 +72,7 @@ uint ColorMapWidget::getColorAtPoint( const int xPosition )
                                               qreal( _shade.height() - 1 ))));
         }
     }
-    return (uint) 0;
+    return 0u;
 }
 
 UInt8Vector ColorMapWidget::getCurve()
@@ -137,7 +133,6 @@ void ColorMapWidget::_generateShade()
 {
     if( _shade.isNull() || _shade.size() != size() )
     {
-
         // Alpha widget
         if( _shadeType == ARGB_SHADE )
         {
