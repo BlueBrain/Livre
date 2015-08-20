@@ -48,7 +48,7 @@ struct StimuliController::Impl
           Controller& controller,
           Ui_stimuliController& ui )
         : _simulator( 0 )
-        , _subscriber( 0 )
+        , _isRegistered( false )
         , _ui( ui )
         , _stimuliController( stimuliController )
         , _controller( controller )
@@ -167,11 +167,11 @@ struct StimuliController::Impl
     {
         const QString& uriStr = _ui.txtHBPURL->text();
         const servus::URI uri( uriStr.toStdString( ));
-
-        _subscriber = _controller.getSubscriber( uri );
-        _subscriber->registerHandler( zeq::hbp::EVENT_SELECTEDIDS,
-                                      boost::bind( &StimuliController::Impl::onSelection,
-                                                 this, _1 ));
+        _isRegistered = _controller.registerHandler(
+                                 uri,
+                                 zeq::hbp::EVENT_SELECTEDIDS,
+                                 boost::bind( &StimuliController::Impl::onSelection,
+                                            this, _1 ));
     }
 
     void connectHBP()
@@ -187,14 +187,18 @@ struct StimuliController::Impl
             _ui.btnConnectHBP->setEnabled( true );
             _ui.btnDisconnectHBP->setEnabled( false );
             LBERROR << "Error:" << error.what() << std::endl;
-            _subscriber = 0;
+            _isRegistered = false;
         }
     }
 
     void disconnectHBP()
     {
-        _subscriber->deregisterHandler( zeq::hbp::EVENT_SELECTEDIDS );
-        _subscriber = 0;
+        const QString& uriStr = _ui.txtHBPURL->text();
+        const servus::URI uri( uriStr.toStdString( ));
+         _isRegistered = _controller.deregisterHandler(
+                                          uri,
+                                          zeq::hbp::EVENT_SELECTEDIDS );
+        _isRegistered = false;
         _ui.btnConnectHBP->setEnabled( true );
         _ui.btnDisconnectHBP->setEnabled( false );
     }
@@ -214,7 +218,7 @@ struct StimuliController::Impl
 public:
 
     isc::Simulator* _simulator;
-    zeq::Subscriber* _subscriber;
+    bool _isRegistered;
     Ui_stimuliController& _ui;
     StimuliController* _stimuliController;
     Controller& _controller;

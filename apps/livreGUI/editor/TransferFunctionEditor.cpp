@@ -35,7 +35,7 @@ TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller, Q
     : QWidget( tfParentWidget )
     , _controller( controller )
     , ui( new Ui::TransferFunctionEditor )
-    , _publisher( 0 )
+    , _isConnected( false )
     , _redWidget( new ColorMapWidget( ColorMapWidget::RED_SHADE, this ))
     , _greenWidget( new ColorMapWidget( ColorMapWidget::GREEN_SHADE, this ))
     , _blueWidget( new ColorMapWidget( ColorMapWidget::BLUE_SHADE, this ))
@@ -117,7 +117,7 @@ void TransferFunctionEditor::_pointsUpdated()
         stops << QGradientStop( xPoint / alphaWidgetWidth, color );
     }
 
-    _publishTransfertFunction();
+    _publishTransferFunction();
 
     _alphaWidget->setGradientStops( stops );
     _gradientRenderer->setGradientStops( stops );
@@ -174,17 +174,23 @@ void TransferFunctionEditor::_setDefault()
     _pointsUpdated();
 }
 
-void TransferFunctionEditor::_publishTransfertFunction()
+void TransferFunctionEditor::_publishTransferFunction()
 {
     UInt8Vector redCurve =  _redWidget->getCurve();
     UInt8Vector greenCurve =  _greenWidget->getCurve();
     UInt8Vector blueCurve =  _blueWidget->getCurve();
     UInt8Vector alphaCurve =  _alphaWidget->getCurve();
 
-    if( redCurve.empty() || greenCurve.empty() || blueCurve.empty() || alphaCurve.empty())
+    if( redCurve.empty()
+            || greenCurve.empty()
+            || blueCurve.empty()
+            || alphaCurve.empty())
+    {
         return;
+    }
 
     UInt8Vector transferFunction;
+    transferFunction.reserve( redCurve.size( ));
     for( uint32_t i = 0; i < redCurve.size(); ++i )
     {
         transferFunction.push_back( redCurve[i] );
@@ -192,8 +198,12 @@ void TransferFunctionEditor::_publishTransfertFunction()
         transferFunction.push_back( blueCurve[i] );
         transferFunction.push_back( alphaCurve[i] );
     }
-    if(( transferFunction.size() == 1024 ) && ( _publisher ))
-        _publisher->publish( zeq::hbp::serializeLookupTable1D( transferFunction ));
+    if( _isConnected && transferFunction.size() == 1024 )
+    {
+        const servus::URI uri( ui->txtURL->text().toStdString());
+        _controller.publish( uri,
+                             zeq::hbp::serializeLookupTable1D( transferFunction ));
+    }
 }
 
 void TransferFunctionEditor::_clear()
@@ -214,20 +224,20 @@ void TransferFunctionEditor::_connect()
     {
         ui->btnConnect->setEnabled( false );
         ui->btnDisconnect->setEnabled( true );
-        _publisher =  _controller.getPublisher( servus::URI( ui->txtURL->text().toStdString()));
+        _isConnected = true;
     }
     catch( const std::exception& error )
     {
         ui->btnConnect->setEnabled( true );
         ui->btnDisconnect->setEnabled( false );
         LBERROR << "Error:" << error.what() << std::endl;
-        _publisher = 0;
+        _isConnected = false;
     }
 }
 
 void TransferFunctionEditor::_disconnect()
 {
-    _publisher = 0;
+    _isConnected = false;
     ui->btnConnect->setEnabled( true );
     ui->btnDisconnect->setEnabled( false );
 }

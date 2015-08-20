@@ -36,9 +36,7 @@ void GradientRenderer::setGradientStops( const QGradientStops &stops )
     _gradient = QLinearGradient( 0.0f, 0.0f, width(), 0.0f );
 
     for ( int i = 0; i < stops.size(); ++i )
-    {
         _gradient.setColorAt( stops.at( i ).first, stops.at( i ).second );
-    }
 
     _shade = QImage();
     _generateShade();
@@ -60,7 +58,6 @@ void GradientRenderer::_generateShade()
 {
     if ( _shade.isNull() || _shade.size() != size())
     {
-
         _shade = QImage( size(), QImage::Format_ARGB32_Premultiplied );
         _shade.fill( 0 );
 
