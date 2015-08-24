@@ -22,8 +22,8 @@
 #define _TransferFunctionEditor_h_
 
 #include <QMainWindow>
-#include <livreGUI/editor/ColorMapWidget.h>
-#include <livreGUI/editor/GradientRenderer.h>
+#include <livreGUI/tfEditor/ColorMapWidget.h>
+#include <livreGUI/tfEditor/GradientRenderer.h>
 #include <QResizeEvent>
 #include <livreGUI/Controller.h>
 

@@ -20,7 +20,7 @@
  */
 
 #include <livreGUI/AppSettings.h>
-#include <livreGUI/editor/TransferFunctionEditor.h>
+#include <livreGUI/tfEditor/TransferFunctionEditor.h>
 #include <livreGUI/Controller.h>
 
 #ifdef LIVRE_USE_ISC

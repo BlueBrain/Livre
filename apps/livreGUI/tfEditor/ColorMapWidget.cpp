@@ -18,8 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livreGUI/editor/ColorMapWidget.h>
-#include <livreGUI/editor/HoverPoints.h>
+#include <livreGUI/tfEditor/ColorMapWidget.h>
+#include <livreGUI/tfEditor/HoverPoints.h>
 
 namespace livre
 {
@@ -52,7 +52,7 @@ QPolygonF ColorMapWidget::getPoints() const
     return _hoverPoints->points();
 }
 
-uint32_t ColorMapWidget::getColorAtPoint( const int xPosition )
+uint32_t ColorMapWidget::getColorAtPoint( const int32_t xPosition )
 {
     _generateShade();
 
@@ -75,7 +75,7 @@ uint32_t ColorMapWidget::getColorAtPoint( const int xPosition )
     return 0u;
 }
 
-UInt8Vector ColorMapWidget::getCurve()
+UInt8Vector ColorMapWidget::getCurve() const
 {
     UInt8Vector curve;
 

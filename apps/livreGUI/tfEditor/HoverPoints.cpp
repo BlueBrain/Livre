@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livreGUI/editor/HoverPoints.h>
+#include <livreGUI/tfEditor/HoverPoints.h>
 
 namespace livre
 {

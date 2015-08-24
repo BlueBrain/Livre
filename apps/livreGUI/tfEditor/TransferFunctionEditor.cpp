@@ -18,10 +18,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livreGUI/editor/TransferFunctionEditor.h>
+#include <livreGUI/tfEditor/TransferFunctionEditor.h>
 #include <livreGUI/ui_TransferFunctionEditor.h>
-#include <livreGUI/editor/Utilities.h>
-#include <livreGUI/editor/HoverPoints.h>
+#include <livreGUI/tfEditor/Utilities.h>
+#include <livreGUI/tfEditor/HoverPoints.h>
 
 #include <zeq/event.h>
 #include <zeq/hbp/vocabulary.h>
@@ -31,7 +31,8 @@
 namespace livre
 {
 
-TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller, QWidget* tfParentWidget )
+TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
+                                                QWidget* tfParentWidget )
     : QWidget( tfParentWidget )
     , _controller( controller )
     , ui( new Ui::TransferFunctionEditor )
@@ -176,10 +177,10 @@ void TransferFunctionEditor::_setDefault()
 
 void TransferFunctionEditor::_publishTransferFunction()
 {
-    UInt8Vector redCurve =  _redWidget->getCurve();
-    UInt8Vector greenCurve =  _greenWidget->getCurve();
-    UInt8Vector blueCurve =  _blueWidget->getCurve();
-    UInt8Vector alphaCurve =  _alphaWidget->getCurve();
+    const UInt8Vector& redCurve =  _redWidget->getCurve();
+    const UInt8Vector& greenCurve =  _greenWidget->getCurve();
+    const UInt8Vector& blueCurve =  _blueWidget->getCurve();
+    const UInt8Vector& alphaCurve =  _alphaWidget->getCurve();
 
     if( redCurve.empty()
             || greenCurve.empty()
@@ -190,7 +191,7 @@ void TransferFunctionEditor::_publishTransferFunction()
     }
 
     UInt8Vector transferFunction;
-    transferFunction.reserve( redCurve.size( ));
+    transferFunction.reserve( redCurve.size( ) * 4u );
     for( uint32_t i = 0; i < redCurve.size(); ++i )
     {
         transferFunction.push_back( redCurve[i] );
@@ -198,6 +199,7 @@ void TransferFunctionEditor::_publishTransferFunction()
         transferFunction.push_back( blueCurve[i] );
         transferFunction.push_back( alphaCurve[i] );
     }
+
     if( _isConnected && transferFunction.size() == 1024 )
     {
         const servus::URI uri( ui->txtURL->text().toStdString());

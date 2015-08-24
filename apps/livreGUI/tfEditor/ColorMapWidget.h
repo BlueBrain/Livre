@@ -21,7 +21,7 @@
 #ifndef _ColorMapWidget_h_
 #define _ColorMapWidget_h_
 
-#include <livreGUI/editor/TFWidget.h>
+#include <livreGUI/tfEditor/TFWidget.h>
 #include <livre/core/types.h>
 
 namespace livre
@@ -97,13 +97,13 @@ public:
      * @param xPosition Position of the mouse cursor on the x-axis.
      * @return An uint containing RGBA 8-bits values.
      */
-    uint32_t getColorAtPoint(const int xPosition );
+    uint32_t getColorAtPoint( int32_t xPosition );
 
     /**
      * Return curve's values.
      * @return A vector of 8-bits uints with the curve values.
      */
-    UInt8Vector getCurve();
+    UInt8Vector getCurve() const;
 
 signals:
 

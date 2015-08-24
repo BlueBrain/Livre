@@ -37,22 +37,12 @@ class GaussGraphCore;
 class MainWindow;
 class RampGraphCore;
 class RecentFiles;
-class TransferFunctionEditor;
-class TransferFunctionGraph;
-class TransferFunctionGraphCore;
 
 /**
  * SmartPtr definitions
  */
 typedef boost::shared_ptr< ConnectDialog > ConnectDialogPtr;
 typedef boost::shared_ptr< Controller > ControllerPtr;
-typedef boost::shared_ptr< TransferFunctionGraph > TransferFunctionGraphPtr;
-typedef boost::shared_ptr< AnchorGraphCore > AnchorGraphCorePtr;
-typedef boost::shared_ptr< const AnchorGraphCore > ConstAnchorGraphCorePtr;
-typedef boost::shared_ptr< GaussGraphCore > GaussGraphCorePtr;
-typedef boost::shared_ptr< const GaussGraphCore > ConstGaussGraphCorePtr;
-typedef boost::shared_ptr< TransferFunctionGraphCore > GraphCorePtr;
-typedef boost::shared_ptr< const TransferFunctionGraphCore > ConstGraphCorePtr;
 
 typedef std::vector< std::string > Strings;
 typedef std::pair< std::string, QVariant > Property;
