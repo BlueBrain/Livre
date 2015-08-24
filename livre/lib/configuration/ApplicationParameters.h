@@ -42,6 +42,7 @@ struct ApplicationParameters : public ClientParameters
     int32_t animation; //!< animation forward/backward speed
     bool isResident; //!< Is the main app resident.
     bool syncCamera; //!< Synchronize camera with other applications using ZEQ.
+    std::string zeqSchema; //!< ZEQ schema for connections.
 
     /** @param parameters The source parameters. */
     LIVRE_API ApplicationParameters& operator=( const ApplicationParameters& parameters );

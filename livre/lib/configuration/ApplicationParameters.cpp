@@ -44,6 +44,7 @@ const std::string NUMFRAMES_PARAM = "num-frames";
 const std::string CAMERAPOS_PARAM = "camera-position";
 const std::string CAMERALOOKAT_PARAM = "camera-lookat";
 const std::string SYNC_CAMERA_PARAM = "sync-camera";
+const std::string ZEQSCHEMA_PARAM = "zeq-schema";
 
 ApplicationParameters::ApplicationParameters()
     : cameraPosition( 0, 0, 1 )
@@ -53,6 +54,7 @@ ApplicationParameters::ApplicationParameters()
     , animation( 0 )
     , isResident( false )
     , syncCamera( false )
+    , zeqSchema( "hbp://" )
 {
     configuration_.addDescription( configGroupName_, ANIMATION_PARAM,
                                    "Enable animation mode (optional frame delta for animation speed, use --animation=-<int> for reverse animation)", animation, 1 );
@@ -64,9 +66,14 @@ ApplicationParameters::ApplicationParameters()
                                    "Camera position", cameraPosition );
     configuration_.addDescription( configGroupName_, CAMERALOOKAT_PARAM,
                                    "Camera orientation", cameraLookAt );
+#ifdef LIVRE_USE_ZEQ
     configuration_.addDescription( configGroupName_, SYNC_CAMERA_PARAM,
                                    "Synchronize camera with other applications",
                                    syncCamera );
+    configuration_.addDescription( configGroupName_, ZEQSCHEMA_PARAM,
+                                   "Zeq schema",
+                                   zeqSchema );
+#endif
 }
 
 ApplicationParameters& ApplicationParameters::operator = (
@@ -83,6 +90,7 @@ ApplicationParameters& ApplicationParameters::operator = (
     animation = parameters.animation;
     isResident = parameters.isResident;
     syncCamera = parameters.syncCamera;
+    zeqSchema = parameters.zeqSchema;
 
     return *this;
 }
@@ -95,7 +103,10 @@ void ApplicationParameters::initialize_()
     configuration_.getValue( NUMFRAMES_PARAM, maxFrames );
     configuration_.getValue( CAMERAPOS_PARAM, cameraPosition );
     configuration_.getValue( CAMERALOOKAT_PARAM, cameraLookAt );
+#ifdef LIVRE_USE_ZEQ
     configuration_.getValue( SYNC_CAMERA_PARAM, syncCamera );
+    configuration_.getValue( ZEQSCHEMA_PARAM, zeqSchema );
+#endif
 }
 
 }
