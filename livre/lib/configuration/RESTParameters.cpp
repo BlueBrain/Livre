@@ -24,7 +24,7 @@ namespace livre
 
 const std::string HOSTNAME_PARAM = "rest-host";
 const std::string PORT_PARAM = "rest-port";
-const std::string ZEQSCHEMA_PARAM = "zeq-schema";
+const std::string ZEQSCHEMA_PARAM = "rest-zeq-schema";
 const std::string USEREST_PARAM = "use-rest";
 
 RESTParameters::RESTParameters()

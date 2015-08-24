@@ -51,13 +51,13 @@ class Communicator::Impl
 {
 public:
     explicit Impl( Config& config )
-        : _publisher( servus::URI( "hbp://" ))
-        , _vwsPublisher()
+        : _vwsPublisher()
         , _config( config )
     {
         if( !servus::Servus::isAvailable( ))
             return;
 
+        _setupPublisher();
         _setupRequests();
         _setupRESTBridge();
         _setupSubscribers();
@@ -66,7 +66,7 @@ public:
     void publishModelView( const Matrix4f& modelView )
     {
         const FloatVector matrix( modelView.begin(), modelView.end( ));
-        _publisher.publish( ::zeq::hbp::serializeCamera( matrix ));
+        _publisher->publish( ::zeq::hbp::serializeCamera( matrix ));
     }
 
     void publishCamera()
@@ -99,7 +99,7 @@ public:
                                             frameSettings->getFrameNumber(),
                                             params.frames.y(),
                                             params.animation ));
-        _publisher.publish( frame );
+        _publisher->publish( frame );
         _vwsPublisher->publish( frame );
     }
 
@@ -229,6 +229,14 @@ public:
     }
 
 private:
+
+    void _setupPublisher()
+    {
+        const auto& params = _config.getApplicationParameters();
+        const servus::URI zeqSchema( params.zeqSchema );
+        _publisher.reset( new ::zeq::Publisher( zeqSchema ));
+    }
+
     void _setupRequests()
     {
         _requests[::zeq::hbp::EVENT_CAMERA] =
@@ -308,7 +316,7 @@ private:
     typedef std::vector< SubscriberPtr > Subscribers;
 
     Subscribers subscribers;
-    ::zeq::Publisher _publisher;
+    PublisherPtr _publisher;
     lunchbox::Clock _heartbeatClock;
     PublisherPtr _vwsPublisher;
     typedef std::function< void() > RequestFunc;
