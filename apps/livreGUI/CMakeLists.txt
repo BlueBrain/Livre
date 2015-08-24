@@ -16,31 +16,31 @@ set(LIVREGUI_HEADERS
   types.h
   AppSettings.h
   Controller.h
-  editor/ColorMapWidget.h
-  editor/GradientRenderer.h
-  editor/HoverPoints.h
-  editor/TFWidget.h
-  editor/TransferFunctionEditor.h
-  editor/Utilities.h)
+  tfEditor/ColorMapWidget.h
+  tfEditor/GradientRenderer.h
+  tfEditor/HoverPoints.h
+  tfEditor/TFWidget.h
+  tfEditor/TransferFunctionEditor.h
+  tfEditor/Utilities.h)
 
 set(LIVREGUI_MOC_HEADERS
-  editor/ColorMapWidget.h
-  editor/GradientRenderer.h
-  editor/HoverPoints.h
-  editor/TFWidget.h
-  editor/TransferFunctionEditor.h)
+  tfEditor/ColorMapWidget.h
+  tfEditor/GradientRenderer.h
+  tfEditor/HoverPoints.h
+  tfEditor/TFWidget.h
+  tfEditor/TransferFunctionEditor.h)
 
 set(LIVREGUI_SOURCES
   Controller.cpp
   livreGUI.cpp
-  editor/ColorMapWidget.cpp
-  editor/GradientRenderer.cpp
-  editor/HoverPoints.cpp
-  editor/TFWidget.cpp
-  editor/TransferFunctionEditor.cpp)
+  tfEditor/ColorMapWidget.cpp
+  tfEditor/GradientRenderer.cpp
+  tfEditor/HoverPoints.cpp
+  tfEditor/TFWidget.cpp
+  tfEditor/TransferFunctionEditor.cpp)
 
 set(LIVREGUI_RESOURCES resources/resources.qrc)
-set(LIVREGUI_UI_FORMS editor/gui/TransferFunctionEditor.ui)
+set(LIVREGUI_UI_FORMS tfEditor/gui/TransferFunctionEditor.ui)
 
 set(LIVREGUI_LINK_LIBRARIES LivreCore LivreEq Qt5::Widgets zeq zeqHBP)
 

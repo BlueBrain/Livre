@@ -21,7 +21,7 @@
 #ifndef _GradientRenderer_h_
 #define _GradientRenderer_h_
 
-#include <livreGUI/editor/TFWidget.h>
+#include <livreGUI/tfEditor/TFWidget.h>
 
 namespace livre
 {

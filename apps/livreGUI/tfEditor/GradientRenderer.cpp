@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livreGUI/editor/GradientRenderer.h>
+#include <livreGUI/tfEditor/GradientRenderer.h>
 
 #include <QtWidgets>
 
