@@ -150,19 +150,14 @@ bool DataUploadProcessor::initializeThreadRun_()
     setName( "DataUp" );
     LBASSERT( getGLContext( ));
     _shareContext->shareContext( getGLContext( ));
+    VolumeDataSourcePtr dataSource = _textureDataCache.getDataSource();
+    dataSource->initializeGL();
     return DashProcessor::initializeThreadRun_();
 }
 
 void DataUploadProcessor::runLoop_()
 {
     LBASSERT( getGLContext( ));
-    if( GLContext::getCurrent() != getGLContext().get( ))
-    {
-        getGLContext()->makeCurrent();
-
-        VolumeDataSourcePtr dataSource = _textureDataCache.getDataSource();
-        dataSource->initializeGL();
-    }
 
     processorInputPtr_->applyAll( CONNECTION_ID );
 
