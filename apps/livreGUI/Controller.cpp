@@ -149,8 +149,12 @@ struct Controller::Impl
         */
         while( _continuePolling )
         {
-            ScopedLock lock( _subscriberMutex );
-            BOOST_FOREACH( const URISubscriberPair& pair, _subscriberMap )
+            SubscriberMap subscribers;
+            {
+                ScopedLock lock( _subscriberMutex );
+                subscribers = _subscriberMap;
+            }
+            BOOST_FOREACH( const URISubscriberPair& pair, subscribers )
             {
                 zeq::Subscriber* subscriber = pair.second;
                 subscriber->receive( 100 );

@@ -62,6 +62,7 @@ public:
 
 signals:
     void gradientStopsChanged( const QGradientStops& stops );
+    void transferFunctionChanged( UInt8Vector tf );
 
 private Q_SLOTS:
 
@@ -70,14 +71,20 @@ private Q_SLOTS:
     void _pointsUpdated();
     void _connect();
     void _disconnect();
+    void _onTransferFunctionChanged( UInt8Vector tf );
 
 private:
 
     void _publishTransferFunction();
+    bool _requestTransferFunction();
+    void _receiveTransferFunction( const zeq::Event& event );
+    void _onHeartbeat();
+    void _enableWidget( bool enable );
 
     livre::Controller& _controller;
     Ui::TransferFunctionEditor *ui;
-    bool _isConnected;
+    lunchbox::Monitorb _isConnected;
+    bool _tfReceived;
     ColorMapWidget* _redWidget;
     ColorMapWidget* _greenWidget;
     ColorMapWidget* _blueWidget;
