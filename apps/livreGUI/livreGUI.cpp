@@ -20,6 +20,7 @@
  */
 
 #include <livreGUI/AppSettings.h>
+#include <livreGUI/animationController/AnimationController.h>
 #include <livreGUI/tfEditor/TransferFunctionEditor.h>
 #include <livreGUI/Controller.h>
 
@@ -53,6 +54,9 @@ int main( int argc, char *argv[] )
     tabWidget->addTab( new livre::StimuliController(controller),
                        "Simulation Controller" );
 #endif
+
+    tabWidget->addTab( new livre::AnimationController(controller),
+                       "Animation Controller");
 
     QMainWindow window;
     window.setCentralWidget( tabWidget );

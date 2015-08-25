@@ -364,6 +364,11 @@ void Communicator::publishExit()
     _impl->publishExit();
 }
 
+void Communicator::publishFrame()
+{
+    _impl->publishFrame();
+}
+
 void Communicator::handleEvents()
 {
     _impl->handleEvents();

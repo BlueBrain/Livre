@@ -57,6 +57,8 @@ public:
     /** Publish EVENT_EXIT on the REST schema. */
     void publishExit();
 
+    void publishFrame();
+
     /** Non-blocking receive & handle of all pending events. */
     void handleEvents();
 

@@ -211,6 +211,7 @@ uint32_t Config::frame()
     frameSettings->setFrameNumber( frameNumber );
 
     _impl->redraw = false;
+    _impl->communicator->publishFrame();
     eq::Config::startFrame( version );
     return eq::Config::finishFrame();
 }

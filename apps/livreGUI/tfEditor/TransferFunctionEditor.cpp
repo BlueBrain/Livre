@@ -220,10 +220,7 @@ bool TransferFunctionEditor::_requestTransferFunction()
 {
     const QString& uriStr = ui->txtURL->text();
     const servus::URI uri( uriStr.toStdString( ));
-    _controller.registerHandler( uri,
-                                 zeq::vocabulary::EVENT_EXIT,
-                                 boost::bind( &TransferFunctionEditor::_disconnect,
-                                              this ));
+
     _controller.registerHandler( uri,
                                  zeq::hbp::EVENT_LOOKUPTABLE1D,
                                  boost::bind( &TransferFunctionEditor::_receiveTransferFunction,
@@ -242,6 +239,10 @@ void TransferFunctionEditor::_receiveTransferFunction( const zeq::Event& tfEvent
     if( !_tfReceived )
         emit transferFunctionChanged( zeq::hbp::deserializeLookupTable1D( tfEvent ));
     _tfReceived = true;
+    _controller.deregisterHandler( servus::URI( ui->txtURL->text().toStdString()),
+                                   zeq::vocabulary::EVENT_HEARTBEAT,
+                                   boost::bind( &TransferFunctionEditor::_onHeartbeat,
+                                   this ));
 }
 
 void TransferFunctionEditor::_onHeartbeat()
