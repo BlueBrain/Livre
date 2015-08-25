@@ -37,12 +37,15 @@ TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
     , _controller( controller )
     , ui( new Ui::TransferFunctionEditor )
     , _isConnected( false )
+    , _tfReceived( false )
     , _redWidget( new ColorMapWidget( ColorMapWidget::RED_SHADE, this ))
     , _greenWidget( new ColorMapWidget( ColorMapWidget::GREEN_SHADE, this ))
     , _blueWidget( new ColorMapWidget( ColorMapWidget::BLUE_SHADE, this ))
     , _alphaWidget( new ColorMapWidget( ColorMapWidget::ARGB_SHADE, this ))
     , _gradientRenderer( new GradientRenderer( this ))
 {
+    qRegisterMetaType< UInt8Vector >("UInt8Vector");
+
     ui->setupUi( this );
 
     // Add the widgets to the layouts to match the exact positions on the TransferFunctionEditor.
@@ -65,6 +68,9 @@ TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
     connect( ui->clearButton, SIGNAL( clicked()), this, SLOT( _clear()));
     connect( ui->btnConnect, SIGNAL( pressed()), this, SLOT( _connect( )));
     connect( ui->btnDisconnect, SIGNAL( pressed()), this, SLOT( _disconnect()));
+
+    connect( this, &TransferFunctionEditor::transferFunctionChanged,
+             this, &TransferFunctionEditor::_onTransferFunctionChanged );
 
     QTimer::singleShot( 50, this, SLOT( _setDefault()));
 }
@@ -208,6 +214,47 @@ void TransferFunctionEditor::_publishTransferFunction()
     }
 }
 
+bool TransferFunctionEditor::_requestTransferFunction()
+{
+    const QString& uriStr = ui->txtURL->text();
+    const servus::URI uri( uriStr.toStdString( ));
+    _controller.registerHandler( uri,
+                                 zeq::vocabulary::EVENT_EXIT,
+                                 boost::bind( &TransferFunctionEditor::_disconnect,
+                                              this ));
+    _controller.registerHandler( uri,
+                                 zeq::hbp::EVENT_LOOKUPTABLE1D,
+                                 boost::bind( &TransferFunctionEditor::_receiveTransferFunction,
+                                              this, _1 ));
+    _controller.registerHandler( uri,
+                                 zeq::vocabulary::EVENT_HEARTBEAT,
+                                 boost::bind( &TransferFunctionEditor::_onHeartbeat,
+                                              this ));
+
+    _isConnected.timedWaitEQ( true, 2000 /*ms*/ );
+    return _isConnected;
+}
+
+void TransferFunctionEditor::_receiveTransferFunction( const zeq::Event& tfEvent )
+{
+    if( !_tfReceived )
+        emit transferFunctionChanged( zeq::hbp::deserializeLookupTable1D( tfEvent ));
+    _tfReceived = true;
+}
+
+void TransferFunctionEditor::_onHeartbeat()
+{
+    if( !_tfReceived )
+    {
+        const QString& uriStr = ui->txtURL->text();
+        const servus::URI uri( uriStr.toStdString( ));
+        const zeq::Event& zeqEvent =
+            zeq::vocabulary::serializeRequest( zeq::hbp::EVENT_LOOKUPTABLE1D );
+        _controller.publish( uri, zeqEvent );
+    }
+    _isConnected = true;
+}
+
 void TransferFunctionEditor::_clear()
 {
     QGradientStops stops;
@@ -220,13 +267,102 @@ void TransferFunctionEditor::_clear()
     _pointsUpdated();
 }
 
+namespace
+{
+QPolygon _filterPoints( const QPolygon& points )
+{
+    QPolygon filteredPoints;
+    float prevSlope = 0;
+    QPoint prevPoint = points.first();
+    for( int i = 1; i < points.size() - 1; ++i )
+    {
+        const QPoint& currentPoint = points[i];
+        const QLine currentLine( prevPoint, currentPoint );
+        const float currentSlope = float(currentLine.dy()) / float(currentLine.dx());
+
+        bool change = std::abs(prevSlope - currentSlope) > std::numeric_limits<float>::epsilon();
+        if( change )
+        {
+            const QLine nextLine( currentPoint, points[i+1] );
+            const float nextSlope = float(nextLine.dy()) / float(nextLine.dx());
+            if( std::abs(prevSlope - nextSlope) <= std::numeric_limits<float>::epsilon() )
+                change = false;
+        }
+
+        if( change || i == 1 )
+        {
+            prevSlope = currentSlope;
+            filteredPoints << prevPoint;
+        }
+        prevPoint = points[i];
+    }
+    filteredPoints << points.last();
+    return filteredPoints;
+}
+
+QPolygonF _convertPoints( const QPolygon& points, const int width, const int height )
+{
+    QPolygonF convertedPoints;
+    for( int32_t i = 0; i < points.size(); ++i )
+    {
+        const int position = points.at( i ).x();
+        const int value = points.at( i ).y();
+
+        convertedPoints << QPointF( (position/255.f) * width,
+                             height - value * height / 255 );
+    }
+    qDebug() << convertedPoints;
+    return convertedPoints;
+}
+}
+
+void TransferFunctionEditor::_onTransferFunctionChanged( UInt8Vector tf )
+{
+    QGradientStops stops;
+    QPolygon redPoints, bluePoints, greenPoints, alphaPoints;
+    for( size_t i = 0; i < 256; ++i )
+    {
+        redPoints << QPoint(i, tf[i*4]);
+        greenPoints << QPoint(i, tf[i*4+1]);
+        bluePoints << QPoint(i, tf[i*4+2]);
+        alphaPoints << QPoint(i, tf[i*4+3]);
+        stops << QGradientStop( float(i) / 255.f , QColor( tf[i*4], tf[i*4+1], tf[i*4+2], tf[i*4+3]));
+    }
+
+    QPolygonF redPointsF = _convertPoints( _filterPoints( redPoints ),
+                                           _redWidget->width(),
+                                           _redWidget->height());
+    QPolygonF greenPointsF = _convertPoints( _filterPoints( greenPoints ),
+                                             _greenWidget->width(),
+                                             _greenWidget->height());
+    QPolygonF bluePointsF = _convertPoints( _filterPoints( bluePoints ),
+                                            _blueWidget->width(),
+                                            _blueWidget->height());
+    QPolygonF alphaPointsF = _convertPoints( _filterPoints( alphaPoints ),
+                                             _alphaWidget->width(),
+                                             _alphaWidget->height());
+
+    _redWidget->setPoints( redPointsF );
+    _greenWidget->setPoints( greenPointsF );
+    _blueWidget->setPoints( bluePointsF );
+    _alphaWidget->setPoints( alphaPointsF );
+    _gradientRenderer->setGradientStops( stops );
+
+    _enableWidget( true );
+}
+
 void TransferFunctionEditor::_connect()
 {
     try
     {
-        ui->btnConnect->setEnabled( false );
-        ui->btnDisconnect->setEnabled( true );
-        _isConnected = true;
+        _enableWidget( false );
+        if( _requestTransferFunction())
+        {
+            ui->btnConnect->setEnabled( false );
+            ui->btnDisconnect->setEnabled( true );
+        }
+        else
+            _enableWidget( true );
     }
     catch( const std::exception& error )
     {
@@ -239,9 +375,28 @@ void TransferFunctionEditor::_connect()
 
 void TransferFunctionEditor::_disconnect()
 {
+    const QString& uriStr = ui->txtURL->text();
+    const servus::URI uri( uriStr.toStdString( ));
+    _controller.deregisterHandler( uri,
+                                   zeq::vocabulary::EVENT_HEARTBEAT );
+    _controller.deregisterHandler( uri,
+                                   zeq::vocabulary::EVENT_EXIT );
+    _controller.deregisterHandler( uri,
+                                   zeq::hbp::EVENT_LOOKUPTABLE1D );
+
     _isConnected = false;
+    _tfReceived = false;
     ui->btnConnect->setEnabled( true );
     ui->btnDisconnect->setEnabled( false );
+}
+
+void TransferFunctionEditor::_enableWidget( bool enable )
+{
+    _redWidget->setEnabled( enable );
+    _greenWidget->setEnabled( enable );
+    _blueWidget->setEnabled( enable );
+    _alphaWidget->setEnabled( enable );
+    _gradientRenderer->setEnabled( enable );
 }
 
 }

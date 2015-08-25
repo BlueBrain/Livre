@@ -79,6 +79,7 @@ public:
 
     void publishExit()
     {
+        _publisher->publish( ::zeq::Event( ::zeq::vocabulary::EVENT_EXIT ));
         _vwsPublisher->publish( ::zeq::Event( ::zeq::vocabulary::EVENT_EXIT ));
     }
 
@@ -87,6 +88,7 @@ public:
         const auto& renderSettings = _config.getFrameData().getRenderSettings();
         const auto& lut = renderSettings->getTransferFunction().getData();
         _vwsPublisher->publish( ::zeq::hbp::serializeLookupTable1D( lut ));
+        _publisher->publish( ::zeq::hbp::serializeLookupTable1D( lut ) );
     }
 
     void publishFrame()
@@ -141,6 +143,8 @@ public:
         {
             _heartbeatClock.reset();
             _vwsPublisher->publish(
+                ::zeq::Event( ::zeq::vocabulary::EVENT_HEARTBEAT ));
+            _publisher->publish(
                 ::zeq::Event( ::zeq::vocabulary::EVENT_HEARTBEAT ));
         }
     }
@@ -309,6 +313,9 @@ private:
         subscriber->registerHandler( ::zeq::hbp::EVENT_FRAME,
                                      std::bind( &Impl::onFrame,
                                                  this, std::placeholders::_1 ));
+        subscriber->registerHandler( ::zeq::vocabulary::EVENT_REQUEST,
+                                     std::bind( &Impl::onRequest,
+                                                this, std::placeholders::_1 ));
     }
 
     typedef std::shared_ptr< ::zeq::Subscriber > SubscriberPtr;
