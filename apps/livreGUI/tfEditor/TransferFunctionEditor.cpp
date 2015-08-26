@@ -311,7 +311,6 @@ QPolygonF _convertPoints( const QPolygon& points, const int width, const int hei
         convertedPoints << QPointF( (position/255.f) * width,
                              height - value * height / 255 );
     }
-    qDebug() << convertedPoints;
     return convertedPoints;
 }
 }
