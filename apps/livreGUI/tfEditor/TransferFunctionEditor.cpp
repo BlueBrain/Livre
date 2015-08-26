@@ -66,6 +66,8 @@ TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
 
     connect( ui->resetButton, SIGNAL( clicked()), this, SLOT( _setDefault()));
     connect( ui->clearButton, SIGNAL( clicked()), this, SLOT( _clear()));
+    connect( ui->loadButton, SIGNAL( clicked()), this, SLOT( _load()));
+    connect( ui->saveButton, SIGNAL( clicked()), this, SLOT( _save()));
     connect( ui->btnConnect, SIGNAL( pressed()), this, SLOT( _connect( )));
     connect( ui->btnDisconnect, SIGNAL( pressed()), this, SLOT( _disconnect()));
 
@@ -265,6 +267,74 @@ void TransferFunctionEditor::_clear()
     setColorMapStops( stops );
     _gradientRenderer->setGradientStops( stops );
     _pointsUpdated();
+}
+
+const quint32 TF_FILE_HEADER = 0xdeadbeef;
+const quint32 TF_FILE_VERSION = 1;
+const QString TF_FILE_FILTER( "Transfer function files (*.tf)" );
+
+void TransferFunctionEditor::_load()
+{
+    const QString filename = QFileDialog::getOpenFileName( this, "Load transfer function",
+                                                           QString(),
+                                                           TF_FILE_FILTER );
+    if( filename.isEmpty( ))
+        return;
+
+    QFile file( filename );
+    file.open( QIODevice::ReadOnly );
+    QDataStream in( &file );
+
+    quint32 header;
+    in >> header;
+    if( header != TF_FILE_HEADER )
+        return;
+
+    quint32 version;
+    in >> version;
+    if( version != TF_FILE_VERSION )
+        return;
+
+    QPolygonF redPoints, greenPoints, bluePoints, alphaPoints;
+    QGradientStops gradientStops;
+    in >> redPoints
+       >> greenPoints
+       >> bluePoints
+       >> alphaPoints
+       >> gradientStops;
+
+    _redWidget->setPoints( redPoints );
+    _greenWidget->setPoints( greenPoints );
+    _blueWidget->setPoints( bluePoints );
+    _alphaWidget->setPoints( alphaPoints );
+    QLinearGradient gradient;
+    gradient.setStops( gradientStops );
+    _gradientRenderer->setGradient( gradient );
+    _pointsUpdated();
+}
+
+void TransferFunctionEditor::_save()
+{
+    QString filename = QFileDialog::getSaveFileName( this, "Save transfer function",
+                                                           QString(),
+                                                           TF_FILE_FILTER );
+    if( filename.isEmpty( ))
+        return;
+
+    if( !filename.endsWith( ".tf" ))
+        filename.append( ".tf" );
+
+    QFile file( filename );
+    file.open( QIODevice::WriteOnly );
+    QDataStream out( &file );
+    out.setVersion( QDataStream::Qt_5_0 );
+
+    out << TF_FILE_HEADER << TF_FILE_VERSION;
+    out << _redWidget->getPoints()
+        << _greenWidget->getPoints()
+        << _blueWidget->getPoints()
+        << _alphaWidget->getPoints()
+        << _gradientRenderer->getGradient().stops();
 }
 
 namespace

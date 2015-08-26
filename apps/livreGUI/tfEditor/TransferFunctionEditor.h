@@ -67,6 +67,8 @@ signals:
 private Q_SLOTS:
 
     void _clear();
+    void _load();
+    void _save();
     void _setDefault();
     void _pointsUpdated();
     void _connect();

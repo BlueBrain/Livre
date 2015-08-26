@@ -42,6 +42,9 @@ public:
      */
     TFWidget( QWidget* parent );
 
+    const QLinearGradient& getGradient() const { return _gradient; }
+    void setGradient( const QLinearGradient& gradient ) { _gradient = gradient; }
+
 protected:
 
     void _createCheckersBackground();
