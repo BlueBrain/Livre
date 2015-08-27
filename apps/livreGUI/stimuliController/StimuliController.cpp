@@ -167,11 +167,12 @@ struct StimuliController::Impl
     {
         const QString& uriStr = _ui.txtHBPURL->text();
         const servus::URI uri( uriStr.toStdString( ));
-        _isRegistered = _controller.registerHandler(
+        _controller.registerHandler(
                                  uri,
                                  zeq::hbp::EVENT_SELECTEDIDS,
                                  boost::bind( &StimuliController::Impl::onSelection,
                                             this, _1 ));
+        _isRegistered = true;
     }
 
     void connectHBP()
@@ -195,9 +196,10 @@ struct StimuliController::Impl
     {
         const QString& uriStr = _ui.txtHBPURL->text();
         const servus::URI uri( uriStr.toStdString( ));
-         _isRegistered = _controller.deregisterHandler(
-                                          uri,
-                                          zeq::hbp::EVENT_SELECTEDIDS );
+        _controller.deregisterHandler( uri,
+                                       zeq::hbp::EVENT_SELECTEDIDS,
+                                       boost::bind( &StimuliController::Impl::onSelection,
+                                                  this, _1 ));
         _isRegistered = false;
         _ui.btnConnectHBP->setEnabled( true );
         _ui.btnDisconnectHBP->setEnabled( false );

@@ -33,9 +33,6 @@ namespace livre
 
 /**
  * Controls communication between the GUI and the rendering application.
- * TODO: If registering to events becomes more complex ( i.e. Same event is
- * registered by two different objects on the same uri ), we would need
- * this class to multiplex the events.
  * TODO: The widgets for connection can be provided by this interface.
  */
 class Controller
@@ -70,8 +67,7 @@ public:
      * it will be used.
      * @param event the event type of interest
      * @param func the callback function on receive of event
-     * @return true if callback could be registered
-     *
+     * @return true if function can be registered
      */
     bool registerHandler( const servus::URI& uri,
                           const servus::uint128_t& event,
@@ -80,10 +76,12 @@ public:
     /**
      * @param uri Subscriber uri.
      * @param event the event type of interest
-     * @return true if callback could be deregistered
+     * @param func the callback function that receives the event
+     * @return true if function can be unregistered
      */
     bool deregisterHandler( const servus::URI& uri,
-                            const servus::uint128_t& event );
+                            const servus::uint128_t& event,
+                            const zeq::EventFunc& func );
 
 #ifdef LIVRE_USE_ISC
     /**
