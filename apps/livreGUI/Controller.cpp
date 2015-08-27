@@ -34,23 +34,53 @@
 #endif
 
 #include <boost/thread.hpp>
+#include <boost/function_equal.hpp>
 
 namespace livre
 {
 
+bool operator==( const zeq::EventFunc& func1, const zeq::EventFunc& func2 )
+{
+    return func1.target<void*>() == func2.target<void*>()
+            && func1.target_type() == func2.target_type();
+}
+
 struct Controller::Impl
 {
+    struct EventIdEventFuncPair
+    {
+        EventIdEventFuncPair( const servus::uint128_t& eventId_,
+                              const zeq::EventFunc eventFunc_ )
+            : eventId( eventId_ ),
+              eventFunc( eventFunc_ )
+        {}
+
+        bool operator==( const EventIdEventFuncPair& pair ) const
+        {
+            return eventId == pair.eventId &&
+                    eventFunc == pair.eventFunc;
+        }
+
+        servus::uint128_t eventId;
+        zeq::EventFunc eventFunc;
+
+    };
 
     typedef std::map< std::string, zeq::Publisher* > PublisherMap;
     typedef std::pair< std::string, zeq::Subscriber* > URISubscriberPair;
     typedef std::map< std::string, zeq::Subscriber* > SubscriberMap;
+    typedef std::pair< const zeq::Subscriber*, EventIdEventFuncPair >
+                                                    SubscriberEventFunctionsPair;
+    typedef std::list< SubscriberEventFunctionsPair >
+                                                SubscriberEventFunctionsList;
 
 #ifdef LIVRE_USE_ISC
     typedef std::map< std::string, isc::Simulator* > SimulatorMap;
 #endif
 
     Impl()
-        : _subscriberPoll( boost::bind( &Impl::pollSubscribers, this ))
+        : _currentSubscriber( 0 )
+        , _subscriberPoll( boost::bind( &Impl::pollSubscribers, this ))
         , _continuePolling( true )
 
     {}
@@ -92,7 +122,7 @@ struct Controller::Impl
 
     template< typename Type >
     Type* getObject( std::map< std::string, Type* >& map,
-                const servus::URI& uri  )
+                     const servus::URI& uri  )
     {
         const std::string& uriStr = getURIStr( uri );
         typename std::map< std::string, Type* >::iterator it = map.find( uriStr );
@@ -102,9 +132,55 @@ struct Controller::Impl
         return map[ uriStr ];
     }
 
-    zeq::Subscriber* getSubscriber( const servus::URI& uri )
+    void subscriberMultiplexer( const zeq::Event& event )
     {
-        return getObject<zeq::Subscriber>( _subscriberMap, uri );
+        BOOST_FOREACH( const SubscriberEventFunctionsPair& pair,
+                       _subscriberEventFunctionList )
+        {
+            const zeq::Subscriber* subscriber = pair.first;
+            if( _currentSubscriber == subscriber )
+            {
+                const EventIdEventFuncPair& eventIdPair = pair.second;
+                if( eventIdPair.eventId == event.getType( ))
+                    eventIdPair.eventFunc( event );
+            }
+        }
+    }
+
+    bool createSubscriberAndRegisterEvent( const servus::URI& uri,
+                                           const servus::uint128_t& event,
+                                           const zeq::EventFunc& func )
+    {
+        const std::string& uriStr = getURIStr( uri );
+        typename std::map< std::string, zeq::Subscriber* >::iterator it =
+                _subscriberMap.find( uriStr );
+        if( it == _subscriberMap.end( ))
+        {
+            zeq::Subscriber* subcriber = new zeq::Subscriber( uri );
+            _subscriberMap[ uriStr ] = subcriber;
+        }
+
+        zeq::Subscriber* subscriber = _subscriberMap[ uriStr ];
+        BOOST_FOREACH( SubscriberEventFunctionsPair& pair,
+                       _subscriberEventFunctionList )
+        {
+            const zeq::Subscriber* sub = pair.first;
+            if( sub == subscriber )
+            {
+                const EventIdEventFuncPair& eventIdPair = pair.second;
+                if( eventIdPair.eventId == event )
+                    return false;
+            }
+        }
+
+        EventIdEventFuncPair eventIdPair( event, func );
+        _subscriberEventFunctionList.push_back(
+                    std::make_pair( subscriber, eventIdPair ));
+        subscriber->registerHandler( event,
+                                    boost::bind( &Impl::subscriberMultiplexer,
+                                                    this,
+                                                 _1 ));
+        return true;
     }
 
     bool registerHandler( const servus::URI& uri,
@@ -112,16 +188,53 @@ struct Controller::Impl
                           const zeq::EventFunc& func )
     {
         ScopedLock lock( _subscriberMutex );
-        zeq::Subscriber* subscriber = getSubscriber( uri );
-        return subscriber->registerHandler( event, func );
+        return createSubscriberAndRegisterEvent( uri, event, func );
     }
 
     bool deregisterHandler( const servus::URI& uri,
-                            const servus::uint128_t& event )
+                            const servus::uint128_t& event,
+                            const zeq::EventFunc& func )
     {
         ScopedLock lock( _subscriberMutex );
-        zeq::Subscriber* subscriber = getSubscriber( uri );
-        return subscriber->deregisterHandler( event );
+        const std::string& uriStr = getURIStr( uri );
+        if( _subscriberMap.count( uriStr ) == 0 )
+            return false;
+
+        zeq::Subscriber* subscriber = _subscriberMap[ uriStr ];
+
+        SubscriberEventFunctionsList::iterator it =
+                _subscriberEventFunctionList.begin();
+        const EventIdEventFuncPair idFuncPair( event, func );
+        BOOST_FOREACH( SubscriberEventFunctionsPair& pair,
+                       _subscriberEventFunctionList )
+        {
+            const zeq::Subscriber* sub = pair.first;
+            if( sub == subscriber )
+            {
+                const EventIdEventFuncPair& eventIdPair = pair.second;
+                if( eventIdPair == idFuncPair )
+                    break;
+            }
+            ++it;
+        }
+        _subscriberEventFunctionList.erase( it );
+
+        bool eventFound = false;
+        BOOST_FOREACH( SubscriberEventFunctionsPair& pair,
+                       _subscriberEventFunctionList )
+        {
+            const EventIdEventFuncPair& eventIdPair = pair.second;
+            if( eventIdPair.eventId == event )
+            {
+                eventFound = true;
+                break;
+            }
+        }
+
+        if( !eventFound )
+            subscriber->deregisterHandler( event );
+
+        return false;
     }
 
     zeq::Publisher* getPublisher( const servus::URI& uri )
@@ -157,6 +270,7 @@ struct Controller::Impl
             BOOST_FOREACH( const URISubscriberPair& pair, subscribers )
             {
                 zeq::Subscriber* subscriber = pair.second;
+                _currentSubscriber = subscriber;
                 subscriber->receive( 100 );
             }
         }
@@ -164,6 +278,8 @@ struct Controller::Impl
 
     PublisherMap _publisherMap;
     SubscriberMap _subscriberMap;
+    SubscriberEventFunctionsList _subscriberEventFunctionList;
+    zeq::Subscriber* _currentSubscriber;
 
 #ifdef LIVRE_USE_ISC
     SimulatorMap _simulatorMap;
@@ -180,7 +296,9 @@ Controller::Controller( )
 {}
 
 Controller::~Controller( )
-{}
+{
+    delete _impl;
+}
 
 bool Controller::connect( const std::string& hostname,
                           const uint16_t port )
@@ -195,16 +313,17 @@ bool Controller::publish( const servus::URI& uri,
 }
 
 bool Controller::registerHandler( const servus::URI& uri,
-                                  const uint128_t& event,
+                                  const servus::uint128_t& event,
                                   const zeq::EventFunc& func )
 {
      return _impl->registerHandler( uri, event, func );
 }
 
 bool Controller::deregisterHandler( const servus::URI& uri,
-                                    const servus::uint128_t& event )
+                                    const servus::uint128_t& event,
+                                    const zeq::EventFunc& func )
 {
-    return _impl->deregisterHandler( uri, event );
+     return _impl->deregisterHandler( uri, event, func );
 }
 
 #ifdef LIVRE_USE_ISC

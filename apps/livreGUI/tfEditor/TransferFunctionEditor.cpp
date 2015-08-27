@@ -447,11 +447,17 @@ void TransferFunctionEditor::_disconnect()
     const QString& uriStr = ui->txtURL->text();
     const servus::URI uri( uriStr.toStdString( ));
     _controller.deregisterHandler( uri,
-                                   zeq::vocabulary::EVENT_HEARTBEAT );
+                                   zeq::vocabulary::EVENT_HEARTBEAT,
+                                   boost::bind( &TransferFunctionEditor::_onHeartbeat,
+                                                this ));
     _controller.deregisterHandler( uri,
-                                   zeq::vocabulary::EVENT_EXIT );
+                                   zeq::vocabulary::EVENT_EXIT,
+                                   boost::bind( &TransferFunctionEditor::_disconnect,
+                                                this ));
     _controller.deregisterHandler( uri,
-                                   zeq::hbp::EVENT_LOOKUPTABLE1D );
+                                   zeq::hbp::EVENT_LOOKUPTABLE1D,
+                                   boost::bind( &TransferFunctionEditor::_receiveTransferFunction,
+                                                this, _1 ));
 
     _isConnected = false;
     _tfReceived = false;
