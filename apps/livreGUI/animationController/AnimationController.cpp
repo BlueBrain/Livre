@@ -178,7 +178,7 @@ struct AnimationController::Impl
     {
         _connected = true;
         _startFrame = frame.start;
-        _endFrame = std::max(( int32_t )frame.end, std::numeric_limits< int32_t >::max());
+        _endFrame = std::min(( int32_t )frame.end, std::numeric_limits< int32_t >::max());
         _currentFrame = frame.current;
         _ui.sldFrame->setMinimum( _startFrame );
         _ui.sldFrame->setMaximum( _endFrame );
