@@ -89,6 +89,9 @@ public:
                     _uvfDataSetPtr->GetUVFFile()->GetGlobalHeader().bIsBigEndian;
             _volumeInfo.compCount = _uvfDataSetPtr->GetComponentCount();
 
+            _volumeInfo.frameRange[ 0 ] = 0;
+            _volumeInfo.frameRange[ 1 ] = _uvfDataSetPtr->GetNumberOfTimesteps();
+
             const uint32_t bitWidth = _uvfDataSetPtr->GetBitWidth();
             if( _uvfDataSetPtr->GetIsFloat() )
             {

@@ -299,7 +299,9 @@ private:
     void _setupSubscribers()
     {
         SubscriberPtr subscriber(
-                    new ::zeq::Subscriber( servus::URI( "hbp://" )));
+                    new ::zeq::Subscriber(
+                        servus::URI( _config.getApplicationParameters().zeqSchema )));
+
         subscribers.push_back( subscriber );
         if( _config.getApplicationParameters().syncCamera )
         {
