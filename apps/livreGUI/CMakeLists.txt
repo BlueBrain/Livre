@@ -14,6 +14,7 @@ endif()
 set(LIVREGUI_HEADERS
   qtTypes.h
   types.h
+  animationController/AnimationController.h
   AppSettings.h
   Controller.h
   tfEditor/ColorMapWidget.h
@@ -24,6 +25,7 @@ set(LIVREGUI_HEADERS
   tfEditor/Utilities.h)
 
 set(LIVREGUI_MOC_HEADERS
+  animationController/AnimationController.h
   tfEditor/ColorMapWidget.h
   tfEditor/GradientRenderer.h
   tfEditor/HoverPoints.h
@@ -33,6 +35,7 @@ set(LIVREGUI_MOC_HEADERS
 set(LIVREGUI_SOURCES
   Controller.cpp
   livreGUI.cpp
+  animationController/AnimationController.cpp
   tfEditor/ColorMapWidget.cpp
   tfEditor/GradientRenderer.cpp
   tfEditor/HoverPoints.cpp
@@ -40,7 +43,9 @@ set(LIVREGUI_SOURCES
   tfEditor/TransferFunctionEditor.cpp)
 
 set(LIVREGUI_RESOURCES resources/resources.qrc)
-set(LIVREGUI_UI_FORMS tfEditor/gui/TransferFunctionEditor.ui)
+set(LIVREGUI_UI_FORMS 
+  animationController/gui/AnimationController.ui 
+  tfEditor/gui/TransferFunctionEditor.ui)
 
 set(LIVREGUI_LINK_LIBRARIES LivreCore LivreEq Qt5::Widgets zeq zeqHBP)
 
@@ -69,7 +74,7 @@ list(APPEND CPPCHECK_EXTRA_ARGS
 endif()
 
 list(APPEND CPPCHECK_EXTRA_ARGS
-    --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/moc_MainWindow.cxx)
+  --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/moc_MainWindow.cxx)
 
 add_definitions(${QT_DEFINITIONS} "-DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED" )
 
