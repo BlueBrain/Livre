@@ -57,6 +57,7 @@ struct VolumeInformation
         , worldSize( 0.0f )
         , boundingBox( Boxf::makeUnitBox( ))
         , worldSpacePerVoxel( 0.0f )
+        , frameRange( Vector2ui( 0, 1u << NODEID_FRAME_BITS ))
     { }
 
     /**
@@ -112,6 +113,11 @@ struct VolumeInformation
       * keeps level count, number of blocks, number of frames
       */
     RootNode rootNode;
+
+    /**
+      * Frame range for the volume
+      */
+    Vector2ui frameRange;
 
     /** @return the number of bytes per element. */
     size_t getBytesPerVoxel() const
