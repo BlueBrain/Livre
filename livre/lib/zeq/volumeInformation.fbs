@@ -16,9 +16,7 @@ table VolumeInformation {
   worldSize:[float];
   boundingBoxMin:[float];
   boundingBoxMax:[float];
-
-    //std::vector< MaxMinPair > minMaxValuesForLevel;
-    //std::vector< Vector3ui > levelBlockDimensions;
+  frameRange:[uint];
   worldSpacePerVoxel:float;
 }
 

@@ -50,7 +50,8 @@ class Node
 {
 public:
     explicit Node( livre::Node* node )
-        : _config( static_cast< livre::Config* >( node->getConfig( )))
+       : _node( node )
+       , _config( static_cast< livre::Config* >( node->getConfig( )))
     {}
 
     void initializeCache()
@@ -78,6 +79,7 @@ public:
             const livre::VolumeInformation& info =
                     _dataSourcePtr->getVolumeInformation();
             _config->sendEvent( VOLUME_BOUNDING_BOX ) << info.boundingBox;
+            _config->sendEvent( VOLUME_FRAME_RANGE ) << info.frameRange;
         }
         catch( const std::runtime_error& err )
         {
@@ -104,6 +106,17 @@ public:
         releaseVolume();
     }
 
+
+    void frameStart( const eq::uint128_t &frameId )
+    {
+        if( !_node->isApplicationNode( ))
+            _config->getFrameData().sync( frameId );
+
+        const livre::VolumeInformation& info =
+                _dataSourcePtr->getVolumeInformation();
+        _config->sendEvent( VOLUME_FRAME_RANGE ) << info.frameRange;
+    }
+
     void releaseVolume()
     {
         _dataSourcePtr.reset();
@@ -115,6 +128,7 @@ public:
         _textureDataCachePtr.reset();
     }
 
+    livre::Node* const _node;
     livre::Config* const _config;
     TextureDataCachePtr _textureDataCachePtr;
     VolumeDataSourcePtr _dataSourcePtr;
@@ -180,14 +194,10 @@ ConstDashTreePtr Node::getDashTree() const
     return _impl->_dashTreePtr;
 }
 
-void Node::frameStart( const eq::uint128_t &frameId, const uint32_t frameNumber)
+void Node::frameStart( const eq::uint128_t &frameId,
+                       const uint32_t frameNumber)
 {
-    if( !isApplicationNode() )
-    {
-        Config *config = static_cast< Config *>( getConfig( ));
-        config->getFrameData().sync( frameId );
-    }
-
+    _impl->frameStart( frameId );
     eq::Node::frameStart( frameId, frameNumber );
 }
 

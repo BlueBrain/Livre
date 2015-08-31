@@ -102,6 +102,7 @@ public:
     std::unique_ptr< zeq::Communicator > communicator;
 #endif
     bool redraw;
+    Vector2ui frameRange;
 };
 
 Config::Config( eq::ServerPtr parent )
@@ -150,7 +151,6 @@ void Config::unmapFrameData()
 void Config::resetCamera()
 {
     _impl->framedata.getCameraSettings()->reset();
-
     _impl->publishModelView();
 }
 
@@ -191,18 +191,23 @@ uint32_t Config::frame()
 {
     // Set current frame (start/end may have changed)
     FrameSettingsPtr frameSettings = _impl->framedata.getFrameSettings();
-    const ApplicationParameters& params = getApplicationParameters();
+    ApplicationParameters& params = getApplicationParameters();
+
+    params.frames[ 0 ] = std::max( params.frames.x(), _impl->frameRange[ 0 ]);
+    params.frames[ 1 ] = std::min( params.frames.y(), _impl->frameRange[ 1 ]);
+
     const uint32_t start = params.frames.x();
     const uint32_t current = frameSettings->getFrameNumber() > start ?
-                                 frameSettings->getFrameNumber() : start;
+                             frameSettings->getFrameNumber() : start;
 
     frameSettings->setFrameNumber( current );
     const eq::uint128_t& version = _impl->framedata.commit();
 
     // reset data and advance current frame
     frameSettings->setGrabFrame( false );
-    const uint32_t end = params.frames.y() > current ?
+    uint32_t end = params.frames.y() > current ?
                              params.frames.y() : current;
+
     const int32_t delta = params.animation;
     // avoid overflow condition:
     const uint32_t interval = end-start == 0xFFFFFFFFu ?
@@ -419,6 +424,9 @@ bool Config::handleEvent( eq::EventICommand command )
         return false;
     }
 #endif
+    case VOLUME_FRAME_RANGE:
+        _impl->frameRange = command.read< Vector2ui >();
+        return false;
     }
 
     _impl->redraw |= eq::Config::handleEvent( command );
