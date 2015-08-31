@@ -217,7 +217,9 @@ struct Controller::Impl
             }
             ++it;
         }
-        _subscriberEventFunctionList.erase( it );
+
+        if( it != _subscriberEventFunctionList.end( ))
+            _subscriberEventFunctionList.erase( it );
 
         bool eventFound = false;
         BOOST_FOREACH( SubscriberEventFunctionsPair& pair,
