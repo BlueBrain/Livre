@@ -70,7 +70,6 @@ lunchbox::URI deserializeDataSource( const ::zeq::Event& event )
     auto worldSize = fbb.CreateVector( vi.worldSize.array, 3 );
     auto bboxMin = fbb.CreateVector( vi.boundingBox.getMin().array, 3 );
     auto bboxMax = fbb.CreateVector( vi.boundingBox.getMax().array, 3 );
-    auto frameRange = fbb.CreateVector( vi.frameRange.array, 2 );
 
     VolumeInformationBuilder builder( fbb );
     builder.add_eventLow( info.first.low( ));
@@ -87,7 +86,6 @@ lunchbox::URI deserializeDataSource( const ::zeq::Event& event )
     builder.add_worldSize( worldSize );
     builder.add_boundingBoxMin( bboxMin );
     builder.add_boundingBoxMax( bboxMax );
-    builder.add_frameRange( frameRange );
     builder.add_worldSpacePerVoxel( vi.worldSpacePerVoxel );
 
     fbb.Finish( builder.Finish( ));
@@ -100,12 +98,6 @@ template< class T >
 vmml::vector< 3, T > _deserializeVector3( const flatbuffers::Vector< T > *in )
 {
     return vmml::vector< 3, T >( in->Get(0), in->Get(1), in->Get(2) );
-}
-
-template< class T >
-vmml::vector< 2, T > _deserializeVector2( const flatbuffers::Vector< T > *in )
-{
-    return vmml::vector< 2, T >( in->Get(0), in->Get(1));
 }
 }
 
@@ -134,7 +126,6 @@ RemoteInformation deserializeDataSourceData( const ::zeq::Event& event )
                                      data->boundingBoxMin( ));
     vi.boundingBox.getMax() = _deserializeVector3< float >(
                                      data->boundingBoxMax( ));
-    vi.frameRange = _deserializeVector2< uint32_t >( data->frameRange( ));
     vi.worldSpacePerVoxel = data->worldSpacePerVoxel();
 
     const Vector3ui& blockSize = vi.maximumBlockSize - vi.overlap * 2;

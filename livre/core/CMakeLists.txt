@@ -85,6 +85,7 @@ set(LIVRECORE_SOURCES
   data/NodeId.cpp
   data/VolumeDataSource.cpp
   data/VolumeDataSourcePlugin.cpp
+  data/VolumeInformation.cpp
   dashpipeline/DashConnection.cpp
   dashpipeline/DashProcessor.cpp
   dashpipeline/DashProcessorInput.cpp

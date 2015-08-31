@@ -79,7 +79,7 @@ public:
             const livre::VolumeInformation& info =
                     _dataSourcePtr->getVolumeInformation();
             _config->sendEvent( VOLUME_BOUNDING_BOX ) << info.boundingBox;
-            _config->sendEvent( VOLUME_FRAME_RANGE ) << info.frameRange;
+            _config->sendEvent( VOLUME_FRAME_RANGE ) << info.getFrameRange();
         }
         catch( const std::runtime_error& err )
         {
@@ -114,7 +114,7 @@ public:
 
         const livre::VolumeInformation& info =
                 _dataSourcePtr->getVolumeInformation();
-        _config->sendEvent( VOLUME_FRAME_RANGE ) << info.frameRange;
+        _config->sendEvent( VOLUME_FRAME_RANGE ) << info.getFrameRange();
     }
 
     void releaseVolume()

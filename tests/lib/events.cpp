@@ -87,7 +87,6 @@ void onDataSourceDataEvent( const zeq::Event& event,
     BOOST_CHECK_EQUAL( info.maxPos, info2.maxPos );
     BOOST_CHECK_EQUAL( info.worldSize, info2.worldSize );
     BOOST_CHECK_EQUAL( info.voxels, info2.voxels );
-    BOOST_CHECK_EQUAL( info.frameRange, info2.frameRange );
     BOOST_CHECK_EQUAL( info.worldSpacePerVoxel, info2.worldSpacePerVoxel );
 }
 
@@ -111,7 +110,6 @@ BOOST_AUTO_TEST_CASE( testDataSourceData )
                                rng.get<float>( ));
     info.voxels = Vector3ui( rng.get<uint32_t>(), rng.get<uint32_t>(),
                              rng.get<uint32_t>( ));
-    info.frameRange = Vector2ui( rng.get<uint32_t>(), rng.get<uint32_t>( ));
     info.worldSpacePerVoxel = rng.get<float>();
 
     info.rootNode = livre::RootNode( rng.get<uint32_t>(), Vector3ui( 1, 2, 3 ));

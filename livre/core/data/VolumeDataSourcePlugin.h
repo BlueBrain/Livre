@@ -54,6 +54,9 @@ private:
 class VolumeDataSourcePlugin : public boost::noncopyable
 {
 public:
+
+    VolumeDataSourcePlugin();
+
     /** Needed by the PluginRegisterer. */
     typedef VolumeDataSourcePlugin PluginT;
 
@@ -86,6 +89,12 @@ public:
      */
     LIVRECORE_API virtual void internalNodeToLODNode( const NodeId internalNode,
                                                       LODNode& lodNode ) const;
+
+    /**
+      @return the frame range for data. For streaming data sources the range
+      can be dynamic.
+      */
+    LIVRECORE_API virtual Vector2ui getFrameRange();
 
     /**
      * @param nodeId The nodeId to get the node for.

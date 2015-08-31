@@ -16,7 +16,6 @@ table VolumeInformation {
   worldSize:[float];
   boundingBoxMin:[float];
   boundingBoxMax:[float];
-  frameRange:[uint];
   worldSpacePerVoxel:float;
 }
 

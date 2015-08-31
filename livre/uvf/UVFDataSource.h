@@ -39,6 +39,7 @@ public:
     virtual ~UVFDataSource();
 
     static bool handles( const VolumeDataSourcePluginData& initData );
+    Vector2ui getFrameRange() final;
 
 private:
 
