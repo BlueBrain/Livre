@@ -79,23 +79,23 @@ UInt8Vector ColorMapWidget::getCurve() const
 {
     UInt8Vector curve;
 
-    const float delta = 256.0f / float( width() );
-    for( int32_t i = 0; i < _hoverPoints->points().size(); ++i )
+    int32_t currentHPointIndex = 0;
+    const size_t tfSize = 256u;
+    const float scale = float( width()) / 255.0f;
+
+    for( size_t i = 0; i < tfSize; ++i )
     {
-        const QLineF currentLine( _hoverPoints->points().at( i ), _hoverPoints->points().at( i + 1 ));
+        const float realX = i * scale;
+        if( _hoverPoints->points().at( currentHPointIndex + 1 ).x() <= realX )
+            currentHPointIndex++;
 
-        const uint32_t beginPos = currentLine.p1().x() * delta + 0.5f;
-        const uint32_t endPos = currentLine.p2().x() * delta + 0.5f;
+        const QLineF currentLine( _hoverPoints->points().at( currentHPointIndex ),
+                                  _hoverPoints->points().at( currentHPointIndex + 1 ));
+        const float slope = currentLine.dy() / currentLine.dx();
+        const float realY = ( realX - currentLine.p1().x()) * slope + currentLine.p1().y();
 
-        for( uint32_t j = beginPos; j < endPos; ++j )
-        {
-            const float slope = currentLine.dy() / currentLine.dx();
-            const float realX = j / delta;
-            const float realY = ( realX - currentLine.p1().x()) * slope + currentLine.p1().y();
-
-            const uint8_t currentCurveValue = 255u * ( 1.0f - realY / height());
-            curve.push_back( currentCurveValue );
-        }
+        const uint8_t currentCurveValue = 255u * ( 1.0f - realY / height());
+        curve.push_back( currentCurveValue );
     }
     return curve;
 }
