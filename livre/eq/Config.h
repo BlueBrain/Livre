@@ -86,6 +86,11 @@ public:
      */
     uint32_t frame();
 
+    /**
+     * @return the data range data source provides.
+     */
+    Vector2ui getDataFrameRange();
+
     /** @return true if an event required a redraw. */
     bool needRedraw();
 

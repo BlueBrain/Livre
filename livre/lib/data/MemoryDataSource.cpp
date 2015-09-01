@@ -92,6 +92,9 @@ bool MemoryDataSource::handles( const VolumeDataSourcePluginData& initData )
     return initData.getURI().getScheme() == "mem";
 }
 
-
+livre::Vector2ui livre::MemoryDataSource::getFrameRange()
+{
+    return Vector2ui( 0, 1u << NODEID_FRAME_BITS );
+}
 
 }

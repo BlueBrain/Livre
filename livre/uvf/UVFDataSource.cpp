@@ -89,9 +89,6 @@ public:
                     _uvfDataSetPtr->GetUVFFile()->GetGlobalHeader().bIsBigEndian;
             _volumeInfo.compCount = _uvfDataSetPtr->GetComponentCount();
 
-            _volumeInfo.frameRange[ 0 ] = 0;
-            _volumeInfo.frameRange[ 1 ] = _uvfDataSetPtr->GetNumberOfTimesteps();
-
             const uint32_t bitWidth = _uvfDataSetPtr->GetBitWidth();
             if( _uvfDataSetPtr->GetIsFloat() )
             {
@@ -390,6 +387,11 @@ public:
         return _volumeInfo.rootNode.getDepth() - treeLevel - 1;
     }
 
+    Vector2ui getFrameRange()
+    {
+        return Vector2ui( 0, _uvfDataSetPtr->GetNumberOfTimesteps( ));
+    }
+
     TOCBlock* _uvfTOCBlock;
     uint64_t _offset;
 
@@ -414,7 +416,6 @@ UVFDataSource::~UVFDataSource()
     delete _impl;
 }
 
-
 bool UVFDataSource::handles( const VolumeDataSourcePluginData& initData )
 {
     return initData.getURI().getScheme() == "uvf";
@@ -423,7 +424,6 @@ bool UVFDataSource::handles( const VolumeDataSourcePluginData& initData )
 MemoryUnitPtr UVFDataSource::getData( const LODNode& node )
 {
     return _impl->getData( node );
-
 }
 
 void UVFDataSource::internalNodeToLODNode(
@@ -432,5 +432,9 @@ void UVFDataSource::internalNodeToLODNode(
     return _impl->internalNodeToLODNode( internalNode, lodNode );
 }
 
+Vector2ui UVFDataSource::getFrameRange()
+{
+    return _impl->getFrameRange();
+}
 
 }

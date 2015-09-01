@@ -45,20 +45,7 @@ enum DataType
 /** Properties of the volumetric data. */
 struct VolumeInformation
 {
-    VolumeInformation( )
-        : isBigEndian( false )
-        , compCount( 1u )
-        , dataType( DT_UINT8 )
-        , overlap( 0u )
-        , maximumBlockSize( 0u )
-        , minPos( 0.0f )
-        , maxPos( 0.0f )
-        , voxels( 256u )
-        , worldSize( 0.0f )
-        , boundingBox( Boxf::makeUnitBox( ))
-        , worldSpacePerVoxel( 0.0f )
-        , frameRange( Vector2ui( 0, 1u << NODEID_FRAME_BITS ))
-    { }
+    VolumeInformation( VolumeDataSourcePlugin* dataSource = 0 );
 
     /**
      * The endianness of the data.
@@ -114,32 +101,16 @@ struct VolumeInformation
       */
     RootNode rootNode;
 
-    /**
-      * Frame range for the volume
-      */
-    Vector2ui frameRange;
-
     /** @return the number of bytes per element. */
-    size_t getBytesPerVoxel() const
-    {
-        switch( dataType )
-        {
-        case DT_FLOAT64:
-            return 8;
-        case DT_FLOAT32:
-        case DT_UINT32:
-        case DT_INT32:
-            return 4;
-        case DT_UINT16:
-        case DT_INT16:
-            return 2;
-        case DT_UINT8:
-        case DT_INT8:
-            return 1;
-        default:
-            return -1;
-        }
-    }
+    size_t getBytesPerVoxel() const;
+
+    /** @return the number of frames for the data source. If there is
+        no data source, [0,1) range is returned */
+    Vector2ui getFrameRange() const;
+
+private:
+
+    mutable VolumeDataSourcePlugin* _dataSource;
 };
 
 }

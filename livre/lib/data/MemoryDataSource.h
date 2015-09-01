@@ -45,6 +45,9 @@ public:
      * @return The block data for the node.
      */
     MemoryUnitPtr getData( const LODNode& node ) override;
+
+    Vector2ui getFrameRange() final;
+
     static bool handles( const VolumeDataSourcePluginData& initData );
 
 };

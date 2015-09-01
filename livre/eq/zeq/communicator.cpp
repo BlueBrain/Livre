@@ -95,11 +95,20 @@ public:
     {
         const auto& frameSettings = _config.getFrameData().getFrameSettings();
         const auto& params = _config.getApplicationParameters();
-        const ::zeq::Event frame = ::zeq::hbp::serializeFrame(
+
+        const Vector2ui& dataFrameRange = _config.getDataFrameRange();
+
+        const uint32_t frameMin =
+                std::max( params.frames.x(), dataFrameRange[ 0 ]);
+
+        const uint32_t frameMax =
+                std::min( params.frames.y(), dataFrameRange[ 1 ]);
+
+        const ::zeq::Event& frame = ::zeq::hbp::serializeFrame(
                                         ::zeq::hbp::data::Frame(
-                                            params.frames.x(),
+                                            frameMin,
                                             frameSettings->getFrameNumber(),
-                                            params.frames.y(),
+                                            frameMax,
                                             params.animation ));
         _publisher->publish( frame );
         _vwsPublisher->publish( frame );
@@ -205,9 +214,10 @@ public:
         auto frameSettings = _config.getFrameData().getFrameSettings();
         auto& params = _config.getApplicationParameters();
 
-        params.frames.x() = frame.start;
+        if( frameSettings->getFrameNumber() == frame.current  )
+            return;
+
         frameSettings->setFrameNumber( frame.current );
-        params.frames.y() = frame.end;
         params.animation = frame.delta;
         _config.postRedraw();
     }
