@@ -11,6 +11,11 @@ if(NOT ZEQ_FOUND)
   return()
 endif()
 
+if(NOT QT5WIDGETS_FOUND)
+  message(STATUS "Not building GUI due to missing Qt5 dependency")
+  return()
+endif()
+
 set(LIVREGUI_HEADERS
   qtTypes.h
   types.h
