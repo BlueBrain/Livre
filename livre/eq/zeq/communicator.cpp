@@ -65,12 +65,18 @@ public:
 
     void publishModelView( const Matrix4f& modelView )
     {
+        if( !_publisher )
+	    return;
+
         const FloatVector matrix( modelView.begin(), modelView.end( ));
         _publisher->publish( ::zeq::hbp::serializeCamera( matrix ));
     }
 
     void publishCamera()
     {
+        if( !_publisher )
+	    return;
+
         const auto cameraSettings = _config.getFrameData().getCameraSettings();
         const Matrix4f& modelView = cameraSettings->getModelViewMatrix();
         const FloatVector matrix( modelView.begin(), modelView.end( ));
@@ -79,12 +85,18 @@ public:
 
     void publishExit()
     {
+        if( !_publisher )
+	    return;
+
         _publisher->publish( ::zeq::Event( ::zeq::vocabulary::EVENT_EXIT ));
         _vwsPublisher->publish( ::zeq::Event( ::zeq::vocabulary::EVENT_EXIT ));
     }
 
     void publishLookupTable1D()
     {
+        if( !_publisher )
+	    return;
+
         const auto& renderSettings = _config.getFrameData().getRenderSettings();
         const auto& lut = renderSettings->getTransferFunction().getData();
         _vwsPublisher->publish( ::zeq::hbp::serializeLookupTable1D( lut ));
@@ -93,6 +105,9 @@ public:
 
     void publishFrame()
     {
+        if( !_publisher )
+	    return;
+
         const auto& frameSettings = _config.getFrameData().getFrameSettings();
         const auto& params = _config.getApplicationParameters();
 
@@ -116,6 +131,9 @@ public:
 
     void publishVocabulary()
     {
+        if( !_vwsPublisher )
+	    return;
+
         ::zeq::EventDescriptors vocabulary;
         vocabulary.push_back(
                     ::zeq::EventDescriptor( ::zeq::hbp::IMAGEJPEG,
@@ -148,6 +166,9 @@ public:
 
     void publishHeartbeat()
     {
+        if( !_publisher )
+	    return;
+
         if( _heartbeatClock.getTimef() >= DEFAULT_HEARTBEAT_TIME )
         {
             _heartbeatClock.reset();
@@ -160,6 +181,9 @@ public:
 
     void publishImageJPEG( const uint8_t* data, const uint64_t size )
     {
+        if( !_vwsPublisher )
+	    return;
+
         const ::zeq::hbp::data::ImageJPEG image( size, data );
         const auto& event = ::zeq::hbp::serializeImageJPEG( image );
         _vwsPublisher->publish( event );

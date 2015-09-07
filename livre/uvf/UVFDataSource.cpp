@@ -140,6 +140,10 @@ public:
         {
             LBTHROW( std::runtime_error( "UVF data format initialization failed" ));
         }
+        if( !_uvfTOCBlock )
+        {
+  	    LBTHROW( std::runtime_error( "UVF TOC block not found in data set" ));
+        }
     }
 
     ~UVFDataSource()
