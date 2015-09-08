@@ -19,6 +19,7 @@
 #include "communicator.h"
 
 #include <livre/eq/Config.h>
+#include <livre/eq/Event.h>
 #include <livre/eq/FrameData.h>
 #include <livre/eq/settings/CameraSettings.h>
 #include <livre/eq/settings/FrameSettings.h>
@@ -205,7 +206,7 @@ public:
         modelViewMatrix.set( matrix.begin(), matrix.end(), false );
         auto cameraSettings = _config.getFrameData().getCameraSettings();
         cameraSettings->setModelViewMatrix( modelViewMatrix );
-        _config.postRedraw();
+        _config.sendEvent( REDRAW );
     }
 
     // HBP 'micron' camera from other brain applications
@@ -219,7 +220,7 @@ public:
                 _config.convertFromHBPCamera( modelViewMatrixMicron );
         auto cameraSettings = _config.getFrameData().getCameraSettings();
         cameraSettings->setModelViewMatrix( modelViewMatrix );
-        _config.postRedraw();
+        _config.sendEvent( REDRAW );
     }
 
     void onLookupTable1D( const ::zeq::Event& event )
@@ -228,7 +229,7 @@ public:
             ::zeq::hbp::deserializeLookupTable1D( event ));
         auto renderSettings = _config.getFrameData().getRenderSettings();
         renderSettings->setTransferFunction( transferFunction );
-        _config.postRedraw();
+        _config.sendEvent( REDRAW );
     }
 
     void onFrame( const ::zeq::Event& event )
@@ -243,19 +244,19 @@ public:
 
         frameSettings->setFrameNumber( frame.current );
         params.animation = frame.delta;
-        _config.postRedraw();
+        _config.sendEvent( REDRAW );
     }
 
     void requestImageJPEG()
     {
         _config.getFrameData().getFrameSettings()->setGrabFrame( true );
-        _config.postRedraw();
+        _config.sendEvent( REDRAW );
     }
 
     void requestExit()
     {
         _config.stopRunning();
-        _config.postRedraw();
+        _config.sendEvent( REDRAW );
     }
 
     void handleEvents()
