@@ -26,7 +26,7 @@
 #include <livreGUI/stimuliController/nestData.h>
 #include <livreGUI/Controller.h>
 
-#include <isc/steering/simulator.h>
+#include <monsteer/steering/simulator.h>
 
 #include <zeq/types.h>
 #include <zeq/subscriber.h>
@@ -219,7 +219,7 @@ struct StimuliController::Impl
 
 public:
 
-    isc::Simulator* _simulator;
+    ::monsteer::Simulator* _simulator;
     bool _isRegistered;
     Ui_stimuliController& _ui;
     StimuliController* _stimuliController;

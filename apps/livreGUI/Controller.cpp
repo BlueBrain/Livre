@@ -29,8 +29,8 @@
 
 #include <zeq/hbp/vocabulary.h>
 
-#ifdef LIVRE_USE_ISC
-#   include <isc/steering/simulator.h>
+#ifdef LIVRE_USE_MONSTEER
+#   include <monsteer/steering/simulator.h>
 #endif
 
 #include <boost/thread.hpp>
@@ -74,8 +74,8 @@ struct Controller::Impl
     typedef std::list< SubscriberEventFunctionsPair >
                                                 SubscriberEventFunctionsList;
 
-#ifdef LIVRE_USE_ISC
-    typedef std::map< std::string, isc::Simulator* > SimulatorMap;
+#ifdef LIVRE_USE_MONSTEER
+    typedef std::map< std::string, ::monsteer::Simulator* > SimulatorMap;
 #endif
 
     Impl()
@@ -102,8 +102,8 @@ struct Controller::Impl
         _subscriberPoll.join();
         deleteObjects< zeq::Subscriber >( _subscriberMap );
         deleteObjects< zeq::Publisher >( _publisherMap );
-#ifdef LIVRE_USE_ISC
-        deleteObjects< isc::Simulator >( _simulatorMap );
+#ifdef LIVRE_USE_MONSTEER
+        deleteObjects< ::monsteer::Simulator >( _simulatorMap );
 #endif
     }
 
@@ -249,10 +249,10 @@ struct Controller::Impl
         return getPublisher( uri )->publish( event );
     }
 
-#ifdef LIVRE_USE_ISC
-    isc::Simulator* getSimulator( const servus::URI& uri )
+#ifdef LIVRE_USE_MONSTEER
+    ::monsteer::Simulator* getSimulator( const servus::URI& uri )
     {
-        return getObject<isc::Simulator>( _simulatorMap, uri );
+        return getObject<::monsteer::Simulator>( _simulatorMap, uri );
     }
 #endif
 
@@ -283,7 +283,7 @@ struct Controller::Impl
     SubscriberEventFunctionsList _subscriberEventFunctionList;
     zeq::Subscriber* _currentSubscriber;
 
-#ifdef LIVRE_USE_ISC
+#ifdef LIVRE_USE_MONSTEER
     SimulatorMap _simulatorMap;
 #endif
 
@@ -328,8 +328,8 @@ bool Controller::deregisterHandler( const servus::URI& uri,
      return _impl->deregisterHandler( uri, event, func );
 }
 
-#ifdef LIVRE_USE_ISC
-isc::Simulator* Controller::getSimulator( const servus::URI& uri )
+#ifdef LIVRE_USE_MONSTEER
+::monsteer::Simulator* Controller::getSimulator( const servus::URI& uri )
 {
     return _impl->getSimulator( uri );
 }
