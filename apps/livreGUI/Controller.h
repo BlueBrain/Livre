@@ -25,8 +25,8 @@
 
 #include <livre/core/render/TransferFunction1D.h>
 #include <zeq/types.h>
-#ifdef LIVRE_USE_ISC
-#   include <isc/types.h>
+#ifdef LIVRE_USE_MONSTEER
+#   include <monsteer/types.h>
 #endif
 namespace livre
 {
@@ -83,13 +83,13 @@ public:
                             const servus::uint128_t& event,
                             const zeq::EventFunc& func );
 
-#ifdef LIVRE_USE_ISC
+#ifdef LIVRE_USE_MONSTEER
     /**
      * @param uri Simulator uri
      * @return If there is no simulator with the given uri a new simulator is
      * registered and returned, if there is registered simulator is returned.
      */
-    isc::Simulator* getSimulator( const servus::URI& uri );
+    ::monsteer::Simulator* getSimulator( const servus::URI& uri );
 #endif
 
 private:

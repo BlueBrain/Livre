@@ -24,7 +24,7 @@
 #include <livreGUI/tfEditor/TransferFunctionEditor.h>
 #include <livreGUI/Controller.h>
 
-#ifdef LIVRE_USE_ISC
+#ifdef LIVRE_USE_MONSTEER
 #include <livreGUI/stimuliController/StimuliController.h>
 #endif
 
@@ -50,7 +50,7 @@ int main( int argc, char *argv[] )
     tabWidget->addTab( new livre::TransferFunctionEditor(controller),
                        "Transfer Function Editor");
 
-#ifdef LIVRE_USE_ISC
+#ifdef LIVRE_USE_MONSTEER
     tabWidget->addTab( new livre::StimuliController(controller),
                        "Simulation Controller" );
 #endif

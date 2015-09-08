@@ -84,7 +84,7 @@
      <item>
       <widget class="QLineEdit" name="txtISCURL">
        <property name="text">
-        <string>isc-nesteer://</string>
+        <string>monsteer-nesteer://</string>
        </property>
       </widget>
      </item>
