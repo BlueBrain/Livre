@@ -51,6 +51,45 @@ public:
                       VolumeDataSourcePluginData( uri, accessMode )))
     {}
 
+    bool isFrameInRange( uint32_t frame ) const
+    {
+        // Frame range can change for the streaming data sources according
+        // to the received data ( getFrameRange() ). The const cast is
+        // applied because of this reason.
+        VolumeDataSourcePlugin* impl =
+                const_cast<VolumeDataSourcePlugin*>( plugin.get( ));
+
+        if( !impl )
+            return false;
+
+        const Vector2ui& frameRange = plugin->getFrameRange();
+        return frame >= frameRange[0] && frame < frameRange[1];
+    }
+
+    ConstLODNodePtr getNode( const NodeId nodeId ) const
+    {
+        if( !isFrameInRange( nodeId.getFrame( )))
+            return ConstLODNodePtr();
+
+        return plugin->getNode( nodeId );
+    }
+
+    MemoryUnitPtr getData( const LODNode& node )
+    {
+        if( !isFrameInRange( node.getNodeId().getFrame( )))
+            return MemoryUnitPtr();
+
+        return plugin->getData( node );
+    }
+
+    ConstMemoryUnitPtr getData( const LODNode& node ) const
+    {
+        if( !isFrameInRange( node.getNodeId().getFrame( )))
+            return MemoryUnitPtr();
+
+        return plugin->getData( node );
+    }
+
     boost::scoped_ptr< VolumeDataSourcePlugin > plugin;
 };
 
@@ -77,7 +116,7 @@ void VolumeDataSource::unloadPlugins()
 
 ConstLODNodePtr VolumeDataSource::getNode( const NodeId nodeId ) const
 {
-    return _impl->plugin->getNode( nodeId );
+    return _impl->getNode( nodeId );
 }
 
 const VolumeInformation& VolumeDataSource::getVolumeInformation() const
@@ -92,12 +131,12 @@ bool VolumeDataSource::initializeGL()
 
 MemoryUnitPtr VolumeDataSource::getData( const LODNode& node )
 {
-    return _impl->plugin->getData( node );
+    return _impl->getData( node );
 }
 
 ConstMemoryUnitPtr VolumeDataSource::getData( const LODNode& node ) const
 {
-    return _impl->plugin->getData( node );
+    return _impl->getData( node );
 }
 
 livre::VolumeDataSource::~VolumeDataSource()

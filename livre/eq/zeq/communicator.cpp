@@ -214,9 +214,6 @@ public:
         auto frameSettings = _config.getFrameData().getFrameSettings();
         auto& params = _config.getApplicationParameters();
 
-        if( frameSettings->getFrameNumber() == frame.current  )
-            return;
-
         frameSettings->setFrameNumber( frame.current );
         params.animation = frame.delta;
         _config.postRedraw();

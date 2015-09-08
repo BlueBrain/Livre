@@ -89,7 +89,7 @@ public:
         LBASSERT( &_localContext != &dash::Context::getCurrent() );
         ReadLock readLock( _mutex );
         NodeIDDashNodePtrMap::const_iterator it = _dashNodeMap.find( nodeId );
-        if( it != _dashNodeMap.end( ))
+        if( it != _dashNodeMap.end( ) && it->second )
             return it->second;
 
         readLock.unlock();
@@ -102,9 +102,15 @@ public:
         dash::Context& prevCtx = dash::Context::getCurrent();
         _localContext.setCurrent();
 
+        ConstLODNodePtr lodNodePtr = _dataSource->getNode( nodeId );
+        if( !lodNodePtr )
+        {
+            prevCtx.setCurrent();
+            return dash::NodePtr();
+        }
+
         dash::NodePtr node = new dash::Node();
         DashRenderNode::initializeDashNode( node );
-        ConstLODNodePtr lodNodePtr = _dataSource->getNode( nodeId );
         DashRenderNode renderNode( node );
         renderNode.setLODNode( *lodNodePtr );
 

@@ -30,7 +30,7 @@ VolumeDataSourcePlugin::VolumeDataSourcePlugin()
 ConstLODNodePtr VolumeDataSourcePlugin::getNode( const NodeId nodeId ) const
 {
     NodeIDLODNodePtrMap::iterator it = _lodNodeMap.find( nodeId );
-    if( it == _lodNodeMap.end( ) )
+    if( it == _lodNodeMap.end( ) || !it->second )
     {
         LODNodePtr lodNodePtr( new LODNode() );
         internalNodeToLODNode( nodeId, *lodNodePtr );

@@ -115,11 +115,14 @@ const void* TextureDataObject::getDataPtr() const
 }
 
 template< class T >
-void TextureDataObject::setTextureData_( const bool quantize )
+bool TextureDataObject::setTextureData_( const bool quantize )
 {
     getUnconst_()->updateLastUsedWithCurrentTime_();
 
     ConstMemoryUnitPtr data = dataSourcePtr_->getData( *lodNodePtr_ );
+    if( !data )
+        return false;
+
     const T* rawData = data->getData< T >();
     if( quantize )
     {
@@ -129,6 +132,7 @@ void TextureDataObject::setTextureData_( const bool quantize )
     }
     else
         data_->allocAndSetData( rawData, getRawDataSize_( ));
+    return true;
 }
 
 template< class T >
@@ -213,16 +217,13 @@ bool TextureDataObject::load_( )
     switch( gpuDataType_ )
     {
         case GL_UNSIGNED_BYTE:
-            setTextureData_< uint8_t >( dataType != DT_UINT8 );
-            break;
+            return setTextureData_< uint8_t >( dataType != DT_UINT8 );
         case GL_FLOAT:
-            setTextureData_< float >( dataType != DT_FLOAT32 );
-            break;
+            return setTextureData_< float >( dataType != DT_FLOAT32 );
         case GL_UNSIGNED_SHORT:
-            setTextureData_< uint16_t >( dataType != DT_UINT16 );
-            break;
+            return setTextureData_< uint16_t >( dataType != DT_UINT16 );
     }
-    return true;
+    return false;
 }
 
 void TextureDataObject::unload_( )
