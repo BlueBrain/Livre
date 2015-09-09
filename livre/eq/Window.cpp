@@ -24,6 +24,7 @@
 #include <livre/core/version.h>
 #include <livre/eq/Config.h>
 #include <livre/eq/Error.h>
+#include <livre/eq/Event.h>
 #include <livre/eq/FrameData.h>
 #include <livre/eq/Node.h>
 #include <livre/eq/Pipe.h>
@@ -64,7 +65,7 @@ public:
     {
         TextureUploadProcessor::onPostCommit_( connection, state );
         if( needRedraw( ))
-            _config.postRedraw();
+            _config.sendEvent( REDRAW );
     }
 
 private:

@@ -232,14 +232,6 @@ bool Config::needRedraw()
     return _impl->redraw || getApplicationParameters().animation != 0;
 }
 
-void Config::postRedraw()
-{
-    _impl->redraw = true;
-    eq::MessagePump* pump = getMessagePump();
-    if( pump )
-        pump->postWakeup();
-}
-
 bool Config::exit()
 {
     bool ret = eq::Config::exit(); // cppcheck-suppress unreachableCode
@@ -369,12 +361,11 @@ Matrix4f Config::convertFromHBPCamera( const Matrix4f& modelViewMatrix ) const
 bool Config::handleEvent( const eq::ConfigEvent* event )
 {
 #ifdef LIVRE_USE_ZEQ
-    const Matrix4f& oldModelViewMatrix =
-            _impl->framedata.getCameraSettings()->getModelViewMatrix();
+    CameraSettingsPtr cameraSettings = _impl->framedata.getCameraSettings();
+    const Matrix4f& oldModelViewMatrix = cameraSettings->getModelViewMatrix();
 #endif
 
     EqEventInfo eventInfo( this, event );
-
     bool hasEvent = false;
 
     switch( event->data.type )
@@ -394,7 +385,6 @@ bool Config::handleEvent( const eq::ConfigEvent* event )
             hasEvent = true;
         break;
     }
-
     default:
         break;
     }
@@ -402,7 +392,7 @@ bool Config::handleEvent( const eq::ConfigEvent* event )
     if( hasEvent )
     {
 #ifdef LIVRE_USE_ZEQ
-        if( _impl->framedata.getCameraSettings()->getModelViewMatrix() != oldModelViewMatrix )
+        if( cameraSettings->getModelViewMatrix() != oldModelViewMatrix )
             _impl->publishModelView();
 #endif
         _impl->redraw = true;
@@ -420,6 +410,7 @@ bool Config::handleEvent( eq::EventICommand command )
     case VOLUME_BOUNDING_BOX:
         _impl->volumeBBox = command.read< Boxf >();
         return false;
+
 #ifdef LIVRE_USE_ZEQ
     case GRAB_IMAGE:
     {
@@ -434,6 +425,10 @@ bool Config::handleEvent( eq::EventICommand command )
     case VOLUME_FRAME_RANGE:
         _impl->dataFrameRange = command.read< Vector2ui >();
         return false;
+
+    case REDRAW:
+        _impl->redraw = true;
+        return true;
     }
 
     _impl->redraw |= eq::Config::handleEvent( command );

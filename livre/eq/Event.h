@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
  *                          Stefan Eilemann <Stefan.Eilemann@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -30,7 +30,8 @@ enum ConfigEventType
 {
     VOLUME_BOUNDING_BOX = eq::Event::USER,
     GRAB_IMAGE,
-    VOLUME_FRAME_RANGE
+    VOLUME_FRAME_RANGE,
+    REDRAW
 };
 
 }
