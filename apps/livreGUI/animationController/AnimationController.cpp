@@ -33,7 +33,6 @@ namespace livre
 
 const size_t DEFAULT_MIN_VALUE   = 0;
 const size_t DEFAULT_MAX_VALUE   = 1e4;
-const size_t DEFAULT_TICK_COUNTS = 10;
 
 /**
  * AnimationEditor defines the possible actions for the animation feature
