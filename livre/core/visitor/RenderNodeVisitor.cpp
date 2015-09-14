@@ -64,14 +64,22 @@ DashTreePtr RenderNodeVisitor::getDashTree()
 void RenderNodeVisitor::onVisitBegin( const NodeId& nodeId,
                                       const VisitState& state )
 {
-    DashRenderNode renderNode( _impl->getDashNode( nodeId ));
+    dash::NodePtr node = _impl->getDashNode( nodeId );
+    if( !node)
+        return;
+
+    DashRenderNode renderNode( node );
     onVisitBegin( renderNode, state );
 }
 
 void RenderNodeVisitor::onVisitEnd( const NodeId& nodeId,
                                     const VisitState& state )
 {
-    DashRenderNode renderNode( _impl->getDashNode( nodeId ));
+    dash::NodePtr node = _impl->getDashNode( nodeId );
+    if( !node)
+        return;
+
+    DashRenderNode renderNode( node );
     onVisitEnd( renderNode, state );
 }
 
@@ -79,21 +87,33 @@ void RenderNodeVisitor::onVisitChildrenBegin(
                            const NodeId& nodeId,
                            const VisitState& state )
 {
-    DashRenderNode renderNode( _impl->getDashNode( nodeId ));
+    dash::NodePtr node = _impl->getDashNode( nodeId );
+    if( !node)
+        return;
+
+    DashRenderNode renderNode( node );
     onVisitChildrenBegin( renderNode, state );
 }
 
 void RenderNodeVisitor::onVisitChildrenEnd( const NodeId& nodeId,
                                             const VisitState& state )
 {
-    DashRenderNode renderNode( _impl->getDashNode( nodeId ));
+    dash::NodePtr node = _impl->getDashNode( nodeId );
+    if( !node)
+        return;
+
+    DashRenderNode renderNode( node );
     onVisitChildrenEnd( renderNode, state );
 }
 
 void RenderNodeVisitor::visit( const NodeId& nodeId,
                                VisitState& state )
 {
-    DashRenderNode renderNode( _impl->getDashNode( nodeId ));
+    dash::NodePtr node = _impl->getDashNode( nodeId );
+    if( !node)
+        return;
+
+    DashRenderNode renderNode( node );
     visit( renderNode, state );
 }
 

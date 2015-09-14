@@ -320,6 +320,16 @@ public:
     void frameDraw( const eq::uint128_t& )
     {
         applyCamera();
+
+        livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
+        DashTreePtr dashTree = node->getDashTree();
+        const uint32_t frame = dashTree->getRenderStatus().getFrameID();
+        const VolumeInformation& volInfo =
+                dashTree->getDataSource()->getVolumeInformation();
+        const Vector2ui& frameRange = volInfo.getFrameRange();
+        if( frame < frameRange[0] || frame >= frameRange[1] )
+            return;
+
         initializeLivreFrustum();
         requestData();
 
@@ -327,7 +337,6 @@ public:
         const Viewport viewport( vp.x, vp.y, vp.w, vp.h );
         _renderViewPtr->setViewport( viewport );
 
-        livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
         livre::Window* window = static_cast< livre::Window* >( _channel->getWindow( ));
         AvailableSetGenerator generateSet( node->getDashTree( ),
                                            window->getTextureCache( ));

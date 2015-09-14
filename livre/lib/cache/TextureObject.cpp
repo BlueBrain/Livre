@@ -104,7 +104,8 @@ bool TextureObject::load_( )
     if( !lodTextureData_ )
         return false;
 
-    if( !lodTextureData_->isValid( ) )
+    if( !lodTextureData_->isLoaded()
+        || !lodTextureData_->isValid())
     {
         LBERROR << "Load texture is executed for invalid or unloaded data" << std::endl;
         return false;

@@ -67,7 +67,7 @@ private:
     CacheId getCacheID() const final;
 
     template< class T >
-    void setTextureData_( bool quantize );
+    bool setTextureData_( bool quantize );
 
     size_t getDataSize_() const;
     size_t getRawDataSize_() const;
