@@ -40,19 +40,29 @@ MemoryDataSource::MemoryDataSource( const VolumeDataSourcePluginData& initData )
 {
     _volumeInfo.overlap = Vector3ui( 4 );
 
+    const servus::URI& uri = initData.getURI();
     std::vector< std::string > parameters;
-    boost::algorithm::split( parameters, initData.getURI().getFragment(),
+    boost::algorithm::split( parameters, uri.getFragment(),
                              boost::is_any_of( "," ));
+
+    using boost::lexical_cast;
+    try
+    {
+        servus::URI::ConstKVIter i = uri.findQuery( "sparsity" );
+        _sparsity = i == uri.queryEnd() ? 1.0f : lexical_cast< float >( i->second );
+    }
+    catch( boost::bad_lexical_cast& except )
+        LBTHROW( std::runtime_error( except.what() ));
+
     if( parameters.size() < 4 ) // use defaults
     {
         _volumeInfo.voxels = Vector3ui( 4096 );
-        _volumeInfo.maximumBlockSize = Vector3ui(32) + _volumeInfo.overlap * 2;
+        _volumeInfo.maximumBlockSize = Vector3ui(32) + _volumeInfo.overlap * 2;        
     }
     else
     {
         try
         {
-            using boost::lexical_cast;
             _volumeInfo.voxels[ 0 ] = lexical_cast< uint32_t >( parameters[0] );
             _volumeInfo.voxels[ 1 ] = lexical_cast< uint32_t >( parameters[1] );
             _volumeInfo.voxels[ 2 ] = lexical_cast< uint32_t >( parameters[2] );
@@ -79,11 +89,20 @@ MemoryUnitPtr MemoryDataSource::getData( const LODNode& node )
     const Identifier nodeID = node.getNodeId().getId();
     const uint8_t* id = reinterpret_cast< const uint8_t* >( &nodeID );
     const uint8_t fillValue = ( id[0] ^ id[1] ^ id[2] ^ id[3] ) + 16 +
-        // emulate animation
         127 * std::sin( ((float)node.getNodeId().getFrame() + 1) / 200.f);
+
+    UInt8Vector data;
+    for( int32_t i = 0; i < blockSize.product(); ++i )
+    {
+        int random = rand() % 1000000 + 1;
+        if( random < 1000000 * _sparsity )
+            data.push_back( fillValue );
+        else
+            data.push_back( 0 );
+    }
+
     AllocMemoryUnitPtr memoryUnit( new AllocMemoryUnit );
-    memoryUnit->alloc( 1, dataSize );
-    ::memset( memoryUnit->getData< uint8_t >(), fillValue, dataSize );
+    memoryUnit->allocAndSetData( &data[0], dataSize );
     return memoryUnit;
 }
 
