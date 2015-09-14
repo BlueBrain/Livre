@@ -199,8 +199,8 @@ uint32_t Config::frame()
                                         _impl->dataFrameRange[ 1 ]);
 
     const uint32_t start = frameMin;
-    const uint32_t current = frameSettings->getFrameNumber() > start ?
-                             frameSettings->getFrameNumber() : start;
+    uint32_t current = frameSettings->getFrameNumber() > start ?
+                       frameSettings->getFrameNumber() : start;
 
     frameSettings->setFrameNumber( current );
     const eq::uint128_t& version = _impl->framedata.commit();
@@ -213,7 +213,12 @@ uint32_t Config::frame()
     // avoid overflow condition:
     const uint32_t interval = end-start == 0xFFFFFFFFu ?
                                   0xFFFFFFFFu : end - start + 1;
-    const uint32_t frameNumber = ((current-start+delta) % interval) + start;
+    //This check is needed because in the lines below (current-start+delta)
+    //become 4294967295 instead of -1
+    if(( current - start == 0 ) && ( delta < 0 ))
+        current = end;
+
+    const uint32_t frameNumber = (( current - start + delta ) % interval ) + start;
     frameSettings->setFrameNumber( frameNumber );
 
     _impl->redraw = false;

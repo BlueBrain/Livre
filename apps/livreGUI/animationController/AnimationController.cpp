@@ -146,9 +146,15 @@ struct AnimationController::Impl
     void play()
     {
         if( _ui.chbxReverse->checkState() == Qt::Checked )
+        {
             _action = AA_PLAY_BACKWARDS;
+            --_currentFrame;
+        }
         else
+        {
             _action = AA_PLAY;
+            ++_currentFrame;
+        }
 
         resetControls();
         publishFrame();
