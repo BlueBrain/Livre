@@ -36,13 +36,17 @@ class RayCastRenderer : public Renderer
 public:
 
     /**
-     * @param samples Number of samples per ray.
+     * @param samplesPerRay Number of samples per ray.
+     * @param samplesPerPixel Number of samples per pixel.
      * @param componentCount Component count of rendering.
      * @param gpuDataType Data type of the texture data source.
      * @param internalFormat Internal format of the texture in GPU memory.
      */
-    RayCastRenderer( const uint32_t samples, const uint32_t componentCount,
-                     const uint32_t gpuDataType, const int32_t internalFormat );
+    RayCastRenderer( uint32_t samplesPerRay,
+                     uint32_t samplesPerPixel,
+                     uint32_t componentCount,
+                     uint32_t gpuDataType,
+                     int32_t internalFormat );
     ~RayCastRenderer();
 
     /**
@@ -71,7 +75,8 @@ private:
 
     EqTexturePtr _framebufferTexture;
     GLSLShadersPtr _shaders;
-    uint32_t _nSamples;
+    uint32_t _nSamplesPerRay;
+    uint32_t _nSamplesPerPixel;
     uint32_t _transferFunctionTexture;
     std::vector< uint32_t > _usedTextures[2]; // last, current frame
 };

@@ -30,6 +30,7 @@ const std::string CPUCACHEMEM_PARAM = "cpu-cache-mem";
 const std::string MINLOD_PARAM = "min-lod";
 const std::string MAXLOD_PARAM = "max-lod";
 const std::string SAMPLESPERRAY_PARAM = "samples-per-ray";
+const std::string SAMPLESPERPIXEL_PARAM = "samples-per-pixel";
 const std::string TRANSFERFUNCTION_PARAM = "transfer-function";
 
 VolumeRendererParameters::VolumeRendererParameters()
@@ -47,6 +48,7 @@ VolumeRendererParameters::VolumeRendererParameters()
     , minLOD( 0 )
     , maxLOD( ( NODEID_LEVEL_BITS << 1 ) + 1 )
     , samplesPerRay( 512u )
+    , samplesPerPixel( 1u )
     , transferFunction()
 {
     configuration_.addDescription( configGroupName_, GPUCACHEMEM_PARAM,
@@ -67,6 +69,8 @@ VolumeRendererParameters::VolumeRendererParameters()
                                    "Maximum level of detail", maxLOD );
     configuration_.addDescription( configGroupName_, SAMPLESPERRAY_PARAM,
                                    "Number of samples per ray", samplesPerRay );
+    configuration_.addDescription( configGroupName_, SAMPLESPERPIXEL_PARAM,
+                                   "Number of samples per pixel", samplesPerPixel );
     configuration_.addDescription( configGroupName_, TRANSFERFUNCTION_PARAM,
                                 ".1dt transfer function file (from ImageVis3D)",
                                    transferFunction );
@@ -81,6 +85,7 @@ void VolumeRendererParameters::deserialize( co::DataIStream &is, const uint64_t 
        >> minLOD
        >> maxLOD
        >> samplesPerRay
+       >> samplesPerPixel
        >> transferFunction;
 }
 
@@ -93,6 +98,7 @@ void VolumeRendererParameters::serialize( co::DataOStream &os, const uint64_t )
        << minLOD
        << maxLOD
        << samplesPerRay
+       << samplesPerPixel
        << transferFunction;
 }
 
@@ -109,6 +115,7 @@ VolumeRendererParameters &VolumeRendererParameters::operator=(
     minLOD = rhs.minLOD;
     maxLOD = rhs.maxLOD;
     samplesPerRay = rhs.samplesPerRay;
+    samplesPerPixel = rhs.samplesPerPixel;
     transferFunction = rhs.transferFunction;
     setDirty( DIRTY_ALL );
 
@@ -124,6 +131,7 @@ void VolumeRendererParameters::initialize_()
     configuration_.getValue( MINLOD_PARAM, minLOD );
     configuration_.getValue( MAXLOD_PARAM, maxLOD );
     configuration_.getValue( SAMPLESPERRAY_PARAM, samplesPerRay );
+    configuration_.getValue( SAMPLESPERPIXEL_PARAM, samplesPerPixel );
     configuration_.getValue( TRANSFERFUNCTION_PARAM, transferFunction );
     setDirty( DIRTY_ALL );
 }

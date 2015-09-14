@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # master {#master}
 
+* [#145](https://github.com/BlueBrain/Livre/pull/145):
+  Added multisampling per pixel and sparsity parameter for memory datasource
 * [#105](https://github.com/BlueBrain/Livre/pull/105):
   Fix 32 bit issue with REST jpeg image request
 * [#101](https://github.com/BlueBrain/Livre/pull/101):

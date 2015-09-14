@@ -213,8 +213,11 @@ public:
 
     void initializeRenderer()
     {
-        const uint32_t nSlices =
+        const uint32_t nSamplesPerRay =
             getFrameData()->getVRParameters()->samplesPerRay;
+
+        const uint32_t nSamplesPerPixel =
+            getFrameData()->getVRParameters()->samplesPerPixel;
 
         const livre::Node* node =
                 static_cast< livre::Node* >( _channel->getNode( ));
@@ -224,9 +227,12 @@ public:
         ConstVolumeDataSourcePtr dataSource = dashTree->getDataSource();
 
         _renderViewPtr.reset( new EqRenderView( this, dashTree ));
-        _renderViewPtr->setRenderer( RendererPtr( new RayCastRenderer( nSlices,
+        _renderViewPtr->setRenderer( RendererPtr( new RayCastRenderer(
+                                  nSamplesPerRay,
+                                  nSamplesPerPixel,
                                   dataSource->getVolumeInformation().compCount,
-                                  GL_UNSIGNED_BYTE, GL_LUMINANCE8 )));
+                                  GL_UNSIGNED_BYTE,
+                                  GL_LUMINANCE8 )));
     }
 
     const Frustum& initializeLivreFrustum()

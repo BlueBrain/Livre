@@ -30,7 +30,14 @@ namespace livre
 /**
  * Generates in-memory volume data.
  *
- * Parses URIs in the form:   mem:///#1024,1024,1024,32
+ * Parses URIs in the form:   mem:///?sparsity=1.0#1024,1024,1024,32
+ *
+ * The "sparsity" parameter is the sparsity of the data between 0.0
+ * and 1.0. 1.0 means no voxels will be empty. 0.0 means all voxels
+ * will be empty. 0.001 means 99.9% of the voxels will be empty.
+ *
+ * The rest of the parameters are total number of voxels in X,Y,Z and
+ * the block size.
  */
 class MemoryDataSource : public VolumeDataSourcePlugin
 {
@@ -50,6 +57,7 @@ public:
 
     static bool handles( const VolumeDataSourcePluginData& initData );
 
+    float _sparsity;
 };
 
 }

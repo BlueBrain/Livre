@@ -48,14 +48,16 @@ std::string where( const char* file, const int line )
 }
 }
 
-RayCastRenderer::RayCastRenderer( const uint32_t samples,
-                                  const uint32_t componentCount,
-                                  const GLenum gpuDataType,
-                                  const GLint internalFormat )
+RayCastRenderer::RayCastRenderer( uint32_t samplesPerRay,
+                                  uint32_t samplesPerPixel,
+                                  uint32_t componentCount,
+                                  uint32_t gpuDataType,
+                                  int32_t internalFormat )
     : Renderer( componentCount, gpuDataType, internalFormat )
     , _framebufferTexture(
         new eq::util::Texture( GL_TEXTURE_RECTANGLE_ARB, glewGetContext( )))
-    , _nSamples( samples )
+    , _nSamplesPerRay( samplesPerRay )
+    , _nSamplesPerPixel( samplesPerPixel )
     , _transferFunctionTexture( 0 )
 {
     TransferFunction1D< unsigned char > transferFunction;
@@ -243,8 +245,11 @@ void RayCastRenderer::renderBrick_( const GLWidget& glWidget,
     tParamNameGL = glGetUniformLocation( program, "volumeTex" );
     glUniform1i( tParamNameGL, 0 ); //f-shader
 
-    tParamNameGL = glGetUniformLocation(  program, "nSamples" );
-    glUniform1i( tParamNameGL, _nSamples );
+    tParamNameGL = glGetUniformLocation(  program, "nSamplesPerRay" );
+    glUniform1i( tParamNameGL, _nSamplesPerRay );
+
+    tParamNameGL = glGetUniformLocation(  program, "nSamplesPerPixel" );
+    glUniform1i( tParamNameGL, _nSamplesPerPixel );
 
     const uint32_t refLevel = renderBrick.getLODNode( )->getRefLevel( );
 

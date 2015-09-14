@@ -10,7 +10,7 @@
 #extension GL_ARB_texture_rectangle : enable
 
 #define EARLY_EXIT 0.99
-#define DEFAULT_NSAMPLES 32
+#define DEFAULT_NSAMPLES_PER_RAY 32
 
 uniform sampler3D volumeTex; //gx, gy, gz, v
 uniform sampler1D transferFnTex;
@@ -30,7 +30,8 @@ uniform vec3 worldEyePosition;
 uniform vec2 depthRange;
 uniform ivec2 screenPos;
 
-uniform int nSamples;
+uniform int nSamplesPerRay;
+uniform int nSamplesPerPixel;
 uniform float shininess;
 uniform int refLevel;
 
@@ -43,6 +44,10 @@ struct AABB {
     vec3 Min;
     vec3 Max;
 };
+
+float rand(vec2 co){
+  return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
 
 // http://www.opengl.org/wiki/Compute_eye_space_from_window_space.
 vec3 calcPositionInWorldSpaceFromWindowSpace( vec4 windowSpace )
@@ -91,48 +96,58 @@ vec4 composite( vec4 src, vec4 dst, float alphaCorrection )
 void main( void )
 {
     vec4 result = texture2DRect( frameBufferTex, gl_FragCoord.xy - screenPos );
+
     if( result.a > EARLY_EXIT )
          discard;
 
-    vec3 pixelWorldSpacePos = calcPositionInWorldSpaceFromWindowSpace( gl_FragCoord );
-    vec3 rayDirection = normalize( pixelWorldSpacePos - worldEyePosition );
-    Ray eye = Ray( worldEyePosition, rayDirection );
+    vec4 brickResult = vec4( 0.0, 0.0, 0.0, 0.0 );
 
-    AABB aabb = AABB( aabbMin, aabbMax );
-
-    float tnear, tfar;
-    intersectBox( eye, aabb, tnear, tfar );
-
-    if(tnear < 0.0)
-        tnear = 0.0;
-
-    vec3 rayStart = eye.Origin + eye.Dir * tnear;
-    vec3 rayStop = eye.Origin + eye.Dir * tfar;
-
-
-    float stepSize = 1.0 / float( nSamples );
-    float alphaCorrection = float( DEFAULT_NSAMPLES ) / float( nSamples );
-
-    vec3 pos = rayStart;
-    float travel = distance( rayStop, rayStart );
-    vec3 step = normalize( rayStop - rayStart ) * stepSize;
-
-    // Front-to-back absorption-emission integrator
-    for ( int i = 0; travel > 0.0; ++i, pos += step, travel -= stepSize )
+    for( int i = 0; i < nSamplesPerPixel; i++ )
     {
-        vec3 texPos = calcTexturePositionFromAABBPos( pos );
-        float density = texture3D( volumeTex, texPos ).r;
-        vec4 transferFn  = texture1D( transferFnTex, density );
-        result = composite( transferFn, result, alphaCorrection );
+        float xPixelDelta = rand( vec2( gl_FragCoord.x * i, gl_FragCoord.y * i )) / 2.0f;
+        float yPixelDelta = rand( vec2( gl_FragCoord.x * 2 * i , gl_FragCoord.y * 2 * i )) / 2.0f;
+        vec4 localResult = result;
 
-        if( result.a > EARLY_EXIT )
-            break;
+        vec4 subPixelCoord = gl_FragCoord + vec4( xPixelDelta, yPixelDelta, 0.0f, 0.0f );
+        vec3 pixelWorldSpacePos = calcPositionInWorldSpaceFromWindowSpace( subPixelCoord );
+        vec3 rayDirection = normalize( pixelWorldSpacePos - worldEyePosition );
+        Ray eye = Ray( worldEyePosition, rayDirection );
 
-        if( i > nSamples )
-            break;
+        AABB aabb = AABB( aabbMin, aabbMax );
 
+        float tnear, tfar;
+        intersectBox( eye, aabb, tnear, tfar );
+
+        if(tnear < 0.0)
+            tnear = 0.0;
+
+        vec3 rayStart = eye.Origin + eye.Dir * tnear;
+        vec3 rayStop = eye.Origin + eye.Dir * tfar;
+
+
+        float stepSize = 1.0 / float( nSamplesPerRay );
+        float alphaCorrection = float( DEFAULT_NSAMPLES_PER_RAY ) / float( nSamplesPerRay );
+
+        vec3 pos = rayStart;
+        float travel = distance( rayStop, rayStart );
+        vec3 step = normalize( rayStop - rayStart ) * stepSize;
+
+        // Front-to-back absorption-emission integrator
+        for ( int i = 0; travel > 0.0; ++i, pos += step, travel -= stepSize )
+        {
+            vec3 texPos = calcTexturePositionFromAABBPos( pos );
+            float density = texture3D( volumeTex, texPos ).r;
+            vec4 transferFn  = texture1D( transferFnTex, density );
+            localResult = composite( transferFn, localResult, alphaCorrection );
+
+            if( localResult.a > EARLY_EXIT )
+                break;
+
+            if( i > nSamplesPerRay )
+                break;
+
+        }
+        brickResult += localResult;
     }
-
-    gl_FragColor = result;
-
+    gl_FragColor = brickResult / nSamplesPerPixel;
 }
