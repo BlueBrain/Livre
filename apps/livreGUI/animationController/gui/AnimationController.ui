@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>790</width>
-    <height>297</height>
+    <height>203</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,12 +19,22 @@
      <item row="0" column="0">
       <layout class="QHBoxLayout" name="lytConnection">
        <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>URI</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QLineEdit" name="leURI">
          <property name="focusPolicy">
-          <enum>Qt::TabFocus</enum>
+          <enum>Qt::StrongFocus</enum>
          </property>
          <property name="text">
           <string>hbp://</string>
+         </property>
+         <property name="clearButtonEnabled">
+          <bool>false</bool>
          </property>
         </widget>
        </item>
