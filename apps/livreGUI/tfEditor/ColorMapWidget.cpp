@@ -86,7 +86,7 @@ UInt8Vector ColorMapWidget::getCurve() const
     for( size_t i = 0; i < tfSize; ++i )
     {
         const float realX = i * scale;
-        if( _hoverPoints->points().at( currentHPointIndex + 1 ).x() <= realX )
+        if( _hoverPoints->points().at( currentHPointIndex + 1 ).x() < realX )
             currentHPointIndex++;
 
         const QLineF currentLine( _hoverPoints->points().at( currentHPointIndex ),
