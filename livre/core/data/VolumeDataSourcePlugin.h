@@ -91,9 +91,10 @@ public:
                                                       LODNode& lodNode ) const;
 
     /**
-      @return the frame range for data. For streaming data sources the range
-      can be dynamic.
-      */
+     * @return the frame range for data. For streaming data sources the range
+     * can be dynamic. If not implemented by the data source plugin, default
+     * range will be (0,0)
+     */
     LIVRECORE_API virtual Vector2ui getFrameRange();
 
     /**

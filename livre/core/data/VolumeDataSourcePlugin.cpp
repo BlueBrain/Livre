@@ -76,7 +76,7 @@ void VolumeDataSourcePlugin::internalNodeToLODNode(
 
 Vector2ui VolumeDataSourcePlugin::getFrameRange()
 {
-    return Vector2ui( 0, 1 );
+    return Vector2ui( 0, 0 );
 }
 
 bool fillRegularVolumeInfo( VolumeInformation& info )
