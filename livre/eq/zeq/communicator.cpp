@@ -239,7 +239,12 @@ public:
         auto frameSettings = _config.getFrameData().getFrameSettings();
         auto& params = _config.getApplicationParameters();
 
-        if( frameSettings->getFrameNumber() == frame.current  )
+        const Vector2ui& frameRange = _config.getDataFrameRange();
+        const uint32_t frameCount = frameRange[1] - frameRange[0];
+
+        // Continue polling until new frames received
+        if( frameCount > 0 &&
+            frameSettings->getFrameNumber() == frame.current  )
             return;
 
         frameSettings->setFrameNumber( frame.current );
