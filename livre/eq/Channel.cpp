@@ -320,7 +320,6 @@ public:
                             visitor, dashTree->getRenderStatus().getFrameID( ));
 
         window->commit();
-        window->apply();
     }
 
     void frameDraw( const eq::uint128_t& )
@@ -350,13 +349,33 @@ public:
         _frameInfo.clear();
         generateSet.generateRenderingSet( _currentFrustum, _frameInfo );
 
+        const livre::Pipe* pipe = static_cast< const livre::Pipe* >( _channel->getPipe( ));
+
+        // #75: only wait for data in synchronous mode
+        bool dashTreeUpdated = false;
+
+        if( pipe->getFrameData()->getVRParameters()->synchronousMode )
+        {
+            if( _frameInfo.notAvailableRenderNodes.empty( ))
+                dashTreeUpdated = window->apply( false ); // Do not block if rendering nodes are present
+            else
+                dashTreeUpdated = window->apply( true ); // Block until rendering nodes arrive
+        }
+        else
+            dashTreeUpdated = window->apply( false ); // Never block
+
+        if( dashTreeUpdated )
+        {
+            _frameInfo.clear();
+            generateSet.generateRenderingSet( _currentFrustum, _frameInfo );
+        }
+
         EqRenderViewPtr renderViewPtr =
                 boost::static_pointer_cast< EqRenderView >( _renderViewPtr );
         RayCastRendererPtr renderer =
                 boost::static_pointer_cast< RayCastRenderer >(
                     renderViewPtr->getRenderer( ));
 
-        const livre::Pipe* pipe = static_cast< const livre::Pipe* >( _channel->getPipe( ));
         renderer->initTransferFunction(
             pipe->getFrameData()->getRenderSettings()->getTransferFunction( ));
 
