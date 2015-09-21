@@ -23,7 +23,6 @@
 
 #include <QMainWindow>
 #include <livreGUI/tfEditor/ColorMapWidget.h>
-#include <livreGUI/tfEditor/GradientRenderer.h>
 #include <QResizeEvent>
 #include <livreGUI/Controller.h>
 
@@ -71,17 +70,14 @@ private Q_SLOTS:
     void _save();
     void _setDefault();
     void _pointsUpdated();
-    void _connect();
-    void _disconnect();
     void _onTransferFunctionChanged( UInt8Vector tf );
 
 private:
 
     void _publishTransferFunction();
-    bool _requestTransferFunction();
-    void _receiveTransferFunction( const zeq::Event& event );
+    void _requestTransferFunction();
+    void _onTransferFunction( const zeq::Event& event );
     void _onHeartbeat();
-    void _enableWidget( bool enable );
 
     livre::Controller& _controller;
     Ui::TransferFunctionEditor *ui;
@@ -91,7 +87,6 @@ private:
     ColorMapWidget* _greenWidget;
     ColorMapWidget* _blueWidget;
     ColorMapWidget* _alphaWidget;
-    GradientRenderer* _gradientRenderer;
 };
 
 }

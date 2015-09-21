@@ -14,15 +14,6 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="2" column="0">
-    <layout class="QVBoxLayout" name="redLayout"/>
-   </item>
-   <item row="4" column="0">
-    <layout class="QVBoxLayout" name="blueLayout"/>
-   </item>
-   <item row="5" column="0">
-    <layout class="QVBoxLayout" name="rgbaLayout"/>
-   </item>
    <item row="0" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
@@ -55,43 +46,17 @@
      </item>
     </layout>
    </item>
+   <item row="2" column="0">
+    <layout class="QVBoxLayout" name="rgbaLayout"/>
+   </item>
    <item row="3" column="0">
+    <layout class="QVBoxLayout" name="redLayout"/>
+   </item>
+   <item row="4" column="0">
     <layout class="QVBoxLayout" name="greenLayout"/>
    </item>
-   <item row="7" column="0">
-    <layout class="QVBoxLayout" name="rgbGradientLayout"/>
-   </item>
-   <item row="1" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>URL</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="txtURL">
-       <property name="text">
-        <string>hbp://</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btnConnect">
-       <property name="text">
-        <string>Connect</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btnDisconnect">
-       <property name="text">
-        <string>Disconnect</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+   <item row="5" column="0">
+    <layout class="QVBoxLayout" name="blueLayout"/>
    </item>
   </layout>
  </widget>

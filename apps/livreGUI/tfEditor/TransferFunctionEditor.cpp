@@ -30,55 +30,65 @@
 
 namespace livre
 {
+namespace
+{
+static const servus::URI _uri( "hbp://" );
+}
 
 TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
                                                 QWidget* tfParentWidget )
     : QWidget( tfParentWidget )
     , _controller( controller )
     , ui( new Ui::TransferFunctionEditor )
-    , _isConnected( false )
     , _tfReceived( false )
     , _redWidget( new ColorMapWidget( ColorMapWidget::RED_SHADE, this ))
     , _greenWidget( new ColorMapWidget( ColorMapWidget::GREEN_SHADE, this ))
     , _blueWidget( new ColorMapWidget( ColorMapWidget::BLUE_SHADE, this ))
     , _alphaWidget( new ColorMapWidget( ColorMapWidget::ARGB_SHADE, this ))
-    , _gradientRenderer( new GradientRenderer( this ))
 {
     qRegisterMetaType< UInt8Vector >("UInt8Vector");
 
     ui->setupUi( this );
 
-    // Add the widgets to the layouts to match the exact positions on the TransferFunctionEditor.
+    // Add the widgets to the layouts to match the exact positions on the
+    // TransferFunctionEditor
     ui->redLayout->addWidget( _redWidget );
     ui->greenLayout->addWidget( _greenWidget );
     ui->blueLayout->addWidget( _blueWidget );
     ui->rgbaLayout->addWidget( _alphaWidget );
-    ui->rgbGradientLayout->addWidget( _gradientRenderer );
 
-    connect( _redWidget, SIGNAL( colorsChanged()),
-            this, SLOT( _pointsUpdated()));
-    connect( _greenWidget, SIGNAL( colorsChanged()),
-            this, SLOT( _pointsUpdated()));
-    connect( _blueWidget, SIGNAL( colorsChanged()),
-            this, SLOT( _pointsUpdated()));
-    connect( _alphaWidget, SIGNAL( colorsChanged()),
-            this, SLOT( _pointsUpdated()));
+    connect( _redWidget, SIGNAL( colorsChanged( )), this,
+             SLOT( _pointsUpdated()));
+    connect( _greenWidget, SIGNAL( colorsChanged( )), this,
+             SLOT( _pointsUpdated( )));
+    connect( _blueWidget, SIGNAL( colorsChanged( )), this,
+             SLOT( _pointsUpdated( )));
+    connect( _alphaWidget, SIGNAL( colorsChanged( )), this,
+             SLOT( _pointsUpdated( )));
 
     connect( ui->resetButton, SIGNAL( clicked()), this, SLOT( _setDefault()));
     connect( ui->clearButton, SIGNAL( clicked()), this, SLOT( _clear()));
     connect( ui->loadButton, SIGNAL( clicked()), this, SLOT( _load()));
     connect( ui->saveButton, SIGNAL( clicked()), this, SLOT( _save()));
-    connect( ui->btnConnect, SIGNAL( pressed()), this, SLOT( _connect( )));
-    connect( ui->btnDisconnect, SIGNAL( pressed()), this, SLOT( _disconnect()));
 
     connect( this, &TransferFunctionEditor::transferFunctionChanged,
              this, &TransferFunctionEditor::_onTransferFunctionChanged );
 
     QTimer::singleShot( 50, this, SLOT( _setDefault()));
+    _requestTransferFunction();
 }
 
 TransferFunctionEditor::~TransferFunctionEditor()
 {
+    _controller.deregisterHandler( _uri,
+                                   zeq::vocabulary::EVENT_HEARTBEAT,
+                                   boost::bind( &TransferFunctionEditor::_onHeartbeat,
+                                                this ));
+    _controller.deregisterHandler( _uri,
+                                   zeq::hbp::EVENT_LOOKUPTABLE1D,
+                                   boost::bind( &TransferFunctionEditor::_onTransferFunction,
+                                                this, _1 ));
+
     delete ui;
 }
 
@@ -107,29 +117,27 @@ void TransferFunctionEditor::_pointsUpdated()
     for( int32_t i = 0; i < allPoints.size(); ++i )
     {
         const int xPoint = int( allPoints.at(i).x());
-        if ( i + 1 < allPoints.size() && xPoint == allPoints.at(i + 1).x())
+        if( i + 1 < allPoints.size() && xPoint == allPoints.at(i + 1).x( ))
             continue;
 
         const int red = _redWidget->getColorAtPoint( xPoint );
         const int green = _greenWidget->getColorAtPoint( xPoint );
         const int blue = _blueWidget->getColorAtPoint( xPoint );
-        const int alpha =_alphaWidget->getColorAtPoint( xPoint );
+        const int alpha = _alphaWidget->getColorAtPoint( xPoint );
         QColor color((0x00ff0000 & red) >> 16,      // R (16)
                      (0x0000ff00 & green) >> 8,     // G (8)
                      (0x000000ff & blue),           // B (1)
                      (0xff000000 & alpha) >> 24);   // A (24)
 
         // Outlier
-        if ( xPoint / alphaWidgetWidth > 1 )
+        if( xPoint / alphaWidgetWidth > 1 )
             return;
 
         stops << QGradientStop( xPoint / alphaWidgetWidth, color );
     }
 
     _publishTransferFunction();
-
     _alphaWidget->setGradientStops( stops );
-    _gradientRenderer->setGradientStops( stops );
 }
 
 void TransferFunctionEditor::setColorMapStops( const QGradientStops& stops )
@@ -179,27 +187,27 @@ void TransferFunctionEditor::_setDefault()
     stops << QGradientStop( 1.00, QColor::fromRgba( 0xffff7dff ));
 
     setColorMapStops( stops );
-    _gradientRenderer->setGradientStops( stops );
     _pointsUpdated();
 }
 
 void TransferFunctionEditor::_publishTransferFunction()
 {
+    if( ! _tfReceived )
+        return;
+
     const UInt8Vector& redCurve =  _redWidget->getCurve();
     const UInt8Vector& greenCurve =  _greenWidget->getCurve();
     const UInt8Vector& blueCurve =  _blueWidget->getCurve();
     const UInt8Vector& alphaCurve =  _alphaWidget->getCurve();
 
-    if( redCurve.empty()
-            || greenCurve.empty()
-            || blueCurve.empty()
-            || alphaCurve.empty())
+    if( redCurve.empty() || greenCurve.empty() || blueCurve.empty() ||
+        alphaCurve.empty( ))
     {
         return;
     }
 
     UInt8Vector transferFunction;
-    transferFunction.reserve( redCurve.size( ) * 4u );
+    transferFunction.reserve( redCurve.size() * 4u );
     for( uint32_t i = 0; i < redCurve.size(); ++i )
     {
         transferFunction.push_back( redCurve[i] );
@@ -208,38 +216,33 @@ void TransferFunctionEditor::_publishTransferFunction()
         transferFunction.push_back( alphaCurve[i] );
     }
 
-    if( _isConnected && transferFunction.size() == 1024 )
+    if( transferFunction.size() == 1024 )
     {
-        const servus::URI uri( ui->txtURL->text().toStdString());
-        _controller.publish( uri,
+        _controller.publish( _uri,
                              zeq::hbp::serializeLookupTable1D( transferFunction ));
     }
 }
 
-bool TransferFunctionEditor::_requestTransferFunction()
+void TransferFunctionEditor::_requestTransferFunction()
 {
-    const QString& uriStr = ui->txtURL->text();
-    const servus::URI uri( uriStr.toStdString( ));
-
-    _controller.registerHandler( uri,
+    _controller.registerHandler( _uri,
                                  zeq::hbp::EVENT_LOOKUPTABLE1D,
-                                 boost::bind( &TransferFunctionEditor::_receiveTransferFunction,
+                                 boost::bind( &TransferFunctionEditor::_onTransferFunction,
                                               this, _1 ));
-    _controller.registerHandler( uri,
+    _controller.registerHandler( _uri,
                                  zeq::vocabulary::EVENT_HEARTBEAT,
                                  boost::bind( &TransferFunctionEditor::_onHeartbeat,
                                               this ));
-
-    _isConnected.timedWaitEQ( true, 2000 /*ms*/ );
-    return _isConnected;
 }
 
-void TransferFunctionEditor::_receiveTransferFunction( const zeq::Event& tfEvent )
+void TransferFunctionEditor::_onTransferFunction( const zeq::Event& tfEvent )
 {
     if( !_tfReceived )
+    {
         emit transferFunctionChanged( zeq::hbp::deserializeLookupTable1D( tfEvent ));
+    }
     _tfReceived = true;
-    _controller.deregisterHandler( servus::URI( ui->txtURL->text().toStdString()),
+    _controller.deregisterHandler( _uri,
                                    zeq::vocabulary::EVENT_HEARTBEAT,
                                    boost::bind( &TransferFunctionEditor::_onHeartbeat,
                                    this ));
@@ -249,13 +252,10 @@ void TransferFunctionEditor::_onHeartbeat()
 {
     if( !_tfReceived )
     {
-        const QString& uriStr = ui->txtURL->text();
-        const servus::URI uri( uriStr.toStdString( ));
         const zeq::Event& zeqEvent =
             zeq::vocabulary::serializeRequest( zeq::hbp::EVENT_LOOKUPTABLE1D );
-        _controller.publish( uri, zeqEvent );
+        _controller.publish( _uri, zeqEvent );
     }
-    _isConnected = true;
 }
 
 void TransferFunctionEditor::_clear()
@@ -266,7 +266,6 @@ void TransferFunctionEditor::_clear()
     stops << QGradientStop( 1.00, QColor::fromRgba( 0xffffffff ));
 
     setColorMapStops( stops );
-    _gradientRenderer->setGradientStops( stops );
     _pointsUpdated();
 }
 
@@ -301,16 +300,12 @@ void TransferFunctionEditor::_load()
     in >> redPoints
        >> greenPoints
        >> bluePoints
-       >> alphaPoints
-       >> gradientStops;
+       >> alphaPoints;
 
     _redWidget->setPoints( redPoints );
     _greenWidget->setPoints( greenPoints );
     _blueWidget->setPoints( bluePoints );
     _alphaWidget->setPoints( alphaPoints );
-    QLinearGradient gradient;
-    gradient.setStops( gradientStops );
-    _gradientRenderer->setGradient( gradient );
     _pointsUpdated();
 }
 
@@ -334,8 +329,7 @@ void TransferFunctionEditor::_save()
     out << _redWidget->getPoints()
         << _greenWidget->getPoints()
         << _blueWidget->getPoints()
-        << _alphaWidget->getPoints()
-        << _gradientRenderer->getGradient().stops();
+        << _alphaWidget->getPoints();
 }
 
 namespace
@@ -416,63 +410,7 @@ void TransferFunctionEditor::_onTransferFunctionChanged( UInt8Vector tf )
     _greenWidget->setPoints( greenPointsF );
     _blueWidget->setPoints( bluePointsF );
     _alphaWidget->setPoints( alphaPointsF );
-    _gradientRenderer->setGradientStops( stops );
-
-    _enableWidget( true );
-}
-
-void TransferFunctionEditor::_connect()
-{
-    try
-    {
-        _enableWidget( false );
-        if( _requestTransferFunction())
-        {
-            ui->btnConnect->setEnabled( false );
-            ui->btnDisconnect->setEnabled( true );
-        }
-        else
-            _enableWidget( true );
-    }
-    catch( const std::exception& error )
-    {
-        ui->btnConnect->setEnabled( true );
-        ui->btnDisconnect->setEnabled( false );
-        LBERROR << "Error:" << error.what() << std::endl;
-        _isConnected = false;
-    }
-}
-
-void TransferFunctionEditor::_disconnect()
-{
-    const QString& uriStr = ui->txtURL->text();
-    const servus::URI uri( uriStr.toStdString( ));
-    _controller.deregisterHandler( uri,
-                                   zeq::vocabulary::EVENT_HEARTBEAT,
-                                   boost::bind( &TransferFunctionEditor::_onHeartbeat,
-                                                this ));
-    _controller.deregisterHandler( uri,
-                                   zeq::vocabulary::EVENT_EXIT,
-                                   boost::bind( &TransferFunctionEditor::_disconnect,
-                                                this ));
-    _controller.deregisterHandler( uri,
-                                   zeq::hbp::EVENT_LOOKUPTABLE1D,
-                                   boost::bind( &TransferFunctionEditor::_receiveTransferFunction,
-                                                this, _1 ));
-
-    _isConnected = false;
-    _tfReceived = false;
-    ui->btnConnect->setEnabled( true );
-    ui->btnDisconnect->setEnabled( false );
-}
-
-void TransferFunctionEditor::_enableWidget( bool enable )
-{
-    _redWidget->setEnabled( enable );
-    _greenWidget->setEnabled( enable );
-    _blueWidget->setEnabled( enable );
-    _alphaWidget->setEnabled( enable );
-    _gradientRenderer->setEnabled( enable );
+    _pointsUpdated();
 }
 
 }
