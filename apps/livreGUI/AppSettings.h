@@ -1,6 +1,6 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
- *                     Maxim Makhinya <maxmah@gmail.com>
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                          Maxim Makhinya <maxmah@gmail.com>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -29,15 +29,15 @@ namespace livre
 {
 
 
-#define COMPANY_NAME "BlueBrainProject"
-#define PRODUCT_NAME "Livre"
+#define COMPANY_NAME "Blue Brain Project"
+#define PRODUCT_NAME "Interactive Supercomputing Controller"
 
 
 /**
  * settings for QSettings initialization, company and product names.
  */
 
-LB_UNUSED static void setCoreSettingsNames( )
+LB_UNUSED static void setCoreSettingsNames()
 {
     QCoreApplication::setOrganizationName( COMPANY_NAME );
     QCoreApplication::setApplicationName( PRODUCT_NAME );

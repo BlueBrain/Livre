@@ -24,8 +24,8 @@
 namespace livre
 {
 
-ColorMapWidget::ColorMapWidget( const ShadeType type, QWidget* colorMapParentWidget )
-    : TFWidget( colorMapParentWidget )
+ColorMapWidget::ColorMapWidget( const ShadeType type, QWidget* parent_ )
+    : TFWidget( parent_ )
     , _shadeType( type )
 {
     // Add checkers background for the alpha widget.
@@ -57,20 +57,31 @@ uint32_t ColorMapWidget::getColorAtPoint( const int32_t xPosition )
     _generateShade();
 
     const QPolygonF& hoverPoints = _hoverPoints->points();
-    for ( int32_t i = 1; i < hoverPoints.size(); ++i )
+    for( int i = 1; i < hoverPoints.size(); ++i )
     {
-        if( hoverPoints.at(i - 1).x() <= xPosition && hoverPoints.at(i).x() >= xPosition )
+        if( hoverPoints.at(i - 1).x() > xPosition ||
+            hoverPoints.at(i).x() < xPosition )
         {
-            QLineF pointsConnection( hoverPoints.at( i-1 ), hoverPoints.at( i ) );
-            const float length = pointsConnection.length() *
-                    ( xPosition - pointsConnection.x1()) / pointsConnection.dx();
-            pointsConnection.setLength( length );
-
-            return _shade.pixel( qRound( qMin( pointsConnection.x2(),
-                                            ( qreal(_shade.width() - 1 )))),
-                                 qRound( qMin( pointsConnection.y2(),
-                                              qreal( _shade.height() - 1 ))));
+            continue;
         }
+
+        QLineF line( hoverPoints.at( i-1 ), hoverPoints.at( i ) );
+        line.setLength(( xPosition - line.x1( )) / line.dx() * line.length( ));
+
+        if( _shadeType != ARGB_SHADE )
+            return _shade.pixel( qRound( qMin( line.x2(),
+                                               qreal( _shade.width() - 1 ))),
+                                 qRound( qMin( line.y2(),
+                                               qreal( _shade.height() - 1 ))));
+
+        const float alpha = std::min( 1.f,
+                                      float( line.y2( )) /
+                                      float( _shade.height() - 1 ));
+        const uint32_t pixel =
+            _shade.pixel( qRound( qMin( line.x2(),
+                                        qreal( _shade.width() - 1 ))), 0 );
+        return ( pixel & 0xffffffu ) |
+            ( qMin( unsigned( (1.f - alpha) * 255 ), 255u ) << 24u );
     }
     return 0u;
 }
@@ -102,20 +113,17 @@ UInt8Vector ColorMapWidget::getCurve() const
 
 void ColorMapWidget::setGradientStops( const QGradientStops& stops )
 {
-    if( _shadeType == ARGB_SHADE )
-    {
-        _gradient = QLinearGradient( 0.0f, 0.0f, width(), 0.0f );
+    if( _shadeType != ARGB_SHADE )
+        return;
 
-        for( int32_t i = 0; i < stops.size(); ++i )
-        {
-            const QColor& color = stops.at( i ).second;
-            _gradient.setColorAt( stops.at( i ).first, QColor( color.red(), color.green(),
-                                                               color.blue()));
-        }
-        _shade = QImage();
-        _generateShade();
-        update();
-    }
+    _gradient = QLinearGradient( 0.0f, 0.0f, width(), 0.0f );
+
+    for( int i = 0; i < stops.size(); ++i )
+        _gradient.setColorAt( stops.at( i ).first, stops.at( i ).second );
+
+    _shade = QImage();
+    _generateShade();
+    update();
 }
 
 void ColorMapWidget::paintEvent( QPaintEvent* )
@@ -125,28 +133,21 @@ void ColorMapWidget::paintEvent( QPaintEvent* )
     QPainter painter( this );
     painter.drawImage( 0, 0, _shade );
 
-    painter.setPen( QColor( 255, 255, 255 ) );
+    painter.setPen( QColor( 255, 255, 255 ));
     painter.drawRect( 0, 0, width(), height());
 }
 
 void ColorMapWidget::_generateShade()
 {
-    if( _shade.isNull() || _shade.size() != size() )
+    if( _shade.isNull() || _shade.size() != size( ))
     {
         // Alpha widget
         if( _shadeType == ARGB_SHADE )
         {
             _shade = QImage( size(), QImage::Format_ARGB32_Premultiplied );
-            _shade.fill(0);
-
+            _shade.fill( 0 );
             QPainter painter( &_shade );
             painter.fillRect( rect(), _gradient );
-
-            painter.setCompositionMode( QPainter::CompositionMode_DestinationIn );
-            QLinearGradient fade( 0, 0, 0, height());
-            fade.setColorAt( 0, QColor(0, 0, 0, 255 ));
-            fade.setColorAt( 1, QColor(0, 0, 0, 0 ));
-            painter.fillRect( rect(), fade );
         }
         else // RGB widgets
         {

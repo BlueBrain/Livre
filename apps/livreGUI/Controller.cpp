@@ -113,18 +113,11 @@ struct Controller::Impl
         return false;
     }
 
-    std::string getURIStr( const servus::URI& uri ) const
-    {
-        std::stringstream ss;
-        ss << uri;
-        return ss.str();
-    }
-
     template< typename Type >
     Type* getObject( std::map< std::string, Type* >& map,
                      const servus::URI& uri  )
     {
-        const std::string& uriStr = getURIStr( uri );
+        const std::string& uriStr = std::to_string( uri );
         typename std::map< std::string, Type* >::iterator it = map.find( uriStr );
         if( it == map.end( ))
             map[ uriStr ] = new Type( uri );
@@ -151,7 +144,7 @@ struct Controller::Impl
                                            const servus::uint128_t& event,
                                            const zeq::EventFunc& func )
     {
-        const std::string& uriStr = getURIStr( uri );
+        const std::string& uriStr = std::to_string( uri );
         typename std::map< std::string, zeq::Subscriber* >::iterator it =
                 _subscriberMap.find( uriStr );
         if( it == _subscriberMap.end( ))
@@ -196,7 +189,7 @@ struct Controller::Impl
                             const zeq::EventFunc& func )
     {
         ScopedLock lock( _subscriberMutex );
-        const std::string& uriStr = getURIStr( uri );
+        const std::string& uriStr = std::to_string( uri );
         if( _subscriberMap.count( uriStr ) == 0 )
             return false;
 

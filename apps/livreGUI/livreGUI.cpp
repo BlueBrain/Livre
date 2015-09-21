@@ -48,15 +48,15 @@ int main( int argc, char *argv[] )
     QTabWidget* tabWidget = new QTabWidget;
 
     tabWidget->addTab( new livre::TransferFunctionEditor(controller),
-                       "Transfer Function Editor");
+                       "Color Map");
 
 #ifdef LIVRE_USE_MONSTEER
     tabWidget->addTab( new livre::StimuliController(controller),
-                       "Simulation Controller" );
+                       "Simulation" );
 #endif
 
     tabWidget->addTab( new livre::AnimationController(controller),
-                       "Animation Controller");
+                       "Time");
 
     QMainWindow window;
     window.setCentralWidget( tabWidget );
