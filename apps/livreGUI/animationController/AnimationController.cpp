@@ -134,7 +134,7 @@ struct AnimationController::Impl
             _ui.chbxReverse->setEnabled( true );
     }
 
-    void slider( int value )
+    void setCurrentFrame( const int value )
     {
         _ui.btnPlay->setEnabled( _connected && _action==AA_PAUSE );
         _ui.btnPause->setEnabled( _connected && _action!=AA_PAUSE );
@@ -187,6 +187,8 @@ struct AnimationController::Impl
         _currentFrame = frame.current;
         _ui.sldFrame->setMinimum( _startFrame );
         _ui.sldFrame->setMaximum( _endFrame );
+        _ui.lblStartFrame->setText( QString::number( _startFrame ));
+        _ui.lblEndFrame->setText( QString::number( _endFrame ));
 
         if( _onFirstFrame )
         {
@@ -263,7 +265,7 @@ AnimationController::AnimationController( Controller& controller,
     qRegisterMetaType< ::zeq::hbp::data::Frame >("::zeq::hbp::data::Frame");
 
     _ui.setupUi( this );
-    connect( _ui.sldFrame, SIGNAL( valueChanged( int )), this, SLOT( _slider( int )));
+    connect( _ui.sldFrame, SIGNAL( valueChanged( int )), this, SLOT( _onSliderMoved( int )));
     connect( _ui.btnPlay, SIGNAL( pressed()), this, SLOT( _play()));
     connect( _ui.btnPause, SIGNAL( pressed()), this, SLOT( _pause()));
     connect( _ui.btnConnect, SIGNAL( pressed()), this, SLOT( _connect()));
@@ -291,9 +293,9 @@ void AnimationController::_disconnect()
     _impl->disconnect();
 }
 
-void AnimationController::_slider( int value )
+void AnimationController::_onSliderMoved( const int value )
 {
-    _impl->slider( value );
+    _impl->setCurrentFrame( value );
 }
 
 void AnimationController::_play()

@@ -72,13 +72,12 @@ struct StimuliController::Impl
                 static_cast< GeneratorPropertiesModel * >(
                     _ui.tblGeneratorProperties->model( ));
 
-        QItemSelectionModel* selectionModel = _ui.tblGenerators->selectionModel();
-        const QModelIndex& ind = selectionModel->currentIndex();
-        if( !ind.isValid( ))
+        const int generatorIndex = _ui.generatorsComboBox->currentIndex();
+        if( generatorIndex < 0 )
             return;
 
         const Strings& generators = getGenerators();
-        const std::string& generator = generators[ ind.row() ];
+        const std::string& generator = generators[ generatorIndex ];
 
         PropertyList properties = model->getProperties( );
         QVariantList _list;
@@ -97,15 +96,13 @@ struct StimuliController::Impl
             _simulator->injectStimulus( json, _selectedIds );
     }
 
-    void generatorSelected()
+    void generatorSelected( const int generatorIndex )
     {
-        QItemSelectionModel* selectionModel = _ui.tblGenerators->selectionModel();
-        const QModelIndex& ind = selectionModel->currentIndex();
-        if( !ind.isValid( ))
+        if( generatorIndex < 0 )
             return;
 
         const Strings& generators = getGenerators();
-        const PropertyList& prop = getGeneratorProperties( generators[ ind.row() ] );
+        const PropertyList& prop = getGeneratorProperties( generators[ generatorIndex ] );
         GeneratorPropertiesModel* model =
                 static_cast< GeneratorPropertiesModel* >(_ui.tblGeneratorProperties->model());
 
@@ -149,12 +146,11 @@ struct StimuliController::Impl
     {
         _selectedIds = cellIds;
 
-        QItemSelectionModel* selectionModel = _ui.tblGenerators->selectionModel();
-        const QModelIndex& ind = selectionModel->currentIndex();
+        const int generatorIndex = _ui.generatorsComboBox->currentIndex();
 
         _ui.btnInjectStimulus->setEnabled( _simulator &&
                                            !_selectedIds.empty( )
-                                           && ind.isValid( ));
+                                           && generatorIndex >= 0 );
 
         std::stringstream str;
         BOOST_FOREACH( const uint32_t gid, _selectedIds )
@@ -236,11 +232,8 @@ StimuliController::StimuliController( Controller& controller,
 
     _ui.setupUi( this );
     _ui.txtCellIds->setReadOnly( true );
-    GeneratorModel *generatorModel = new GeneratorModel( _ui.tblGenerators );
-    _ui.tblGenerators->setModel( generatorModel );
-    _ui.tblGenerators->setColumnWidth( 0, 300 );
-    _ui.tblGenerators->setSelectionMode( QAbstractItemView::SingleSelection );
-    _ui.tblGenerators->setSelectionBehavior( QAbstractItemView::SelectRows );
+    GeneratorModel* generatorModel = new GeneratorModel( _ui.generatorsComboBox );
+    _ui.generatorsComboBox->setModel( generatorModel );
 
     PropertyEditDelegate* editorDelegate =
             new PropertyEditDelegate( _ui.tblGeneratorProperties );
@@ -260,11 +253,8 @@ StimuliController::StimuliController( Controller& controller,
     connect( _ui.btnInjectStimulus, SIGNAL(clicked()),
              this, SLOT(_injectStimuli()));
 
-    QItemSelectionModel* selectionModel = _ui.tblGenerators->selectionModel();
-    connect( selectionModel, SIGNAL(selectionChanged(const QItemSelection&,
-                                                     const QItemSelection& )),
-             this, SLOT(_generatorSelected(const QItemSelection&,
-                                          const QItemSelection& )));
+    connect( _ui.generatorsComboBox, SIGNAL( currentIndexChanged( int )),
+             this, SLOT( _generatorSelected( int )));
 
     _ui.btnDisconnectHBP->setEnabled( false );
     _ui.btnDisconnectISC->setEnabled( false );
@@ -279,7 +269,9 @@ StimuliController::StimuliController( Controller& controller,
              this, SLOT(_updateCellIdsTextBox(std::vector<uint32_t>)),
              Qt::QueuedConnection );
 
-    _ui.tblGenerators->selectRow( 0 );
+    _ui.generatorsComboBox->setCurrentIndex( 0 );
+    // Emulate currentIndexChanged() signal as qApp has not been created yet
+    _impl->generatorSelected( 0 );
 }
 
 StimuliController::~StimuliController( )
@@ -292,10 +284,9 @@ void StimuliController::_injectStimuli()
      _impl->injectStimuli();
 }
 
-void StimuliController::_generatorSelected( const QItemSelection&,
-                                            const QItemSelection& )
+void StimuliController::_generatorSelected( const int index )
 {
-    _impl->generatorSelected();
+    _impl->generatorSelected( index );
 }
 
 void StimuliController::_updateCellIdsTextBox( std::vector<uint32_t> cellIds )

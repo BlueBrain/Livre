@@ -60,6 +60,13 @@
      <item row="1" column="0">
       <layout class="QHBoxLayout" name="lytAction">
        <item>
+        <widget class="QLabel" name="lblStartFrame">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QSlider" name="sldFrame">
          <property name="enabled">
           <bool>false</bool>
@@ -76,6 +83,20 @@
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="lblFrameSeparator">
+         <property name="text">
+          <string>/</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="lblEndFrame">
+         <property name="text">
+          <string>0</string>
          </property>
         </widget>
        </item>

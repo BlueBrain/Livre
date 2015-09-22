@@ -59,8 +59,7 @@ signals:
 private Q_SLOTS:
 
     void _injectStimuli();
-    void _generatorSelected( const QItemSelection& selected,
-                             const QItemSelection& deselected );
+    void _generatorSelected( int index );
 
     void _updateCellIdsTextBox( std::vector<uint32_t> cellIds );
 
