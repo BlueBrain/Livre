@@ -50,6 +50,7 @@ struct StimuliController::Impl
           const servus::URI& simulationZeqSchema,
           Ui_stimuliController& ui )
         : _simulator( 0 )
+        , _playing( true )
         , _isRegistered( false )
         , _ui( ui )
         , _stimuliController( stimuliController )
@@ -57,6 +58,8 @@ struct StimuliController::Impl
         , _selectionZeqSchema( selectionZeqSchema )
         , _simulationZeqSchema( simulationZeqSchema )
     {
+        _ui.setupUi( stimuliController );
+
         connectHBP();
         connectISC();
     }
@@ -95,12 +98,25 @@ struct StimuliController::Impl
         if( json.empty( ))
             return;
 
-        const bool individual = _ui.chkIndividual->checkState() == Qt::Checked;
+        _simulator->injectStimulus( json, _selectedIds );
+    }
 
-        if( individual)
-            _simulator->injectMultipleStimuli( json, _selectedIds );
+    void playPauseSimulation()
+    {
+        if( !_simulator )
+            return;
+
+        if( _playing )
+        {
+            _simulator->pause();
+            _ui.btnPlayPauseSimulation->setText( "Play simulation" );
+        }
         else
-            _simulator->injectStimulus( json, _selectedIds );
+        {
+            _simulator->play();
+            _ui.btnPlayPauseSimulation->setText( "Pause simulation" );
+        }
+        _playing = !_playing;
     }
 
     void generatorSelected( const int generatorIndex )
@@ -121,10 +137,12 @@ struct StimuliController::Impl
         try
         {
             _simulator = _controller.getSimulator( _simulationZeqSchema );
+            _ui.btnPlayPauseSimulation->setEnabled( true );
         }
         catch( const std::exception& error )
         {
             _ui.btnInjectStimulus->setEnabled( false );
+            _ui.btnPlayPauseSimulation->setEnabled( false );
             LBERROR << "Error:" << error.what() << std::endl;
         }
     }
@@ -204,6 +222,7 @@ struct StimuliController::Impl
 public:
 
     ::monsteer::Simulator* _simulator;
+    bool _playing;
     bool _isRegistered;
     Ui_stimuliController& _ui;
     StimuliController* _stimuliController;
@@ -224,7 +243,6 @@ StimuliController::StimuliController( Controller& controller,
 {
     qRegisterMetaType< std::vector<uint32_t> >("std::vector<uint32_t>");
 
-    _ui.setupUi( this );
     _ui.txtCellIds->setReadOnly( true );
     GeneratorModel* generatorModel = new GeneratorModel( _ui.generatorsComboBox );
     _ui.generatorsComboBox->setModel( generatorModel );
@@ -244,6 +262,9 @@ StimuliController::StimuliController( Controller& controller,
     _ui.btnInjectStimulus->setEnabled( false );
 
     setWindowFlags(( windowFlags() ^ Qt::Dialog) | Qt::Window );
+
+    connect( _ui.btnPlayPauseSimulation, SIGNAL(clicked()),
+             this, SLOT(_playPauseSimulation()));
 
     connect( _ui.btnInjectStimulus, SIGNAL(clicked()),
              this, SLOT(_injectStimuli()));
@@ -271,6 +292,11 @@ StimuliController::~StimuliController( )
 void StimuliController::_injectStimuli()
 {
      _impl->injectStimuli();
+}
+
+void StimuliController::_playPauseSimulation()
+{
+     _impl->playPauseSimulation();
 }
 
 void StimuliController::_generatorSelected( const int index )
