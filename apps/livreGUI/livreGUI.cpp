@@ -39,7 +39,7 @@ int main( int argc, char *argv[] )
 
     livre::Controller controller;
 
-    MainWindow window( controller );
+    livre::MainWindow window( controller );
     window.resize( QDesktopWidget().availableGeometry( &window ).size() / 2.0 );
     window.show();
 

@@ -29,6 +29,9 @@ namespace Ui
 class MainWindow;
 }
 
+namespace livre
+{
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -40,5 +43,7 @@ public:
 private:
     Ui::MainWindow* _ui;
 };
+
+}
 
 #endif // MAINWINDOW_H

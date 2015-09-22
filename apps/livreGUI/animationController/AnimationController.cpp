@@ -49,20 +49,25 @@ struct AnimationController::Impl
 
     Impl( AnimationController* animationController,
           Controller& controller,
+          const servus::URI& zeqSchema,
           Ui_animationController& ui )
         : _ui( ui )
         , _animationController( animationController )
         , _controller( controller )
+        , _zeqSchema( zeqSchema )
         , _startFrame( DEFAULT_MIN_VALUE )
         , _endFrame( DEFAULT_MAX_VALUE )
         , _currentFrame( 0 )
         , _action( AA_PAUSE )
         , _connected( false )
         , _onFirstFrame( true )
-    {}
+    {
+        connect();
+    }
 
     ~Impl()
     {
+        disconnect();
     }
 
     void onFrame( const ::zeq::Event& event_ )
@@ -77,11 +82,12 @@ struct AnimationController::Impl
 
     void setSubscriber()
     {
-        const servus::URI uri( _ui.leURI->text().toStdString( ));
-        _controller.registerHandler( uri, ::zeq::hbp::EVENT_FRAME,
+        _controller.registerHandler( _zeqSchema,
+                                     ::zeq::hbp::EVENT_FRAME,
                                      boost::bind( &AnimationController::Impl::onFrame,
                                                   this, _1 ));
-        _controller.registerHandler( uri, zeq::vocabulary::EVENT_HEARTBEAT,
+        _controller.registerHandler( _zeqSchema,
+                                     zeq::vocabulary::EVENT_HEARTBEAT,
                                      boost::bind(
                                          &AnimationController::Impl::onFirstHeartbeatEvent,
                                          this ));
@@ -104,7 +110,7 @@ struct AnimationController::Impl
 
     void disconnect()
     {
-        _controller.deregisterHandler( servus::URI( _ui.leURI->text().toStdString()),
+        _controller.deregisterHandler( _zeqSchema,
                                        ::zeq::hbp::EVENT_FRAME,
                                        boost::bind( &AnimationController::Impl::onFrame,
                                                     this, _1 ));
@@ -114,8 +120,6 @@ struct AnimationController::Impl
 
     void resetControls()
     {
-        _ui.btnConnect->setEnabled( !_connected );
-        _ui.btnDisconnect->setEnabled( _connected );
         _ui.btnPlay->setEnabled( _connected && _action==AA_PAUSE );
         _ui.btnPause->setEnabled( _connected && _action!=AA_PAUSE );
         _ui.sldFrame->setEnabled( _connected );
@@ -169,9 +173,10 @@ struct AnimationController::Impl
 
     void onFirstHeartBeatReceived()
     {
-        const servus::URI uri( _ui.leURI->text().toStdString( ));
-        _controller.publish( uri, ::zeq::vocabulary::serializeRequest( ::zeq::hbp::EVENT_FRAME ));
-        _controller.deregisterHandler( uri, zeq::vocabulary::EVENT_HEARTBEAT,
+        _controller.publish( _zeqSchema,
+                             ::zeq::vocabulary::serializeRequest( ::zeq::hbp::EVENT_FRAME ));
+        _controller.deregisterHandler( _zeqSchema,
+                                       zeq::vocabulary::EVENT_HEARTBEAT,
                                        boost::bind(
                                            &AnimationController::Impl::onFirstHeartbeatEvent,
                                            this ));
@@ -222,8 +227,7 @@ struct AnimationController::Impl
         {
             const ::zeq::hbp::data::Frame frame(
                         _startFrame, _currentFrame, _endFrame, getDeltaFromAction());
-            _controller.publish( servus::URI( _ui.leURI->text().toStdString()),
-                                 ::zeq::hbp::serializeFrame( frame ));
+            _controller.publish( _zeqSchema, ::zeq::hbp::serializeFrame( frame ));
         }
     }
 
@@ -249,6 +253,7 @@ public:
     Ui_animationController& _ui;
     AnimationController* _animationController;
     Controller& _controller;
+    servus::URI _zeqSchema;
     uint32_t        _startFrame;
     uint32_t        _endFrame;
     uint32_t        _currentFrame;
@@ -258,9 +263,10 @@ public:
 };
 
 AnimationController::AnimationController( Controller& controller,
+                                          const servus::URI& zeqSchema,
                                           QWidget* parentWgt )
     : QWidget( parentWgt )
-    , _impl( new AnimationController::Impl( this, controller, _ui ))
+    , _impl( new AnimationController::Impl( this, controller, zeqSchema, _ui ))
 {
     qRegisterMetaType< ::zeq::hbp::data::Frame >("::zeq::hbp::data::Frame");
 
@@ -268,8 +274,6 @@ AnimationController::AnimationController( Controller& controller,
     connect( _ui.sldFrame, SIGNAL( valueChanged( int )), this, SLOT( _onSliderMoved( int )));
     connect( _ui.btnPlay, SIGNAL( pressed()), this, SLOT( _play()));
     connect( _ui.btnPause, SIGNAL( pressed()), this, SLOT( _pause()));
-    connect( _ui.btnConnect, SIGNAL( pressed()), this, SLOT( _connect()));
-    connect( _ui.btnDisconnect, SIGNAL( pressed()), this, SLOT( _disconnect()));
     connect( this, &AnimationController::newFrameReceived,
              this, &AnimationController::_onNewFrameReceived,
              Qt::QueuedConnection );

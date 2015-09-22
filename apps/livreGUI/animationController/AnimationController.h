@@ -23,16 +23,13 @@
 #define _AnimationController_h_
 
 #include <livreGUI/types.h>
-
-#include <zeq/hbp/vocabulary.h>
-
 #ifndef Q_MOC_RUN
 #  include <livreGUI/ui_AnimationController.h>
 #endif // Q_MOC_RUN
 
-#include <QWidget>
+#include <zeq/hbp/vocabulary.h>
 
-//struct AnimationControllerImpl;
+#include <QWidget>
 
 namespace livre
 {
@@ -49,9 +46,11 @@ public:
 
     /**
      * @param controller The GUI connection to zeq world.
+     * @param zeqSchema the ZeroEQ schema used to send/receive frame events.
      * @param parentWgt Parent widget.
      */
     AnimationController( Controller& controller,
+                         const servus::URI& zeqSchema,
                          QWidget *parentWgt = 0 );
     ~AnimationController( );
 

@@ -26,24 +26,37 @@
 #include <livreGUI/stimuliController/StimuliController.h>
 #endif
 
+namespace
+{
+static const servus::URI LIVRE_ZEQ_SCHEMA( "hbp://" );
+static const servus::URI NEST_ZEQ_SCHEMA( "monsteer-nesteer://" );
+}
+
+namespace livre
+{
+
 MainWindow::MainWindow( livre::Controller& controller, QWidget* parent_ )
     : QMainWindow( parent_ )
     , _ui( new Ui::MainWindow )
 {
     _ui->setupUi( this );
 
-    setCentralWidget( new livre::TransferFunctionEditor( controller ));
+    setCentralWidget( new TransferFunctionEditor( controller,
+                                                  LIVRE_ZEQ_SCHEMA ));
 
 #ifdef LIVRE_USE_MONSTEER
     _ui->simulationDockWidget->setWidget(
-                new livre::StimuliController( controller ));
+                new StimuliController( controller, LIVRE_ZEQ_SCHEMA,
+                                       NEST_ZEQ_SCHEMA ));
 #endif
 
     _ui->animationDockWidget->setWidget(
-                new livre::AnimationController( controller ));
+                new AnimationController( controller, LIVRE_ZEQ_SCHEMA ));
 }
 
 MainWindow::~MainWindow()
 {
     delete _ui;
+}
+
 }

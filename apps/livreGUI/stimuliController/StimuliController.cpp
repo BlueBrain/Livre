@@ -46,14 +46,17 @@ struct StimuliController::Impl
 
     Impl( StimuliController* stimuliController,
           Controller& controller,
+          const servus::URI& selectionZeqSchema,
+          const servus::URI& simulationZeqSchema,
           Ui_stimuliController& ui )
         : _simulator( 0 )
         , _isRegistered( false )
         , _ui( ui )
         , _stimuliController( stimuliController )
         , _controller( controller )
+        , _selectionZeqSchema( selectionZeqSchema )
+        , _simulationZeqSchema( simulationZeqSchema )
     {
-
     }
 
     ~Impl()
@@ -104,7 +107,7 @@ struct StimuliController::Impl
         const Strings& generators = getGenerators();
         const PropertyList& prop = getGeneratorProperties( generators[ generatorIndex ] );
         GeneratorPropertiesModel* model =
-                static_cast< GeneratorPropertiesModel* >(_ui.tblGeneratorProperties->model());
+                static_cast< GeneratorPropertiesModel* >( _ui.tblGeneratorProperties->model( ));
 
         model->setProperties( prop );
     }
@@ -113,17 +116,11 @@ struct StimuliController::Impl
     {
         try
         {
-            const QString& uriStr = _ui.txtISCURL->text();
-            const servus::URI uri( uriStr.toStdString( ));
-            _simulator =  _controller.getSimulator( uri );
-            _ui.btnConnectISC->setEnabled( false );
-            _ui.btnDisconnectISC->setEnabled( true );
+            _simulator = _controller.getSimulator( _simulationZeqSchema );
         }
         catch( const std::exception& error )
         {
-            _ui.btnConnectISC->setEnabled( true );
             _ui.btnInjectStimulus->setEnabled( false );
-            _ui.btnDisconnectISC->setEnabled( false );
             LBERROR << "Error:" << error.what() << std::endl;
         }
     }
@@ -131,8 +128,6 @@ struct StimuliController::Impl
     void disconnectISC()
     {
         _simulator = 0;
-        _ui.btnConnectISC->setEnabled( true );
-        _ui.btnDisconnectISC->setEnabled( false );
     }
 
     void onSelection( const ::zeq::Event& event_ )
@@ -161,13 +156,10 @@ struct StimuliController::Impl
 
     void setSubscriber()
     {
-        const QString& uriStr = _ui.txtHBPURL->text();
-        const servus::URI uri( uriStr.toStdString( ));
-        _controller.registerHandler(
-                                 uri,
-                                 zeq::hbp::EVENT_SELECTEDIDS,
-                                 boost::bind( &StimuliController::Impl::onSelection,
-                                            this, _1 ));
+        _controller.registerHandler( _selectionZeqSchema,
+                                     zeq::hbp::EVENT_SELECTEDIDS,
+                                     boost::bind( &StimuliController::Impl::onSelection,
+                                                  this, _1 ));
         _isRegistered = true;
     }
 
@@ -175,14 +167,10 @@ struct StimuliController::Impl
     {
         try
         {
-            _ui.btnConnectHBP->setEnabled( false );
-            _ui.btnDisconnectHBP->setEnabled( true );
             setSubscriber();
         }
         catch( const std::exception& error )
         {
-            _ui.btnConnectHBP->setEnabled( true );
-            _ui.btnDisconnectHBP->setEnabled( false );
             LBERROR << "Error:" << error.what() << std::endl;
             _isRegistered = false;
         }
@@ -190,15 +178,11 @@ struct StimuliController::Impl
 
     void disconnectHBP()
     {
-        const QString& uriStr = _ui.txtHBPURL->text();
-        const servus::URI uri( uriStr.toStdString( ));
-        _controller.deregisterHandler( uri,
+        _controller.deregisterHandler( _selectionZeqSchema,
                                        zeq::hbp::EVENT_SELECTEDIDS,
                                        boost::bind( &StimuliController::Impl::onSelection,
                                                   this, _1 ));
         _isRegistered = false;
-        _ui.btnConnectHBP->setEnabled( true );
-        _ui.btnDisconnectHBP->setEnabled( false );
     }
 
     void propertiesChanged()
@@ -220,13 +204,19 @@ public:
     Ui_stimuliController& _ui;
     StimuliController* _stimuliController;
     Controller& _controller;
+    servus::URI _selectionZeqSchema;
+    servus::URI _simulationZeqSchema;
+
     std::vector<uint32_t> _selectedIds;
 };
 
 StimuliController::StimuliController( Controller& controller,
+                                      const servus::URI& selectionZeqSchema,
+                                      const servus::URI& simulationZeqSchema,
                                       QWidget* parentWgt )
-    : QWidget( parentWgt ),
-      _impl( new StimuliController::Impl( this, controller, _ui ))
+    : QWidget( parentWgt )
+    , _impl( new StimuliController::Impl( this, controller, selectionZeqSchema,
+                                          simulationZeqSchema, _ui ))
 {
     qRegisterMetaType< std::vector<uint32_t> >("std::vector<uint32_t>");
 
@@ -245,6 +235,7 @@ StimuliController::StimuliController( Controller& controller,
     _ui.tblGeneratorProperties->setModel( model );
     _ui.tblGeneratorProperties->setColumnWidth( 0, 150 );
     _ui.tblGeneratorProperties->setColumnWidth( 1, 150 );
+    _ui.tblGeneratorProperties->setMinimumWidth( 310 );
 
     _ui.btnInjectStimulus->setEnabled( false );
 
@@ -256,17 +247,11 @@ StimuliController::StimuliController( Controller& controller,
     connect( _ui.generatorsComboBox, SIGNAL( currentIndexChanged( int )),
              this, SLOT( _generatorSelected( int )));
 
-    _ui.btnDisconnectHBP->setEnabled( false );
-    _ui.btnDisconnectISC->setEnabled( false );
+    connect( model, SIGNAL( layoutChanged( )),
+             this, SLOT( _propertiesChanged( )));
 
-    connect( model, SIGNAL(layoutChanged()), this, SLOT(_propertiesChanged()));
-    connect( _ui.btnConnectISC, SIGNAL(pressed( )), this, SLOT(_connectISC( )));
-    connect( _ui.btnConnectHBP, SIGNAL(pressed( )), this, SLOT(_connectHBP( )));
-    connect( _ui.btnDisconnectISC, SIGNAL(pressed( )), this, SLOT(_disconnectISC( )));
-    connect( _ui.btnDisconnectHBP, SIGNAL(pressed( )), this, SLOT(_disconnectHBP( )));
-
-    connect( this, SIGNAL(updateCellIdsTextBox(std::vector<uint32_t>)),
-             this, SLOT(_updateCellIdsTextBox(std::vector<uint32_t>)),
+    connect( this, SIGNAL( updateCellIdsTextBox( std::vector<uint32_t> )),
+             this, SLOT( _updateCellIdsTextBox( std::vector<uint32_t> )),
              Qt::QueuedConnection );
 
     _ui.generatorsComboBox->setCurrentIndex( 0 );
