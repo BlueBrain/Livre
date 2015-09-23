@@ -28,7 +28,6 @@
 #include <livre/eq/types.h>
 #include <livre/lib/configuration/ApplicationParameters.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
-#include <livre/lib/configuration/RESTParameters.h>
 
 namespace livre
 {
@@ -57,16 +56,13 @@ public:
      */
     LIVREEQ_API static std::string getVersion();
 
-    /** @override eq::Client::initLocal() */
-    bool initLocal( const int argc, char** argv ) override;
-
     /**
-     * run Starts the client.
+     * Initalize, start and run the client main loop.
      * @param argc Argument count.
      * @param argv Argument list.
      * @return The exit code.
      */
-    LIVREEQ_API int32_t run();
+    LIVREEQ_API int32_t run( int argc, char* argv[] );
 
     const ApplicationParameters& getApplicationParameters() const
         { return _applicationParameters; }
@@ -75,15 +71,15 @@ public:
 
 protected:
 
-    /**
-     * Infinite client loop.
-     */
-    virtual void clientLoop();
+    /** @override eq::Client::initLocal() */
+    bool initLocal( const int argc, char* argv[] ) override;
+
+    /** Infinite loop on remote render client. */
+    void clientLoop() override;
 
 private:
     ApplicationParameters _applicationParameters;
     VolumeRendererParameters _rendererParameters;
-    RESTParameters _restParameters;
 
     /**
      * Parse command line arguments.
@@ -91,7 +87,7 @@ private:
      * @param argv Argument list.
      * @return true if the application should continue to run, false otherwise.
      */
-    bool _parseArguments( const int32_t argc, char** argv );
+    bool _parseArguments( const int32_t argc, char* argv[] );
 };
 
 }

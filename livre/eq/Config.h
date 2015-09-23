@@ -72,7 +72,7 @@ public:
      * Initializes the config.
      * @return True if initalization is successful.
      */
-    bool init();
+    bool init( int argc, char** argv );
 
     /**
      * Exits the config.
