@@ -10,11 +10,11 @@
     <height>444</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Form</string>
-  </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
+   <item row="6" column="0">
+    <layout class="QVBoxLayout" name="blueLayout"/>
+   </item>
+   <item row="1" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
       <widget class="QPushButton" name="clearButton">
@@ -46,17 +46,21 @@
      </item>
     </layout>
    </item>
-   <item row="2" column="0">
-    <layout class="QVBoxLayout" name="rgbaLayout"/>
-   </item>
-   <item row="3" column="0">
+   <item row="4" column="0">
     <layout class="QVBoxLayout" name="redLayout"/>
    </item>
-   <item row="4" column="0">
-    <layout class="QVBoxLayout" name="greenLayout"/>
+   <item row="3" column="0">
+    <layout class="QVBoxLayout" name="rgbaLayout"/>
    </item>
    <item row="5" column="0">
-    <layout class="QVBoxLayout" name="blueLayout"/>
+    <layout class="QVBoxLayout" name="greenLayout"/>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Color Map</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

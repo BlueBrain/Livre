@@ -10,6 +10,11 @@
     <height>600</height>
    </rect>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QMainWindow::separator {
+background-color: darkGray; width: 1px; height: 1px;
+}</string>
+  </property>
   <widget class="QWidget" name="centralwidget"/>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

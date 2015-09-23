@@ -227,9 +227,15 @@ uint32_t Config::frame()
     return eq::Config::finishFrame();
 }
 
-Vector2ui Config::getDataFrameRange()
+Vector2ui Config::getDataFrameRange() const
 {
     return _impl->dataFrameRange;
+}
+
+uint32_t Config::getDataFrameCount() const
+{
+    const Vector2ui& range = _impl->dataFrameRange;
+    return range[1] > range[0] ? range[1] - range[0] : 0;
 }
 
 bool Config::needRedraw()

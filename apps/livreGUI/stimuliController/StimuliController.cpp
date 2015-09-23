@@ -148,8 +148,8 @@ struct StimuliController::Impl
         const int generatorIndex = _ui.generatorsComboBox->currentIndex();
 
         _ui.btnInjectStimulus->setEnabled( _simulator &&
-                                           !_selectedIds.empty( )
-                                           && generatorIndex >= 0 );
+                                           !_selectedIds.empty( ) &&
+                                           generatorIndex >= 0 );
 
         std::stringstream str;
         BOOST_FOREACH( const uint32_t gid, _selectedIds )
