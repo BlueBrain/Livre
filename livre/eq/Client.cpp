@@ -29,6 +29,9 @@
 #include <livre/eq/FrameData.h>
 #include <livre/eq/settings/VolumeSettings.h>
 #include <livre/eq/settings/CameraSettings.h>
+#ifdef LIVRE_USE_RESTBRIDGE
+#  include <restbridge/RestBridge.h>
+#endif
 
 namespace livre
 {
@@ -42,7 +45,7 @@ Client::~Client()
     VolumeDataSource::unloadPlugins();
 }
 
-bool Client::_parseArguments( const int32_t argc, char **argv )
+bool Client::_parseArguments( const int32_t argc, char** argv )
 {
     if( !_applicationParameters.initialize( argc, argv ) ||
         !_rendererParameters.initialize( argc, argv ))
@@ -50,14 +53,6 @@ bool Client::_parseArguments( const int32_t argc, char **argv )
         LBERROR << "Error parsing command line arguments" << std::endl;
         return false;
     }
-
-#ifdef LIVRE_USE_RESTBRIDGE
-    if( !_restParameters.initialize( argc, argv ))
-    {
-        LBERROR << "Error parsing command line arguments" << std::endl;
-        return false;
-    }
-#endif
 
     if( _applicationParameters.dataFileName.empty())
         _applicationParameters.dataFileName = "mem:///#4096,4096,4096,32";
@@ -69,19 +64,16 @@ std::string Client::getHelp()
 {
     VolumeRendererParameters vrParameters;
     ApplicationParameters applicationParameters;
-#ifdef LIVRE_USE_RESTBRIDGE
-    RESTParameters restParameters;
-#endif
 
     Configuration conf;
     conf.addDescription( vrParameters.getConfiguration( ));
     conf.addDescription( applicationParameters.getConfiguration( ));
-#ifdef LIVRE_USE_RESTBRIDGE
-    conf.addDescription( restParameters.getConfiguration( ));
-#endif
 
     std::stringstream os;
     os << conf;
+#ifdef LIVRE_USE_RESTBRIDGE
+    os << std::endl << restbridge::RestBridge::getHelp();
+#endif
     return os.str();
 }
 
@@ -101,13 +93,21 @@ bool Client::initLocal( const int argc, char** argv )
     return eq::Client::initLocal( argc, argv );
 }
 
-int Client::run()
+int Client::run( const int argc, char** argv )
 {
+    // 0. Init local client
+    if( !initLocal( argc, argv ))
+    {
+        LBERROR << "Can't init client" << std::endl;
+        return EXIT_FAILURE;
+    }
+
     // 1. connect to server
     eq::ServerPtr server = new eq::Server;
     if( !connectServer( server ))
     {
         LBERROR << "Can't open server" << std::endl;
+        exitLocal();
         return EXIT_FAILURE;
     }
 
@@ -120,21 +120,21 @@ int Client::run()
     {
         LBERROR << "No matching config on server" << std::endl;
         disconnectServer( server );
+        exitLocal();
         return EXIT_FAILURE;
     }
 
     FrameData& frameData = config->getFrameData();
-    frameData.setup( _applicationParameters,
-                     _rendererParameters,
-                     _restParameters );
+    frameData.setup( _applicationParameters, _rendererParameters );
     frameData.getVolumeSettings()->setURI( _applicationParameters.dataFileName);
 
     // 3. init config
     lunchbox::Clock clock;
-    if( !config->init())
+    if( !config->init( argc, argv ))
     {
         server->releaseConfig( config );
         disconnectServer( server );
+        exitLocal();
         return EXIT_FAILURE;
     }
     LBLOG( LOG_STATS ) << "Config init took " << clock.getTimef() << " ms"
@@ -186,6 +186,7 @@ int Client::run()
     if( !disconnectServer( server ))
         LBERROR << "Client::disconnectServer failed" << std::endl;
     server = 0;
+    exitLocal();
 
     return EXIT_SUCCESS;
 }

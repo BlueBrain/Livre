@@ -25,7 +25,6 @@
 #include <livre/eq/settings/FrameSettings.h>
 #include <livre/eq/settings/RenderSettings.h>
 #include <livre/lib/configuration/ApplicationParameters.h>
-#include <livre/lib/configuration/RESTParameters.h>
 
 #include <lunchbox/clock.h>
 #include <servus/uri.h>
@@ -34,8 +33,6 @@
 
 #ifdef LIVRE_USE_RESTBRIDGE
 #  include <restbridge/RestBridge.h>
-static const std::string PUBLISHER_SCHEMA_SUFFIX = "resp://";
-static const std::string SUBSCRIBER_SCHEMA_SUFFIX = "cmd://";
 #endif
 
 #include <functional>
@@ -51,7 +48,7 @@ namespace zeq
 class Communicator::Impl
 {
 public:
-    explicit Impl( Config& config )
+    Impl( Config& config, const int argc, char** argv )
         : _vwsPublisher()
         , _config( config )
     {
@@ -60,7 +57,7 @@ public:
 
         _setupPublisher();
         _setupRequests();
-        _setupRESTBridge();
+        _setupRESTBridge( argc, argv );
         _setupSubscribers();
     }
 
@@ -274,7 +271,6 @@ public:
     }
 
 private:
-
     void _setupPublisher()
     {
         const auto& params = _config.getApplicationParameters();
@@ -298,42 +294,31 @@ private:
                 std::bind( &Impl::publishVocabulary, this );
     }
 
-    void _setupRESTBridge()
+    void _setupRESTBridge( const int argc, char** argv )
     {
 #ifdef LIVRE_USE_RESTBRIDGE
-    const auto& restParameters = _config.getFrameData().getRESTParameters();
-    const std::string publisherSchema = restParameters->zeqSchema +
-                                        PUBLISHER_SCHEMA_SUFFIX;
+        _restBridge = restbridge::RestBridge::parse( argc, argv );
+        if( !_restBridge )
+            return;
 
-    _vwsPublisher.reset( new ::zeq::Publisher( servus::URI( publisherSchema )));
-    if( !restParameters->useRESTBridge )
-        return;
-
-    _restBridge.reset( new restbridge::RestBridge( restParameters->hostName,
-                                                   restParameters->port ));
-    _restBridge->run( restParameters->zeqSchema );
-
-    const std::string subscriberSchema = restParameters->zeqSchema +
-                                         SUBSCRIBER_SCHEMA_SUFFIX;
-
-    SubscriberPtr vwsSubscriber(
-                new ::zeq::Subscriber( servus::URI( subscriberSchema )));
-    subscribers.push_back( vwsSubscriber );
-    vwsSubscriber->registerHandler( ::zeq::hbp::EVENT_CAMERA,
-                                    std::bind( &Impl::onCamera,
-                                                 this, std::placeholders::_1 ));
-    vwsSubscriber->registerHandler( ::zeq::vocabulary::EVENT_REQUEST,
-                                    std::bind( &Impl::onRequest,
-                                                 this, std::placeholders::_1 ));
-    vwsSubscriber->registerHandler( ::zeq::hbp::EVENT_FRAME,
-                                    std::bind( &Impl::onFrame,
-                                               this, std::placeholders::_1 ));
-    vwsSubscriber->registerHandler( ::zeq::hbp::EVENT_LOOKUPTABLE1D,
-                                    std::bind( &Impl::onLookupTable1D,
-                                               this, std::placeholders::_1 ));
-
+        _vwsPublisher.reset( new ::zeq::Publisher( _restBridge->getPublisherURI()));
+        SubscriberPtr subscriber(
+            new ::zeq::Subscriber( _restBridge->getSubscriberURI( )));
+        subscribers.push_back( subscriber );
+        subscriber->registerHandler( ::zeq::hbp::EVENT_CAMERA,
+                                        std::bind( &Impl::onCamera, this,
+                                                   std::placeholders::_1 ));
+        subscriber->registerHandler( ::zeq::vocabulary::EVENT_REQUEST,
+                                        std::bind( &Impl::onRequest, this,
+                                                   std::placeholders::_1 ));
+        subscriber->registerHandler( ::zeq::hbp::EVENT_FRAME,
+                                        std::bind( &Impl::onFrame, this,
+                                                   std::placeholders::_1 ));
+        subscriber->registerHandler( ::zeq::hbp::EVENT_LOOKUPTABLE1D,
+                                        std::bind( &Impl::onLookupTable1D, this,
+                                                   std::placeholders::_1 ));
 #else
-    _vwsPublisher.reset( new ::zeq::Publisher( servus::URI( "vwsresp://" )));
+        _vwsPublisher.reset( new ::zeq::Publisher( servus::URI( "vwsrep://" )));
 #endif
     }
 
@@ -373,13 +358,13 @@ private:
     typedef std::map< ::zeq::uint128_t, RequestFunc > RequestFuncs;
     RequestFuncs _requests;
 #ifdef LIVRE_USE_RESTBRIDGE
-    std::shared_ptr< restbridge::RestBridge > _restBridge;
+    std::unique_ptr< restbridge::RestBridge > _restBridge;
 #endif
     Config& _config;
 };
 
-Communicator::Communicator( Config& config )
-    : _impl( new Impl( config ))
+Communicator::Communicator( Config& config, const int argc, char* argv[] )
+    : _impl( new Impl( config, argc, argv ))
 {
 }
 

@@ -25,7 +25,6 @@
 #include <livre/eq/settings/CameraSettings.h>
 #include <livre/eq/settings/VolumeSettings.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
-#include <livre/lib/configuration/RESTParameters.h>
 
 namespace livre
 {
@@ -69,9 +68,6 @@ public:
             break;
         case SMI_VR_PARAMETERS:
             object = new VolumeRendererParameters();
-            break;
-        case SMI_REST_PARAMETERS:
-            object = new RESTParameters();
             break;
         }
 
@@ -128,8 +124,6 @@ FrameData::FrameData( )
                          ( objectFactoryPtr_->createObject( SMI_CLIENT_PARAMETERS ) ) )
     , vrParametersPtr_( static_cast< VolumeRendererParameters* >
                       ( objectFactoryPtr_->createObject( SMI_VR_PARAMETERS ) ) )
-    , restParametersPtr_( static_cast< RESTParameters* >
-                           ( objectFactoryPtr_->createObject( SMI_REST_PARAMETERS ) ) )
 {
 }
 
@@ -142,9 +136,6 @@ void FrameData::registerObjects( )
     LBCHECK( registerObject( objectMapPtr_, volumeSettingsPtr_, SMI_VOLUME_SETTINGS ) );
     LBCHECK( registerObject( objectMapPtr_, clientParametersPtr_, SMI_CLIENT_PARAMETERS ) );
     LBCHECK( registerObject( objectMapPtr_, vrParametersPtr_, SMI_VR_PARAMETERS ) );
-#ifdef LIVRE_USE_RESTBRIDGE
-    LBCHECK( registerObject( objectMapPtr_, restParametersPtr_, SMI_REST_PARAMETERS ) );
-#endif
 }
 
 void FrameData::deregisterObjects( )
@@ -156,9 +147,6 @@ void FrameData::deregisterObjects( )
     LBCHECK( deregisterObject( objectMapPtr_, volumeSettingsPtr_ ) );
     LBCHECK( deregisterObject( objectMapPtr_, clientParametersPtr_ ) );
     LBCHECK( deregisterObject( objectMapPtr_, vrParametersPtr_ ) );
-#ifdef LIVRE_USE_RESTBRIDGE
-    LBCHECK( deregisterObject( objectMapPtr_, restParametersPtr_ ) );
-#endif
 }
 
 void FrameData::mapObjects( )
@@ -193,14 +181,6 @@ void FrameData::mapObjects( )
                         objectFactoryPtr_,
                         vrParametersPtr_,
                         SMI_VR_PARAMETERS ) );
-
-#ifdef LIVRE_USE_RESTBRIDGE
-    LBCHECK( mapObject( objectMapPtr_,
-                        objectFactoryPtr_,
-                        restParametersPtr_,
-                        SMI_REST_PARAMETERS ) );
-#endif
-
 }
 
 void FrameData::unmapObjects( )
@@ -213,9 +193,6 @@ void FrameData::unmapObjects( )
     LBCHECK( objectMapPtr_->unmap( volumeSettingsPtr_.get() ) );
     LBCHECK( objectMapPtr_->unmap( clientParametersPtr_.get() ) );
     LBCHECK( objectMapPtr_->unmap( vrParametersPtr_.get() ) );
-#ifdef LIVRE_USE_RESTBRIDGE
-    LBCHECK( objectMapPtr_->unmap( restParametersPtr_.get() ) );
-#endif
     objectMapPtr_->clear();
 }
 
@@ -226,12 +203,10 @@ void FrameData::initialize( eq::Config* eqConfig )
 }
 
 void FrameData::setup( const ClientParameters& clientParams,
-                       const VolumeRendererParameters& rendererParams,
-                       const RESTParameters& restParams )
+                       const VolumeRendererParameters& rendererParams )
 {
     *clientParametersPtr_ = clientParams;
     *vrParametersPtr_ = rendererParams;
-    *restParametersPtr_ = restParams;
 }
 
 FrameSettingsPtr FrameData::getFrameSettings() const
@@ -262,11 +237,6 @@ ConstClientParametersPtr FrameData::getClientParameters() const
 ConstVolumeRendererParametersPtr FrameData::getVRParameters() const
 {
     return vrParametersPtr_;
-}
-
-ConstRESTParametersPtr FrameData::getRESTParameters() const
-{
-    return restParametersPtr_;
 }
 
 const eq::uint128_t& FrameData::getID() const
