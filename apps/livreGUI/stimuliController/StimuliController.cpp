@@ -57,10 +57,14 @@ struct StimuliController::Impl
         , _selectionZeqSchema( selectionZeqSchema )
         , _simulationZeqSchema( simulationZeqSchema )
     {
+        connectHBP();
+        connectISC();
     }
 
     ~Impl()
     {
+        disconnectISC();
+        disconnectHBP();
     }
 
     void injectStimuli()
