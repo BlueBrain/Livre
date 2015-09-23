@@ -154,10 +154,10 @@ void Config::resetCamera()
     _impl->publishModelView();
 }
 
-bool Config::init()
+bool Config::init( const int argc, char** argv )
 {
 #ifdef LIVRE_USE_ZEQ
-    _impl->communicator.reset( new zeq::Communicator( *this ));
+    _impl->communicator.reset( new zeq::Communicator( *this, argc, argv ));
 #endif
 
     resetCamera();
