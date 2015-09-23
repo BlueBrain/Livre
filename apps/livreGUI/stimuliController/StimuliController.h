@@ -46,10 +46,16 @@ public:
 
     /**
      * @param controller The GUI connection to zeq world.
+     * @param selectionZeqSchema the ZeroEQ schema used for receiving selection
+     *        events.
+     * @param simulationZeqSchema the ZeroEQ schema used for sending stimuli to
+     *        the simulation.
      * @param parentWgt Parent widget.
      */
-    explicit StimuliController( Controller& controller,
-                                QWidget *parentWgt = 0 );
+    StimuliController( Controller& controller,
+                       const servus::URI& selectionZeqSchema,
+                       const servus::URI& simulationZeqSchema,
+                       QWidget *parentWgt = 0 );
      ~StimuliController( );
 
 signals:
@@ -59,8 +65,7 @@ signals:
 private Q_SLOTS:
 
     void _injectStimuli();
-    void _generatorSelected( const QItemSelection& selected,
-                             const QItemSelection& deselected );
+    void _generatorSelected( int index );
 
     void _updateCellIdsTextBox( std::vector<uint32_t> cellIds );
 

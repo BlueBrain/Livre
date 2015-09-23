@@ -46,14 +46,17 @@ struct StimuliController::Impl
 
     Impl( StimuliController* stimuliController,
           Controller& controller,
+          const servus::URI& selectionZeqSchema,
+          const servus::URI& simulationZeqSchema,
           Ui_stimuliController& ui )
         : _simulator( 0 )
         , _isRegistered( false )
         , _ui( ui )
         , _stimuliController( stimuliController )
         , _controller( controller )
+        , _selectionZeqSchema( selectionZeqSchema )
+        , _simulationZeqSchema( simulationZeqSchema )
     {
-
     }
 
     ~Impl()
@@ -72,13 +75,12 @@ struct StimuliController::Impl
                 static_cast< GeneratorPropertiesModel * >(
                     _ui.tblGeneratorProperties->model( ));
 
-        QItemSelectionModel* selectionModel = _ui.tblGenerators->selectionModel();
-        const QModelIndex& ind = selectionModel->currentIndex();
-        if( !ind.isValid( ))
+        const int generatorIndex = _ui.generatorsComboBox->currentIndex();
+        if( generatorIndex < 0 )
             return;
 
         const Strings& generators = getGenerators();
-        const std::string& generator = generators[ ind.row() ];
+        const std::string& generator = generators[ generatorIndex ];
 
         PropertyList properties = model->getProperties( );
         QVariantList _list;
@@ -97,17 +99,15 @@ struct StimuliController::Impl
             _simulator->injectStimulus( json, _selectedIds );
     }
 
-    void generatorSelected()
+    void generatorSelected( const int generatorIndex )
     {
-        QItemSelectionModel* selectionModel = _ui.tblGenerators->selectionModel();
-        const QModelIndex& ind = selectionModel->currentIndex();
-        if( !ind.isValid( ))
+        if( generatorIndex < 0 )
             return;
 
         const Strings& generators = getGenerators();
-        const PropertyList& prop = getGeneratorProperties( generators[ ind.row() ] );
+        const PropertyList& prop = getGeneratorProperties( generators[ generatorIndex ] );
         GeneratorPropertiesModel* model =
-                static_cast< GeneratorPropertiesModel* >(_ui.tblGeneratorProperties->model());
+                static_cast< GeneratorPropertiesModel* >( _ui.tblGeneratorProperties->model( ));
 
         model->setProperties( prop );
     }
@@ -116,17 +116,11 @@ struct StimuliController::Impl
     {
         try
         {
-            const QString& uriStr = _ui.txtISCURL->text();
-            const servus::URI uri( uriStr.toStdString( ));
-            _simulator =  _controller.getSimulator( uri );
-            _ui.btnConnectISC->setEnabled( false );
-            _ui.btnDisconnectISC->setEnabled( true );
+            _simulator = _controller.getSimulator( _simulationZeqSchema );
         }
         catch( const std::exception& error )
         {
-            _ui.btnConnectISC->setEnabled( true );
             _ui.btnInjectStimulus->setEnabled( false );
-            _ui.btnDisconnectISC->setEnabled( false );
             LBERROR << "Error:" << error.what() << std::endl;
         }
     }
@@ -134,8 +128,6 @@ struct StimuliController::Impl
     void disconnectISC()
     {
         _simulator = 0;
-        _ui.btnConnectISC->setEnabled( true );
-        _ui.btnDisconnectISC->setEnabled( false );
     }
 
     void onSelection( const ::zeq::Event& event_ )
@@ -149,12 +141,11 @@ struct StimuliController::Impl
     {
         _selectedIds = cellIds;
 
-        QItemSelectionModel* selectionModel = _ui.tblGenerators->selectionModel();
-        const QModelIndex& ind = selectionModel->currentIndex();
+        const int generatorIndex = _ui.generatorsComboBox->currentIndex();
 
         _ui.btnInjectStimulus->setEnabled( _simulator &&
                                            !_selectedIds.empty( )
-                                           && ind.isValid( ));
+                                           && generatorIndex >= 0 );
 
         std::stringstream str;
         BOOST_FOREACH( const uint32_t gid, _selectedIds )
@@ -165,13 +156,10 @@ struct StimuliController::Impl
 
     void setSubscriber()
     {
-        const QString& uriStr = _ui.txtHBPURL->text();
-        const servus::URI uri( uriStr.toStdString( ));
-        _controller.registerHandler(
-                                 uri,
-                                 zeq::hbp::EVENT_SELECTEDIDS,
-                                 boost::bind( &StimuliController::Impl::onSelection,
-                                            this, _1 ));
+        _controller.registerHandler( _selectionZeqSchema,
+                                     zeq::hbp::EVENT_SELECTEDIDS,
+                                     boost::bind( &StimuliController::Impl::onSelection,
+                                                  this, _1 ));
         _isRegistered = true;
     }
 
@@ -179,14 +167,10 @@ struct StimuliController::Impl
     {
         try
         {
-            _ui.btnConnectHBP->setEnabled( false );
-            _ui.btnDisconnectHBP->setEnabled( true );
             setSubscriber();
         }
         catch( const std::exception& error )
         {
-            _ui.btnConnectHBP->setEnabled( true );
-            _ui.btnDisconnectHBP->setEnabled( false );
             LBERROR << "Error:" << error.what() << std::endl;
             _isRegistered = false;
         }
@@ -194,15 +178,11 @@ struct StimuliController::Impl
 
     void disconnectHBP()
     {
-        const QString& uriStr = _ui.txtHBPURL->text();
-        const servus::URI uri( uriStr.toStdString( ));
-        _controller.deregisterHandler( uri,
+        _controller.deregisterHandler( _selectionZeqSchema,
                                        zeq::hbp::EVENT_SELECTEDIDS,
                                        boost::bind( &StimuliController::Impl::onSelection,
                                                   this, _1 ));
         _isRegistered = false;
-        _ui.btnConnectHBP->setEnabled( true );
-        _ui.btnDisconnectHBP->setEnabled( false );
     }
 
     void propertiesChanged()
@@ -224,23 +204,26 @@ public:
     Ui_stimuliController& _ui;
     StimuliController* _stimuliController;
     Controller& _controller;
+    servus::URI _selectionZeqSchema;
+    servus::URI _simulationZeqSchema;
+
     std::vector<uint32_t> _selectedIds;
 };
 
 StimuliController::StimuliController( Controller& controller,
+                                      const servus::URI& selectionZeqSchema,
+                                      const servus::URI& simulationZeqSchema,
                                       QWidget* parentWgt )
-    : QWidget( parentWgt ),
-      _impl( new StimuliController::Impl( this, controller, _ui ))
+    : QWidget( parentWgt )
+    , _impl( new StimuliController::Impl( this, controller, selectionZeqSchema,
+                                          simulationZeqSchema, _ui ))
 {
     qRegisterMetaType< std::vector<uint32_t> >("std::vector<uint32_t>");
 
     _ui.setupUi( this );
     _ui.txtCellIds->setReadOnly( true );
-    GeneratorModel *generatorModel = new GeneratorModel( _ui.tblGenerators );
-    _ui.tblGenerators->setModel( generatorModel );
-    _ui.tblGenerators->setColumnWidth( 0, 300 );
-    _ui.tblGenerators->setSelectionMode( QAbstractItemView::SingleSelection );
-    _ui.tblGenerators->setSelectionBehavior( QAbstractItemView::SelectRows );
+    GeneratorModel* generatorModel = new GeneratorModel( _ui.generatorsComboBox );
+    _ui.generatorsComboBox->setModel( generatorModel );
 
     PropertyEditDelegate* editorDelegate =
             new PropertyEditDelegate( _ui.tblGeneratorProperties );
@@ -252,6 +235,7 @@ StimuliController::StimuliController( Controller& controller,
     _ui.tblGeneratorProperties->setModel( model );
     _ui.tblGeneratorProperties->setColumnWidth( 0, 150 );
     _ui.tblGeneratorProperties->setColumnWidth( 1, 150 );
+    _ui.tblGeneratorProperties->setMinimumWidth( 310 );
 
     _ui.btnInjectStimulus->setEnabled( false );
 
@@ -260,26 +244,19 @@ StimuliController::StimuliController( Controller& controller,
     connect( _ui.btnInjectStimulus, SIGNAL(clicked()),
              this, SLOT(_injectStimuli()));
 
-    QItemSelectionModel* selectionModel = _ui.tblGenerators->selectionModel();
-    connect( selectionModel, SIGNAL(selectionChanged(const QItemSelection&,
-                                                     const QItemSelection& )),
-             this, SLOT(_generatorSelected(const QItemSelection&,
-                                          const QItemSelection& )));
+    connect( _ui.generatorsComboBox, SIGNAL( currentIndexChanged( int )),
+             this, SLOT( _generatorSelected( int )));
 
-    _ui.btnDisconnectHBP->setEnabled( false );
-    _ui.btnDisconnectISC->setEnabled( false );
+    connect( model, SIGNAL( layoutChanged( )),
+             this, SLOT( _propertiesChanged( )));
 
-    connect( model, SIGNAL(layoutChanged()), this, SLOT(_propertiesChanged()));
-    connect( _ui.btnConnectISC, SIGNAL(pressed( )), this, SLOT(_connectISC( )));
-    connect( _ui.btnConnectHBP, SIGNAL(pressed( )), this, SLOT(_connectHBP( )));
-    connect( _ui.btnDisconnectISC, SIGNAL(pressed( )), this, SLOT(_disconnectISC( )));
-    connect( _ui.btnDisconnectHBP, SIGNAL(pressed( )), this, SLOT(_disconnectHBP( )));
-
-    connect( this, SIGNAL(updateCellIdsTextBox(std::vector<uint32_t>)),
-             this, SLOT(_updateCellIdsTextBox(std::vector<uint32_t>)),
+    connect( this, SIGNAL( updateCellIdsTextBox( std::vector<uint32_t> )),
+             this, SLOT( _updateCellIdsTextBox( std::vector<uint32_t> )),
              Qt::QueuedConnection );
 
-    _ui.tblGenerators->selectRow( 0 );
+    _ui.generatorsComboBox->setCurrentIndex( 0 );
+    // Emulate currentIndexChanged() signal as qApp has not been created yet
+    _impl->generatorSelected( 0 );
 }
 
 StimuliController::~StimuliController( )
@@ -292,10 +269,9 @@ void StimuliController::_injectStimuli()
      _impl->injectStimuli();
 }
 
-void StimuliController::_generatorSelected( const QItemSelection&,
-                                            const QItemSelection& )
+void StimuliController::_generatorSelected( const int index )
 {
-    _impl->generatorSelected();
+    _impl->generatorSelected( index );
 }
 
 void StimuliController::_updateCellIdsTextBox( std::vector<uint32_t> cellIds )

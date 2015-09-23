@@ -21,10 +21,10 @@
 #ifndef _TransferFunctionEditor_h_
 #define _TransferFunctionEditor_h_
 
-#include <QMainWindow>
-#include <livreGUI/tfEditor/ColorMapWidget.h>
-#include <QResizeEvent>
+#include <QWidget>
+
 #include <livreGUI/Controller.h>
+#include <livreGUI/tfEditor/ColorMapWidget.h>
 
 #include <zeq/publisher.h>
 
@@ -48,9 +48,13 @@ public:
      * Constructor of TransferFunctionEditor.
      * @param conroller The controller used to receive/publish transfer fuction
      * data.
+     * @param zeqSchema the ZeroEQ schema used to send/receive transfer
+     *        function events.
      * @param tfParentWidget Parent widget.
      */
-    explicit TransferFunctionEditor( livre::Controller& conroller, QWidget* tfParentWidget = 0 );
+    TransferFunctionEditor( livre::Controller& controller,
+                            const servus::URI& zeqSchema,
+                            QWidget* tfParentWidget = 0 );
     ~TransferFunctionEditor();
 
     /**
@@ -80,7 +84,8 @@ private:
     void _onHeartbeat();
 
     livre::Controller& _controller;
-    Ui::TransferFunctionEditor *ui;
+    servus::URI _zeqSchema;
+    Ui::TransferFunctionEditor* _ui;
     lunchbox::Monitorb _isConnected;
     bool _tfReceived;
     ColorMapWidget* _redWidget;

@@ -23,7 +23,7 @@
 namespace livre
 {
 
-GeneratorModel::GeneratorModel( QObject *parentObj )
+GeneratorModel::GeneratorModel( QObject* parentObj )
     : QAbstractTableModel( parentObj )
 {
 
@@ -76,7 +76,5 @@ QVariant GeneratorModel::headerData( int section,
     }
     return QVariant();
 }
-
-
 
 }

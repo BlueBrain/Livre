@@ -30,16 +30,14 @@
 
 namespace livre
 {
-namespace
-{
-static const servus::URI _uri( "hbp://" );
-}
 
 TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
+                                                const servus::URI& zeqSchema,
                                                 QWidget* tfParentWidget )
     : QWidget( tfParentWidget )
     , _controller( controller )
-    , ui( new Ui::TransferFunctionEditor )
+    , _zeqSchema( zeqSchema )
+    , _ui( new Ui::TransferFunctionEditor )
     , _tfReceived( false )
     , _redWidget( new ColorMapWidget( ColorMapWidget::RED_SHADE, this ))
     , _greenWidget( new ColorMapWidget( ColorMapWidget::GREEN_SHADE, this ))
@@ -48,14 +46,14 @@ TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
 {
     qRegisterMetaType< UInt8Vector >("UInt8Vector");
 
-    ui->setupUi( this );
+    _ui->setupUi( this );
 
     // Add the widgets to the layouts to match the exact positions on the
     // TransferFunctionEditor
-    ui->redLayout->addWidget( _redWidget );
-    ui->greenLayout->addWidget( _greenWidget );
-    ui->blueLayout->addWidget( _blueWidget );
-    ui->rgbaLayout->addWidget( _alphaWidget );
+    _ui->redLayout->addWidget( _redWidget );
+    _ui->greenLayout->addWidget( _greenWidget );
+    _ui->blueLayout->addWidget( _blueWidget );
+    _ui->rgbaLayout->addWidget( _alphaWidget );
 
     connect( _redWidget, SIGNAL( colorsChanged( )), this,
              SLOT( _pointsUpdated()));
@@ -66,10 +64,10 @@ TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
     connect( _alphaWidget, SIGNAL( colorsChanged( )), this,
              SLOT( _pointsUpdated( )));
 
-    connect( ui->resetButton, SIGNAL( clicked()), this, SLOT( _setDefault()));
-    connect( ui->clearButton, SIGNAL( clicked()), this, SLOT( _clear()));
-    connect( ui->loadButton, SIGNAL( clicked()), this, SLOT( _load()));
-    connect( ui->saveButton, SIGNAL( clicked()), this, SLOT( _save()));
+    connect( _ui->resetButton, SIGNAL( clicked()), this, SLOT( _setDefault()));
+    connect( _ui->clearButton, SIGNAL( clicked()), this, SLOT( _clear()));
+    connect( _ui->loadButton, SIGNAL( clicked()), this, SLOT( _load()));
+    connect( _ui->saveButton, SIGNAL( clicked()), this, SLOT( _save()));
 
     connect( this, &TransferFunctionEditor::transferFunctionChanged,
              this, &TransferFunctionEditor::_onTransferFunctionChanged );
@@ -80,16 +78,16 @@ TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
 
 TransferFunctionEditor::~TransferFunctionEditor()
 {
-    _controller.deregisterHandler( _uri,
+    _controller.deregisterHandler( _zeqSchema,
                                    zeq::vocabulary::EVENT_HEARTBEAT,
                                    boost::bind( &TransferFunctionEditor::_onHeartbeat,
                                                 this ));
-    _controller.deregisterHandler( _uri,
+    _controller.deregisterHandler( _zeqSchema,
                                    zeq::hbp::EVENT_LOOKUPTABLE1D,
                                    boost::bind( &TransferFunctionEditor::_onTransferFunction,
                                                 this, _1 ));
 
-    delete ui;
+    delete _ui;
 }
 
 void TransferFunctionEditor::_pointsUpdated()
@@ -218,18 +216,18 @@ void TransferFunctionEditor::_publishTransferFunction()
 
     if( transferFunction.size() == 1024 )
     {
-        _controller.publish( _uri,
+        _controller.publish( _zeqSchema,
                              zeq::hbp::serializeLookupTable1D( transferFunction ));
     }
 }
 
 void TransferFunctionEditor::_requestTransferFunction()
 {
-    _controller.registerHandler( _uri,
+    _controller.registerHandler( _zeqSchema,
                                  zeq::hbp::EVENT_LOOKUPTABLE1D,
                                  boost::bind( &TransferFunctionEditor::_onTransferFunction,
                                               this, _1 ));
-    _controller.registerHandler( _uri,
+    _controller.registerHandler( _zeqSchema,
                                  zeq::vocabulary::EVENT_HEARTBEAT,
                                  boost::bind( &TransferFunctionEditor::_onHeartbeat,
                                               this ));
@@ -242,7 +240,7 @@ void TransferFunctionEditor::_onTransferFunction( const zeq::Event& tfEvent )
         emit transferFunctionChanged( zeq::hbp::deserializeLookupTable1D( tfEvent ));
     }
     _tfReceived = true;
-    _controller.deregisterHandler( _uri,
+    _controller.deregisterHandler( _zeqSchema,
                                    zeq::vocabulary::EVENT_HEARTBEAT,
                                    boost::bind( &TransferFunctionEditor::_onHeartbeat,
                                    this ));
@@ -254,7 +252,7 @@ void TransferFunctionEditor::_onHeartbeat()
     {
         const zeq::Event& zeqEvent =
             zeq::vocabulary::serializeRequest( zeq::hbp::EVENT_LOOKUPTABLE1D );
-        _controller.publish( _uri, zeqEvent );
+        _controller.publish( _zeqSchema, zeqEvent );
     }
 }
 

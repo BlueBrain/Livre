@@ -1,5 +1,5 @@
 /* Copyright (c) 2011-2015, EPFL/Blue Brain Project
- *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                          Raphael Dumusc <raphael.dumusc@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -17,36 +17,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
 
-#ifndef _GeneratorModel_h_
-#define _GeneratorModel_h_
+#include <QMainWindow>
 
-#include <QAbstractTableModel>
+#include "types.h"
+
+namespace Ui
+{
+class MainWindow;
+}
 
 namespace livre
 {
 
-/**
- * Keeps the data for generator table view.
- */
-class GeneratorModel : public QAbstractTableModel
+class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
+    MainWindow( livre::Controller& controller, QWidget* parent = 0 );
+    ~MainWindow();
 
-    /**
-     * @param parentWgt Parent widget.
-     */
-    explicit GeneratorModel( QObject* parentObj );
-     ~GeneratorModel( );
-
-    int columnCount( const QModelIndex& parent = QModelIndex( )) const final;
-    int rowCount( const QModelIndex& parent = QModelIndex( )) const final;
-    QVariant data( const QModelIndex &index, int role = Qt::DisplayRole ) const final;
-    Qt::ItemFlags flags(const QModelIndex & /*index*/) const final;
-    QVariant headerData(int section, Qt::Orientation orientation, int role ) const final;
+private:
+    Ui::MainWindow* _ui;
 };
 
 }
-#endif
+
+#endif // MAINWINDOW_H

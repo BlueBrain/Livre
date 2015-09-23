@@ -17,15 +17,17 @@ if(NOT QT5WIDGETS_FOUND)
 endif()
 
 set(LIVREGUI_MOC_HEADERS
+  MainWindow.h
   animationController/AnimationController.h
   tfEditor/ColorMapWidget.h
   tfEditor/HoverPoints.h
   tfEditor/TFWidget.h
   tfEditor/TransferFunctionEditor.h)
 
-set(LIVREGUI_HEADERS ${LIVREGUI_MOC_HEADERS}
-  qtTypes.h
+set(LIVREGUI_HEADERS
+  ${LIVREGUI_MOC_HEADERS}
   types.h
+  qtTypes.h
   AppSettings.h
   Controller.h
   tfEditor/Utilities.h)
@@ -33,6 +35,7 @@ set(LIVREGUI_HEADERS ${LIVREGUI_MOC_HEADERS}
 set(LIVREGUI_SOURCES
   Controller.cpp
   livreGUI.cpp
+  MainWindow.cpp
   animationController/AnimationController.cpp
   tfEditor/ColorMapWidget.cpp
   tfEditor/HoverPoints.cpp
@@ -41,6 +44,7 @@ set(LIVREGUI_SOURCES
 
 set(LIVREGUI_RESOURCES resources/resources.qrc)
 set(LIVREGUI_UI_FORMS
+  MainWindow.ui
   animationController/gui/AnimationController.ui
   tfEditor/gui/TransferFunctionEditor.ui)
 

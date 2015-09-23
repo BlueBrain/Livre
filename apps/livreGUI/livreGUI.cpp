@@ -20,47 +20,27 @@
  */
 
 #include <livreGUI/AppSettings.h>
-#include <livreGUI/animationController/AnimationController.h>
-#include <livreGUI/tfEditor/TransferFunctionEditor.h>
 #include <livreGUI/Controller.h>
-
-#ifdef LIVRE_USE_MONSTEER
-#include <livreGUI/stimuliController/StimuliController.h>
-#endif
+#include <livreGUI/MainWindow.h>
 
 #include <QApplication>
 #include <QDesktopWidget>
-#include <QMainWindow>
-#include <QTabWidget>
 
 QT_USE_NAMESPACE
 
 int main( int argc, char *argv[] )
 {
     QApplication app( argc, argv );
-    livre::Controller controller;
 
     Q_INIT_RESOURCE( resources );
 
     app.setAttribute( Qt::AA_DontCreateNativeWidgetSiblings );
     livre::setCoreSettingsNames( );
 
-    QTabWidget* tabWidget = new QTabWidget;
+    livre::Controller controller;
 
-    tabWidget->addTab( new livre::TransferFunctionEditor(controller),
-                       "Color Map");
-
-#ifdef LIVRE_USE_MONSTEER
-    tabWidget->addTab( new livre::StimuliController(controller),
-                       "Simulation" );
-#endif
-
-    tabWidget->addTab( new livre::AnimationController(controller),
-                       "Time");
-
-    QMainWindow window;
-    window.setCentralWidget( tabWidget );
-    window.resize( QDesktopWidget().availableGeometry( &window ).size() / 2.0f );
+    livre::MainWindow window( controller );
+    window.resize( QDesktopWidget().availableGeometry( &window ).size() / 2.0 );
     window.show();
 
     return app.exec();
