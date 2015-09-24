@@ -26,7 +26,7 @@
      <item>
       <widget class="QPushButton" name="resetButton">
        <property name="text">
-        <string>Default Preset</string>
+        <string>Default</string>
        </property>
       </widget>
      </item>
