@@ -109,7 +109,7 @@ struct StimuliController::Impl
         if( _playing )
         {
             _simulator->pause();
-            _ui.btnPlayPauseSimulation->setText( "Play simulation" );
+            _ui.btnPlayPauseSimulation->setText( "Resume simulation" );
         }
         else
         {

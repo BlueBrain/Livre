@@ -172,7 +172,7 @@ void TransferFunctionEditor::_setDefault()
 {
     QGradientStops stops;
 
-    stops << QGradientStop( 0.0, QColor::fromRgba( 0x000000ff ));
+    stops << QGradientStop( 0.0, QColor::fromRgba( 0x110000ff ));
     stops << QGradientStop( 0.1, QColor::fromRgba( 0x330000ff ));
     stops << QGradientStop( 0.2, QColor::fromRgba( 0x53007dff ));
     stops << QGradientStop( 0.3, QColor::fromRgba( 0x7300ffff ));
