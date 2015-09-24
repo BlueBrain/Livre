@@ -26,12 +26,12 @@
    <item row="7" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
-      <widget class="QPushButton" name="btnInjectStimulus">
+      <widget class="QPushButton" name="btnPlayPauseSimulation">
        <property name="enabled">
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>Inject Stimulus</string>
+        <string>Pause simulation</string>
        </property>
        <property name="flat">
         <bool>false</bool>
@@ -39,9 +39,15 @@
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="chkIndividual">
+      <widget class="QPushButton" name="btnInjectStimulus">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
-        <string>Individually</string>
+        <string>Inject stimulus</string>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
        </property>
       </widget>
      </item>

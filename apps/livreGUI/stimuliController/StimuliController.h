@@ -64,6 +64,7 @@ signals:
 
 private Q_SLOTS:
 
+    void _playPauseSimulation();
     void _injectStimuli();
     void _generatorSelected( int index );
 
