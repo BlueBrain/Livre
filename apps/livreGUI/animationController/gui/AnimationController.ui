@@ -70,6 +70,13 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QCheckBox" name="chbxFollowSimulation">
+         <property name="text">
+          <string>Follow Simulation</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
     </layout>

@@ -198,28 +198,33 @@ uint32_t Config::frame()
     const uint32_t frameMax = std::min( params.frames.y(),
                                         _impl->dataFrameRange[ 1 ]);
 
-    const uint32_t start = frameMin;
-    uint32_t current = frameSettings->getFrameNumber() > start ?
-                       frameSettings->getFrameNumber() : start;
+    uint32_t current = std::max( frameMin, frameSettings->getFrameNumber( ));
 
     frameSettings->setFrameNumber( current );
     const eq::uint128_t& version = _impl->framedata.commit();
 
     // reset data and advance current frame
     frameSettings->setGrabFrame( false );
-    uint32_t end = frameMax > current ? frameMax : current;
 
-    const int32_t delta = params.animation;
-    // avoid overflow condition:
-    const uint32_t interval = end-start == 0xFFFFFFFFu ?
-                                  0xFFFFFFFFu : end - start + 1;
-    //This check is needed because in the lines below (current-start+delta)
-    //become 4294967295 instead of -1
-    if(( current - start == 0 ) && ( delta < 0 ))
-        current = end;
+    if( params.animation == INT_MAX )
+        frameSettings->setFrameNumber( frameMax );
+    else
+    {
+        const uint32_t start = frameMin;
+        const uint32_t end = std::max( frameMax, current );
+        const int32_t delta = params.animation;
 
-    const uint32_t frameNumber = (( current - start + delta ) % interval ) + start;
-    frameSettings->setFrameNumber( frameNumber );
+        // avoid overflow condition:
+        const uint32_t interval = end-start == 0xFFFFFFFFu ?
+                                      0xFFFFFFFFu : end - start + 1;
+        //This check is needed because in the lines below (current-start+delta)
+        //become 4294967295 instead of -1
+        if(( current - start == 0 ) && ( delta < 0 ))
+            current = end;
+
+        const uint32_t frameNumber = (( current - start + delta ) % interval ) + start;
+        frameSettings->setFrameNumber( frameNumber );
+    }
 
     _impl->redraw = false;
     _impl->communicator->publishFrame();

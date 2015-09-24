@@ -39,6 +39,7 @@ namespace livre
 {
 
 const std::string ANIMATION_PARAM = "animation";
+const std::string ANIMATION_FOLLOW_DATA_PARAM = "animation-follow-data";
 const std::string FRAMES_PARAM = "frames";
 const std::string NUMFRAMES_PARAM = "num-frames";
 const std::string CAMERAPOS_PARAM = "camera-position";
@@ -58,6 +59,8 @@ ApplicationParameters::ApplicationParameters()
 {
     configuration_.addDescription( configGroupName_, ANIMATION_PARAM,
                                    "Enable animation mode (optional frame delta for animation speed, use --animation=-<int> for reverse animation)", animation, 1 );
+    configuration_.addDescription( configGroupName_, ANIMATION_FOLLOW_DATA_PARAM,
+                                   "Enable animation and follow volume data stream (overrides --animation=value)", false );
     configuration_.addDescription( configGroupName_, FRAMES_PARAM,
                                    "Frames to render 'start end'", frames );
     configuration_.addDescription( configGroupName_, NUMFRAMES_PARAM,
@@ -107,6 +110,10 @@ void ApplicationParameters::initialize_()
     configuration_.getValue( SYNC_CAMERA_PARAM, syncCamera );
     configuration_.getValue( ZEQSCHEMA_PARAM, zeqSchema );
 #endif
+    bool animationFollowData = false;
+    configuration_.getValue( ANIMATION_FOLLOW_DATA_PARAM, animationFollowData );
+    if( animationFollowData )
+        animation = INT_MAX;
 }
 
 }

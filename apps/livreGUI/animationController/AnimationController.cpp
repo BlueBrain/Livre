@@ -31,14 +31,6 @@
 namespace livre
 {
 
-/** Possible actions for the animation feature **/
-enum AnimationAction
-{
-    AA_PAUSE,
-    AA_PLAY,
-    AA_PLAY_BACKWARDS
-};
-
 struct AnimationController::Impl
 {
 
@@ -48,7 +40,6 @@ struct AnimationController::Impl
         : _animationController( animationController )
         , _controller( controller )
         , _zeqSchema( zeqSchema )
-        , _action( AA_PLAY )
         , _connected( false )
         , _onFirstFrame( true )
     {
@@ -111,6 +102,10 @@ struct AnimationController::Impl
 
     void resetControls()
     {
+        const bool followSimulation = _ui.chbxFollowSimulation->isChecked();
+        _ui.chbxReverse->setEnabled( !followSimulation );
+        _ui.btnPlay->setEnabled( !followSimulation );
+        _ui.sldFrame->setEnabled( !followSimulation );
         _animationController->setEnabled( _connected );
     }
 
@@ -122,19 +117,6 @@ struct AnimationController::Impl
     void setPlaying( const bool enable )
     {
         _ui.btnPlay->setText( enable ? "Pause" : "Play" );
-    }
-
-    void togglePlayPause()
-    {
-        if( isPlaying( ))
-            _action = AA_PAUSE;
-        else if( _ui.chbxReverse->checkState() == Qt::Checked )
-            _action = AA_PLAY_BACKWARDS;
-        else
-            _action = AA_PLAY;
-
-        resetControls();
-        publishFrame();
     }
 
     void onFirstHeartBeatReceived()
@@ -176,6 +158,7 @@ struct AnimationController::Impl
         }
 
         setPlaying( frame.delta != 0 );
+        _ui.chbxFollowSimulation->setChecked( frame.delta == INT_MAX );
         _ui.chbxReverse->setChecked( frame.delta < 0 );
     }
 
@@ -186,23 +169,23 @@ struct AnimationController::Impl
             const ::zeq::hbp::data::Frame frame( _ui.sldFrame->minimum(),
                                                  _ui.sldFrame->value(),
                                                  _ui.sldFrame->maximum(),
-                                                 getDeltaFromAction( ));
+                                                 getFrameDelta( ));
             _controller.publish( _zeqSchema, ::zeq::hbp::serializeFrame( frame ));
         }
     }
 
-    int getDeltaFromAction() const
+    int getFrameDelta() const
     {
-        switch( _action )
-        {
-        case AA_PLAY:
-            return 1;
-        case AA_PLAY_BACKWARDS:
-            return -1;
-        case AA_PAUSE:
-        default:
+        if( !isPlaying( ))
             return 0;
-        }
+
+        if( _ui.chbxFollowSimulation->isChecked( ))
+            return INT_MAX;
+
+        if( _ui.chbxReverse->isChecked( ))
+            return -1;
+
+        return 1;
     }
 
 public:
@@ -210,7 +193,6 @@ public:
     AnimationController* _animationController;
     Controller& _controller;
     servus::URI _zeqSchema;
-    AnimationAction _action;
     bool            _connected;
     bool            _onFirstFrame;
 };
@@ -227,8 +209,10 @@ AnimationController::AnimationController( Controller& controller,
              this, SLOT( _onSliderMoved( )));
     connect( _impl->_ui.sldFrame, SIGNAL( valueChanged( int )),
              _impl->_ui.lblFrame, SLOT( setNum( int )));
-    connect( _impl->_ui.btnPlay, SIGNAL( pressed()),
+    connect( _impl->_ui.btnPlay, SIGNAL( pressed( )),
              this, SLOT( _togglePlayPause( )));
+    connect( _impl->_ui.chbxFollowSimulation, SIGNAL( stateChanged( int )),
+             this, SLOT( _setFollowSimulation( int )));
     connect( this, &AnimationController::newFrameReceived,
              this, &AnimationController::_onNewFrameReceived,
              Qt::QueuedConnection );
@@ -261,7 +245,16 @@ void AnimationController::_onSliderMoved()
 
 void AnimationController::_togglePlayPause()
 {
-    _impl->togglePlayPause();
+    _impl->setPlaying( !_impl->isPlaying( ));
+    _impl->resetControls();
+    _impl->publishFrame();
+}
+
+void AnimationController::_setFollowSimulation( int on )
+{
+    _impl->setPlaying( on );
+    _impl->resetControls();
+    _impl->publishFrame();
 }
 
 void AnimationController::_onNewFrameReceived( zeq::hbp::data::Frame frame )
