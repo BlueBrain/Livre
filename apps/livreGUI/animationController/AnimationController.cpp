@@ -18,10 +18,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/core/types.h>
-
 #include <livreGUI/animationController/AnimationController.h>
+#include <livreGUI/ui_AnimationController.h>
 #include <livreGUI/Controller.h>
+#include <livre/core/types.h>
 
 #include <zeq/types.h>
 #include <zeq/event.h>
@@ -49,19 +49,15 @@ struct AnimationController::Impl
 
     Impl( AnimationController* animationController,
           Controller& controller,
-          const servus::URI& zeqSchema,
-          Ui_animationController& ui )
-        : _ui( ui )
-        , _animationController( animationController )
+          const servus::URI& zeqSchema )
+        : _animationController( animationController )
         , _controller( controller )
         , _zeqSchema( zeqSchema )
-        , _startFrame( DEFAULT_MIN_VALUE )
-        , _endFrame( DEFAULT_MAX_VALUE )
-        , _currentFrame( 0 )
-        , _action( AA_PAUSE )
+        , _action( AA_PLAY )
         , _connected( false )
         , _onFirstFrame( true )
     {
+        _ui.setupUi( _animationController );
         connect();
     }
 
@@ -104,8 +100,8 @@ struct AnimationController::Impl
         {
             LBERROR << "Error:" << error.what() << std::endl;
             _connected = false;
-            resetControls();
         }
+        resetControls();
     }
 
     void disconnect()
@@ -120,53 +116,28 @@ struct AnimationController::Impl
 
     void resetControls()
     {
-        _ui.btnPlay->setEnabled( _connected && _action==AA_PAUSE );
-        _ui.btnPause->setEnabled( _connected && _action!=AA_PAUSE );
-        _ui.sldFrame->setEnabled( _connected );
-
-        if( _action == AA_PLAY )
-        {
-            _ui.chbxReverse->setChecked( false );
-            _ui.chbxReverse->setEnabled( false );
-        }
-        else if( _action == AA_PLAY_BACKWARDS )
-        {
-            _ui.chbxReverse->setChecked( true );
-            _ui.chbxReverse->setEnabled( false );
-        }
-        else
-            _ui.chbxReverse->setEnabled( true );
+        _animationController->setEnabled( _connected );
     }
 
-    void setCurrentFrame( const int value )
+    bool isPlaying() const
     {
-        _ui.btnPlay->setEnabled( _connected && _action==AA_PAUSE );
-        _ui.btnPause->setEnabled( _connected && _action!=AA_PAUSE );
-        _currentFrame = value;
-        _ui.lblFrame->setText( QString::number( _currentFrame ));
-        publishFrame();
+        return _ui.btnPlay->text() == "Pause";
     }
 
-    void play()
+    void setPlaying( const bool enable )
     {
-        if( _ui.chbxReverse->checkState() == Qt::Checked )
-        {
+        _ui.btnPlay->setText( enable ? "Pause" : "Play" );
+    }
+
+    void togglePlayPause()
+    {
+        if( isPlaying( ))
+            _action = AA_PAUSE;
+        else if( _ui.chbxReverse->checkState() == Qt::Checked )
             _action = AA_PLAY_BACKWARDS;
-            --_currentFrame;
-        }
         else
-        {
             _action = AA_PLAY;
-            ++_currentFrame;
-        }
 
-        resetControls();
-        publishFrame();
-    }
-
-    void pause()
-    {
-        _action = AA_PAUSE;
         resetControls();
         publishFrame();
     }
@@ -187,76 +158,63 @@ struct AnimationController::Impl
     void onNewFrameReceived( zeq::hbp::data::Frame frame )
     {
         _connected = true;
-        _startFrame = frame.start;
-        _endFrame = std::min(( int32_t )frame.end, std::numeric_limits< int32_t >::max());
-        _currentFrame = frame.current;
-        _ui.sldFrame->setMinimum( _startFrame );
-        _ui.sldFrame->setMaximum( _endFrame );
-        _ui.lblStartFrame->setText( QString::number( _startFrame ));
-        _ui.lblEndFrame->setText( QString::number( _endFrame ));
+        const int32_t endFrame = std::min( (int32_t)frame.end,
+                                           std::numeric_limits<int32_t>::max());
+
+        // QSlider has no reliable signal for user only input.
+        // valueChange() is always fired and sliderMoved() does not signal on
+        // keyboard input. So block signal emission when setting the value
+        // programatically.
+        _ui.sldFrame->blockSignals( true );
+        _ui.sldFrame->setMinimum( frame.start );
+        _ui.sldFrame->setMaximum( endFrame );
+        _ui.sldFrame->setValue( frame.current );
+        _ui.lblStartFrame->setText( QString::number( _ui.sldFrame->minimum( )));
+        _ui.lblFrame->setText( QString::number( _ui.sldFrame->value( )));
+        _ui.lblEndFrame->setText( QString::number( _ui.sldFrame->maximum( )));
+        _ui.sldFrame->blockSignals( false );
 
         if( _onFirstFrame )
         {
-            if( frame.delta > 0 )
-            {
-                _onFirstFrame = false;
-                _action = AA_PLAY;
-                resetControls();
-            }
-            else if( frame.delta < 0 )
-            {
-                _onFirstFrame = false;
-                _action = AA_PLAY_BACKWARDS;
-                resetControls();
-            }
+            _onFirstFrame = false;
+            resetControls();
         }
 
-        // Update slider value only when animation is active
-        if(( _action == AA_PLAY ) || ( _action == AA_PLAY_BACKWARDS ))
-        {
-            _ui.sldFrame->blockSignals( true );
-            _ui.sldFrame->setValue( _currentFrame );
-            _ui.lblFrame->setText( QString::number( _currentFrame ));
-            _ui.sldFrame->blockSignals( false );
-        }
+        setPlaying( frame.delta != 0 );
+        _ui.chbxReverse->setChecked( frame.delta < 0 );
     }
 
     void publishFrame() const
     {
         if( _connected )
         {
-            const ::zeq::hbp::data::Frame frame(
-                        _startFrame, _currentFrame, _endFrame, getDeltaFromAction());
+            const ::zeq::hbp::data::Frame frame( _ui.sldFrame->minimum(),
+                                                 _ui.sldFrame->value(),
+                                                 _ui.sldFrame->maximum(),
+                                                 getDeltaFromAction( ));
             _controller.publish( _zeqSchema, ::zeq::hbp::serializeFrame( frame ));
         }
     }
 
     int getDeltaFromAction() const
     {
-        int delta = 0;
         switch( _action )
         {
         case AA_PLAY:
-            delta = 1;
-            break;
+            return 1;
         case AA_PLAY_BACKWARDS:
-            delta = -1;
-            break;
+            return -1;
+        case AA_PAUSE:
         default:
-            break;
+            return 0;
         }
-        return delta;
     }
 
 public:
-
-    Ui_animationController& _ui;
+    Ui_animationController _ui;
     AnimationController* _animationController;
     Controller& _controller;
     servus::URI _zeqSchema;
-    uint32_t        _startFrame;
-    uint32_t        _endFrame;
-    uint32_t        _currentFrame;
     AnimationAction _action;
     bool            _connected;
     bool            _onFirstFrame;
@@ -266,20 +224,24 @@ AnimationController::AnimationController( Controller& controller,
                                           const servus::URI& zeqSchema,
                                           QWidget* parentWgt )
     : QWidget( parentWgt )
-    , _impl( new AnimationController::Impl( this, controller, zeqSchema, _ui ))
+    , _impl( new AnimationController::Impl( this, controller, zeqSchema ))
 {
-    qRegisterMetaType< ::zeq::hbp::data::Frame >("::zeq::hbp::data::Frame");
+    qRegisterMetaType< ::zeq::hbp::data::Frame >( "::zeq::hbp::data::Frame" );
 
-    _ui.setupUi( this );
-    connect( _ui.sldFrame, SIGNAL( valueChanged( int )), this, SLOT( _onSliderMoved( int )));
-    connect( _ui.btnPlay, SIGNAL( pressed()), this, SLOT( _play()));
-    connect( _ui.btnPause, SIGNAL( pressed()), this, SLOT( _pause()));
+    connect( _impl->_ui.sldFrame, SIGNAL( valueChanged( int )),
+             this, SLOT( _onSliderMoved( )));
+    connect( _impl->_ui.sldFrame, SIGNAL( valueChanged( int )),
+             _impl->_ui.lblFrame, SLOT( setNum( int )));
+    connect( _impl->_ui.btnPlay, SIGNAL( pressed()),
+             this, SLOT( _togglePlayPause( )));
     connect( this, &AnimationController::newFrameReceived,
              this, &AnimationController::_onNewFrameReceived,
              Qt::QueuedConnection );
     connect( this, &AnimationController::firstHeartBeatReceived,
              this, &AnimationController::_onFirstHeartBeatReceived,
              Qt::QueuedConnection );
+
+    _impl->_ui.chbxReverse->setVisible( false ); // temporarily hidden
 }
 
 AnimationController::~AnimationController( )
@@ -297,19 +259,14 @@ void AnimationController::_disconnect()
     _impl->disconnect();
 }
 
-void AnimationController::_onSliderMoved( const int value )
+void AnimationController::_onSliderMoved()
 {
-    _impl->setCurrentFrame( value );
+    _impl->publishFrame();
 }
 
-void AnimationController::_play()
+void AnimationController::_togglePlayPause()
 {
-    _impl->play();
-}
-
-void AnimationController::_pause()
-{
-    _impl->pause();
+    _impl->togglePlayPause();
 }
 
 void AnimationController::_onNewFrameReceived( zeq::hbp::data::Frame frame )

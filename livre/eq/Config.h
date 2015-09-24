@@ -89,7 +89,12 @@ public:
     /**
      * @return the data range data source provides.
      */
-    Vector2ui getDataFrameRange();
+    Vector2ui getDataFrameRange() const;
+
+    /**
+     * @return the number of frames that the data source provides.
+     */
+    uint32_t getDataFrameCount() const;
 
     /** @return true if an event required a redraw. */
     bool needRedraw();

@@ -67,7 +67,7 @@ public:
     void publishModelView( const Matrix4f& modelView )
     {
         if( !_publisher )
-	    return;
+            return;
 
         const FloatVector matrix( modelView.begin(), modelView.end( ));
         _publisher->publish( ::zeq::hbp::serializeCamera( matrix ));
@@ -76,7 +76,7 @@ public:
     void publishCamera()
     {
         if( !_publisher )
-	    return;
+            return;
 
         const auto cameraSettings = _config.getFrameData().getCameraSettings();
         const Matrix4f& modelView = cameraSettings->getModelViewMatrix();
@@ -87,7 +87,7 @@ public:
     void publishExit()
     {
         if( !_publisher )
-	    return;
+            return;
 
         _publisher->publish( ::zeq::Event( ::zeq::vocabulary::EVENT_EXIT ));
         _vwsPublisher->publish( ::zeq::Event( ::zeq::vocabulary::EVENT_EXIT ));
@@ -96,7 +96,7 @@ public:
     void publishLookupTable1D()
     {
         if( !_publisher )
-	    return;
+            return;
 
         const auto& renderSettings = _config.getFrameData().getRenderSettings();
         const auto& lut = renderSettings->getTransferFunction().getData();
@@ -107,7 +107,7 @@ public:
     void publishFrame()
     {
         if( !_publisher )
-	    return;
+            return;
 
         const auto& frameSettings = _config.getFrameData().getFrameSettings();
         const auto& params = _config.getApplicationParameters();
@@ -133,7 +133,7 @@ public:
     void publishVocabulary()
     {
         if( !_vwsPublisher )
-	    return;
+            return;
 
         ::zeq::EventDescriptors vocabulary;
         vocabulary.push_back(
@@ -168,7 +168,7 @@ public:
     void publishHeartbeat()
     {
         if( !_publisher )
-	    return;
+            return;
 
         if( _heartbeatClock.getTimef() >= DEFAULT_HEARTBEAT_TIME )
         {
@@ -183,7 +183,7 @@ public:
     void publishImageJPEG( const uint8_t* data, const uint64_t size )
     {
         if( !_vwsPublisher )
-	    return;
+            return;
 
         const ::zeq::hbp::data::ImageJPEG image( size, data );
         const auto& event = ::zeq::hbp::serializeImageJPEG( image );
@@ -236,16 +236,17 @@ public:
     {
         const auto& frame = ::zeq::hbp::deserializeFrame( event );
 
+        if( _config.getDataFrameCount() == 0 )
+            return;
+
         auto frameSettings = _config.getFrameData().getFrameSettings();
         auto& params = _config.getApplicationParameters();
 
-        const Vector2ui& frameRange = _config.getDataFrameRange();
-        const uint32_t frameCount = frameRange[1] - frameRange[0];
-
-        // Continue polling until new frames received
-        if( frameCount > 0 &&
-            frameSettings->getFrameNumber() == frame.current  )
+        if( frame.current == frameSettings->getFrameNumber() &&
+            frame.delta == params.animation )
+        {
             return;
+        }
 
         frameSettings->setFrameNumber( frame.current );
         params.animation = frame.delta;

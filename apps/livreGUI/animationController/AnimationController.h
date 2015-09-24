@@ -23,9 +23,6 @@
 #define _AnimationController_h_
 
 #include <livreGUI/types.h>
-#ifndef Q_MOC_RUN
-#  include <livreGUI/ui_AnimationController.h>
-#endif // Q_MOC_RUN
 
 #include <zeq/hbp/vocabulary.h>
 
@@ -63,18 +60,15 @@ private Q_SLOTS:
 
     void _connect();
     void _disconnect();
-    void _onSliderMoved( int value );
-    void _play();
-    void _pause();
+    void _onSliderMoved();
+    void _togglePlayPause();
     void _onNewFrameReceived( ::zeq::hbp::data::Frame frame );
     void _onFirstHeartBeatReceived();
 
 private:
 
     struct Impl;
-    Impl *_impl;
-
-    Ui_animationController _ui;
+    Impl* _impl;
 };
 
 }
