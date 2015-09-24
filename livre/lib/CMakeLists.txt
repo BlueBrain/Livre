@@ -19,7 +19,6 @@ set(LIVRELIB_PUBLIC_HEADERS
   data/MemoryDataSource.h
   configuration/ApplicationParameters.h
   configuration/ClientParameters.h
-  configuration/RESTParameters.h
   configuration/VolumeRendererParameters.h
   render/AvailableSetGenerator.h
   render/ScreenSpaceLODEvaluator.h
@@ -40,7 +39,6 @@ set(LIVRELIB_SOURCES
   data/MemoryDataSource.cpp
   configuration/ApplicationParameters.cpp
   configuration/ClientParameters.cpp
-  configuration/RESTParameters.cpp
   configuration/VolumeRendererParameters.cpp
   render/AvailableSetGenerator.cpp
   render/ScreenSpaceLODEvaluator.cpp

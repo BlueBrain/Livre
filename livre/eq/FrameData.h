@@ -35,8 +35,7 @@ enum SerializationMapIds
     SMI_CAMERA_SETTINGS,
     SMI_VOLUME_SETTINGS,
     SMI_CLIENT_PARAMETERS,
-    SMI_VR_PARAMETERS,
-    SMI_REST_PARAMETERS
+    SMI_VR_PARAMETERS
 };
 
 /**
@@ -57,8 +56,7 @@ public:
 
     /** Set up the parameters. */
     void setup( const ClientParameters& clientParams,
-                const VolumeRendererParameters& rendererParams,
-                const RESTParameters& networkParams );
+                const VolumeRendererParameters& rendererParams );
 
     /**
      * Registers objects to the internal \see co::ObjectMap.
@@ -161,11 +159,6 @@ public:
      */
     ConstVolumeRendererParametersPtr getVRParameters() const;
 
-    /**
-     * @return The RESTBridge's parameters.
-     */
-    ConstRESTParametersPtr getRESTParameters() const;
-
     virtual ~FrameData();
 
 private:
@@ -180,7 +173,6 @@ private:
 
     ClientParametersPtr clientParametersPtr_;
     VolumeRendererParametersPtr vrParametersPtr_;
-    RESTParametersPtr restParametersPtr_;
 };
 
 }
