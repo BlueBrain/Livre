@@ -49,8 +49,7 @@ class Communicator::Impl
 {
 public:
     Impl( Config& config, const int argc, char** argv )
-        : _vwsPublisher()
-        , _config( config )
+        : _config( config )
     {
         if( !servus::Servus::isAvailable( ))
             return;
@@ -78,7 +77,7 @@ public:
         const auto cameraSettings = _config.getFrameData().getCameraSettings();
         const Matrix4f& modelView = cameraSettings->getModelViewMatrix();
         const FloatVector matrix( modelView.begin(), modelView.end( ));
-        _vwsPublisher->publish( ::zeq::hbp::serializeCamera( matrix ));
+        _publisher->publish( ::zeq::hbp::serializeCamera( matrix ));
     }
 
     void publishExit()
@@ -87,7 +86,6 @@ public:
             return;
 
         _publisher->publish( ::zeq::Event( ::zeq::vocabulary::EVENT_EXIT ));
-        _vwsPublisher->publish( ::zeq::Event( ::zeq::vocabulary::EVENT_EXIT ));
     }
 
     void publishLookupTable1D()
@@ -97,7 +95,6 @@ public:
 
         const auto& renderSettings = _config.getFrameData().getRenderSettings();
         const auto& lut = renderSettings->getTransferFunction().getData();
-        _vwsPublisher->publish( ::zeq::hbp::serializeLookupTable1D( lut ));
         _publisher->publish( ::zeq::hbp::serializeLookupTable1D( lut ) );
     }
 
@@ -124,12 +121,11 @@ public:
                                             frameMax,
                                             params.animation ));
         _publisher->publish( frame );
-        _vwsPublisher->publish( frame );
     }
 
     void publishVocabulary()
     {
-        if( !_vwsPublisher )
+        if( !_publisher )
             return;
 
         ::zeq::EventDescriptors vocabulary;
@@ -159,7 +155,7 @@ public:
                                             ::zeq::hbp::SCHEMA_FRAME,
                                             ::zeq::BIDIRECTIONAL ));
         const auto& event = ::zeq::vocabulary::serializeVocabulary( vocabulary);
-        _vwsPublisher->publish( event );
+        _publisher->publish( event );
     }
 
     void publishHeartbeat()
@@ -170,8 +166,6 @@ public:
         if( _heartbeatClock.getTimef() >= DEFAULT_HEARTBEAT_TIME )
         {
             _heartbeatClock.reset();
-            _vwsPublisher->publish(
-                ::zeq::Event( ::zeq::vocabulary::EVENT_HEARTBEAT ));
             _publisher->publish(
                 ::zeq::Event( ::zeq::vocabulary::EVENT_HEARTBEAT ));
         }
@@ -179,12 +173,12 @@ public:
 
     void publishImageJPEG( const uint8_t* data, const uint64_t size )
     {
-        if( !_vwsPublisher )
+        if( !_publisher )
             return;
 
         const ::zeq::hbp::data::ImageJPEG image( size, data );
         const auto& event = ::zeq::hbp::serializeImageJPEG( image );
-        _vwsPublisher->publish( event );
+        _publisher->publish( event );
     }
 
     void onRequest( const ::zeq::Event& event )
@@ -274,7 +268,7 @@ private:
     void _setupPublisher()
     {
         const auto& params = _config.getApplicationParameters();
-        const servus::URI zeqSchema( params.zeqSchema );
+        const ::zeq::URI zeqSchema( params.zeqSchema );
         _publisher.reset( new ::zeq::Publisher( zeqSchema ));
     }
 
@@ -297,11 +291,10 @@ private:
     void _setupRESTBridge( const int argc, char** argv )
     {
 #ifdef LIVRE_USE_RESTBRIDGE
-        _restBridge = restbridge::RestBridge::parse( argc, argv );
+        _restBridge = restbridge::RestBridge::parse( *_publisher, argc, argv );
         if( !_restBridge )
             return;
 
-        _vwsPublisher.reset( new ::zeq::Publisher( _restBridge->getPublisherURI()));
         SubscriberPtr subscriber(
             new ::zeq::Subscriber( _restBridge->getSubscriberURI( )));
         subscribers.push_back( subscriber );
@@ -317,8 +310,6 @@ private:
         subscriber->registerHandler( ::zeq::hbp::EVENT_LOOKUPTABLE1D,
                                         std::bind( &Impl::onLookupTable1D, this,
                                                    std::placeholders::_1 ));
-#else
-        _vwsPublisher.reset( new ::zeq::Publisher( servus::URI( "vwsrep://" )));
 #endif
     }
 
@@ -326,7 +317,7 @@ private:
     {
         SubscriberPtr subscriber(
                     new ::zeq::Subscriber(
-                        servus::URI( _config.getApplicationParameters().zeqSchema )));
+                        ::zeq::URI( _config.getApplicationParameters().zeqSchema )));
 
         subscribers.push_back( subscriber );
         if( _config.getApplicationParameters().syncCamera )
@@ -353,7 +344,6 @@ private:
     Subscribers subscribers;
     PublisherPtr _publisher;
     lunchbox::Clock _heartbeatClock;
-    PublisherPtr _vwsPublisher;
     typedef std::function< void() > RequestFunc;
     typedef std::map< ::zeq::uint128_t, RequestFunc > RequestFuncs;
     RequestFuncs _requests;
