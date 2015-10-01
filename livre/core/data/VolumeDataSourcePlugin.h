@@ -90,11 +90,10 @@ public:
     LIVRECORE_API virtual void internalNodeToLODNode( const NodeId internalNode,
                                                       LODNode& lodNode ) const;
 
-    /**
-     * @return the frame range for data. For streaming data sources the range
-     * can be dynamic. If not implemented by the data source plugin, default
-     * range will be (0,0)
-     */
+    /** @return the frame range for the data source in [start,end) format.
+      * If there is no frames, [0,0) range is returned. In streaming data sources
+      * frame range can change over time.
+      */
     LIVRECORE_API virtual Vector2ui getFrameRange();
 
     /**
