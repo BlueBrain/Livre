@@ -194,11 +194,13 @@ uint32_t Config::frame()
     ApplicationParameters& params = getApplicationParameters();
 
     const uint32_t frameMin = std::max( params.frames.x(),
-                                        _impl->dataFrameRange[ 0 ]);
+                                        _impl->dataFrameRange[ 0 ] );
     const uint32_t frameMax = std::min( params.frames.y(),
-                                        _impl->dataFrameRange[ 1 ]);
+                                        _impl->dataFrameRange[ 1 ] ) - 1;
 
     uint32_t current = std::max( frameMin, frameSettings->getFrameNumber( ));
+    if( params.animation == INT_MAX )
+        current = frameMax;
 
     frameSettings->setFrameNumber( current );
     const eq::uint128_t& version = _impl->framedata.commit();
@@ -206,9 +208,7 @@ uint32_t Config::frame()
     // reset data and advance current frame
     frameSettings->setGrabFrame( false );
 
-    if( params.animation == INT_MAX )
-        frameSettings->setFrameNumber( frameMax );
-    else
+    if( params.animation != INT_MAX )
     {
         const uint32_t start = frameMin;
         const uint32_t end = std::max( frameMax, current );

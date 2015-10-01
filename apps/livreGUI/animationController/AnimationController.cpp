@@ -144,7 +144,7 @@ struct AnimationController::Impl
         // programatically.
         _ui.sldFrame->blockSignals( true );
         _ui.sldFrame->setMinimum( frame.start );
-        _ui.sldFrame->setMaximum( endFrame );
+        _ui.sldFrame->setMaximum( endFrame - 1 );
         _ui.sldFrame->setValue( frame.current );
         _ui.lblStartFrame->setText( QString::number( _ui.sldFrame->minimum( )));
         _ui.lblFrame->setText( QString::number( _ui.sldFrame->value( )));
@@ -168,7 +168,7 @@ struct AnimationController::Impl
         {
             const ::zeq::hbp::data::Frame frame( _ui.sldFrame->minimum(),
                                                  _ui.sldFrame->value(),
-                                                 _ui.sldFrame->maximum(),
+                                                 _ui.sldFrame->maximum() + 1,
                                                  getFrameDelta( ));
             _controller.publish( _zeqSchema, ::zeq::hbp::serializeFrame( frame ));
         }

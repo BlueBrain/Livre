@@ -62,7 +62,7 @@ ApplicationParameters::ApplicationParameters()
     configuration_.addDescription( configGroupName_, ANIMATION_FOLLOW_DATA_PARAM,
                                    "Enable animation and follow volume data stream (overrides --animation=value)", false );
     configuration_.addDescription( configGroupName_, FRAMES_PARAM,
-                                   "Frames to render 'start end'", frames );
+                                   "Frames to render [start end)", frames );
     configuration_.addDescription( configGroupName_, NUMFRAMES_PARAM,
                                    "Maximum nuber of frames to render", maxFrames );
     configuration_.addDescription( configGroupName_, CAMERAPOS_PARAM,
