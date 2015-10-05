@@ -248,8 +248,9 @@ public:
     MemoryUnitPtr _tuvokBrickToMemoryUnit( const LODNode& node,
                                            const uint32_t brickIndex ) const
     {
+        const uint32_t frame = node.getNodeId().getFrame();
         const tuvok::BrickKey brickKey =
-                tuvok::BrickKey( 0, _treeLevelToTuvokLevel(
+                tuvok::BrickKey( frame, _treeLevelToTuvokLevel(
                                             node.getRefLevel( )), brickIndex );
 
         const UINT64VECTOR4 coords = _uvfDataSetPtr->KeyToTOCVector( brickKey );
@@ -316,10 +317,10 @@ public:
     void internalNodeToLODNode( const NodeId& internalNode,
                                 LODNode& lodNode ) const
     {
+        const uint32_t frame = internalNode.getFrame();
         const uint32_t lod = _treeLevelToTuvokLevel( internalNode.getLevel() );
-
         const UINTVECTOR3& tuvokBricksInLod =
-                _uvfDataSetPtr->GetBrickLayout( lod, 0 );
+                _uvfDataSetPtr->GetBrickLayout( lod, frame );
 
         const Vector3ui& localBlockPosition = internalNode.getPosition();
         if( localBlockPosition[ 0 ] >= tuvokBricksInLod[ 0 ] ||
@@ -335,7 +336,7 @@ public:
                                      tuvokBricksInLod.y,
                                      tuvokBricksInLod.z );
 
-        const tuvok::BrickKey brickKey( 0,
+        const tuvok::BrickKey brickKey( frame,
                                         lod,
                                         _getBrickIndex( localBlockPosition.x(),
                                                         localBlockPosition.y(),
@@ -348,7 +349,7 @@ public:
                              float( _uvfDataSetPtr->GetScale().y ),
                              float( _uvfDataSetPtr->GetScale().z ) );
 
-        const UINT64VECTOR3& vDomainSize = _uvfDataSetPtr->GetDomainSize( lod );
+        const UINT64VECTOR3& vDomainSize = _uvfDataSetPtr->GetDomainSize( lod, frame );
 
         const FLOATVECTOR3 vDomainSizeCorrectedScale =
                 vScale * FLOATVECTOR3( vDomainSize ) / float(vDomainSize.maxVal());
