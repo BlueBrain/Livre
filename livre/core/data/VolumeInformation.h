@@ -104,8 +104,10 @@ struct VolumeInformation
     /** @return the number of bytes per element. */
     size_t getBytesPerVoxel() const;
 
-    /** @return the number of frames for the data source. If there is
-        no data source, [0,1) range is returned */
+    /** @return the frame range for the data source in [start,end) format.
+      * If there is no frames, [0,0) range is returned. In streaming data sources
+      * frame range can change over time.
+      */
     Vector2ui getFrameRange() const;
 
 private:

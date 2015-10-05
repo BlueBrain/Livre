@@ -45,8 +45,12 @@ public:
     /** Commits changes. */
     void commit();
 
-    /** Applies all the changes to the context. Blocks until a commit arrives.*/
-    void apply();
+    /**
+     * Applies all the changes to the context.
+     * @param wait if true blocks until changes are applied to the current context
+     * @return true if any change is applied to the current context
+     */
+    bool apply( bool wait);
 
     /** @return The texture data cache. */
     const TextureCache& getTextureCache() const;
