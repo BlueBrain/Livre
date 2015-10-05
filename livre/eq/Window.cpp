@@ -150,17 +150,14 @@ public:
         _dashProcessor->getProcessorOutput_()->commit( CONNECTION_ID );
     }
 
-    void apply()
+    bool apply( bool wait )
     {
-        Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
         ProcessorInputPtr input = _dashProcessor->getProcessorInput_();
 
-        // #75: only wait for data in synchronous mode
-        if( pipe->getFrameData()->getVRParameters()->synchronousMode ||
-            input->dataWaitingOnInput( CONNECTION_ID ))
-        {
-            input->applyAll( CONNECTION_ID );
-        }
+        if( wait || input->dataWaitingOnInput( CONNECTION_ID ))
+            return input->applyAll( CONNECTION_ID );
+
+        return false;
     }
 
     void initializePipelineProcessors()
@@ -325,9 +322,9 @@ void Window::commit()
     _impl->commit();
 }
 
-void Window::apply()
+bool Window::apply( bool wait )
 {
-    _impl->apply();
+    return _impl->apply( wait );
 }
 
 const TextureCache& Window::getTextureCache() const

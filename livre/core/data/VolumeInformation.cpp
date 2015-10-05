@@ -63,7 +63,7 @@ Vector2ui VolumeInformation::getFrameRange() const
 {
     if( _dataSource )
         return _dataSource->getFrameRange();
-    return Vector2ui( Vector2ui( 0, 1 ));
+    return Vector2ui( Vector2ui( 0, 0 ));
 }
 
 }
