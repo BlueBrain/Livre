@@ -82,23 +82,10 @@ int main( const int argc, char** argv )
         return EXIT_FAILURE;
     }
 
-    // 2. initialization of local client node
+    // Run local client node
     livre::ClientPtr client = new livre::Client();
-    if( !client->initLocal( argc, argv ))
-    {
-        LBERROR << "Can't init client" << std::endl;
-        eq::exit( );
-        // cppcheck-suppress unreachableCode
-        livre::exitErrors( );
-        return EXIT_FAILURE;
-    }
+    const int32_t ret = client->run( argc, argv );
 
-    // 4. run clientPtr
-    const int32_t ret = client->run();
-
-    // 5. cleanup and exit
-    client->exitLocal();
-    // cppcheck-suppress unreachableCode
     LBASSERTINFO( client->getRefCount() == 1, "Client still referenced by " <<
                   client->getRefCount() - 1 );
 

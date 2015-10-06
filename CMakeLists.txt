@@ -29,7 +29,7 @@ set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)
 
 include(Common)
 if(NOT MSVC) # cppnetlib does not build on Windows
-  git_subproject(RESTBridge https://github.com/BlueBrain/RESTBridge.git 4f16cfb)
+  git_subproject(RESTBridge https://github.com/BlueBrain/RESTBridge.git a126090)
 endif()
 if(APPLE) # WAR otherwise MacPorts X11 (/opt/local) is preferred
   list(REMOVE_ITEM CMAKE_SYSTEM_LIBRARY_PATH /opt/local/lib)

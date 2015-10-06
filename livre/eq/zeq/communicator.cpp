@@ -25,7 +25,6 @@
 #include <livre/eq/settings/FrameSettings.h>
 #include <livre/eq/settings/RenderSettings.h>
 #include <livre/lib/configuration/ApplicationParameters.h>
-#include <livre/lib/configuration/RESTParameters.h>
 
 #include <lunchbox/clock.h>
 #include <servus/uri.h>
@@ -34,8 +33,6 @@
 
 #ifdef LIVRE_USE_RESTBRIDGE
 #  include <restbridge/RestBridge.h>
-static const std::string PUBLISHER_SCHEMA_SUFFIX = "resp://";
-static const std::string SUBSCRIBER_SCHEMA_SUFFIX = "cmd://";
 #endif
 
 #include <functional>
@@ -51,16 +48,15 @@ namespace zeq
 class Communicator::Impl
 {
 public:
-    explicit Impl( Config& config )
-        : _vwsPublisher()
-        , _config( config )
+    Impl( Config& config, const int argc, char** argv )
+        : _config( config )
     {
         if( !servus::Servus::isAvailable( ))
             return;
 
         _setupPublisher();
         _setupRequests();
-        _setupRESTBridge();
+        _setupRESTBridge( argc, argv );
         _setupSubscribers();
     }
 
@@ -81,7 +77,7 @@ public:
         const auto cameraSettings = _config.getFrameData().getCameraSettings();
         const Matrix4f& modelView = cameraSettings->getModelViewMatrix();
         const FloatVector matrix( modelView.begin(), modelView.end( ));
-        _vwsPublisher->publish( ::zeq::hbp::serializeCamera( matrix ));
+        _publisher->publish( ::zeq::hbp::serializeCamera( matrix ));
     }
 
     void publishExit()
@@ -90,7 +86,6 @@ public:
             return;
 
         _publisher->publish( ::zeq::Event( ::zeq::vocabulary::EVENT_EXIT ));
-        _vwsPublisher->publish( ::zeq::Event( ::zeq::vocabulary::EVENT_EXIT ));
     }
 
     void publishLookupTable1D()
@@ -100,7 +95,6 @@ public:
 
         const auto& renderSettings = _config.getFrameData().getRenderSettings();
         const auto& lut = renderSettings->getTransferFunction().getData();
-        _vwsPublisher->publish( ::zeq::hbp::serializeLookupTable1D( lut ));
         _publisher->publish( ::zeq::hbp::serializeLookupTable1D( lut ) );
     }
 
@@ -127,12 +121,11 @@ public:
                                             frameMax,
                                             params.animation ));
         _publisher->publish( frame );
-        _vwsPublisher->publish( frame );
     }
 
     void publishVocabulary()
     {
-        if( !_vwsPublisher )
+        if( !_publisher )
             return;
 
         ::zeq::EventDescriptors vocabulary;
@@ -162,7 +155,7 @@ public:
                                             ::zeq::hbp::SCHEMA_FRAME,
                                             ::zeq::BIDIRECTIONAL ));
         const auto& event = ::zeq::vocabulary::serializeVocabulary( vocabulary);
-        _vwsPublisher->publish( event );
+        _publisher->publish( event );
     }
 
     void publishHeartbeat()
@@ -173,8 +166,6 @@ public:
         if( _heartbeatClock.getTimef() >= DEFAULT_HEARTBEAT_TIME )
         {
             _heartbeatClock.reset();
-            _vwsPublisher->publish(
-                ::zeq::Event( ::zeq::vocabulary::EVENT_HEARTBEAT ));
             _publisher->publish(
                 ::zeq::Event( ::zeq::vocabulary::EVENT_HEARTBEAT ));
         }
@@ -182,12 +173,12 @@ public:
 
     void publishImageJPEG( const uint8_t* data, const uint64_t size )
     {
-        if( !_vwsPublisher )
+        if( !_publisher )
             return;
 
         const ::zeq::hbp::data::ImageJPEG image( size, data );
         const auto& event = ::zeq::hbp::serializeImageJPEG( image );
-        _vwsPublisher->publish( event );
+        _publisher->publish( event );
     }
 
     void onRequest( const ::zeq::Event& event )
@@ -274,11 +265,10 @@ public:
     }
 
 private:
-
     void _setupPublisher()
     {
         const auto& params = _config.getApplicationParameters();
-        const servus::URI zeqSchema( params.zeqSchema );
+        const ::zeq::URI zeqSchema( params.zeqSchema );
         _publisher.reset( new ::zeq::Publisher( zeqSchema ));
     }
 
@@ -298,42 +288,28 @@ private:
                 std::bind( &Impl::publishVocabulary, this );
     }
 
-    void _setupRESTBridge()
+    void _setupRESTBridge( const int argc, char** argv )
     {
 #ifdef LIVRE_USE_RESTBRIDGE
-    const auto& restParameters = _config.getFrameData().getRESTParameters();
-    const std::string publisherSchema = restParameters->zeqSchema +
-                                        PUBLISHER_SCHEMA_SUFFIX;
+        _restBridge = restbridge::RestBridge::parse( *_publisher, argc, argv );
+        if( !_restBridge )
+            return;
 
-    _vwsPublisher.reset( new ::zeq::Publisher( servus::URI( publisherSchema )));
-    if( !restParameters->useRESTBridge )
-        return;
-
-    _restBridge.reset( new restbridge::RestBridge( restParameters->hostName,
-                                                   restParameters->port ));
-    _restBridge->run( restParameters->zeqSchema );
-
-    const std::string subscriberSchema = restParameters->zeqSchema +
-                                         SUBSCRIBER_SCHEMA_SUFFIX;
-
-    SubscriberPtr vwsSubscriber(
-                new ::zeq::Subscriber( servus::URI( subscriberSchema )));
-    subscribers.push_back( vwsSubscriber );
-    vwsSubscriber->registerHandler( ::zeq::hbp::EVENT_CAMERA,
-                                    std::bind( &Impl::onCamera,
-                                                 this, std::placeholders::_1 ));
-    vwsSubscriber->registerHandler( ::zeq::vocabulary::EVENT_REQUEST,
-                                    std::bind( &Impl::onRequest,
-                                                 this, std::placeholders::_1 ));
-    vwsSubscriber->registerHandler( ::zeq::hbp::EVENT_FRAME,
-                                    std::bind( &Impl::onFrame,
-                                               this, std::placeholders::_1 ));
-    vwsSubscriber->registerHandler( ::zeq::hbp::EVENT_LOOKUPTABLE1D,
-                                    std::bind( &Impl::onLookupTable1D,
-                                               this, std::placeholders::_1 ));
-
-#else
-    _vwsPublisher.reset( new ::zeq::Publisher( servus::URI( "vwsresp://" )));
+        SubscriberPtr subscriber(
+            new ::zeq::Subscriber( _restBridge->getSubscriberURI( )));
+        subscribers.push_back( subscriber );
+        subscriber->registerHandler( ::zeq::hbp::EVENT_CAMERA,
+                                        std::bind( &Impl::onCamera, this,
+                                                   std::placeholders::_1 ));
+        subscriber->registerHandler( ::zeq::vocabulary::EVENT_REQUEST,
+                                        std::bind( &Impl::onRequest, this,
+                                                   std::placeholders::_1 ));
+        subscriber->registerHandler( ::zeq::hbp::EVENT_FRAME,
+                                        std::bind( &Impl::onFrame, this,
+                                                   std::placeholders::_1 ));
+        subscriber->registerHandler( ::zeq::hbp::EVENT_LOOKUPTABLE1D,
+                                        std::bind( &Impl::onLookupTable1D, this,
+                                                   std::placeholders::_1 ));
 #endif
     }
 
@@ -341,7 +317,7 @@ private:
     {
         SubscriberPtr subscriber(
                     new ::zeq::Subscriber(
-                        servus::URI( _config.getApplicationParameters().zeqSchema )));
+                        ::zeq::URI( _config.getApplicationParameters().zeqSchema )));
 
         subscribers.push_back( subscriber );
         if( _config.getApplicationParameters().syncCamera )
@@ -368,18 +344,17 @@ private:
     Subscribers subscribers;
     PublisherPtr _publisher;
     lunchbox::Clock _heartbeatClock;
-    PublisherPtr _vwsPublisher;
     typedef std::function< void() > RequestFunc;
     typedef std::map< ::zeq::uint128_t, RequestFunc > RequestFuncs;
     RequestFuncs _requests;
 #ifdef LIVRE_USE_RESTBRIDGE
-    std::shared_ptr< restbridge::RestBridge > _restBridge;
+    std::unique_ptr< restbridge::RestBridge > _restBridge;
 #endif
     Config& _config;
 };
 
-Communicator::Communicator( Config& config )
-    : _impl( new Impl( config ))
+Communicator::Communicator( Config& config, const int argc, char* argv[] )
+    : _impl( new Impl( config, argc, argv ))
 {
 }
 
