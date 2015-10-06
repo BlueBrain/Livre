@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
- *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+ *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -17,197 +17,446 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "TransferFunction1D.h"
+#include <livre/core/render/TransferFunction1D.h>
+#include <livre/core/render/TransferFunctionData.h>
+#include <livre/core/util/Utilities.h>
 
 #include <co/dataIStream.h>
 #include <co/dataOStream.h>
 
-#include <fstream>
-#include <iterator>
+#include <eq/gl.h>
 
-#define DEFAULT_COLOR1_DENSITY 128u
-#define DEFAULT_COLOR2_DENSITY 255u
-#define DEFAULT_COLOR1_ALPHA 0.39f
-#define DEFAULT_COLOR2_ALPHA 0.03f
-#define DEFAULT_TF_SIZE 256u
-#define DEFAULT_COLOR1_RGB Vector3f( 0.0f, 1.0f, 1.0f )
-#define DEFAULT_COLOR2_RGB Vector3f( 1.0f, 0.0f, 1.0f )
+#include <boost/filesystem/path.hpp>
+
+#include <fstream>
+#include <limits>
 
 namespace livre
 {
-namespace
+
+bool sortControlPointsX( const ControlPoint& p1,
+                         const ControlPoint& p2 )
 {
-enum SamplePointsType
+    return p1[ 0 ] < p2[ 0 ];
+}
+
+bool sortControlPointsY( const ControlPoint& p1,
+                         const ControlPoint& p2 )
 {
-    UINT8,
-    FLOAT,
-    DEFAULT = FLOAT
+    return p1[ 1 ] < p2[ 1 ];
+}
+
+class LinearInterpolationAlgorithm::Impl
+{
+    Impl()
+        : _isDirty( true )
+    {
+        _controlPoints.push_back( ControlPoint( 0.0, 0.0, 0.0 ));
+        _controlPoints.push_back( ControlPoint( 1.0, 0.0, 1.0 ));
+    }
+
+    void addControlPoint( const ControlPoint& controlPoint )
+    {
+        BOOST_FOREACH( const ControlPoint& cp, _controlPoints )
+        {
+            if( std::abs( 1.0f - cp.dot( controlPoint )) <= std::numeric_limits<float>::epsilon( ))
+                return; // There is already a control point on that location
+        }
+
+        _controlPoints.push_back( controlPoint );
+        _isDirty = true;
+    }
+
+    void removeControlPoint( const ControlPoint& controlPoint )
+    {
+        ControlPoints::const_iterator it = controlPoints.begin();
+        while( it != controlPoints.end( ))
+        {
+            if( std::abs( 1.0f - cp.dot( _controlPoints )) <= std::numeric_limits<float>::epsilon( ))
+            {
+                controlPoints.remove( it );
+                _isDirty = true;
+                return;
+            }
+            else
+                ++it;
+        }
+    }
+
+    void compute(  const TransferFunction& transferFunction,
+                   FloatVector& result ) const final
+    {
+        if( !_isDirty )
+        {
+            result = _rawData;
+            return result;
+        }
+
+        result.resize( transferFunction.getFormat().nXElements *
+                       transferFunction.getFormat().nYElements );
+
+        // Implement based on x, y interpolation
+        ControlPoints xSorted;
+        if( format.nXElements > 0 )
+        {
+            xSorted = _controlPoints;
+            std::sort( xSorted.begin(), xSorted.end(), sortControlPointsX );
+        }
+
+        for( uint32_t elementX = 0; elementX < format.nXElements; ++elementX )
+            for( uint32_t channel = 0; channel < format.nChannels; ++nChannels )
+            {
+                const float x = (float)elementX / (float)format.nXElements;
+
+                ControlPoints::const_iterator lowX =
+                        std::lower_bound( xSorted.begin(), xSorted.end(), x );
+
+                // Computes only depending on x dimension
+                const float startX = *lowX;
+                const float endX = *( lowX + 1 );
+                const float distanceRecp = 1.0f / ( endX - startX );
+
+                const size_t index = elementY * format.nXElements * format.nChannels +
+                                     elementX * format.nChannels +
+                                     channel;
+
+                _rawData[ index ] = ( startX * ( endX - x ) + endX * ( x - beginX )) * distanceRecp;
+             }
+
+       result = _rawData;
+       _isDirty = false;
+    }
+
+    void setControlPoints( const ControlPoints& controlPoints )
+    {
+        if( controlPoints.size() < 2 )
+            LBTHROW( std::runtime_error( "At least two contol points should be provided"))
+        _controlPoints = controlPoints;
+        _isDirty = true;
+    }
+
+    std::string& _name;
+    bool _isDirty;
+    FloatVector _result;
 };
 
-FloatVector create2ColorTF( const uint32_t surfaceColorPos,
-                            const float surfaceColorAlpha,
-                            const float solidColorAlpha, const size_t size,
-                            const Vector3f& surfaceColorRGB,
-                            const Vector3f& solidColorRGB )
+LinearInterpolationAlgorithm::LinearInterpolationAlgorithm()
+    : _impl( new LinearInterpolationAlgorithm::Impl())
+{}
+
+LinearInterpolationAlgorithm::~LinearInterpolationAlgorithm()
 {
-    Vector3f finalColorRGB;
-    float alpha;
-    FloatVector transferFunction;
+    delete _impl;
+}
 
-    const Vector3f colorDiff = solidColorRGB - surfaceColorRGB;
-    const float alphaDiff = solidColorAlpha - surfaceColorAlpha;
-
-    for( uint32_t i = 0; i < size; ++i )
+class DiracInterpolationAlgorithm::Impl
+{
+    Impl()
+        : _isDirty( true )
     {
-        if( i == 0 )
+        controlPoint.push_back( ControlPoint( 0.5, 0.0, 1.0 ));
+    }
+
+    void compute(  const TransferFunction& transferFunction,
+                   FloatVector& result ) const final
+    {
+        if( !_isDirty )
         {
-            finalColorRGB = Vector3f(0.0f);
-            alpha = 0;
-        }
-        else if( ( 0 < i ) && ( i<= surfaceColorPos ) )
-        {
-            finalColorRGB = surfaceColorRGB;
-            alpha = surfaceColorAlpha * ( float(i) / (float)surfaceColorPos );
-        }
-        else
-        {
-            finalColorRGB = ( (float)( i - surfaceColorPos + 1u ) /
-                              (float)( DEFAULT_COLOR2_DENSITY -
-                                       surfaceColorPos + 1u ) ) * colorDiff +
-                             surfaceColorRGB;
-            alpha = ( (float)( i - surfaceColorPos + 1u ) /
-                    (float)( DEFAULT_COLOR2_DENSITY - surfaceColorPos + 1u ) ) *
-                    alphaDiff + surfaceColorAlpha;
+            result = _rawData;
+            return result;
         }
 
-        transferFunction.push_back( finalColorRGB[0] );
-        transferFunction.push_back( finalColorRGB[1] );
-        transferFunction.push_back( finalColorRGB[2] );
-        transferFunction.push_back( alpha );
+       result = _rawData;
+       _isDirty = false;
     }
-    return transferFunction;
-}
 
-FloatVector createDefault2ColorTF()
-{
-    return create2ColorTF( DEFAULT_COLOR1_DENSITY, DEFAULT_COLOR1_ALPHA,
-                           DEFAULT_COLOR2_ALPHA,
-                           DEFAULT_TF_SIZE, DEFAULT_COLOR1_RGB,
-                           DEFAULT_COLOR2_RGB );
-}
-
-SamplePointsType readTransferFunction( const std::string& file,
-                                       FloatVector& transferFunction )
-{
-    transferFunction = createDefault2ColorTF();
-    if( file.empty( ))
+    void setControlPoint( const ControlPoint& controlPoint )
     {
-        LBWARN << "Using default transfer function" << std::endl;
-        return DEFAULT;
-    }
-    if( file.substr( file.find_last_of(".") + 1 ) != "1dt" )
-    {
-        LBWARN << "Wrong transfer function file format: " << file
-               << ", it must be '.1dt'. Using default transfer function"
-               << std::endl;
-        return DEFAULT;
+        if( std::abs( 1.0f - cp.dot( controlPoint[ 0 ] )) <= std::numeric_limits<float>::epsilon( ))
+            return; // There is already a control point on that location
+
+        _controlPoints[ 0 ] = controlPoint;
+        _isDirty = true;
     }
 
-    std::ifstream ifs( file );
-    if( !ifs.is_open( ))
-    {
-        LBWARN << "The specified transfer function file: " << file
-               << ", could not be opened. Using default transfer function"
-               << std::endl;
-        return DEFAULT;
-    }
+    bool _isDirty;
+};
 
-    std::string line, val;
-    std::getline( ifs, line );
-    const std::string& formatStr = line.substr( line.find(' ') + 1 );
-    const SamplePointsType format = formatStr == "uint8" ? UINT8 : DEFAULT;
+DiracInterpolationAlgorithm::DiracInterpolationAlgorithm()
+    : _impl( new DiracInterpolationAlgorithm::Impl())
+{}
 
-    const size_t numValues = atoi( line.c_str( )) * TF_NCHANNELS;
-    if( !numValues )
-    {
-        LBWARN << "Wrong format in transfer function file: " << file
-               << ", the number of values must be specified. "
-               << "Using default transfer function" << std::endl;
-        return DEFAULT;
-    }
-    transferFunction.resize( numValues );
-    size_t i = 0;
-    while( ifs >> val && i < numValues )
-        transferFunction[i++] = atof( val.c_str( ));
-
-    return format;
-}
-}
-
-template<> void TransferFunction1D< uint8_t >::reset()
+DiracInterpolationAlgorithm::~DiracInterpolationAlgorithm()
 {
-    const FloatVector defaultTF = createDefault2ColorTF();
-    const float maxVal = std::numeric_limits< uint8_t >::max();
-    const size_t size = defaultTF.size();
-
-    rgba_.resize( size );
-    for( size_t i = 0; i < size; ++i )
-        rgba_[i] = maxVal * defaultTF[i];
+    delete _impl;
 }
 
-template<> void TransferFunction1D< float >::reset()
-{
-    rgba_ = createDefault2ColorTF();
-}
+typedef std::map< std::string, InterpolationAlgorithms > NameInterpolationAlgorithmsMap;
+typedef std::pair< std::string, InterpolationAlgorithms > NameInterpolationAlgorithmsPair;
 
-template<>
-void TransferFunction1D< uint8_t >::createCustomTF_( const uint32_t size )
+struct TransferFunction::Impl
 {
-    rgba_.resize( size * TF_NCHANNELS );
+    Impl( const TransferFunction::Format& format )
+    {}
 
-    rgba_[0] = 0u;
-    rgba_[1] = 0u;
-    rgba_[2] = 0u;
-    rgba_[3] = 0u;
-    for( size_t i = 1; i < size; ++i )
+    Impl( const TransferFunction& tf )
+    {}
+
+    bool addAlgorithm( const std::string& name,
+                       InterpolationAlgorithmType type )
+    {}
+
+    InterpolationAlgorithmPtr getAlgorithm( const std::string& name,
+                                            const size_t channel ) const
+    {}
+
+    bool removeAlgorithm( const std::name )
+    {}
+
+    void compute( const size_t channel,
+                  FloatVector& result ) const
+    {}
+
+    void fillTransferFunctionData( TransferFunctionData& data )
     {
-        rgba_[ i * TF_NCHANNELS ] = 0u;
-        rgba_[ i * TF_NCHANNELS + 1 ] = 0u;
-        rgba_[ i * TF_NCHANNELS + 2 ] = 255u;
-        rgba_[ i * TF_NCHANNELS + 3 ] = 2u;
+        std::vector< uint32_t > algorithms;
+        std::vector< std::string > algorithmNames;
+        BOOST_FOREACH( const NameInterpolationAlgorithmsPair& pair, _algorithmMap )
+        {
+            algorithms.push_back( pair.second[0].getType( ));
+            algorithmNames.push_back( pair.first );
+        }
+
+        data.setAlgorithms( algorithms );
     }
-}
 
-template<>
-void TransferFunction1D< float >::createCustomTF_( const uint32_t size )
-{
-    rgba_.resize( size * TF_NCHANNELS );
-
-    rgba_[0] = 0.0f;
-    rgba_[1] = 0.0f;
-    rgba_[2] = 0.0f;
-    rgba_[3] = 0.0f;
-    for( size_t i = 1; i < size; ++i )
+    bool load( const std::string& filename )
     {
-        rgba_[ i * TF_NCHANNELS ] = 0.0f;
-        rgba_[ i * TF_NCHANNELS + 1 ] = 0.0f;
-        rgba_[ i * TF_NCHANNELS + 2 ] = 1.0f;
-        rgba_[ i * TF_NCHANNELS + 3 ] = 0.08f;
+
+
+
+
+
     }
-}
 
-template<>
-void TransferFunction1D< uint8_t >::createTfFromFile_( const std::string& file )
+    bool save( const std::string& filename )
+    {
+        TransferFunctionData data;
+        fillTransferFunctionData( data );
+        std::
+    }
+
+    TransferFunction::Format _format;
+    NameInterpolationAlgorithmsMap _algorithmMap;
+};
+
+TransferFunction::TransferFunction( const Format& format )
+{}
+
+TransferFunction::TransferFunction( const TransferFunction& tf )
+{}
+
+Format TransferFunction::getFormat() const
+{}
+
+bool TransferFunction::addAlgorithm( const std::string& name,
+                                     InterpolationAlgorithmType type )
+{}
+
+bool TransferFunction::removeAlgorithm( const std::string& name )
+{}
+
+virtual void TransferFunction::compute( const size_t channel,
+                                        FloatVector& result ) const;
+
+TransferFunction::~TransferFunction()
+{}
+
+bool TransferFunction::load( const std::string& filename )
+{}
+
+bool TransferFunction::save( const std::string& filename )
+{}
+
+struct ControlPointTransferFunction::Impl
 {
-    FloatVector transferFunction;
-    const SamplePointsType& format = readTransferFunction( file, transferFunction );
-    const size_t size = transferFunction.size();
-    rgba_.resize( size );
+    Impl( ControlPointTransferFunction& transferFunction,
+          const ControlPoints& controlPoints,
+          InterpolationMethod method )
+        : _transferFunction( transferFunction )
+        , _tfTexture( -1 )
+        , _isDirty( true )
+        , _interpolationMethod( method )
+    {
+    }
 
-    const uint8_t maxVal = std::numeric_limits< uint8_t >::max();
-    const uint8_t conversionFactor = format == UINT8 ? 1u : maxVal;
+    void fillWithDefaultData()
+    {
+        _controlPoints.push_back( ControlPoint( 0.0f, 0.0f, 0.0f ));
+        _controlPoints.push_back( ControlPoint( 1.0f, 0.0f, 1.0f ));
+    }
 
-    for( size_t i = 0; i < size; ++i )
-        rgba_[i] = conversionFactor * transferFunction[i];
+    bool load( const std::string& filename )
+    {
+        std::ifstream ofs( filename );
+        if( ifs.is_open())
+        {
+            LBERROR( "Cannot open the file for writing" );
+            return false;
+        }
+
+        deserialize( ifs );
+        ifs.close();
+        isDirty = true;
+        return true;
+    }
+
+    void save( const std::string& filename )
+    {
+        std::ofstream ofs( filename );
+        if( ofs.is_open())
+        {
+            LBERROR( "Cannot open the file for writing");
+            return false;
+        }
+
+        serialize( ofs );
+        ofs.close();
+        return true;
+    }
+
+
+    void computeTransferFunction()
+    {
+        // TODO : support more types
+        const TransferFunction::Format& format = _transferFunction.getFormat();
+        if( _rawData.empty( ))
+        {
+            const size_t elementSize = livre::util::getDataTypeSize( format.dataType );
+            const size_t dataSize = elementSize *
+                                    format.nXElements *
+                                    format.nYElements *
+                                    format.nChannels;
+
+            _rawData.reserve( dataSize );
+        }
+
+        if( !isDirty )
+            return;
+
+        ControlPoints xSorted;
+        if( format.nXElements > 0 )
+        {
+            xSorted = _controlPoints;
+            std::sort( xSorted.begin(), xSorted.end(), sortControlPointsX );
+        }
+
+        ControlPoints ySorted;
+        if( format.nYElements > 0 )
+        {
+            ySorted = _controlPoints;
+            std::sort( ySorted.begin(), ySorted.end(), sortControlPointsY );
+        }
+
+        for( uint32_t elementY = 0; elementY < format.nYElements; ++elementY )
+            for( uint32_t elementX = 0; elementX < format.nXElements; ++elementX )
+                for( uint32_t channel = 0; channel < format.nChannels; ++nChannels )
+                {
+                    const float x = (float)elementX / (float)format.nXElements;
+                    const float y = (float)elementY / (float)format.nYElements;
+                    const float z = _interpolationMethod->compute( xSorted,
+                                                                   x,
+                                                                   ySorted,
+                                                                   y );
+                    const size_t index = elementY * format.nXElements * format.nChannels +
+                                         elementX * format.nChannels +
+                                         channel;
+
+                    _rawData[ index ] =
+                            y * std::numeric_limits< unsigned char >::max();
+                }
+    }
+
+    int uploadToGPU( int internalFormat )
+    {
+        if( internalFormat != GL_RGBA )
+            LBTHROW( std::runtime_error( "Only GL_RGBA is format is supported" ));
+
+        computeTransferFunction();
+
+        // TODO : support more types
+        // TODO : fill & return a texture object
+        // Do not update transfer function texture
+        if( _tfTexture >= 0 && !isDirty )
+            return _tfTexture;
+
+        const TransferFunction::Format defaultFormat;
+        if( _transferFunction.getFormat() != defaultFormat )
+            return -1;
+
+        if( _tfTexture == -1 )
+        {
+            glGenTextures( 1, &_tfTexture );
+            glTexParameteri( GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+            glTexParameteri( GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+            glTexParameteri( GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+        }
+
+        glBindTexture( GL_TEXTURE_1D, _tfTexture );
+        glTexImage1D(  GL_TEXTURE_1D, 0,
+                       internalFormat,
+                       GLsizei( _transferFunction.getFormat().nElements ), 0,
+                       GL_RGBA, // Should be derived from channel info
+                       GL_UNSIGNED_BYTE, // Should be derived from data type
+                       &rawData[ 0 ] );
+
+        isDirty = false;
+        return _tfTexture;
+
+    }
+
+    std::ostream& serialize( std::ostream& os ) const
+    {
+
+    }
+
+    std::istream& deserialize( std::ostream& is )
+    {
+
+    }
+
+
+    co::DataOStream& serialize( co::DataOStream& os ) const
+    {
+
+    }
+
+    co::DataIStream& deserialize( co::DataIStream& is )
+    {
+
+    }
+
+    GLuint _tfTexture;
+    InterpolationAlgorithms _algorithms;
+};
+
+
+std::istream& operator>>( std::istream& is,
+                          TransferFunction& tf )
+{
+    return tf._impl->derialize( os );
 }
+
+co::DataOStream& operator<<( co::DataOStream& os,
+                             const TransferFunction& tf )
+{
+    return tf._impl->serialize( os );
+}
+
+co::DataIStream& operator>>( co::DataIStream& is,
+                             TransferFunction& tf )
+{
+    return tf._impl->derialize( os );
+}
+
 }

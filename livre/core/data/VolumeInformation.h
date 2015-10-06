@@ -26,22 +26,6 @@
 namespace livre
 {
 
-/**
- * The DataType enum is used for defining the data type in volumetric data.
- */
-enum DataType
-{
-    DT_FLOAT32,
-    DT_UINT8,
-    DT_UINT16,
-    DT_UINT32,
-    DT_FLOAT64,
-    DT_INT8,
-    DT_INT16,
-    DT_INT32,
-    DT_UNDEFINED
-};
-
 /** Properties of the volumetric data. */
 struct VolumeInformation
 {

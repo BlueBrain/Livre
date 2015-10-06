@@ -5,6 +5,15 @@
 # This file is part of Livre <https://github.com/BlueBrain/Livre>
 #
 
+set(TRANSFERFUNCTIONDATA1D_INCLUDE_NAME livre/core/render)
+
+include(zerobufGenerateCxx)
+zerobuf_generate_cxx(TRANSFERFUNCTIONDATA1D
+  ${OUTPUT_INCLUDE_DIR}/${TRANSFERFUNCTIONDATA1D_INCLUDE_NAME} render/TransferFunctionData1D.fbs)
+
+set(TRANSFERFUNCTIONDATA1D_PUBLIC_HEADERS ${TRANSFERFUNCTIONDATA1D_HEADERS})
+set(TRANSFERFUNCTIONDATA1D_NAMESPACE livre)
+
 set(LIVRECORE_PUBLIC_HEADERS
   data/LODNode.h
   data/NodeId.h
@@ -21,6 +30,7 @@ set(LIVRECORE_PUBLIC_HEADERS
 )
 
 set(LIVRECORE_HEADERS
+  ${TRANSFERFUNCTIONDATA1D_PUBLIC_HEADERS}
   dashTypes.h
   cache/Cache.h
   cache/CacheObject.h
@@ -70,6 +80,7 @@ set(LIVRECORE_HEADERS
   visitor/VisitState.h)
 
 set(LIVRECORE_SOURCES
+  ${TRANSFERFUNCTIONDATA_SOURCES}
   cache/Cache.cpp
   cache/CacheObject.cpp
   cache/CacheStatistics.cpp

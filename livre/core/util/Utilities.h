@@ -20,10 +20,18 @@
 #ifndef _utility_h_
 #define _utility_h_
 
+#include <livre/core/types.h>
+#include <string>
+
 namespace livre
 {
 
 bool hasOpenGL42Support();
+size_t getDataTypeSize( DataType dataType );
+std::string getDataTypeStr( DataType dataType );
+DataType getDataTypeFromStr( const std::string& str );
+
+}
 
 }
 
