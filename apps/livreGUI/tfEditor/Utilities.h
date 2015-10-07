@@ -21,7 +21,7 @@
 #ifndef _Utilities_h_
 #define _Utilities_h_
 
-#include <QtWidgets>
+#include <QPoint>
 
 namespace livre
 {
@@ -34,4 +34,3 @@ inline static bool xLessThan( const QPointF &p1, const QPointF &p2 )
 }
 
 #endif // _Utilities_h_
-

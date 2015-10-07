@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -23,6 +23,7 @@
 #include <livre/core/lunchboxTypes.h>
 #include <livre/eq/types.h>
 #include <livreGUI/qtTypes.h>
+#include <zeq/types.h>
 
 namespace livre
 {

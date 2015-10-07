@@ -21,7 +21,7 @@
 #ifndef _TFWidget_h_
 #define _TFWidget_h_
 
-#include <QGroupBox>
+#include <QWidget>
 
 namespace livre
 {

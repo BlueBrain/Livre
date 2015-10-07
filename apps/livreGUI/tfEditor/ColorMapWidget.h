@@ -21,7 +21,7 @@
 #ifndef _ColorMapWidget_h_
 #define _ColorMapWidget_h_
 
-#include <livreGUI/tfEditor/TFWidget.h>
+#include <livreGUI/tfEditor/TFWidget.h> // base class
 #include <livre/core/types.h>
 
 namespace livre
