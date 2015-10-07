@@ -23,9 +23,7 @@
 #define _AnimationController_h_
 
 #include <livreGUI/types.h>
-
 #include <zeq/hbp/vocabulary.h>
-
 #include <QWidget>
 
 namespace livre

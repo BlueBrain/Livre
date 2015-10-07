@@ -29,8 +29,6 @@
 
 #include <QWidget>
 
-struct StimuliControllerImpl;
-
 namespace livre
 {
 

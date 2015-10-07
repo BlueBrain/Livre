@@ -21,12 +21,9 @@
 #ifndef _TransferFunctionEditor_h_
 #define _TransferFunctionEditor_h_
 
+#include <livreGUI/types.h>
+#include <lunchbox/monitor.h> // member
 #include <QWidget>
-
-#include <livreGUI/Controller.h>
-#include <livreGUI/tfEditor/ColorMapWidget.h>
-
-#include <zeq/publisher.h>
 
 namespace Ui
 {
@@ -34,6 +31,7 @@ class TransferFunctionEditor;
 }
 namespace livre
 {
+class ColorMapWidget;
 
 /**
  * This contains all the widget for the transfert function editor.
