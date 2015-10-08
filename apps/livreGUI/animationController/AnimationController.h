@@ -60,6 +60,7 @@ private Q_SLOTS:
     void _disconnect();
     void _onSliderMoved();
     void _togglePlayPause();
+    void _setFollowSimulation( int on );
     void _onNewFrameReceived( ::zeq::hbp::data::Frame frame );
     void _onFirstHeartBeatReceived();
 
