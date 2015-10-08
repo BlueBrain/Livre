@@ -135,15 +135,22 @@ struct AnimationController::Impl
     void onNewFrameReceived( zeq::hbp::data::Frame frame )
     {
         _connected = true;
-        const int32_t endFrame = std::min( (int32_t)frame.end,
-                                           std::numeric_limits<int32_t>::max());
+
+        const int32_t int32Max = std::numeric_limits<int32_t>::max();
+        const int32_t startFrame = std::min( (int32_t)frame.start, int32Max );
+        const int32_t endFrame = std::min( (int32_t)frame.end, int32Max );
+
+        // Ignore events with invalid frame range, observed when a remote data
+        // source is not yet connected
+        if( startFrame >= endFrame )
+            return;
 
         // QSlider has no reliable signal for user only input.
         // valueChange() is always fired and sliderMoved() does not signal on
         // keyboard input. So block signal emission when setting the value
         // programatically.
         _ui.sldFrame->blockSignals( true );
-        _ui.sldFrame->setMinimum( frame.start );
+        _ui.sldFrame->setMinimum( startFrame );
         _ui.sldFrame->setMaximum( endFrame - 1 );
         _ui.sldFrame->setValue( frame.current );
         _ui.lblStartFrame->setText( QString::number( _ui.sldFrame->minimum( )));
