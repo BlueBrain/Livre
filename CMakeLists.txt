@@ -24,10 +24,13 @@ set(VERSION_ABI 3) # OFF or ABI version
 
 set(LIVRE_namespace livre)
 set(LIVRE_INCLUDE_NAME livre/core)
-set(LIVRE_DESCRIPTION "Largescale Interactive Volume Rendering Engine")
+set(LIVRE_DESCRIPTION "Largescale Interactive Volume Rendering Engine (Livre)")
+set(LIVRE_MAINTAINER "Blue Brain Project <bbp-open-source@googlegroups.com>")
+set(LIVRE_LICENSE LGPL)
 set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)
 
 include(Common)
+
 if(NOT MSVC) # cppnetlib does not build on Windows
   git_subproject(RESTBridge https://github.com/BlueBrain/RESTBridge.git a126090)
 endif()
