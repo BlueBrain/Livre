@@ -1,4 +1,5 @@
 /* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+ *                          Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
  *                          Raphael Dumusc <raphael.dumusc@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -22,8 +23,9 @@
 
 #include <livreGUI/animationController/AnimationController.h>
 #include <livreGUI/tfEditor/TransferFunctionEditor.h>
+
 #ifdef LIVRE_USE_MONSTEER
-#include <livreGUI/stimuliController/StimuliController.h>
+#  include <monsteer/qt/SteeringWidget.h>
 #endif
 
 namespace
@@ -46,8 +48,9 @@ MainWindow::MainWindow( livre::Controller& controller, QWidget* parent_ )
 
 #ifdef LIVRE_USE_MONSTEER
     _ui->simulationDockWidget->setWidget(
-                new StimuliController( controller, LIVRE_ZEQ_SCHEMA,
-                                       NEST_ZEQ_SCHEMA ));
+        new monsteer::qt::SteeringWidget( LIVRE_ZEQ_SCHEMA, NEST_ZEQ_SCHEMA ));
+#else
+    _ui->simulationDockWidget->setHidden( true );
 #endif
 
     _ui->animationDockWidget->setWidget(

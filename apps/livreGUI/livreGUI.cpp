@@ -34,8 +34,7 @@ int main( int argc, char *argv[] )
 
     Q_INIT_RESOURCE( resources );
 
-    app.setAttribute( Qt::AA_DontCreateNativeWidgetSiblings );
-    livre::setCoreSettingsNames( );
+    livre::setCoreSettingsNames();
 
     livre::Controller controller;
 

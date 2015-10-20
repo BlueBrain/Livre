@@ -27,7 +27,6 @@ set(LIVREGUI_MOC_HEADERS
 set(LIVREGUI_HEADERS
   ${LIVREGUI_MOC_HEADERS}
   types.h
-  qtTypes.h
   AppSettings.h
   Controller.h
   tfEditor/Utilities.h)
@@ -51,27 +50,7 @@ set(LIVREGUI_UI_FORMS
 set(LIVREGUI_LINK_LIBRARIES LivreCore LivreEq Qt5::Widgets zeq zeqHBP)
 
 if(MONSTEER_FOUND)
-list(APPEND LIVREGUI_HEADERS
-      stimuliController/nestData.h
-      stimuliController/GeneratorModel.h
-      stimuliController/GeneratorPropertiesModel.h
-      stimuliController/PropertyEditDelegate.h
-      stimuliController/StimuliController.h)
-list(APPEND LIVREGUI_MOC_HEADERS
-      stimuliController/GeneratorModel.h
-      stimuliController/GeneratorPropertiesModel.h
-      stimuliController/PropertyEditDelegate.h
-      stimuliController/StimuliController.h)
-list(APPEND LIVREGUI_SOURCES
-      stimuliController/nestData.cpp
-      stimuliController/GeneratorModel.cpp
-      stimuliController/GeneratorPropertiesModel.cpp
-      stimuliController/PropertyEditDelegate.cpp
-      stimuliController/StimuliController.cpp)
-list(APPEND LIVREGUI_UI_FORMS stimuliController/gui/StimuliController.ui)
-list(APPEND LIVREGUI_LINK_LIBRARIES Monsteer)
-list(APPEND CPPCHECK_EXTRA_ARGS
-    --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/stimuliController/moc_StimuliController.cxx)
+  list(APPEND LIVREGUI_LINK_LIBRARIES MonsteerQt)
 endif()
 
 list(APPEND CPPCHECK_EXTRA_ARGS
@@ -79,4 +58,4 @@ list(APPEND CPPCHECK_EXTRA_ARGS
 
 add_definitions(${QT_DEFINITIONS} "-DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED" )
 
-common_application(livreGUI MACOSX_BUNDLE)
+common_gui_application(livreGUI)

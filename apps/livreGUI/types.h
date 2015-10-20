@@ -20,9 +20,9 @@
 #ifndef _GuiTypes_h_
 #define _GuiTypes_h_
 
-#include <livre/core/lunchboxTypes.h>
+#include <QVariant>
+
 #include <livre/eq/types.h>
-#include <livreGUI/qtTypes.h>
 #include <zeq/types.h>
 
 namespace livre
@@ -30,21 +30,12 @@ namespace livre
 /**
  * Class definitions
  */
-class AnchorGraphCore;
-class ConnectDialog;
 class Controller;
-class DoubleGaussGraphCore;
-class GaussGraphCore;
 class MainWindow;
-class RampGraphCore;
-class RecentFiles;
 
 /**
  * SmartPtr definitions
  */
-typedef boost::shared_ptr< ConnectDialog > ConnectDialogPtr;
-typedef boost::shared_ptr< Controller > ControllerPtr;
-
 typedef std::vector< std::string > Strings;
 typedef std::pair< std::string, QVariant > Property;
 typedef std::vector< Property > PropertyList;
