@@ -72,6 +72,7 @@ public:
             VolumeSettingsPtr volumeSettingsPtr =
                     _config->getFrameData().getVolumeSettings();
             const lunchbox::URI& uri = lunchbox::URI( volumeSettingsPtr->getURI( ));
+            dash::Context::getMain(); // Create the main context
             _dataSourcePtr.reset( new livre::VolumeDataSource( uri ));
             _dashTreePtr.reset( new livre::DashTree( _dataSourcePtr ));
 
