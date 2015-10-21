@@ -25,31 +25,6 @@ namespace livre
 namespace maths
 {
 
-void matrixToEulerAngles( const Matrix3f& rotationMatrix, float& roll, float& pitch, float& yaw )
-{
-    // http://www.flipcode.com/documents/matrfaq.html#Q37
-    pitch = -std::asin( rotationMatrix[ 6 ] );        /* Calculate Y-axis angle */
-    const float C =  std::cos( pitch );
-
-    if ( std::abs( C ) > 0.005f )       /* Gimball lock? */
-    {
-        float trX = rotationMatrix[ 8 ] / C;  /* No, so get X-axis angle */
-        float trY = -rotationMatrix[ 7 ]  / C;
-
-        roll  = std::atan2( trY, trX );
-        trX =  rotationMatrix[ 0 ] / C; /* Get Z-axis angle */
-        trY = -rotationMatrix[ 3 ] / C;
-        yaw  = std::atan2( trY, trX );
-    }
-    else                                 /* Gimball lock has occurred */
-    {
-        roll = 0.0;                      /* Set X-axis angle to zero */
-        const float trX = rotationMatrix[ 4 ];                 /* And calculate Z-axis angle */
-        const float trY = rotationMatrix[ 1 ];
-        yaw  = std::atan2( trY, trX );
-    }
-}
-
 void getRotationAndEyePositionFromModelView( const Matrix4f& modelViewMatrix,
                                                    Matrix3f& rotationMatrix,
                                                    Vector3f& eye )

@@ -28,15 +28,6 @@ namespace maths
 {
 
 /**
- * Computes the euler angles in radians between 0 and 2pi.
- * @param rotationMatrix is the 3x3 rotation matrix.
- * @param roll return roll angle in radians.
- * @param pitch return pitch angle in radians.
- * @param yaw return yaw angle in radians.
- */
-LIVRECORE_API void matrixToEulerAngles( const Matrix3f& rotationMatrix, float& roll, float& pitch, float& yaw );
-
-/**
  * Extracts rotation and eye position from model view matrix.
  * @param modelViewMatrix is the 4x4 modelview matrix.
  * @param rotationMatrix returns 3x3 rotation matrix.
