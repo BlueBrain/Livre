@@ -27,14 +27,7 @@
 #include <zeq/publisher.h>
 #include <zeq/event.h>
 
-#include <zeq/hbp/vocabulary.h>
-
-#ifdef LIVRE_USE_MONSTEER
-#   include <monsteer/steering/simulator.h>
-#endif
-
 #include <boost/thread.hpp>
-#include <boost/function_equal.hpp>
 
 namespace livre
 {
@@ -45,56 +38,14 @@ bool operator==( const zeq::EventFunc& func1, const zeq::EventFunc& func2 )
             && func1.target_type() == func2.target_type();
 }
 
-struct Controller::Impl
+class Controller::Impl
 {
-    struct EventIdEventFuncPair
-    {
-        EventIdEventFuncPair( const servus::uint128_t& eventId_,
-                              const zeq::EventFunc eventFunc_ )
-            : eventId( eventId_ ),
-              eventFunc( eventFunc_ )
-        {}
-
-        bool operator==( const EventIdEventFuncPair& pair ) const
-        {
-            return eventId == pair.eventId &&
-                    eventFunc == pair.eventFunc;
-        }
-
-        servus::uint128_t eventId;
-        zeq::EventFunc eventFunc;
-
-    };
-
-    typedef std::map< std::string, zeq::Publisher* > PublisherMap;
-    typedef std::pair< std::string, zeq::Subscriber* > URISubscriberPair;
-    typedef std::map< std::string, zeq::Subscriber* > SubscriberMap;
-    typedef std::pair< const zeq::Subscriber*, EventIdEventFuncPair >
-                                                    SubscriberEventFunctionsPair;
-    typedef std::list< SubscriberEventFunctionsPair >
-                                                SubscriberEventFunctionsList;
-
-#ifdef LIVRE_USE_MONSTEER
-    typedef std::map< std::string, ::monsteer::Simulator* > SimulatorMap;
-#endif
-
+public:
     Impl()
         : _currentSubscriber( 0 )
         , _subscriberPoll( boost::bind( &Impl::pollSubscribers, this ))
         , _continuePolling( true )
-
     {}
-
-    template< typename Type >
-    void deleteObjects( const std::map< std::string, Type* >& map )
-    {
-        typedef std::pair< std::string, Type* > Pair;
-        BOOST_FOREACH( const Pair& pair, map )
-        {
-            Type* object = pair.second;
-            delete object;
-        }
-    }
 
     ~Impl()
     {
@@ -102,9 +53,6 @@ struct Controller::Impl
         _subscriberPoll.join();
         deleteObjects< zeq::Subscriber >( _subscriberMap );
         deleteObjects< zeq::Publisher >( _publisherMap );
-#ifdef LIVRE_USE_MONSTEER
-        deleteObjects< ::monsteer::Simulator >( _simulatorMap );
-#endif
     }
 
     bool connect( const std::string&, const uint16_t )
@@ -113,67 +61,9 @@ struct Controller::Impl
         return false;
     }
 
-    template< typename Type >
-    Type* getObject( std::map< std::string, Type* >& map,
-                     const servus::URI& uri  )
+    bool publish( const servus::URI& uri, const zeq::Event& event )
     {
-        const std::string& uriStr = std::to_string( uri );
-        typename std::map< std::string, Type* >::iterator it = map.find( uriStr );
-        if( it == map.end( ))
-            map[ uriStr ] = new Type( uri );
-
-        return map[ uriStr ];
-    }
-
-    void subscriberMultiplexer( const zeq::Event& event )
-    {
-        BOOST_FOREACH( const SubscriberEventFunctionsPair& pair,
-                       _subscriberEventFunctionList )
-        {
-            const zeq::Subscriber* subscriber = pair.first;
-            if( _currentSubscriber == subscriber )
-            {
-                const EventIdEventFuncPair& eventIdPair = pair.second;
-                if( eventIdPair.eventId == event.getType( ))
-                    eventIdPair.eventFunc( event );
-            }
-        }
-    }
-
-    bool createSubscriberAndRegisterEvent( const servus::URI& uri,
-                                           const servus::uint128_t& event,
-                                           const zeq::EventFunc& func )
-    {
-        const std::string& uriStr = std::to_string( uri );
-        typename std::map< std::string, zeq::Subscriber* >::iterator it =
-                _subscriberMap.find( uriStr );
-        if( it == _subscriberMap.end( ))
-        {
-            zeq::Subscriber* subcriber = new zeq::Subscriber( uri );
-            _subscriberMap[ uriStr ] = subcriber;
-        }
-
-        zeq::Subscriber* subscriber = _subscriberMap[ uriStr ];
-        BOOST_FOREACH( SubscriberEventFunctionsPair& pair,
-                       _subscriberEventFunctionList )
-        {
-            const zeq::Subscriber* sub = pair.first;
-            if( sub == subscriber )
-            {
-                const EventIdEventFuncPair& eventIdPair = pair.second;
-                if( eventIdPair.eventId == event )
-                    return false;
-            }
-        }
-
-        EventIdEventFuncPair eventIdPair( event, func );
-        _subscriberEventFunctionList.push_back(
-                    std::make_pair( subscriber, eventIdPair ));
-        subscriber->registerHandler( event,
-                                    boost::bind( &Impl::subscriberMultiplexer,
-                                                    this,
-                                                 _1 ));
-        return true;
+        return getPublisher( uri )->publish( event );
     }
 
     bool registerHandler( const servus::URI& uri,
@@ -232,29 +122,108 @@ struct Controller::Impl
         return false;
     }
 
-    zeq::Publisher* getPublisher( const servus::URI& uri )
+private:
+    struct EventIdEventFuncPair
     {
-        return getObject<zeq::Publisher>( _publisherMap, uri );
+        EventIdEventFuncPair( const servus::uint128_t& eventId_,
+                              const zeq::EventFunc eventFunc_ )
+            : eventId( eventId_ ),
+              eventFunc( eventFunc_ )
+        {}
+
+        bool operator==( const EventIdEventFuncPair& pair ) const
+        {
+            return eventId == pair.eventId &&
+                    eventFunc == pair.eventFunc;
+        }
+
+        servus::uint128_t eventId;
+        zeq::EventFunc eventFunc;
+    };
+
+    typedef std::map< std::string, zeq::Publisher* > PublisherMap;
+    typedef std::pair< std::string, zeq::Subscriber* > URISubscriberPair;
+    typedef std::map< std::string, zeq::Subscriber* > SubscriberMap;
+    typedef std::pair< const zeq::Subscriber*, EventIdEventFuncPair >
+                                                    SubscriberEventFunctionsPair;
+    typedef std::list< SubscriberEventFunctionsPair >
+                                                SubscriberEventFunctionsList;
+
+    template< typename Type >
+    void deleteObjects( const std::map< std::string, Type* >& map )
+    {
+        typedef std::pair< std::string, Type* > Pair;
+        BOOST_FOREACH( const Pair& pair, map )
+        {
+            Type* object = pair.second;
+            delete object;
+        }
     }
 
-    bool publish( const servus::URI& uri, const zeq::Event& event )
+    template< typename Type >
+    Type* getObject( std::map< std::string, Type* >& map,
+                     const servus::URI& uri )
     {
-        return getPublisher( uri )->publish( event );
+        const std::string& uriStr = std::to_string( uri );
+        typename std::map< std::string, Type* >::iterator it = map.find( uriStr );
+        if( it == map.end( ))
+            map[ uriStr ] = new Type( uri );
+
+        return map[ uriStr ];
     }
 
-#ifdef LIVRE_USE_MONSTEER
-    ::monsteer::Simulator* getSimulator( const servus::URI& uri )
+    void subscriberMultiplexer( const zeq::Event& event )
     {
-        return getObject<::monsteer::Simulator>( _simulatorMap, uri );
+        BOOST_FOREACH( const SubscriberEventFunctionsPair& pair,
+                       _subscriberEventFunctionList )
+        {
+            const zeq::Subscriber* subscriber = pair.first;
+            if( _currentSubscriber == subscriber )
+            {
+                const EventIdEventFuncPair& eventIdPair = pair.second;
+                if( eventIdPair.eventId == event.getType( ))
+                    eventIdPair.eventFunc( event );
+            }
+        }
     }
-#endif
+
+    bool createSubscriberAndRegisterEvent( const servus::URI& uri,
+                                           const servus::uint128_t& event,
+                                           const zeq::EventFunc& func )
+    {
+        const std::string& uriStr = std::to_string( uri );
+        typename std::map< std::string, zeq::Subscriber* >::iterator it =
+                _subscriberMap.find( uriStr );
+        if( it == _subscriberMap.end( ))
+        {
+            zeq::Subscriber* subscriber = new zeq::Subscriber( uri );
+            _subscriberMap[ uriStr ] = subscriber;
+        }
+
+        zeq::Subscriber* subscriber = _subscriberMap[ uriStr ];
+        BOOST_FOREACH( SubscriberEventFunctionsPair& pair,
+                       _subscriberEventFunctionList )
+        {
+            const zeq::Subscriber* sub = pair.first;
+            if( sub == subscriber )
+            {
+                const EventIdEventFuncPair& eventIdPair = pair.second;
+                if( eventIdPair.eventId == event )
+                    return false;
+            }
+        }
+
+        EventIdEventFuncPair eventIdPair( event, func );
+        _subscriberEventFunctionList.push_back(
+                    std::make_pair( subscriber, eventIdPair ));
+        subscriber->registerHandler( event,
+                                     boost::bind( &Impl::subscriberMultiplexer,
+                                                  this, _1 ));
+        return true;
+    }
 
     void pollSubscribers()
     {
-        /* Polling can be done through the QTimer object ( will simplify
-           locking issues ), which is part of the main loop, but this class
-           has no Qt dependency, currently we are using regular threads.
-        */
         while( _continuePolling )
         {
             SubscriberMap subscribers;
@@ -271,14 +240,15 @@ struct Controller::Impl
         }
     }
 
+    zeq::Publisher* getPublisher( const servus::URI& uri )
+    {
+        return getObject<zeq::Publisher>( _publisherMap, uri );
+    }
+
     PublisherMap _publisherMap;
     SubscriberMap _subscriberMap;
     SubscriberEventFunctionsList _subscriberEventFunctionList;
     zeq::Subscriber* _currentSubscriber;
-
-#ifdef LIVRE_USE_MONSTEER
-    SimulatorMap _simulatorMap;
-#endif
 
     boost::mutex _subscriberMutex;
     boost::thread _subscriberPoll;
@@ -286,14 +256,12 @@ struct Controller::Impl
 };
 
 
-Controller::Controller( )
+Controller::Controller()
     : _impl( new Controller::Impl( ))
 {}
 
-Controller::~Controller( )
-{
-    delete _impl;
-}
+Controller::~Controller()
+{}
 
 bool Controller::connect( const std::string& hostname,
                           const uint16_t port )
@@ -320,12 +288,4 @@ bool Controller::deregisterHandler( const servus::URI& uri,
 {
      return _impl->deregisterHandler( uri, event, func );
 }
-
-#ifdef LIVRE_USE_MONSTEER
-::monsteer::Simulator* Controller::getSimulator( const servus::URI& uri )
-{
-    return _impl->getSimulator( uri );
-}
-#endif
-
 }

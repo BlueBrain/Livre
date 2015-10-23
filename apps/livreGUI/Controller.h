@@ -25,78 +25,69 @@
 
 #include <livre/core/render/TransferFunction1D.h>
 #include <zeq/types.h>
-#ifdef LIVRE_USE_MONSTEER
-#   include <monsteer/types.h>
-#endif
+
 namespace livre
 {
 
 /**
+ * Allows having a set of publishers on different URIs, as well as subscribers
+ * that can register different functions for different event types.
+ *
  * Controls communication between the GUI and the rendering application.
  * TODO: The widgets for connection can be provided by this interface.
  */
 class Controller
 {
 public:
-
-    Controller( );
-    ~Controller( );
+    Controller();
+    ~Controller();
 
     /**
      * TODO: use zeq::connection::Broker to connect livre subscriber to GUI
-     * @param hostname Hostname to connect.
-     * @param port Port of the host to connect.
-     * @return True if connection is successful.
+     * @param hostname the hostname to connect to
+     * @param port the port of the host to connect to
+     * @return True if the connection was successful, false otherwise
      */
     bool connect( const std::string& hostname,
                   uint16_t port );
 
     /**
-     * @param uri Publisher uri. If there is no publisher with the given uri
-     * a new publisher is registered and returned, if there is registered
-     * publisher is returned.
+     * @param uri the publisher URI. If there is no publisher created on the
+     * given URI then add a new one and use it to publish the specified event.
+     * If a publisher object already exists, use it
      * @param event the serialized event to publish
-     * @return true if publish was successful
+     * @return true if the publication of the event was successful, false
+     * otherwise
      */
     bool publish( const servus::URI& uri,
                   const zeq::Event& event );
 
     /**
-     * @param uri Subscriber uri. If there is no subscriber with the
-     * given uri a new subscriber is registered, if there is registered
-     * it will be used.
+     * @param uri the subscriber URI. If there is no subscriber created on the
+     * given URI then add a new one use it to register a function to the
+     * specified event. If a subscriber object already exists, use it.
      * @param event the event type of interest
      * @param func the callback function on receive of event
-     * @return true if function can be registered
+     * @return true if the function was successfully registered
      */
     bool registerHandler( const servus::URI& uri,
                           const servus::uint128_t& event,
                           const zeq::EventFunc& func );
 
     /**
-     * @param uri Subscriber uri.
+     * @param uri the subscriber URI
      * @param event the event type of interest
      * @param func the callback function that receives the event
-     * @return true if function can be unregistered
+     * @return true if function was successfully deregistered
      */
     bool deregisterHandler( const servus::URI& uri,
                             const servus::uint128_t& event,
                             const zeq::EventFunc& func );
 
-#ifdef LIVRE_USE_MONSTEER
-    /**
-     * @param uri Simulator uri
-     * @return If there is no simulator with the given uri a new simulator is
-     * registered and returned, if there is registered simulator is returned.
-     */
-    ::monsteer::Simulator* getSimulator( const servus::URI& uri );
-#endif
-
 private:
-
-    struct Impl;
-    Impl* _impl;
+    class Impl;
+    std::unique_ptr< Impl > _impl;
 };
 
 }
-#endif  // MASS_VOL__GUI_CONTROLLER_H
+#endif  // _Controller_h_

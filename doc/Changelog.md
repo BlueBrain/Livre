@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # master {#master}
 
+* [#168](https://github.com/BlueBrain/Livre/pull/168):
+  Use simulation widget (from the MonsteerQt library) in livreGUI
 * [#165](https://github.com/BlueBrain/Livre/pull/165):
   UVF time support added
 * [#145](https://github.com/BlueBrain/Livre/pull/145):
