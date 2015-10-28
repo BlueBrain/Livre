@@ -28,16 +28,17 @@ SLURM_NODES = 'nodes'
 SLURM_TASKS_PER_NODE = 'tasks_per_node'
 
 SECTION_LIVRE = 'livre'
-LIVRE_VOLUME = 'volume'
-LIVRE_LAYOUT = 'eq_layout'
-LIVRE_SSE = 'sse'
-LIVRE_WIDTH = 'width'
-LIVRE_HEIGHT = 'height'
-LIVRE_CAMERA_POSITION = 'camera_position'
 LIVRE_CAMERA_LOOKAT = 'camera_lookat'
-LIVRE_STARTFRAME = 'start_frame'
+LIVRE_CAMERA_POSITION = 'camera_position'
 LIVRE_ENDFRAME = 'end_frame'
+LIVRE_HEIGHT = 'height'
+LIVRE_LAYOUT = 'eq_layout'
 LIVRE_MAXFRAMES = 'max_frames'
+LIVRE_SSE = 'sse'
+LIVRE_STARTFRAME = 'start_frame'
+LIVRE_TRANSFER_FUNCTION = 'transfer_function'
+LIVRE_VOLUME = 'volume'
+LIVRE_WIDTH = 'width'
 
 EXAMPLE_JSON = 'example.json'
 
@@ -90,6 +91,7 @@ class LivreBatch(object):
                 LIVRE_HEIGHT: 1200,
                 LIVRE_CAMERA_POSITION: "0 0 2",
                 LIVRE_CAMERA_LOOKAT: "0 0 0",
+                LIVRE_TRANSFER_FUNCTION: "",
                 LIVRE_STARTFRAME: 0,
                 LIVRE_ENDFRAME: 100,
                 LIVRE_MAXFRAMES: 50}}
@@ -122,7 +124,8 @@ class LivreBatch(object):
             "--sse {livre[sse]} --synchronous --animation "\
             "--frames \"{start} {end}\" --num-frames {num_frames} "\
             "--camera-position \"{livre[camera_position]}\" "\
-            "--camera-lookat \"{livre[camera_lookat]}\" ")).format(**values)
+            "--camera-lookat \"{livre[camera_lookat]}\" "\
+            "--transfer-function \"{livre[transfer_function]}\"")).format(**values)
 
         if self.verbose:
             print sbatch_script
