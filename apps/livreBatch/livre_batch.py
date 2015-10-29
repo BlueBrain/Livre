@@ -104,7 +104,7 @@ class LivreBatch(object):
         values = self.dict
         values['start'] = start
         values['end'] = end
-        values['num_frames'] = end - start + 1
+        values['num_frames'] = end - start
 
         sbatch_script = '\n'.join((
             "#!/bin/bash",
@@ -204,7 +204,7 @@ class LivreBatch(object):
         # Submit job(s) for range(s)
         idx = 1
         for sub_range in ranges:
-            idx += self._submit_jobs_for_range(idx, sub_range[0], sub_range[1])
+            idx += self._submit_jobs_for_range(idx, sub_range[0], sub_range[1] + 1)
 
         if self.dry_run:
             print "{0} job(s) not submitted (dry run)\n".format(idx-1)
@@ -223,17 +223,17 @@ class LivreBatch(object):
 
         livre_dict = self.dict[SECTION_LIVRE]
         batch_size = livre_dict[LIVRE_MAXFRAMES]
-        num_frames = end_frame - start_frame + 1
+        num_frames = end_frame - start_frame
+
         num_jobs = int(math.ceil(float(num_frames) / float(batch_size)))
         batch_size = int(math.ceil(float(num_frames) / float(num_jobs)))
 
         print "Create {0} job(s) with {1} frame(s) each".format(num_jobs,
                                                                 batch_size)
 
-        # python range has exclusive end, but we need the last frame
-        for batch_start in range(start_frame, end_frame + 1, batch_size):
+        for batch_start in range(start_frame, end_frame, batch_size):
             start = batch_start
-            end = min(batch_start + batch_size - 1, end_frame)
+            end = min(batch_start + batch_size, end_frame)
 
             sbatch_script = self._build_sbatch_script(start, end)
             print "Submit job {0} for frames {1} to {2}...".format(idx, start,
