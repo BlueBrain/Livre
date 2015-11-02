@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # master {#master}
 
+# Release 0.4 (2015-11-09) {#Release040}
+
 * [#168](https://github.com/BlueBrain/Livre/pull/168):
   Use simulation widget (from the MonsteerQt library) in livreGUI
 * [#165](https://github.com/BlueBrain/Livre/pull/165):

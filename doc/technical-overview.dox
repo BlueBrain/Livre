@@ -20,10 +20,8 @@ Livre is an out-of-core rendering engine that has the following features:
 
 - Distributed rendering using Equalizer library (https://github.com/Eyescale/Equalizer)
 (Sort-first is implemented, sort-last is in progress)
-
 - Lock-free data sharing using DASH library (https://github.com/BlueBrain/dash)
-
-- Octree based out-of-core rendering
+- Octree based out-of-core rendering.
 - Visualisation of pre-processed UVF format.
   ([source code](https://github.com/SCIInstitute/Tuvok.git)) volume data sets.
 - Real-time voxelisation of different data sources (surface meshes, BBP morphologies,
