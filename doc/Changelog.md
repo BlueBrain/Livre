@@ -1,7 +1,12 @@
 Changelog {#Changelog}
 =========
 
+
 # master {#master}
+
+* [#177](https://github.com/BlueBrain/Livre/pull/176):
+  Ray sampling is adapted to the volume size to prevent
+  artifacts
 
 # Release 0.4 (2015-11-09) {#Release040}
 

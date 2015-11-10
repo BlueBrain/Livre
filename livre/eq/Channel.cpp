@@ -227,12 +227,15 @@ public:
         ConstVolumeDataSourcePtr dataSource = dashTree->getDataSource();
 
         _renderViewPtr.reset( new EqRenderView( this, dashTree ));
-        _renderViewPtr->setRenderer( RendererPtr( new RayCastRenderer(
+
+        RendererPtr renderer( new RayCastRenderer(
                                   nSamplesPerRay,
                                   nSamplesPerPixel,
-                                  dataSource->getVolumeInformation().compCount,
+                                  dataSource->getVolumeInformation(),
                                   GL_UNSIGNED_BYTE,
-                                  GL_LUMINANCE8 )));
+                                  GL_LUMINANCE8 ));
+
+        _renderViewPtr->setRenderer( renderer);
     }
 
     const Frustum& initializeLivreFrustum()

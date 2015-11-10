@@ -38,13 +38,13 @@ public:
     /**
      * @param samplesPerRay Number of samples per ray.
      * @param samplesPerPixel Number of samples per pixel.
-     * @param componentCount Component count of rendering.
+     * @param volInfo Volume information.
      * @param gpuDataType Data type of the texture data source.
      * @param internalFormat Internal format of the texture in GPU memory.
      */
     RayCastRenderer( uint32_t samplesPerRay,
                      uint32_t samplesPerPixel,
-                     uint32_t componentCount,
+                     const VolumeInformation& volInfo,
                      uint32_t gpuDataType,
                      int32_t internalFormat );
     ~RayCastRenderer();
@@ -56,29 +56,19 @@ public:
     void initTransferFunction( const TransferFunction1D< uint8_t >& transferFunction );
 
 private:
+
     void onFrameStart_( const GLWidget& glWidget,
                         const View& view,
-                        const Frustum &frustum,
-                        const RenderBricks &brickList );
+                        const Frustum& frustum,
+                        const RenderBricks& renderBricks );
 
     void renderBrick_( const GLWidget& glWidget,
                        const View& view,
-                       const Frustum &frustum,
+                       const Frustum& frustum,
                        const RenderBrick& renderBrick );
 
-    bool readFromFrameBuffer_( const GLWidget& glWidget,
-                               const View& view,
-                               const Frustum &frustum,
-                               const RenderBrick& renderBrick,
-                               Vector2i& screenPos );
-
-
-    EqTexturePtr _framebufferTexture;
-    GLSLShadersPtr _shaders;
-    uint32_t _nSamplesPerRay;
-    uint32_t _nSamplesPerPixel;
-    uint32_t _transferFunctionTexture;
-    std::vector< uint32_t > _usedTextures[2]; // last, current frame
+    struct Impl;
+    std::unique_ptr< Impl > _impl;
 };
 
 }

@@ -47,7 +47,7 @@ VolumeRendererParameters::VolumeRendererParameters()
 #endif
     , minLOD( 0 )
     , maxLOD( ( NODEID_LEVEL_BITS << 1 ) + 1 )
-    , samplesPerRay( 512u )
+    , samplesPerRay( 0 )
     , samplesPerPixel( 1u )
     , transferFunction()
 {
@@ -68,7 +68,9 @@ VolumeRendererParameters::VolumeRendererParameters()
     configuration_.addDescription( configGroupName_, MAXLOD_PARAM,
                                    "Maximum level of detail", maxLOD );
     configuration_.addDescription( configGroupName_, SAMPLESPERRAY_PARAM,
-                                   "Number of samples per ray", samplesPerRay );
+                                   "Number of samples per ray. The value of 0 (default) sets"
+                                   " the number of samples automatically, based on the volume size",
+                                   samplesPerRay );
     configuration_.addDescription( configGroupName_, SAMPLESPERPIXEL_PARAM,
                                    "Number of samples per pixel", samplesPerPixel );
     configuration_.addDescription( configGroupName_, TRANSFERFUNCTION_PARAM,
@@ -76,7 +78,7 @@ VolumeRendererParameters::VolumeRendererParameters()
                                    transferFunction );
 }
 
-void VolumeRendererParameters::deserialize( co::DataIStream &is, const uint64_t )
+void VolumeRendererParameters::deserialize( co::DataIStream& is, const uint64_t )
 {
     is >> screenSpaceError
        >> synchronousMode
@@ -89,7 +91,7 @@ void VolumeRendererParameters::deserialize( co::DataIStream &is, const uint64_t 
        >> transferFunction;
 }
 
-void VolumeRendererParameters::serialize( co::DataOStream &os, const uint64_t )
+void VolumeRendererParameters::serialize( co::DataOStream& os, const uint64_t )
 {
     os << screenSpaceError
        << synchronousMode
@@ -102,8 +104,8 @@ void VolumeRendererParameters::serialize( co::DataOStream &os, const uint64_t )
        << transferFunction;
 }
 
-VolumeRendererParameters &VolumeRendererParameters::operator=(
-        const VolumeRendererParameters &rhs )
+VolumeRendererParameters& VolumeRendererParameters::operator=(
+        const VolumeRendererParameters& rhs )
 {
     if( this == &rhs )
         return *this;
