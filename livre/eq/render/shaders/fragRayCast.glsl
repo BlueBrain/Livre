@@ -11,7 +11,7 @@
 
 #define EARLY_EXIT 0.99
 #define DEFAULT_NSAMPLES_PER_RAY 32
-#define EPSILON = 0.0000000001f
+#define EPSILON 0.0000000001f
 
 uniform sampler3D volumeTex; //gx, gy, gz, v
 uniform sampler1D transferFnTex;
