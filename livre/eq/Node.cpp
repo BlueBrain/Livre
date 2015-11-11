@@ -28,6 +28,7 @@
 #include <livre/eq/Pipe.h>
 #include <livre/eq/Event.h>
 
+#include <livre/eq/settings/FrameSettings.h>
 #include <livre/eq/settings/VolumeSettings.h>
 #include <livre/lib/cache/TextureDataCache.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
@@ -115,7 +116,10 @@ public:
 
         const livre::VolumeInformation& info =
                 _dataSourcePtr->getVolumeInformation();
-        _config->sendEvent( VOLUME_FRAME_RANGE ) << info.getFrameRange();
+        const Vector2ui& frameRange( info.getFrameRange( ));
+
+        _config->getFrameData().getFrameSettings()->setFrameRange( frameRange );
+        _config->sendEvent( VOLUME_FRAME_RANGE ) << frameRange;
     }
 
     void releaseVolume()

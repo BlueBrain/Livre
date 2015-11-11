@@ -71,6 +71,12 @@ public:
     /** @return the current frame number to render. */
     uint32_t getFrameNumber() const { return frameNumber_; }
 
+    /** Set the frame range */
+    void setFrameRange( const Vector2ui& frameRange );
+
+    /** @return the current frameRange */
+    const Vector2ui& getFrameRange() const { return frameRange_; }
+
     /**
      * Screen shots the current frame.
      */
@@ -125,6 +131,7 @@ private:
 
     eq::uint128_t currentViewId_;
     uint32_t frameNumber_;
+    Vector2ui frameRange_;
     uint32_t screenShot_;
     bool recording_;
     bool statistics_;
