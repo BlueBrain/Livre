@@ -33,6 +33,7 @@ void FrameSettings::reset()
 {
     currentViewId_ = lunchbox::uint128_t( 0 );
     frameNumber_ = 0;
+    frameRange_ = Vector2ui(0, 0);
     screenShot_ = 0;
     recording_ = false;
     statistics_ = false;
@@ -44,24 +45,33 @@ void FrameSettings::reset()
 void FrameSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
 {
     co::Serializable::serialize( os, dirtyBits );
-    os << currentViewId_ << frameNumber_ << screenShot_
+    os << currentViewId_ << frameNumber_ << frameRange_ << screenShot_
        << recording_ << statistics_ << help_ << grabFrame_;
 }
 
 void FrameSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits )
 {
     co::Serializable::deserialize( is, dirtyBits );
-    is >> currentViewId_ >> frameNumber_ >> screenShot_
+    is >> currentViewId_ >> frameNumber_ >> frameRange_ >> screenShot_
        >> recording_ >> statistics_ >> help_ >> grabFrame_;
 }
 
 void FrameSettings::setFrameNumber( uint32_t frame )
 {
-    if( frameNumber_ == frame )
-        return;
+    if( frameNumber_ != frame )
+    {
+        frameNumber_ = frame;
+        setDirty( DIRTY_ALL );
+    }
+}
 
-    frameNumber_ = frame;
-    setDirty( DIRTY_ALL );
+void FrameSettings::setFrameRange( const Vector2ui& frameRange )
+{
+    if( frameRange_ != frameRange )
+    {
+        frameRange_ = frameRange;
+        setDirty( DIRTY_ALL );
+    }
 }
 
 void FrameSettings::makeScreenshot()

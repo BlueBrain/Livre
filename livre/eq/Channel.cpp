@@ -332,9 +332,8 @@ public:
         livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
         DashTreePtr dashTree = node->getDashTree();
         const uint32_t frame = dashTree->getRenderStatus().getFrameID();
-        const VolumeInformation& volInfo =
-                dashTree->getDataSource()->getVolumeInformation();
-        const Vector2ui& frameRange = volInfo.getFrameRange();
+        const Vector2ui& frameRange =
+                getFrameData()->getFrameSettings()->getFrameRange();
         if( frame < frameRange[0] || frame >= frameRange[1] )
             return;
 
