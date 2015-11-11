@@ -49,7 +49,7 @@ MemoryDataSource::MemoryDataSource( const VolumeDataSourcePluginData& initData )
     try
     {
         servus::URI::ConstKVIter i = uri.findQuery( "sparsity" );
-        _sparsity = i == uri.queryEnd() ? 1.0f : lexical_cast< float >( i->second );
+        _sparsity = i == uri.queryEnd() ? 1.0f : lexical_cast<float>(i->second);
     }
     catch( boost::bad_lexical_cast& except )
         LBTHROW( std::runtime_error( except.what() ));
@@ -57,7 +57,7 @@ MemoryDataSource::MemoryDataSource( const VolumeDataSourcePluginData& initData )
     if( parameters.size() < 4 ) // use defaults
     {
         _volumeInfo.voxels = Vector3ui( 4096 );
-        _volumeInfo.maximumBlockSize = Vector3ui(32) + _volumeInfo.overlap * 2;        
+        _volumeInfo.maximumBlockSize = Vector3ui(32) + _volumeInfo.overlap * 2;
     }
     else
     {
@@ -88,21 +88,27 @@ MemoryUnitPtr MemoryDataSource::getData( const LODNode& node )
                             _volumeInfo.getBytesPerVoxel();
     const Identifier nodeID = node.getNodeId().getId();
     const uint8_t* id = reinterpret_cast< const uint8_t* >( &nodeID );
-    const uint8_t fillValue = ( id[0] ^ id[1] ^ id[2] ^ id[3] ) + 16 +
+    const uint8_t value =  ( id[0] ^ id[1] ^ id[2] ^ id[3] ) + 16 +
         127 * std::sin( ((float)node.getNodeId().getFrame() + 1) / 200.f);
 
-    UInt8Vector data;
-    for( int32_t i = 0; i < blockSize.product(); ++i )
-    {
-        int random = rand() % 1000000 + 1;
-        if( random < 1000000 * _sparsity )
-            data.push_back( fillValue );
-        else
-            data.push_back( 0 );
-    }
-
     AllocMemoryUnitPtr memoryUnit( new AllocMemoryUnit );
-    memoryUnit->allocAndSetData( &data[0], dataSize );
+    memoryUnit->alloc( dataSize );
+    uint8_t* data = memoryUnit->getData< uint8_t >();
+
+    if( _sparsity < 1.f )
+    {
+        for( int32_t i = 0; i < blockSize.product(); ++i )
+        {
+            const int random = rand() % 1000000 + 1;
+            if( random < 1000000 * _sparsity )
+                data[ i ] = value;
+            else
+                data[ i ] = 0;
+        }
+    }
+    else
+        ::memset( data, value, dataSize );
+
     return memoryUnit;
 }
 

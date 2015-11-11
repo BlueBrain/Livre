@@ -59,11 +59,10 @@ size_t AllocMemoryUnit::getAllocSize() const
     return _rawData.getMaxSize();
 }
 
-void AllocMemoryUnit::alloc( const size_t allocSizePerElement,
-                             const size_t dataSize )
+void AllocMemoryUnit::alloc( const size_t nBytes )
 {
     LB_TS_THREAD( thread_ );
-    _rawData.reset( allocSizePerElement * dataSize );
+    _rawData.reset( nBytes );
 }
 
 void AllocMemoryUnit::release()
