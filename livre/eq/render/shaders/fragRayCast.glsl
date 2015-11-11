@@ -11,6 +11,7 @@
 
 #define EARLY_EXIT 0.99
 #define DEFAULT_NSAMPLES_PER_RAY 32
+#define EPSILON = 0.0000000001f
 
 uniform sampler3D volumeTex; //gx, gy, gz, v
 uniform sampler1D transferFnTex;
@@ -73,9 +74,19 @@ vec3 calcTexturePositionFromAABBPos( vec3 pos )
 // AABB-Ray intersection ( http://prideout.net/blog/?p=64 ).
 bool intersectBox( Ray r, AABB aabb, out float t0, out float t1 )
 {
+    //We need to avoid division by zero in "vec3 invR = 1.0 / r.Dir;"
+    if( r.Dir.x == 0 )
+        r.Dir.x = EPSILON;
+
+    if( r.Dir.y == 0 )
+        r.Dir.y = EPSILON;
+
+    if( r.Dir.z == 0 )
+        r.Dir.z = EPSILON;
+
     vec3 invR = 1.0 / r.Dir;
-    vec3 tbot = invR * ( aabb.Min-r.Origin);
-    vec3 ttop = invR * ( aabb.Max-r.Origin);
+    vec3 tbot = invR * ( aabb.Min - r.Origin );
+    vec3 ttop = invR * ( aabb.Max - r.Origin );
     vec3 tmin = min( ttop, tbot );
     vec3 tmax = max( ttop, tbot );
     vec2 t = max( tmin.xx, tmin.yz );
