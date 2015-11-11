@@ -4,12 +4,14 @@ Changelog {#Changelog}
 
 # master {#master}
 
+# Release 0.4 (2015-11-09) {#Release040}
+
+* [#181](https://github.com/BlueBrain/Livre/pull/181):
+  Fix #114, rendering artefacts with screen-aligned bricks caused by 
+  division by zero with axis aligned rays in the shader
 * [#177](https://github.com/BlueBrain/Livre/pull/176):
   Ray sampling is adapted to the volume size to prevent
   artifacts
-
-# Release 0.4 (2015-11-09) {#Release040}
-
 * [#168](https://github.com/BlueBrain/Livre/pull/168):
   Use simulation widget (from the MonsteerQt library) in livreGUI
 * [#165](https://github.com/BlueBrain/Livre/pull/165):
