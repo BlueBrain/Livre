@@ -6,6 +6,9 @@ Changelog {#Changelog}
 
 # Release 0.4 (2015-11-09) {#Release040}
 
+* [#185](https://github.com/BlueBrain/Livre/pull/185):
+  Fix #179, the rendering is updated according to the
+  latest frustum
 * [#181](https://github.com/BlueBrain/Livre/pull/181):
   Fix #114, rendering artefacts with screen-aligned bricks caused by 
   division by zero with axis aligned rays in the shader
