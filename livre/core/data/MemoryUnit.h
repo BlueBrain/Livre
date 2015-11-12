@@ -36,16 +36,7 @@ class MemoryUnit
 {
 public:
     LIVRECORE_API MemoryUnit();
-
     LIVRECORE_API virtual ~MemoryUnit();
-
-    /**
-     * Allocate memory.
-     * @param allocSizePerElement Allocation size per element of the array.
-     * @param dataSize Number of elements in the array.
-     */
-    virtual void alloc( const size_t allocSizePerElement LB_UNUSED,
-                        const size_t dataSize LB_UNUSED ) = 0;
 
     /** Release memory */
     virtual void release() = 0;
@@ -79,7 +70,6 @@ class NoMemoryUnit : public MemoryUnit
 {
 public:
     virtual ~NoMemoryUnit() {}
-    void alloc( const size_t, const size_t ) final { LBDONTCALL; }
     void release() final {}
 
     size_t getMemSize() const final { return 0; }
@@ -104,7 +94,6 @@ protected:
     const uint8_t* getData_() const final;
     uint8_t* getData_() final { LBDONTCALL; return 0; }
 
-    void alloc( const size_t, const size_t ) final { LBDONTCALL; }
     void release() final {}
 
     const uint8_t* const ptr_;
@@ -120,19 +109,19 @@ public:
     LIVRECORE_API AllocMemoryUnit();
 
     /**
-     * Allocates and sets the data from the given ptr, with given size
+     * Allocate and copy the data from the given source and size
      * @param sourceData Source data ptr.
      * @param size Number of the elements in the source data ptr.
      */
     template< class T >
     void allocAndSetData( const T* sourceData, const size_t size )
     {
-        alloc( sizeof( T ), size );
+        alloc( sizeof( T ) * size );
         ::memcpy( _rawData.getData(), sourceData, size * sizeof( T ) );
     }
 
     /**
-     * Allocates and sets the data from the given source data vector, with given size
+     * Allocate and copy the data from the given source and size
      * @param sourceData Source data vector.
      */
     template< class T >
@@ -142,12 +131,10 @@ public:
     }
 
     /**
-     * Allocates memory.
-     * @param allocSizePerElement Allocation size per element of the array.
-     * @param dataSize Number of elements in the array.
+     * Allocate memory.
+     * @param nBytes Number of bytes to allocate.
      */
-    LIVRECORE_API void alloc( const size_t allocSizePerElement,
-                              const size_t dataSize ) final;
+    LIVRECORE_API void alloc( size_t nBytes );
 
     /** Release memory. */
     LIVRECORE_API void release() final;
