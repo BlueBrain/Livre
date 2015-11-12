@@ -49,7 +49,7 @@ public:
     /**
      * @return The cache id.
      */
-    LIVRE_API CacheId getCacheID() const;
+    LIVRE_API CacheId getCacheID() const override;
 
     /**
      * @return The GPU memory usage.
@@ -87,13 +87,13 @@ private:
 
     const TextureDataObject& getTextureDataObject_( ) const;
 
-    bool load_( );
+    bool load_( ) override;
 
-    void unload_( );
+    void unload_( ) override;
 
-    bool isLoaded_( ) const;
+    bool isLoaded_( ) const override;
 
-    bool isValid_( ) const;
+    bool isValid_( ) const override;
 
     bool loadTextureToGPU_( ) const;
 

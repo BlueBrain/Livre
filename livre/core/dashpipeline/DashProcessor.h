@@ -56,13 +56,13 @@ protected:
     /**
      * Is executed when the dash context is set.
      */
-    LIVRECORE_API virtual void onSetDashContext_();
+    LIVRECORE_API void onSetDashContext_() override;
 
     /**
      * Initializes the dash context for thread.
      * @return True if thread initialization is successfull.
      */
-    LIVRECORE_API virtual bool initializeThreadRun_( );
+    LIVRECORE_API bool initializeThreadRun_() override;
 };
 
 }
