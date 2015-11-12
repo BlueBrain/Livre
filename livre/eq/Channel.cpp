@@ -22,6 +22,7 @@
 
 #include <livre/eq/Channel.h>
 #include <livre/eq/Config.h>
+#include <livre/eq/Event.h>
 #include <livre/eq/Error.h>
 #include <livre/eq/FrameData.h>
 #include <livre/eq/FrameGrabber.h>
@@ -330,8 +331,11 @@ public:
         applyCamera();
 
         livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
+
         DashTreePtr dashTree = node->getDashTree();
-        const uint32_t frame = dashTree->getRenderStatus().getFrameID();
+        const DashRenderStatus& renderStatus = dashTree->getRenderStatus();
+
+        const uint32_t frame = renderStatus.getFrameID();
         const VolumeInformation& volInfo =
                 dashTree->getDataSource()->getVolumeInformation();
         const Vector2ui& frameRange = volInfo.getFrameRange();
@@ -369,6 +373,17 @@ public:
 
         if( dashTreeUpdated )
         {
+            const Frustum& receivedFrustum = renderStatus.getFrustum();
+
+            // If there are multiple channels, this may cause the ping-pong
+            // because every channel will try to update the same DashTree in
+            // node with their own frustum.
+            if( !pipe->getFrameData()->getVRParameters()->synchronousMode
+                 && receivedFrustum != _currentFrustum )
+            {
+                _channel->getConfig()->sendEvent( REDRAW );
+            }
+
             _frameInfo.clear();
             generateSet.generateRenderingSet( _currentFrustum, _frameInfo );
         }
