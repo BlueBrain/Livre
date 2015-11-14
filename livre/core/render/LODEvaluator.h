@@ -35,15 +35,21 @@ public:
     virtual ~LODEvaluator() {}
 
     /**
-     * Computes a level of detail with given parameters and the frustum.
-     * @param frustum view frustum.
-     * @param volumeDepth Depth of the volume.
-     * @param worldCoord The 3D world coordinate
-     * @return
+     * Computes the LOD for a world space point.
+     * @param worldCoord World position of a point.
+     * @param volumeInfo Volume information.
+     * @param viewport View port in pixels.
+     * @param frustum The view furstum.
+     * @param minLOD Minimum LOD to be rendered.
+     * @param maxLOD Maximum LOD to be rendered.
+     * @return Returns the LOD between min - max LOD.
      */
-    virtual uint32_t getLODForPoint(  const Frustum& frustum,
-                                      const uint32_t volumeDepth,
-                                      const Vector3f& worldCoord ) const = 0;
+    virtual uint32_t getLODForPoint( const Vector3f& worldCoord,
+                                     const VolumeInformation& volumeInfo,
+                                     const PixelViewport& viewport,
+                                     const Frustum& frustum,
+                                     uint32_t minLOD,
+                                     uint32_t maxLOD ) const = 0;
 
 };
 

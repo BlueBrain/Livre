@@ -51,14 +51,14 @@ public:
      * @param cacheObjectID The object cache id to be queried.
      * @return The cache object from cache, if object is not in the list it is created with given cache id.
      */
-    LIVRECORE_API CacheObjectPtr getObjectFromCache( const CacheId cacheObjectID );
+    LIVRECORE_API CacheObjectPtr getObjectFromCache( const CacheId& cacheObjectID );
 
     /**
      * @param cacheObjectID The object cache id to be queried.
      * @return The cache object from cache, if object is not in the list an empty cache
      * object is returned.
      */
-    LIVRECORE_API CacheObjectPtr getObjectFromCache( const CacheId cacheObjectID ) const;
+    LIVRECORE_API CacheObjectPtr getObjectFromCache( const CacheId& cacheObjectID ) const;
 
     /**
      * Applies a policy to the cache.
@@ -66,11 +66,6 @@ public:
      * @return The state for the cache policy application.
      */
     LIVRECORE_API ApplyResult applyPolicy( CachePolicy& cachePolicy ) const;
-
-    /**
-     * @return The number of cache objects managed ( not the number of loaded objects ).
-     */
-    LIVRECORE_API size_t getNumberOfCacheObjects( ) const;
 
     /**
      * @return Statistics.
@@ -91,19 +86,19 @@ protected:
      * @param cacheObjectID The object cache id to be queried.
      * @return The cache object from cache, if object is not in the list it is created.
      */
-    LIVRECORE_API CacheObjectPtr getObjectFromCache_( const CacheId cacheObjectID );
+    LIVRECORE_API CacheObjectPtr getObjectFromCache_( const CacheId& cacheObjectID );
 
     /**
      * @param cacheObjectID The object cache id to be queried.
      * @return The cache object from cache, if object is not in the list an invalid cache object is returned.
      */
-    LIVRECORE_API CacheObjectPtr getObjectFromCache_( const CacheId cacheObjectID ) const;
+    LIVRECORE_API CacheObjectPtr getObjectFromCache_( const CacheId& cacheObjectID ) const;
 
     /**
-     * @param cacheID The derived class allocates an \see CacheObject with the given ID
+     * @param cacheId The derived class allocates an \see CacheObject with the given ID
      * @return The allocated object.
      */
-    virtual CacheObject* generateCacheObjectFromID_( const CacheId cacheID ) = 0;
+    virtual CacheObject* generateCacheObjectFromID_( const CacheId& cacheId ) = 0;
 
     CacheStatisticsPtr statisticsPtr_;  //!< The statistics object ptr.
 

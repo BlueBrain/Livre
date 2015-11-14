@@ -39,7 +39,7 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
  * SILICON GRAPHICS, INC. BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF
- * OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * OR IN PORT WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
  * Except as contained in this notice, the name of Silicon Graphics, Inc.
@@ -58,16 +58,11 @@ namespace livre
 {
 
 
-RenderBrick::RenderBrick( ConstLODNodePtr lodNodePtr,
-                          ConstTextureStatePtr textureState )
-    : LODNodeTrait( lodNodePtr ),
-      textureState_( textureState )
+RenderBrick::RenderBrick( const LODNode& lodNode_,
+                          ConstTextureStatePtr textureState_ )
+    : lodNode( lodNode_ ),
+      textureState( textureState_ )
 {
-}
-
-ConstTextureStatePtr RenderBrick::getTextureState() const
-{
-    return textureState_;
 }
 
 void RenderBrick::getScreenCoordinates( const Frustum& frustum,
@@ -75,8 +70,8 @@ void RenderBrick::getScreenCoordinates( const Frustum& frustum,
                                         Vector2i& minScreenPos,
                                         Vector2i& maxScreenPos ) const
 {
-    const Vector3f& minPos = lodNodePtr_->getWorldBox().getMin();
-    const Vector3f& maxPos = lodNodePtr_->getWorldBox().getMax();
+    const Vector3f& minPos = lodNode.getWorldBox().getMin();
+    const Vector3f& maxPos = lodNode.getWorldBox().getMax();
 
     const double x[ 2 ] = { minPos[ 0 ], maxPos[ 0 ] };
     const double y[ 2 ] = { minPos[ 1 ], maxPos[ 1 ] };
@@ -155,7 +150,7 @@ void RenderBrick::drawBrick( bool front, bool back  ) const
         glCullFace( GL_FRONT );
     }
 
-    const Boxf& worldBox = lodNodePtr_->getWorldBox();
+    const Boxf& worldBox = lodNode.getWorldBox();
     const Vector3f& minPos = worldBox.getMin();
     const Vector3f& maxPos = worldBox.getMax();
 

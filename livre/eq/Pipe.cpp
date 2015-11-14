@@ -1,4 +1,3 @@
-
 /* Copyright (c) 2012-2015, Stefan Eilemann <eile@equalizergraphics.com>
  *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
  *                          Maxim Makhinya  <maxmah@gmail.com>
@@ -20,9 +19,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <livre/lib/cache/TextureCache.h>
+
 #include <livre/eq/Pipe.h>
 #include <livre/eq/Config.h>
 #include <livre/eq/FrameData.h>
+
+#include <eq/gl.h>
 
 namespace livre
 {
@@ -71,6 +74,7 @@ public:
 
     livre::Pipe* const _pipe;
     FrameDataPtr _frameDataPtr;
+
 };
 
 }
@@ -83,7 +87,7 @@ Pipe::Pipe( eq::Node* parent )
 
 Pipe::~Pipe( )
 {
-    delete _impl;
+    
 }
 
 void Pipe::frameStart( const eq::uint128_t& frameId, const uint32_t frameNumber )
@@ -110,5 +114,6 @@ ConstFrameDataPtr Pipe::getFrameData() const
 {
     return _impl->_frameDataPtr;
 }
+
 
 }

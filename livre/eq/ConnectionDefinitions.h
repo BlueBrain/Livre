@@ -18,8 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _ConnectionDefinitions_h_
-#define _ConnectionDefinitions_h_
+#ifndef _PortDefinitions_h_
+#define _PortDefinitions_h_
 
 #define DEFAULT_HOST "127.0.0.1"
 #define DEFAULT_PORT 4999

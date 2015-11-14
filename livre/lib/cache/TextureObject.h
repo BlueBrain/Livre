@@ -23,7 +23,6 @@
 #include <livre/lib/api.h>
 #include <livre/lib/types.h>
 #include <livre/core/mathTypes.h>
-#include <livre/core/data/LODNodeTrait.h>
 #include <livre/core/cache/CacheObject.h>
 
 namespace livre
@@ -32,7 +31,7 @@ namespace livre
 /**
  * The TextureObject class holds the informarmation for the data which is on the GPU.
   */
-class TextureObject : public CacheObject, public LODNodeTrait
+class TextureObject : public CacheObject
 {
     friend class TextureCache;
 
@@ -45,11 +44,6 @@ public:
      * @return True if two data object has the same cache id.
      */
     LIVRE_API bool operator==( const TextureObject& texture ) const;
-
-    /**
-     * @return The cache id.
-     */
-    LIVRE_API CacheId getCacheID() const override;
 
     /**
      * @return The GPU memory usage.
@@ -83,28 +77,22 @@ public:
     static TextureObject* getEmptyPtr();
 
 private:
-    TextureObject( TextureCachePtr textureCachePtr );
+
+    TextureObject( const CacheId& cacheId,
+                   TextureCachePtr textureCachePtr );
 
     const TextureDataObject& getTextureDataObject_( ) const;
 
-    bool load_( ) override;
-
-    void unload_( ) override;
-
-    bool isLoaded_( ) const override;
-
-    bool isValid_( ) const override;
-
+    bool load_( ) final;
+    void unload_( ) final;
+    bool isLoaded_( ) const final;
+    bool isValid_( ) const final;
     bool loadTextureToGPU_( ) const;
 
     void initialize_( );
-
     TextureCachePtr textureCachePtr_;
-
     TextureStatePtr textureState_;
-
     ConstTextureDataObjectPtr lodTextureData_;
-
     ConstVolumeDataSourcePtr dataSourcePtr_;
 };
 

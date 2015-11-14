@@ -28,14 +28,11 @@
 #include <livre/eq/FrameData.h>
 #include <livre/eq/Pipe.h>
 #include <livre/eq/Event.h>
-
 #include <livre/eq/settings/VolumeSettings.h>
+
 #include <livre/lib/cache/TextureDataCache.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
-#include <livre/lib/uploaders/DataUploadProcessor.h>
-#include <livre/core/dash/DashRenderStatus.h>
-#include <livre/core/dash/DashTree.h>
-#include <livre/core/dashpipeline/DashProcessorOutput.h>
+
 #include <livre/core/data/VolumeDataSource.h>
 
 #include <eq/eq.h>
@@ -57,13 +54,12 @@ public:
 
     void initializeCache()
     {
-        _textureDataCachePtr.reset(
-               new livre::TextureDataCache( _dataSourcePtr, GL_UNSIGNED_BYTE ));
-
         ConstVolumeRendererParametersPtr vrRenderParametersPtr =
                 _config->getFrameData().getVRParameters();
-        _textureDataCachePtr->setMaximumMemory(
-                    vrRenderParametersPtr->maxCPUCacheMemoryMB * LB_1MB );
+        _textureDataCachePtr.reset(
+               new livre::TextureDataCache( vrRenderParametersPtr->maxCPUCacheMemoryMB * LB_1MB,
+                                            _dataSourcePtr,
+                                            GL_UNSIGNED_BYTE ));
     }
 
     bool initializeVolume()
@@ -73,9 +69,14 @@ public:
             VolumeSettingsPtr volumeSettingsPtr =
                     _config->getFrameData().getVolumeSettings();
             const lunchbox::URI& uri = lunchbox::URI( volumeSettingsPtr->getURI( ));
-            dash::Context::getMain(); // Create the main context
             _dataSourcePtr.reset( new livre::VolumeDataSource( uri ));
-            _dashTreePtr.reset( new livre::DashTree( _dataSourcePtr ));
+
+            // Inform application of real-world size for camera manipulations
+            const livre::VolumeInformation& info =
+                    _dataSourcePtr->getVolumeInformation();
+            _config->sendEvent( VOLUME_BOUNDING_BOX ) << info.boundingBox;
+            _config->sendEvent( VOLUME_FRAME_RANGE ) << info.getFrameRange();
+
         }
         catch( const std::runtime_error& err )
         {
@@ -111,7 +112,6 @@ public:
     void releaseVolume()
     {
         _dataSourcePtr.reset();
-        _dashTreePtr.reset();
     }
 
     void releaseCache()
@@ -131,9 +131,8 @@ public:
 
     livre::Node* const _node;
     livre::Config* const _config;
-    TextureDataCachePtr _textureDataCachePtr;
+    CachePtr _textureDataCachePtr;
     VolumeDataSourcePtr _dataSourcePtr;
-    DashTreePtr _dashTreePtr;
 };
 
 }
@@ -146,7 +145,7 @@ Node::Node( eq::Config* parent )
 
 Node::~Node()
 {
-    delete _impl;
+
 }
 
 bool Node::configInit( const eq::uint128_t& initId )
@@ -184,19 +183,19 @@ bool Node::configExit()
     return eq::Node::configExit();
 }
 
-TextureDataCache& Node::getTextureDataCache()
+CachePtr Node::getTextureDataCache()
 {
-    return *_impl->_textureDataCachePtr;
+    return _impl->_textureDataCachePtr;
 }
 
-DashTreePtr Node::getDashTree()
+VolumeDataSourcePtr Node::getDataSource()
 {
-    return _impl->_dashTreePtr;
+    return _impl->_dataSourcePtr;
 }
 
-ConstDashTreePtr Node::getDashTree() const
+ConstVolumeDataSourcePtr Node::getDataSource() const
 {
-    return _impl->_dashTreePtr;
+    return _impl->_dataSourcePtr;
 }
 
 void Node::frameStart( const eq::uint128_t &frameId,

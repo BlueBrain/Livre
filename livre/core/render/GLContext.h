@@ -44,6 +44,11 @@ public:
     LIVRECORE_API void shareContext( GLContextPtr dstContextPtr );
 
     /**
+     * @return a similar context.
+     */
+    virtual GLContextPtr createContext() const = 0;
+
+    /**
      * Makes the context current.
      */
     virtual void makeCurrent() = 0;

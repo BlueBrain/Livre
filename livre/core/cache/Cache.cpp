@@ -28,12 +28,12 @@
 namespace livre
 {
 
-CacheObjectPtr Cache::getObjectFromCache( const CacheId cacheObjectID )
+CacheObjectPtr Cache::getObjectFromCache( const CacheId& cacheObjectID )
 {
     return getObjectFromCache_( cacheObjectID );
 }
 
-CacheObjectPtr Cache::getObjectFromCache( const CacheId cacheObjectID ) const
+CacheObjectPtr Cache::getObjectFromCache( const CacheId& cacheObjectID ) const
 {
     return getObjectFromCache_( cacheObjectID );
 }
@@ -84,12 +84,18 @@ Cache::~Cache()
     }
 }
 
-CacheObjectPtr Cache::getObjectFromCache_( const CacheId cacheObjectID )
+CacheObjectPtr Cache::getObjectFromCache_( const CacheId& cacheObjectID )
 {
     LBASSERT( cacheObjectID != INVALID_CACHE_ID );
+    ReadLock readLock( mutex_ );
+    CacheMap::iterator it = cacheMap_.find( cacheObjectID );
+    if( it != cacheMap_.end() )
+        return it->second;
+
+    readLock.unlock();
 
     WriteLock writeLock( mutex_ );
-    CacheMap::iterator it = cacheMap_.find( cacheObjectID );
+    it = cacheMap_.find( cacheObjectID );
     if( it == cacheMap_.end() )
     {
         CacheObjectPtr cacheObjectPtr( generateCacheObjectFromID_( cacheObjectID ) );
@@ -103,7 +109,7 @@ CacheObjectPtr Cache::getObjectFromCache_( const CacheId cacheObjectID )
     return cacheMap_[ cacheObjectID ];
 }
 
-CacheObjectPtr Cache::getObjectFromCache_( const CacheId cacheObjectID ) const
+CacheObjectPtr Cache::getObjectFromCache_( const CacheId& cacheObjectID ) const
 {
     ReadLock readLock( mutex_ );
     CacheMap::const_iterator it = cacheMap_.find( cacheObjectID );
@@ -126,12 +132,6 @@ void Cache::unloadCacheObjectsWithPolicy_( CachePolicy& cachePolicy,
         if( cachePolicy.isPolicySatisfied( *this ) )
             return;
     }
-}
-
-size_t Cache::getNumberOfCacheObjects( ) const
-{
-    ReadLock readLock( mutex_ );
-    return cacheMap_.size( );
 }
 
 CacheStatistics& Cache::getStatistics( )

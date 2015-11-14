@@ -113,7 +113,6 @@ struct RayCastRenderer::Impl
 
     void onFrameStart( const GLWidget& glWidget LB_UNUSED,
                        const View& view LB_UNUSED,
-                       const Frustum& frustum,
                        const RenderBricks& renderBricks )
     {
     #ifdef LIVRE_DEBUG_RENDERING
@@ -134,7 +133,7 @@ struct RayCastRenderer::Impl
             uint32_t maxLOD = 0;
             for( const RenderBrickPtr& rb : renderBricks )
             {
-                const uint32_t level = rb->getLODNode()->getRefLevel();
+                const uint32_t level = rb->lodNode.getRefLevel();
                 if( level > maxLOD )
                     maxLOD = level;
             }
@@ -157,6 +156,8 @@ struct RayCastRenderer::Impl
         // Enable shaders
         glUseProgram( program );
         GLint tParamNameGL;
+
+        const Frustum& frustum = view.getFrustum();
 
         tParamNameGL = glGetUniformLocation( program, "invProjectionMatrix" );
         glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getInvProjectionMatrix( ).array );
@@ -201,29 +202,29 @@ struct RayCastRenderer::Impl
 
         // Enable shaders
         glUseProgram( program );
-
-        if( rb.getTextureState( )->textureId == INVALID_TEXTURE_ID )
+        const LODNode& lodNode = rb.lodNode;
+        if( rb.textureState->textureId == INVALID_TEXTURE_ID )
         {
-            LBERROR << "Invalid texture for node : " << rb.getLODNode( )->getNodeId( ) << std::endl;
+            LBERROR << "Invalid texture for node : " << lodNode.getNodeId() << std::endl;
             return;
         }
 
         GLint tParamNameGL = glGetUniformLocation( program, "aabbMin" );
-        const ConstLODNodePtr& lodNodePtr = rb.getLODNode( );
-        glUniform3fv( tParamNameGL, 1, lodNodePtr->getWorldBox( ).getMin( ).array );
+
+        glUniform3fv( tParamNameGL, 1, lodNode.getWorldBox( ).getMin( ).array );
 
         tParamNameGL = glGetUniformLocation( program, "aabbMax" );
-        glUniform3fv( tParamNameGL, 1, lodNodePtr->getWorldBox( ).getMax( ).array );
+        glUniform3fv( tParamNameGL, 1, lodNode.getWorldBox( ).getMax( ).array );
 
         tParamNameGL = glGetUniformLocation( program, "textureMin" );
-        ConstTextureStatePtr texState = rb.getTextureState( );
+        const ConstTextureStatePtr& texState = rb.textureState;
         glUniform3fv( tParamNameGL, 1, texState->textureCoordsMin.array );
 
         tParamNameGL = glGetUniformLocation( program, "textureMax" );
         glUniform3fv( tParamNameGL, 1, texState->textureCoordsMax.array );
 
         const Vector3f& voxSize =
-                rb.getTextureState( )->textureSize / lodNodePtr->getWorldBox( ).getDimension( );
+                rb.textureState->textureSize / lodNode.getWorldBox( ).getDimension( );
         tParamNameGL = glGetUniformLocation( program, "voxelSpacePerWorldSpace" );
         glUniform3fv( tParamNameGL, 1, voxSize.array );
 
@@ -247,7 +248,7 @@ struct RayCastRenderer::Impl
         tParamNameGL = glGetUniformLocation( program, "volumeTex" );
         glUniform1i( tParamNameGL, 0 ); //f-shader
 
-        const uint32_t refLevel = lodNodePtr->getRefLevel();
+        const uint32_t refLevel = lodNode.getRefLevel();
 
         tParamNameGL = glGetUniformLocation( program, "refLevel" );
         glUniform1i( tParamNameGL, refLevel );
@@ -293,16 +294,14 @@ void RayCastRenderer::initTransferFunction(
 
 void RayCastRenderer::onFrameStart_( const GLWidget& glWidget,
                                      const View& view,
-                                     const Frustum& frustum,
                                      const RenderBricks& renderBricks )
 {
-    _impl->onFrameStart( glWidget, view, frustum, renderBricks );
+    _impl->onFrameStart( glWidget, view, renderBricks );
 }
 
 
 void RayCastRenderer::renderBrick_( const GLWidget& glWidget,
                                     const View& view,
-                                    const Frustum&,
                                     const RenderBrick& renderBrick )
 {
     _impl->renderBrick( glWidget, view, renderBrick );

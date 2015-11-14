@@ -18,10 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <dash/dash.h>
-
 #include <livre/core/defines.h>
-#include <livre/core/dash/DashRenderNode.h>
 #include <livre/core/data/VolumeDataSource.h>
 #include <livre/core/data/VolumeDataSourcePlugin.h>
 #include <livre/core/data/LODNode.h>
@@ -51,8 +48,11 @@ public:
                       VolumeDataSourcePluginData( uri, accessMode )))
     {}
 
-    ConstLODNodePtr getNode( const NodeId nodeId ) const
+    LODNode getNode( const NodeId nodeId ) const
     {
+        if( !isFrameInRange( nodeId.getFrame( )))
+            return LODNode();
+
         return plugin->getNode( nodeId );
     }
 
@@ -90,7 +90,7 @@ void VolumeDataSource::unloadPlugins()
         detail::VolumeDataSource::PluginFactory::getInstance().unload( plugin );
 }
 
-ConstLODNodePtr VolumeDataSource::getNode( const NodeId nodeId ) const
+LODNode VolumeDataSource::getNode( const NodeId nodeId ) const
 {
     return _impl->getNode( nodeId );
 }
@@ -110,19 +110,21 @@ bool VolumeDataSource::initializeGL()
     return _impl->plugin->initializeGL();
 }
 
-MemoryUnitPtr VolumeDataSource::getData( const LODNode& node )
+MemoryUnitPtr VolumeDataSource::getData( const NodeId& nodeId )
 {
-    return _impl->getData( node );
+    const LODNode& lodNode = getNode( nodeId );
+    return _impl->plugin->getData( lodNode );
 }
 
-ConstMemoryUnitPtr VolumeDataSource::getData( const LODNode& node ) const
+ConstMemoryUnitPtr VolumeDataSource::getData( const NodeId& nodeId ) const
 {
-    return _impl->getData( node );
+    const LODNode& lodNode = getNode( nodeId );
+    return _impl->plugin->getData( lodNode );
 }
 
 livre::VolumeDataSource::~VolumeDataSource()
 {
-    delete _impl;
+    
 }
 
 }

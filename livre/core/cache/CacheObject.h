@@ -45,7 +45,7 @@ public:
     /**
      * @return The unique cache id.
      */
-    virtual CacheId getCacheID() const = 0;
+    CacheId getCacheId() const;
 
     /**
      * Loads the object to cache ( if the reference count is more than 1, it is not unloaded ).
@@ -131,7 +131,7 @@ protected:
     friend class Cache;
     friend class CacheStatistics;
 
-    LIVRECORE_API CacheObject();
+    LIVRECORE_API CacheObject( const CacheId& cacheId = INVALID_CACHE_ID );
 
     /**
      * Implemented by the derived class, for loading data to memory. Thread safety is satisfied for
@@ -149,7 +149,7 @@ protected:
     /**
      * @return The validity of derived class.
      */
-    virtual bool isValid_() const = 0;
+    virtual bool isValid_() const;
 
     /**
      * @return True if object is loaded into memory.
@@ -160,6 +160,11 @@ protected:
      * @return The unconst object.
      */
     CacheObject* getUnconst_() const { return const_cast< CacheObject * >( this ); }
+
+    /**
+     * @return On default returns true if cache ids are same
+     */
+    virtual bool operator==( const CacheObject& cacheObject ) const;
 
 private:
     LIVRECORE_API void increaseReference_();

@@ -21,6 +21,7 @@
 
 #include <livre/core/render/TexturePoolFactory.h>
 #include <livre/core/render/Frustum.h>
+#include <livre/core/render/View.h>
 #include <livre/core/render/RenderBrick.h>
 #include <livre/core/data/LODNode.h>
 #include <eq/gl.h>
@@ -31,17 +32,20 @@ namespace livre
 // Sort helper funtion for sorting the textures with their distances to viewpoint
 struct DistanceOperator
 {
-    explicit DistanceOperator( const Frustum& frustum ) : frustum_( frustum ) { }
+    explicit DistanceOperator( const Frustum& frustum )
+        : _frustum( frustum )
+    { }
+
     bool operator()( const RenderBrickPtr& rb1,
                      const RenderBrickPtr& rb2 )
     {
-        const float distance1 = ( frustum_.getModelViewMatrix() *
-                                  rb1->getLODNode()->getWorldBox().getCenter() ).length();
-        const float distance2 = ( frustum_.getModelViewMatrix() *
-                                  rb2->getLODNode()->getWorldBox().getCenter() ).length();
+        const float distance1 = ( _frustum.getModelViewMatrix() *
+                                  rb1->lodNode.getWorldBox().getCenter() ).length();
+        const float distance2 = ( _frustum.getModelViewMatrix() *
+                                  rb2->lodNode.getWorldBox().getCenter() ).length();
         return  distance1 < distance2;
     }
-    const Frustum& frustum_;
+    const Frustum& _frustum;
 };
 
 Renderer::Renderer( const uint32_t nComponents,
@@ -91,24 +95,23 @@ void Renderer::order_( RenderBricks &bricks, const Frustum &frustum ) const
 }
 
 
-void Renderer::onFrameRender_( const GLWidget& glWidget, const View& view,
-                               const Frustum& frustum,
+void Renderer::onFrameRender_( const GLWidget& glWidget,
+                               const View& view,
                                const RenderBricks &bricks )
 {
     BOOST_FOREACH( const RenderBrickPtr& brick, bricks )
-        renderBrick_( glWidget, view, frustum, *brick );
+        renderBrick_( glWidget, view, *brick );
 }
 
 void Renderer::render( const GLWidget& glWidget,
                        const View& view,
-                       const Frustum& frustum,
                        const RenderBricks& brickList )
 {
     RenderBricks bricks = brickList;
-    order_( bricks, frustum );
-    onFrameStart_( glWidget, view, frustum, bricks );
-    onFrameRender_( glWidget, view, frustum, bricks );
-    onFrameEnd_( glWidget, view, frustum, bricks );
+    order_( bricks, view.getFrustum( ));
+    onFrameStart_( glWidget, view, bricks );
+    onFrameRender_( glWidget, view, bricks );
+    onFrameEnd_( glWidget, view, bricks );
 }
 
 }

@@ -59,12 +59,10 @@ private:
 
     void onFrameStart_( const GLWidget& glWidget,
                         const View& view,
-                        const Frustum& frustum,
                         const RenderBricks& renderBricks ) final;
 
     void renderBrick_( const GLWidget& glWidget,
                        const View& view,
-                       const Frustum& frustum,
                        const RenderBrick& renderBrick ) final;
 
     struct Impl;

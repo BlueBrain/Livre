@@ -38,6 +38,11 @@ EqContext::~EqContext()
     delete systemWindow_;
 }
 
+GLContextPtr EqContext::createContext() const
+{
+    return GLContextPtr( new EqContext( window_ ));
+}
+
 void EqContext::makeCurrent()
 {
     if( systemWindow_ )

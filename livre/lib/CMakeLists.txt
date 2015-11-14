@@ -20,13 +20,14 @@ set(LIVRELIB_PUBLIC_HEADERS
   configuration/ApplicationParameters.h
   configuration/ClientParameters.h
   configuration/VolumeRendererParameters.h
+  pipeline/DataUploadFilter.h
+  pipeline/RenderingSetGeneratorFilter.h
+  pipeline/RenderFilter.h
+  pipeline/RenderPipeFilter.h
+  pipeline/VisibleSetGeneratorFilter.h
   render/AvailableSetGenerator.h
   render/ScreenSpaceLODEvaluator.h
-  render/RenderView.h
-  uploaders/DataUploadProcessor.h
-  uploaders/TextureUploadProcessor.h
-  visitor/CollectionTraversal.h
-  visitor/DFSTraversal.h)
+  )
 
 set(LIVRELIB_HEADERS
   render/SelectVisibles.h)
@@ -43,13 +44,13 @@ set(LIVRELIB_SOURCES
   configuration/ApplicationParameters.cpp
   configuration/ClientParameters.cpp
   configuration/VolumeRendererParameters.cpp
+  pipeline/DataUploadFilter.cpp
+  pipeline/RenderingSetGeneratorFilter.cpp
+  pipeline/RenderFilter.cpp
+  pipeline/RenderPipeFilter.cpp
+  pipeline/VisibleSetGeneratorFilter.cpp
   render/AvailableSetGenerator.cpp
-  render/ScreenSpaceLODEvaluator.cpp
-  render/RenderView.cpp
-  uploaders/DataUploadProcessor.cpp
-  uploaders/TextureUploadProcessor.cpp
-  visitor/CollectionTraversal.cpp
-  visitor/DFSTraversal.cpp)
+  render/ScreenSpaceLODEvaluator.cpp)
 
 set(LIVRELIB_LINK_LIBRARIES PUBLIC LivreCore PRIVATE Equalizer ${VTUNE_LIBRARIES})
 

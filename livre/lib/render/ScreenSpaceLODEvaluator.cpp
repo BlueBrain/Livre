@@ -18,47 +18,46 @@
  */
 
 #include <livre/lib/render/ScreenSpaceLODEvaluator.h>
+#include <livre/core/data/VolumeInformation.h>
 #include <livre/core/render/Frustum.h>
 #include <livre/core/maths/maths.h>
 
 namespace livre
 {
 
-ScreenSpaceLODEvaluator::ScreenSpaceLODEvaluator( const uint32_t windowHeight,
-                                                  const float screenSpaceError,
-                                                  const float worldSpacePerVoxel,
-                                                  const uint32_t minLOD,
-                                                  const uint32_t maxLOD )
+ScreenSpaceLODEvaluator::ScreenSpaceLODEvaluator( const float screenSpaceError )
     : LODEvaluator( )
-    , _windowHeight( windowHeight )
     , _screenSpaceError( screenSpaceError )
-    , _worldSpacePerVoxel( worldSpacePerVoxel )
-    , _minLOD( minLOD )
-    , _maxLOD( maxLOD )
 {}
 
-uint32_t ScreenSpaceLODEvaluator::getLODForPoint( const Frustum& frustum,
-                                                  const uint32_t volumeDepth,
-                                                  const Vector3f& worldCoord ) const
+uint32_t ScreenSpaceLODEvaluator::getLODForPoint( const Vector3f& worldCoord,
+                                                  const VolumeInformation& volumeInfo,
+                                                  const PixelViewport& viewport,
+                                                  const Frustum& frustum,
+                                                  uint32_t minLOD,
+                                                  uint32_t maxLOD ) const
 {
     const float t = frustum.getFrustumLimits( PL_TOP );
     const float b = frustum.getFrustumLimits( PL_BOTTOM );
+    const uint32_t windowHeight = viewport[ 3 ];
 
-    const float worldSpacePerPixel = (  t - b ) / _windowHeight;
-    const float voxelPerPixel = worldSpacePerPixel  / _worldSpacePerVoxel * _screenSpaceError;
+    const float worldSpacePerPixel = (  t - b ) / windowHeight;
+    const float worldSpacePerVoxel = volumeInfo.worldSpacePerVoxel;
+    const float voxelPerPixel = worldSpacePerPixel  / worldSpacePerVoxel * _screenSpaceError;
 
     const float distance = std::abs( frustum.getWPlane( PL_NEAR ).distance( worldCoord ));
 
     const float n = frustum.getFrustumLimits( PL_NEAR );
     const float voxelPerPixelInDistance = voxelPerPixel * distance / n;
 
-    const uint32_t minLOD = std::min( _minLOD, volumeDepth );
-    const uint32_t maxLOD = std::min( _maxLOD, volumeDepth );
+    const uint32_t volumeDepth = volumeInfo.rootNode.getDepth();
+    const uint32_t lodMin = std::min( minLOD, volumeDepth );
+    const uint32_t lodMax = std::min( maxLOD, volumeDepth );
 
     const uint32_t lod = std::min( std::max( std::log2( voxelPerPixelInDistance ), 0.0f ),
                                    (float)volumeDepth - 1 );
 
-    return livre::maths::clamp( volumeDepth - lod - 1, minLOD, maxLOD );
+    return livre::maths::clamp( volumeDepth - lod - 1, lodMin, lodMax );
 
 }
 

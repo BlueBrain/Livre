@@ -42,14 +42,19 @@ public:
     ~EqContext();
 
     /**
+     * @return a similar context
+     */
+    GLContextPtr createContext() const final;
+
+    /**
      * Makes the context, current.
      */
-    virtual void makeCurrent( );
+    void makeCurrent( ) final;
 
     /**
      * Clears the current context.
      */
-    virtual void doneCurrent( );
+    void doneCurrent( ) final;
 
 private:
 

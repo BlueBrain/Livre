@@ -69,19 +69,16 @@ public:
      */
     LIVRECORE_API void releaseTexture( TextureStatePtr textureState );
 
+    ~TexturePool();
+
 private:
     TexturePool( const Vector3i& maxBlockSize,
                  const int internalFormat,
                  const uint32_t format,
                  const uint32_t gpuDataType );
 
-    std::vector< uint32_t > textureStack_;
-
-    const Vector3i maxBlockSize_;
-
-    const int32_t internalFormat_;
-    const uint32_t format_;
-    const uint32_t gpuDataType_;
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 
 

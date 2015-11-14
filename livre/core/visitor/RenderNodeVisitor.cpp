@@ -18,58 +18,55 @@
  */
 
 #include <livre/core/visitor/RenderNodeVisitor.h>
-#include <livre/core/dash/DashRenderNode.h>
-#include <livre/core/dash/DashTree.h>
+#include <livre/core/data/LODNode.h>
+#include <livre/core/data/VolumeDataSource.h>
 
 namespace livre
 {
 
-namespace detail
-{
-
-class RenderNodeVisitor
+class RenderNodeVisitor::Impl
 {
 public:
-    explicit RenderNodeVisitor( DashTreePtr dashTree )
-        : _dashTree( dashTree )
+    explicit Impl( const VolumeDataSource& dataSource )
+        : _dataSource( dataSource )
     {}
 
-    dash::NodePtr getDashNode( const NodeId& nodeId )
+    LODNode getLODNode( const NodeId& nodeId )
     {
-        return _dashTree->getDashNode( nodeId );
+        return _dataSource.getNode( nodeId );
     }
 
-    DashTreePtr getDashTree() { return _dashTree; }
-    DashTreePtr _dashTree;
+    LODNode getLODNode( const NodeId& nodeId ) const
+    {
+        return _dataSource.getNode( nodeId );
+    }
+
+    const VolumeDataSource& _dataSource;
 };
 
-}
-
-RenderNodeVisitor::RenderNodeVisitor( DashTreePtr dashTree )
-    : _impl( new detail::RenderNodeVisitor( dashTree ))
+RenderNodeVisitor::RenderNodeVisitor( const VolumeDataSource& dataSource )
+    : _impl( new RenderNodeVisitor::Impl( dataSource ))
 {
 
 }
 
 RenderNodeVisitor::~RenderNodeVisitor()
 {
-    delete _impl;
+    
 }
 
-DashTreePtr RenderNodeVisitor::getDashTree()
+const VolumeDataSource& RenderNodeVisitor::getDataSource() const
 {
-    return _impl->getDashTree();
+    return _impl->_dataSource;
 }
 
 void RenderNodeVisitor::visit( const NodeId& nodeId,
                                VisitState& state )
 {
-    dash::NodePtr node = _impl->getDashNode( nodeId );
-    if( !node)
-        return;
-
-    DashRenderNode renderNode( node );
-    visit( renderNode, state );
+    const LODNode& node = _impl->getLODNode( nodeId );
+    if( node.isValid( ))
+        visit( node, state );
 }
 
 }
+

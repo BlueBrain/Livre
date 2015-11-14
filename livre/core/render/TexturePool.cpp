@@ -28,76 +28,112 @@ namespace livre
 
 #define glewGetContext() GLContext::glewGetContext()
 
+
+struct TexturePool::Impl
+{
+    Impl( const Vector3i& maxBlockSize,
+          const int internalFormat,
+          const uint32_t format,
+          const uint32_t gpuDataType )
+        : _maxBlockSize( maxBlockSize )
+        , _internalFormat( internalFormat )
+        , _format( format )
+        , _gpuDataType( gpuDataType )
+    {}
+
+    void generateTexture( TextureStatePtr textureState )
+    {
+        LBASSERT( textureState->textureId == INVALID_TEXTURE_ID );
+
+        if( !_texturePool.empty() )
+            textureState->textureId = _texturePool.pop();
+        else
+        {
+            glGenTextures( 1, &textureState->textureId );
+            glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+            textureState->bind();
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+            // Allocate a texture
+            glTexImage3D( GL_TEXTURE_3D, 0,
+                          _internalFormat,
+                          _maxBlockSize[0],
+                          _maxBlockSize[1],
+                          _maxBlockSize[2], 0,
+                          _format, _gpuDataType, (GLvoid *)NULL );
+
+            const GLenum glErr = glGetError();
+            if ( glErr != GL_NO_ERROR )
+            {
+                LBERROR << "Error loading the texture into GPU, error number : " << glErr  << std::endl;
+            }
+        }
+    }
+
+    void releaseTexture( TextureStatePtr textureState )
+    {
+        LBASSERT( textureState->textureId );
+
+        _texturePool.push( textureState->textureId );
+        textureState->textureId = INVALID_TEXTURE_ID;
+    }
+
+    lunchbox::MTQueue< uint32_t > _texturePool;
+    const Vector3i _maxBlockSize;
+    const int32_t _internalFormat;
+    const uint32_t _format;
+    const uint32_t _gpuDataType;
+};
+
 TexturePool::TexturePool( const Vector3i& maxBlockSize,
                           const GLint internalFormat,
                           const GLenum format,
                           const GLenum gpuDataType )
-    : maxBlockSize_( maxBlockSize )
-    , internalFormat_( internalFormat )
-    , format_( format )
-    , gpuDataType_( gpuDataType )
+    : _impl( new TexturePool::Impl( maxBlockSize,
+                                    internalFormat,
+                                    format,
+                                    gpuDataType ))
 {
+}
+
+
+TexturePool::~TexturePool()
+{
+    
 }
 
 void TexturePool::generateTexture( TextureStatePtr textureState )
 {
-    LBASSERT( textureState->textureId == INVALID_TEXTURE_ID );
-
-    if( !textureStack_.empty() )
-    {
-        textureState->textureId = textureStack_.back();
-        textureStack_.pop_back();
-    }
-    else
-    {
-        glGenTextures( 1, &textureState->textureId );
-        glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-        textureState->bind();
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-        // Allocate a texture
-        glTexImage3D( GL_TEXTURE_3D, 0, internalFormat_,
-                      maxBlockSize_[0], maxBlockSize_[1], maxBlockSize_[2], 0,
-                      format_, gpuDataType_, (GLvoid *)NULL );
-
-        const GLenum glErr = glGetError();
-        if ( glErr != GL_NO_ERROR )
-        {
-            LBERROR << "Error loading the texture into GPU, error number : " << glErr  << std::endl;
-        }
-    }
+    _impl->generateTexture( textureState );
 }
 
 void TexturePool::releaseTexture( TextureStatePtr textureState )
 {
-    LBASSERT( textureState->textureId );
-
-    textureStack_.push_back( textureState->textureId );
-    textureState->textureId = INVALID_TEXTURE_ID;
+     _impl->releaseTexture( textureState );
 }
 
 GLint TexturePool::getInternalFormat() const
 {
-    return internalFormat_;
+    return _impl->_internalFormat;
 }
 
 GLenum TexturePool::getGPUDataType() const
 {
-    return gpuDataType_;
+    return _impl->_gpuDataType;
 }
 
 GLenum TexturePool::getFormat() const
 {
-    return format_;
+    return _impl->_format;
 }
 
 const Vector3i& TexturePool::getMaxBlockSize( ) const
 {
-    return maxBlockSize_;
+    return _impl->_maxBlockSize;
 }
 
 }

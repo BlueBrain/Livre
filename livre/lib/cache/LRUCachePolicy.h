@@ -33,7 +33,7 @@ class LRUCachePolicy : public CachePolicy
 {
 public:
 
-    LRUCachePolicy( );
+    LRUCachePolicy( size_t maxMem );
 
     /**
      * Checks whether the policy will be activated for current state of \see Cache.
@@ -48,18 +48,6 @@ public:
      * @return True if the limitations are satisfied.
      */
     virtual bool isPolicySatisfied( const Cache& cache ) const;
-
-    /**
-     * Sets a list of node ids to be protected from unloading.
-     * @param protectUnloadingList The set of node ids.
-     */
-    void setProtectList( const CacheIdSet& protectUnloadingList );
-
-    /**
-     * Sets the maximum memory.
-     * @param maxMemoryInBytes Maximum memory in bytes.
-     */
-    void setMaximumMemory( const size_t maxMemoryInBytes );
 
     /**
      * Sets the clean up ratio.

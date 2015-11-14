@@ -41,7 +41,7 @@ public:
 
     void setCacheId( livre::CacheId cacheId ) { cacheId_ = cacheId; }
 
-    virtual livre::CacheId getCacheID() const { return cacheId_; }
+    virtual livre::CacheId getCacheId() const { return cacheId_; }
 
     size_t getCacheSize( ) const final { return CACHE_SIZE; }
 

@@ -53,18 +53,14 @@ const Viewport& View::getViewport() const
     return viewport_;
 }
 
-void View::render( const FrameInfo& frameInfo,
-                   const RenderBricks& bricks,
+void View::render( const RenderBricks& bricks,
                    const GLWidget& widget )
 {
     if( !rendererPtr_ )
         return ;
 
-    onPreRender_( widget, frameInfo );
-
-     if( !bricks.empty( ))
-        rendererPtr_->render( widget, *this, frameInfo.currentFrustum, bricks );
-
-    onPostRender_( widget, frameInfo );
+    if( !bricks.empty( ))
+        rendererPtr_->render( widget, *this, bricks );
 }
+
 }

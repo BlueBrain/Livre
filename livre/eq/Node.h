@@ -23,7 +23,6 @@
 #define _Node_h_
 
 #include <livre/eq/api.h>
-#include <livre/core/dash/DashContextTrait.h>
 #include <livre/lib/types.h>
 #include <eq/node.h>
 
@@ -39,7 +38,7 @@ class Node;
  * The Node class is a standard EQ abstraction for a process. It manages the data loaders
  * and keeps the data cache.
  */
-class Node : public eq::Node, public DashContextTrait
+class Node : public eq::Node
 {
 public:
     /**
@@ -51,19 +50,20 @@ public:
     /**
      * @return The texture data cache.
      */
-    TextureDataCache& getTextureDataCache();
+    CachePtr getTextureDataCache();
 
     /**
-     * @return The dash tree.
+     * @return data source.
      */
-    DashTreePtr getDashTree();
+    VolumeDataSourcePtr getDataSource();
 
     /**
-     * @return The dash tree.
+     * @return data source.
      */
-    ConstDashTreePtr getDashTree() const;
+    ConstVolumeDataSourcePtr getDataSource() const;
 
 private:
+
     bool configInit( const eq::uint128_t& initId ) final;
     void frameStart(  const eq::uint128_t& frameId,
                       const uint32_t frameNumber ) final;

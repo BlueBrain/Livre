@@ -23,8 +23,7 @@
 #include <lunchbox/debug.h>
 #include <lunchbox/log.h>
 #include <lunchbox/uri.h>
-
-#include <dash/types.h>
+#include <servus/uint128_t.h>
 
 #include <boost/foreach.hpp>
 #include <boost/intrusive_ptr.hpp>
@@ -35,6 +34,7 @@
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/weak_ptr.hpp>
+#include <boost/function.hpp>
 
 #include <stdint.h>
 #include <set>
@@ -43,6 +43,8 @@
 #include <deque>
 #include <algorithm>
 #include <utility>
+#include <typeindex>
+#include <memory>
 
 namespace livre
 {
@@ -54,28 +56,35 @@ class CacheObjectObserver;
 class CachePolicy;
 class CacheStatistics;
 class Configuration;
-class DashConnection;
-class DashProcessor;
-class DashProcessorInput;
-class DashProcessorOutput;
-class DashRenderNode;
-class DashRenderStatus;
-class DashTree;
 class DataSourceFactory;
 class EventHandler;
 class EventHandlerFactory;
 class EventInfo;
 class EventMapper;
+class Executor;
+class Executable;
+class Filter;
+class FilterInput;
+class FilterOutput;
+class PortData;
+class PortDataFuture;
+class PortDataPromise;
 class Frustum;
 class GLContext;
 class GLSLShaders;
 class GLWidget;
+class InputPort;
+class OutputPort;
 class LODNode;
 class LODEvaluator;
 class MemoryUnit;
 class NodeId;
 class Parameter;
+class Pipeline;
+class PipeFilter;
 class Plane;
+class PortData;
+class PortInfo;
 class Processor;
 class ProcessorInput;
 class ProcessorOutput;
@@ -89,11 +98,15 @@ class VisitState;
 class VolumeDataSource;
 class VolumeDataSourcePlugin;
 class VolumeDataSourcePluginData;
+class WorkInput;
+class Workers;
+class WorkQueue;
+
 struct FrameInfo;
 struct TextureState;
 struct VolumeInformation;
 
-using lunchbox::uint128_t;
+using servus::uint128_t;
 using lunchbox::Strings;
 
 typedef uint64_t Identifier;
@@ -110,9 +123,7 @@ typedef boost::shared_ptr< AllocMemoryUnit > AllocMemoryUnitPtr;
 typedef boost::shared_ptr< RenderBrick > RenderBrickPtr;
 typedef boost::shared_ptr< LODNode > LODNodePtr;
 typedef boost::shared_ptr< const LODNode > ConstLODNodePtr;
-typedef boost::shared_ptr< DashConnection > DashConnectionPtr;
 typedef boost::shared_ptr< Processor > ProcessorPtr;
-typedef boost::shared_ptr< DashProcessor > DashProcessorPtr;
 typedef boost::shared_ptr< ProcessorInput > ProcessorInputPtr;
 typedef boost::shared_ptr< ProcessorOutput > ProcessorOutputPtr;
 typedef boost::shared_ptr< Renderer > RendererPtr;
@@ -128,17 +139,46 @@ typedef boost::shared_ptr< const TextureState > ConstTextureStatePtr;
 typedef boost::shared_ptr< VolumeDataSource > VolumeDataSourcePtr;
 typedef boost::shared_ptr< const VolumeDataSource > ConstVolumeDataSourcePtr;
 typedef boost::shared_ptr< TexturePool > TexturePoolPtr;
-typedef boost::shared_ptr< DashTree > DashTreePtr;
-typedef boost::shared_ptr< const DashTree > ConstDashTreePtr;
 typedef boost::shared_ptr< EventHandler > EventHandlerPtr;
 typedef boost::shared_ptr< EventHandlerFactory > EventHandlerFactoryPtr;
 typedef boost::shared_ptr< EventMapper > EventMapperPtr;
 typedef boost::shared_ptr< DataSourceFactory > DataSourceFactoryPtr;
 typedef boost::shared_ptr< MemoryUnit > MemoryUnitPtr;
 typedef boost::shared_ptr< const MemoryUnit > ConstMemoryUnitPtr;
+typedef boost::shared_ptr< WorkQueue > WorkQueuePtr;
+typedef boost::shared_ptr< PortData > PortDataPtr;
+typedef boost::shared_ptr< Filter > FilterPtr;
+typedef boost::shared_ptr< const Filter > ConstFilterPtr;
+typedef boost::shared_ptr< PortData > PortDataPtr;
+typedef boost::shared_ptr< const PortData > ConstPortDataPtr;
+typedef boost::shared_ptr< Pipeline > PipelinePtr;
+typedef boost::shared_ptr< const Pipeline > ConstPipelinePtr;
+typedef boost::shared_ptr< PipeFilter > PipeFilterPtr;
+typedef boost::shared_ptr< const PipeFilter > ConstPipeFilterPtr;
+typedef boost::shared_ptr< Workers > WorkersPtr;
+typedef boost::shared_ptr< Executor > ExecutorPtr;
+typedef boost::shared_ptr< InputPort > InputPortPtr;
+typedef boost::shared_ptr< OutputPort > OutputPortPtr;
+typedef boost::shared_ptr< const InputPort > ConstInputPortPtr;
+typedef boost::shared_ptr< const OutputPort > ConstOutputPortPtr;
+typedef boost::shared_ptr< RenderingSetGenerator > RenderingSetGeneratorPtr;
+typedef boost::shared_ptr< const RenderingSetGenerator > ConstRenderingSetGeneratorPtr;
+typedef boost::shared_ptr< LODEvaluator > LODEvaluatorPtr;
+typedef boost::shared_ptr< const LODEvaluator > ConstLODEvaluatorPtr;
+typedef boost::shared_ptr< Cache > CachePtr;
+typedef boost::shared_ptr< const Cache > ConstCachePtr;
+typedef boost::shared_ptr< Executable > ExecutablePtr;
+typedef boost::shared_ptr< const Executable > ConstExecutablePtr;
 
 typedef boost::intrusive_ptr< CacheObject > CacheObjectPtr;
 typedef boost::intrusive_ptr< const CacheObject > ConstCacheObjectPtr;
+
+/**
+  * Pair definitions
+  */
+typedef std::pair< FilterPtr, FilterPtr > FilterPair;
+typedef std::pair< NodeId, FilterPtr > WorkInputFilterPair;
+typedef std::pair< std::string, std::type_index > NameTypePair;
 
 /**
  * Helper classes for shared_ptr objects
@@ -189,17 +229,30 @@ typedef std::vector< CacheObjectPtr > CacheObjects;
 typedef std::vector< ConstCacheObjectPtr > ConstCacheObjects;
 typedef std::vector< RenderBrickPtr > RenderBricks;
 typedef std::vector< TexturePoolPtr > TexturePools;
+typedef std::vector< FilterPtr > FilterPtrs;
+typedef std::vector< ConstFilterPtr > ConstFilterPtrs;
+typedef std::vector< FilterPair > ConstFilterPtrPairs;
+typedef std::vector< ConstPortDataPtr > ConstPortDataPtrs;
+typedef std::vector< WorkInputFilterPair > WorkInputFilterPairs;
+typedef std::vector< WorkInput > WorkInputs;
+typedef std::vector< PipelinePtr > PipelinePtrs;
+typedef std::vector< PipeFilterPtr > PipeFilterPtrs;
+typedef std::vector< OutputPortPtr > OutputPortPtrs;
+typedef std::vector< InputPortPtr > InputPortPtrs;
+typedef std::vector< ConstOutputPortPtr > ConstOutputPortPtrs;
+typedef std::vector< ConstInputPortPtr > ConstInputPortPtrs;
+typedef std::vector< NameTypePair > NameTypePairs;
+typedef std::vector< PortInfo > PortInfos;
+
+typedef std::list< ExecutablePtr > ExecutablePtrs;
 
 /**
  * Map definitions
  */
-typedef boost::unordered_map< NodeId, LODNodePtr > NodeIDLODNodePtrMap;
-typedef boost::unordered_map< NodeId, dash::NodePtr > NodeIDDashNodePtrMap;
+typedef boost::unordered_map< NodeId, LODNode > NodeIDLODNodeMap;
 typedef boost::unordered_map< CacheId, CacheObjectPtr > CacheMap;
 typedef boost::unordered_map< CacheId, ConstCacheObjectPtr > ConstCacheMap;
-typedef boost::unordered_map< uint32_t, bool > BoolMap;
 typedef boost::unordered_map< uint32_t, EventHandlerPtr > EventHandlerPtrMap;
-typedef boost::unordered_map< uint32_t, DashConnectionPtr > DashConnectionPtrMap;
 
 /**
  * Set definitions
@@ -237,6 +290,10 @@ const uint32_t NODEID_FRAME_BITS = 18; //>! @see NodeId
 const uint32_t INVALID_POSITION = ( 1u << NODEID_BLOCK_BITS ) - 1; //!< Invalid node ID.
 const uint32_t INVALID_LEVEL = ( 1u << NODEID_LEVEL_BITS ) - 1; //!< Invalid tree level.4 bits is on
 const uint32_t INVALID_FRAME = ( 1u << NODEID_FRAME_BITS ) - 1; //!< Invalid tree level.4 bits is on
+
+// functions
+
+typedef boost::function< void( PipeFilter& )> FilterFunc;
 
 
 #define HIDDEN_PROGRAMDESCRIPTION_STR "_HIDDEN_"

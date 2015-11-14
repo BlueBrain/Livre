@@ -21,7 +21,6 @@
 #include "dataSource.h"
 
 #include <livre/core/data/LODNode.h>
-#include <livre/core/dash/DashRenderNode.h>
 #include <livre/core/data/MemoryUnit.h>
 
 #include <livre/lib/zeq/events.h>
@@ -177,7 +176,7 @@ DataSource::DataSource( const VolumeDataSourcePluginData& initData )
 
 DataSource::~DataSource()
 {
-    delete _impl;
+    
 }
 
 MemoryUnitPtr DataSource::getData( const LODNode& node )

@@ -50,11 +50,6 @@ typedef boost::shared_ptr< RESTParameters > RESTParametersPtr;
 typedef boost::shared_ptr< const RESTParameters > ConstRESTParametersPtr;
 
 typedef boost::shared_ptr< TextureCache > TextureCachePtr;
-typedef boost::shared_ptr< DataUploadProcessor > DataUploadProcessorPtr;
-typedef boost::shared_ptr< TextureUploadProcessor > TextureUploadProcessorPtr;
-typedef boost::shared_ptr< const DataUploadProcessor > ConstDataUploadProcessorPtr;
-typedef boost::shared_ptr< const TextureUploadProcessor > ConstTextureUploadProcessorPtr;
-typedef boost::shared_ptr< const DashProcessor > ConstDashProcessorPtr;
 
 typedef boost::intrusive_ptr< const TextureDataObject > ConstTextureDataObjectPtr;
 typedef boost::intrusive_ptr< const TextureObject > ConstTextureObjectPtr;
@@ -62,13 +57,6 @@ typedef boost::intrusive_ptr< TextureDataObject > TextureDataObjectPtr;
 typedef boost::intrusive_ptr< TextureObject > TextureObjectPtr;
 
 typedef boost::scoped_ptr< TextureDataCache > TextureDataCachePtr;
-
-/** Map definitions */
-typedef boost::unordered_map< uint32_t, DataUploadProcessorPtr > DataUploadProcessorPtrMap;
-
-static const uint32_t CONNECTION_ID( 0u );
-
-typedef std::vector< DashRenderNode > DashRenderNodes;
 
 }
 

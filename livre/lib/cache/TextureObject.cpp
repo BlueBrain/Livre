@@ -40,8 +40,10 @@ TextureObject::TextureObject()
 {
 }
 
-TextureObject::TextureObject( TextureCachePtr textureCachePtr )
-   : textureCachePtr_( textureCachePtr )
+TextureObject::TextureObject( const CacheId& cacheId,
+                              TextureCachePtr textureCachePtr )
+   : CacheObject( cacheId )
+   , textureCachePtr_( textureCachePtr )
    , textureState_( new TextureState( ))
    , lodTextureData_( TextureDataObject::getEmptyPtr( ))
 {
@@ -72,11 +74,6 @@ bool TextureObject::operator==( const TextureObject& texture ) const
     return textureState_ == texture.textureState_;
 }
 
-CacheId TextureObject::getCacheID() const
-{
-    return lodNodePtr_->getNodeId().getId();
-}
-
 TextureStatePtr TextureObject::getTextureState( )
 {
     return textureState_;
@@ -92,10 +89,7 @@ void TextureObject::setTextureDataObject( ConstTextureDataObjectPtr lodTextureDa
     lodTextureData_ = lodTextureData;
     dataSourcePtr_ = lodTextureData_->getDataSource();
 
-    if( !lodNodePtr_->isValid() )
-        lodNodePtr_ = lodTextureData_->getLODNode();
-
-    if( lodNodePtr_->getRefLevel() ==  0 )
+    if( NodeId( getCacheId( )).getLevel() ==  0 )
         setUnloadable( false );
 }
 
@@ -152,20 +146,14 @@ void TextureObject::unload_( )
         return;
 
     textureState_->texturePoolPtr->releaseTexture( textureState_ );
-#ifdef _DEBUG_
-    LBVERB << "Texture released : " << lodNodePtr_->getNodeId()
-           << " Last used at : " << getLastUsed()
-           << " Number of references : " << getReferenceCount_( )
-           << std::endl;
-
-#endif //_DEBUG
 }
 
 void TextureObject::initialize_( )
 {
     // TODO: The internal format size should be calculated correctly
     const Vector3f& overlap = dataSourcePtr_->getVolumeInformation().overlap;
-    const Vector3f& size = lodNodePtr_->getVoxelBox( ).getDimension( );
+    const LODNode& lodNode = dataSourcePtr_->getNode( NodeId( getCacheId( )));
+    const Vector3f& size = lodNode.getVoxelBox( ).getDimension( );
     const Vector3f& maxSize = textureState_->texturePoolPtr->getMaxBlockSize();
     const Vector3f& overlapf = overlap / maxSize;
     textureState_->textureCoordsMax = size / maxSize;
@@ -216,13 +204,15 @@ const TextureDataObject& TextureObject::getTextureDataObject_( ) const
 
 bool TextureObject::loadTextureToGPU_( ) const
 {
+    const LODNode& lodNode = dataSourcePtr_->getNode( NodeId( getCacheId( )));
+
 #ifdef LIVRE_DEBUG_RENDERING
-    std::cout << "Upload "  << lodNodePtr_->getRefLevel() << ' '
-              << lodNodePtr_->getRelativePosition() << " to "
+    std::cout << "Upload "  << lodNode.getRefLevel() << ' '
+              << lodNode.getRelativePosition() << " to "
               << textureState_->textureId << std::endl;
 #endif
 
-    const Vector3i& voxSizeVec = lodNodePtr_->getVoxelBox( ).getDimension( );
+    const Vector3i& voxSizeVec = lodNode.getVoxelBox( ).getDimension( );
 
     textureState_->bind( );
     glTexSubImage3D( GL_TEXTURE_3D, 0, 0, 0, 0,

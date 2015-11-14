@@ -23,7 +23,6 @@
 #include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <livre/core/data/LODNode.h>
-#include <livre/core/data/LODNodeTrait.h>
 #include <livre/core/render/TextureState.h>
 
 namespace livre
@@ -33,19 +32,15 @@ namespace livre
  * The RenderBrick class, is used to keep the rendering information of an LOD block. It can also render the
  * faces of the block and can compute the screen coordinates with given parameters.
  */
-class RenderBrick : public LODNodeTrait
+class RenderBrick
 {
 public:
     /**
-     * @param lodNodePtr livre::LODNode is used for spatial information of rendered block.
+     * @param lodNode livre::LODNode is used for spatial information of rendered block.
      * @param textureState TextureState is used to hold the information of OpenGL texture and coordinates.
      */
-    LIVRECORE_API RenderBrick( ConstLODNodePtr lodNodePtr, ConstTextureStatePtr textureState);
-
-    /**
-     * @return The information of OpenGL texture and coordinates.
-     */
-    LIVRECORE_API ConstTextureStatePtr getTextureState() const;
+    LIVRECORE_API RenderBrick( const LODNode& lodNode,
+                               ConstTextureStatePtr textureState);
 
     /**
      * Computes the screen coordinates of an LOD block.
@@ -64,10 +59,11 @@ public:
      * @param front Only draw front faces.
      * @param back Only draw back faces.
      */
-    LIVRECORE_API void drawBrick( bool front, bool back ) const;
+    LIVRECORE_API void drawBrick( bool front,
+                                  bool back ) const;
 
-private:
-    ConstTextureStatePtr textureState_;
+    LODNode lodNode;
+    ConstTextureStatePtr textureState;
 };
 
 }
