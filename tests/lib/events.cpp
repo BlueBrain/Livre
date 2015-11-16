@@ -25,8 +25,7 @@
 #include <zeq/event.h>
 #include <zeq/publisher.h>
 #include <zeq/subscriber.h>
-#include <lunchbox/rng.h>
-#include <lunchbox/uri.h>
+#include <zeq/uri.h>
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -35,31 +34,27 @@ using livre::Vector3ui;
 using livre::Vector2ui;
 using livre::Vector3f;
 
-const unsigned short port = (lunchbox::RNG().get<uint16_t>() % 60000) + 1024;
-const std::string& portStr = lexical_cast< std::string >( port );
-const lunchbox::URI uri( "livreTest://localhost:" + portStr );
-
-void onDataSourceEvent( const zeq::Event& event )
+void onDataSourceEvent( const zeq::Event& event, const zeq::URI& reference )
 {
     BOOST_CHECK( event.getType() == livre::zeq::EVENT_DATASOURCE );
     const lunchbox::URI& deserialized =
         livre::zeq::deserializeDataSource( event );
-    BOOST_CHECK_EQUAL( lexical_cast< std::string >( uri ),
+    BOOST_CHECK_EQUAL( lexical_cast< std::string >( reference ),
                        lexical_cast< std::string >( deserialized ));
 }
 
 BOOST_AUTO_TEST_CASE( testDataSource )
 {
-    zeq::Publisher publisher( lunchbox::URI( "livreTest://*:" + portStr ));
-    zeq::Subscriber subscriber( uri );
+    zeq::Publisher publisher;
+    zeq::Subscriber subscriber( publisher.getURI( ));
     BOOST_CHECK( subscriber.registerHandler( livre::zeq::EVENT_DATASOURCE,
                                              boost::bind( &onDataSourceEvent,
-                                                          _1 )));
+                                                     _1, publisher.getURI( ))));
     bool received = false;
     for( size_t i = 0; i < 10; ++i )
     {
-        BOOST_CHECK(
-            publisher.publish( livre::zeq::serializeDataSource( uri )));
+        BOOST_CHECK( publisher.publish(
+                        livre::zeq::serializeDataSource( publisher.getURI( ))));
 
         if( subscriber.receive( 100 ))
         {
@@ -92,8 +87,8 @@ void onDataSourceDataEvent( const zeq::Event& event,
 
 BOOST_AUTO_TEST_CASE( testDataSourceData )
 {
-    zeq::Publisher publisher( lunchbox::URI( "livreTest://*:" + portStr ));
-    zeq::Subscriber subscriber( uri );
+    zeq::Publisher publisher;
+    zeq::Subscriber subscriber( publisher.getURI( ));
     livre::VolumeInformation info;
     lunchbox::RNG rng;
 
