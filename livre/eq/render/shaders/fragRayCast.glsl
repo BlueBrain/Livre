@@ -20,6 +20,7 @@ uniform sampler2DRect frameBufferTex;
 uniform mat4 invProjectionMatrix;
 uniform mat4 invModelViewMatrix;
 uniform ivec4 viewport;
+uniform float nearPlaneDist;
 
 uniform vec3 aabbMin;
 uniform vec3 aabbMax;
@@ -29,7 +30,6 @@ uniform vec3 voxelSpacePerWorldSpace;
 uniform vec3 worldEyePosition;
 
 uniform vec2 depthRange;
-uniform ivec2 screenPos;
 
 uniform int nSamplesPerRay;
 uniform int nSamplesPerPixel;
@@ -51,7 +51,7 @@ float rand(vec2 co){
 }
 
 // http://www.opengl.org/wiki/Compute_eye_space_from_window_space.
-vec3 calcPositionInWorldSpaceFromWindowSpace( vec4 windowSpace )
+vec4 calcPositionInEyeSpaceFromWindowSpace( vec4 windowSpace )
 {
     vec4 ndcPos;
     ndcPos.xy = 2.0 * ( windowSpace.xy - viewport.xy - ( viewport.zw / 2.0 ) ) / viewport.zw;
@@ -60,9 +60,7 @@ vec3 calcPositionInWorldSpaceFromWindowSpace( vec4 windowSpace )
 
     vec4 clipSpacePos = ndcPos / windowSpace.w;
     vec4 eyeSpacePos = invProjectionMatrix * clipSpacePos;
-    eyeSpacePos = eyeSpacePos / eyeSpacePos.w;
-
-    return vec3( ( invModelViewMatrix * eyeSpacePos ).xyz );
+    return eyeSpacePos / eyeSpacePos.w;
 }
 
 // Compute texture position.
@@ -106,7 +104,7 @@ vec4 composite( vec4 src, vec4 dst, float alphaCorrection )
 
 void main( void )
 {
-    vec4 result = texture2DRect( frameBufferTex, gl_FragCoord.xy - screenPos );
+    vec4 result = texture2DRect( frameBufferTex, gl_FragCoord.xy );
 
     if( result.a > EARLY_EXIT )
          discard;
@@ -120,7 +118,8 @@ void main( void )
         vec4 localResult = result;
 
         vec4 subPixelCoord = gl_FragCoord + vec4( xPixelDelta, yPixelDelta, 0.0f, 0.0f );
-        vec3 pixelWorldSpacePos = calcPositionInWorldSpaceFromWindowSpace( subPixelCoord );
+        vec4 pixelEyeSpacePos = calcPositionInEyeSpaceFromWindowSpace( subPixelCoord );
+        vec3 pixelWorldSpacePos = vec3(( invModelViewMatrix * pixelEyeSpacePos ).xyz );
         vec3 rayDirection = normalize( pixelWorldSpacePos - worldEyePosition );
         Ray eye = Ray( worldEyePosition, rayDirection );
 
@@ -129,14 +128,23 @@ void main( void )
         float tnear, tfar;
         intersectBox( eye, aabb, tnear, tfar );
 
-        if(tnear < 0.0)
-            tnear = 0.0;
+        vec3 nearPlaneNormal = vec3( 0.0f, 0.0f, 1.0f );
+        float tNearPlane = dot( nearPlaneNormal, vec3( 0.0, 0.0, -nearPlaneDist )) / dot( nearPlaneNormal, normalize( pixelEyeSpacePos.xyz ));
+
+        if(tnear < tNearPlane )
+            tnear = tNearPlane;
+
+        float stepSize = 1.0 / float( nSamplesPerRay );
+
+        float residu = mod( tnear, stepSize );
+        if( residu > 0.0f )
+            tnear += stepSize - residu;
+        if( tnear > tfar )
+            discard;
 
         vec3 rayStart = eye.Origin + eye.Dir * tnear;
         vec3 rayStop = eye.Origin + eye.Dir * tfar;
 
-
-        float stepSize = 1.0 / float( nSamplesPerRay );
         float alphaCorrection = float( DEFAULT_NSAMPLES_PER_RAY ) / float( nSamplesPerRay );
 
         vec3 pos = rayStart;

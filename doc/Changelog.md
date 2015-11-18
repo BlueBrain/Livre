@@ -6,6 +6,9 @@ Changelog {#Changelog}
 
 # Release 0.4 (2015-11-09) {#Release040}
 
+* [#188](https://github.com/BlueBrain/Livre/pull/188):
+  Fix #180, rendering has artifacts when the camera is inside
+  the volume.
 * [#185](https://github.com/BlueBrain/Livre/pull/185):
   Fix #179, the rendering is updated according to the
   latest frustum

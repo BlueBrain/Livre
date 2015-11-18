@@ -107,9 +107,9 @@ void RenderBrick::getScreenCoordinates( const Frustum& frustum,
                 in.normalize();
 
                 /* The perspective correction is done in the constructor */
-                Vector3d in3( in );  
- 
-                /* Map x, y and z to range 0-1 */ 
+                Vector3d in3( in );
+
+                /* Map x, y and z to range 0-1 */
                 in3 = in3 * 0.5 + 0.5;
 
                 /* Map x,y to viewport */
