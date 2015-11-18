@@ -24,6 +24,9 @@
 #include <livre/core/version.h>
 #include <livre/core/data/VolumeDataSource.h>
 
+#include <livre/lib/configuration/ApplicationParameters.h>
+#include <livre/lib/configuration/VolumeRendererParameters.h>
+
 #include <livre/eq/Client.h>
 #include <livre/eq/Config.h>
 #include <livre/eq/FrameData.h>
@@ -36,59 +39,107 @@
 namespace livre
 {
 
-Client::Client()
+struct Client::Impl
 {
-}
-
-Client::~Client()
-{
-    VolumeDataSource::unloadPlugins();
-}
-
-bool Client::_parseArguments( const int32_t argc, char** argv )
-{
-    if( !_applicationParameters.initialize( argc, argv ) ||
-        !_rendererParameters.initialize( argc, argv ))
+    Impl()
     {
-        LBERROR << "Error parsing command line arguments" << std::endl;
-        return false;
     }
 
-    if( _applicationParameters.dataFileName.empty())
-        _applicationParameters.dataFileName = "mem:///#4096,4096,4096,32";
+    ~Impl()
+    {
+        VolumeDataSource::unloadPlugins();
+    }
 
-    return true;
-}
+    bool parseArguments( const int32_t argc, char** argv )
+    {
+        if( !_applicationParameters.initialize( argc, argv ) ||
+            !_rendererParameters.initialize( argc, argv ))
+        {
+            LBERROR << "Error parsing command line arguments" << std::endl;
+            return false;
+        }
+
+        if( _applicationParameters.dataFileName.empty())
+            _applicationParameters.dataFileName = "mem:///#4096,4096,4096,32";
+
+        return true;
+    }
+
+    static std::string getHelp()
+    {
+        VolumeRendererParameters vrParameters;
+        ApplicationParameters applicationParameters;
+
+        Configuration conf;
+        conf.addDescription( vrParameters.getConfiguration( ));
+        conf.addDescription( applicationParameters.getConfiguration( ));
+
+        std::stringstream os;
+        os << conf;
+    #ifdef LIVRE_USE_RESTBRIDGE
+        os << std::endl << restbridge::RestBridge::getHelp();
+    #endif
+        return os.str();
+    }
+
+    static std::string getVersion()
+    {
+        std::stringstream os;
+        os << "Livre version " << livrecore::Version::getString() << std::endl;
+        return os.str();
+    }
+
+    bool initLocal( const int argc, char** argv )
+    {
+        if( !parseArguments( argc, argv ))
+            return false;
+
+        VolumeDataSource::loadPlugins(); //initLocal on render clients never returns
+        return true;
+    }
+
+    IdleFunc _idleFunc;
+    ApplicationParameters _applicationParameters;
+    VolumeRendererParameters _rendererParameters;
+};
+
+Client::Client()
+    : _impl( new Client::Impl( ))
+{}
+
+Client::~Client()
+{}
 
 std::string Client::getHelp()
 {
-    VolumeRendererParameters vrParameters;
-    ApplicationParameters applicationParameters;
-
-    Configuration conf;
-    conf.addDescription( vrParameters.getConfiguration( ));
-    conf.addDescription( applicationParameters.getConfiguration( ));
-
-    std::stringstream os;
-    os << conf;
-#ifdef LIVRE_USE_RESTBRIDGE
-    os << std::endl << restbridge::RestBridge::getHelp();
-#endif
-    return os.str();
+    return Impl::getHelp();
 }
 
 std::string Client::getVersion()
 {
-    std::stringstream os;
-    os << "Livre version " << livrecore::Version::getString() << std::endl;
-    return os.str();
+    return Impl::getVersion();
+}
+
+void Client::registerIdleFunction( const IdleFunc& idleFunc LB_UNUSED )
+{
+    _impl->_idleFunc = idleFunc;
+}
+
+const ApplicationParameters& Client::getApplicationParameters() const
+{
+    return _impl->_applicationParameters;
+}
+
+ApplicationParameters& Client::getApplicationParameters()
+{
+    return _impl->_applicationParameters;
 }
 
 bool Client::initLocal( const int argc, char** argv )
 {
-    if( !_parseArguments( argc, argv ))
+    if( !_impl->initLocal( argc, argv ))
         return false;
-    VolumeDataSource::loadPlugins(); //initLocal on render clients never returns
+
     addActiveLayout( "Simple" ); // prefer single GPU layout by default
     return eq::Client::initLocal( argc, argv );
 }
@@ -125,8 +176,8 @@ int Client::run( const int argc, char** argv )
     }
 
     FrameData& frameData = config->getFrameData();
-    frameData.setup( _applicationParameters, _rendererParameters );
-    frameData.getVolumeSettings()->setURI( _applicationParameters.dataFileName);
+    frameData.setup( _impl->_applicationParameters, _impl->_rendererParameters );
+    frameData.getVolumeSettings()->setURI( _impl->_applicationParameters.dataFileName);
 
     // 3. init config
     lunchbox::Clock clock;
@@ -141,16 +192,20 @@ int Client::run( const int argc, char** argv )
                        << std::endl;
 
     // 4. run main loop
-    uint32_t maxFrames = _applicationParameters.maxFrames;
+    uint32_t maxFrames = _impl->_applicationParameters.maxFrames;
     frameData.getCameraSettings()->setDefaultCameraPosition(
-        _applicationParameters.cameraPosition );
+        _impl->_applicationParameters.cameraPosition );
     frameData.getCameraSettings()->setDefaultCameraLookAt(
-        _applicationParameters.cameraLookAt );
+        _impl->_applicationParameters.cameraLookAt );
 
     clock.reset();
     while( config->isRunning() && maxFrames-- )
     {
         config->frame();
+
+        if( _impl->_idleFunc )
+            _impl->_idleFunc(); // order is important to latency
+
         while( !config->needRedraw( )) // wait for an event requiring redraw
         {
             if( hasCommands( )) // execute non-critical pending commands
@@ -195,9 +250,20 @@ void Client::clientLoop()
 {
     do
     {
-         eq::Client::clientLoop();
-         LBINFO << "Configuration run successfully executed" << std::endl;
+        LBINFO << "Entered client loop" << std::endl;
+        const uint32_t timeout = 100; // Run idle function
+                                      // every 100ms
+        while( isRunning( ))
+        {
+            if( _impl->_idleFunc )
+                _impl->_idleFunc(); // order is important for latency
+
+            processCommand( timeout );
+        }
+
     }
-    while( _applicationParameters.isResident ); // execute at least one config run
+    while( _impl->_applicationParameters.isResident ); // execute at least one config run
 }
+
 }
+

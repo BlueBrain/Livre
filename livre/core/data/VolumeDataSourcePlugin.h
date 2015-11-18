@@ -92,11 +92,11 @@ public:
     LIVRECORE_API virtual void internalNodeToLODNode( const NodeId internalNode,
                                                       LODNode& lodNode ) const;
 
-    /** @return the frame range for the data source in [start,end) format.
-      * If there is no frames, [0,0) range is returned. In streaming data sources
-      * frame range can change over time.
-      */
-    LIVRECORE_API virtual Vector2ui getFrameRange();
+    /**
+     * Updates the volume. For instance, in streaming data sources
+     * the range can change in time.
+     */
+    LIVRECORE_API virtual void update() {}
 
     /**
      * @param nodeId The nodeId to get the node for.

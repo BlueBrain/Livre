@@ -21,6 +21,9 @@
 
 #include <livre/eq/settings/FrameSettings.h>
 
+#include <co/dataOStream.h>
+#include <co/dataIStream.h>
+
 namespace livre
 {
 

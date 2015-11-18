@@ -23,7 +23,7 @@
 namespace livre
 {
 
-VolumeInformation::VolumeInformation( VolumeDataSourcePlugin* dataSource )
+VolumeInformation::VolumeInformation()
     : isBigEndian( false )
     , compCount( 1u )
     , dataType( DT_UINT8 )
@@ -35,7 +35,7 @@ VolumeInformation::VolumeInformation( VolumeDataSourcePlugin* dataSource )
     , worldSize( 0.0f )
     , boundingBox( Boxf::makeUnitBox( ))
     , worldSpacePerVoxel( 0.0f )
-    , _dataSource( dataSource )
+    , frameRange( Vector2ui( 0, 0 ))
 {}
 
 size_t VolumeInformation::getBytesPerVoxel() const
@@ -57,13 +57,6 @@ size_t VolumeInformation::getBytesPerVoxel() const
     default:
         return -1;
     }
-}
-
-Vector2ui VolumeInformation::getFrameRange() const
-{
-    if( _dataSource )
-        return _dataSource->getFrameRange();
-    return Vector2ui( Vector2ui( 0, 0 ));
 }
 
 }

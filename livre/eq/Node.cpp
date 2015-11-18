@@ -23,6 +23,7 @@
 #include <livre/eq/Node.h>
 
 #include <livre/eq/Config.h>
+#include <livre/eq/Client.h>
 #include <livre/eq/Error.h>
 #include <livre/eq/FrameData.h>
 #include <livre/eq/Pipe.h>
@@ -80,7 +81,7 @@ public:
             const livre::VolumeInformation& info =
                     _dataSourcePtr->getVolumeInformation();
             _config->sendEvent( VOLUME_BOUNDING_BOX ) << info.boundingBox;
-            _config->sendEvent( VOLUME_FRAME_RANGE ) << info.getFrameRange();
+            _config->sendEvent( VOLUME_FRAME_RANGE ) << info.frameRange;
         }
         catch( const std::runtime_error& err )
         {
@@ -107,15 +108,10 @@ public:
         releaseVolume();
     }
 
-
     void frameStart( const eq::uint128_t &frameId )
     {
         if( !_node->isApplicationNode( ))
             _config->getFrameData().sync( frameId );
-
-        const livre::VolumeInformation& info =
-                _dataSourcePtr->getVolumeInformation();
-        _config->sendEvent( VOLUME_FRAME_RANGE ) << info.getFrameRange();
     }
 
     void releaseVolume()
@@ -127,6 +123,17 @@ public:
     void releaseCache()
     {
         _textureDataCachePtr.reset();
+    }
+
+    void updateAndSendFrameRange()
+    {
+        if( !_dataSourcePtr )
+            return;
+
+        _dataSourcePtr->update();
+        const livre::VolumeInformation& info =
+                _dataSourcePtr->getVolumeInformation();
+        _config->sendEvent( VOLUME_FRAME_RANGE ) << info.frameRange;
     }
 
     livre::Node* const _node;
@@ -157,6 +164,10 @@ bool Node::configInit( const eq::uint128_t& initId )
 
     if( !eq::Node::configInit( initId ))
         return false;
+
+    livre::Client* client = static_cast<livre::Client*>( getClient( ).get());
+    client->registerIdleFunction( std::bind( &detail::Node::updateAndSendFrameRange,
+                                             _impl));
 
     if( !isApplicationNode( ))
     {
@@ -198,6 +209,8 @@ ConstDashTreePtr Node::getDashTree() const
 void Node::frameStart( const eq::uint128_t &frameId,
                        const uint32_t frameNumber)
 {
+
+
     _impl->frameStart( frameId );
     eq::Node::frameStart( frameId, frameNumber );
 }

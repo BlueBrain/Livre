@@ -18,9 +18,9 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
 include(GitExternal)
 
 set(VERSION_MAJOR "0")
-set(VERSION_MINOR "4")
+set(VERSION_MINOR "5")
 set(VERSION_PATCH "0")
-set(VERSION_ABI 3) # OFF or ABI version
+set(VERSION_ABI 4) # OFF or ABI version
 
 set(LIVRE_namespace livre)
 set(LIVRE_INCLUDE_NAME livre/core)

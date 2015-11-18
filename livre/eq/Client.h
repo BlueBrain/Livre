@@ -26,8 +26,6 @@
 
 #include <livre/eq/api.h>
 #include <livre/eq/types.h>
-#include <livre/lib/configuration/ApplicationParameters.h>
-#include <livre/lib/configuration/VolumeRendererParameters.h>
 
 namespace livre
 {
@@ -37,6 +35,8 @@ enum LogTopics
     LOG_STATS = lunchbox::LOG_CUSTOM      // 65536
 };
 
+typedef std::function<void()> IdleFunc;
+
 /**
  * The client application class.
  */
@@ -44,7 +44,7 @@ class Client : public eq::Client
 {
 public:
     LIVREEQ_API Client();
-    LIVREEQ_API virtual ~Client();
+    LIVREEQ_API ~Client();
 
     /**
      * @return Help string
@@ -64,30 +64,36 @@ public:
      */
     LIVREEQ_API int32_t run( int argc, char* argv[] );
 
-    const ApplicationParameters& getApplicationParameters() const
-        { return _applicationParameters; }
-    ApplicationParameters& getApplicationParameters()
-        { return _applicationParameters; }
+    /**
+     * Registers the idle function which is called
+     * every 100ms for updating information ( i.e.
+     * frame ranges in data sources )
+     * @param idleFunc
+     */
+    LIVREEQ_API  void registerIdleFunction( const IdleFunc& idleFunc );
+
+    /**
+     * @return Application parameters
+     */
+    const ApplicationParameters& getApplicationParameters() const;
+
+    /**
+     * @return Application parameters
+     */
+    ApplicationParameters& getApplicationParameters();
 
 protected:
 
     /** @override eq::Client::initLocal() */
-    bool initLocal( const int argc, char* argv[] ) override;
+    bool initLocal( const int argc, char* argv[] ) final;
 
     /** Infinite loop on remote render client. */
-    void clientLoop() override;
+    void clientLoop() final;
 
 private:
-    ApplicationParameters _applicationParameters;
-    VolumeRendererParameters _rendererParameters;
 
-    /**
-     * Parse command line arguments.
-     * @param argc Argument count.
-     * @param argv Argument list.
-     * @return true if the application should continue to run, false otherwise.
-     */
-    bool _parseArguments( const int32_t argc, char* argv[] );
+    struct Impl;
+    std::unique_ptr< Impl > _impl;
 };
 
 }

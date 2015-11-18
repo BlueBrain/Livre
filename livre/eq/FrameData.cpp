@@ -25,6 +25,7 @@
 #include <livre/eq/settings/CameraSettings.h>
 #include <livre/eq/settings/VolumeSettings.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
+#include <livre/lib/configuration/ClientParameters.h>
 
 namespace livre
 {

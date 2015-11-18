@@ -53,16 +53,7 @@ public:
 
     bool isFrameInRange( uint32_t frame ) const
     {
-        // Frame range can change for the streaming data sources according
-        // to the received data ( getFrameRange() ). The const cast is
-        // applied because of this reason.
-        VolumeDataSourcePlugin* impl =
-                const_cast<VolumeDataSourcePlugin*>( plugin.get( ));
-
-        if( !impl )
-            return false;
-
-        const Vector2ui& frameRange = plugin->getFrameRange();
+        const Vector2ui& frameRange = plugin->getVolumeInformation().frameRange;
         return frame >= frameRange[0] && frame < frameRange[1];
     }
 
@@ -117,6 +108,11 @@ void VolumeDataSource::unloadPlugins()
 ConstLODNodePtr VolumeDataSource::getNode( const NodeId nodeId ) const
 {
     return _impl->getNode( nodeId );
+}
+
+void VolumeDataSource::update()
+{
+    _impl->plugin->update();
 }
 
 const VolumeInformation& VolumeDataSource::getVolumeInformation() const

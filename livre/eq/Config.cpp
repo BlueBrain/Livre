@@ -29,6 +29,10 @@
 #include <livre/eq/settings/CameraSettings.h>
 #include <livre/eq/settings/FrameSettings.h>
 #include <livre/eq/settings/RenderSettings.h>
+
+#include <livre/lib/configuration/ApplicationParameters.h>
+#include <livre/lib/configuration/VolumeRendererParameters.h>
+
 #include <livre/core/events/EventMapper.h>
 #include <livre/core/maths/maths.h>
 

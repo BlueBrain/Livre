@@ -137,6 +137,8 @@ public:
                                               domainSize[2] ) / (float)domainSize.maxVal();
 
             _readTOCBlock( initData.getURI().getPath());
+
+            _volumeInfo.frameRange = Vector2ui( 0, _uvfDataSetPtr->GetNumberOfTimesteps( ));
          }
         catch( ... )
         {
@@ -394,11 +396,6 @@ public:
         return _volumeInfo.rootNode.getDepth() - treeLevel - 1;
     }
 
-    Vector2ui getFrameRange()
-    {
-        return Vector2ui( 0, _uvfDataSetPtr->GetNumberOfTimesteps( ));
-    }
-
     TOCBlock* _uvfTOCBlock;
     uint64_t _offset;
 
@@ -437,11 +434,6 @@ void UVFDataSource::internalNodeToLODNode(
     const NodeId internalNode, LODNode& lodNode ) const
 {
     return _impl->internalNodeToLODNode( internalNode, lodNode );
-}
-
-Vector2ui UVFDataSource::getFrameRange()
-{
-    return _impl->getFrameRange();
 }
 
 }

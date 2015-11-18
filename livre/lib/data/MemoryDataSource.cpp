@@ -74,6 +74,8 @@ MemoryDataSource::MemoryDataSource( const VolumeDataSourcePluginData& initData )
             LBTHROW( std::runtime_error( except.what() ));
     }
 
+    _volumeInfo.frameRange = Vector2ui( 0, 1u << NODEID_FRAME_BITS );
+
     if(!fillRegularVolumeInfo( _volumeInfo  ))
         LBTHROW( std::runtime_error( "Cannot setup the regular tree" ));
 }
@@ -116,11 +118,6 @@ MemoryUnitPtr MemoryDataSource::getData( const LODNode& node )
 bool MemoryDataSource::handles( const VolumeDataSourcePluginData& initData )
 {
     return initData.getURI().getScheme() == "mem";
-}
-
-livre::Vector2ui livre::MemoryDataSource::getFrameRange()
-{
-    return Vector2ui( 0, 1u << NODEID_FRAME_BITS );
 }
 
 }
