@@ -162,18 +162,23 @@ bool Config::init( const int argc, char** argv )
 
     resetCamera();
     _initEvents();
-    FrameSettingsPtr frameSettings = _impl->framedata.getFrameSettings();
+    FrameData& framedata = _impl->framedata;
+    FrameSettingsPtr frameSettings = framedata.getFrameSettings();
     const ApplicationParameters& params = getApplicationParameters();
     frameSettings->setFrameNumber( params.frames.x( ));
 
-    RenderSettingsPtr renderSettings = _impl->framedata.getRenderSettings();
-    const TransferFunction1Dc tf( _impl->framedata.getVRParameters()->transferFunction );
+    RenderSettingsPtr renderSettings = framedata.getRenderSettings();
+    ConstVolumeRendererParametersPtr vrParameters = framedata.getVRParameters();
+    const TransferFunction1Dc tf( vrParameters->transferFunction );
     renderSettings->setTransferFunction( tf );
 
     _impl->framedata.registerObjects();
 
     if( !_registerFrameData( ))
         return false;
+
+    if( vrParameters->synchronousMode )
+        setLatency( 0 );
 
     if( !eq::Config::init( _impl->framedata.getID( )))
     {
