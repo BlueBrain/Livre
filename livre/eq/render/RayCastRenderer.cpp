@@ -103,28 +103,12 @@ struct RayCastRenderer::Impl
                        GL_RGBA, GL_UNSIGNED_BYTE, &transferFunctionData[ 0 ] );
     }
 
-    bool readFromFrameBuffer( const GLWidget& glWidget,
-                              const View& view,
-                              const Frustum& frustum,
-                              const RenderBrick& rb,
-                              Vector2i& screenPos )
+    void readFromFrameBuffer( const GLWidget& glWidget,
+                              const View& view )
     {
         const Viewport& viewport = glWidget.getViewport( view );
-        Vector2i minPos;
-        Vector2i maxPos;
-
-        rb.getScreenCoordinates( frustum, viewport, minPos, maxPos );
-
-        const Vector2i texSize = maxPos - minPos;
-
-        const eq::PixelViewport pvp( minPos[ 0 ], minPos[ 1 ],
-                                     texSize[ 0 ], texSize[ 1 ] );
-        if( !pvp.hasArea( ))
-            return false;
-
+        const eq::PixelViewport pvp( 0, 0, viewport[2], viewport[3] );
         _framebufferTexture->copyFromFrameBuffer( GL_RGBA, pvp );
-        screenPos = minPos;
-        return true;
     }
 
     void onFrameStart( const GLWidget& glWidget LB_UNUSED,
@@ -162,7 +146,7 @@ struct RayCastRenderer::Impl
         }
 
         glDisable( GL_LIGHTING );
-        glDisable( GL_CULL_FACE );
+        glEnable( GL_CULL_FACE );
         glDisable( GL_DEPTH_TEST );
         glDisable( GL_BLEND );
 
@@ -193,11 +177,14 @@ struct RayCastRenderer::Impl
         tParamNameGL = glGetUniformLocation( program, "worldEyePosition" );
         glUniform3fv( tParamNameGL, 1, frustum.getEyeCoords( ).array );
 
-        tParamNameGL = glGetUniformLocation(  program, "nSamplesPerRay" );
+        tParamNameGL = glGetUniformLocation( program, "nSamplesPerRay" );
         glUniform1i( tParamNameGL, _computedSamplePerRay );
 
-        tParamNameGL = glGetUniformLocation(  program, "nSamplesPerPixel" );
+        tParamNameGL = glGetUniformLocation( program, "nSamplesPerPixel" );
         glUniform1i( tParamNameGL, _nSamplesPerPixel );
+
+        tParamNameGL = glGetUniformLocation( program, "nearPlaneDist" );
+        glUniform1f( tParamNameGL, frustum.getFrustumLimits( PL_NEAR ));
 
         // Disable shader
         glUseProgram( 0 );
@@ -206,7 +193,6 @@ struct RayCastRenderer::Impl
 
     void renderBrick( const GLWidget& glWidget,
                       const View& view,
-                      const Frustum& frustum,
                       const RenderBrick& rb )
     {
         GLSLShaders::Handle program = _shaders->getProgram( );
@@ -240,17 +226,7 @@ struct RayCastRenderer::Impl
         tParamNameGL = glGetUniformLocation( program, "voxelSpacePerWorldSpace" );
         glUniform3fv( tParamNameGL, 1, voxSize.array );
 
-        // Read from buffer and get the screen position
-        Vector2i screenPos;
-        if( !readFromFrameBuffer( glWidget, view, frustum, rb, screenPos ))
-        {
-            glUseProgram( 0 );
-            return;
-        }
-
-        // Put data to the shader
-        tParamNameGL = glGetUniformLocation( program, "screenPos" );
-        glUniform2iv( tParamNameGL, 1, screenPos.array );
+        readFromFrameBuffer( glWidget, view );
 
         glActiveTexture( GL_TEXTURE2 );
         _framebufferTexture->bind( );
@@ -278,7 +254,7 @@ struct RayCastRenderer::Impl
     #ifdef LIVRE_DEBUG_RENDERING
         _usedTextures[1].push_back( texState->textureId );
     #endif
-        rb.drawBrick( true /* draw front */, false /* cull back */ );
+        rb.drawBrick( false /* draw front */, true /* cull back */ );
 
         glUseProgram( 0 );
     }
@@ -325,10 +301,10 @@ void RayCastRenderer::onFrameStart_( const GLWidget& glWidget,
 
 void RayCastRenderer::renderBrick_( const GLWidget& glWidget,
                                     const View& view,
-                                    const Frustum& frustum,
+                                    const Frustum&,
                                     const RenderBrick& renderBrick )
 {
-    _impl->renderBrick( glWidget, view, frustum, renderBrick );
+    _impl->renderBrick( glWidget, view, renderBrick );
 }
 
 }

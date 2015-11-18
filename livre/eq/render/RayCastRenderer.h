@@ -60,12 +60,12 @@ private:
     void onFrameStart_( const GLWidget& glWidget,
                         const View& view,
                         const Frustum& frustum,
-                        const RenderBricks& renderBricks );
+                        const RenderBricks& renderBricks ) final;
 
     void renderBrick_( const GLWidget& glWidget,
                        const View& view,
                        const Frustum& frustum,
-                       const RenderBrick& renderBrick );
+                       const RenderBrick& renderBrick ) final;
 
     struct Impl;
     std::unique_ptr< Impl > _impl;
