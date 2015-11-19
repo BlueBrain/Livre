@@ -58,7 +58,7 @@ protected:
         renderNode.setInFrustum( isInFrustum );
         if( !isInFrustum )
         {
-            renderNode.setVisible( false );
+            renderNode.setLODVisible( false );
             state.setVisitChild( false );
             return;
         }
@@ -86,7 +86,7 @@ protected:
         for( size_t i = 0; i < _visibles.size(); ++i )
         {
             const bool isInRange = i >= startIndex && i < endIndex;
-            _visibles[i].setVisible( isInRange );
+            _visibles[i].setLODVisible( isInRange );
             _visibles[i].setInFrustum( isInRange );
             if( isInRange )
                 selected.push_back( _visibles[i] );

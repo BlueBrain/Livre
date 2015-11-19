@@ -97,7 +97,7 @@ public:
         if( !renderNode.isInFrustum( ))
              state.setVisitChild( false );
 
-        if( renderNode.isVisible( ))
+        if( renderNode.isLODVisible( ))
         {
             currentVisibleSet_.insert( lodNode.getNodeId().getId( ));
             state.setVisitChild( false );
@@ -233,7 +233,7 @@ void TextureLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state 
         return;
     }
 
-    if( !renderNode.isVisible( ))
+    if( !renderNode.isLODVisible( ))
         return;
 
     state.setVisitChild( false );

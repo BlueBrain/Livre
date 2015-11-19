@@ -238,7 +238,7 @@ void DataLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state )
         return;
     }
 
-    if( !renderNode.isVisible( ))
+    if( !renderNode.isLODVisible( ))
         return;
 
     state.setVisitChild( false );
@@ -282,7 +282,7 @@ void DepthCollectorVisitor::visit( DashRenderNode& renderNode, VisitState& state
         return;
     }
 
-    if( !renderNode.isVisible( ))
+    if( !renderNode.isLODVisible( ))
         return;
 
     state.setVisitChild( false );

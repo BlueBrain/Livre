@@ -56,7 +56,7 @@ bool DashRenderNode::isInFrustum( ) const
     return getAttribute_< bool >( DNT_INFRUSTUM );
 }
 
-bool DashRenderNode::isVisible( ) const
+bool DashRenderNode::isLODVisible( ) const
 {
     return getAttribute_< bool >( DNT_LODVISIBLE );
 }
@@ -81,7 +81,7 @@ void DashRenderNode::setInFrustum( bool visibility )
     *(_dashNode->getAttribute( DNT_INFRUSTUM )) = visibility;
 }
 
-void DashRenderNode::setVisible( bool visibility )
+void DashRenderNode::setLODVisible( bool visibility )
 {
     *(_dashNode->getAttribute( DNT_LODVISIBLE )) = visibility;
 }

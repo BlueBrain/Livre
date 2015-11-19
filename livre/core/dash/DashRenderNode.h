@@ -70,7 +70,7 @@ public:
      * @return True, if object is visible.
      * @warning This condition is set from outside of the object.
      */
-    LIVRECORE_API bool isVisible() const;
+    LIVRECORE_API bool isLODVisible() const;
 
     /**
      * @return True, if object is in frustum.
@@ -104,7 +104,7 @@ public:
      * Sets visibilty of node.
      * @param visibility If parameter is true, node is visible.
      */
-    LIVRECORE_API void setVisible( bool visibility );
+    LIVRECORE_API void setLODVisible( bool visibility );
 
     /**
      * Sets frustum status of node.
