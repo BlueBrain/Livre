@@ -301,11 +301,11 @@ if(EXISTS ${GIT_EXTERNALS} AND NOT GIT_EXTERNAL_SCRIPT_MODE)
           file(WRITE "${GIT_EXTERNAL_SCRIPT}" "
 include(\"${CMAKE_CURRENT_LIST_DIR}/GitExternal.cmake\")
 execute_process(COMMAND \"${GIT_EXECUTABLE}\" fetch origin -q
-  WORKING_DIRECTORY \"${DIR}\")
+  WORKING_DIRECTORY \"${CMAKE_SOURCE_DIR}/${DIR}\")
 execute_process(
   COMMAND \"${GIT_EXECUTABLE}\" show-ref --hash=7 refs/remotes/origin/master
   OUTPUT_VARIABLE newref OUTPUT_STRIP_TRAILING_WHITESPACE
-  WORKING_DIRECTORY \"${DIR}\")
+  WORKING_DIRECTORY \"${CMAKE_SOURCE_DIR}/${DIR}\")
 if(newref)
   file(APPEND ${GIT_EXTERNALS} \"# ${DIR} ${REPO} \${newref}\\n\")
   git_external(${DIR} ${REPO} \${newref})

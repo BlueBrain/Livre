@@ -267,9 +267,7 @@ public:
 private:
     void _setupPublisher()
     {
-        const auto& params = _config.getApplicationParameters();
-        const ::zeq::URI zeqSchema( params.zeqSchema );
-        _publisher.reset( new ::zeq::Publisher( zeqSchema ));
+        _publisher.reset( new ::zeq::Publisher );
     }
 
     void _setupRequests()
@@ -315,9 +313,7 @@ private:
 
     void _setupSubscribers()
     {
-        SubscriberPtr subscriber(
-                    new ::zeq::Subscriber(
-                        ::zeq::URI( _config.getApplicationParameters().zeqSchema )));
+        SubscriberPtr subscriber( new ::zeq::Subscriber );
 
         subscribers.push_back( subscriber );
         if( _config.getApplicationParameters().syncCamera )
