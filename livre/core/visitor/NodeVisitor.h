@@ -36,12 +36,18 @@ public:
     NodeVisitor() {}
     virtual ~NodeVisitor() {}
 
+    /** Called before all traversal. */
+    virtual void visitPre() {};
+
     /**
      * Called when the given node is being visited.
      * @param renderNode is the node being visited.
      * @param state Visit state.
      */
     virtual void visit( const NodeId& nodeId, VisitState& state ) = 0;
+
+    /** Called after all traversal. */
+    virtual void visitPost() {};
 };
 
 }

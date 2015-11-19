@@ -46,6 +46,7 @@ bool CollectionTraversal::traverse( DashNodeVector& dashNodeVector,
     }
 
     VisitState state;
+    visitor.visitPre();
 
     for( DashNodeVector::const_iterator i = begin;
          i != end && !state.getBreakTraversal();
@@ -55,6 +56,7 @@ bool CollectionTraversal::traverse( DashNodeVector& dashNodeVector,
         visitor.visit( renderNode, state );
     }
 
+    visitor.visitPost();
     return state.getBreakTraversal();
 }
 

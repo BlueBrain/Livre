@@ -44,11 +44,9 @@ public:
 
     /**
      * Generates the rendering set according to the given frustum.
-     * @param viewFrustum Frustum to query HVD
      * @param frameInfo Keeps the frame information
      */
-    LIVRE_API void generateRenderingSet( const Frustum& viewFrustum,
-                                         FrameInfo& frameInfo );
+    LIVRE_API void generateRenderingSet( FrameInfo& frameInfo );
 
 private:
 

@@ -36,37 +36,6 @@
 namespace livre
 {
 
-class VisibleCollectorVisitor : public RenderNodeVisitor
-{
-public:
-    VisibleCollectorVisitor( DashTreePtr dashTree, NodeIds& nodeIds )
-        : RenderNodeVisitor( dashTree ),
-          _nodeIds( nodeIds )
-    {}
-
-    void visit( DashRenderNode& renderNode, VisitState& state ) final
-    {
-        const LODNode& lodNode = renderNode.getLODNode();
-        if( !lodNode.isValid( ))
-            return;
-
-        if( !renderNode.isInFrustum( ))
-        {
-            state.setVisitChild( false );
-            return;
-        }
-
-        if( renderNode.isVisible( ))
-        {
-            _nodeIds.push_back( lodNode.getNodeId( ));
-            state.setVisitChild( false );
-        }
-    }
-
-private:
-    NodeIds& _nodeIds;
-};
-
 struct AvailableSetGenerator::Impl
 {
     Impl( DashTreePtr dashTree, const TextureCache& textureCache )
@@ -111,17 +80,8 @@ struct AvailableSetGenerator::Impl
             notAvailableRenderNodes.push_back( nodeId );
     }
 
-    void generateRenderingSet( const Frustum&, FrameInfo& frameInfo )
+    void generateRenderingSet( FrameInfo& frameInfo )
     {
-        VisibleCollectorVisitor visibleSelector( _dashTree,
-                                                 frameInfo.allNodes );
-        DFSTraversal dfsTraverser;
-        const RootNode& rootNode =
-                _dashTree->getDataSource()->getVolumeInformation().rootNode;
-
-        dfsTraverser.traverse( rootNode, visibleSelector,
-                               _dashTree->getRenderStatus().getFrameID( ));
-
         ConstCacheMap cacheMap;
         for( const NodeId& nodeId : frameInfo.allNodes )
         {
@@ -171,10 +131,9 @@ AvailableSetGenerator::~AvailableSetGenerator()
     delete _impl;
 }
 
-void AvailableSetGenerator::generateRenderingSet( const Frustum& frustum,
-                                                  FrameInfo& frameInfo )
+void AvailableSetGenerator::generateRenderingSet( FrameInfo& frameInfo )
 {
-    _impl->generateRenderingSet( frustum, frameInfo );
+    _impl->generateRenderingSet( frameInfo );
 }
 
 }
