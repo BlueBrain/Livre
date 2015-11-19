@@ -30,30 +30,26 @@ NodeId::NodeId( const Identifier& identifier )
     : _id( identifier )
 {}
 
-NodeId::NodeId( const uint32_t level,
-                const Vector3ui& position,
+NodeId::NodeId( const uint32_t level, const Vector3ui& position,
                 const uint32_t frame )
-    : _level( level ),
-      _frame( frame )
-{
-    _blockPosX = position[ 0 ];
-    _blockPosY = position[ 1 ];
-    _blockPosZ = position[ 2 ];
-}
+    : _level( level )
+    , _blockPosX( position[ 0 ])
+    , _blockPosY( position[ 1 ])
+    , _blockPosZ( position[ 2 ])
+    , _frame( frame )
+{}
 
 Vector3ui NodeId::getPosition( ) const
 {
-    return Vector3ui( _blockPosX,
-                      _blockPosY,
-                      _blockPosZ  );
+    return Vector3ui( _blockPosX, _blockPosY, _blockPosZ );
 }
 
-NodeIds NodeId::getParents( ) const
+NodeIds NodeId::getParents() const
 {
     NodeIds nodeIds;
     NodeId parent = getParent();
 
-    while( parent.isValid() )
+    while( parent.isValid( ))
     {
         nodeIds.push_back( parent );
         parent = parent.getParent();
@@ -62,7 +58,7 @@ NodeIds NodeId::getParents( ) const
     return nodeIds;
 }
 
-NodeId NodeId::getParent( ) const
+NodeId NodeId::getParent() const
 {
     if( _level == INVALID_LEVEL || _level == 0 )
         return NodeId();
@@ -92,15 +88,17 @@ bool NodeId::isChild( const NodeId& childNodeId ) const
    return childNodeId.isParent( *this );
 }
 
-NodeIds NodeId::getChildren( ) const
+NodeIds NodeId::getChildren() const
 {
-    NodeIds nodeIds;
     if( _level == INVALID_LEVEL )
-        return nodeIds;
+        return NodeIds();
 
+    NodeIds nodeIds;
     const Vector3ui childPos = getPosition() * 2;
     for( uint32_t x = 0; x < 2; ++x )
+    {
         for( uint32_t y = 0; y < 2; ++y )
+        {
             for( uint32_t z = 0; z < 2; ++z )
             {
                 const Vector3ui pos( childPos[ 0 ] + x,
@@ -108,7 +106,8 @@ NodeIds NodeId::getChildren( ) const
                                      childPos[ 2 ] + z );
                 nodeIds.push_back( NodeId( _level + 1, pos, _frame ) );
             }
-
+        }
+    }
     return nodeIds;
 }
 
@@ -128,15 +127,17 @@ NodeIds NodeId::getSiblings( ) const
 
 NodeIds NodeId::getChildrenAtLevel( const uint32_t level ) const
 {
-    NodeIds nodeIds;
     if( _level == INVALID_LEVEL || _level >= level )
-        return nodeIds;
+        return NodeIds();
 
+    NodeIds nodeIds;
     const uint32_t childCount = 1u << ( level - _level );
     const Vector3f& startPosInLevel = getPosition() * childCount;
 
     for( uint32_t x = 0; x < childCount; ++x )
+    {
         for( uint32_t y = 0; y < childCount; ++y )
+        {
             for( uint32_t z = 0; z < childCount; ++z )
             {
                 const Vector3ui pos( startPosInLevel[ 0 ] + x,
@@ -144,7 +145,8 @@ NodeIds NodeId::getChildrenAtLevel( const uint32_t level ) const
                                      startPosInLevel[ 2 ] + z );
                 nodeIds.push_back( NodeId( level, pos, _frame ) );
             }
-
+        }
+    }
     return nodeIds;
 }
 

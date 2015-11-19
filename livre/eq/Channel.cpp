@@ -77,16 +77,13 @@ private:
     Channel* const _channel;
 };
 
-
 typedef boost::shared_ptr< EqRenderView > EqRenderViewPtr;
 
-/**
- * The EqGlWidget class implements livre \GLWidget for internal use of \see eq::Channel.
- */
-class EqGlWidget : public GLWidget
+/** Implements livre \GLWidget for internal use of eq::Channel. */
+class EqGLWidget : public GLWidget
 {
 public:
-    explicit EqGlWidget( livre::Channel* channel )
+    explicit EqGLWidget( livre::Channel* channel )
         : _channel( channel )
     {}
 
@@ -193,7 +190,7 @@ class Channel
 public:
     explicit Channel( livre::Channel* channel )
           : _channel( channel )
-          , _glWidgetPtr( new EqGlWidget( channel ))
+          , _glWidgetPtr( new EqGLWidget( channel ))
           , _frameInfo( _currentFrustum )
     {}
 
@@ -364,9 +361,11 @@ public:
         if( pipe->getFrameData()->getVRParameters()->synchronousMode )
         {
             if( _frameInfo.notAvailableRenderNodes.empty( ))
-                dashTreeUpdated = window->apply( false ); // Do not block if rendering nodes are present
+                 // Do not block if rendering nodes are present
+                dashTreeUpdated = window->apply( false );
             else
-                dashTreeUpdated = window->apply( true ); // Block until rendering nodes arrive
+                // Block until rendering nodes arrive
+                dashTreeUpdated = window->apply( true );
         }
         else
             dashTreeUpdated = window->apply( false ); // Never block
@@ -413,9 +412,7 @@ public:
 
             const eq::Range& range = frame->getRange();
             if( range == eq::Range::ALL ) // 2D frame, assemble directly
-            {
                 eq::Compositor::assembleFrame( frame, _channel );
-            }
             else
             {
                 dbFrames.push_back( frame );
@@ -423,8 +420,8 @@ public:
 
                 BOOST_FOREACH( const eq::Image* image, frame->getImages( ))
                 {
-                    const eq::PixelViewport imagePVP = image->getPixelViewport( ) +
-                            frame->getOffset( );
+                    const eq::PixelViewport imagePVP =
+                        image->getPixelViewport() + frame->getOffset( );
                     coveredPVP.merge( imagePVP );
                 }
             }
@@ -449,10 +446,10 @@ public:
                         eq::FrameDataPtr data,
                         eq::Frames& dbFrames )
     {
-        if( dbFrames.front( ) == &_frame )
+        if( dbFrames.front() == &_frame )
         {
             LBWARN << "not erasing main frame" << std::endl;
-            dbFrames.erase( dbFrames.begin( ) );
+            dbFrames.erase( dbFrames.begin( ));
         }
         else if( coveredPVP.hasArea( ) )
         {
@@ -567,7 +564,7 @@ public:
 
     void _drawText( std::string text, float& y )
     {
-        const eq::util::BitmapFont* font = _channel->getWindow()->getSmallFont();
+        const eq::util::BitmapFont* font =_channel->getWindow()->getSmallFont();
         for( size_t pos = text.find( '\n' ); pos != std::string::npos;
              pos = text.find( '\n' ))
         {

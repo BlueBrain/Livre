@@ -34,8 +34,7 @@ namespace detail
 class DFSTraversal
 {
 public:
-    bool traverse( const NodeId& nodeId,
-                   const uint32_t depth,
+    bool traverse( const NodeId& nodeId, const uint32_t depth,
                    livre::NodeVisitor& visitor )
     {
         if( depth == 0 || _state.getBreakTraversal() )
@@ -77,17 +76,15 @@ public:
 
 
 DFSTraversal::DFSTraversal( )
-    : _impl( new detail::DFSTraversal() )
-{
-}
+    : _impl( new detail::DFSTraversal )
+{}
 
 DFSTraversal::~DFSTraversal()
 {
     delete _impl;
 }
 
-bool DFSTraversal::traverse( const RootNode& rootNode,
-                             const NodeId& node,
+bool DFSTraversal::traverse( const RootNode& rootNode, const NodeId& node,
                              NodeVisitor& visitor )
 {
     return _impl->traverse( node,
@@ -95,18 +92,16 @@ bool DFSTraversal::traverse( const RootNode& rootNode,
                             visitor );
 }
 
-void DFSTraversal::traverse( const RootNode& rootNode,
-                             NodeVisitor& visitor,
+void DFSTraversal::traverse( const RootNode& rootNode, NodeVisitor& visitor,
                              const uint32_t frame )
 {
     const Vector3ui& blockSize = rootNode.getBlockSize();
-    for( uint32_t x = 0; x < blockSize[0]; ++x )
-        for( uint32_t y = 0; y < blockSize[1]; ++y )
-            for( uint32_t z = 0; z < blockSize[2]; ++z )
+    for( uint32_t x = 0; x < blockSize.x(); ++x )
+        for( uint32_t y = 0; y < blockSize.y(); ++y )
+            for( uint32_t z = 0; z < blockSize.z(); ++z )
             {
                 _impl->traverse( NodeId( 0, Vector3ui( x, y, z ), frame ),
-                                 rootNode.getDepth(),
-                                 visitor );
+                                 rootNode.getDepth(), visitor );
             }
 }
 

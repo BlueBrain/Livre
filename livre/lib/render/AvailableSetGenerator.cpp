@@ -56,7 +56,7 @@ public:
             return;
         }
 
-        if( renderNode.isLODVisible( ))
+        if( renderNode.isVisible( ))
         {
             _nodeIds.push_back( lodNode.getNodeId( ));
             state.setVisitChild( false );
