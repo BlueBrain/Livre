@@ -17,6 +17,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <livre/lib/render/AvailableSetGenerator.h>
+
+#include <livre/lib/cache/TextureCache.h>
+#include <livre/lib/cache/TextureObject.h>
+#include <livre/lib/visitor/CollectionTraversal.h>
+#include <livre/lib/visitor/DFSTraversal.h>
 #include <livre/core/dash/DashRenderNode.h>
 #include <livre/core/dash/DashRenderStatus.h>
 #include <livre/core/dash/DashTree.h>
@@ -26,11 +32,6 @@
 #include <livre/core/render/RenderBrick.h>
 #include <livre/core/render/View.h>
 #include <livre/core/visitor/RenderNodeVisitor.h>
-#include <livre/lib/cache/TextureCache.h>
-#include <livre/lib/cache/TextureObject.h>
-#include <livre/lib/render/AvailableSetGenerator.h>
-#include <livre/lib/visitor/CollectionTraversal.h>
-#include <livre/lib/visitor/DFSTraversal.h>
 
 namespace livre
 {
@@ -68,10 +69,9 @@ private:
 
 struct AvailableSetGenerator::Impl
 {
-    Impl( DashTreePtr dashTree,
-          const TextureCache& textureCache )
-        : _dashTree( dashTree ),
-          _textureCache( textureCache )
+    Impl( DashTreePtr dashTree, const TextureCache& textureCache )
+        : _dashTree( dashTree )
+        , _textureCache( textureCache )
     {}
 
     bool hasParentInMap( const NodeId& childRenderNode,
@@ -79,11 +79,10 @@ struct AvailableSetGenerator::Impl
     {
         const NodeIds& parentNodeIds = childRenderNode.getParents();
 
-        BOOST_FOREACH( const NodeId& parentId, parentNodeIds )
-        {
+        for( const NodeId& parentId : parentNodeIds )
             if( cacheMap.find( parentId.getId( )) != cacheMap.end() )
                 return true;
-        }
+
         return false;
     }
 
@@ -163,8 +162,7 @@ struct AvailableSetGenerator::Impl
 
 AvailableSetGenerator::AvailableSetGenerator( DashTreePtr tree,
                                               const TextureCache& textureCache )
-    : RenderingSetGenerator( tree )
-    , _impl( new AvailableSetGenerator::Impl( tree, textureCache ))
+    : _impl( new AvailableSetGenerator::Impl( tree, textureCache ))
 {
 }
 

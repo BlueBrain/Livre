@@ -20,7 +20,6 @@
 #ifndef _AvailableSetGenerator_h_
 #define _AvailableSetGenerator_h_
 
-#include <livre/core/render/RenderingSetGenerator.h>
 #include <livre/lib/api.h>
 #include <livre/lib/types.h>
 
@@ -31,7 +30,7 @@ namespace livre
  * The AvailableSetGenerator class generates a rendering set according to the availability
  * of the textures.
  */
-class AvailableSetGenerator : public RenderingSetGenerator
+class AvailableSetGenerator
 {
 public:
     /**

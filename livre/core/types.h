@@ -81,7 +81,6 @@ class ProcessorInput;
 class ProcessorOutput;
 class RenderBrick;
 class Renderer;
-class RenderingSetGenerator;
 class RootNode;
 class TexturePool;
 class TexturePoolFactory;

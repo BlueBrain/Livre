@@ -29,7 +29,6 @@
 #include <livre/core/render/FrameInfo.h>
 #include <livre/core/render/Frustum.h>
 #include <livre/core/render/GLWidget.h>
-#include <livre/core/render/RenderingSetGenerator.h>
 
 namespace livre
 {
