@@ -46,7 +46,6 @@ bool CollectionTraversal::traverse( DashNodeVector& dashNodeVector,
     }
 
     VisitState state;
-    visitor.onTraverseBegin( state );
 
     if( !state.getBreakTraversal() )
     {
@@ -61,9 +60,7 @@ bool CollectionTraversal::traverse( DashNodeVector& dashNodeVector,
         }
     }
 
-    visitor.onTraverseEnd( state );
     return state.getBreakTraversal();
 }
 
 }
-

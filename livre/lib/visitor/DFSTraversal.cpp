@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -43,13 +43,10 @@ public:
 
         _state = VisitState();
 
-        visitor.onTraverseBegin( _state );
         if( _state.getBreakTraversal( ) )
             return true;
 
-        visitor.onVisitBegin( nodeId, _state );
         visitor.visit( nodeId, _state );
-        visitor.onVisitEnd( nodeId, _state );
 
         if( _state.getBreakTraversal() || !_state.getVisitChild() )
         {
@@ -58,7 +55,6 @@ public:
         }
 
         const NodeIds& nodeIds = nodeId.getChildren();
-        visitor.onVisitChildrenBegin( nodeId, _state );
         BOOST_FOREACH( const NodeId& childNodeId, nodeIds )
         {
             traverse( childNodeId, depth - 1, visitor );
@@ -66,10 +62,7 @@ public:
                 break;
         }
 
-        visitor.onVisitChildrenEnd( nodeId, _state );
         _state.setVisitNeighbours( true );
-
-        visitor.onTraverseEnd( _state );
 
         bool retVal = _state.getBreakTraversal();
         _state.setBreakTraversal( false );
