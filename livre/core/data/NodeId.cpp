@@ -125,6 +125,17 @@ NodeIds NodeId::getSiblings( ) const
     return parentId.getChildren();
 }
 
+Range NodeId::getRange() const
+{
+    const size_t width = 1u << _level;
+    const size_t nChildren = std::pow( width, 3 );
+    const Vector3ui& pos = getPosition();
+    const size_t position = pos.x() * width * width + pos.y() * width + pos.z();
+    const float span = 1.f / float( nChildren );
+    const float begin = float( position )  / float( nChildren );
+    return Range{{ begin, begin + span }};
+}
+
 NodeIds NodeId::getChildrenAtLevel( const uint32_t level ) const
 {
     if( _level == INVALID_LEVEL || _level >= level )

@@ -83,6 +83,7 @@ public:
     LIVRECORE_API NodeId getRoot() const; //!< Return root node
     LIVRECORE_API NodeIds getSiblings() const; //<! Return siblings
     LIVRECORE_API NodeIds getChildrenAtLevel( const uint32_t level ) const; //<! Returns children at level
+    LIVRECORE_API Range getRange() const; //<! Normalized data range within tree
     LIVRECORE_API Identifier getId() const { return _id; } //<! Returns the unique identifier
 
     /**

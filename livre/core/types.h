@@ -98,6 +98,7 @@ using lunchbox::Strings;
 
 typedef uint64_t Identifier;
 typedef Identifier CacheId;
+typedef std::array< float, 2 > Range;
 
 /**
  * SmartPtr definitions

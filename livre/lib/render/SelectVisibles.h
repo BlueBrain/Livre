@@ -23,6 +23,8 @@
 #include <livre/lib/types.h>
 #include <livre/core/visitor/RenderNodeVisitor.h>
 
+//#define LIVRE_STATIC_DECOMPOSITION
+
 namespace livre
 {
 /** Selects all visible rendering nodes */
@@ -79,13 +81,22 @@ protected:
     void visitPost() final
     {
         // Sort-last range selection:
+#ifndef LIVRE_STATIC_DECOMPOSITION
         const size_t startIndex = _range[0] * _visibles.size();
         const size_t endIndex = _range[1] * _visibles.size();
+#endif
         DashRenderNodes selected;
 
         for( size_t i = 0; i < _visibles.size(); ++i )
         {
+#ifdef LIVRE_STATIC_DECOMPOSITION
+            const Range& nodeRange =
+                _visibles[i].getLODNode().getNodeId().getRange();
+            const bool isInRange = nodeRange[1] > _range[0] &&
+                                   nodeRange[1] <= _range[1];
+#else
             const bool isInRange = i >= startIndex && i < endIndex;
+#endif
             _visibles[i].setLODVisible( isInRange );
             _visibles[i].setInFrustum( isInRange );
             if( isInRange )
