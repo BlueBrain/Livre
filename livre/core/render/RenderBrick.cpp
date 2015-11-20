@@ -39,7 +39,7 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
  * SILICON GRAPHICS, INC. BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF
- * OR IN PORT WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
  * Except as contained in this notice, the name of Silicon Graphics, Inc.
@@ -60,8 +60,8 @@ namespace livre
 
 RenderBrick::RenderBrick( const LODNode& lodNode_,
                           ConstTextureStatePtr textureState_ )
-    : lodNode( lodNode_ ),
-      textureState( textureState_ )
+    : lodNode( lodNode_ )
+    , textureState( textureState_ )
 {
 }
 

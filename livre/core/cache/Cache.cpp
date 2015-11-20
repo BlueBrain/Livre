@@ -87,12 +87,13 @@ Cache::~Cache()
 CacheObjectPtr Cache::getObjectFromCache_( const CacheId& cacheObjectID )
 {
     LBASSERT( cacheObjectID != INVALID_CACHE_ID );
-    ReadLock readLock( mutex_ );
-    CacheMap::iterator it = cacheMap_.find( cacheObjectID );
-    if( it != cacheMap_.end() )
-        return it->second;
-
-    readLock.unlock();
+    CacheMap::iterator it;
+    {
+        ReadLock readLock( mutex_ );
+        it = cacheMap_.find( cacheObjectID );
+        if( it != cacheMap_.end() )
+            return it->second;
+    }
 
     WriteLock writeLock( mutex_ );
     it = cacheMap_.find( cacheObjectID );

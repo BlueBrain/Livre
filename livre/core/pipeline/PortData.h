@@ -91,8 +91,7 @@ using ConstPortDataTPtrs = std::vector< ConstPortDataTPtr< T >>;
 template< class T >
 PortDataTPtr< T > makePortDataPtr( const T& data )
 {
-    PortDataT< T >* msg = new PortDataT< T >( data );
-    return boost::shared_ptr< PortDataT< T >>( msg );
+    return boost::make_shared< PortDataT< T >>( data );
 }
 
 /**
@@ -102,8 +101,7 @@ PortDataTPtr< T > makePortDataPtr( const T& data )
 template< class T >
 PortDataTPtr< T > makePortDataPtr( const T&& data )
 {
-    PortDataT< T >* msg = new PortDataT< T >( data );
-    return boost::shared_ptr< PortDataT< T >>( msg );
+    return boost::make_shared< PortDataT< T >>( data );
 }
 
 }

@@ -66,7 +66,7 @@ struct SimpleExecutor::Impl
                 break;
 
             BOOST_FOREACH( ExecutablePtr executable, pipeline->getExecutables())
-                _workers->submitWork( executable );
+                _workers->execute( executable );
 
         }
     }
@@ -101,7 +101,7 @@ void SimpleExecutor::clear()
     _impl->clear();
 }
 
-void SimpleExecutor::submit( PipelinePtr pipeline )
+void SimpleExecutor::execute( PipelinePtr pipeline )
 {
     _impl->submit( pipeline );
 }

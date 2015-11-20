@@ -51,7 +51,7 @@ public:
     /**
      * @copydoc Executor::submit( PipelinePtr pipeline )
      */
-    void submit( PipelinePtr pipeline ) final;
+    void execute( PipelinePtr pipeline ) final;
 
     /**
      * @copydoc Executor::clear()
@@ -66,4 +66,4 @@ private:
 
 }
 
-#endif // _Executore_h_
+#endif // _SimpleExecutor_h_

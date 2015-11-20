@@ -46,6 +46,14 @@ struct FilterInput::Impl
         return _portMap[ portName ];
     }
 
+    ConstInputPortPtr getPort( const std::string& portName ) const
+    {
+        if(!hasPort( portName ))
+            throwError( portName );
+
+        return _portMap.find( portName )->second;
+    }
+
     InputPortPtr addPort( const PortInfo& portInfo )
     {
         if( hasPort( portInfo.portName ))
@@ -55,27 +63,14 @@ struct FilterInput::Impl
         InputPortPtr port( new InputPort( portInfo ));
         _portMap.insert( std::make_pair( portInfo.portName, port ));
 
-        return _portMap[ portInfo.portName ];
-    }
-
-    ConstInputPortPtr getPort( const std::string& portName ) const
-    {
-        if(!hasPort( portName ))
-            throwError( portName );
-
-        InputPortMap::const_iterator it = _portMap.find( portName );
-        return it->second;
+        return port;
     }
 
     void wait( const std::string& portName ) const
     {
         if( !portName.empty())
         {
-            if(!hasPort( portName ))
-                throwError( portName );
-
-            const ConstInputPortPtr& port = getPort( portName );
-            port->wait();
+            getPort( portName )->wait();
             return;
         }
 
@@ -124,11 +119,7 @@ struct FilterInput::Impl
 
     bool waitForAny( const std::string& portName ) const
     {
-        if(!hasPort( portName ))
-            throwError( portName );
-
-        const ConstInputPortPtr& port = getPort( portName );
-        return port->waitForAny();
+        return getPort( portName )->waitForAny();
     }
 
     lunchbox::Strings getPortNames() const
@@ -148,13 +139,7 @@ struct FilterInput::Impl
     bool isReady( const std::string& portName = "" ) const
     {
         if( !portName.empty( ))
-        {
-            if(!hasPort( portName ))
-                throwError( portName );
-
-            ConstInputPortPtr port = getPort( portName );
-            return port->isReady();
-        }
+            return getPort( portName )->isReady();
 
         BOOST_FOREACH( const NameInputPortPair& namePortPair,
                        _portMap )
@@ -169,11 +154,7 @@ struct FilterInput::Impl
 
     size_t getPortSize( const std::string& portName ) const
     {
-        if(!hasPort( portName ))
-            throwError( portName );
-
-        const ConstInputPortPtr& port = getPort( portName );
-        return port->getSize();
+        return getPort( portName )->getSize();
     }
 
     void clear()

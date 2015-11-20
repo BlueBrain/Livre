@@ -48,14 +48,14 @@ public:
     /**
      * Gets the port according to given name.
      * @param portName is the name of the port.
-     * @return the input port
-     * @throw std::runtime_error whem the port with the port name
+     * @return the output port
+     * @throw std::runtime_error if the port with the port name
      * is not available.
      */
     ConstOutputPortPtr getPort( const std::string& portName ) const;
 
     /**
-     * Queries if port with the given name is available.
+     * Queries if a port with the given name is available.
      * @param portName is the name of the port.
      * @return true if there is a port with given name
      */
@@ -65,7 +65,7 @@ public:
      * Gets the value with the given type T.
      * @param portName is the name of the port.
      * @return the value reference.
-     * @throw std::runtime_error whem the port with the port name
+     * @throw std::runtime_error if the port with the port name
      * is not available.
      * @throw std::runtime_error when the port data is not exact
      * type T
@@ -84,7 +84,7 @@ public:
      * Moves the value with the given type T
      * @param portName is the name of the port.
      * @return the value.
-     * @throw std::runtime_error whem the port with the port name
+     * @throw std::runtime_error if the port with the port name
      * is not available.
      * @throw std::runtime_error when the port data is not exact
      * type T
@@ -103,7 +103,7 @@ public:
      * Sets the value with the given type T
      * @param portName is the name of the port.
      * @return the value reference.
-     * @throw std::runtime_error whem the port with the port name
+     * @throw std::runtime_error if the port with the port name
      * is not available.
      * @throw std::runtime_error when the port data is not exact
      * type T
@@ -128,13 +128,13 @@ public:
      * Waits for a given port name or for all the output ports if
      * portname is empty.
      * @param portName is the name of the port. Empty for all ports.
-     * @throw std::runtime_error whem the port with the port name
+     * @throw std::runtime_error if the port with the port name
      * is not available.
      */
     void wait( const std::string& portName = "" ) const;
 
     /**
-     * Waits for a any input to be ready.
+     * Waits for any input to be ready.
      * @param readyPorts The ready ports are listed into readyPorts array.
      * @return true there are still waiting outputs.
      */
@@ -146,7 +146,7 @@ public:
      * @param portName is the name of the port. Empty for all ports.
      * @return true if port/ports are ready.
      * is not available.
-     * @throw std::runtime_error whem the port with the port name
+     * @throw std::runtime_error if the port with the port name
      */
     bool isReady( const std::string& portName = "" ) const;
 
@@ -158,15 +158,15 @@ public:
      * @param portName connection port name.
      * @return true if connection is successful.
      */
-    friend bool connect( PipeFilterPtr& src,
-                         PipeFilterPtr& dst,
-                         const std::string& portName );
+    friend bool connectFilters( PipeFilterPtr src,
+                                PipeFilterPtr dst,
+                                const std::string& portName );
 
     /**
      * Adds a new input port according to the given port info.
      * @param portInfo The port information
      * @return the generated code.
-     * @throw std::runtime_error whem the port with the port name
+     * @throw std::runtime_error if the port with the port name
      * is already registered.
      */
     OutputPortPtr addPort( const PortInfo& portInfo );
@@ -175,19 +175,20 @@ public:
      * Gets the port according to given name.
      * @param portName is the name of the port.
      * @return the input port
-     * @throw std::runtime_error whem the port with the port name
+     * @throw std::runtime_error if the port with the port name
      * is not available.
      */
     OutputPortPtr getPort( const std::string& portName );
 
     /**
-     * Gets the list of ports
      * @return the output ports
      */
     ConstOutputPortPtrs getPorts() const;
 
     /**
-     * Sets the ports with default values.
+     * If a value to the port, is not provided by filter, this function
+     * sets the port output with default value that is defined by the port
+     * information.
      */
     void flush();
 

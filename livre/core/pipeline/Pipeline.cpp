@@ -54,11 +54,11 @@ struct Pipeline::Impl
         PipeFilterPtr pipefilter( new PipeFilter( filter ));
         _filters.push_back( pipefilter );
 
-        const ConstOutputPortPtrs& outputPorts =
-                pipefilter->_getOutput().getPorts();
-
         if( wait )
         {
+            const ConstOutputPortPtrs& outputPorts =
+                    pipefilter->_getOutput().getPorts();
+
             _outputs.insert( _outputs.end(),
                              outputPorts.begin(),
                              outputPorts.end( ));

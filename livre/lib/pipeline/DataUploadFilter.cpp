@@ -186,7 +186,7 @@ struct DataUploadFilter::Impl
 
             PipelinePtr uploadDataSynchronousPipeline( new Pipeline( ));
             uploadDataSynchronousPipeline->add( uploadDataPipeline, false );
-            renderPipeInput.uploadExecutor->submit( uploadDataSynchronousPipeline );
+            renderPipeInput.uploadExecutor->execute( uploadDataSynchronousPipeline );
         }
 
         if( renderPipeInput.isSynchronous )

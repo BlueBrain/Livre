@@ -77,7 +77,7 @@ public:
      * @param nodeId The nodeId to get the node for.
      * @return The LODNode for the ID or 0 if not found.
      */
-    LIVRECORE_API LODNode getNode( const NodeId nodeId ) const;
+    LIVRECORE_API LODNode getNode( const NodeId& nodeId ) const;
 
     /** @copydoc VolumeDataSourcePlugin::update() */
     LIVRECORE_API void update();

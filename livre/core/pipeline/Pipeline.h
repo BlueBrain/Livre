@@ -28,10 +28,10 @@ namespace livre
 {
 
 /**
- * Pipeline provides task grouping so that, all tasks in same group
- * can be waited. The asynchronous execution is done through the
- * Executor class and it can be executed separately which causes
- * every pipe filter to be executed in order.
+ * Pipeline represents a filter graph. On asynchronous
+ * execution through the Executor, the status of the
+ * execution can be queried whether the execution is
+ * complete or not.
  */
 class Pipeline : public Executable
 {
@@ -42,7 +42,8 @@ public:
     ~Pipeline();
 
     /**
-     * Executes the pipeline
+     * Executes each executable element in the graph
+     * synchronously.
      */
     void execute() final;
 

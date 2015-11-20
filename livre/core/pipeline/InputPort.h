@@ -50,7 +50,7 @@ public:
     const std::string& getName() const;
 
     /**
-     * @return the number of inputs the port
+     * @return the number of the inputs to the port
      */
     size_t getSize() const;
 
@@ -62,7 +62,7 @@ public:
 
     /**
      * Waits until the data is ready. If multiple
-     * outputs are connected waits for all the outputs..
+     * outputs are connected waits for all the outputs.
      */
     void wait() const;
 

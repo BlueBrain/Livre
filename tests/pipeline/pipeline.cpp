@@ -224,7 +224,7 @@ BOOST_AUTO_TEST_CASE( testWaitPipeline )
     livre::PipelinePtr pipeline = createPipeline( pipeOutput, inputValue );
     livre::ExecutorPtr executor = createExecutor();
 
-    executor->submit( pipeline );
+    executor->execute( pipeline );
     pipeline->waitForAll();
 
     const OutputData& outputData = pipeOutput->getOutputValue<OutputData>( "OutputData" );
@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE( testAsynchronousPipeline )
     livre::PipelinePtr pipeline = createPipeline( pipeOutput, inputValue );
     livre::ExecutorPtr executor = createExecutor();
 
-    executor->submit( pipeline );
+    executor->execute( pipeline );
 
     const OutputData& outputData = pipeOutput->getOutputValue<OutputData>( "OutputData" );
     BOOST_CHECK_EQUAL( outputData.thanksForAllTheFish, 222 );
@@ -253,7 +253,7 @@ BOOST_AUTO_TEST_CASE( testOneToManyManyToOnePipeline )
                                                   inputValue,
                                                   convertFilterCount );
     livre::ExecutorPtr executor = createExecutor();
-    executor->submit( pipeline );
+    executor->execute( pipeline );
 
     const OutputData& outputData = pipeOutput->getOutputValue<OutputData>( "OutputData" );
     BOOST_CHECK_EQUAL( outputData.thanksForAllTheFish, 1761 );

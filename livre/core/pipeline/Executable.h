@@ -40,5 +40,5 @@ public:
 
 }
 
-#endif // _Filter_h_
+#endif // _Executable_h_
 

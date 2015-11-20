@@ -102,7 +102,7 @@ public:
      * @param nodeId The nodeId to get the node for.
      * @return The LODNode for the ID or 0 if not found.
      */
-    LODNode getNode( const NodeId nodeId ) const;
+    LODNode getNode( const NodeId& nodeId ) const;
 
 protected:
     /**

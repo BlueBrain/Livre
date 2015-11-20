@@ -111,7 +111,11 @@ public:
     void wait() const;
 
     /**
-     * Sets the port with default value.
+     * If a value to the port, is not provided by filter, this function
+     * sets the port output with default value that is defined by the port
+     * information. This function is automatically called when
+     * the worker threads finishes execution of a filter or when
+     * the port is destroyed.
      */
     void flush();
 

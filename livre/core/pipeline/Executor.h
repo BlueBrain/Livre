@@ -41,7 +41,7 @@ public:
      * Submits work to the pipeline.
      * @param pipeline is executed.
      */
-    virtual void submit( PipelinePtr pipeline ) = 0;
+    virtual void execute( PipelinePtr pipeline ) = 0;
 
     /**
      * Clears the executor
@@ -51,4 +51,4 @@ public:
 
 }
 
-#endif // _Executore_h_
+#endif // _Executor_h_

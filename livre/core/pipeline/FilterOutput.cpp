@@ -59,16 +59,6 @@ struct FilterOutput::Impl
         return _portMap[ portName ];
     }
 
-    OutputPortPtr addPort( const PortInfo& portInfo )
-    {
-        if( _portMap.count( portInfo.portName ) == 0 )
-        {
-            OutputPortPtr port( new OutputPort( portInfo ));
-            _portMap.insert( std::make_pair( portInfo.portName, port ));
-        }
-        return _portMap[ portInfo.portName ];
-    }
-
     ConstOutputPortPtrs getPorts() const
     {
         ConstOutputPortPtrs outputPorts;
@@ -85,8 +75,17 @@ struct FilterOutput::Impl
         if(!hasPort( portName ))
             throwError( portName );
 
-        OutputPortMap::const_iterator it = _portMap.find( portName );
-        return it->second;
+        return _portMap.find( portName )->second;
+    }
+
+    OutputPortPtr addPort( const PortInfo& portInfo )
+    {
+        if( _portMap.count( portInfo.portName ) == 0 )
+        {
+            OutputPortPtr port( new OutputPort( portInfo ));
+            _portMap.insert( std::make_pair( portInfo.portName, port ));
+        }
+        return _portMap[ portInfo.portName ];
     }
 
     bool hasPort( const std::string& portName ) const
@@ -132,12 +131,7 @@ struct FilterOutput::Impl
     {
         if( !portName.empty())
         {
-            if(!hasPort( portName ))
-                throwError( portName );
-
-            const ConstOutputPortPtr& port =
-                                getPort( portName );
-            port->wait();
+            getPort( portName )->wait();
             return;
         }
 
@@ -151,13 +145,7 @@ struct FilterOutput::Impl
     bool isReady( const std::string& portName ) const
     {
         if( !portName.empty())
-        {
-            if(!hasPort( portName ))
-                throwError( portName );
-
-            const ConstOutputPortPtr& port = getPort( portName );
-            return port->isReady();
-        }
+            return getPort( portName )->isReady();
 
         BOOST_FOREACH( const NameOutputPortPair& namePortPair,
                        _portMap )

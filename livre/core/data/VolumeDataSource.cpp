@@ -48,11 +48,8 @@ public:
                       VolumeDataSourcePluginData( uri, accessMode )))
     {}
 
-    LODNode getNode( const NodeId nodeId ) const
+    LODNode getNode( const NodeId& nodeId ) const
     {
-        if( !isFrameInRange( nodeId.getFrame( )))
-            return LODNode();
-
         return plugin->getNode( nodeId );
     }
 
@@ -90,7 +87,7 @@ void VolumeDataSource::unloadPlugins()
         detail::VolumeDataSource::PluginFactory::getInstance().unload( plugin );
 }
 
-LODNode VolumeDataSource::getNode( const NodeId nodeId ) const
+LODNode VolumeDataSource::getNode( const NodeId& nodeId ) const
 {
     return _impl->getNode( nodeId );
 }

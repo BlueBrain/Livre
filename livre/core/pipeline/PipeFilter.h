@@ -83,7 +83,7 @@ public:
      * ports are ready to retrieve the data.
      * @param portName is the name of the port.
      * @param value to be set
-     * @throw std::runtime_error whem the port with the port name
+     * @throw std::runtime_error if the port with the port name
      * is not available.
      * @throw std::runtime_error when the port data is not exact
      * type T
@@ -99,7 +99,7 @@ public:
      * is set, the output ports are ready to retrieve the data.
      * @param portName is the name of the port.
      * @param value to be set
-     * @throw std::runtime_error whem the port with the port name
+     * @throw std::runtime_error if the port with the port name
      * is not available.
      * @throw std::runtime_error when the port data is not exact
      * type T
@@ -114,7 +114,7 @@ public:
      * Sets the output port with the value.
      * @param portName is the name of the port.
      * @param value to be set
-     * @throw std::runtime_error whem the port with the port name
+     * @throw std::runtime_error if the port with the port name
      * is not available.
      * @throw std::runtime_error when the port data is not exact
      * type T
@@ -129,7 +129,7 @@ public:
      * Sets the output port with the value (moves the value).
      * @param portName is the name of the port.
      * @param value to be set
-     * @throw std::runtime_error whem the port with the port name
+     * @throw std::runtime_error if the port with the port name
      * is not available.
      * @throw std::runtime_error when the port data is not exact
      * type T
@@ -210,7 +210,7 @@ public:
      * Waits for a given port name or for all the input ports if
      * portname is empty.
      * @param portName is the name of the port. Empty for all ports.
-     * @throw std::runtime_error whem the port with the port name
+     * @throw std::runtime_error if the port with the port name
      * is not available.
      */
     void waitForInput( const std::string& portName = "" ) const;
@@ -219,7 +219,7 @@ public:
      * Waits for a given port name or for all the output ports if
      * portname is empty.
      * @param portName is the name of the port. Empty for all ports.
-     * @throw std::runtime_error whem the port with the port name
+     * @throw std::runtime_error if the port with the port name
      * is not available.
      */
     void waitForOutput( const std::string& portName = "" ) const;
@@ -244,7 +244,7 @@ public:
      * @param portName is the name of the port. Empty for all ports.
      * @return true if port/ports are ready.
      * is not available.
-     * @throw std::runtime_error whem the port with the port name
+     * @throw std::runtime_error if the port with the port name
      */
     bool isOutputPortReady( const std::string& portName = "") const;
 
@@ -254,7 +254,7 @@ public:
      * @param portName is the name of the port. Empty for all ports.
      * @return true if port/ports are ready.
      * is not available.
-     * @throw std::runtime_error whem the port with the port name
+     * @throw std::runtime_error if the port with the port name
      */
     bool isInputPortReady( const std::string& portName = "" ) const;
 
@@ -269,7 +269,7 @@ public:
      * Gets the count of connections to the given input port.
      * @param portName is the name of the port.
      * @return the number of inputs.
-     * @throw std::runtime_error whem the port with the port name
+     * @throw std::runtime_error if the port with the port name
      * is not available.
      */
     size_t getInputSize( const std::string& portName ) const;
@@ -287,8 +287,8 @@ public:
      * @param portName connection port name.
      * @return true if connection is successful.
      */
-    friend bool connectFilters( PipeFilterPtr& src,
-                                PipeFilterPtr& dst,
+    friend bool connectFilters( PipeFilterPtr src,
+                                PipeFilterPtr dst,
                                 const std::string& portName );
 
     /**
@@ -298,8 +298,8 @@ public:
      * @param dst is the destination pipe filter.
      * @return true if connection is successful.
      */
-    friend bool connectFilters( PipeFilterPtr& src,
-                                PipeFilterPtr& dst );
+    friend bool connectFilters( PipeFilterPtr src,
+                                PipeFilterPtr dst );
 
 private:
 
@@ -316,12 +316,12 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 
-bool connectFilters( PipeFilterPtr& src,
-                     PipeFilterPtr& dst,
+bool connectFilters( PipeFilterPtr src,
+                     PipeFilterPtr dst,
                      const std::string& portName );
 
-bool connectFilters( PipeFilterPtr& src,
-                     PipeFilterPtr& dst );
+bool connectFilters( PipeFilterPtr src,
+                     PipeFilterPtr dst );
 
 
 }

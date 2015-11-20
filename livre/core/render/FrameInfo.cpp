@@ -24,8 +24,8 @@ namespace livre
 
 FrameInfo::FrameInfo( const Frustum& frustum_,
                       const uint32_t frameId_ )
-    : currentFrustum( frustum_ ),
-      frameId( frameId_ )
+    : currentFrustum( frustum_ )
+    , frameId( frameId_ )
 {
 }
 

@@ -30,9 +30,9 @@
 namespace livre
 {
 
-bool connectFilters( PipeFilterPtr& src,
-                      PipeFilterPtr& dst,
-                      const std::string& portName )
+bool connectFilters( PipeFilterPtr src,
+                     PipeFilterPtr dst,
+                     const std::string& portName )
 {
     InputPortPtr input =
             dst->_getInput().getPort( portName );
@@ -44,8 +44,8 @@ bool connectFilters( PipeFilterPtr& src,
     return true;
 }
 
-bool connectFilters( PipeFilterPtr& src,
-                     PipeFilterPtr& dst )
+bool connectFilters( PipeFilterPtr src,
+                     PipeFilterPtr dst )
 {
     InputPortPtr input =
             dst->_getInput().getPort( dst->getId().getString( ));

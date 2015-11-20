@@ -61,14 +61,6 @@ struct Workers::Impl
             if( !executable )
                 break;
 
-            Pipeline* pipeline = dynamic_cast<Pipeline*>( executable.get( ));
-            if( pipeline )
-            {
-                int zzzz;
-                zzzz++;
-
-            }
-
             executable->execute();
         }
     }
@@ -109,7 +101,7 @@ Workers::~Workers()
     
 }
 
-void Workers::submitWork( ExecutablePtr executable )
+void Workers::execute( ExecutablePtr executable )
 {
     _impl->submitWork( executable );
 }

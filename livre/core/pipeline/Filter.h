@@ -37,9 +37,10 @@ namespace livre
  * have their unique names and these names are used to query,
  * retrieve and set data.
  *
- * Filters can be thought as classes. They have the execution
- * and port definitions. These definitions are used by @Pipefilters
- * to create instances of filters.
+ * Execution part of filters can be thought as functions and
+ * port definitions can be thought as inputs and outputs to
+ * those functions. PipeFilters build the connection and execution
+ * functionality around filter instances.
  */
 
 class Filter
@@ -55,13 +56,13 @@ public:
 
     /**
      * @param inputPorts information is filled by the Filter class.
-     * Afterwards, these ports are instantiated by the @PipeFilter.
+     * These ports are constructed by the @PipeFilter.
      */
     virtual void getInputPorts( PortInfos& inputPorts LB_UNUSED ) const  {}
 
     /**
      * @param outputPorts information is filled by the Filter class.
-     * Afterwards,, these ports are instantiated by the @PipeFilter.
+     * Afterwards, these ports are instantiated by the @PipeFilter.
      */
     virtual void getOutputPorts( PortInfos& outputPorts LB_UNUSED ) const {}
 

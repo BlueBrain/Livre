@@ -26,13 +26,15 @@ namespace livre
 VolumeDataSourcePlugin::VolumeDataSourcePlugin()
 {}
 
-LODNode VolumeDataSourcePlugin::getNode( const NodeId nodeId ) const
+LODNode VolumeDataSourcePlugin::getNode( const NodeId& nodeId ) const
 {
-    ReadLock lock( _mutex );
-    NodeIDLODNodeMap::iterator it = _lodNodeMap.find( nodeId );
-    if( it != _lodNodeMap.end( ))
-        return it->second;
-    lock.unlock();
+    NodeIDLODNodeMap::iterator it;
+    {
+        ReadLock lock( _mutex );
+        it = _lodNodeMap.find( nodeId );
+        if( it != _lodNodeMap.end( ))
+            return it->second;
+    }
 
     WriteLock writeLock( _mutex );
     it = _lodNodeMap.find( nodeId );

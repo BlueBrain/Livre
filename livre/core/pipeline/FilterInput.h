@@ -48,7 +48,7 @@ public:
      * Gets the port according to given name.
      * @param portName is the name of the port.
      * @return the input port
-     * @throw std::runtime_error whem the port with the port name
+     * @throw std::runtime_error if the port with the port name
      * is not available.
      */
     ConstInputPortPtr getPort( const std::string& portName ) const;
@@ -64,7 +64,7 @@ public:
      * Waits for a given port name or for all the input ports if
      * portname is empty.
      * @param portName is the name of the port. Empty for all ports.
-     * @throw std::runtime_error whem the port with the port name
+     * @throw std::runtime_error if the port with the port name
      * is not available.
      */
     void wait( const std::string& portName = "" ) const;
@@ -74,7 +74,7 @@ public:
      * can have many inputs )
      * @param portName is the name of the port.
      * @return true there are still waiting inputs.
-     * @throw std::runtime_error whem the port with the port name
+     * @throw std::runtime_error if the port with the port name
      * is not available.
      */
     bool waitForAny( const std::string& portName ) const;
@@ -92,7 +92,7 @@ public:
      * @param portName is the name of the port. Empty for all ports.
      * @return true if port/ports are ready.
      * is not available.
-     * @throw std::runtime_error whem the port with the port name
+     * @throw std::runtime_error if the port with the port name
      */
     bool isReady( const std::string& portName = "" ) const;
 
@@ -110,7 +110,7 @@ public:
      * Gets the count of connections to the given input port.
      * @param portName is the name of the port.
      * @return the number of inputs.
-     * @throw std::runtime_error whem the port with the port name
+     * @throw std::runtime_error if the port with the port name
      * is not available.
      */
     size_t getInputSize( const std::string& portName ) const;
@@ -118,7 +118,7 @@ public:
     /**
      * @param portName is the name of the port.
      * @return the input port
-     * @throw std::runtime_error whem the port with the port name
+     * @throw std::runtime_error if the port with the port name
      * is not available.
      */
     InputPortPtr getPort( const std::string& portName );
@@ -127,7 +127,7 @@ public:
      * Adds a new input port according to the given port info.
      * @param portInfo The port information
      * @return the generated code.
-     * @throw std::runtime_error whem the port with the port name
+     * @throw std::runtime_error if the port with the port name
      * is already registered.
      */
     InputPortPtr addPort( const PortInfo& portInfo );
@@ -138,15 +138,15 @@ public:
     void clear();
 
     /**
-     * Connect given pipe filters with the given port name. Both filters
+     * Connect the given pipe filters with the given port name. Both filters
      * should have the port name.
      * @param src is the source pipe filter.
      * @param dst is the destination pipe filter.
      * @param portName connection port name.
      * @return true if connection is successful.
      */
-    friend bool connectFilters( PipeFilterPtr& src,
-                                PipeFilterPtr& dst,
+    friend bool connectFilters( PipeFilterPtr src,
+                                PipeFilterPtr dst,
                                 const std::string& portName );
 
 private:

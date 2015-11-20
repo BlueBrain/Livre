@@ -98,7 +98,7 @@ struct RenderPipeFilter::Impl
             livre::connectFilters( renderPipeFilter, redrawPipeFilter );
         }
 
-        renderPipeInput.computeExecutor->submit( pipeline );
+        renderPipeInput.computeExecutor->execute( pipeline );
         renderPipeFilter->execute();
     }
 
