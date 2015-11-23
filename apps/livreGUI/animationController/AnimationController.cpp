@@ -33,7 +33,6 @@ namespace livre
 
 struct AnimationController::Impl
 {
-
     Impl( AnimationController* animationController,
           Controller& controller,
           const servus::URI& zeqSchema )
@@ -102,7 +101,7 @@ struct AnimationController::Impl
 
     void resetControls()
     {
-        const bool followSimulation = _ui.chbxFollowSimulation->isChecked();
+        const bool followSimulation = _ui.chbxFollow->isChecked();
         _ui.chbxReverse->setEnabled( !followSimulation );
         _ui.btnPlay->setEnabled( !followSimulation );
         _ui.sldFrame->setEnabled( !followSimulation );
@@ -165,7 +164,7 @@ struct AnimationController::Impl
         }
 
         setPlaying( frame.delta != 0 );
-        _ui.chbxFollowSimulation->setChecked( frame.delta == INT_MAX );
+        _ui.chbxFollow->setChecked( frame.delta == INT_MAX );
         _ui.chbxReverse->setChecked( frame.delta < 0 );
     }
 
@@ -186,7 +185,7 @@ struct AnimationController::Impl
         if( !isPlaying( ))
             return 0;
 
-        if( _ui.chbxFollowSimulation->isChecked( ))
+        if( _ui.chbxFollow->isChecked( ))
             return INT_MAX;
 
         if( _ui.chbxReverse->isChecked( ))
@@ -218,8 +217,8 @@ AnimationController::AnimationController( Controller& controller,
              _impl->_ui.lblFrame, SLOT( setNum( int )));
     connect( _impl->_ui.btnPlay, SIGNAL( pressed( )),
              this, SLOT( _togglePlayPause( )));
-    connect( _impl->_ui.chbxFollowSimulation, SIGNAL( stateChanged( int )),
-             this, SLOT( _setFollowSimulation( int )));
+    connect( _impl->_ui.chbxFollow, SIGNAL( stateChanged( int )),
+             this, SLOT( _setFollow( int )));
     connect( this, &AnimationController::newFrameReceived,
              this, &AnimationController::_onNewFrameReceived,
              Qt::QueuedConnection );
@@ -257,7 +256,7 @@ void AnimationController::_togglePlayPause()
     _impl->publishFrame();
 }
 
-void AnimationController::_setFollowSimulation( int on )
+void AnimationController::_setFollow( int on )
 {
     _impl->setPlaying( on );
     _impl->resetControls();

@@ -71,9 +71,9 @@
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="chbxFollowSimulation">
+        <widget class="QCheckBox" name="chbxFollow">
          <property name="text">
-          <string>Follow Simulation</string>
+          <string>Follow Updates</string>
          </property>
         </widget>
        </item>
