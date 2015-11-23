@@ -33,7 +33,7 @@ DashRenderStatus::DashRenderStatus()
     : _dashNode( new dash::Node() )
 {
    dash::AttributePtr currentRenderID = new dash::Attribute();
-    *currentRenderID = (uint64_t)0;
+    *currentRenderID = INVALID_FRAME;
     _dashNode->insert( currentRenderID );
 
     dash::AttributePtr threadOp = new dash::Attribute();

@@ -65,12 +65,12 @@ public:
     LIVREEQ_API int32_t run( int argc, char* argv[] );
 
     /**
-     * Registers the idle function which is called
+     * Sets the idle function which is called
      * every 100ms for updating information ( i.e.
      * frame ranges in data sources )
      * @param idleFunc
      */
-    LIVREEQ_API  void registerIdleFunction( const IdleFunc& idleFunc );
+    LIVREEQ_API  void setIdleFunction( const IdleFunc& idleFunc );
 
     /**
      * @return Application parameters

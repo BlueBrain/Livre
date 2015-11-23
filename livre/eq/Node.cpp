@@ -76,12 +76,6 @@ public:
             dash::Context::getMain(); // Create the main context
             _dataSourcePtr.reset( new livre::VolumeDataSource( uri ));
             _dashTreePtr.reset( new livre::DashTree( _dataSourcePtr ));
-
-            // Inform application of real-world size for camera manipulations
-            const livre::VolumeInformation& info =
-                    _dataSourcePtr->getVolumeInformation();
-            _config->sendEvent( VOLUME_BOUNDING_BOX ) << info.boundingBox;
-            _config->sendEvent( VOLUME_FRAME_RANGE ) << info.frameRange;
         }
         catch( const std::runtime_error& err )
         {
@@ -166,8 +160,8 @@ bool Node::configInit( const eq::uint128_t& initId )
         return false;
 
     livre::Client* client = static_cast<livre::Client*>( getClient( ).get());
-    client->registerIdleFunction( std::bind( &detail::Node::updateAndSendFrameRange,
-                                             _impl));
+    client->setIdleFunction( std::bind( &detail::Node::updateAndSendFrameRange,
+                                        _impl));
 
     if( !isApplicationNode( ))
     {
@@ -209,8 +203,6 @@ ConstDashTreePtr Node::getDashTree() const
 void Node::frameStart( const eq::uint128_t &frameId,
                        const uint32_t frameNumber)
 {
-
-
     _impl->frameStart( frameId );
     eq::Node::frameStart( frameId, frameNumber );
 }

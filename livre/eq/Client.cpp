@@ -120,7 +120,7 @@ std::string Client::getVersion()
     return Impl::getVersion();
 }
 
-void Client::registerIdleFunction( const IdleFunc& idleFunc LB_UNUSED )
+void Client::setIdleFunction( const IdleFunc& idleFunc )
 {
     _impl->_idleFunc = idleFunc;
 }

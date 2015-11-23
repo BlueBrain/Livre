@@ -79,10 +79,7 @@ public:
      */
     LIVRECORE_API ConstLODNodePtr getNode( const NodeId nodeId ) const;
 
-    /**
-     * Updates the volume. For instance the streaming data sources
-     * the range can change in time.
-     */
+    /** @copydoc VolumeDataSourcePlugin::update() */
     LIVRECORE_API void update();
 
 private:

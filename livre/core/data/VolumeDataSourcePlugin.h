@@ -93,8 +93,8 @@ public:
                                                       LODNode& lodNode ) const;
 
     /**
-     * Updates the volume. For instance, in streaming data sources
-     * the range can change in time.
+     * Updates the data source. For example, data sources may update their
+     * temporal range based on newly available data.
      */
     LIVRECORE_API virtual void update() {}
 

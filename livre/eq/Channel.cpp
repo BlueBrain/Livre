@@ -255,6 +255,12 @@ public:
 
     void frameDraw( const eq::uint128_t& )
     {
+        livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
+        const DashRenderStatus& renderStatus = node->getDashTree()->getRenderStatus();
+        const uint32_t frame = renderStatus.getFrameID();
+        if( frame >= INVALID_FRAME )
+            return;
+
         applyCamera();
         initializeLivreFrustum();
         const DashRenderNodes& visibles = requestData();
@@ -263,7 +269,6 @@ public:
         const Viewport viewport( vp.x, vp.y, vp.w, vp.h );
         _renderViewPtr->setViewport( viewport );
 
-        livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
         livre::Window* window = static_cast< livre::Window* >( _channel->getWindow( ));
         AvailableSetGenerator generateSet( node->getDashTree(),
                                            window->getTextureCache( ));

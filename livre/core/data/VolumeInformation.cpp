@@ -35,7 +35,7 @@ VolumeInformation::VolumeInformation()
     , worldSize( 0.0f )
     , boundingBox( Boxf::makeUnitBox( ))
     , worldSpacePerVoxel( 0.0f )
-    , frameRange( Vector2ui( 0, 0 ))
+    , frameRange( INVALID_FRAME_RANGE )
 {}
 
 size_t VolumeInformation::getBytesPerVoxel() const

@@ -74,7 +74,7 @@ MemoryDataSource::MemoryDataSource( const VolumeDataSourcePluginData& initData )
             LBTHROW( std::runtime_error( except.what() ));
     }
 
-    _volumeInfo.frameRange = Vector2ui( 0, 1u << NODEID_FRAME_BITS );
+    _volumeInfo.frameRange = FULL_FRAME_RANGE;
 
     if(!fillRegularVolumeInfo( _volumeInfo  ))
         LBTHROW( std::runtime_error( "Cannot setup the regular tree" ));

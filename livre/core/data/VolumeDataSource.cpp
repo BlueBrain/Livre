@@ -51,33 +51,18 @@ public:
                       VolumeDataSourcePluginData( uri, accessMode )))
     {}
 
-    bool isFrameInRange( uint32_t frame ) const
-    {
-        const Vector2ui& frameRange = plugin->getVolumeInformation().frameRange;
-        return frame >= frameRange[0] && frame < frameRange[1];
-    }
-
     ConstLODNodePtr getNode( const NodeId nodeId ) const
     {
-        if( !isFrameInRange( nodeId.getFrame( )))
-            return ConstLODNodePtr();
-
         return plugin->getNode( nodeId );
     }
 
     MemoryUnitPtr getData( const LODNode& node )
     {
-        if( !isFrameInRange( node.getNodeId().getFrame( )))
-            return MemoryUnitPtr();
-
         return plugin->getData( node );
     }
 
     ConstMemoryUnitPtr getData( const LODNode& node ) const
     {
-        if( !isFrameInRange( node.getNodeId().getFrame( )))
-            return MemoryUnitPtr();
-
         return plugin->getData( node );
     }
 
