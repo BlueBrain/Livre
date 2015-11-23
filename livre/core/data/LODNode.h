@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -33,30 +33,30 @@ namespace livre
 class LODNode
 {
 public:
-    /**
-     * Constructs an invalid LODNode.
-     */
+    /** Construct an invalid LODNode. */
     LIVRECORE_API LODNode();
 
     /**
-     * Computes the world position from given information.
+     * Compute the world position from given information.
+     *
      * @param nodeId Unique node id.
      * @param blockSize Block size in voxels.
-     * @param levelTotalBlockDimensions Total number of blocks in the corresponding tree level.
+     * @param levelTotalBlockDimensions Total number of blocks in the
+     *                                  corresponding tree level.
      */
     LIVRECORE_API LODNode( const NodeId nodeId,
-                       const Vector3i& blockSize,
-                       const Vector3i& levelTotalBlockDimensions );
+                           const Vector3i& blockSize,
+                           const Vector3i& levelTotalBlockDimensions );
 
     /**
-     * Computes the world position from given information.
+     * Compute the world position from given information.
      * @param nodeId Unique node id.
      * @param blockSize Block size in voxels.
      * @param worldBox Node position in the world space.
      */
     LIVRECORE_API LODNode( const NodeId nodeId,
-                       const Vector3i& blockSize,
-                       const Boxf& worldBox );
+                           const Vector3i& blockSize,
+                           const Boxf& worldBox );
 
     /**
      * Get the absolute node position wrt its level.
@@ -122,7 +122,6 @@ private:
     Boxui localVoxelBox_; //!< Voxelwise position and dimension in reflevel resolution in model space.
     Boxf worldBox_; //!< World box.
     void initialize_( ); //!< Computes the internal values of LODBox (voxel extents, block extents, etc ).
-    void computeVoxelBoxes_( ); //!< compute voxel box.
     void computeWorldBox_( const Vector3ui& levelTotalBlockDimensions ); //!< compute world box.
 };
 

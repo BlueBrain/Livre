@@ -33,15 +33,10 @@ namespace detail
 class Channel;
 }
 
-/**
- * The Channel class implements a view in opengl.
- */
+/** A view in OpenGL. */
 class Channel : public eq::Channel
 {
 public:
-    /**
-     * @param parent Parent window.
-     */
     LIVREEQ_API Channel( eq::Window* parent );
     LIVREEQ_API ~Channel();
 

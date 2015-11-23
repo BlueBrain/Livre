@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -32,34 +32,27 @@ LODNode::LODNode( ) :
 LODNode::LODNode( const NodeId nodeId,
                   const Vector3i& blockSize,
                   const Vector3i& levelTotalBlockDimensions )
-   : nodeId_( nodeId ),
-     blockSize_( blockSize )
+   : nodeId_( nodeId )
+   , blockSize_( blockSize )
 {
-    initialize_( );
+    initialize_();
     computeWorldBox_( levelTotalBlockDimensions );
 }
 
 LODNode::LODNode( const NodeId nodeId,
                   const Vector3i& blockSize,
                   const Boxf& worldBox )
-   : nodeId_( nodeId ),
-     blockSize_( blockSize ),
-     worldBox_( worldBox )
+   : nodeId_( nodeId )
+   , blockSize_( blockSize )
+   , worldBox_( worldBox )
 {
-    initialize_( );
+    initialize_();
 }
 
-void LODNode::computeVoxelBoxes_( )
+void LODNode::computeWorldBox_( const Vector3ui& levelTotalBlockDimensions )
 {
-    Vector3i pntPos = getAbsolutePosition() * blockSize_;
-    localVoxelBox_ = Boxui( pntPos, pntPos + blockSize_ );
-}
-
-void LODNode::computeWorldBox_( const Vector3ui &levelTotalBlockDimensions )
-{
-    Vector3f lBoxCoordMin( getAbsolutePosition( ));
+    Vector3f lBoxCoordMin = getAbsolutePosition();
     Vector3f lBoxCoordMax( lBoxCoordMin + Vector3i( 1 ));
-
     const size_t index = levelTotalBlockDimensions.find_max_index();
 
     lBoxCoordMin = lBoxCoordMin / levelTotalBlockDimensions[index];
@@ -70,7 +63,8 @@ void LODNode::computeWorldBox_( const Vector3ui &levelTotalBlockDimensions )
 
 void LODNode::initialize_( )
 {
-    computeVoxelBoxes_( );
+    const Vector3i pntPos = getAbsolutePosition() * blockSize_;
+    localVoxelBox_ = Boxui( pntPos, pntPos + blockSize_ );
 }
 
 Vector3f LODNode::getRelativePosition() const

@@ -66,7 +66,9 @@ typedef boost::scoped_ptr< TextureDataCache > TextureDataCachePtr;
 /** Map definitions */
 typedef boost::unordered_map< uint32_t, DataUploadProcessorPtr > DataUploadProcessorPtrMap;
 
-const uint32_t CONNECTION_ID( 0u );
+static const uint32_t CONNECTION_ID( 0u );
+
+typedef std::vector< DashRenderNode > DashRenderNodes;
 
 }
 

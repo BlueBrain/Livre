@@ -81,7 +81,6 @@ class ProcessorInput;
 class ProcessorOutput;
 class RenderBrick;
 class Renderer;
-class RenderingSetGenerator;
 class RootNode;
 class TexturePool;
 class TexturePoolFactory;
@@ -99,6 +98,7 @@ using lunchbox::Strings;
 
 typedef uint64_t Identifier;
 typedef Identifier CacheId;
+typedef std::array< float, 2 > Range;
 
 /**
  * SmartPtr definitions

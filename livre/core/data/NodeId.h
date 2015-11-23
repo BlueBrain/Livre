@@ -67,8 +67,8 @@ public:
      * @param frame The temporal coordinate of the volume
      */
     LIVRECORE_API NodeId( const uint32_t level,
-                      const Vector3ui& position,
-                      const uint32_t frame = 0 );
+                          const Vector3ui& position,
+                          const uint32_t frame = 0 );
 
     LIVRECORE_API uint32_t getLevel() const  { return _level; } //!< The octree level
     LIVRECORE_API uint32_t getFrame() const { return _frame; } //!< Temporal position
@@ -83,6 +83,7 @@ public:
     LIVRECORE_API NodeId getRoot() const; //!< Return root node
     LIVRECORE_API NodeIds getSiblings() const; //<! Return siblings
     LIVRECORE_API NodeIds getChildrenAtLevel( const uint32_t level ) const; //<! Returns children at level
+    LIVRECORE_API Range getRange() const; //<! Normalized data range within tree
     LIVRECORE_API Identifier getId() const { return _id; } //<! Returns the unique identifier
 
     /**

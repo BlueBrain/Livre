@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -34,8 +34,7 @@ namespace detail
 class DFSTraversal
 {
 public:
-    bool traverse( const NodeId& nodeId,
-                   const uint32_t depth,
+    bool traverse( const NodeId& nodeId, const uint32_t depth,
                    livre::NodeVisitor& visitor )
     {
         if( depth == 0 || _state.getBreakTraversal() )
@@ -43,13 +42,10 @@ public:
 
         _state = VisitState();
 
-        visitor.onTraverseBegin( _state );
         if( _state.getBreakTraversal( ) )
             return true;
 
-        visitor.onVisitBegin( nodeId, _state );
         visitor.visit( nodeId, _state );
-        visitor.onVisitEnd( nodeId, _state );
 
         if( _state.getBreakTraversal() || !_state.getVisitChild() )
         {
@@ -58,7 +54,6 @@ public:
         }
 
         const NodeIds& nodeIds = nodeId.getChildren();
-        visitor.onVisitChildrenBegin( nodeId, _state );
         BOOST_FOREACH( const NodeId& childNodeId, nodeIds )
         {
             traverse( childNodeId, depth - 1, visitor );
@@ -66,10 +61,7 @@ public:
                 break;
         }
 
-        visitor.onVisitChildrenEnd( nodeId, _state );
         _state.setVisitNeighbours( true );
-
-        visitor.onTraverseEnd( _state );
 
         bool retVal = _state.getBreakTraversal();
         _state.setBreakTraversal( false );
@@ -84,37 +76,36 @@ public:
 
 
 DFSTraversal::DFSTraversal( )
-    : _impl( new detail::DFSTraversal() )
-{
-}
+    : _impl( new detail::DFSTraversal )
+{}
 
 DFSTraversal::~DFSTraversal()
 {
     delete _impl;
 }
 
-bool DFSTraversal::traverse( const RootNode& rootNode,
-                             const NodeId& node,
+bool DFSTraversal::traverse( const RootNode& rootNode, const NodeId& node,
                              NodeVisitor& visitor )
 {
-    return _impl->traverse( node,
-                            rootNode.getDepth(),
-                            visitor );
+    visitor.visitPre();
+    const bool ret = _impl->traverse( node, rootNode.getDepth(), visitor );
+    visitor.visitPost();
+    return ret;
 }
 
-void DFSTraversal::traverse( const RootNode& rootNode,
-                             NodeVisitor& visitor,
+void DFSTraversal::traverse( const RootNode& rootNode, NodeVisitor& visitor,
                              const uint32_t frame )
 {
+    visitor.visitPre();
     const Vector3ui& blockSize = rootNode.getBlockSize();
-    for( uint32_t x = 0; x < blockSize[0]; ++x )
-        for( uint32_t y = 0; y < blockSize[1]; ++y )
-            for( uint32_t z = 0; z < blockSize[2]; ++z )
+    for( uint32_t x = 0; x < blockSize.x(); ++x )
+        for( uint32_t y = 0; y < blockSize.y(); ++y )
+            for( uint32_t z = 0; z < blockSize.z(); ++z )
             {
                 _impl->traverse( NodeId( 0, Vector3ui( x, y, z ), frame ),
-                                 rootNode.getDepth(),
-                                 visitor );
+                                 rootNode.getDepth(), visitor );
             }
+    visitor.visitPost();
 }
 
 

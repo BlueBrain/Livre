@@ -17,6 +17,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <livre/lib/render/AvailableSetGenerator.h>
+
+#include <livre/lib/cache/TextureCache.h>
+#include <livre/lib/cache/TextureObject.h>
+#include <livre/lib/visitor/CollectionTraversal.h>
+#include <livre/lib/visitor/DFSTraversal.h>
 #include <livre/core/dash/DashRenderNode.h>
 #include <livre/core/dash/DashRenderStatus.h>
 #include <livre/core/dash/DashTree.h>
@@ -26,52 +32,15 @@
 #include <livre/core/render/RenderBrick.h>
 #include <livre/core/render/View.h>
 #include <livre/core/visitor/RenderNodeVisitor.h>
-#include <livre/lib/cache/TextureCache.h>
-#include <livre/lib/cache/TextureObject.h>
-#include <livre/lib/render/AvailableSetGenerator.h>
-#include <livre/lib/visitor/CollectionTraversal.h>
-#include <livre/lib/visitor/DFSTraversal.h>
 
 namespace livre
 {
 
-class VisibleCollectorVisitor : public RenderNodeVisitor
-{
-public:
-    VisibleCollectorVisitor( DashTreePtr dashTree, NodeIds& nodeIds )
-        : RenderNodeVisitor( dashTree ),
-          _nodeIds( nodeIds )
-    {}
-
-    void visit( DashRenderNode& renderNode, VisitState& state ) final
-    {
-        const LODNode& lodNode = renderNode.getLODNode();
-        if( !lodNode.isValid( ))
-            return;
-
-        if( !renderNode.isInFrustum( ))
-        {
-            state.setVisitChild( false );
-            return;
-        }
-
-        if( renderNode.isLODVisible( ))
-        {
-            _nodeIds.push_back( lodNode.getNodeId( ));
-            state.setVisitChild( false );
-        }
-    }
-
-private:
-    NodeIds& _nodeIds;
-};
-
 struct AvailableSetGenerator::Impl
 {
-    Impl( DashTreePtr dashTree,
-          const TextureCache& textureCache )
-        : _dashTree( dashTree ),
-          _textureCache( textureCache )
+    Impl( DashTreePtr dashTree, const TextureCache& textureCache )
+        : _dashTree( dashTree )
+        , _textureCache( textureCache )
     {}
 
     bool hasParentInMap( const NodeId& childRenderNode,
@@ -79,11 +48,10 @@ struct AvailableSetGenerator::Impl
     {
         const NodeIds& parentNodeIds = childRenderNode.getParents();
 
-        BOOST_FOREACH( const NodeId& parentId, parentNodeIds )
-        {
+        for( const NodeId& parentId : parentNodeIds )
             if( cacheMap.find( parentId.getId( )) != cacheMap.end() )
                 return true;
-        }
+
         return false;
     }
 
@@ -112,17 +80,8 @@ struct AvailableSetGenerator::Impl
             notAvailableRenderNodes.push_back( nodeId );
     }
 
-    void generateRenderingSet( const Frustum&, FrameInfo& frameInfo )
+    void generateRenderingSet( FrameInfo& frameInfo )
     {
-        VisibleCollectorVisitor visibleSelector( _dashTree,
-                                                 frameInfo.allNodes );
-        DFSTraversal dfsTraverser;
-        const RootNode& rootNode =
-                _dashTree->getDataSource()->getVolumeInformation().rootNode;
-
-        dfsTraverser.traverse( rootNode, visibleSelector,
-                               _dashTree->getRenderStatus().getFrameID( ));
-
         ConstCacheMap cacheMap;
         for( const NodeId& nodeId : frameInfo.allNodes )
         {
@@ -163,8 +122,7 @@ struct AvailableSetGenerator::Impl
 
 AvailableSetGenerator::AvailableSetGenerator( DashTreePtr tree,
                                               const TextureCache& textureCache )
-    : RenderingSetGenerator( tree )
-    , _impl( new AvailableSetGenerator::Impl( tree, textureCache ))
+    : _impl( new AvailableSetGenerator::Impl( tree, textureCache ))
 {
 }
 
@@ -173,10 +131,9 @@ AvailableSetGenerator::~AvailableSetGenerator()
     delete _impl;
 }
 
-void AvailableSetGenerator::generateRenderingSet( const Frustum& frustum,
-                                                  FrameInfo& frameInfo )
+void AvailableSetGenerator::generateRenderingSet( FrameInfo& frameInfo )
 {
-    _impl->generateRenderingSet( frustum, frameInfo );
+    _impl->generateRenderingSet( frameInfo );
 }
 
 }

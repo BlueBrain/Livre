@@ -58,7 +58,6 @@ set(LIVRECORE_HEADERS
   render/GLWidget.h
   render/RenderBrick.h
   render/Renderer.h
-  render/RenderingSetGenerator.h
   render/TexturePool.h
   render/TexturePoolFactory.h
   render/TextureState.h
@@ -104,7 +103,6 @@ set(LIVRECORE_SOURCES
   render/GLWidget.cpp
   render/RenderBrick.cpp
   render/Renderer.cpp
-  render/RenderingSetGenerator.cpp
   render/TexturePool.cpp
   render/TexturePoolFactory.cpp
   render/TextureState.cpp

@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -42,34 +42,6 @@ public:
     LIVRECORE_API ~RenderNodeVisitor();
 
     /**
-     * @see NodeVisitor::onVisitBegin
-     */
-    virtual void onVisitBegin( DashRenderNode& node LB_UNUSED,
-                               const VisitState& state LB_UNUSED)
-    {}
-
-    /**
-     * @see NodeVisitor::onVisitEnd
-     */
-    virtual void onVisitEnd( DashRenderNode& node LB_UNUSED,
-                             const VisitState& state LB_UNUSED)
-    {}
-
-    /**
-     * @see NodeVisitor::onVisitChildrenBegin
-     */
-    virtual void onVisitChildrenBegin( DashRenderNode& node LB_UNUSED,
-                                       const VisitState& state LB_UNUSED)
-    {}
-
-    /**
-     * @see NodeVisitor::onVisitChildrenEnd
-     */
-    virtual void onVisitChildrenEnd( DashRenderNode& node LB_UNUSED,
-                                     const VisitState& state LB_UNUSED)
-    {}
-
-    /**
      * @see NodeVisitor::visit
      */
     virtual void visit( DashRenderNode& node,
@@ -81,12 +53,6 @@ public:
     LIVRECORE_API DashTreePtr getDashTree();
 
 private:
-    LIVRECORE_API void onVisitBegin( const NodeId& nodeId, const VisitState& state ) final;
-    LIVRECORE_API void onVisitEnd( const NodeId& nodeId, const VisitState& state ) final;
-    LIVRECORE_API void onVisitChildrenBegin( const NodeId& nodeId,
-                                             const VisitState& state) final;
-    LIVRECORE_API void onVisitChildrenEnd( const NodeId& nodeId,
-                                           const VisitState& state ) final;
     LIVRECORE_API void visit( const NodeId& nodeId, VisitState& state ) final;
 
     detail::RenderNodeVisitor* _impl;

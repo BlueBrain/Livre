@@ -233,8 +233,7 @@ void TextureLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state 
         return;
     }
 
-    const bool isLODVisible = renderNode.isLODVisible();
-    if( !isLODVisible )
+    if( !renderNode.isLODVisible( ))
         return;
 
     state.setVisitChild( false );

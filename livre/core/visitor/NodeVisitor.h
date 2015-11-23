@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -33,69 +33,21 @@ class NodeVisitor
 {
 public:
 
-    NodeVisitor( )
-    { }
+    NodeVisitor() {}
+    virtual ~NodeVisitor() {}
 
-    /**
-     * Is called at the beginning of a traversal.
-     * @param state Visit state.
-     */
-    virtual void onTraverseBegin( VisitState& state LB_UNUSED )
-    { }
-
-    /**
-     * Is called at the end of a traversal.
-     * @param state Visit state.
-     */
-    virtual void onTraverseEnd( const VisitState& state LB_UNUSED )
-    { }
-
-    /**
-     * Called before the node is  visited.
-     * @param renderNode is the node being visited.
-     * @param state Visit state.
-     */
-    virtual void onVisitBegin( const NodeId& nodeId LB_UNUSED,
-                               const VisitState& state LB_UNUSED )
-    { }
-
-    /**
-     * Called after the node has been visited.
-     * @param renderNode is the node being visited.
-     * @param state Visit state.
-     */
-    virtual void onVisitEnd( const NodeId& nodeId LB_UNUSED,
-                             const VisitState& state LB_UNUSED )
-    { }
-
-    /**
-     * Called before all the children of the node is visited.
-     * @param renderNode is the node being visited.
-     * @param state Visit state.
-     */
-    virtual void onVisitChildrenBegin( const NodeId& nodeId LB_UNUSED,
-                                       const VisitState& state LB_UNUSED )
-    { }
-
-    /**
-     * Called after all the children of the node has been visited.
-     * @param renderNode is the node being visited.
-     * @param state Visit state.
-     */
-    virtual void onVisitChildrenEnd( const NodeId& nodeId LB_UNUSED,
-                                     const VisitState& state LB_UNUSED )
-    { }
+    /** Called before all traversal. */
+    virtual void visitPre() {};
 
     /**
      * Called when the given node is being visited.
      * @param renderNode is the node being visited.
      * @param state Visit state.
      */
-    virtual void visit( const NodeId& nodeId,
-                        VisitState& state ) = 0;
+    virtual void visit( const NodeId& nodeId, VisitState& state ) = 0;
 
-    virtual ~NodeVisitor( ) { }
-
+    /** Called after all traversal. */
+    virtual void visitPost() {};
 };
 
 }

@@ -117,12 +117,13 @@ struct RayCastRenderer::Impl
                        const RenderBricks& renderBricks )
     {
     #ifdef LIVRE_DEBUG_RENDERING
+        std::sort( _usedTextures[1].begin(), _usedTextures[1].end( ));
         if( _usedTextures[0] != _usedTextures[1] )
         {
             std::cout << "Render ";
             std::copy( _usedTextures[1].begin(), _usedTextures[1].end(),
                        std::ostream_iterator< uint32_t >( std::cout, " " ));
-            std::cout << std::endl;
+            std::cout << " in " << (void*)this << std::endl;
         }
         _usedTextures[0].swap( _usedTextures[1] );
         _usedTextures[1].clear();

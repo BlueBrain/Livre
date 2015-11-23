@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -81,7 +81,7 @@ void DashRenderNode::setInFrustum( bool visibility )
     *(_dashNode->getAttribute( DNT_INFRUSTUM )) = visibility;
 }
 
-void DashRenderNode::setVisible( bool visibility )
+void DashRenderNode::setLODVisible( bool visibility )
 {
     *(_dashNode->getAttribute( DNT_LODVISIBLE )) = visibility;
 }
