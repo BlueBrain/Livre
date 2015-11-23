@@ -116,10 +116,10 @@ public:
         livre::Node* node = static_cast< livre::Node* >( _window->getNode( ));
         DashRenderStatus& renderStatus = node->getDashTree()->getRenderStatus();
 
-        Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
-
-        renderStatus.setFrameID(
-            pipe->getFrameData()->getFrameSettings()->getFrameNumber( ));
+        const Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
+        const uint32_t frame =
+                pipe->getFrameData()->getFrameSettings()->getFrameNumber();
+        renderStatus.setFrameID( frame );
     }
 
     void startUploadProcessors()

@@ -29,6 +29,10 @@
 #include <livre/eq/settings/CameraSettings.h>
 #include <livre/eq/settings/FrameSettings.h>
 #include <livre/eq/settings/RenderSettings.h>
+
+#include <livre/lib/configuration/ApplicationParameters.h>
+#include <livre/lib/configuration/VolumeRendererParameters.h>
+
 #include <livre/core/events/EventMapper.h>
 #include <livre/core/maths/maths.h>
 
@@ -49,6 +53,7 @@ public:
         , eventMapper( EventHandlerFactoryPtr( new EqEventHandlerFactory ))
         , volumeBBox( Boxf::makeUnitBox( ))
         , redraw( true )
+        , dataFrameRange( INVALID_FRAME_RANGE )
     {}
 
     void publishModelView()
@@ -194,16 +199,22 @@ bool Config::init( const int argc, char** argv )
 
 uint32_t Config::frame()
 {
-    // Set current frame (start/end may have changed)
-    FrameSettingsPtr frameSettings = _impl->framedata.getFrameSettings();
-    ApplicationParameters& params = getApplicationParameters();
+    if( _impl->dataFrameRange == INVALID_FRAME_RANGE )
+        return eq::Config::finishFrame();
 
+    // Set current frame (start/end may have changed)
+    ApplicationParameters& params = getApplicationParameters();
     const uint32_t frameMin = std::max( params.frames.x(),
                                         _impl->dataFrameRange[ 0 ] );
     const uint32_t frameMax = std::min( params.frames.y(),
-                                        _impl->dataFrameRange[ 1 ] ) - 1;
+                                        _impl->dataFrameRange[ 1 ] - 1 );
 
-    uint32_t current = std::max( frameMin, frameSettings->getFrameNumber( ));
+    FrameSettingsPtr frameSettings = _impl->framedata.getFrameSettings();
+    const uint32_t currentFrame =
+            frameSettings->getFrameNumber() == INVALID_FRAME ? 0 :
+            frameSettings->getFrameNumber();
+
+    uint32_t current = std::max( frameMin, currentFrame );
     if( params.animation == INT_MAX )
         current = frameMax;
 
@@ -220,10 +231,11 @@ uint32_t Config::frame()
         const int32_t delta = params.animation;
 
         // avoid overflow condition:
-        const uint32_t interval = end-start == 0xFFFFFFFFu ?
-                                      0xFFFFFFFFu : end - start + 1;
-        //This check is needed because in the lines below (current-start+delta)
-        //become 4294967295 instead of -1
+        const uint32_t fullInterval = FULL_FRAME_RANGE[ 1 ] - FULL_FRAME_RANGE[ 0 ];
+        const uint32_t interval = end - start == fullInterval ?
+                                      fullInterval : end - start + 1;
+        // If current is at the beginning and animation is reverse,
+        // set current to the end
         if(( current - start == 0 ) && ( delta < 0 ))
             current = end;
 

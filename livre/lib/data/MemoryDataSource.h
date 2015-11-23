@@ -51,9 +51,7 @@ public:
      * @param node LODNode to be read.
      * @return The block data for the node.
      */
-    MemoryUnitPtr getData( const LODNode& node ) override;
-
-    Vector2ui getFrameRange() final;
+    MemoryUnitPtr getData( const LODNode& node ) final;
 
     static bool handles( const VolumeDataSourcePluginData& initData );
 

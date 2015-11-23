@@ -24,7 +24,6 @@ namespace livre
 {
 
 VolumeDataSourcePlugin::VolumeDataSourcePlugin()
-    : _volumeInfo( this )
 {}
 
 ConstLODNodePtr VolumeDataSourcePlugin::getNode( const NodeId nodeId ) const
@@ -32,7 +31,7 @@ ConstLODNodePtr VolumeDataSourcePlugin::getNode( const NodeId nodeId ) const
     NodeIDLODNodePtrMap::iterator it = _lodNodeMap.find( nodeId );
     if( it == _lodNodeMap.end( ) || !it->second )
     {
-        LODNodePtr lodNodePtr( new LODNode() );
+        LODNodePtr lodNodePtr( new LODNode( ));
         internalNodeToLODNode( nodeId, *lodNodePtr );
         _lodNodeMap[ nodeId ] = lodNodePtr;
     }
@@ -74,11 +73,6 @@ void VolumeDataSourcePlugin::internalNodeToLODNode(
                              boxCoordMax - _volumeInfo.worldSize * 0.5f ));
 }
 
-Vector2ui VolumeDataSourcePlugin::getFrameRange()
-{
-    return Vector2ui( 0, 0 );
-}
-
 bool fillRegularVolumeInfo( VolumeInformation& info )
 {
     const Vector3ui& blockSize = info.maximumBlockSize - info.overlap * 2;
@@ -103,8 +97,7 @@ bool fillRegularVolumeInfo( VolumeInformation& info )
     const uint32_t depth = std::min( xDepth, std::min( yDepth, zDepth ));
     blocksSize = blocksSize / ( 1u << depth );
 
-    info.rootNode = RootNode(  depth + 1,
-                               blocksSize );
+    info.rootNode = RootNode( depth + 1, blocksSize );
     return true;
 }
 

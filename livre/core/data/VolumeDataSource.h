@@ -45,7 +45,7 @@ public:
      * @param accessMode The access mode.
      */
     LIVRECORE_API VolumeDataSource( const lunchbox::URI& uri,
-                                const AccessMode accessMode = MODE_READ );
+                                    const AccessMode accessMode = MODE_READ );
 
     LIVRECORE_API ~VolumeDataSource();
 
@@ -78,6 +78,9 @@ public:
      * @return The LODNode for the ID or 0 if not found.
      */
     LIVRECORE_API ConstLODNodePtr getNode( const NodeId nodeId ) const;
+
+    /** @copydoc VolumeDataSourcePlugin::update() */
+    LIVRECORE_API void update();
 
 private:
     detail::VolumeDataSource* _impl;

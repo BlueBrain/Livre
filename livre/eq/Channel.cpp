@@ -255,20 +255,13 @@ public:
 
     void frameDraw( const eq::uint128_t& )
     {
-        applyCamera();
-
         livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
-
-        DashTreePtr dashTree = node->getDashTree();
-        const DashRenderStatus& renderStatus = dashTree->getRenderStatus();
-
+        const DashRenderStatus& renderStatus = node->getDashTree()->getRenderStatus();
         const uint32_t frame = renderStatus.getFrameID();
-        const VolumeInformation& volInfo =
-                dashTree->getDataSource()->getVolumeInformation();
-        const Vector2ui& frameRange = volInfo.getFrameRange();
-        if( frame < frameRange[0] || frame >= frameRange[1] )
+        if( frame >= INVALID_FRAME )
             return;
 
+        applyCamera();
         initializeLivreFrustum();
         const DashRenderNodes& visibles = requestData();
 

@@ -45,7 +45,7 @@ enum DataType
 /** Properties of the volumetric data. */
 struct VolumeInformation
 {
-    VolumeInformation( VolumeDataSourcePlugin* dataSource = 0 );
+    VolumeInformation();
 
     /**
      * The endianness of the data.
@@ -104,15 +104,13 @@ struct VolumeInformation
     /** @return the number of bytes per element. */
     size_t getBytesPerVoxel() const;
 
-    /** @return the frame range for the data source in [start,end) format.
-      * If there is no frames, [0,0) range is returned. In streaming data sources
+    /** The frame range for the data sources. If there are no frames,
+      * [0,0) range is the default value. In streaming data sources
       * frame range can change over time.
       */
-    Vector2ui getFrameRange() const;
+    Vector2ui frameRange;
 
-private:
 
-    mutable VolumeDataSourcePlugin* _dataSource;
 };
 
 }
