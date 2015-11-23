@@ -31,7 +31,6 @@
 namespace
 {
 static const servus::URI LIVRE_ZEQ_SCHEMA( "hbp://" );
-static const servus::URI NEST_ZEQ_SCHEMA( "monsteer-nesteer://" );
 }
 
 namespace livre
@@ -47,8 +46,7 @@ MainWindow::MainWindow( livre::Controller& controller, QWidget* parent_ )
                                                   LIVRE_ZEQ_SCHEMA ));
 
 #ifdef LIVRE_USE_MONSTEER
-    _ui->simulationDockWidget->setWidget(
-        new monsteer::qt::SteeringWidget( LIVRE_ZEQ_SCHEMA, NEST_ZEQ_SCHEMA ));
+    _ui->simulationDockWidget->setWidget( new monsteer::qt::SteeringWidget( ));
 #else
     _ui->simulationDockWidget->setHidden( true );
 #endif
