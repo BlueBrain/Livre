@@ -24,6 +24,7 @@
 
 #include <livre/core/mathTypes.h>
 #include <co/serializable.h>
+#include <eq/fabric/vmmlib.h>
 
 namespace livre
 {

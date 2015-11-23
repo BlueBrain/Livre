@@ -28,6 +28,7 @@
 #include <zeq/uri.h>
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
+#include <lunchbox/rng.h>
 
 using boost::lexical_cast;
 using livre::Vector3ui;

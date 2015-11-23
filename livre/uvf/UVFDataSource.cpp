@@ -36,6 +36,8 @@
 
 #pragma GCC diagnostic pop
 
+#include <lunchbox/pluginRegisterer.h>
+
 #define MINIMUM_NUMBEROF_NODES 8u
 #define MAX_ACCEPTABLE_BLOCK_SIZE 512
 
@@ -142,7 +144,7 @@ public:
         }
         if( !_uvfTOCBlock )
         {
-  	    LBTHROW( std::runtime_error( "UVF TOC block not found in data set" ));
+        LBTHROW( std::runtime_error( "UVF TOC block not found in data set" ));
         }
     }
 

@@ -114,8 +114,8 @@ set(LIVRECORE_SOURCES
   visitor/VisitState.cpp)
 
 set(LIVRECORE_LINK_LIBRARIES
-  PUBLIC ${Boost_LIBRARIES} dash Collage Equalizer Lunchbox vmmlib
-  PRIVATE ${GLEW_MX_LIBRARIES})
+  PUBLIC ${Boost_LIBRARIES} dash Collage Lunchbox vmmlib
+  PRIVATE Equalizer ${GLEW_MX_LIBRARIES})
 
 set(LIVRECORE_INCLUDE_NAME livre/core)
 set(LIVRECORE_NAMESPACE livrecore)
