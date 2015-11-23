@@ -28,6 +28,7 @@
 #include <apps/livreService/dataService.h>
 #include <livre/remote/dataSource.h>
 #include <lunchbox/clock.h>
+#include <lunchbox/rng.h>
 #include <lunchbox/thread.h>
 
 static const std::string port = boost::lexical_cast< std::string >(

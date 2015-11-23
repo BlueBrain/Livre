@@ -24,6 +24,7 @@
 #include <boost/numeric/conversion/cast.hpp>
 #include <boost/test/unit_test.hpp>
 #include <fstream>
+#include <lunchbox/file.h>
 
 const std::string& tfDir = lunchbox::getRootPath() +
                                "/share/Livre/examples/";

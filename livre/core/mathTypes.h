@@ -23,8 +23,7 @@
 #define _mathTypes_h_
 
 #include <livre/core/types.h>
-#include <eq/fabric/vmmlib.h>
-#include <lunchbox/lunchbox.h>
+#include <vmmlib/vmmlib.h>
 
 namespace livre
 {
@@ -39,28 +38,28 @@ typedef vmml::AABB< uint32_t > Boxui; //!< integer AABB box.
 /**
  * Matrix definitions
  */
-using eq::fabric::Matrix3f; //!< A 3x3 float matrix.
-using eq::fabric::Matrix4f; //!< A 4x4 float matrix.
+using vmml::Matrix3f; //!< A 3x3 float matrix.
+using vmml::Matrix4f; //!< A 4x4 float matrix.
 
-using eq::fabric::Matrix3d; //!< A 3x3 double matrix.
-using eq::fabric::Matrix4d; //!< A 4x4 double matrix.
+using vmml::Matrix3d; //!< A 3x3 double matrix.
+using vmml::Matrix4d; //!< A 4x4 double matrix.
 
 /**
  * Vector definitions
  */
-using eq::fabric::Vector2i; //!< A two-component integer vector.
-using eq::fabric::Vector3i; //!< A three-component integer vector.
-using eq::fabric::Vector4i; //!< A four-component integer vector.
+using vmml::Vector2i; //!< A two-component integer vector.
+using vmml::Vector3i; //!< A three-component integer vector.
+using vmml::Vector4i; //!< A four-component integer vector.
 
 typedef vmml::vector< 2, uint32_t > Vector2ui; //!< A two-component integer vector.
 typedef vmml::vector< 3, uint32_t > Vector3ui; //!< A three-component integer vector.
 typedef vmml::vector< 4, uint32_t > Vector4ui; //!< A four-component integer vector.
 
-using eq::fabric::Vector2f; //!< A two-component float vector.
-using eq::fabric::Vector3f; //!< A three-component float vector.
-using eq::fabric::Vector3d; //!< A three-component double vector.
-using eq::fabric::Vector4d; //!< A four-component double vector.
-using eq::fabric::Vector4f; //!< A four-component float vector.
+using vmml::Vector2f; //!< A two-component float vector.
+using vmml::Vector3f; //!< A three-component float vector.
+using vmml::Vector3d; //!< A three-component double vector.
+using vmml::Vector4d; //!< A four-component double vector.
+using vmml::Vector4f; //!< A four-component float vector.
 
 /**
  * Frustum definitions

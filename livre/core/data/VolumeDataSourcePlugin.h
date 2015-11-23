@@ -25,6 +25,8 @@
 #include <livre/core/data/NodeId.h>
 #include <livre/core/data/VolumeInformation.h>
 
+#include <lunchbox/plugin.h>
+
 namespace livre
 {
 
@@ -123,6 +125,8 @@ LIVRECORE_API bool fillRegularVolumeInfo( VolumeInformation& info );
 
 }
 
+#include <lunchbox/pluginFactory.h>
+
 namespace boost
 {
 template<> inline
@@ -134,7 +138,6 @@ std::string lexical_cast( const livre::VolumeDataSourcePluginData& data )
 
 // http://stackoverflow.com/questions/1566963/singleton-in-a-dll
 #ifdef _MSC_VER
-#  include <lunchbox/pluginFactory.h>
    template class LIVRECORE_API
    lunchbox::PluginFactory< livre::VolumeDataSourcePlugin,
                             livre::VolumeDataSourcePluginData >;

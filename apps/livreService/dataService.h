@@ -26,6 +26,9 @@
 #include <zeq/zeq.h>
 #include <lunchbox/stdExt.h>
 
+#include <boost/bind.hpp>
+#include <boost/lexical_cast.hpp>
+
 namespace livre
 {
 /**

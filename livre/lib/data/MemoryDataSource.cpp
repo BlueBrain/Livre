@@ -27,6 +27,7 @@
 #include <livre/core/dash/DashRenderNode.h>
 
 #include <livre/lib/data/MemoryDataSource.h>
+#include <lunchbox/pluginRegisterer.h>
 
 namespace livre
 {

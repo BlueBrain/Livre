@@ -28,6 +28,8 @@
 #include <zeq/subscriber.h>
 #include <zeq/publisher.h>
 
+#include <boost/bind.hpp>
+
 namespace livre
 {
 
