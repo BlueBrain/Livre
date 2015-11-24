@@ -140,53 +140,45 @@ void TransferFunctionEditor::_pointsUpdated()
     _alphaWidget->setGradientStops( stops );
 }
 
-void TransferFunctionEditor::setColorMapStops( const QGradientStops& stops )
-{
-    QPolygonF redPoints, greenPoints, bluePoints, alphaPoints;
-
-    const double redCMHt = _redWidget->height();
-    const double greenCMHt = _greenWidget->height();
-    const double blueCMHt = _blueWidget->height();
-    const double alphaCMHt = _alphaWidget->height();
-
-    for( int32_t i = 0; i < stops.size(); ++i )
-    {
-        double position = stops.at( i ).first;
-        QRgb color = stops.at( i ).second.rgba();
-
-        redPoints << QPointF( position * _redWidget->width(),
-                             redCMHt - qRed(color) * redCMHt / 255 );
-        greenPoints << QPointF( position * _greenWidget->width(),
-                               greenCMHt - qGreen(color) * greenCMHt / 255 );
-        bluePoints << QPointF( position * _blueWidget->width(),
-                              blueCMHt - qBlue(color) * blueCMHt / 255 );
-        alphaPoints << QPointF( position * _alphaWidget->width(),
-                               alphaCMHt - qAlpha(color) * alphaCMHt / 255 );
-    }
-
-    _redWidget->setPoints( redPoints );
-    _greenWidget->setPoints( greenPoints );
-    _blueWidget->setPoints( bluePoints );
-    _alphaWidget->setPoints( alphaPoints );
-}
-
 void TransferFunctionEditor::_setDefault()
 {
-    QGradientStops stops;
+    QPolygonF points;
+    double h = _redWidget->height();
+    double w = _redWidget->width();
+    points << QPointF( 0.0 * w, h );
+    points << QPointF( 0.4 * w, h );
+    points << QPointF( 0.6 * w, 0.0 );
+    points << QPointF( 1.0 * w, 0.0 );
+    _redWidget->setPoints( points );
 
-    stops << QGradientStop( 0.0, QColor::fromRgba( 0x000000ff ));
-    stops << QGradientStop( 0.1, QColor::fromRgba( 0x330000ff ));
-    stops << QGradientStop( 0.2, QColor::fromRgba( 0x53007dff ));
-    stops << QGradientStop( 0.3, QColor::fromRgba( 0x7300ffff ));
-    stops << QGradientStop( 0.4, QColor::fromRgba( 0x7f00ff7d ));
-    stops << QGradientStop( 0.5, QColor::fromRgba( 0x8500ff00 ));
-    stops << QGradientStop( 0.6, QColor::fromRgba( 0x86ffff00 ));
-    stops << QGradientStop( 0.7, QColor::fromRgba( 0x8cff7d00 ));
-    stops << QGradientStop( 0.8, QColor::fromRgba( 0x99ff0000 ));
-    stops << QGradientStop( 0.925, QColor::fromRgba( 0xb3ff007d ));
-    stops << QGradientStop( 1.00, QColor::fromRgba( 0xffff7dff ));
+    h = _greenWidget->height();
+    w = _greenWidget->width();
+    points.clear();
+    points << QPointF( 0.0 * w, h );
+    points << QPointF( 0.2 * w, 0.0 );
+    points << QPointF( 0.6 * w, 0.0 );
+    points << QPointF( 0.8 * w, h );
+    points << QPointF( 1.0 * w, h );
+    _greenWidget->setPoints( points );
 
-    setColorMapStops( stops );
+    h = _blueWidget->height();
+    w = _blueWidget->width();
+    points.clear();
+    points << QPointF( 0.0 * w, 0.0 );
+    points << QPointF( 0.2 * w, 0.0 );
+    points << QPointF( 0.4 * w, h );
+    points << QPointF( 0.8 * w, h );
+    points << QPointF( 1.0 * w, 0.0 );
+    _blueWidget->setPoints( points );
+
+    h = _alphaWidget->height();
+    w = _alphaWidget->width();
+    points.clear();
+    points << QPointF( 0.0 * w, h );
+    points << QPointF( 0.1 * w, 0.8 * h );
+    points << QPointF( 1.0 * w, 0.1 * h );
+    _alphaWidget->setPoints( points );
+
     _pointsUpdated();
 }
 
@@ -260,12 +252,16 @@ void TransferFunctionEditor::_onHeartbeat()
 
 void TransferFunctionEditor::_clear()
 {
-    QGradientStops stops;
+    QPolygonF points;
+    const double h = _redWidget->height();
+    const double w = _redWidget->width();
+    points << QPointF( 0.0 * w, h );
+    points << QPointF( 1.0 * w, 0.0 );
 
-    stops << QGradientStop( 0.00, QColor::fromRgba( 0 ));
-    stops << QGradientStop( 1.00, QColor::fromRgba( 0xffffffff ));
-
-    setColorMapStops( stops );
+    _redWidget->setPoints( points );
+    _greenWidget->setPoints( points );
+    _blueWidget->setPoints( points );
+    _alphaWidget->setPoints( points );
     _pointsUpdated();
 }
 
