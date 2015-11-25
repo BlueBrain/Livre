@@ -22,8 +22,11 @@ set(LIVREEQ_LINK_LIBRARIES PUBLIC LivreLib Equalizer)
 if(ZEQ_FOUND)
   list(APPEND LIVREEQ_HEADERS zeq/communicator.h)
   list(APPEND LIVREEQ_SOURCES zeq/communicator.cpp)
-  list(APPEND LIVREEQ_LINK_LIBRARIES
-    PRIVATE zeq zeqHBP ${LibJpegTurbo_LIBRARIES})
+  list(APPEND LIVREEQ_LINK_LIBRARIES PRIVATE zeq zeqHBP)
+endif()
+
+if(LibJpegTurbo_FOUND)
+  list(APPEND LIVREEQ_LINK_LIBRARIES PRIVATE ${LibJpegTurbo_LIBRARIES})
 endif()
 
 if(RESTBRIDGE_FOUND)

@@ -159,7 +159,7 @@ void Config::resetCamera()
     _impl->publishModelView();
 }
 
-bool Config::init( const int argc, char** argv )
+bool Config::init( const int argc LB_UNUSED, char** argv LB_UNUSED )
 {
 #ifdef LIVRE_USE_ZEQ
     _impl->communicator.reset( new zeq::Communicator( *this, argc, argv ));
@@ -244,7 +244,9 @@ uint32_t Config::frame()
     }
 
     _impl->redraw = false;
+#ifdef LIVRE_USE_ZEQ
     _impl->communicator->publishFrame();
+#endif
     eq::Config::startFrame( version );
     return eq::Config::finishFrame();
 }
