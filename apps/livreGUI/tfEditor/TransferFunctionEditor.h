@@ -55,12 +55,6 @@ public:
                             QWidget* tfParentWidget = 0 );
     ~TransferFunctionEditor();
 
-    /**
-     * Set the gradient stops for colormap
-     * @param stops The gradient stops.
-     */
-    void setColorMapStops( const QGradientStops& stops );
-
 signals:
     void gradientStopsChanged( const QGradientStops& stops );
     void transferFunctionChanged( UInt8Vector tf );

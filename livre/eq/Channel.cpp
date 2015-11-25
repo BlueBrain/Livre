@@ -137,6 +137,7 @@ public:
         eq::FrameDataPtr frameData = new eq::FrameData();
         frameData->setBuffers( eq::Frame::BUFFER_COLOR );
         _frame.setFrameData( frameData );
+        _frame.setName( std::string( "self." ) + _channel->getName( ));
     }
 
     ConstFrameDataPtr getFrameData() const
@@ -174,6 +175,17 @@ public:
 
     const Frustum& initializeLivreFrustum()
     {
+        const eq::Matrix4f& modelView = computeModelView();
+        const eq::Frustumf& eqFrustum = _channel->getFrustum();
+        const eq::Matrix4f& projection = eqFrustum.compute_matrix();
+
+        _currentFrustum.reset();
+        _currentFrustum.initialize( modelView, projection );
+        return _currentFrustum;
+    }
+
+    eq::Matrix4f computeModelView() const
+    {
         ConstCameraSettingsPtr cameraSettings =
                 getFrameData()->getCameraSettings();
         const Matrix4f& cameraRotation = cameraSettings->getCameraRotation();
@@ -184,14 +196,7 @@ public:
         modelView.set_translation( cameraPosition );
         modelView = cameraRotation * modelView;
         modelView = _channel->getHeadTransform() * modelView;
-
-        // Compute cull matrix
-        const eq::Frustumf& eqFrustum = _channel->getFrustum();
-        const eq::Matrix4f& projection = eqFrustum.compute_matrix();
-
-        _currentFrustum.reset();
-        _currentFrustum.initialize( modelView, projection );
-        return _currentFrustum;
+        return modelView;
     }
 
     void clearViewport( const eq::PixelViewport &pvp )
@@ -238,13 +243,13 @@ public:
 
         const float worldSpacePerVoxel = volInfo.worldSpacePerVoxel;
         const uint32_t volumeDepth = volInfo.rootNode.getDepth();
-        const eq::Range& range = _channel->getRange();
+        _drawRange = _channel->getRange();
 
         SelectVisibles visitor( dashTree, _currentFrustum,
                                 _channel->getPixelViewport().h,
                                 screenSpaceError, worldSpacePerVoxel,
                                 volumeDepth, minLOD, maxLOD,
-                                Range{{ range.start, range.end }});
+                                Range{{ _drawRange.start, _drawRange.end }});
 
         livre::DFSTraversal traverser;
         traverser.traverse( volInfo.rootNode, visitor,
@@ -328,33 +333,6 @@ public:
         renderViewPtr->render( _frameInfo, renderBricks, *_glWidgetPtr );
     }
 
-    void prepareFramesAndSetPvp( const eq::Frames& frames,
-                                 eq::Frames& dbFrames,
-                                 eq::PixelViewport& coveredPVP,
-                                 eq::Zoom& zoom )
-    {
-        BOOST_FOREACH( eq::Frame* frame, frames )
-        {
-            frame->waitReady( );
-
-            const eq::Range& range = frame->getRange();
-            if( range == eq::Range::ALL ) // 2D frame, assemble directly
-                eq::Compositor::assembleFrame( frame, _channel );
-            else
-            {
-                dbFrames.push_back( frame );
-                zoom = frame->getZoom( );
-
-                BOOST_FOREACH( const eq::Image* image, frame->getImages( ))
-                {
-                    const eq::PixelViewport imagePVP =
-                        image->getPixelViewport() + frame->getOffset( );
-                    coveredPVP.merge( imagePVP );
-                }
-            }
-        }
-    }
-
     void applyCamera()
     {
         ConstCameraSettingsPtr cameraSettings = getFrameData()->getCameraSettings( );
@@ -364,35 +342,9 @@ public:
         const Vector3f& cameraPosition = cameraSettings->getCameraPosition( );
 
         EQ_GL_CALL( glMultMatrixf( cameraRotation.array ) );
-        EQ_GL_CALL( glTranslatef( cameraPosition[ 0 ], cameraPosition[ 1 ], cameraPosition[ 2 ] ) );
+        EQ_GL_CALL( glTranslatef( cameraPosition[ 0 ], cameraPosition[ 1 ],
+                                  cameraPosition[ 2 ] ) );
         EQ_GL_CALL( glMultMatrixf( modelRotation.array ) );
-    }
-
-    void composeFrames( const eq::PixelViewport& coveredPVP,
-                        const eq::Zoom& zoom,
-                        eq::FrameDataPtr data,
-                        eq::Frames& dbFrames )
-    {
-        if( dbFrames.front() == &_frame )
-        {
-            LBWARN << "not erasing main frame" << std::endl;
-            dbFrames.erase( dbFrames.begin( ));
-        }
-        else if( coveredPVP.hasArea( ) )
-        {
-            eq::util::ObjectManager& glObjects = _channel->getObjectManager( );
-
-            _frame.setOffset( eq::Vector2i( 0, 0 ) );
-            _frame.setZoom( zoom );
-            data->setPixelViewport( coveredPVP );
-            _frame.readback( glObjects,
-                             _channel->getDrawableConfig( ),
-                             _channel->getRegions( ));
-            clearViewport( coveredPVP );
-
-            // offset for assembly
-            _frame.setOffset( eq::Vector2i( coveredPVP.x, coveredPVP.y ) );
-        }
     }
 
     void configInit()
@@ -406,6 +358,7 @@ public:
 
     void configExit()
     {
+        _frame.getFrameData()->flush();
         _renderViewPtr.reset();
     }
 
@@ -515,68 +468,155 @@ public:
 
     void frameReadback( const eq::Frames& frames ) const
     {
-        // Drop depth buffer flag from all output frames
-        BOOST_FOREACH( eq::Frame* frame, frames )
-        {
+        for( eq::Frame* frame : frames ) // Drop depth buffer from output frames
             frame->disableBuffer( eq::Frame::BUFFER_DEPTH );
-            frame->getFrameData()->setRange( _drawRange );
-        }
-    }
-
-    bool composeOnly() const
-    {
-        return _drawRange == eq::Range::ALL;
     }
 
     void frameAssemble( const eq::Frames& frames )
     {
         eq::PixelViewport coveredPVP;
         eq::Frames dbFrames;
-        eq::Zoom zoom( eq::Zoom::NONE );
 
         // Make sure all frames are ready and gather some information on them
-        prepareFramesAndSetPvp( frames, dbFrames, coveredPVP, zoom );
-
-        if( dbFrames.empty( ))
-            return;
-
+        prepareFramesAndSetPvp( frames, dbFrames, coveredPVP );
         coveredPVP.intersect( _channel->getPixelViewport( ));
 
-        // calculate correct frames sequence
-        eq::FrameDataPtr data = _frame.getFrameData();
+        if( dbFrames.empty() || !coveredPVP.hasArea( ))
+            return;
 
-        if( !composeOnly() && coveredPVP.hasArea( ))
+        if( useDBSelfAssemble( )) // add self to determine ordering
         {
+            eq::FrameDataPtr data = _frame.getFrameData();
             _frame.clear( );
+            _frame.setOffset( eq::Vector2i( 0, 0 ));
             data->setRange( _drawRange );
+            data->setPixelViewport( coveredPVP );
             dbFrames.push_back( &_frame );
         }
 
-        // Update range
-        eq::Range newRange( 1.f, 0.f );
-        for( size_t i = 0; i < dbFrames.size(); ++i )
+        orderFrames( dbFrames, computeModelView( ));
+
+        if( useDBSelfAssemble( )) // read back self frame
         {
-            const eq::Range& range = dbFrames[i]->getRange( );
-            if( newRange.start > range.start )
-                newRange.start = range.start;
-            if( newRange.end   < range.end   )
-                newRange.end   = range.end;
+            if( dbFrames.front() == &_frame ) // OPT: first in framebuffer!
+                dbFrames.erase( dbFrames.begin( ));
+            else
+            {
+                _frame.readback( _channel->getObjectManager(),
+                                 _channel->getDrawableConfig(),
+                                 _channel->getRegions( ));
+                clearViewport( coveredPVP );
+                // offset for assembly
+                _frame.setOffset( eq::Vector2i( coveredPVP.x, coveredPVP.y ));
+            }
         }
 
-        _drawRange = newRange;
+        LBINFO << "Frame order: ";
+        for( const eq::Frame* frame : dbFrames )
+            LBINFO << frame->getName() <<  " "
+                   << frame->getFrameData()->getRange() << " : ";
+        LBINFO << std::endl;
 
-        // check if current frame is in proper position, read back if not
-        if( !composeOnly( ))
-            composeFrames( coveredPVP, zoom, data, dbFrames );
-
-        // blend DB frames in order
-        try
+        try // blend DB frames in computed order
         {
-            eq::Compositor::assembleFramesSorted( dbFrames, _channel, 0, true /* blendAlpha */ );
+            eq::Compositor::assembleFramesSorted( dbFrames, _channel, 0,
+                                                  true /* blendAlpha */ );
         }
         catch( const std::exception& e )
         {
-            LBWARN << e.what( ) << std::endl;
+            LBWARN << e.what() << std::endl;
+        }
+
+        // Update draw range
+        for( size_t i = 0; i < dbFrames.size(); ++i )
+            _drawRange.merge( dbFrames[i]->getRange( ));
+    }
+
+    bool useDBSelfAssemble() const { return _drawRange != eq::Range::ALL; }
+
+    static bool cmpRangesInc(const eq::Frame* a, const eq::Frame* b )
+        { return a->getRange().start > b->getRange().start; }
+
+    void prepareFramesAndSetPvp( const eq::Frames& frames,
+                                 eq::Frames& dbFrames,
+                                 eq::PixelViewport& coveredPVP )
+    {
+        for( eq::Frame* frame : frames )
+        {
+            {
+                eq::ChannelStatistics event(
+                    eq::Statistic::CHANNEL_FRAME_WAIT_READY, _channel );
+                frame->waitReady( );
+            }
+
+            const eq::Range& range = frame->getRange();
+            if( range == eq::Range::ALL ) // 2D frame, assemble directly
+            {
+                eq::Compositor::assembleFrame( frame, _channel );
+                continue;
+            }
+
+            dbFrames.push_back( frame );
+            for( const eq::Image* image : frame->getImages( ))
+            {
+                const eq::PixelViewport imagePVP = image->getPixelViewport() +
+                                                   frame->getOffset();
+                coveredPVP.merge( imagePVP );
+            }
+        }
+    }
+
+    void orderFrames( eq::Frames& frames, const Matrix4f& modelView )
+    {
+        LBASSERT( !_channel->useOrtho( ));
+
+        // calculate modelview inversed+transposed matrix
+        Matrix3f modelviewITM;
+        Matrix4f modelviewIM;
+        modelView.inverse( modelviewIM );
+        Matrix3f( modelviewIM ).transpose_to( modelviewITM );
+
+        Vector3f norm = modelviewITM * Vector3f( 0.0f, 0.0f, 1.0f );
+        norm.normalize();
+        std::sort( frames.begin(), frames.end(), cmpRangesInc );
+
+        // cos of angle between normal and vectors from center
+        std::vector<double> dotVals;
+
+        // of projection to the middle of slices' boundaries
+        for( const eq::Frame* frame : frames )
+        {
+            const double px = -1.0 + frame->getRange().end*2.0;
+            const Vector4f pS = modelView * Vector4f( 0.0f, 0.0f, px, 1.0f );
+            Vector3f pSsub( pS[ 0 ], pS[ 1 ], pS[ 2 ] );
+            pSsub.normalize();
+            dotVals.push_back( norm.dot( pSsub ));
+        }
+
+        const Vector4f pS = modelView * Vector4f( 0.0f, 0.0f, -1.0f, 1.0f );
+        eq::Vector3f pSsub( pS[ 0 ], pS[ 1 ], pS[ 2 ] );
+        pSsub.normalize();
+        dotVals.push_back( norm.dot( pSsub ));
+
+        // check if any slices need to be rendered in reverse order
+        size_t minPos = std::numeric_limits< size_t >::max();
+        for( size_t i=0; i<dotVals.size()-1; i++ )
+            if( dotVals[i] > 0 && dotVals[i+1] > 0 )
+                minPos = static_cast< int >( i );
+
+        const size_t nFrames = frames.size();
+        minPos++;
+        if( minPos < frames.size()-1 )
+        {
+            eq::Frames framesTmp = frames;
+
+            // copy slices that should be rendered first
+            memcpy( &frames[ nFrames-minPos-1 ], &framesTmp[0],
+                    (minPos+1)*sizeof( eq::Frame* ) );
+
+            // copy slices that should be rendered last, in reverse order
+            for( size_t i=0; i<nFrames-minPos-1; i++ )
+                frames[ i ] = framesTmp[ nFrames-i-1 ];
         }
     }
 
@@ -629,6 +669,13 @@ bool Channel::configExit()
     return eq::Channel::configExit();
 }
 
+void Channel::frameStart( const eq::uint128_t& frameID,
+                          const uint32_t frameNumber )
+{
+    _impl->_drawRange = eq::Range::ALL;
+    eq::Channel::frameStart( frameID, frameNumber );
+}
+
 void Channel::frameDraw( const lunchbox::uint128_t& frameId )
 {
     eq::Channel::frameDraw( frameId );
@@ -668,8 +715,8 @@ void Channel::frameAssemble( const eq::uint128_t&, const eq::Frames& frames )
 void Channel::frameReadback( const eq::uint128_t& frameId,
                              const eq::Frames& frames )
 {
-    eq::Channel::frameReadback( frameId, frames );
     _impl->frameReadback( frames );
+    eq::Channel::frameReadback( frameId, frames );
 }
 
 std::string Channel::getDumpImageFileName() const
