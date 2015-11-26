@@ -59,7 +59,7 @@ struct RayCastRenderer::Impl
         , _shaders( new GLSLShaders )
         , _nSamplesPerRay( samplesPerRay )
         , _nSamplesPerPixel( samplesPerPixel )
-        , _computedSamplePerRay( samplesPerRay )
+        , _computedSamplesPerRay( samplesPerRay )
         , _volInfo( volInfo )
         , _transferFunctionTexture( 0 )
     {
@@ -140,10 +140,10 @@ struct RayCastRenderer::Impl
             }
 
             const float maxVoxelDim = _volInfo.voxels.find_max();
-            const float maxVoxelsAtLOD = maxVoxelDim /
+            const float maxVoxelsAtLOD = ( maxVoxelDim * std::sqrt( 2.0f )) /
                     (float)( 1u << ( _volInfo.rootNode.getDepth() - maxLOD ));
             // Nyquist limited nb of samples according to voxel size
-            _computedSamplePerRay = 2.0f * maxVoxelsAtLOD;
+            _computedSamplesPerRay = std::max( 2.0f * maxVoxelsAtLOD, 512.f );
         }
 
         glDisable( GL_LIGHTING );
@@ -179,7 +179,7 @@ struct RayCastRenderer::Impl
         glUniform3fv( tParamNameGL, 1, frustum.getEyeCoords( ).array );
 
         tParamNameGL = glGetUniformLocation( program, "nSamplesPerRay" );
-        glUniform1i( tParamNameGL, _computedSamplePerRay );
+        glUniform1i( tParamNameGL, _computedSamplesPerRay );
 
         tParamNameGL = glGetUniformLocation( program, "nSamplesPerPixel" );
         glUniform1i( tParamNameGL, _nSamplesPerPixel );
@@ -264,7 +264,7 @@ struct RayCastRenderer::Impl
     GLSLShadersPtr _shaders;
     const uint32_t _nSamplesPerRay;
     const uint32_t _nSamplesPerPixel;
-    uint32_t _computedSamplePerRay;
+    uint32_t _computedSamplesPerRay;
     const VolumeInformation& _volInfo;
     uint32_t _transferFunctionTexture;
     std::vector< uint32_t > _usedTextures[2]; // last, current frame
