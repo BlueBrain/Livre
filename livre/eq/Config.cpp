@@ -197,17 +197,17 @@ bool Config::init( const int argc LB_UNUSED, char** argv LB_UNUSED )
     return true;
 }
 
-uint32_t Config::frame()
+void Config::frame()
 {
     if( _impl->dataFrameRange == INVALID_FRAME_RANGE )
-        return eq::Config::finishFrame();
+        return;
 
     // Set current frame (start/end may have changed)
     ApplicationParameters& params = getApplicationParameters();
     const uint32_t frameMin = std::max( params.frames.x(),
                                         _impl->dataFrameRange[ 0 ] );
     const uint32_t frameMax = std::min( params.frames.y(),
-                                        _impl->dataFrameRange[ 1 ] - 1 );
+                                        _impl->dataFrameRange[ 1 ] );
 
     FrameSettingsPtr frameSettings = _impl->framedata.getFrameSettings();
     const uint32_t currentFrame =
@@ -216,7 +216,7 @@ uint32_t Config::frame()
 
     uint32_t current = std::max( frameMin, currentFrame );
     if( params.animation == INT_MAX )
-        current = frameMax;
+       current = frameMax - 1;
 
     frameSettings->setFrameNumber( current );
     const eq::uint128_t& version = _impl->framedata.commit();
@@ -244,11 +244,13 @@ uint32_t Config::frame()
     }
 
     _impl->redraw = false;
+
 #ifdef LIVRE_USE_ZEQ
     _impl->communicator->publishFrame();
 #endif
+
     eq::Config::startFrame( version );
-    return eq::Config::finishFrame();
+    eq::Config::finishFrame();
 }
 
 Vector2ui Config::getDataFrameRange() const

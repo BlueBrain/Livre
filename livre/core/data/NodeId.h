@@ -168,7 +168,8 @@ private:
 inline std::ostream& operator<<( std::ostream& os, const NodeId& nodeId )
 {
     return os << "Level: " << nodeId.getLevel()
-              << " Position: " << nodeId.getPosition();
+              << " Position: " << nodeId.getPosition()
+              << " Frame: " << nodeId.getFrame();
 }
 
 inline std::size_t hash_value( const NodeId& nodeId )

@@ -82,9 +82,8 @@ public:
 
     /**
      * Trigger rendering of a new frame.
-     * @return the frame number of the new frame.
      */
-    uint32_t frame();
+    void frame();
 
     /**
      * @return the data range data source provides.

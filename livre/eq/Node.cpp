@@ -121,12 +121,11 @@ public:
 
     void updateAndSendFrameRange()
     {
-        if( !_dataSourcePtr )
-            return;
-
         _dataSourcePtr->update();
+
         const livre::VolumeInformation& info =
                 _dataSourcePtr->getVolumeInformation();
+
         _config->sendEvent( VOLUME_FRAME_RANGE ) << info.frameRange;
     }
 

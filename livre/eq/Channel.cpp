@@ -284,21 +284,10 @@ public:
         generateSet.generateRenderingSet( _frameInfo );
 
         const livre::Pipe* pipe = static_cast< const livre::Pipe* >( _channel->getPipe( ));
+        const bool isSynchronous = pipe->getFrameData()->getVRParameters()->synchronousMode;
 
         // #75: only wait for data in synchronous mode
-        bool dashTreeUpdated = false;
-
-        if( pipe->getFrameData()->getVRParameters()->synchronousMode )
-        {
-            if( _frameInfo.notAvailableRenderNodes.empty( ))
-                 // Do not block if rendering nodes are present
-                dashTreeUpdated = window->apply( false );
-            else
-                // Block until rendering nodes arrive
-                dashTreeUpdated = window->apply( true );
-        }
-        else
-            dashTreeUpdated = window->apply( false ); // Never block
+        const bool dashTreeUpdated = window->apply( isSynchronous );
 
         if( dashTreeUpdated )
         {
