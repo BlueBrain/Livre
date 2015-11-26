@@ -148,11 +148,10 @@ void main( void )
         float alphaCorrection = float( DEFAULT_NSAMPLES_PER_RAY ) / float( nSamplesPerRay );
 
         vec3 pos = rayStart;
-        float travel = distance( rayStop, rayStart );
         vec3 step = normalize( rayStop - rayStart ) * stepSize;
 
         // Front-to-back absorption-emission integrator
-        for ( int i = 0; travel > 0.0; ++i, pos += step, travel -= stepSize )
+        for ( float travel = distance( rayStop, rayStart ); travel > 0.0; pos += step, travel -= stepSize )
         {
             vec3 texPos = calcTexturePositionFromAABBPos( pos );
             float density = texture3D( volumeTex, texPos ).r;
