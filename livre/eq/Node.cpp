@@ -119,34 +119,14 @@ public:
         _textureDataCachePtr.reset();
     }
 
-    void getCurrentPrevFrameRanges( Vector2ui& prevRange,
-                                    Vector2ui& currentRange )
+    void updateAndSendFrameRange()
     {
-        const livre::VolumeInformation& info =
-                _dataSourcePtr->getVolumeInformation();
-        prevRange = info.frameRange;
         _dataSourcePtr->update();
-        currentRange = info.frameRange;
-    }
 
-    void sendFrameRange()
-    {
         const livre::VolumeInformation& info =
                 _dataSourcePtr->getVolumeInformation();
 
         _config->sendEvent( VOLUME_FRAME_RANGE ) << info.frameRange;
-    }
-
-    void updateAndSendFrameRange()
-    {
-        if( !_dataSourcePtr )
-            return;
-
-        Vector2ui prevRange;
-        Vector2ui currentRange;
-        getCurrentPrevFrameRanges( prevRange, currentRange );
-        if( currentRange != prevRange )
-            sendFrameRange();
     }
 
     livre::Node* const _node;

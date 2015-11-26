@@ -287,7 +287,7 @@ public:
         const bool isSynchronous = pipe->getFrameData()->getVRParameters()->synchronousMode;
 
         // #75: only wait for data in synchronous mode
-        bool dashTreeUpdated = window->apply( isSynchronous );
+        const bool dashTreeUpdated = window->apply( isSynchronous );
 
         if( dashTreeUpdated )
         {
