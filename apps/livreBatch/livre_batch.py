@@ -34,6 +34,7 @@ LIVRE_ENDFRAME = 'end_frame'
 LIVRE_HEIGHT = 'height'
 LIVRE_LAYOUT = 'eq_layout'
 LIVRE_MAXFRAMES = 'max_frames'
+LIVRE_SAMPLES_PER_RAY = 'samples_per_ray'
 LIVRE_SSE = 'sse'
 LIVRE_STARTFRAME = 'start_frame'
 LIVRE_TRANSFER_FUNCTION = 'transfer_function'
@@ -51,9 +52,9 @@ def find_livre():
     from distutils import spawn
     livre_path = spawn.find_executable("livre")
     if not livre_path:
-        print "Cannot find livre executable in PATH"
+        print("Cannot find livre executable in PATH")
         return False
-    print "Using livre executable '{0}'".format(livre_path)
+    print("Using livre executable '{0}'".format(livre_path))
     return True
 
 class LivreBatch(object):
@@ -82,19 +83,20 @@ class LivreBatch(object):
                 SLURM_ACCOUNT: 'proj3',
                 SLURM_OUTPUTDIR: '.',
                 SLURM_NODES: 1,
-                SLURM_TASKS_PER_NODE: 12},
+                SLURM_TASKS_PER_NODE: 16},
             SECTION_LIVRE: {
-                LIVRE_LAYOUT: 'Simple',
-                LIVRE_VOLUME: '',
-                LIVRE_SSE: 1,
-                LIVRE_WIDTH: 1920,
-                LIVRE_HEIGHT: 1200,
-                LIVRE_CAMERA_POSITION: "0 0 2",
-                LIVRE_CAMERA_LOOKAT: "0 0 0",
-                LIVRE_TRANSFER_FUNCTION: "",
-                LIVRE_STARTFRAME: 0,
+                LIVRE_CAMERA_LOOKAT: '0 0 0',
+                LIVRE_CAMERA_POSITION: '0 0 1',
                 LIVRE_ENDFRAME: 100,
-                LIVRE_MAXFRAMES: 50}}
+                LIVRE_HEIGHT: 1200,
+                LIVRE_LAYOUT: 'Simple',
+                LIVRE_MAXFRAMES: 50,
+                LIVRE_SAMPLES_PER_RAY: 2048,
+                LIVRE_SSE: 1,
+                LIVRE_STARTFRAME: 0,
+                LIVRE_TRANSFER_FUNCTION: '',
+                LIVRE_VOLUME: '',
+                LIVRE_WIDTH: 1920}}
 
     def _build_sbatch_script(self, start, end):
         """
@@ -120,15 +122,18 @@ class LivreBatch(object):
             "export EQ_WINDOW_IATTR_HINT_WIDTH={livre[width]}",
             "export EQ_WINDOW_IATTR_HINT_HEIGHT={livre[height]}",
             "export EQ_CHANNEL_SATTR_DUMP_IMAGE={image}",
+            "export ZEROEQ_SESSION=$SLURM_JOB_ID",
             "livre --eq-layout {livre[eq_layout]} --volume {livre[volume]} "\
-            "--sse {livre[sse]} --synchronous --animation "\
-            "--frames \"{start} {end}\" --num-frames {num_frames} "\
+            "--sse {livre[sse]} --samples-per-ray {livre[samples_per_ray]} "\
+            "--synchronous --animation --frames \"{start} {end}\" "\
+            "--num-frames {num_frames} "\
             "--camera-position \"{livre[camera_position]}\" "\
             "--camera-lookat \"{livre[camera_lookat]}\" "\
-            "--transfer-function \"{livre[transfer_function]}\"")).format(**values)
+            "--transfer-function \"{livre[transfer_function]}\""
+        )).format(**values)
 
         if self.verbose:
-            print sbatch_script
+            print(sbatch_script)
         return sbatch_script
 
     def write_example_config(self):
@@ -139,7 +144,7 @@ class LivreBatch(object):
         with open(EXAMPLE_JSON, 'w') as configfile:
             json.dump(self.default_dict, configfile, sort_keys=True, indent=4,
                       ensure_ascii=False)
-        print "Wrote {0} to current directory".format(EXAMPLE_JSON)
+        print("Wrote {0} to current directory".format(EXAMPLE_JSON))
 
     def read_config(self, config):
         """
@@ -151,7 +156,7 @@ class LivreBatch(object):
 
         volume = self.dict.get(SECTION_LIVRE).get(LIVRE_VOLUME, '')
         if not volume:
-            print "Error: Need valid volume URI"
+            print("Error: Need valid volume URI")
             return False
 
         self.dict['image'] = "{slurm[output_dir]}/{slurm[job_name]}_".format(**self.dict)
@@ -187,16 +192,16 @@ class LivreBatch(object):
             missing_frames.sort()
 
             if not missing_frames:
-                print "No missing frames found, no jobs will be submitted."
+                print("No missing frames found, no jobs will be submitted.")
                 return
-            print "Found {0} missing frames".format(len(missing_frames))
+            print("Found {0} missing frames".format(len(missing_frames)))
 
             def _calc_ranges(i):
                 """
                 http://stackoverflow.com/questions/4628333/converting-a-list-of-integers-into-range-in-python
                 """
                 from itertools import groupby
-                for a, b in groupby(enumerate(i), lambda(x, y): y - x):
+                for a, b in groupby(enumerate(i), lambda xy: (xy[1] - xy[0])):
                     b = list(b)
                     yield b[0][1], b[-1][1]
             ranges = _calc_ranges(missing_frames)
@@ -204,13 +209,14 @@ class LivreBatch(object):
         # Submit job(s) for range(s)
         idx = 1
         for sub_range in ranges:
-            idx += self._submit_jobs_for_range(idx, sub_range[0], sub_range[1] + 1)
+            idx += self._submit_jobs_for_range(idx, sub_range[0],
+                                               sub_range[1] + 1)
 
         if self.dry_run:
-            print "{0} job(s) not submitted (dry run)\n".format(idx-1)
+            print("{0} job(s) not submitted (dry run)\n".format(idx-1))
         else:
-            print "{0} job(s) submitted, find outputs in {1}\n".format(idx-1,
-                                                                       outdir)
+            print("{0} job(s) submitted, find outputs in {1}\n".format(idx-1,
+                                                                       outdir))
         return
 
 
@@ -228,16 +234,16 @@ class LivreBatch(object):
         num_jobs = int(math.ceil(float(num_frames) / float(batch_size)))
         batch_size = int(math.ceil(float(num_frames) / float(num_jobs)))
 
-        print "Create {0} job(s) with {1} frame(s) each".format(num_jobs,
-                                                                batch_size)
+        print("Create {0} job(s) with {1} frame(s) each".format(num_jobs,
+                                                                batch_size))
 
         for batch_start in range(start_frame, end_frame, batch_size):
             start = batch_start
             end = min(batch_start + batch_size, end_frame)
 
             sbatch_script = self._build_sbatch_script(start, end)
-            print "Submit job {0} for frames {1} to {2}...".format(idx, start,
-                                                                   end)
+            print("Submit job {0} for frames {1} to {2}...".format(idx, start,
+                                                                   end))
             idx += 1
             if not self.dry_run:
                 sbatch = subprocess.Popen(['sbatch'], stdin=subprocess.PIPE)
