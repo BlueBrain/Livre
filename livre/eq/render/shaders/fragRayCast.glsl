@@ -161,10 +161,6 @@ void main( void )
 
             if( localResult.a > EARLY_EXIT )
                 break;
-
-            if( i > nSamplesPerRay )
-                break;
-
         }
         brickResult += localResult;
     }
