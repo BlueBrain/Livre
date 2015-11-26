@@ -197,10 +197,10 @@ bool Config::init( const int argc LB_UNUSED, char** argv LB_UNUSED )
     return true;
 }
 
-void Config::frame()
+bool Config::frame()
 {
     if( _impl->dataFrameRange == INVALID_FRAME_RANGE )
-        return;
+        return false;
 
     // Set current frame (start/end may have changed)
     ApplicationParameters& params = getApplicationParameters();
@@ -251,6 +251,7 @@ void Config::frame()
 
     eq::Config::startFrame( version );
     eq::Config::finishFrame();
+    return true;
 }
 
 Vector2ui Config::getDataFrameRange() const

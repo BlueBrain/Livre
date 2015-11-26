@@ -201,7 +201,8 @@ int Client::run( const int argc, char** argv )
     clock.reset();
     while( config->isRunning() && maxFrames-- )
     {
-        config->frame();
+        if( !config->frame()) // If not valid, reset maxFrames
+            maxFrames++;
 
         if( _impl->_idleFunc )
             _impl->_idleFunc(); // order is important to latency
