@@ -81,7 +81,7 @@ public:
     }
 };
 
-typedef boost::shared_ptr< ObjectFactory > ObjectFactoryPtr;
+typedef std::shared_ptr< ObjectFactory > ObjectFactoryPtr;
 
 template< class T >
 bool mapObject( CoObjectMapPtr objectMapPtr,
@@ -89,7 +89,7 @@ bool mapObject( CoObjectMapPtr objectMapPtr,
                 boost::shared_ptr< T > objectPtr,
                 const uint32_t type )
 {
-    ObjectFactoryPtr objectFactory =  boost::static_pointer_cast< ObjectFactory >( objectFactoryPtr );
+    ObjectFactoryPtr objectFactory =  std::static_pointer_cast< ObjectFactory >( objectFactoryPtr );
     LBVERB << "Mapping object : " << objectPtr->getID() << std::endl;
     return objectMapPtr->map( objectFactory->generateID( type ), objectPtr.get() );
 }

@@ -21,7 +21,6 @@
 #define _RayCastRenderer_h_
 
 #include <livre/eq/types.h>
-#include <livre/eq/eqTypes.h>
 #include <livre/core/render/Renderer.h>
 #include <livre/core/render/TransferFunction1D.h>
 

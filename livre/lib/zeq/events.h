@@ -21,19 +21,18 @@
 #define _livreEvents_h_
 
 #include <livre/lib/api.h>
-#include <livre/core/types.h>
-#include <lunchbox/uint128_t.h>
+#include <livre/lib/types.h>
 #include <zeq/types.h>
 
 namespace livre
 {
 namespace zeq
 {
-static const lunchbox::uint128_t EVENT_DATASOURCE(
-    lunchbox::make_uint128( "livre::zeq::DataSourceEvent" ));
+static const uint128_t EVENT_DATASOURCE(
+    servus::make_uint128( "livre::zeq::DataSourceEvent" ));
 
-static const lunchbox::uint128_t EVENT_DATASOURCE_DATA(
-    lunchbox::make_uint128( "livre::zeq::DataSourceDataEvent" ));
+static const uint128_t EVENT_DATASOURCE_DATA(
+    servus::make_uint128( "livre::zeq::DataSourceDataEvent" ));
 
 /** Serialize a data source event. */
 LIVRE_API ::zeq::Event serializeDataSource( const lunchbox::URI& uri );
@@ -50,7 +49,7 @@ LIVRE_API lunchbox::URI deserializeDataSource( const ::zeq::Event& event );
  * provided uint128_t is the event to request data, and the uint128_t + 1 is the
  * event on which data is delivered.
  */
-typedef std::pair< lunchbox::uint128_t,
+typedef std::pair< uint128_t,
                    livre::VolumeInformation > RemoteInformation;
 
 /** Serialize information of a data source. */
@@ -63,7 +62,7 @@ LIVRE_API RemoteInformation deserializeDataSourceData( const ::zeq::Event& );
 /**
  * Deserialized data sample event. See RemoteInformation for uint128_t semantic.
  */
-typedef std::pair< lunchbox::uint128_t, LODNode > LODNodeSample;
+typedef std::pair< uint128_t, LODNode > LODNodeSample;
 
 /** Serialize the request for the data of one node. */
 LIVRE_API ::zeq::Event serializeDataSample( const uint128_t& id,

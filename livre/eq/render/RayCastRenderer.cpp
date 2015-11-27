@@ -270,7 +270,7 @@ struct RayCastRenderer::Impl
         glUseProgram( 0 );
     }
 
-    EqTexturePtr _framebufferTexture;
+    std::unique_ptr< eq::util::Texture > _framebufferTexture;
     GLSLShadersPtr _shaders;
     const uint32_t _nSamplesPerRay;
     const uint32_t _nSamplesPerPixel;

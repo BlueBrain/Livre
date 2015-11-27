@@ -23,6 +23,7 @@
 #include <lunchbox/debug.h>
 #include <lunchbox/log.h>
 #include <lunchbox/uri.h>
+#include <servus/uint128_t.h>
 
 #include <dash/types.h>
 
@@ -93,7 +94,7 @@ struct FrameInfo;
 struct TextureState;
 struct VolumeInformation;
 
-using lunchbox::uint128_t;
+using servus::uint128_t;
 using lunchbox::Strings;
 
 typedef uint64_t Identifier;

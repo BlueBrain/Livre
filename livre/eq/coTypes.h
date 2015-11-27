@@ -20,10 +20,8 @@
 #ifndef _coTypes_h_
 #define _coTypes_h_
 
-#include <livre/lib/types.h>
-#include <co/serializable.h>
-#include <co/objectHandler.h>
 #include <co/objectMap.h>
+#include <memory>
 
 namespace livre
 {
@@ -31,17 +29,8 @@ namespace livre
 /**
  * SmartPtr definitions
  */
-typedef boost::shared_ptr< co::Serializable > CoSerializablePtr;
-typedef boost::shared_ptr< co::ObjectMap > CoObjectMapPtr;
-typedef boost::shared_ptr< co::ObjectFactory > CoObjectFactoryPtr;
-
-typedef boost::scoped_ptr< boost::unordered_map< uint32_t, CoSerializablePtr > > CoSerializableMapPtr;
-
-/**
- * Map definitions
- */
-typedef boost::unordered_map< uint32_t, CoSerializablePtr > CoSerializableMap;
-typedef boost::unordered_map< uint32_t, lunchbox::uint128_t > UUIDMap;
+typedef std::shared_ptr< co::ObjectMap > CoObjectMapPtr;
+typedef std::shared_ptr< co::ObjectFactory > CoObjectFactoryPtr;
 
 }
 
