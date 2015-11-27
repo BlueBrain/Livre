@@ -24,6 +24,7 @@
 #include "Controller.h"
 
 #include <zeq/zeq.h>
+#include <zerobuf/Zerobuf.h>
 
 #include <algorithm>
 #include <mutex>
@@ -75,6 +76,11 @@ public:
         return _publisher.publish( event );
     }
 
+    bool publish( const ::zerobuf::Zerobuf& zerobuf )
+    {
+        return _publisher.publish( zerobuf );
+    }
+
     bool registerHandler( const zeq::uint128_t& event,
                           const zeq::EventFunc& func )
     {
@@ -97,6 +103,33 @@ public:
         {
             _requests.erase( i );
             _replySubscriber.deregisterHandler( event );
+        }
+
+        return true;
+    }
+
+    bool subscribe( ::zerobuf::Zerobuf& zerobuf )
+    {
+        if( !_subscriber.subscribe( zerobuf ))
+            return false;
+
+        _requests.push_back( zerobuf.getZerobufType( ));
+        return _replySubscriber.registerHandler( zerobuf.getZerobufType(),
+                                                std::bind( &Impl::onReply, this,
+                                                       std::placeholders::_1 ));
+    }
+
+    bool unsubscribe( const ::zerobuf::Zerobuf& zerobuf )
+    {
+        if( !_subscriber.unsubscribe( zerobuf ))
+            return false;
+
+        const auto& i = std::find( _requests.begin(), _requests.end(),
+                                   zerobuf.getZerobufType( ));
+        if( i != _requests.end( ))
+        {
+            _requests.erase( i );
+            _replySubscriber.deregisterHandler( zerobuf.getZerobufType( ));
         }
 
         return true;
@@ -132,14 +165,30 @@ bool Controller::publish( const zeq::Event& event )
     return _impl->publish( event );
 }
 
+bool Controller::publish( const ::zerobuf::Zerobuf& zerobuf )
+{
+    return _impl->publish( zerobuf );
+}
+
 bool Controller::registerHandler( const zeq::uint128_t& event,
                                   const zeq::EventFunc& func )
 {
-     return _impl->registerHandler( event, func );
+    return _impl->registerHandler( event, func );
 }
 
 bool Controller::deregisterHandler( const zeq::uint128_t& event )
 {
-     return _impl->deregisterHandler( event );
+    return _impl->deregisterHandler( event );
 }
+
+bool Controller::subscribe( ::zerobuf::Zerobuf& zerobuf )
+{
+    return _impl->subscribe( zerobuf );
+}
+
+bool Controller::unsubscribe( const ::zerobuf::Zerobuf& zerobuf )
+{
+    return _impl->unsubscribe( zerobuf );
+}
+
 }

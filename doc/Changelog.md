@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # master {#master}
 
+* [#220](https://github.com/BlueBrain/Livre/pull/220):
+  LivreGUI: Add renderer parameters panel
 * [#219](https://github.com/BlueBrain/Livre/pull/219):
   LivreGUI: Editable frame range in animation panel  
 

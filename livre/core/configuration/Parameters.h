@@ -25,18 +25,13 @@
 #include <livre/core/lunchboxTypes.h>
 #include <livre/core/configuration/Configuration.h>
 
-#include <co/dataIStream.h>
-#include <co/dataOStream.h>
-
-#include <co/serializable.h>
-
 namespace livre
 {
 
 /**
  * The Parameters class is used to load/initialize parameters from file/arguments.
  */
-class Parameters : public co::Serializable
+class Parameters
 {
 public:
     LIVRECORE_API virtual ~Parameters( );
@@ -54,7 +49,7 @@ public:
      * @param argv Argument list.
      * @return True if arguments can be parsed.
      */
-    LIVRECORE_API bool initialize( const int32_t argc, char **argv );
+    LIVRECORE_API bool initialize( const int32_t argc, const char **argv );
 
     /**
      * @return The parameter name.
@@ -86,10 +81,6 @@ protected:
      * configGroupName_ Configuration group name.
      */
     std::string configGroupName_;
-
-private:
-
-     virtual ChangeType getChangeType() const { return DELTA; }
 };
 
 }

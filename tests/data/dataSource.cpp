@@ -84,6 +84,10 @@ BOOST_AUTO_TEST_CASE( memoryDataSource )
 #ifdef LIVRE_USE_REMOTE_DATASOURCE
 BOOST_AUTO_TEST_CASE( remoteMemoryDataSource )
 {
+    char** argv = boost::unit_test::framework::master_test_suite().argv;
+    if( std::string( argv[0] ).find( "perf-" ) == std::string::npos )
+        return;
+
     std::stringstream volumeName;
     volumeName << "remotemem://#" << VOXEL_SIZE_X << "," << VOXEL_SIZE_Y << ","
                << VOXEL_SIZE_Z << "," << BLOCK_SIZE;

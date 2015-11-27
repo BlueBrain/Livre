@@ -7,7 +7,12 @@
 list(APPEND CPPCHECK_EXTRA_ARGS
   --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/*_generated.h)
 
+include(zerobufGenerateCxx)
+zerobuf_generate_cxx(ZEROBUF_GENERATED
+  ${OUTPUT_INCLUDE_DIR}/livre/lib/zerobuf zeq/volumeRendererParameters.fbs)
+
 set(LIVRELIB_PUBLIC_HEADERS
+  ${ZEROBUF_GENERATED_HEADERS}
   types.h
   animation/CameraPath.h
   cache/LRUCache.h
@@ -18,7 +23,6 @@ set(LIVRELIB_PUBLIC_HEADERS
   cache/TextureDataObject.h
   data/MemoryDataSource.h
   configuration/ApplicationParameters.h
-  configuration/ClientParameters.h
   configuration/VolumeRendererParameters.h
   render/AvailableSetGenerator.h
   render/ScreenSpaceLODEvaluator.h
@@ -32,6 +36,7 @@ set(LIVRELIB_HEADERS
   render/SelectVisibles.h)
 
 set(LIVRELIB_SOURCES
+  ${ZEROBUF_GENERATED_SOURCES}
   animation/CameraPath.cpp
   cache/LRUCache.cpp
   cache/LRUCachePolicy.cpp
@@ -41,7 +46,6 @@ set(LIVRELIB_SOURCES
   cache/TextureDataObject.cpp
   data/MemoryDataSource.cpp
   configuration/ApplicationParameters.cpp
-  configuration/ClientParameters.cpp
   configuration/VolumeRendererParameters.cpp
   render/AvailableSetGenerator.cpp
   render/ScreenSpaceLODEvaluator.cpp
@@ -51,7 +55,8 @@ set(LIVRELIB_SOURCES
   visitor/CollectionTraversal.cpp
   visitor/DFSTraversal.cpp)
 
-set(LIVRELIB_LINK_LIBRARIES PUBLIC LivreCore PRIVATE Equalizer ${VTUNE_LIBRARIES})
+set(LIVRELIB_LINK_LIBRARIES PUBLIC LivreCore ZeroBuf
+                            PRIVATE Equalizer ${VTUNE_LIBRARIES})
 
 if(LIVRE_USE_REMOTE_DATASOURCE)
   flatbuffers_generate_c_headers(FBS

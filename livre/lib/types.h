@@ -22,6 +22,7 @@
 #define _livreTypes_h_
 
 #include <livre/core/types.h>
+#include <livre/lib/configuration/VolumeRendererParameters.h>
 
 namespace livre
 {
@@ -34,15 +35,10 @@ class TextureDataObject;
 class TextureObject;
 class TextureUploadProcessor;
 struct ApplicationParameters;
-struct ClientParameters;
 struct EFPrefetchAlgorithmParameters;
-struct VolumeRendererParameters;
 struct RESTParameters;
 
 /** SmartPtr definitions */
-typedef boost::shared_ptr< ClientParameters > ClientParametersPtr;
-typedef boost::shared_ptr< const ClientParameters > ConstClientParametersPtr;
-
 typedef boost::shared_ptr< VolumeRendererParameters > VolumeRendererParametersPtr;
 typedef boost::shared_ptr< const VolumeRendererParameters > ConstVolumeRendererParametersPtr;
 

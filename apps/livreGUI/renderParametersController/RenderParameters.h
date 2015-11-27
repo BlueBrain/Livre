@@ -1,6 +1,5 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
- *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
- *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+/* Copyright (c) 2015, EPFL/Blue Brain Project
+ *                     Daniel.Nachbaur@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -18,32 +17,35 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _VolumeRendererParameters_h_
-#define _VolumeRendererParameters_h_
 
-#include <livre/core/configuration/Parameters.h>
-#include <livre/lib/api.h>
+#ifndef _RenderParameters_h_
+#define _RenderParameters_h_
+
 #include <livre/lib/zerobuf/volumeRendererParameters.h>
-#include <co/zerobuf.h>
+#include <QObject>
 
 namespace livre
 {
 
 /**
- * Enhance the ZeroBuf VolumeRendererParameters for Collage serialization and
- * initialization from config file and/or commandline parameters.
+ * Enhance the VolumeRendererParameters ZeroBuf object with a signal when
+ * updates were received to update the GUI accordingly.
  */
-class VolumeRendererParameters
-        : public co::ZeroBuf< zerobuf::VolumeRendererParameters >,
-          public Parameters
+class RenderParameters : public QObject,
+                         public zerobuf::VolumeRendererParameters
 {
-public:
-    LIVRE_API VolumeRendererParameters();
+    Q_OBJECT
 
-protected:
-    void initialize_() final;
+signals:
+    void received();
+
+public:
+    RenderParameters() {}
+
+private:
+    void notifyReceived() final { emit received(); }
 };
 
 }
 
-#endif // _VolumeRendererParameters_h_
+#endif

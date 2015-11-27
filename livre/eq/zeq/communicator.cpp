@@ -26,6 +26,7 @@
 #include <livre/eq/settings/RenderSettings.h>
 
 #include <livre/lib/configuration/ApplicationParameters.h>
+#include <livre/lib/configuration/VolumeRendererParameters.h>
 
 #include <lunchbox/clock.h>
 #include <servus/uri.h>
@@ -118,6 +119,11 @@ public:
         _publisher->publish( frame );
     }
 
+    void publishVolumeRendererParameters()
+    {
+         _publisher->publish( *_config.getFrameData().getVRParameters( ));
+    }
+
     void publishVocabulary()
     {
         if( !_publisher )
@@ -192,7 +198,6 @@ public:
         modelViewMatrix.set( matrix.begin(), matrix.end(), false );
         auto cameraSettings = _config.getFrameData().getCameraSettings();
         cameraSettings->setModelViewMatrix( modelViewMatrix );
-        _config.sendEvent( REDRAW );
     }
 
     // HBP 'micron' camera from other brain applications
@@ -206,7 +211,6 @@ public:
                 _config.convertFromHBPCamera( modelViewMatrixMicron );
         auto cameraSettings = _config.getFrameData().getCameraSettings();
         cameraSettings->setModelViewMatrix( modelViewMatrix );
-        _config.sendEvent( REDRAW );
     }
 
     void onLookupTable1D( const ::zeq::Event& event )
@@ -215,7 +219,6 @@ public:
             ::zeq::hbp::deserializeLookupTable1D( event ));
         auto renderSettings = _config.getFrameData().getRenderSettings();
         renderSettings->setTransferFunction( transferFunction );
-        _config.sendEvent( REDRAW );
     }
 
     void onFrame( const ::zeq::Event& event )
@@ -239,19 +242,16 @@ public:
         frameSettings->setFrameNumber( frame.current );
         params.animation = frame.delta;
         params.frames = { frame.start, frame.end };
-        _config.sendEvent( REDRAW );
     }
 
     void requestImageJPEG()
     {
         _config.getFrameData().getFrameSettings()->setGrabFrame( true );
-        _config.sendEvent( REDRAW );
     }
 
     void requestExit()
     {
         _config.stopRunning();
-        _config.sendEvent( REDRAW );
     }
 
     void handleEvents()
@@ -259,7 +259,7 @@ public:
         // Receiving all queued events from all receivers without blocking.
         for( auto subscriber : subscribers )
             while( subscriber->receive( 0 ))
-                /*nop*/ ;
+                _config.sendEvent( REDRAW );
     }
 
 private:
@@ -282,6 +282,8 @@ private:
                 std::bind( &Impl::requestExit, this );
         _requests[::zeq::vocabulary::EVENT_VOCABULARY] =
                 std::bind( &Impl::publishVocabulary, this );
+        _requests[_config.getFrameData().getVRParameters()->getZerobufType()] =
+                std::bind( &Impl::publishVolumeRendererParameters, this );
     }
 
     void _setupRESTBridge( const int argc, char** argv )
@@ -329,6 +331,7 @@ private:
         subscriber->registerHandler( ::zeq::vocabulary::EVENT_REQUEST,
                                      std::bind( &Impl::onRequest,
                                                 this, std::placeholders::_1 ));
+        subscriber->subscribe( *_config.getFrameData().getVRParameters( ));
     }
 
     typedef std::shared_ptr< ::zeq::Subscriber > SubscriberPtr;

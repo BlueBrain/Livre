@@ -19,7 +19,6 @@
  */
 
 #include <livre/lib/configuration/ApplicationParameters.h>
-#include <livre/core/mathTypes.h>
 
 namespace vmml
 {
@@ -45,9 +44,12 @@ const std::string NUMFRAMES_PARAM = "num-frames";
 const std::string CAMERAPOS_PARAM = "camera-position";
 const std::string CAMERALOOKAT_PARAM = "camera-lookat";
 const std::string SYNC_CAMERA_PARAM = "sync-camera";
+const std::string DATAFILE_PARAM = "volume";
+const std::string TRANSFERFUNCTION_PARAM = "transfer-function";
 
 ApplicationParameters::ApplicationParameters()
-    : cameraPosition( 0, 0, 1 )
+    : Parameters( "Application Parameters" )
+    , cameraPosition( 0, 0, 1 )
     , cameraLookAt( 0, 0, 0 )
     , frames( FULL_FRAME_RANGE )
     , maxFrames( -1u )
@@ -67,6 +69,11 @@ ApplicationParameters::ApplicationParameters()
                                    "Camera position", cameraPosition );
     configuration_.addDescription( configGroupName_, CAMERALOOKAT_PARAM,
                                    "Camera orientation", cameraLookAt );
+    configuration_.addDescription( configGroupName_, DATAFILE_PARAM,
+                                   "URI of volume data source", dataFileName );
+    configuration_.addDescription( configGroupName_, TRANSFERFUNCTION_PARAM,
+                                ".1dt transfer function file (from ImageVis3D)",
+                                   transferFunction );
 #ifdef LIVRE_USE_ZEQ
     configuration_.addDescription( configGroupName_, SYNC_CAMERA_PARAM,
                                    "Synchronize camera with other applications",
@@ -80,7 +87,6 @@ ApplicationParameters& ApplicationParameters::operator = (
     if( this == &parameters )
         return *this;
 
-    ClientParameters::operator = ( parameters );
     cameraPosition = parameters.cameraPosition;
     cameraLookAt = parameters.cameraLookAt;
     frames = parameters.frames;
@@ -88,23 +94,28 @@ ApplicationParameters& ApplicationParameters::operator = (
     animation = parameters.animation;
     isResident = parameters.isResident;
     syncCamera = parameters.syncCamera;
+    dataFileName = parameters.dataFileName;
+    transferFunction = parameters.transferFunction;
 
     return *this;
 }
 
 void ApplicationParameters::initialize_()
 {
-    ClientParameters::initialize_();
-    configuration_.getValue( ANIMATION_PARAM, animation );
-    configuration_.getValue( FRAMES_PARAM, frames );
-    configuration_.getValue( NUMFRAMES_PARAM, maxFrames );
-    configuration_.getValue( CAMERAPOS_PARAM, cameraPosition );
-    configuration_.getValue( CAMERALOOKAT_PARAM, cameraLookAt );
+    animation = configuration_.getValue( ANIMATION_PARAM, animation );
+    frames = configuration_.getValue( FRAMES_PARAM, frames );
+    maxFrames = configuration_.getValue( NUMFRAMES_PARAM, maxFrames );
+    cameraPosition = configuration_.getValue( CAMERAPOS_PARAM, cameraPosition );
+    cameraLookAt = configuration_.getValue( CAMERALOOKAT_PARAM, cameraLookAt );
+    dataFileName = configuration_.getValue( DATAFILE_PARAM, dataFileName );
+    transferFunction = configuration_.getValue( TRANSFERFUNCTION_PARAM,
+                                                transferFunction );
 #ifdef LIVRE_USE_ZEQ
-    configuration_.getValue( SYNC_CAMERA_PARAM, syncCamera );
+    syncCamera = configuration_.getValue( SYNC_CAMERA_PARAM, syncCamera );
 #endif
     bool animationFollowData = false;
-    configuration_.getValue( ANIMATION_FOLLOW_DATA_PARAM, animationFollowData );
+    animationFollowData = configuration_.getValue( ANIMATION_FOLLOW_DATA_PARAM,
+                                                   animationFollowData );
     if( animationFollowData )
         animation = LATEST_FRAME;
 }

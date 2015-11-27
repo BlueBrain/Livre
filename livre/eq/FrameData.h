@@ -34,7 +34,6 @@ enum SerializationMapIds
     SMI_RENDER_SETTINGS,
     SMI_CAMERA_SETTINGS,
     SMI_VOLUME_SETTINGS,
-    SMI_CLIENT_PARAMETERS,
     SMI_VR_PARAMETERS
 };
 
@@ -55,8 +54,7 @@ public:
     void initialize( eq::Config* eqConfig );
 
     /** Set up the parameters. */
-    void setup( const ClientParameters& clientParams,
-                const VolumeRendererParameters& rendererParams );
+    void setup( const VolumeRendererParameters& rendererParams );
 
     /**
      * Registers objects to the internal \see co::ObjectMap.
@@ -150,14 +148,10 @@ public:
     VolumeSettingsPtr getVolumeSettings() const;
 
     /**
-     * @return The client parameters.
-     */
-    ConstClientParametersPtr getClientParameters() const;
-
-    /**
      * @return The volume rendering parameters.
      */
     ConstVolumeRendererParametersPtr getVRParameters() const;
+    VolumeRendererParametersPtr getVRParameters();
 
     virtual ~FrameData();
 
@@ -171,7 +165,6 @@ private:
     CameraSettingsPtr cameraSettingsPtr_;
     VolumeSettingsPtr volumeSettingsPtr_;
 
-    ClientParametersPtr clientParametersPtr_;
     VolumeRendererParametersPtr vrParametersPtr_;
 };
 

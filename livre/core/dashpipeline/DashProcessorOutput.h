@@ -21,7 +21,6 @@
 #define _DashProcessorOutput_h_
 
 #include <livre/core/api.h>
-#include <livre/lib/types.h>
 #include <livre/core/dashTypes.h>
 #include <livre/core/pipeline/ProcessorOutput.h>
 #include <livre/core/dash/DashContextTrait.h>

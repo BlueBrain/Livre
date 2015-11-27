@@ -1,0 +1,15 @@
+
+namespace livre.zerobuf;
+
+table VolumeRendererParameters {
+  maxLOD:uint32_t = 9; // (NODEID_LEVEL_BITS << 1) + 1
+  minLOD:uint32_t = 0;
+  SSE:float = 4.0;
+  synchronousMode:bool = false;
+  samplesPerRay:uint32_t = 0;
+  samplesPerPixel:uint32_t = 1;
+  maxGPUCacheMemoryMB:uint64_t = 3072;
+  maxCPUCacheMemoryMB:uint64_t = 8192;
+}
+
+root_type VolumeRendererParameters;

@@ -149,10 +149,10 @@ public:
     void initializeRenderer()
     {
         const uint32_t nSamplesPerRay =
-            getFrameData()->getVRParameters()->samplesPerRay;
+            getFrameData()->getVRParameters()->getSamplesPerRay();
 
         const uint32_t nSamplesPerPixel =
-            getFrameData()->getVRParameters()->samplesPerPixel;
+            getFrameData()->getVRParameters()->getSamplesPerPixel();
 
         const livre::Node* node =
                 static_cast< livre::Node* >( _channel->getNode( ));
@@ -233,9 +233,9 @@ public:
         livre::Pipe* pipe = static_cast< livre::Pipe* >( window->getPipe( ));
 
         ConstVolumeRendererParametersPtr vrParams = pipe->getFrameData()->getVRParameters();
-        const uint32_t minLOD = vrParams->minLOD;
-        const uint32_t maxLOD = vrParams->maxLOD;
-        const float screenSpaceError = vrParams->screenSpaceError;
+        const uint32_t minLOD = vrParams->getMinLOD();
+        const uint32_t maxLOD = vrParams->getMaxLOD();
+        const float screenSpaceError = vrParams->getSSE();
 
         DashTreePtr dashTree = node->getDashTree();
 
@@ -284,7 +284,8 @@ public:
         generateSet.generateRenderingSet( _frameInfo );
 
         const livre::Pipe* pipe = static_cast< const livre::Pipe* >( _channel->getPipe( ));
-        const bool isSynchronous = pipe->getFrameData()->getVRParameters()->synchronousMode;
+
+        const bool isSynchronous = pipe->getFrameData()->getVRParameters()->getSynchronousMode();
 
         // #75: only wait for data in synchronous mode
         const bool dashTreeUpdated = window->apply( isSynchronous );
@@ -296,11 +297,8 @@ public:
             // If there are multiple channels, this may cause the ping-pong
             // because every channel will try to update the same DashTree in
             // node with their own frustum.
-            if( !pipe->getFrameData()->getVRParameters()->synchronousMode
-                 && receivedFrustum != _currentFrustum )
-            {
+            if( !isSynchronous && receivedFrustum != _currentFrustum )
                 _channel->getConfig()->sendEvent( REDRAW );
-            }
 
             _frameInfo.clear();
             for( const auto& visible : visibles )
@@ -314,8 +312,7 @@ public:
                 boost::static_pointer_cast< RayCastRenderer >(
                     renderViewPtr->getRenderer( ));
 
-        renderer->initTransferFunction(
-            pipe->getFrameData()->getRenderSettings()->getTransferFunction( ));
+        renderer->update( *pipe->getFrameData( ));
 
         RenderBricks renderBricks;
         generateRenderBricks( _frameInfo.renderNodes, renderBricks );

@@ -38,7 +38,7 @@ bool Parameters::initialize( const std::string& filename )
     return false;
 }
 
-bool Parameters::initialize( const int32_t argc, char **argv )
+bool Parameters::initialize( const int32_t argc, const char **argv )
 {
     try
     {

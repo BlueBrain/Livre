@@ -1,6 +1,6 @@
 # Copyright (c) BBP/EPFL 2011-2014, Stefan.Eilemann@epfl.ch
 #                                   Ahmet.Bilgili@epfl.ch
-# Change this number when adding tests to force a CMake run: 5
+# Change this number when adding tests to force a CMake run: 6
 
 include(InstallFiles)
 

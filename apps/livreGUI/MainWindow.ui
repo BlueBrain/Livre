@@ -44,6 +44,21 @@ background-color: darkGray; width: 1px; height: 1px;
    </attribute>
    <widget class="QWidget" name="animationDockWidgetPlaceholder"/>
   </widget>
+  <widget class="QDockWidget" name="renderParametersDockWidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="windowTitle">
+    <string>Render Parameters</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="renderParametersDockWidgetPlaceholder"/>
+  </widget>
  </widget>
  <resources/>
  <connections/>

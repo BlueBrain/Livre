@@ -19,6 +19,8 @@ endif()
 set(LIVREGUI_MOC_HEADERS
   MainWindow.h
   animationController/AnimationController.h
+  renderParametersController/RenderParameters.h
+  renderParametersController/RenderParametersController.h
   tfEditor/ColorMapWidget.h
   tfEditor/HoverPoints.h
   tfEditor/TFWidget.h
@@ -36,6 +38,7 @@ set(LIVREGUI_SOURCES
   livreGUI.cpp
   MainWindow.cpp
   animationController/AnimationController.cpp
+  renderParametersController/RenderParametersController.cpp
   tfEditor/ColorMapWidget.cpp
   tfEditor/HoverPoints.cpp
   tfEditor/TFWidget.cpp
@@ -45,9 +48,10 @@ set(LIVREGUI_RESOURCES resources/resources.qrc)
 set(LIVREGUI_UI_FORMS
   MainWindow.ui
   animationController/gui/AnimationController.ui
+  renderParametersController/gui/RenderParametersController.ui
   tfEditor/gui/TransferFunctionEditor.ui)
 
-set(LIVREGUI_LINK_LIBRARIES LivreCore Qt5::Widgets zeq zeqHBP)
+set(LIVREGUI_LINK_LIBRARIES LivreCore LivreLib Qt5::Widgets zeq zeqHBP ZeroBuf)
 
 if(MONSTEER_FOUND)
   list(APPEND LIVREGUI_LINK_LIBRARIES MonsteerQt)
