@@ -28,7 +28,6 @@
 #include <livre/core/visitor/VisitState.h>
 #include <livre/core/render/VisibleSetGenerator.h>
 #include <livre/core/visitor/DFSTraversal.h>
-#include <livre/core/visitor/CollectionTraversal.h>
 #include <livre/lib/cache/TextureObject.h>
 #include <livre/lib/cache/TextureCache.h>
 
@@ -45,7 +44,8 @@ public:
                     const VolumeDataSource& dataSource,
                     uint32_t minLOD,
                     uint32_t maxLOD,
-                    NodeIds& allVisibleNodes )
+                    NodeIds& visibles,
+                    const Vector2f& dataRange )
 
         : RenderNodeVisitor( dataSource )
         , _viewport( viewport )
@@ -54,12 +54,13 @@ public:
         , _volInfo( dataSource.getVolumeInformation( ))
         , _minLOD( minLOD )
         , _maxLOD( maxLOD )
-        , _allVisibleNodes( allVisibleNodes )
+        , _visibles( visibles )
+        , _dataRange( dataRange )
     {
 
     }
 
-    void visit( const LODNode& lodNode, VisitState& state )
+    void visit( const LODNode& lodNode, VisitState& state ) final
     {
         if( !lodNode.isValid( ))
             return;
@@ -86,9 +87,34 @@ public:
 
         const bool isLODVisible = (lod <= lodNode.getNodeId().getLevel( ));
         if( isLODVisible )
-            _allVisibleNodes.push_back( lodNode.getNodeId( ));
+            _visibles.push_back( lodNode.getNodeId( ));
 
         state.setVisitChild( !isLODVisible );
+    }
+
+    void visitPost() final
+    {
+        // Sort-last range selection:
+#ifndef LIVRE_STATIC_DECOMPOSITION
+        const size_t startIndex = _dataRange[0] * _visibles.size();
+        const size_t endIndex = _dataRange[1] * _visibles.size();
+#endif
+        NodeIds selected;
+
+        for( size_t i = 0; i < _visibles.size(); ++i )
+        {
+#ifdef LIVRE_STATIC_DECOMPOSITION
+            const Range& nodeRange =
+                _visibles[i].getLODNode().getNodeId().getRange();
+            const bool isInRange = nodeRange[1] > _dataRange[0] &&
+                                   nodeRange[1] <= _dataRange[1];
+#else
+            const bool isInRange = i >= startIndex && i < endIndex;
+#endif
+            if( isInRange )
+                selected.push_back( _visibles[i] );
+        }
+        _visibles.swap( selected );
     }
 
     PixelViewport _viewport;
@@ -97,7 +123,8 @@ public:
     const VolumeInformation& _volInfo;
     uint32_t _minLOD;
     uint32_t _maxLOD;
-    NodeIds& _allVisibleNodes;
+    NodeIds& _visibles;
+    Vector2f _dataRange;
 };
 
 struct VisibleSetGenerator::Impl
@@ -111,7 +138,8 @@ struct VisibleSetGenerator::Impl
                              uint32_t frame,
                              uint32_t minLOD,
                              uint32_t maxLOD,
-                             NodeIds& allVisibleNodes,
+                             NodeIds& visibles,
+                             const Vector2f& dataRange,
                              const NodeId& nodeId )
     {
         SelectVisibles visibleSelector( viewport,
@@ -120,7 +148,8 @@ struct VisibleSetGenerator::Impl
                                         dataSource,
                                         minLOD,
                                         maxLOD,
-                                        allVisibleNodes );
+                                        visibles,
+                                        dataRange );
         DFSTraversal dfsTraverser_;
         if( nodeId.isValid( ))
         {
@@ -155,7 +184,8 @@ void VisibleSetGenerator::generateVisibleSet( const PixelViewport& viewport,
                                               uint32_t frame,
                                               uint32_t minLOD,
                                               uint32_t maxLOD,
-                                              NodeIds& allVisibleNodes,
+                                              NodeIds& visibles,
+                                              const Vector2f& dataRange,
                                               const NodeId& nodeId )
 {
     _impl->generateVisibleSet( viewport,
@@ -165,7 +195,8 @@ void VisibleSetGenerator::generateVisibleSet( const PixelViewport& viewport,
                                frame,
                                minLOD,
                                maxLOD,
-                               allVisibleNodes,
+                               visibles,
+                               dataRange,
                                nodeId );
 }
 

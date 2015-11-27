@@ -48,6 +48,7 @@ struct VisibleSetGeneratorFilter::Impl
         const NodeId& rootNodeId = pipeFilter.getInputValue< NodeId >( "NodeId" );
         const Frustum& frustum = pipeFilter.getInputValue< Frustum >( "Frustum" );
         const uint32_t frame = pipeFilter.getInputValue< uint32_t >( "Frame" );
+        const Vector2f& dataRange = pipeFilter.getInputValue< Vector2f >( "DataRange" );
 
         const PixelViewport viewport( renderPipeInput.glWidget->getX(),
                                       renderPipeInput.glWidget->getY(),
@@ -66,6 +67,7 @@ struct VisibleSetGeneratorFilter::Impl
                                                 renderPipeInput.minLOD,
                                                 renderPipeInput.maxLOD,
                                                 visibleNodes,
+                                                dataRange,
                                                 rootNodeId );
 
 
@@ -78,6 +80,7 @@ struct VisibleSetGeneratorFilter::Impl
         addPortInfo( inputPorts, "Frustum", Frustum( ));
         addPortInfo( inputPorts, "Frame", uint32_t( INVALID_FRAME ));
         addPortInfo( inputPorts, "NodeId", NodeId());
+        addPortInfo( inputPorts, "DataRange", Vector2f( 0.f, 1.f ));
     }
 
     void getOutputPorts( PortInfos& outputPorts ) const

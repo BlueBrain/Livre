@@ -32,6 +32,7 @@
 
 #include <livre/lib/cache/TextureCache.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
+#include <livre/lib/configuration/ClientParameters.h>
 
 #include <livre/core/version.h>
 #include <livre/core/pipeline/SimpleExecutor.h>

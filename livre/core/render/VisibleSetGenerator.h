@@ -44,7 +44,8 @@ public:
      * @param frustum view frustum
      * @param dataSource data source
      * @param frameId frame id
-     * @param list of nodes needed for rendering the volume
+     * @param visibles list of nodes needed for rendering the volume
+     * @param dataRange is the range of volumetric data
      * @param nodeId to start from
      */
      void generateVisibleSet( const PixelViewport& viewport,
@@ -54,7 +55,8 @@ public:
                               uint32_t frame,
                               uint32_t minLOD,
                               uint32_t maxLOD,
-                              NodeIds& allVisibleNodes,
+                              NodeIds& visibles,
+                              const Vector2f& dataRange,
                               const NodeId& nodeId = NodeId( ));
 private:
 

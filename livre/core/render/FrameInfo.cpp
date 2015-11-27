@@ -35,7 +35,7 @@ void FrameInfo::clear()
     renderNodes.clear();
 }
 
-FrameInfo& FrameInfo::addFrameInfo(const FrameInfo& frameInfo)
+FrameInfo& FrameInfo::merge(const FrameInfo& frameInfo)
 {
     if( &frameInfo == this )
         return *this;

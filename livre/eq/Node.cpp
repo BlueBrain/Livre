@@ -70,13 +70,6 @@ public:
                     _config->getFrameData().getVolumeSettings();
             const lunchbox::URI& uri = lunchbox::URI( volumeSettingsPtr->getURI( ));
             _dataSourcePtr.reset( new livre::VolumeDataSource( uri ));
-
-            // Inform application of real-world size for camera manipulations
-            const livre::VolumeInformation& info =
-                    _dataSourcePtr->getVolumeInformation();
-            _config->sendEvent( VOLUME_BOUNDING_BOX ) << info.boundingBox;
-            _config->sendEvent( VOLUME_FRAME_RANGE ) << info.getFrameRange();
-
         }
         catch( const std::runtime_error& err )
         {

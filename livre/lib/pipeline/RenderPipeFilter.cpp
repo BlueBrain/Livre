@@ -48,6 +48,7 @@ struct RenderPipeFilter::Impl
         pipeFilter.setOutput( "RenderPipeInput", renderPipeInput );
         const Frustum& frustum = pipeFilter.getInputValue< Frustum >( "Frustum" );
         const uint32_t frame = pipeFilter.getInputValue< uint32_t >( "Frame" );
+        const Vector2f& dataRange = pipeFilter.getInputValue< Vector2f >( "DataRange" );
 
         FilterPtr visibleSetGenerator( new VisibleSetGeneratorFilter( ));
         FilterPtr renderingSetGenerator( new RenderingSetGeneratorFilter( ));
@@ -72,6 +73,7 @@ struct RenderPipeFilter::Impl
                     visPipeFilter->setInput( "Frustum", frustum );
                     visPipeFilter->setInput( "Frame", frame );
                     visPipeFilter->setInput( "NodeId", rootNode );
+                    visPipeFilter->setInput( "DataRange", dataRange );
 
                     // Pipeline does not wait for uploader unless explicitly waited by another filter
                     PipeFilterPtr uploadDataFilter = pipeline->add( uploadPipeFilter, false );
@@ -107,12 +109,13 @@ struct RenderPipeFilter::Impl
         addPortInfo( inputPorts, "RenderPipeInput", RenderPipeFilter::RenderPipeInput( ));
         addPortInfo( inputPorts, "Frustum", Frustum( ));
         addPortInfo( inputPorts, "Frame", uint32_t( INVALID_FRAME ));
+        addPortInfo( inputPorts, "DataRange", Vector2f( 0.f, 1.f ));
     }
 
     void getOutputPorts( PortInfos& outputPorts ) const
     {
         addPortInfo( outputPorts, "RenderPipeInput", RenderPipeFilter::RenderPipeInput( ));
-        addPortInfo( outputPorts, "Frustum", Frustum( ));
+        addPortInfo( outputPorts, "DataRange", Frustum( ));
     }
 };
 

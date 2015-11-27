@@ -162,8 +162,6 @@ typedef boost::shared_ptr< InputPort > InputPortPtr;
 typedef boost::shared_ptr< OutputPort > OutputPortPtr;
 typedef boost::shared_ptr< const InputPort > ConstInputPortPtr;
 typedef boost::shared_ptr< const OutputPort > ConstOutputPortPtr;
-typedef boost::shared_ptr< RenderingSetGenerator > RenderingSetGeneratorPtr;
-typedef boost::shared_ptr< const RenderingSetGenerator > ConstRenderingSetGeneratorPtr;
 typedef boost::shared_ptr< LODEvaluator > LODEvaluatorPtr;
 typedef boost::shared_ptr< const LODEvaluator > ConstLODEvaluatorPtr;
 typedef boost::shared_ptr< Cache > CachePtr;

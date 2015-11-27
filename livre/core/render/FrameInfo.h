@@ -38,11 +38,11 @@ struct FrameInfo
     LIVRECORE_API void clear();
 
     /**
-      * Adds the node information from the other frame info
+      * Merges the node information from the other frame info
       * @param frameInfo source frame info
       * @return returns the current frame info
       */
-    LIVRECORE_API FrameInfo& addFrameInfo( const FrameInfo& frameInfo );
+    LIVRECORE_API FrameInfo& merge( const FrameInfo& frameInfo );
 
     NodeIds notAvailableRenderNodes; //!< The unavailable nodes for rendering.
     ConstCacheObjects renderNodes; //!< The list of nodes to be rendered.

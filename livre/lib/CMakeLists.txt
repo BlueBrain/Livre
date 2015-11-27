@@ -29,9 +29,6 @@ set(LIVRELIB_PUBLIC_HEADERS
   render/ScreenSpaceLODEvaluator.h
   )
 
-set(LIVRELIB_HEADERS
-  render/SelectVisibles.h)
-
 set(LIVRELIB_SOURCES
   animation/CameraPath.cpp
   cache/LRUCache.cpp

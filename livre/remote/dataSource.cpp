@@ -32,6 +32,9 @@
 
 #include <boost/bind.hpp>
 #include <lunchbox/pluginRegisterer.h>
+#include <lunchbox/clock.h>
+#include <lunchbox/scopedMutex.h>
+
 
 namespace livre
 {
