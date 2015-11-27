@@ -106,6 +106,9 @@ public:
 
     void configExit()
     {
+        // If it did not arrive at the frameStart, the current context should
+        // be set correctly.
+        _dashProcessor->getDashContext()->setCurrent();
         livre::Node* node = static_cast< livre::Node* >( _window->getNode( ));
         node->getDashTree()->getRenderStatus().setThreadOp( TO_EXIT );
     }

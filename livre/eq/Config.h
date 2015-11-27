@@ -82,8 +82,9 @@ public:
 
     /**
      * Trigger rendering of a new frame.
+     * @return true if the frame is a valid frame.
      */
-    void frame();
+    bool frame();
 
     /**
      * @return the data range data source provides.
