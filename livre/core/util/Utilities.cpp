@@ -17,9 +17,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _utility_h_
-#define _utility_h_
-
 #include <livre/core/util/Utilities.h>
 #include <eq/gl.h>
 
@@ -40,5 +37,3 @@ bool hasOpenGL42Support()
 }
 
 }
-
-#endif // _utility_h_

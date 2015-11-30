@@ -6,6 +6,12 @@ Changelog {#Changelog}
 
 # Release 0.4 (2015-11-09) {#Release040}
 
+* [#213](https://github.com/BlueBrain/Livre/pull/213):
+  Fix [#207](https://github.com/BlueBrain/Livre/issues/207).
+  Frame range needs to be open at the end, as the documentation says.
+  Add FrameUtils class that operates with a valid frame range (based on
+  user-specified boundaries) and contains methods to compute current and
+  next frame.
 * [#217](https://github.com/BlueBrain/Livre/pull/217):
   Improve #177 by moving the first ray's samples on the boundary of the volume
   AABB

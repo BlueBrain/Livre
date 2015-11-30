@@ -24,6 +24,7 @@
 #include <livre/eq/settings/CameraSettings.h>
 #include <livre/eq/settings/FrameSettings.h>
 #include <livre/eq/settings/RenderSettings.h>
+
 #include <livre/lib/configuration/ApplicationParameters.h>
 
 #include <lunchbox/clock.h>
@@ -106,19 +107,13 @@ public:
         const auto& frameSettings = _config.getFrameData().getFrameSettings();
         const auto& params = _config.getApplicationParameters();
 
-        const Vector2ui& dataFrameRange = _config.getDataFrameRange();
-
-        const uint32_t frameMin =
-                std::max( params.frames.x(), dataFrameRange[ 0 ]);
-
-        const uint32_t frameMax =
-                std::min( params.frames.y(), dataFrameRange[ 1 ]);
+        const Vector2ui& frameRange( _config.getFrameUtils().getFrameRange( ));
 
         const ::zeq::Event& frame = ::zeq::hbp::serializeFrame(
                                         ::zeq::hbp::data::Frame(
-                                            frameMin,
+                                            frameRange[0],
                                             frameSettings->getFrameNumber(),
-                                            frameMax,
+                                            frameRange[1],
                                             params.animation ));
         _publisher->publish( frame );
     }
