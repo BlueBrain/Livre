@@ -21,43 +21,53 @@
 #include "MainWindow.h"
 #include <livreGUI/ui_MainWindow.h>
 
-#include <livreGUI/animationController/AnimationController.h>
-#include <livreGUI/tfEditor/TransferFunctionEditor.h>
+#include "animationController/AnimationController.h"
+#include "tfEditor/TransferFunctionEditor.h"
+#include "Controller.h"
+
+#include <zeq/zeq.h>
 
 #ifdef LIVRE_USE_MONSTEER
 #  include <monsteer/qt/SteeringWidget.h>
 #endif
 
-namespace
-{
-static const servus::URI LIVRE_ZEQ_SCHEMA( "hbp://" );
-}
-
 namespace livre
 {
-
-MainWindow::MainWindow( livre::Controller& controller, QWidget* parent_ )
-    : QMainWindow( parent_ )
-    , _ui( new Ui::MainWindow )
+struct MainWindow::Impl
 {
-    _ui->setupUi( this );
+    Impl( MainWindow* parent, Controller& controller )
+        : _controller( controller )
+    {
+        _ui.setupUi( parent );
 
-    setCentralWidget( new TransferFunctionEditor( controller,
-                                                  LIVRE_ZEQ_SCHEMA ));
+        parent->setCentralWidget( new TransferFunctionEditor( controller ));
 
 #ifdef LIVRE_USE_MONSTEER
-    _ui->simulationDockWidget->setWidget( new monsteer::qt::SteeringWidget( ));
+        _ui.simulationDockWidget->setWidget( new monsteer::qt::SteeringWidget( ));
 #else
-    _ui->simulationDockWidget->setHidden( true );
+        _ui.simulationDockWidget->setHidden( true );
 #endif
 
-    _ui->animationDockWidget->setWidget(
-                new AnimationController( controller, LIVRE_ZEQ_SCHEMA ));
+        _ui.animationDockWidget->setWidget(
+                    new AnimationController( controller ));
+    }
+
+    ~Impl()
+    {
+    }
+
+    Ui::MainWindow _ui;
+    Controller& _controller;
+};
+
+MainWindow::MainWindow( Controller& controller, QWidget* parent_ )
+    : QMainWindow( parent_ )
+    , _impl( new Impl( this, controller ))
+{
 }
 
 MainWindow::~MainWindow()
 {
-    delete _ui;
 }
 
 }

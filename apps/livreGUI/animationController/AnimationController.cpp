@@ -23,12 +23,7 @@
 #include <livreGUI/Controller.h>
 #include <livre/core/types.h>
 
-#include <zeq/types.h>
-#include <zeq/event.h>
-#include <zeq/subscriber.h>
-#include <zeq/publisher.h>
-
-#include <boost/bind.hpp>
+#include <zeq/zeq.h>
 
 namespace livre
 {
@@ -36,11 +31,9 @@ namespace livre
 struct AnimationController::Impl
 {
     Impl( AnimationController* animationController,
-          Controller& controller,
-          const servus::URI& zeqSchema )
+          Controller& controller)
         : _animationController( animationController )
         , _controller( controller )
-        , _zeqSchema( zeqSchema )
         , _connected( false )
         , _onFirstFrame( true )
     {
@@ -58,22 +51,11 @@ struct AnimationController::Impl
         emit _animationController->newFrameReceived( zeq::hbp::deserializeFrame( event_ ));
     }
 
-    void onFirstHeartbeatEvent()
-    {
-        emit _animationController->firstHeartBeatReceived();
-    }
-
     void setSubscriber()
     {
-        _controller.registerHandler( _zeqSchema,
-                                     ::zeq::hbp::EVENT_FRAME,
-                                     boost::bind( &AnimationController::Impl::onFrame,
-                                                  this, _1 ));
-        _controller.registerHandler( _zeqSchema,
-                                     zeq::vocabulary::EVENT_HEARTBEAT,
-                                     boost::bind(
-                                         &AnimationController::Impl::onFirstHeartbeatEvent,
-                                         this ));
+        _controller.registerHandler( ::zeq::hbp::EVENT_FRAME,
+                                     std::bind( &AnimationController::Impl::onFrame,
+                                                  this, std::placeholders::_1 ));
     }
 
     void connect()
@@ -93,10 +75,7 @@ struct AnimationController::Impl
 
     void disconnect()
     {
-        _controller.deregisterHandler( _zeqSchema,
-                                       ::zeq::hbp::EVENT_FRAME,
-                                       boost::bind( &AnimationController::Impl::onFrame,
-                                                    this, _1 ));
+        _controller.deregisterHandler( ::zeq::hbp::EVENT_FRAME );
         _connected = false;
         resetControls();
     }
@@ -118,19 +97,6 @@ struct AnimationController::Impl
     void setPlaying( const bool enable )
     {
         _ui.btnPlay->setText( enable ? "Pause" : "Play" );
-    }
-
-    void onFirstHeartBeatReceived()
-    {
-        _controller.publish( _zeqSchema,
-                             ::zeq::vocabulary::serializeRequest( ::zeq::hbp::EVENT_FRAME ));
-        _controller.deregisterHandler( _zeqSchema,
-                                       zeq::vocabulary::EVENT_HEARTBEAT,
-                                       boost::bind(
-                                           &AnimationController::Impl::onFirstHeartbeatEvent,
-                                           this ));
-        _connected = true;
-        resetControls();
     }
 
     void onNewFrameReceived( zeq::hbp::data::Frame frame )
@@ -178,7 +144,7 @@ struct AnimationController::Impl
                                                  _ui.sldFrame->value(),
                                                  _ui.sldFrame->maximum() + 1,
                                                  getFrameDelta( ));
-            _controller.publish( _zeqSchema, ::zeq::hbp::serializeFrame( frame ));
+            _controller.publish( ::zeq::hbp::serializeFrame( frame ));
         }
     }
 
@@ -197,19 +163,17 @@ struct AnimationController::Impl
     }
 
 public:
-    Ui_animationController _ui;
+    Ui::animationController _ui;
     AnimationController* _animationController;
     Controller& _controller;
-    servus::URI _zeqSchema;
     bool            _connected;
     bool            _onFirstFrame;
 };
 
 AnimationController::AnimationController( Controller& controller,
-                                          const servus::URI& zeqSchema,
                                           QWidget* parentWgt )
     : QWidget( parentWgt )
-    , _impl( new AnimationController::Impl( this, controller, zeqSchema ))
+    , _impl( new AnimationController::Impl( this, controller ))
 {
     qRegisterMetaType< ::zeq::hbp::data::Frame >( "::zeq::hbp::data::Frame" );
 
@@ -223,9 +187,6 @@ AnimationController::AnimationController( Controller& controller,
              this, SLOT( _setFollow( int )));
     connect( this, &AnimationController::newFrameReceived,
              this, &AnimationController::_onNewFrameReceived,
-             Qt::QueuedConnection );
-    connect( this, &AnimationController::firstHeartBeatReceived,
-             this, &AnimationController::_onFirstHeartBeatReceived,
              Qt::QueuedConnection );
 
     _impl->_ui.chbxReverse->setVisible( false ); // temporarily hidden
@@ -268,11 +229,6 @@ void AnimationController::_setFollow( int on )
 void AnimationController::_onNewFrameReceived( zeq::hbp::data::Frame frame )
 {
     _impl->onNewFrameReceived( frame );
-}
-
-void AnimationController::_onFirstHeartBeatReceived()
-{
-    _impl->onFirstHeartBeatReceived();
 }
 
 }
