@@ -130,38 +130,41 @@ public:
 };
 
 /**
- * The root node holds the number of levels, the number of blocks in the root node
- * and the number of frames
+ * Holds the number of levels of an LOD tree and the number of blocks at its
+ * root.
  */
 class RootNode
 {
 public:
 
     /**
-     * @param depth of the tree.
-     * @param size of the root blocks.
-     * @param frames is total number of frames.
+     * @param depth the depth of the LOD tree.
+     * @param blockCount the number of blocks along each axis at the root of
+     *        the LOD tree.
      */
     RootNode( const uint32_t depth = 0,
-              const Vector3ui& size = Vector3ui( 0u ),
-              const uint32_t frames = 0  )
-        : _nodeId( depth, size, frames )
+              const Vector3ui& blockCount = Vector3ui( 0u ))
+        : _treeDepth( depth )
+        , _blockCount( blockCount )
     {}
 
     /**
-     * @return the depth.
+     * @return the depth of the LOD tree.
      */
-    uint32_t getDepth() const { return _nodeId.getLevel(); }
+    uint32_t getDepth() const { return _treeDepth; }
 
     /**
-     * @param level of the tree.
-     * @return the number of nodes at the given level.
+     * @param level the level of the LOD tree.
+     * @return the maximum number of blocks at a given level, considering a
+     *         regular octree that starts from the root. This is an upper bound,
+     *         which may be superior to the actual value.
      */
     Vector3ui getBlockSize( const uint32_t level = 0 ) const
-        { return _nodeId.getPosition() * (1u << level); }
+        { return _blockCount * (1u << level); }
 
 private:
-    NodeId _nodeId;
+    uint32_t _treeDepth;
+    Vector3ui _blockCount;
 };
 
 
