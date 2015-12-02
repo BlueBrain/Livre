@@ -38,7 +38,6 @@
 
 #include <lunchbox/pluginRegisterer.h>
 
-#define MINIMUM_NUMBEROF_NODES 8u
 #define MAX_ACCEPTABLE_BLOCK_SIZE 512
 
 namespace livre
@@ -69,15 +68,14 @@ public:
             // For to use with MMap
             _tuvokLargeMMapFilePtr.reset( new LargeFileMMap( path ));
 
-            uint32_t depth = 0;
+            // Determine the depth of the LOD tree structure
+            uint32_t depth = -1;
             UINTVECTOR3 lodSize;
             do
             {
-                 lodSize = _uvfDataSetPtr->GetBrickLayout( depth++, 0 );
+                 lodSize = _uvfDataSetPtr->GetBrickLayout( ++depth, 0 );
             }
-            while( lodSize[0] >= MINIMUM_NUMBEROF_NODES &&
-                   lodSize[1] >= MINIMUM_NUMBEROF_NODES &&
-                   lodSize[2] >= MINIMUM_NUMBEROF_NODES  );
+            while( lodSize[0] > 1 && lodSize[1] > 1 && lodSize[2] > 1  );
 
             const UINTVECTOR3 tuvokBricksInRootLod =
                     _uvfDataSetPtr->GetBrickLayout( depth - 1, 0 );
