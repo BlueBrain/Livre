@@ -84,29 +84,29 @@ void VolumeDataSourcePlugin::internalNodeToLODNode(
 
 bool fillRegularVolumeInfo( VolumeInformation& info )
 {
-    const Vector3ui& blockSize = info.maximumBlockSize - info.overlap * 2;
-    const float maxDim = float( info.voxels.find_max( ));
-
-    info.maximumBlockSize = blockSize + info.overlap * 2;
-    info.dataType = DT_UINT8;
-    info.compCount = 1;
-    info.isBigEndian = false;
-    info.worldSpacePerVoxel = 1.0f / maxDim;
+    info.worldSpacePerVoxel = 1.0f / float( info.voxels.find_max( ));
     info.worldSize = Vector3f( info.voxels[0], info.voxels[1],
-                                info.voxels[2] ) / maxDim;
+                               info.voxels[2] ) * info.worldSpacePerVoxel;
 
-    // Find the depth of hierarchy
-    const Vector3ui numBlocks = info.voxels / blockSize;
-    Vector3ui blocksSize = numBlocks;
-
-    const uint32_t xDepth = std::log2( blocksSize[0] );
-    const uint32_t yDepth = std::log2( blocksSize[1] );
-    const uint32_t zDepth = std::log2( blocksSize[2] );
-
-    const uint32_t depth = std::min( xDepth, std::min( yDepth, zDepth ));
-    blocksSize = blocksSize / ( 1u << depth );
-
-    info.rootNode = RootNode( depth + 1, blocksSize );
+    // Create the rootNode of the LOD hierarchy
+    const Vector3ui blockSize = info.maximumBlockSize - info.overlap * 2;
+    const Vector3ui numBlocks(
+                std::ceil( float( info.voxels.x( )) / blockSize.x( )),
+                std::ceil( float( info.voxels.y( )) / blockSize.y( )),
+                std::ceil( float( info.voxels.z( )) / blockSize.z( ))
+                );
+    const Vector3ui lodLevels(
+                std::ceil( std::log2( numBlocks.x( ))),
+                std::ceil( std::log2( numBlocks.y( ))),
+                std::ceil( std::log2( numBlocks.z( )))
+                );
+    const uint32_t depth = lodLevels.find_min();
+    const Vector3ui rootNodeBlocksCount(
+                std::ceil( float( info.voxels.x() >> depth ) / blockSize.x( )),
+                std::ceil( float( info.voxels.y() >> depth ) / blockSize.y( )),
+                std::ceil( float( info.voxels.z() >> depth ) / blockSize.z( ))
+                );
+    info.rootNode = RootNode( depth + 1, rootNodeBlocksCount );
     return true;
 }
 
