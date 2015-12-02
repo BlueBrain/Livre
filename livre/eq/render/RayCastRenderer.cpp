@@ -165,6 +165,16 @@ struct RayCastRenderer::Impl
         tParamNameGL = glGetUniformLocation( program, "invModelViewMatrix" );
         glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getInvModelViewMatrix( ).array );
 
+        // Because the volume is centered to the origin we can compute the volume AABB by using
+        // the volume total size.
+        const Vector3f halfWorldSize = _volInfo.worldSize / 2.0;
+
+        tParamNameGL = glGetUniformLocation( program, "globalAABBMin" );
+        glUniform3fv( tParamNameGL, 1, ( -halfWorldSize ).array );
+
+        tParamNameGL = glGetUniformLocation( program, "globalAABBMax" );
+        glUniform3fv( tParamNameGL, 1, ( halfWorldSize ).array );
+
         Vector4i viewport;
         glGetIntegerv( GL_VIEWPORT, viewport.array );
         tParamNameGL = glGetUniformLocation( program, "viewport" );
