@@ -422,10 +422,8 @@ public:
         }
 
         os.str("");
-        os << "Total resolution " << info.voxels  << " depth "
-           << lunchbox::getIndexOfLastBit( info.voxels.x() /
-                                           info.maximumBlockSize.x( ))
-           << std::endl
+        os << "Total resolution " << info.voxels << " depth "
+           << info.rootNode.getDepth() << std::endl
            << "Block resolution " << info.maximumBlockSize << std::endl
            << unit << "/voxel " << voxelSize;
         _drawText( os.str( ), y );
