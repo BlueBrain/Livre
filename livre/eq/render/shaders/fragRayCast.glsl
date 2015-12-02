@@ -22,6 +22,8 @@ uniform mat4 invModelViewMatrix;
 uniform ivec4 viewport;
 uniform float nearPlaneDist;
 
+uniform vec3 globalAABBMin;
+uniform vec3 globalAABBMax;
 uniform vec3 aabbMin;
 uniform vec3 aabbMax;
 uniform vec3 textureMin;
@@ -124,21 +126,28 @@ void main( void )
         Ray eye = Ray( worldEyePosition, rayDirection );
 
         AABB aabb = AABB( aabbMin, aabbMax );
+        AABB globalAABB = AABB( globalAABBMin, globalAABBMax );
 
         float tnear, tfar;
         intersectBox( eye, aabb, tnear, tfar );
 
-        vec3 nearPlaneNormal = vec3( 0.0f, 0.0f, 1.0f );
-        float tNearPlane = dot( nearPlaneNormal, vec3( 0.0, 0.0, -nearPlaneDist )) / dot( nearPlaneNormal, normalize( pixelEyeSpacePos.xyz ));
+        float tnearGlobal, tfarGlobal;
+        intersectBox( eye, globalAABB, tnearGlobal, tfarGlobal );
 
-        if(tnear < tNearPlane )
+        vec3 nearPlaneNormal = vec3( 0.0f, 0.0f, 1.0f );
+        float tNearPlane = dot( nearPlaneNormal, vec3( 0.0, 0.0, -nearPlaneDist ))
+                           / dot( nearPlaneNormal, normalize( pixelEyeSpacePos.xyz ));
+
+        if( tnear < tNearPlane )
             tnear = tNearPlane;
 
         float stepSize = 1.0 / float( nSamplesPerRay );
 
-        float residu = mod( tnear, stepSize );
+        float residu = mod( tnear - tnearGlobal, stepSize );
+
         if( residu > 0.0f )
             tnear += stepSize - residu;
+
         if( tnear > tfar )
             discard;
 
