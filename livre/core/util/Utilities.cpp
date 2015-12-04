@@ -39,6 +39,76 @@ bool hasOpenGL42Support()
 #endif
 }
 
+size_t getDataTypeSize( DataType dataType )
+{
+    switch( dataType )
+    {
+    case DT_FLOAT64:
+        return 8;
+    case DT_FLOAT32:
+    case DT_UINT32:
+    case DT_INT32:
+        return 4;
+    case DT_UINT16:
+    case DT_INT16:
+        return 2;
+    case DT_UINT8:
+    case DT_INT8:
+        return 1;
+    default:
+        return DT_UNDEFINED;
+    }
+}
+
+std::string getDataTypeSize( DataType dataType )
+{
+    switch( dataType )
+    {
+    case DT_FLOAT64:
+        return "FLOAT64";
+    case DT_FLOAT32:
+        return "FLOAT32";
+    case DT_UINT32:
+        return "UINT32";
+    case DT_INT32:
+        return "INT32";
+    case DT_UINT16:
+        return "UINT16";
+    case DT_INT16:
+        return "INT16";
+    case DT_UINT8:
+        return "UINT8";
+    case DT_INT8:
+        return "INT8";
+    default:
+        return "UNDEFINED";
+    }
+}
+
+DataType getDataTypeFromStr( const std::string& str )
+{
+    if( str == "FLOAT64" )
+        return DT_FLOAT64;
+    else if( str == "FLOAT32" )
+        return DT_FLOAT32;
+    else if( str == "UINT32" )
+        return DT_UINT32;
+    else if( str == "INT32" )
+        return DT_INT32;
+    else if( str == "UINT16" )
+        return DT_UINT16;
+    else if( str == "INT16" )
+        return DT_INT16;
+    else if( str == "INT8" )
+       return DT_UINT8;
+     else if( str == "INT8" )
+        return DT_INT8;
+    else
+        return DT_UNDEFINED;
+}
+
+}
+
 }
 
 #endif // _utility_h_

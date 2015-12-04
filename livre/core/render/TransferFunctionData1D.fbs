@@ -1,0 +1,37 @@
+// Copyright (c) 2011-2015, EPFL/Blue Brain Project
+//                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+//
+// This file is part of Livre <https://github.com/BlueBrain/Livre>
+//
+
+namespace livre;
+
+enum TransferFunctionDataType : uint {  UINT8, UINT16 }
+
+enum AlgorithmType1D : uint
+{
+    LINEAR,
+    DIRAC
+}
+
+table ControlPoint2D
+{
+x : float;
+y : float;
+}
+
+table TransferFunctionData1D
+{
+   dataType: DataType;
+   nElements: uint32_t;
+// Theoratically below should have been a table
+// itself but it means owning a dynamic class
+// with ZeroBuf, which is not yet possible.
+   type: AlgorithmType1D;
+   controlPointsR: [ControlPoint2D];
+   controlPointsG: [ControlPoint2D];
+   controlPointsB: [ControlPoint2D];
+   controlPointsA: [ControlPoint2D];
+}
+
+root_type TransferFunctionData1D;

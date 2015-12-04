@@ -67,6 +67,7 @@ common_package(Threads REQUIRED)
 common_package(Tuvok)
 common_package(VTune)
 common_package(zeq)
+common_package(ZeroBuf)
 
 if(ZEQ_FOUND AND FlatBuffers_FOUND)
   list(APPEND COMMON_PACKAGE_DEFINES LIVRE_USE_REMOTE_DATASOURCE)

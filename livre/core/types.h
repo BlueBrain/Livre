@@ -70,6 +70,7 @@ class Frustum;
 class GLContext;
 class GLSLShaders;
 class GLWidget;
+class InterpolationAlgorithm;
 class LODNode;
 class LODEvaluator;
 class MemoryUnit;
@@ -84,6 +85,7 @@ class Renderer;
 class RootNode;
 class TexturePool;
 class TexturePoolFactory;
+class TransferFunction;
 class View;
 class VisitState;
 class VolumeDataSource;
@@ -136,6 +138,8 @@ typedef boost::shared_ptr< EventMapper > EventMapperPtr;
 typedef boost::shared_ptr< DataSourceFactory > DataSourceFactoryPtr;
 typedef boost::shared_ptr< MemoryUnit > MemoryUnitPtr;
 typedef boost::shared_ptr< const MemoryUnit > ConstMemoryUnitPtr;
+typedef boost::shared_ptr< InterpolationAlgorithm > InterpolationAlgorithmPtr;
+typedef boost::shared_ptr< const InterpolationAlgorithm > ConstInterpolationAlgorithmPtr;
 
 typedef boost::intrusive_ptr< CacheObject > CacheObjectPtr;
 typedef boost::intrusive_ptr< const CacheObject > ConstCacheObjectPtr;
@@ -189,6 +193,7 @@ typedef std::vector< CacheObjectPtr > CacheObjects;
 typedef std::vector< ConstCacheObjectPtr > ConstCacheObjects;
 typedef std::vector< RenderBrickPtr > RenderBricks;
 typedef std::vector< TexturePoolPtr > TexturePools;
+typedef std::vector< InterpolationAlgorithmPtr > InterpolationAlgorithms;
 
 /**
  * Map definitions
@@ -224,6 +229,22 @@ enum AccessMode
     MODE_WRITE = 1u
 };
 
+/**
+ * The DataType enum is used for defining the data type in volumetric data.
+ */
+enum DataType
+{
+    DT_FLOAT32,
+    DT_UINT8,
+    DT_UINT16,
+    DT_UINT32,
+    DT_FLOAT64,
+    DT_INT8,
+    DT_INT16,
+    DT_INT32,
+    DT_UNDEFINED
+};
+
 // Constants
 const uint32_t INVALID_TEXTURE_ID = -1; //!< Invalid OpenGL texture id.
 const Identifier INVALID_CACHE_ID = -1; //!< Invalid cache id.
@@ -237,7 +258,6 @@ const uint32_t NODEID_FRAME_BITS = 18; //>! @see NodeId
 const uint32_t INVALID_POSITION = ( 1u << NODEID_BLOCK_BITS ) - 1; //!< Invalid node ID.
 const uint32_t INVALID_LEVEL = ( 1u << NODEID_LEVEL_BITS ) - 1; //!< Invalid tree level.4 bits is on
 const uint32_t INVALID_FRAME = ( 1u << NODEID_FRAME_BITS ) - 1; //!< Invalid tree level.4 bits is on
-
 
 #define HIDDEN_PROGRAMDESCRIPTION_STR "_HIDDEN_"
 
