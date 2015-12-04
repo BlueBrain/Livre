@@ -29,7 +29,7 @@
 #define SPINX_START 5
 #define SPINY_START 5
 #define ADVANCE_START 0
-#define ROTATE_SPEED 0.005f
+#define ROTATE_AND_ZOOM_SPEED 0.005f
 #define PAN_SPEED 0.0005f
 #define ADVANCE_SPEED 0.05f
 
@@ -88,17 +88,18 @@ bool ChannelPointerHandler::operator ()( EqEventInfo& eqEventInfo )
 
                   if( cameraSettings->getPilotMode())
                       cameraSettings->spinCamera(
-                          -ROTATE_SPEED * event->data.pointerMotion.dy,
-                          -ROTATE_SPEED * event->data.pointerMotion.dx );
+                          -ROTATE_AND_ZOOM_SPEED * event->data.pointerMotion.dy,
+                          -ROTATE_AND_ZOOM_SPEED * event->data.pointerMotion.dx );
                   else
                       cameraSettings->spinModel(
-                          -ROTATE_SPEED * event->data.pointerMotion.dy,
-                          -ROTATE_SPEED * event->data.pointerMotion.dx, 0.f );
+                          -ROTATE_AND_ZOOM_SPEED * event->data.pointerMotion.dy,
+                          -ROTATE_AND_ZOOM_SPEED * event->data.pointerMotion.dx, 0.f );
                   return true;
 
               case eq::PTR_BUTTON2:
                   advance_ = -event->data.pointerMotion.dy;
-                  cameraSettings->moveCamera( 0.f, 0.f, ADVANCE_SPEED * advance_ );
+                  cameraSettings->moveCamera( 0.f, 0.f,
+                                              ROTATE_AND_ZOOM_SPEED * advance_ );
                   return true;
 
               case eq::PTR_BUTTON3:
