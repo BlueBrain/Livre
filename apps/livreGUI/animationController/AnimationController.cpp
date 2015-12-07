@@ -18,12 +18,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livreGUI/animationController/AnimationController.h>
+#include "AnimationController.h"
+#include "../Controller.h"
 #include <livreGUI/ui_AnimationController.h>
-#include <livreGUI/Controller.h>
 #include <livre/core/types.h>
 
-#include <zeq/zeq.h>
+#include <zeq/event.h>
 
 namespace livre
 {
@@ -117,13 +117,23 @@ struct AnimationController::Impl
         // keyboard input. So block signal emission when setting the value
         // programatically.
         _ui.sldFrame->blockSignals( true );
+        _ui.startFrameSpinBox->blockSignals( true );
+        _ui.currentFrameSpinBox->blockSignals( true );
+        _ui.endFrameSpinBox->blockSignals( true );
+
         _ui.sldFrame->setMinimum( startFrame );
+        _ui.startFrameSpinBox->setValue( startFrame );
+
         _ui.sldFrame->setMaximum( endFrame - 1 );
+        _ui.endFrameSpinBox->setValue( endFrame - 1 );
+
         _ui.sldFrame->setValue( frame.current );
-        _ui.lblStartFrame->setText( QString::number( _ui.sldFrame->minimum( )));
-        _ui.lblFrame->setText( QString::number( _ui.sldFrame->value( )));
-        _ui.lblEndFrame->setText( QString::number( _ui.sldFrame->maximum( )));
+        _ui.currentFrameSpinBox->setValue( frame.current );
+
         _ui.sldFrame->blockSignals( false );
+        _ui.startFrameSpinBox->blockSignals( false );
+        _ui.currentFrameSpinBox->blockSignals( false );
+        _ui.endFrameSpinBox->blockSignals( false );
 
         if( _onFirstFrame )
         {
@@ -166,8 +176,8 @@ public:
     Ui::animationController _ui;
     AnimationController* _animationController;
     Controller& _controller;
-    bool            _connected;
-    bool            _onFirstFrame;
+    bool _connected;
+    bool _onFirstFrame;
 };
 
 AnimationController::AnimationController( Controller& controller,
@@ -177,10 +187,18 @@ AnimationController::AnimationController( Controller& controller,
 {
     qRegisterMetaType< ::zeq::hbp::data::Frame >( "::zeq::hbp::data::Frame" );
 
-    connect( _impl->_ui.sldFrame, SIGNAL( valueChanged( int )),
-             this, SLOT( _onSliderMoved( )));
-    connect( _impl->_ui.sldFrame, SIGNAL( valueChanged( int )),
-             _impl->_ui.lblFrame, SLOT( setNum( int )));
+    connect( _impl->_ui.sldFrame, &QSlider::valueChanged,
+             this, &AnimationController::_onFrameChanged );
+    connect( _impl->_ui.sldFrame, &QSlider::rangeChanged,
+             this, &AnimationController::_onFrameChanged );
+
+    connect( _impl->_ui.startFrameSpinBox,
+             static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+             _impl->_ui.sldFrame, &QSlider::setMinimum );
+    connect( _impl->_ui.endFrameSpinBox,
+             static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+             _impl->_ui.sldFrame, &QSlider::setMaximum );
+
     connect( _impl->_ui.btnPlay, SIGNAL( pressed( )),
              this, SLOT( _togglePlayPause( )));
     connect( _impl->_ui.chbxFollow, SIGNAL( stateChanged( int )),
@@ -207,7 +225,7 @@ void AnimationController::_disconnect()
     _impl->disconnect();
 }
 
-void AnimationController::_onSliderMoved()
+void AnimationController::_onFrameChanged()
 {
     _impl->publishFrame();
 }

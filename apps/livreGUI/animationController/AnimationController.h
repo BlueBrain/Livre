@@ -55,7 +55,7 @@ private Q_SLOTS:
 
     void _connect();
     void _disconnect();
-    void _onSliderMoved();
+    void _onFrameChanged();
     void _togglePlayPause();
     void _setFollow( int on );
     void _onNewFrameReceived( ::zeq::hbp::data::Frame frame );

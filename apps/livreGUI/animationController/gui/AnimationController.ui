@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>790</width>
-    <height>51</height>
+    <height>53</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,26 +19,29 @@
      <item row="0" column="0">
       <layout class="QHBoxLayout" name="lytAction">
        <item>
-        <widget class="QLabel" name="lblStartFrame">
-         <property name="text">
-          <string>0</string>
+        <widget class="QSpinBox" name="startFrameSpinBox">
+         <property name="maximum">
+          <number>262143</number>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QSlider" name="sldFrame">
+         <property name="tracking">
+          <bool>false</bool>
+         </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::NoTicks</enum>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="lblFrame">
-         <property name="text">
-          <string>0</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
+        <widget class="QSpinBox" name="currentFrameSpinBox">
+         <property name="maximum">
+          <number>262144</number>
          </property>
         </widget>
        </item>
@@ -50,9 +53,9 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="lblEndFrame">
-         <property name="text">
-          <string>0</string>
+        <widget class="QSpinBox" name="endFrameSpinBox">
+         <property name="maximum">
+          <number>262144</number>
          </property>
         </widget>
        </item>
@@ -84,5 +87,38 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>currentFrameSpinBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>sldFrame</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>322</x>
+     <y>26</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>186</x>
+     <y>26</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sldFrame</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>currentFrameSpinBox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>186</x>
+     <y>26</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>322</x>
+     <y>26</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
