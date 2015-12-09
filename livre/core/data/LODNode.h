@@ -44,7 +44,8 @@ public:
      * @param levelTotalBlockDimensions Total number of blocks in the
      *                                  corresponding tree level.
      */
-    LIVRECORE_API LODNode( const NodeId nodeId,
+
+    LIVRECORE_API LODNode( const NodeId& nodeId,
                            const Vector3i& blockSize,
                            const Vector3i& levelTotalBlockDimensions );
 
@@ -54,7 +55,8 @@ public:
      * @param blockSize Block size in voxels.
      * @param worldBox Node position in the world space.
      */
-    LIVRECORE_API LODNode( const NodeId nodeId,
+
+    LIVRECORE_API LODNode( const NodeId& nodeId,
                            const Vector3i& blockSize,
                            const Boxf& worldBox );
 

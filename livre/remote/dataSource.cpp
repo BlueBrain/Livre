@@ -21,7 +21,6 @@
 #include "dataSource.h"
 
 #include <livre/core/data/LODNode.h>
-#include <livre/core/dash/DashRenderNode.h>
 #include <livre/core/data/MemoryUnit.h>
 
 #include <livre/lib/zeq/events.h>
@@ -33,6 +32,9 @@
 
 #include <boost/bind.hpp>
 #include <lunchbox/pluginRegisterer.h>
+#include <lunchbox/clock.h>
+#include <lunchbox/scopedMutex.h>
+
 
 namespace livre
 {
@@ -177,7 +179,7 @@ DataSource::DataSource( const VolumeDataSourcePluginData& initData )
 
 DataSource::~DataSource()
 {
-    delete _impl;
+    
 }
 
 MemoryUnitPtr DataSource::getData( const LODNode& node )

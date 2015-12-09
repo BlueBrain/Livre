@@ -33,36 +33,31 @@ class ScreenSpaceLODEvaluator : public LODEvaluator
 public:
 
     /**
-     * @param windowHeight Height of the screen in pixels.
      * @param screenSpaceError The number of voxels per pixel.
-     * @param worldSpacePerVoxel The voxel size in world space units.
-     * @param minLOD Minimum LOD to be rendered.
-     * @param maxLOD Maximum LOD to be rendered.
+
      */
-    LIVRE_API ScreenSpaceLODEvaluator( const uint32_t windowHeight,
-                                           const float screenSpaceError,
-                                           const float worldSpacePerVoxel,
-                                           const uint32_t minLOD,
-                                           const uint32_t maxLOD );
+    LIVRE_API ScreenSpaceLODEvaluator( const float screenSpaceError );
 
     /**
      * Computes the LOD for a world space point.
-     * @param frustum The view furstum.
-     * @param volumeDepth The highest level of detail for the volume.
      * @param worldCoord World position of a point.
+     * @param volumeInfo Volume information.
+     * @param viewport View port in pixels.
+     * @param frustum The view furstum.
+     * @param minLOD Minimum LOD to be rendered.
+     * @param maxLOD Maximum LOD to be rendered.
      * @return Returns the LOD between min - max LOD.
      */
-    LIVRE_API uint32_t getLODForPoint( const Frustum& frustum,
-                                           const uint32_t volumeDepth,
-                                           const Vector3f& worldCoord ) const final;
+    LIVRE_API uint32_t getLODForPoint( const Vector3f& worldCoord,
+                                       const VolumeInformation& volumeInfo,
+                                       const PixelViewport& viewport,
+                                       const Frustum& frustum,
+                                       uint32_t minLOD,
+                                       uint32_t maxLOD ) const final;
 
 private:
 
-    const uint32_t _windowHeight;
     const float _screenSpaceError;
-    const float _worldSpacePerVoxel;
-    const uint32_t _minLOD;
-    const uint32_t _maxLOD;
 };
 
 }

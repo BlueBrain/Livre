@@ -24,7 +24,6 @@
 #include <livre/lib/types.h>
 
 #include <livre/core/cache/CacheObject.h> // base class
-#include <livre/core/data/LODNodeTrait.h> // base class
 
 namespace livre
 {
@@ -33,7 +32,7 @@ namespace livre
  * The TextureDataObject class gets raw data from the volume data source and
  * stores the quantized/formatted data for the GPU.
  */
-class TextureDataObject : public CacheObject, public LODNodeTrait
+class TextureDataObject : public CacheObject
 {
 public:
     ~TextureDataObject();
@@ -56,15 +55,15 @@ public:
 private:
     friend class TextureDataCache;
     TextureDataObject();
-    TextureDataObject( VolumeDataSourcePtr dataSourcePtr,
-                       ConstLODNodePtr lodNodePtr, uint32_t gpuDataType );
+    TextureDataObject( const CacheId& cacheId,
+                       VolumeDataSourcePtr dataSourcePtr,
+                       uint32_t gpuDataType );
 
     bool load_() final;
     void unload_() final;
     bool isLoaded_() const final;
-    bool isValid_() const final;
     size_t getCacheSize() const final;
-    CacheId getCacheID() const final;
+
 
     template< class T >
     bool setTextureData_( bool quantize );

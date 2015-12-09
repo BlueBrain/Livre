@@ -52,8 +52,17 @@ public:
      */
     bool apply( bool wait);
 
-    /** @return The texture data cache. */
-    const TextureCache& getTextureCache() const;
+    /** @return The texture cache. */
+    CachePtr getTextureCache();
+
+    /** @return The texture cache. */
+    ConstCachePtr getTextureCache() const;
+
+    /** @return The compute executor. */
+    ExecutorPtr getComputeExecutor();
+
+    /** @return The upload executor. */
+    ExecutorPtr getUploadExecutor();
 
 private:
     class Impl;

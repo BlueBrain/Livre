@@ -19,7 +19,6 @@
 
 #include <livre/uvf/UVFDataSource.h>
 
-#include <livre/core/dash/DashRenderNode.h>
 #include <livre/core/data/LODNode.h>
 #include <livre/core/data/MemoryUnit.h>
 
@@ -415,7 +414,7 @@ UVFDataSource::UVFDataSource( const VolumeDataSourcePluginData& initData )
 
 UVFDataSource::~UVFDataSource()
 {
-    delete _impl;
+    
 }
 
 bool UVFDataSource::handles( const VolumeDataSourcePluginData& initData )

@@ -30,26 +30,24 @@
 namespace livre
 {
 
-TextureDataCache::TextureDataCache( VolumeDataSourcePtr volumeDataSourcePtr,
+TextureDataCache::TextureDataCache( size_t maxMem,
+                                    VolumeDataSourcePtr volumeDataSourcePtr,
                                     const uint32_t type )
-    : volumeDataSourcePtr_( volumeDataSourcePtr )
+    : LRUCache( maxMem )
+    , volumeDataSourcePtr_( volumeDataSourcePtr )
     , type_( type )
 {
     statisticsPtr_->setStatisticsName( "Data cache CPU");
 }
 
-CacheObject* TextureDataCache::generateCacheObjectFromID_( const CacheId cacheID )
+CacheObject* TextureDataCache::generateCacheObjectFromID_( const CacheId& cacheId )
 {
-    ConstLODNodePtr lodNodePtr =
-            volumeDataSourcePtr_->getNode( NodeId( cacheID ));
-
-    if( !lodNodePtr->isValid() )
-        return static_cast< CacheObject* >( TextureDataObject::getEmptyPtr( ));
-
-    return new TextureDataObject( volumeDataSourcePtr_, lodNodePtr, type_ );
+    return new TextureDataObject( cacheId,
+                                  volumeDataSourcePtr_,
+                                  type_ );
 }
 
-TextureDataObject& TextureDataCache::getNodeTextureData( const CacheId cacheId )
+TextureDataObject& TextureDataCache::getNodeTextureData( const CacheId& cacheId )
 {
     if( cacheId == INVALID_CACHE_ID )
         return *TextureDataObject::getEmptyPtr();
@@ -60,7 +58,7 @@ TextureDataObject& TextureDataCache::getNodeTextureData( const CacheId cacheId )
     return *internalTextureData;
 }
 
-TextureDataObject& TextureDataCache::getNodeTextureData( const CacheId cacheId ) const
+TextureDataObject& TextureDataCache::getNodeTextureData( const CacheId& cacheId ) const
 {
     if( cacheId == INVALID_CACHE_ID )
         return *TextureDataObject::getEmptyPtr();

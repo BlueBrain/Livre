@@ -32,6 +32,7 @@
 #include <livre/eq/FrameData.h>
 #include <livre/eq/settings/VolumeSettings.h>
 #include <livre/eq/settings/CameraSettings.h>
+
 #ifdef LIVRE_USE_RESTBRIDGE
 #  include <restbridge/RestBridge.h>
 #endif

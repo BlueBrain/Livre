@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE( testRemote )
                                  block,
                                  worldBox );
             clock.reset();
-            livre::MemoryUnitPtr mem = dataSource.getData( node );
+            livre::MemoryUnitPtr mem = dataSource.getData( node.getNodeId( ));
             const float first = clock.getTimef();
 
             const livre::Vector3ui brickSize = livre::Vector3ui( i ) +
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE( testRemote )
             clock.reset();
             while( clock.getTimef() < 300.f )
             {
-                mem = dataSource.getData( node );
+                mem = dataSource.getData( node.getNodeId( ));
                 ++num;
 
                 BOOST_REQUIRE( mem );

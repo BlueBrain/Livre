@@ -24,27 +24,41 @@ namespace livre
 namespace
 {
 const std::string DATAFILE_PARAM = "volume";
+const std::string COMPUTE_THREADSPERWINDOW_PARAM = "compute-threads-per-window";
+const std::string UPLOAD_THREADSPERWINDOW_PARAM = "upload-threads-per-window";
 }
 
 ClientParameters::ClientParameters()
     : Parameters( "Application Parameters" )
+    , computeThreadsPerWindow( 4 )
+    , uploadThreadsPerWindow( 4 )
 {
     configuration_.addDescription( configGroupName_, DATAFILE_PARAM,
                                    "URI of volume data source", dataFileName );
+    configuration_.addDescription( configGroupName_, COMPUTE_THREADSPERWINDOW_PARAM,
+                                   "Compute threads per window", computeThreadsPerWindow );
+    configuration_.addDescription( configGroupName_, UPLOAD_THREADSPERWINDOW_PARAM,
+                                   "Upload threads per window", uploadThreadsPerWindow );
 }
 
 void ClientParameters::serialize( co::DataOStream &os,
-                                       const uint64_t dirtyBits )
+                                  const uint64_t dirtyBits )
 {
     co::Serializable::serialize( os, dirtyBits );
-    os << dataFileName;
+    os << dataFileName
+       << computeThreadsPerWindow
+       << uploadThreadsPerWindow;
 }
 
 ClientParameters& ClientParameters::operator = (
         const ClientParameters& parameters )
 {
-    if( this != &parameters )
-        dataFileName = parameters.dataFileName;
+    if( this == &parameters )
+        return *this;
+
+    dataFileName = parameters.dataFileName;
+    computeThreadsPerWindow = parameters.computeThreadsPerWindow;
+    uploadThreadsPerWindow = parameters.uploadThreadsPerWindow;
     return *this;
 }
 
@@ -52,11 +66,15 @@ void ClientParameters::deserialize( co::DataIStream &is,
                                     const uint64_t dirtyBits )
 {
     co::Serializable::deserialize( is, dirtyBits );
-    is >> dataFileName;
+    is >> dataFileName
+       >> computeThreadsPerWindow
+       >> uploadThreadsPerWindow;
 }
 
 void ClientParameters::initialize_()
 {
     configuration_.getValue( DATAFILE_PARAM, dataFileName );
+    configuration_.getValue( COMPUTE_THREADSPERWINDOW_PARAM, computeThreadsPerWindow );
+    configuration_.getValue( UPLOAD_THREADSPERWINDOW_PARAM, uploadThreadsPerWindow );
 }
 }

@@ -34,6 +34,8 @@ struct ClientParameters : public Parameters
     LIVRE_API ClientParameters();
 
     std::string dataFileName; //!< Data file name.
+    uint32_t computeThreadsPerWindow; //!< Threads per window.
+    uint32_t uploadThreadsPerWindow; //!< Threads per window.
 
     /**
      * De-serializes the object from input stream.

@@ -21,14 +21,13 @@
 #define _View_h_
 
 #include <livre/core/api.h>
-#include <livre/core/dashTypes.h>
 #include <livre/core/mathTypes.h>
 #include <livre/core/lunchboxTypes.h>
 
 namespace livre
 {
-
 /** A viewport on the rendering widgets frame buffer. */
+
 class View
 {
 public:
@@ -62,8 +61,7 @@ public:
      * @param widget The framebuffer widget to render to.
      * @param renderSetGenerator The renderlist generator.
      */
-    LIVRECORE_API void render( const FrameInfo& frameInfo,
-                               const RenderBricks& renderBricks,
+    LIVRECORE_API void render( const RenderBricks& renderBricks,
                                const GLWidget& widget );
 
     /**
@@ -72,22 +70,6 @@ public:
     virtual const Frustum& getFrustum() const = 0;
 
 protected:
-
-    /**
-     * Is called after the render list generated, and before the rendering.
-     * @param widget The widget to render to.
-     * @param frameInfo Frame information.
-     */
-    virtual void onPreRender_( const GLWidget& widget LB_UNUSED,
-                               const FrameInfo& frameInfo LB_UNUSED ) {}
-
-    /**
-     * Is called after the rendering.
-     * @param widget The widget to render to.
-     * @param frameInfo Frame information.
-     */
-    virtual void onPostRender_( const GLWidget& widget,
-                                const FrameInfo& frameInfo ) = 0;
 
     RendererPtr rendererPtr_; //!< Renderer.
     Viewport viewport_; //!< The normalized viewport.

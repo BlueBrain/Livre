@@ -33,20 +33,10 @@ struct LastUsedOrderOperator
     }
 };
 
-LRUCachePolicy::LRUCachePolicy()
-    : maxMemoryInBytes_( 0 ),
+LRUCachePolicy::LRUCachePolicy( const size_t maxMem )
+    : maxMemoryInBytes_( maxMem ),
       cleanUpRatio_( 1.0 )
 {}
-
-void LRUCachePolicy::setProtectList( const CacheIdSet& protectUnloadingList )
-{
-    protectUnloadingList_ = protectUnloadingList;
-}
-
-void LRUCachePolicy::setMaximumMemory( const size_t maxMemoryInBytes )
-{
-    maxMemoryInBytes_ = maxMemoryInBytes;
-}
 
 void LRUCachePolicy::setCleanupRatio( float cleanUpRatio )
 {
@@ -76,7 +66,7 @@ void LRUCachePolicy::apply_( const Cache& cache LB_UNUSED,
     {
         CacheObject* cacheObject = *it;
         const CacheIdSet::const_iterator& itCacheObject =
-                protectUnloadingList_.find( cacheObject->getCacheID() );
+                protectUnloadingList_.find( cacheObject->getCacheId() );
         if( itCacheObject == protectUnloadingList_.end() )
             modifiedObjectList.push_back( cacheObject );
     }

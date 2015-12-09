@@ -55,16 +55,16 @@ void _testDataSource( const std::string& uriStr )
     const livre::NodeId firstChildNodeId =
         parentNodeId.getChildren().front();
 
-    livre::ConstLODNodePtr lodNode = source.getNode(firstChildNodeId);
-    BOOST_CHECK( lodNode );
-    BOOST_CHECK( lodNode->getVoxelBox().getDimension() =
+    const livre::LODNode& lodNode = source.getNode(firstChildNodeId);
+    BOOST_CHECK( lodNode.isValid( ));
+    BOOST_CHECK( lodNode.getVoxelBox().getDimension() =
                  livre::Vector3ui( BLOCK_SIZE ));
 
-    const livre::Vector3ui blockSize = lodNode->getBlockSize() +
+    const livre::Vector3ui& blockSize = lodNode.getBlockSize() +
                                        livre::Vector3ui( info.overlap ) * 2;
     BOOST_CHECK( blockSize == info.maximumBlockSize );
 
-    livre::MemoryUnitPtr memUnit = source.getData( *lodNode );
+    livre::MemoryUnitPtr memUnit = source.getData( lodNode.getNodeId( ));
     const size_t allocSize = blockSize[ 0 ] * blockSize[ 1 ] * blockSize[ 2 ] *
                              info.compCount * info.getBytesPerVoxel();
 

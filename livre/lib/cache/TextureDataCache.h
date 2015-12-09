@@ -40,20 +40,24 @@ public:
      * @param volumeDataSource The source where the volume data should be loaded from
      * @param type The type of the data for the GPU.
      */
-    LIVRE_API TextureDataCache( VolumeDataSourcePtr volumeDataSource, uint32_t type );
+    LIVRE_API TextureDataCache( size_t maxMem,
+                                VolumeDataSourcePtr volumeDataSource,
+                                uint32_t type );
 
     /**
-     * @param cacheID The cacheId of the node.
-     * @return A valid cache object if id is valid or data source includes the information for cache id.
+     * @param cacheId The cacheId of the node.
+     * @return A valid cache object if id is valid or data source includes
+     * the information for cache id.
      * If there is not, the object is constructed.
      */
-    LIVRE_API TextureDataObject& getNodeTextureData( const CacheId cacheID ) const;
+    LIVRE_API TextureDataObject& getNodeTextureData( const CacheId& cacheId ) const;
 
     /**
-     * @param cacheID The cacheId of the node.
-     * @return A valid cache object if id is valid or data source includes the information for cache id.
+     * @param cacheId The cacheId of the node.
+     * @return A valid cache object if id is valid or data source includes
+     * the information for cache id.
      */
-    LIVRE_API TextureDataObject& getNodeTextureData( const CacheId cacheID );
+    LIVRE_API TextureDataObject& getNodeTextureData( const CacheId& cacheId );
 
     /** @return the data source. */
     VolumeDataSourcePtr getDataSource();
@@ -64,7 +68,8 @@ public:
     LIVRE_API uint32_t getTextureType( ) const { return type_; }
 
 private:
-    CacheObject *generateCacheObjectFromID_( const CacheId cacheID );
+
+    CacheObject *generateCacheObjectFromID_( const CacheId& cacheId );
 
     VolumeDataSourcePtr volumeDataSourcePtr_;
     const uint32_t type_;

@@ -21,15 +21,35 @@
 
 namespace livre
 {
-FrameInfo::FrameInfo( const Frustum& cFrustum )
-    : currentFrustum( cFrustum )
-{}
+
+FrameInfo::FrameInfo( const Frustum& frustum_,
+                      const uint32_t frameId_ )
+    : currentFrustum( frustum_ )
+    , frameId( frameId_ )
+{
+}
 
 void FrameInfo::clear()
 {
-    allNodes.clear();
     notAvailableRenderNodes.clear();
     renderNodes.clear();
+}
+
+FrameInfo& FrameInfo::merge(const FrameInfo& frameInfo)
+{
+    if( &frameInfo == this )
+        return *this;
+
+    notAvailableRenderNodes.insert( notAvailableRenderNodes.end(),
+                                    frameInfo.notAvailableRenderNodes.begin(),
+                                    frameInfo.notAvailableRenderNodes.end( ));
+
+    renderNodes.insert( renderNodes.end(),
+                        frameInfo.renderNodes.begin(),
+                        frameInfo.renderNodes.end( ));
+
+    return *this;
+
 }
 
 }

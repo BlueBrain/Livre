@@ -43,11 +43,6 @@ public:
     }
 
     /**
-     * @return The invalid cache id.
-     */
-    virtual CacheId getCacheID() const { return INVALID_CACHE_ID; }
-
-    /**
      * @return The empty size.
      */
     virtual size_t getCacheSize( ) const { return 0; }

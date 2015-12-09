@@ -29,7 +29,7 @@ LODNode::LODNode( ) :
     blockSize_( 0 )
 {}
 
-LODNode::LODNode( const NodeId nodeId,
+LODNode::LODNode( const NodeId& nodeId,
                   const Vector3i& blockSize,
                   const Vector3i& levelTotalBlockDimensions )
    : nodeId_( nodeId )
@@ -39,7 +39,7 @@ LODNode::LODNode( const NodeId nodeId,
     computeWorldBox_( levelTotalBlockDimensions );
 }
 
-LODNode::LODNode( const NodeId nodeId,
+LODNode::LODNode( const NodeId& nodeId,
                   const Vector3i& blockSize,
                   const Boxf& worldBox )
    : nodeId_( nodeId )

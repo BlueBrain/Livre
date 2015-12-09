@@ -38,20 +38,20 @@ public:
     /**
      * @param internalTextureFormat Internal texture format of OpenGL, it defines the memory usage.
      */
-    TextureCache( const int internalTextureFormat );
+    TextureCache( size_t maxMem, int internalTextureFormat );
 
     /**
-     * @param cacheID The cacheId of the node.
+     * @param cacheId The cacheId of the node.
      * @return A valid cache object if id is valid or data source includes the information for cache id.
      * If there is not, the object is constructed.
      */
-    TextureObject& getNodeTexture( const CacheId cacheID );
+    TextureObject& getNodeTexture( const CacheId& cacheId );
 
     /**
-     * @param cacheID The cacheId of the node.
+     * @param cacheId The cacheId of the node.
      * @return A valid cache object if id is valid or data source includes the information for cache id.
      */
-    TextureObject& getNodeTexture( const CacheId cacheID ) const;
+    TextureObject& getNodeTexture( const CacheId& cacheId ) const;
 
     /**
      * @param maxBlockSize Max block size of the texture.
@@ -65,7 +65,7 @@ public:
 
 private:
 
-    CacheObject *generateCacheObjectFromID_(const CacheId cacheID );
+    CacheObject *generateCacheObjectFromID_(const CacheId& cacheId );
     TexturePoolFactory texturePoolFactory_;
 };
 

@@ -30,22 +30,24 @@ namespace livre
 
 struct CacheObject::CacheInfo : public CacheObjectListener
 {
-    CacheInfo( ) :
+    CacheInfo( const CacheId& cacheId_ ) :
         referenceCount( 0 ),
         lastUsedTime( 0.0 ),
         loadTime( 0.0 ),
-        unloadable( true )
+        unloadable( true ),
+        cacheId( cacheId_ )
     { }
 
     uint32_t referenceCount;
     double lastUsedTime;
     double loadTime;
     bool unloadable;
+    CacheId cacheId;
     ReadWriteMutex mutex;
 };
 
-CacheObject::CacheObject( )
-    : commonInfoPtr_( new CacheInfo( ) )
+CacheObject::CacheObject( const CacheId& cacheId )
+    : commonInfoPtr_( new CacheInfo( cacheId ) )
 {
 }
 
@@ -102,6 +104,11 @@ bool CacheObject::isLoaded() const
 bool CacheObject::isValid() const
 {
     return ( commonInfoPtr_ ? isValid_() : false );
+}
+
+CacheId CacheObject::getCacheId() const
+{
+    return commonInfoPtr_->cacheId;
 }
 
 void CacheObject::cacheLoad()
@@ -182,6 +189,16 @@ void CacheObject::registerObserver( CacheObjectObserver* observer )
 void CacheObject::unregisterObserver( CacheObjectObserver* observer )
 {
     commonInfoPtr_->unregisterObserver( observer );
+}
+
+bool CacheObject::isValid_() const
+{
+    return commonInfoPtr_->cacheId != INVALID_CACHE_ID;
+}
+
+bool CacheObject::operator==( const CacheObject& cacheObject ) const
+{
+    return commonInfoPtr_->cacheId == cacheObject.getCacheId();
 }
 
 void CacheObject::updateLastUsed_( const double lastUsedTime )

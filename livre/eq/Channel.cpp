@@ -24,6 +24,7 @@
 #include <livre/eq/Config.h>
 #include <livre/eq/Event.h>
 #include <livre/eq/Error.h>
+#include <livre/eq/Event.h>
 #include <livre/eq/FrameData.h>
 #include <livre/eq/FrameGrabber.h>
 #include <livre/eq/Node.h>
@@ -35,24 +36,33 @@
 #include <livre/eq/settings/RenderSettings.h>
 #include <livre/eq/Window.h>
 
-#include <livre/lib/cache/TextureCache.h>
-#include <livre/lib/cache/TextureDataCache.h>
-#include <livre/lib/cache/TextureObject.h>
-#include <livre/lib/render/AvailableSetGenerator.h>
-#include <livre/lib/render/RenderView.h>
-#include <livre/lib/render/ScreenSpaceLODEvaluator.h>
-#include <livre/lib/render/SelectVisibles.h>
-#include <livre/lib/visitor/DFSTraversal.h>
-
-#include <livre/core/dash/DashRenderStatus.h>
-#include <livre/core/dash/DashTree.h>
-#include <livre/core/dashpipeline/DashProcessorInput.h>
-#include <livre/core/dashpipeline/DashProcessorOutput.h>
 #include <livre/core/data/VolumeDataSource.h>
 #include <livre/core/render/FrameInfo.h>
 #include <livre/core/render/Frustum.h>
 #include <livre/core/render/GLWidget.h>
 #include <livre/core/render/RenderBrick.h>
+#include <livre/core/render/View.h>
+#include <livre/core/visitor/RenderNodeVisitor.h>
+#include <livre/core/pipeline/Filter.h>
+#include <livre/core/pipeline/FilterInput.h>
+#include <livre/core/pipeline/FilterOutput.h>
+#include <livre/core/pipeline/FunctionFilter.h>
+#include <livre/core/pipeline/PortData.h>
+#include <livre/core/pipeline/PortInfo.h>
+#include <livre/core/pipeline/InputPort.h>
+#include <livre/core/pipeline/Pipeline.h>
+#include <livre/core/pipeline/PipeFilter.h>
+#include <livre/core/pipeline/SimpleExecutor.h>
+#include <livre/core/pipeline/Workers.h>
+#include <livre/core/visitor/DFSTraversal.h>
+
+#include <livre/lib/cache/TextureCache.h>
+#include <livre/lib/cache/TextureDataCache.h>
+#include <livre/lib/cache/TextureObject.h>
+#include <livre/lib/pipeline/RenderPipeFilter.h>
+#include <livre/lib/pipeline/DataUploadFilter.h>
+#include <livre/lib/render/ScreenSpaceLODEvaluator.h>
+#include <livre/lib/configuration/VolumeRendererParameters.h>
 
 #include <eq/eq.h>
 #include <eq/gl.h>
@@ -66,24 +76,25 @@ namespace detail
 /**
  * The EqRenderView class implements livre \see RenderView for internal use of \see eq::Channel.
  */
-class EqRenderView : public RenderView
+class EqRenderView : public View
 {
 public:
 
-    EqRenderView( Channel* channel, ConstDashTreePtr dashTree );
+    EqRenderView( Channel* channel );
     const Frustum& getFrustum() const final;
 
 private:
     Channel* const _channel;
 };
 
+
 typedef boost::shared_ptr< EqRenderView > EqRenderViewPtr;
 
 /** Implements livre \GLWidget for internal use of eq::Channel. */
-class EqGLWidget : public GLWidget
+class EqGlWidget : public GLWidget
 {
 public:
-    explicit EqGLWidget( livre::Channel* channel )
+    explicit EqGlWidget( livre::Channel* channel )
         : _channel( channel )
     {}
 
@@ -125,9 +136,7 @@ class Channel
 {
 public:
     explicit Channel( livre::Channel* channel )
-          : _channel( channel )
-          , _glWidgetPtr( new EqGLWidget( channel ))
-          , _frameInfo( _currentFrustum )
+              : _channel( channel )
     {}
 
     void initializeFrame()
@@ -137,7 +146,6 @@ public:
         eq::FrameDataPtr frameData = new eq::FrameData();
         frameData->setBuffers( eq::Frame::BUFFER_COLOR );
         _frame.setFrameData( frameData );
-        _frame.setName( std::string( "self." ) + _channel->getName( ));
     }
 
     ConstFrameDataPtr getFrameData() const
@@ -149,28 +157,23 @@ public:
     void initializeRenderer()
     {
         const uint32_t nSamplesPerRay =
-            getFrameData()->getVRParameters()->samplesPerRay;
+                   getFrameData()->getVRParameters()->samplesPerRay;
 
         const uint32_t nSamplesPerPixel =
-            getFrameData()->getVRParameters()->samplesPerPixel;
+           getFrameData()->getVRParameters()->samplesPerPixel;
 
         const livre::Node* node =
-                static_cast< livre::Node* >( _channel->getNode( ));
+               static_cast< livre::Node* >( _channel->getNode( ));
 
-        ConstDashTreePtr dashTree = node->getDashTree();
+        const livre::ConstVolumeDataSourcePtr dataSource = node->getDataSource();
 
-        ConstVolumeDataSourcePtr dataSource = dashTree->getDataSource();
-
-        _renderViewPtr.reset( new EqRenderView( this, dashTree ));
-
-        RendererPtr renderer( new RayCastRenderer(
-                                  nSamplesPerRay,
-                                  nSamplesPerPixel,
-                                  dataSource->getVolumeInformation(),
-                                  GL_UNSIGNED_BYTE,
-                                  GL_LUMINANCE8 ));
-
-        _renderViewPtr->setRenderer( renderer);
+        _renderInput.view.reset( new EqRenderView( this ));
+        _renderInput.view->setRenderer( RendererPtr( new RayCastRenderer(
+                                    nSamplesPerRay,
+                                    nSamplesPerPixel,
+                                    dataSource->getVolumeInformation(),
+                                    GL_UNSIGNED_BYTE,
+                                    GL_LUMINANCE8 )));
     }
 
     const Frustum& initializeLivreFrustum()
@@ -211,115 +214,41 @@ public:
         glScissor( 0, 0, channelPvp.w, channelPvp.h );
     }
 
-    void generateRenderBricks( const ConstCacheObjects& renderNodes,
-                               RenderBricks& renderBricks )
+    void notifyRedraw( PipeFilter& pipeFilter )
     {
-        renderBricks.reserve( renderNodes.size( ));
-        BOOST_FOREACH( const ConstCacheObjectPtr& cacheObject, renderNodes )
-        {
-            const ConstTextureObjectPtr texture =
-                boost::static_pointer_cast< const TextureObject >( cacheObject );
-
-            RenderBrickPtr renderBrick( new RenderBrick( texture->getLODNode(),
-                                                         texture->getTextureState( )));
-            renderBricks.push_back( renderBrick );
-        }
-    }
-
-    DashRenderNodes requestData()
-    {
-        livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
-        livre::Window* window = static_cast< livre::Window* >( _channel->getWindow( ));
-        livre::Pipe* pipe = static_cast< livre::Pipe* >( window->getPipe( ));
-
-        ConstVolumeRendererParametersPtr vrParams = pipe->getFrameData()->getVRParameters();
-        const uint32_t minLOD = vrParams->minLOD;
-        const uint32_t maxLOD = vrParams->maxLOD;
-        const float screenSpaceError = vrParams->screenSpaceError;
-
-        DashTreePtr dashTree = node->getDashTree();
-
-        const VolumeInformation& volInfo = dashTree->getDataSource()->getVolumeInformation();
-
-        const float worldSpacePerVoxel = volInfo.worldSpacePerVoxel;
-        const uint32_t volumeDepth = volInfo.rootNode.getDepth();
-        _drawRange = _channel->getRange();
-
-        SelectVisibles visitor( dashTree, _currentFrustum,
-                                _channel->getPixelViewport().h,
-                                screenSpaceError, worldSpacePerVoxel,
-                                volumeDepth, minLOD, maxLOD,
-                                Range{{ _drawRange.start, _drawRange.end }});
-
-        livre::DFSTraversal traverser;
-        traverser.traverse( volInfo.rootNode, visitor,
-                            dashTree->getRenderStatus().getFrameID( ));
-        window->commit();
-        return visitor.getVisibles();
+        pipeFilter.waitForInput();
+        livre::Config* config =
+               static_cast< livre::Config* >( _channel->getConfig( ));
+        config->sendEvent( REDRAW );
     }
 
     void frameDraw( const eq::uint128_t& )
     {
-        livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
-        const DashRenderStatus& renderStatus = node->getDashTree()->getRenderStatus();
-        const uint32_t frame = renderStatus.getFrameID();
+        livre::Window* window =
+               static_cast< livre::Window* >( _channel->getWindow( ));
+        const livre::Pipe* pipe =
+               static_cast< const livre::Pipe* >( window->getPipe( ));
+        const uint32_t frame =
+               pipe->getFrameData()->getFrameSettings()->getFrameNumber();
+
         if( frame >= INVALID_FRAME )
             return;
 
         applyCamera();
         initializeLivreFrustum();
-        const DashRenderNodes& visibles = requestData();
 
-        const eq::fabric::Viewport& vp = _channel->getViewport( );
-        const Viewport viewport( vp.x, vp.y, vp.w, vp.h );
-        _renderViewPtr->setViewport( viewport );
+        _drawRange = _channel->getRange();
 
-        livre::Window* window = static_cast< livre::Window* >( _channel->getWindow( ));
-        AvailableSetGenerator generateSet( node->getDashTree(),
-                                           window->getTextureCache( ));
+        PipelinePtr generateRenderingSetPipe( new Pipeline );
+        FilterPtr renderFilter( new RenderPipeFilter( ));
+        PipeFilterPtr renderPipeFilter = generateRenderingSetPipe->add( renderFilter );
+        renderPipeFilter->setInput( "RenderPipeInput", _renderInput );
+        renderPipeFilter->setInput( "Frustum", std::move( _currentFrustum ));
+        renderPipeFilter->setInput( "Frame", frame );
 
-        _frameInfo.clear();
-        for( const auto& visible : visibles )
-            _frameInfo.allNodes.push_back( visible.getLODNode().getNodeId( ));
-        generateSet.generateRenderingSet( _frameInfo );
-
-        const livre::Pipe* pipe = static_cast< const livre::Pipe* >( _channel->getPipe( ));
-        const bool isSynchronous = pipe->getFrameData()->getVRParameters()->synchronousMode;
-
-        // #75: only wait for data in synchronous mode
-        const bool dashTreeUpdated = window->apply( isSynchronous );
-
-        if( dashTreeUpdated )
-        {
-            const Frustum& receivedFrustum = renderStatus.getFrustum();
-
-            // If there are multiple channels, this may cause the ping-pong
-            // because every channel will try to update the same DashTree in
-            // node with their own frustum.
-            if( !pipe->getFrameData()->getVRParameters()->synchronousMode
-                 && receivedFrustum != _currentFrustum )
-            {
-                _channel->getConfig()->sendEvent( REDRAW );
-            }
-
-            _frameInfo.clear();
-            for( const auto& visible : visibles )
-                _frameInfo.allNodes.push_back(visible.getLODNode().getNodeId());
-            generateSet.generateRenderingSet( _frameInfo );
-        }
-
-        EqRenderViewPtr renderViewPtr =
-                boost::static_pointer_cast< EqRenderView >( _renderViewPtr );
-        RayCastRendererPtr renderer =
-                boost::static_pointer_cast< RayCastRenderer >(
-                    renderViewPtr->getRenderer( ));
-
-        renderer->initTransferFunction(
-            pipe->getFrameData()->getRenderSettings()->getTransferFunction( ));
-
-        RenderBricks renderBricks;
-        generateRenderBricks( _frameInfo.renderNodes, renderBricks );
-        renderViewPtr->render( _frameInfo, renderBricks, *_glWidgetPtr );
+        const Vector2f drawRange( _drawRange.start, _drawRange.end );
+        renderPipeFilter->setInput( "DataRange", drawRange );
+        generateRenderingSetPipe->execute();
     }
 
     void applyCamera()
@@ -341,8 +270,40 @@ public:
         initializeFrame();
         initializeRenderer();
 
-        Window* window = static_cast< Window* >( _channel->getWindow( ));
-        _glWidgetPtr->setGLContext( GLContextPtr( new EqContext( window )));
+        livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
+        livre::Window* window = static_cast< livre::Window* >( _channel->getWindow( ));
+        const livre::Pipe* pipe =
+               static_cast< const livre::Pipe* >( window->getPipe( ));
+
+        _renderInput.glWidget.reset( new EqGlWidget( _channel ));
+
+        GLContextPtr glContext( new EqContext( window ));
+        _renderInput.glWidget->setGLContext( glContext );
+
+        _renderInput.dataSource = node->getDataSource();
+        _renderInput.dataCache = node->getTextureDataCache();
+        _renderInput.textureCache = window->getTextureCache();
+
+        PortInfos redrawFilterInputPorts =
+                   { PortInfo( "RenderPipeInput", RenderPipeFilter::RenderPipeInput()) };
+        PortInfos redrawFilterOutputPorts =
+                   { PortInfo( "RenderPipeInput", RenderPipeFilter::RenderPipeInput()) };
+
+        FilterPtr redrawFilter( new FunctionFilter( boost::bind( &Channel::notifyRedraw,
+                                                                   this,
+                                                                   _1),
+                                                                 redrawFilterInputPorts,
+                                                                 redrawFilterOutputPorts ));
+
+        ConstVolumeRendererParametersPtr vrParams =
+                                   pipe->getFrameData()->getVRParameters();
+        _renderInput.redrawFilter = redrawFilter;
+        _renderInput.computeExecutor = window->getComputeExecutor();
+        _renderInput.uploadExecutor = window->getUploadExecutor();
+        _renderInput.isSynchronous = vrParams->synchronousMode;
+        _renderInput.maxLOD = vrParams->maxLOD;
+        _renderInput.minLOD = vrParams->minLOD;
+        _renderInput.screenSpaceError = vrParams->screenSpaceError;
     }
 
     void configExit()
@@ -390,23 +351,15 @@ public:
         _channel->applyScreenFrustum();
         glMatrixMode( GL_MODELVIEW );
 
-        livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
+        Window* window = static_cast< Window* >( _channel->getWindow( ));
         std::ostringstream os;
-        const size_t all = _frameInfo.allNodes.size();
-        const size_t missing = _frameInfo.notAvailableRenderNodes.size();
-        const float done = all > 0 ? float( all - missing ) / float( all ) : 0;
-        os << node->getTextureDataCache().getStatistics() << "  "
-           << int( 100.f * done + .5f ) << "% loaded" << std::endl;
+        os.str("");
+        os << window->getTextureCache()->getStatistics();
         float y = 220;
         _drawText( os.str(), y );
 
-        Window* window = static_cast< Window* >( _channel->getWindow( ));
-        os.str("");
-        os << window->getTextureCache().getStatistics();
-        _drawText( os.str(), y );
-
         ConstVolumeDataSourcePtr dataSource = static_cast< livre::Node* >(
-            _channel->getNode( ))->getDashTree()->getDataSource();
+            _channel->getNode( ))->getDataSource();
         const VolumeInformation& info = dataSource->getVolumeInformation();
         Vector3f voxelSize = info.boundingBox.getDimension() / info.voxels;
         std::string unit = "m";
@@ -444,13 +397,6 @@ public:
         // last line
         glRasterPos3f( 10.f, y, 0.99f );
         font->draw( text );
-    }
-
-    void frameFinish()
-    {
-        livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
-        DashRenderStatus& renderStatus = node->getDashTree()->getRenderStatus();
-        renderStatus.setFrustum( _currentFrustum );
     }
 
     void frameReadback( const eq::Frames& frames ) const
@@ -607,6 +553,23 @@ public:
         }
     }
 
+    std::string getDumpImageFileName() const
+    {
+        std::stringstream filename;
+
+        const livre::Window* window =
+               static_cast< livre::Window* >( _channel->getWindow( ));
+        const livre::Pipe* pipe =
+               static_cast< const livre::Pipe* >( window->getPipe( ));
+        const uint32_t frame =
+               pipe->getFrameData()->getFrameSettings()->getFrameNumber();
+
+        filename << std::setw( 5 ) << std::setfill('0')
+                 << frame << ".png";
+        return filename.str();
+    }
+
+
     livre::Channel* const _channel;
     eq::Range _drawRange;
     eq::Frame _frame;
@@ -614,13 +577,11 @@ public:
     ViewPtr _renderViewPtr;
     GLWidgetPtr _glWidgetPtr;
     FrameGrabber _frameGrabber;
-    FrameInfo _frameInfo;
+    RenderPipeFilter::RenderPipeInput _renderInput;
 };
 
-EqRenderView::EqRenderView( Channel* channel,
-                            ConstDashTreePtr dashTree )
-    : RenderView( dashTree )
-    , _channel( channel )
+EqRenderView::EqRenderView(Channel* channel)
+    : _channel( channel )
 {}
 
 const Frustum& EqRenderView::getFrustum() const
@@ -669,12 +630,6 @@ void Channel::frameDraw( const lunchbox::uint128_t& frameId )
     _impl->frameDraw( frameId );
 }
 
-void Channel::frameFinish( const eq::uint128_t& frameID, const uint32_t frameNumber )
-{
-    _impl->frameFinish();
-    eq::Channel::frameFinish( frameID, frameNumber );
-}
-
 void Channel::frameViewStart( const uint128_t& frameId )
 {
     eq::Channel::frameViewStart( frameId );
@@ -708,12 +663,7 @@ void Channel::frameReadback( const eq::uint128_t& frameId,
 
 std::string Channel::getDumpImageFileName() const
 {
-    const livre::Node* node = static_cast< const livre::Node* >( getNode( ));
-    ConstDashTreePtr dashTree = node->getDashTree();
-    std::stringstream filename;
-    filename << std::setw( 5 ) << std::setfill('0')
-             << dashTree->getRenderStatus().getFrameID() << ".png";
-    return filename.str();
+    return _impl->getDumpImageFileName();
 }
 
 

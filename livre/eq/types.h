@@ -33,14 +33,14 @@ namespace livre
 class CameraSettings;
 class Channel;
 class Client;
-class CommandConnection;
+class CommandPort;
 class CommandNode;
 class Config;
 class EqEventHandler;
 class EqEventHandlerFactory;
 class FrameData;
 class FrameSettings;
-class GuiConnectionDefs;
+class GuiPortDefs;
 class GuiPackets;
 class LocalInitData;
 class Node;

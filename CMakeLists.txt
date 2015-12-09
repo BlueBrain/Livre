@@ -49,7 +49,6 @@ common_package(BBPTestData)
 common_package(Boost REQUIRED COMPONENTS filesystem program_options thread
                                          system regex unit_test_framework)
 common_package(Collage REQUIRED)
-common_package(dash REQUIRED)
 common_package(Equalizer REQUIRED)
 common_package(FlatBuffers)
 common_package(GLEW_MX)
@@ -76,7 +75,7 @@ endif()
 common_package_post()
 
 include(EqGLLibraries)
-set(LIVRE_DEPENDENT_LIBRARIES vmmlib Lunchbox dash Equalizer)
+set(LIVRE_DEPENDENT_LIBRARIES vmmlib Lunchbox Equalizer)
 
 add_definitions(-DBOOST_PROGRAM_OPTIONS_DYN_LINK) # Fix for windows and shared boost.
 add_subdirectory(livre)

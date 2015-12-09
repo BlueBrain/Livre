@@ -30,35 +30,39 @@
 namespace livre
 {
 
-TextureCache::TextureCache( const GLint internalTextureFormat )
-    : texturePoolFactory_( internalTextureFormat )
+TextureCache::TextureCache( size_t maxMem,
+                            const GLint internalTextureFormat )
+    : LRUCache( maxMem )
+    , texturePoolFactory_( internalTextureFormat )
 {
     statisticsPtr_->setStatisticsName( "Texture cache GPU");
 }
 
-CacheObject *TextureCache::generateCacheObjectFromID_( const CacheId cacheID LB_UNUSED )
+CacheObject *TextureCache::generateCacheObjectFromID_( const CacheId& cacheId )
 {
-    return new TextureObject( TextureCachePtr( this, DontDeleteObject< TextureCache >() ) );
+    return new TextureObject( cacheId,
+                              TextureCachePtr( this, DontDeleteObject< TextureCache >() ) );
 }
 
-TextureObject& TextureCache::getNodeTexture( const CacheId cacheID  )
+TextureObject& TextureCache::getNodeTexture( const CacheId& cacheId  )
 {
-    if( cacheID == INVALID_CACHE_ID )
+    if( cacheId == INVALID_CACHE_ID )
         return *TextureObject::getEmptyPtr();
 
     TextureObject* internalTexture = static_cast< TextureObject *>(
-                getObjectFromCache_( cacheID ).get() );
+                getObjectFromCache_( cacheId ).get() );
 
     return *internalTexture;
 }
 
 
-TextureObject& TextureCache::getNodeTexture( const CacheId cacheID  ) const
+TextureObject& TextureCache::getNodeTexture( const CacheId& cacheId  ) const
 {
-    if( cacheID == INVALID_CACHE_ID )
+    if( cacheId == INVALID_CACHE_ID )
         return *TextureObject::getEmptyPtr();
 
-    TextureObject* internalTexture = static_cast< TextureObject *>( getObjectFromCache_( cacheID ).get() );
+    TextureObject* internalTexture =
+            static_cast< TextureObject *>( getObjectFromCache_( cacheId ).get() );
 
     return internalTexture != NULL ? *internalTexture : *TextureObject::getEmptyPtr();
 }

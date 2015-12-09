@@ -65,19 +65,19 @@ public:
 
     /**
      * Read the data for a given node.
-     * @param node LODNode to be read.
+     * @param node NodeId to be read.
      * @return The memory block containing the data for the node.
      */
-    LIVRECORE_API MemoryUnitPtr getData( const LODNode& node );
+    LIVRECORE_API MemoryUnitPtr getData( const NodeId& nodeId );
 
-    /** @copydoc getData( const LODNode& node ) */
-    LIVRECORE_API ConstMemoryUnitPtr getData( const LODNode& node ) const;
+    /** @copydoc getData( const NodeId& node ) */
+    LIVRECORE_API ConstMemoryUnitPtr getData(  const NodeId& nodeId ) const;
 
     /**
      * @param nodeId The nodeId to get the node for.
      * @return The LODNode for the ID or 0 if not found.
      */
-    LIVRECORE_API ConstLODNodePtr getNode( const NodeId nodeId ) const;
+    LIVRECORE_API LODNode getNode( const NodeId& nodeId ) const;
 
     /** @copydoc VolumeDataSourcePlugin::update() */
     LIVRECORE_API void update();

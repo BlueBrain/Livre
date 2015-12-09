@@ -34,24 +34,25 @@ class AvailableSetGenerator
 {
 public:
     /**
-     * @param tree The initialized dash tree with the volume.
+
      * @param texture cache
      */
-    LIVRE_API AvailableSetGenerator( DashTreePtr tree,
-                                     const TextureCache& textureCache );
+    LIVRE_API AvailableSetGenerator( const TextureCache& textureCache );
 
     LIVRE_API ~AvailableSetGenerator();
 
     /**
      * Generates the rendering set according to the given frustum.
-     * @param frameInfo Keeps the frame information
+     * @param frameInfo keeps the frame information
+     * @param allVisibleNodes list of all visible nodes
      */
-    LIVRE_API void generateRenderingSet( FrameInfo& frameInfo );
+    LIVRE_API void generateRenderingSet( FrameInfo& frameInfo,
+                                         const NodeIds& visibles );
 
 private:
 
     struct Impl;
-    Impl* _impl;
+    std::unique_ptr<Impl> _impl;
 };
 
 
