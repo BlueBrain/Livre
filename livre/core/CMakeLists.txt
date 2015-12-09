@@ -63,6 +63,7 @@ set(LIVRECORE_HEADERS
   render/TextureState.h
   render/TransferFunction1D.h
   render/View.h
+  util/FrameUtils.h
   util/ThreadClock.h
   visitor/NodeVisitor.h
   visitor/RenderNodeVisitor.h
@@ -108,6 +109,7 @@ set(LIVRECORE_SOURCES
   render/TextureState.cpp
   render/TransferFunction1D.cpp
   render/View.cpp
+  util/FrameUtils.cpp
   util/ThreadClock.cpp
   util/Utilities.cpp
   visitor/RenderNodeVisitor.cpp

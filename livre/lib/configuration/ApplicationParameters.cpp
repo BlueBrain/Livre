@@ -106,7 +106,7 @@ void ApplicationParameters::initialize_()
     bool animationFollowData = false;
     configuration_.getValue( ANIMATION_FOLLOW_DATA_PARAM, animationFollowData );
     if( animationFollowData )
-        animation = INT_MAX;
+        animation = LATEST_FRAME;
 }
 
 }

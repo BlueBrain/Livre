@@ -35,6 +35,7 @@
 
 #include <livre/core/events/EventMapper.h>
 #include <livre/core/maths/maths.h>
+#include <livre/core/util/FrameUtils.h>
 
 #ifdef LIVRE_USE_ZEQ
 #  include <livre/eq/zeq/communicator.h>
@@ -54,6 +55,7 @@ public:
         , volumeBBox( Boxf::makeUnitBox( ))
         , redraw( true )
         , dataFrameRange( INVALID_FRAME_RANGE )
+        , frameUtils( config->getApplicationParameters().frames, dataFrameRange )
     {}
 
     void publishModelView()
@@ -108,6 +110,7 @@ public:
 #endif
     bool redraw;
     Vector2ui dataFrameRange;
+    FrameUtils frameUtils;
 };
 
 Config::Config( eq::ServerPtr parent )
@@ -202,21 +205,13 @@ bool Config::frame()
     if( _impl->dataFrameRange == INVALID_FRAME_RANGE )
         return false;
 
-    // Set current frame (start/end may have changed)
     ApplicationParameters& params = getApplicationParameters();
-    const uint32_t frameMin = std::max( params.frames.x(),
-                                        _impl->dataFrameRange[ 0 ] );
-    const uint32_t frameMax = std::min( params.frames.y(),
-                                        _impl->dataFrameRange[ 1 ] );
-
     FrameSettingsPtr frameSettings = _impl->framedata.getFrameSettings();
-    const uint32_t currentFrame =
-            frameSettings->getFrameNumber() == INVALID_FRAME ? 0 :
-            frameSettings->getFrameNumber();
 
-    uint32_t current = std::max( frameMin, currentFrame );
-    if( params.animation == INT_MAX )
-       current = frameMax - 1;
+    // Set current frame (start/end may have changed)
+    const bool keepToLatest = params.animation == LATEST_FRAME;
+    const uint32_t current =
+            _impl->frameUtils.getCurrent( frameSettings->getFrameNumber(), keepToLatest );
 
     frameSettings->setFrameNumber( current );
     const eq::uint128_t& version = _impl->framedata.commit();
@@ -224,24 +219,8 @@ bool Config::frame()
     // reset data and advance current frame
     frameSettings->setGrabFrame( false );
 
-    if( params.animation != INT_MAX )
-    {
-        const uint32_t start = frameMin;
-        const uint32_t end = std::max( frameMax, current );
-        const int32_t delta = params.animation;
-
-        // avoid overflow condition:
-        const uint32_t fullInterval = FULL_FRAME_RANGE[ 1 ] - FULL_FRAME_RANGE[ 0 ];
-        const uint32_t interval = end - start == fullInterval ?
-                                      fullInterval : end - start + 1;
-        // If current is at the beginning and animation is reverse,
-        // set current to the end
-        if(( current - start == 0 ) && ( delta < 0 ))
-            current = end;
-
-        const uint32_t frameNumber = (( current - start + delta ) % interval ) + start;
-        frameSettings->setFrameNumber( frameNumber );
-    }
+    if( !keepToLatest )
+        frameSettings->setFrameNumber( _impl->frameUtils.getNext( current, params.animation ));
 
     _impl->redraw = false;
 
@@ -263,6 +242,11 @@ uint32_t Config::getDataFrameCount() const
 {
     const Vector2ui& range = _impl->dataFrameRange;
     return range[1] > range[0] ? range[1] - range[0] : 0;
+}
+
+const FrameUtils& Config::getFrameUtils() const
+{
+    return _impl->frameUtils;
 }
 
 bool Config::needRedraw()
@@ -328,7 +312,7 @@ bool Config::switchView()
     if( !layout )
         return true;
 
-    const eq::View* current = find< eq::View >( frameSettings->getCurrentViewId( ) );
+    const eq::View* current = find< eq::View >( frameSettings->getCurrentViewId( ));
 
     const eq::Views& views = layout->getViews();
     LBASSERT( !views.empty( ))
@@ -462,6 +446,8 @@ bool Config::handleEvent( eq::EventICommand command )
 #endif
     case VOLUME_FRAME_RANGE:
         _impl->dataFrameRange = command.read< Vector2ui >();
+        _impl->frameUtils = FrameUtils( getApplicationParameters().frames,
+                                        _impl->dataFrameRange );
         return false;
 
     case REDRAW:

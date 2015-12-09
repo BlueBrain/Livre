@@ -166,7 +166,7 @@ struct AnimationController::Impl
         }
 
         setPlaying( frame.delta != 0 );
-        _ui.chbxFollow->setChecked( frame.delta == INT_MAX );
+        _ui.chbxFollow->setChecked( frame.delta == LATEST_FRAME );
         _ui.chbxReverse->setChecked( frame.delta < 0 );
     }
 
@@ -188,7 +188,7 @@ struct AnimationController::Impl
             return 0;
 
         if( _ui.chbxFollow->isChecked( ))
-            return INT_MAX;
+            return LATEST_FRAME;
 
         if( _ui.chbxReverse->isChecked( ))
             return -1;

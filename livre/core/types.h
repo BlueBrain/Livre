@@ -238,6 +238,8 @@ const uint32_t INVALID_POSITION = ( 1u << NODEID_BLOCK_BITS ) - 1; //!< Invalid 
 const uint32_t INVALID_LEVEL = ( 1u << NODEID_LEVEL_BITS ) - 1; //!< Invalid tree level.4 bits is on
 const uint32_t INVALID_FRAME = ( 1u << NODEID_FRAME_BITS ) - 1; //!< Invalid tree level.4 bits is on
 
+const uint32_t LATEST_FRAME = INT_MAX; //!< Maximum frame number
+
 
 #define HIDDEN_PROGRAMDESCRIPTION_STR "_HIDDEN_"
 

@@ -24,6 +24,7 @@
 #define _Config_h_
 
 #include <livre/core/mathTypes.h>
+#include <livre/core/util/FrameUtils.h>
 #include <livre/eq/api.h>
 #include <livre/eq/types.h>
 #include <eq/config.h> // base class
@@ -95,6 +96,11 @@ public:
      * @return the number of frames that the data source provides.
      */
     uint32_t getDataFrameCount() const;
+
+    /**
+     * @return the frame utils object.
+     */
+    const FrameUtils& getFrameUtils() const;
 
     /** @return true if an event required a redraw. */
     bool needRedraw();
