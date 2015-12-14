@@ -120,6 +120,7 @@ BOOST_AUTO_TEST_CASE( testNextFrameNumber )
     BOOST_CHECK_EQUAL( frameUtils.getNext( 0, 1 ), 1 );
     BOOST_CHECK_EQUAL( frameUtils.getNext( 1, 2 ), 3 );
     BOOST_CHECK_EQUAL( frameUtils.getNext( 2, -1 ), 1 );
+    BOOST_CHECK_EQUAL( frameUtils.getNext( 0, -1 ), 3 );
     BOOST_CHECK_EQUAL( frameUtils.getNext( 0, 4 ), 0 );
     BOOST_CHECK_EQUAL( frameUtils.getNext( 3, 2 ), 1 );
 }
