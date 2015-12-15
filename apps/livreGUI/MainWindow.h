@@ -37,11 +37,12 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow( livre::Controller& controller, QWidget* parent = 0 );
+    MainWindow( Controller& controller, QWidget* parent = 0 );
     ~MainWindow();
 
 private:
-    Ui::MainWindow* _ui;
+    struct Impl;
+    std::unique_ptr< Impl > _impl;
 };
 
 }

@@ -34,11 +34,9 @@ namespace livre
 {
 
 TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
-                                                const servus::URI& zeqSchema,
                                                 QWidget* tfParentWidget )
     : QWidget( tfParentWidget )
     , _controller( controller )
-    , _zeqSchema( zeqSchema )
     , _ui( new Ui::TransferFunctionEditor )
     , _tfReceived( false )
     , _redWidget( new ColorMapWidget( ColorMapWidget::RED_SHADE, this ))
@@ -75,19 +73,15 @@ TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
              this, &TransferFunctionEditor::_onTransferFunctionChanged );
 
     QTimer::singleShot( 50, this, SLOT( _setDefault()));
-    _requestTransferFunction();
+
+    _controller.registerHandler( zeq::hbp::EVENT_LOOKUPTABLE1D,
+                                 std::bind( &TransferFunctionEditor::_onTransferFunction,
+                                              this, std::placeholders::_1 ));
 }
 
 TransferFunctionEditor::~TransferFunctionEditor()
 {
-    _controller.deregisterHandler( _zeqSchema,
-                                   zeq::vocabulary::EVENT_HEARTBEAT,
-                                   boost::bind( &TransferFunctionEditor::_onHeartbeat,
-                                                this ));
-    _controller.deregisterHandler( _zeqSchema,
-                                   zeq::hbp::EVENT_LOOKUPTABLE1D,
-                                   boost::bind( &TransferFunctionEditor::_onTransferFunction,
-                                                this, _1 ));
+    _controller.deregisterHandler( zeq::hbp::EVENT_LOOKUPTABLE1D );
 
     delete _ui;
 }
@@ -210,21 +204,8 @@ void TransferFunctionEditor::_publishTransferFunction()
 
     if( transferFunction.size() == 1024 )
     {
-        _controller.publish( _zeqSchema,
-                             zeq::hbp::serializeLookupTable1D( transferFunction ));
+        _controller.publish( zeq::hbp::serializeLookupTable1D( transferFunction ));
     }
-}
-
-void TransferFunctionEditor::_requestTransferFunction()
-{
-    _controller.registerHandler( _zeqSchema,
-                                 zeq::hbp::EVENT_LOOKUPTABLE1D,
-                                 boost::bind( &TransferFunctionEditor::_onTransferFunction,
-                                              this, _1 ));
-    _controller.registerHandler( _zeqSchema,
-                                 zeq::vocabulary::EVENT_HEARTBEAT,
-                                 boost::bind( &TransferFunctionEditor::_onHeartbeat,
-                                              this ));
 }
 
 void TransferFunctionEditor::_onTransferFunction( const zeq::Event& tfEvent )
@@ -234,20 +215,6 @@ void TransferFunctionEditor::_onTransferFunction( const zeq::Event& tfEvent )
         emit transferFunctionChanged( zeq::hbp::deserializeLookupTable1D( tfEvent ));
     }
     _tfReceived = true;
-    _controller.deregisterHandler( _zeqSchema,
-                                   zeq::vocabulary::EVENT_HEARTBEAT,
-                                   boost::bind( &TransferFunctionEditor::_onHeartbeat,
-                                   this ));
-}
-
-void TransferFunctionEditor::_onHeartbeat()
-{
-    if( !_tfReceived )
-    {
-        const zeq::Event& zeqEvent =
-            zeq::vocabulary::serializeRequest( zeq::hbp::EVENT_LOOKUPTABLE1D );
-        _controller.publish( _zeqSchema, zeqEvent );
-    }
 }
 
 void TransferFunctionEditor::_clear()

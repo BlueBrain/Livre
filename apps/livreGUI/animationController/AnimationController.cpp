@@ -18,17 +18,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livreGUI/animationController/AnimationController.h>
+#include "AnimationController.h"
+#include "../Controller.h"
 #include <livreGUI/ui_AnimationController.h>
-#include <livreGUI/Controller.h>
 #include <livre/core/types.h>
 
-#include <zeq/types.h>
 #include <zeq/event.h>
-#include <zeq/subscriber.h>
-#include <zeq/publisher.h>
-
-#include <boost/bind.hpp>
 
 namespace livre
 {
@@ -36,11 +31,9 @@ namespace livre
 struct AnimationController::Impl
 {
     Impl( AnimationController* animationController,
-          Controller& controller,
-          const servus::URI& zeqSchema )
+          Controller& controller)
         : _animationController( animationController )
         , _controller( controller )
-        , _zeqSchema( zeqSchema )
         , _connected( false )
         , _onFirstFrame( true )
     {
@@ -58,22 +51,11 @@ struct AnimationController::Impl
         emit _animationController->newFrameReceived( zeq::hbp::deserializeFrame( event_ ));
     }
 
-    void onFirstHeartbeatEvent()
-    {
-        emit _animationController->firstHeartBeatReceived();
-    }
-
     void setSubscriber()
     {
-        _controller.registerHandler( _zeqSchema,
-                                     ::zeq::hbp::EVENT_FRAME,
-                                     boost::bind( &AnimationController::Impl::onFrame,
-                                                  this, _1 ));
-        _controller.registerHandler( _zeqSchema,
-                                     zeq::vocabulary::EVENT_HEARTBEAT,
-                                     boost::bind(
-                                         &AnimationController::Impl::onFirstHeartbeatEvent,
-                                         this ));
+        _controller.registerHandler( ::zeq::hbp::EVENT_FRAME,
+                                     std::bind( &AnimationController::Impl::onFrame,
+                                                  this, std::placeholders::_1 ));
     }
 
     void connect()
@@ -93,10 +75,7 @@ struct AnimationController::Impl
 
     void disconnect()
     {
-        _controller.deregisterHandler( _zeqSchema,
-                                       ::zeq::hbp::EVENT_FRAME,
-                                       boost::bind( &AnimationController::Impl::onFrame,
-                                                    this, _1 ));
+        _controller.deregisterHandler( ::zeq::hbp::EVENT_FRAME );
         _connected = false;
         resetControls();
     }
@@ -120,19 +99,6 @@ struct AnimationController::Impl
         _ui.btnPlay->setText( enable ? "Pause" : "Play" );
     }
 
-    void onFirstHeartBeatReceived()
-    {
-        _controller.publish( _zeqSchema,
-                             ::zeq::vocabulary::serializeRequest( ::zeq::hbp::EVENT_FRAME ));
-        _controller.deregisterHandler( _zeqSchema,
-                                       zeq::vocabulary::EVENT_HEARTBEAT,
-                                       boost::bind(
-                                           &AnimationController::Impl::onFirstHeartbeatEvent,
-                                           this ));
-        _connected = true;
-        resetControls();
-    }
-
     void onNewFrameReceived( zeq::hbp::data::Frame frame )
     {
         _connected = true;
@@ -151,13 +117,23 @@ struct AnimationController::Impl
         // keyboard input. So block signal emission when setting the value
         // programatically.
         _ui.sldFrame->blockSignals( true );
+        _ui.startFrameSpinBox->blockSignals( true );
+        _ui.currentFrameSpinBox->blockSignals( true );
+        _ui.endFrameSpinBox->blockSignals( true );
+
         _ui.sldFrame->setMinimum( startFrame );
+        _ui.startFrameSpinBox->setValue( startFrame );
+
         _ui.sldFrame->setMaximum( endFrame - 1 );
+        _ui.endFrameSpinBox->setValue( endFrame - 1 );
+
         _ui.sldFrame->setValue( frame.current );
-        _ui.lblStartFrame->setText( QString::number( _ui.sldFrame->minimum( )));
-        _ui.lblFrame->setText( QString::number( _ui.sldFrame->value( )));
-        _ui.lblEndFrame->setText( QString::number( _ui.sldFrame->maximum( )));
+        _ui.currentFrameSpinBox->setValue( frame.current );
+
         _ui.sldFrame->blockSignals( false );
+        _ui.startFrameSpinBox->blockSignals( false );
+        _ui.currentFrameSpinBox->blockSignals( false );
+        _ui.endFrameSpinBox->blockSignals( false );
 
         if( _onFirstFrame )
         {
@@ -178,7 +154,7 @@ struct AnimationController::Impl
                                                  _ui.sldFrame->value(),
                                                  _ui.sldFrame->maximum() + 1,
                                                  getFrameDelta( ));
-            _controller.publish( _zeqSchema, ::zeq::hbp::serializeFrame( frame ));
+            _controller.publish( ::zeq::hbp::serializeFrame( frame ));
         }
     }
 
@@ -197,35 +173,38 @@ struct AnimationController::Impl
     }
 
 public:
-    Ui_animationController _ui;
+    Ui::animationController _ui;
     AnimationController* _animationController;
     Controller& _controller;
-    servus::URI _zeqSchema;
-    bool            _connected;
-    bool            _onFirstFrame;
+    bool _connected;
+    bool _onFirstFrame;
 };
 
 AnimationController::AnimationController( Controller& controller,
-                                          const servus::URI& zeqSchema,
                                           QWidget* parentWgt )
     : QWidget( parentWgt )
-    , _impl( new AnimationController::Impl( this, controller, zeqSchema ))
+    , _impl( new AnimationController::Impl( this, controller ))
 {
     qRegisterMetaType< ::zeq::hbp::data::Frame >( "::zeq::hbp::data::Frame" );
 
-    connect( _impl->_ui.sldFrame, SIGNAL( valueChanged( int )),
-             this, SLOT( _onSliderMoved( )));
-    connect( _impl->_ui.sldFrame, SIGNAL( valueChanged( int )),
-             _impl->_ui.lblFrame, SLOT( setNum( int )));
+    connect( _impl->_ui.sldFrame, &QSlider::valueChanged,
+             this, &AnimationController::_onFrameChanged );
+    connect( _impl->_ui.sldFrame, &QSlider::rangeChanged,
+             this, &AnimationController::_onFrameChanged );
+
+    connect( _impl->_ui.startFrameSpinBox,
+             static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+             _impl->_ui.sldFrame, &QSlider::setMinimum );
+    connect( _impl->_ui.endFrameSpinBox,
+             static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+             _impl->_ui.sldFrame, &QSlider::setMaximum );
+
     connect( _impl->_ui.btnPlay, SIGNAL( pressed( )),
              this, SLOT( _togglePlayPause( )));
     connect( _impl->_ui.chbxFollow, SIGNAL( stateChanged( int )),
              this, SLOT( _setFollow( int )));
     connect( this, &AnimationController::newFrameReceived,
              this, &AnimationController::_onNewFrameReceived,
-             Qt::QueuedConnection );
-    connect( this, &AnimationController::firstHeartBeatReceived,
-             this, &AnimationController::_onFirstHeartBeatReceived,
              Qt::QueuedConnection );
 
     _impl->_ui.chbxReverse->setVisible( false ); // temporarily hidden
@@ -246,7 +225,7 @@ void AnimationController::_disconnect()
     _impl->disconnect();
 }
 
-void AnimationController::_onSliderMoved()
+void AnimationController::_onFrameChanged()
 {
     _impl->publishFrame();
 }
@@ -268,11 +247,6 @@ void AnimationController::_setFollow( int on )
 void AnimationController::_onNewFrameReceived( zeq::hbp::data::Frame frame )
 {
     _impl->onNewFrameReceived( frame );
-}
-
-void AnimationController::_onFirstHeartBeatReceived()
-{
-    _impl->onFirstHeartBeatReceived();
 }
 
 }

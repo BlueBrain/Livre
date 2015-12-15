@@ -229,13 +229,16 @@ public:
         auto& params = _config.getApplicationParameters();
 
         if( frame.current == frameSettings->getFrameNumber() &&
-            frame.delta == params.animation )
+            frame.delta == params.animation &&
+            frame.start == params.frames.x() &&
+            frame.end == params.frames.y( ))
         {
             return;
         }
 
         frameSettings->setFrameNumber( frame.current );
         params.animation = frame.delta;
+        params.frames = { frame.start, frame.end };
         _config.sendEvent( REDRAW );
     }
 

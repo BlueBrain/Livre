@@ -21,238 +21,102 @@
  */
 
 
-#include <livreGUI/Controller.h>
+#include "Controller.h"
 
-#include <zeq/subscriber.h>
-#include <zeq/publisher.h>
-#include <zeq/event.h>
+#include <zeq/zeq.h>
 
-#include <boost/thread.hpp>
+#include <algorithm>
+#include <mutex>
+#include <thread>
 
 namespace livre
 {
-
-bool operator==( const zeq::EventFunc& func1, const zeq::EventFunc& func2 )
-{
-    return func1.target<void*>() == func2.target<void*>()
-            && func1.target_type() == func2.target_type();
-}
 
 class Controller::Impl
 {
 public:
     Impl()
-        : _currentSubscriber( 0 )
-        , _subscriberPoll( boost::bind( &Impl::pollSubscribers, this ))
+        : _subscriber()
+        , _replySubscriber( (::zeq::Receiver&)_subscriber )
+        , _subscriberPoll( std::bind( &Impl::pollSubscriber, this ))
         , _continuePolling( true )
-    {}
+    {
+        _replySubscriber.registerHandler( ::zeq::vocabulary::EVENT_HEARTBEAT,
+                     std::bind( &Impl::onHeartBeatReceived, this ));
+    }
 
     ~Impl()
     {
+        _replySubscriber.deregisterHandler( ::zeq::vocabulary::EVENT_HEARTBEAT );
+
         _continuePolling = false;
         _subscriberPoll.join();
-        deleteObjects< zeq::Subscriber >( _subscriberMap );
-        deleteObjects< zeq::Publisher >( _publisherMap );
     }
 
-    bool connect( const std::string&, const uint16_t )
+    void onHeartBeatReceived()
     {
-        LBUNIMPLEMENTED;
-        return false;
+        for( const auto& request : _requests )
+            _publisher.publish( ::zeq::vocabulary::serializeRequest( request ));
     }
 
-    bool publish( const servus::URI& uri, const zeq::Event& event )
+    void onReply( const ::zeq::Event& event )
     {
-        return getPublisher( uri )->publish( event );
+        const auto& i = std::find( _requests.begin(), _requests.end(),
+                                   event.getType( ));
+        if( i == _requests.end( ))
+            return;
+
+        _requests.erase( i );
+        _replySubscriber.deregisterHandler( event.getType( ));
     }
 
-    bool registerHandler( const servus::URI& uri,
-                          const servus::uint128_t& event,
+    bool publish( const zeq::Event& event )
+    {
+        return _publisher.publish( event );
+    }
+
+    bool registerHandler( const zeq::uint128_t& event,
                           const zeq::EventFunc& func )
     {
-        ScopedLock lock( _subscriberMutex );
-        return createSubscriberAndRegisterEvent( uri, event, func );
-    }
-
-    bool deregisterHandler( const servus::URI& uri,
-                            const servus::uint128_t& event,
-                            const zeq::EventFunc& func )
-    {
-        ScopedLock lock( _subscriberMutex );
-        const std::string& uriStr = std::to_string( uri );
-        if( _subscriberMap.count( uriStr ) == 0 )
+        if( !_subscriber.registerHandler( event, func ))
             return false;
 
-        zeq::Subscriber* subscriber = _subscriberMap[ uriStr ];
-
-        SubscriberEventFunctionsList::iterator it =
-                _subscriberEventFunctionList.begin();
-        const EventIdEventFuncPair idFuncPair( event, func );
-        BOOST_FOREACH( SubscriberEventFunctionsPair& pair,
-                       _subscriberEventFunctionList )
-        {
-            const zeq::Subscriber* sub = pair.first;
-            if( sub == subscriber )
-            {
-                const EventIdEventFuncPair& eventIdPair = pair.second;
-                if( eventIdPair == idFuncPair )
-                    break;
-            }
-            ++it;
-        }
-
-        if( it != _subscriberEventFunctionList.end( ))
-            _subscriberEventFunctionList.erase( it );
-
-        bool eventFound = false;
-        BOOST_FOREACH( SubscriberEventFunctionsPair& pair,
-                       _subscriberEventFunctionList )
-        {
-            const EventIdEventFuncPair& eventIdPair = pair.second;
-            if( eventIdPair.eventId == event )
-            {
-                eventFound = true;
-                break;
-            }
-        }
-
-        if( !eventFound )
-            subscriber->deregisterHandler( event );
-
-        return false;
+        _requests.push_back( event );
+        return _replySubscriber.registerHandler( event,
+                                                std::bind( &Impl::onReply, this,
+                                                       std::placeholders::_1 ));
     }
 
-private:
-    struct EventIdEventFuncPair
+    bool deregisterHandler( const zeq::uint128_t& event )
     {
-        EventIdEventFuncPair( const servus::uint128_t& eventId_,
-                              const zeq::EventFunc eventFunc_ )
-            : eventId( eventId_ ),
-              eventFunc( eventFunc_ )
-        {}
+        if( !_subscriber.deregisterHandler( event ))
+            return false;
 
-        bool operator==( const EventIdEventFuncPair& pair ) const
+        const auto& i = std::find( _requests.begin(), _requests.end(), event );
+        if( i != _requests.end( ))
         {
-            return eventId == pair.eventId &&
-                    eventFunc == pair.eventFunc;
+            _requests.erase( i );
+            _replySubscriber.deregisterHandler( event );
         }
 
-        servus::uint128_t eventId;
-        zeq::EventFunc eventFunc;
-    };
-
-    typedef std::map< std::string, zeq::Publisher* > PublisherMap;
-    typedef std::pair< std::string, zeq::Subscriber* > URISubscriberPair;
-    typedef std::map< std::string, zeq::Subscriber* > SubscriberMap;
-    typedef std::pair< const zeq::Subscriber*, EventIdEventFuncPair >
-                                                    SubscriberEventFunctionsPair;
-    typedef std::list< SubscriberEventFunctionsPair >
-                                                SubscriberEventFunctionsList;
-
-    template< typename Type >
-    void deleteObjects( const std::map< std::string, Type* >& map )
-    {
-        typedef std::pair< std::string, Type* > Pair;
-        BOOST_FOREACH( const Pair& pair, map )
-        {
-            Type* object = pair.second;
-            delete object;
-        }
-    }
-
-    template< typename Type >
-    Type* getObject( std::map< std::string, Type* >& map,
-                     const servus::URI& uri )
-    {
-        const std::string& uriStr = std::to_string( uri );
-        typename std::map< std::string, Type* >::iterator it = map.find( uriStr );
-        if( it == map.end( ))
-            map[ uriStr ] = new Type( uri );
-
-        return map[ uriStr ];
-    }
-
-    void subscriberMultiplexer( const zeq::Event& event )
-    {
-        BOOST_FOREACH( const SubscriberEventFunctionsPair& pair,
-                       _subscriberEventFunctionList )
-        {
-            const zeq::Subscriber* subscriber = pair.first;
-            if( _currentSubscriber == subscriber )
-            {
-                const EventIdEventFuncPair& eventIdPair = pair.second;
-                if( eventIdPair.eventId == event.getType( ))
-                    eventIdPair.eventFunc( event );
-            }
-        }
-    }
-
-    bool createSubscriberAndRegisterEvent( const servus::URI& uri,
-                                           const servus::uint128_t& event,
-                                           const zeq::EventFunc& func )
-    {
-        const std::string& uriStr = std::to_string( uri );
-        typename std::map< std::string, zeq::Subscriber* >::iterator it =
-                _subscriberMap.find( uriStr );
-        if( it == _subscriberMap.end( ))
-        {
-            zeq::Subscriber* subscriber = new zeq::Subscriber( uri );
-            _subscriberMap[ uriStr ] = subscriber;
-        }
-
-        zeq::Subscriber* subscriber = _subscriberMap[ uriStr ];
-        BOOST_FOREACH( SubscriberEventFunctionsPair& pair,
-                       _subscriberEventFunctionList )
-        {
-            const zeq::Subscriber* sub = pair.first;
-            if( sub == subscriber )
-            {
-                const EventIdEventFuncPair& eventIdPair = pair.second;
-                if( eventIdPair.eventId == event )
-                    return false;
-            }
-        }
-
-        EventIdEventFuncPair eventIdPair( event, func );
-        _subscriberEventFunctionList.push_back(
-                    std::make_pair( subscriber, eventIdPair ));
-        subscriber->registerHandler( event,
-                                     boost::bind( &Impl::subscriberMultiplexer,
-                                                  this, _1 ));
         return true;
     }
 
-    void pollSubscribers()
+private:
+    void pollSubscriber()
     {
         while( _continuePolling )
-        {
-            SubscriberMap subscribers;
-            {
-                ScopedLock lock( _subscriberMutex );
-                subscribers = _subscriberMap;
-            }
-            BOOST_FOREACH( const URISubscriberPair& pair, subscribers )
-            {
-                zeq::Subscriber* subscriber = pair.second;
-                _currentSubscriber = subscriber;
-                subscriber->receive( 100 );
-            }
-        }
+            _subscriber.receive( 100 );
     }
 
-    zeq::Publisher* getPublisher( const servus::URI& uri )
-    {
-        return getObject<zeq::Publisher>( _publisherMap, uri );
-    }
+    zeq::Publisher _publisher;
+    zeq::Subscriber _subscriber;
+    zeq::Subscriber _replySubscriber;
 
-    PublisherMap _publisherMap;
-    SubscriberMap _subscriberMap;
-    SubscriberEventFunctionsList _subscriberEventFunctionList;
-    zeq::Subscriber* _currentSubscriber;
-
-    boost::mutex _subscriberMutex;
-    boost::thread _subscriberPoll;
+    std::thread _subscriberPoll;
     bool _continuePolling;
+
+    std::vector< ::zeq::uint128_t > _requests;
 };
 
 
@@ -263,29 +127,19 @@ Controller::Controller()
 Controller::~Controller()
 {}
 
-bool Controller::connect( const std::string& hostname,
-                          const uint16_t port )
+bool Controller::publish( const zeq::Event& event )
 {
-    return _impl->connect( hostname, port );
+    return _impl->publish( event );
 }
 
-bool Controller::publish( const servus::URI& uri,
-                          const zeq::Event& event )
-{
-    return _impl->publish( uri, event );
-}
-
-bool Controller::registerHandler( const servus::URI& uri,
-                                  const servus::uint128_t& event,
+bool Controller::registerHandler( const zeq::uint128_t& event,
                                   const zeq::EventFunc& func )
 {
-     return _impl->registerHandler( uri, event, func );
+     return _impl->registerHandler( event, func );
 }
 
-bool Controller::deregisterHandler( const servus::URI& uri,
-                                    const servus::uint128_t& event,
-                                    const zeq::EventFunc& func )
+bool Controller::deregisterHandler( const zeq::uint128_t& event )
 {
-     return _impl->deregisterHandler( uri, event, func );
+     return _impl->deregisterHandler( event );
 }
 }

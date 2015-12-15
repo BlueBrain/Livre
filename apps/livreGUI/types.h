@@ -22,7 +22,7 @@
 
 #include <QVariant>
 
-#include <livre/eq/types.h>
+#include <livre/core/types.h>
 #include <zeq/types.h>
 
 namespace livre

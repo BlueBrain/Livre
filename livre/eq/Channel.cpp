@@ -249,7 +249,7 @@ public:
                                 _channel->getPixelViewport().h,
                                 screenSpaceError, worldSpacePerVoxel,
                                 volumeDepth, minLOD, maxLOD,
-                                Range{{ _drawRange.start, _drawRange.end }});
+                                Range{ _drawRange.start, _drawRange.end });
 
         livre::DFSTraversal traverser;
         traverser.traverse( volInfo.rootNode, visitor,

@@ -1,8 +1,10 @@
 Changelog {#Changelog}
 =========
 
-
 # master {#master}
+
+* [#219](https://github.com/BlueBrain/Livre/pull/219):
+  LivreGUI: Editable frame range in animation panel  
 
 # Release 0.4 (2015-11-09) {#Release040}
 

@@ -47,7 +47,7 @@ set(LIVREGUI_UI_FORMS
   animationController/gui/AnimationController.ui
   tfEditor/gui/TransferFunctionEditor.ui)
 
-set(LIVREGUI_LINK_LIBRARIES LivreCore LivreEq Qt5::Widgets zeq zeqHBP)
+set(LIVREGUI_LINK_LIBRARIES LivreCore Qt5::Widgets zeq zeqHBP)
 
 if(MONSTEER_FOUND)
   list(APPEND LIVREGUI_LINK_LIBRARIES MonsteerQt)

@@ -46,12 +46,9 @@ public:
      * Constructor of TransferFunctionEditor.
      * @param conroller The controller used to receive/publish transfer fuction
      * data.
-     * @param zeqSchema the ZeroEQ schema used to send/receive transfer
-     *        function events.
      * @param tfParentWidget Parent widget.
      */
     TransferFunctionEditor( livre::Controller& controller,
-                            const servus::URI& zeqSchema,
                             QWidget* tfParentWidget = 0 );
     ~TransferFunctionEditor();
 
@@ -71,14 +68,10 @@ private Q_SLOTS:
 private:
 
     void _publishTransferFunction();
-    void _requestTransferFunction();
     void _onTransferFunction( const zeq::Event& event );
-    void _onHeartbeat();
 
     livre::Controller& _controller;
-    servus::URI _zeqSchema;
     Ui::TransferFunctionEditor* _ui;
-    lunchbox::Monitorb _isConnected;
     bool _tfReceived;
     ColorMapWidget* _redWidget;
     ColorMapWidget* _greenWidget;

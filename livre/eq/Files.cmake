@@ -22,7 +22,6 @@ set(LIVREEQ_HEADERS
   settings/VolumeSettings.h
   Window.h
   coTypes.h
-  eqTypes.h
   types.h
   )
 

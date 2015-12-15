@@ -30,7 +30,7 @@ namespace livre
 
 
 #define COMPANY_NAME "Blue Brain Project"
-#define PRODUCT_NAME "Interactive Supercomputing Controller"
+#define PRODUCT_NAME "Livre Controller"
 
 
 /**

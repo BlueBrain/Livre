@@ -445,10 +445,16 @@ bool Config::handleEvent( eq::EventICommand command )
     }
 #endif
     case VOLUME_FRAME_RANGE:
-        _impl->dataFrameRange = command.read< Vector2ui >();
-        _impl->frameUtils = FrameUtils( getApplicationParameters().frames,
-                                        _impl->dataFrameRange );
+    {
+        const Vector2ui& newDataFrameRange = command.read< Vector2ui >();
+        if( _impl->dataFrameRange != newDataFrameRange )
+        {
+            _impl->dataFrameRange =  newDataFrameRange;
+            _impl->frameUtils = FrameUtils( getApplicationParameters().frames,
+                                            _impl->dataFrameRange );
+        }
         return false;
+    }
 
     case REDRAW:
         _impl->redraw = true;

@@ -41,28 +41,24 @@ public:
 
     /**
      * @param controller The GUI connection to zeq world.
-     * @param zeqSchema the ZeroEQ schema used to send/receive frame events.
      * @param parentWgt Parent widget.
      */
     AnimationController( Controller& controller,
-                         const servus::URI& zeqSchema,
                          QWidget *parentWgt = 0 );
     ~AnimationController( );
 
 signals:
 
     void newFrameReceived( ::zeq::hbp::data::Frame frame );
-    void firstHeartBeatReceived();
 
 private Q_SLOTS:
 
     void _connect();
     void _disconnect();
-    void _onSliderMoved();
+    void _onFrameChanged();
     void _togglePlayPause();
     void _setFollow( int on );
     void _onNewFrameReceived( ::zeq::hbp::data::Frame frame );
-    void _onFirstHeartBeatReceived();
 
 private:
 
