@@ -258,6 +258,49 @@ public:
         return visitor.getVisibles();
     }
 
+    void updateRegions( const RenderBricks& bricks )
+    {
+        const Matrix4f& mvpMatrix = _currentFrustum.getModelViewProjectionMatrix();
+        BOOST_FOREACH( const RenderBrickPtr& brick, bricks )
+        {
+            const Vector3f& min = brick->getLODNode()->getWorldBox().getMin();
+            const Vector3f& max = brick->getLODNode()->getWorldBox().getMax();
+            const Vector3f corners[8] =
+            {
+                Vector3f( min[0], min[1], min[2] ),
+                Vector3f( max[0], min[1], min[2] ),
+                Vector3f( min[0], max[1], min[2] ),
+                Vector3f( max[0], max[1], min[2] ),
+                Vector3f( min[0], min[1], max[2] ),
+                Vector3f( max[0], min[1], max[2] ),
+                Vector3f( min[0], max[1], max[2] ),
+                Vector3f( max[0], max[1], max[2] )
+            };
+
+            Vector4f region(  std::numeric_limits< float >::max(),
+                              std::numeric_limits< float >::max(),
+                             -std::numeric_limits< float >::max(),
+                             -std::numeric_limits< float >::max( ));
+
+            for( size_t i = 0; i < 8; ++i )
+            {
+                const Vector3f corner = mvpMatrix * corners[i];
+                region[0] = std::min( corner[0], region[0] );
+                region[1] = std::min( corner[1], region[1] );
+                region[2] = std::max( corner[0], region[2] );
+                region[3] = std::max( corner[1], region[3] );
+            }
+
+            // transform region of interest from [ -1 -1 1 1 ] to normalized viewport
+            const Vector4f normalized( region[0] * .5f + .5f,
+                                       region[1] * .5f + .5f,
+                                       ( region[2] - region[0] ) * .5f,
+                                       ( region[3] - region[1] ) * .5f );
+
+            _channel->declareRegion( eq::Viewport( normalized ));
+        }
+    }
+
     void frameDraw( const eq::uint128_t& )
     {
         livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
@@ -312,6 +355,7 @@ public:
         RenderBricks renderBricks;
         generateRenderBricks( _frameInfo.renderNodes, renderBricks );
         renderViewPtr->render( _frameInfo, renderBricks, *_glWidgetPtr );
+        updateRegions( renderBricks );
     }
 
     void applyCamera()
