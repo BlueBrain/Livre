@@ -144,6 +144,11 @@ struct AnimationController::Impl
         setPlaying( frame.delta != 0 );
         _ui.chbxFollow->setChecked( frame.delta == LATEST_FRAME );
         _ui.chbxReverse->setChecked( frame.delta < 0 );
+
+        if( endFrame - startFrame <= 1 )
+            _animationController->setDisabled( true );
+        else
+            _animationController->setEnabled( true );
     }
 
     void publishFrame() const
