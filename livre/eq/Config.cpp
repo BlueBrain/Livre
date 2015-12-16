@@ -56,7 +56,6 @@ public:
         , volumeBBox( Boxf::makeUnitBox( ))
         , redraw( true )
         , dataFrameRange( INVALID_FRAME_RANGE )
-        , frameUtils( config->getApplicationParameters().frames, dataFrameRange )
     {}
 
     void publishModelView()
@@ -112,7 +111,6 @@ public:
 #endif
     bool redraw;
     Vector2ui dataFrameRange;
-    FrameUtils frameUtils;
 };
 
 Config::Config( eq::ServerPtr parent )
@@ -212,10 +210,13 @@ bool Config::frame()
     ApplicationParameters& params = getApplicationParameters();
     FrameSettingsPtr frameSettings = _impl->framedata.getFrameSettings();
 
+    const FrameUtils frameUtils( params.frames, _impl->dataFrameRange );
+    params.frames = frameUtils.getFrameRange();
+
     // Set current frame (start/end may have changed)
     const bool keepToLatest = params.animation == LATEST_FRAME;
     const uint32_t current =
-            _impl->frameUtils.getCurrent( frameSettings->getFrameNumber(), keepToLatest );
+            frameUtils.getCurrent( frameSettings->getFrameNumber(), keepToLatest );
 
     frameSettings->setFrameNumber( current );
     const eq::uint128_t& version = _impl->framedata.commit();
@@ -229,7 +230,7 @@ bool Config::frame()
     frameSettings->setGrabFrame( false );
 
     if( !keepToLatest )
-        frameSettings->setFrameNumber( _impl->frameUtils.getNext( current, params.animation ));
+        frameSettings->setFrameNumber( frameUtils.getNext( current, params.animation ));
 
     _impl->redraw = false;
 
@@ -242,20 +243,10 @@ bool Config::frame()
     return true;
 }
 
-Vector2ui Config::getDataFrameRange() const
-{
-    return _impl->dataFrameRange;
-}
-
 uint32_t Config::getDataFrameCount() const
 {
     const Vector2ui& range = _impl->dataFrameRange;
     return range[1] > range[0] ? range[1] - range[0] : 0;
-}
-
-const FrameUtils& Config::getFrameUtils() const
-{
-    return _impl->frameUtils;
 }
 
 bool Config::needRedraw()
@@ -455,13 +446,7 @@ bool Config::handleEvent( eq::EventICommand command )
 #endif
     case VOLUME_FRAME_RANGE:
     {
-        const Vector2ui& newDataFrameRange = command.read< Vector2ui >();
-        if( _impl->dataFrameRange != newDataFrameRange )
-        {
-            _impl->dataFrameRange =  newDataFrameRange;
-            _impl->frameUtils = FrameUtils( getApplicationParameters().frames,
-                                            _impl->dataFrameRange );
-        }
+        _impl->dataFrameRange = command.read< Vector2ui >();
         return false;
     }
 
