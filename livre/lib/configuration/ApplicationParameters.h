@@ -21,7 +21,7 @@
 #ifndef _ApplicationParameters_h_
 #define _ApplicationParameters_h_
 
-#include <livre/lib/configuration/ClientParameters.h>
+#include <livre/core/configuration/Parameters.h>
 #include <livre/lib/api.h>
 #include <livre/core/mathTypes.h>
 
@@ -31,7 +31,7 @@ namespace livre
 /**
  * The ApplicationParameters struct keeps the parameters for main application.
  */
-struct ApplicationParameters : public ClientParameters
+struct ApplicationParameters : public Parameters
 {
     LIVRE_API ApplicationParameters();
 
@@ -42,6 +42,8 @@ struct ApplicationParameters : public ClientParameters
     int32_t animation; //!< animation forward/backward speed
     bool isResident; //!< Is the main app resident.
     bool syncCamera; //!< Synchronize camera with other applications using ZEQ.
+    std::string dataFileName; //!< Data file name.
+    std::string transferFunction; //!< Path to transfer function file
 
     /** @param parameters The source parameters. */
     LIVRE_API ApplicationParameters& operator=( const ApplicationParameters& parameters );

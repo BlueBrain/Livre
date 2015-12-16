@@ -50,6 +50,7 @@ class Config::Impl
 public:
     explicit Impl( Config* config_ )
         : config( config_ )
+        , defaultLatency( 0 )
         , currentCanvas( 0 )
         , eventMapper( EventHandlerFactoryPtr( new EqEventHandlerFactory ))
         , volumeBBox( Boxf::makeUnitBox( ))
@@ -100,6 +101,7 @@ public:
     }
 
     Config* config;
+    uint32_t defaultLatency;
     eq::Canvas* currentCanvas;
     EventMapper eventMapper;
     FrameData framedata;
@@ -174,8 +176,7 @@ bool Config::init( const int argc LB_UNUSED, char** argv LB_UNUSED )
     frameSettings->setFrameNumber( params.frames.x( ));
 
     RenderSettingsPtr renderSettings = framedata.getRenderSettings();
-    ConstVolumeRendererParametersPtr vrParameters = framedata.getVRParameters();
-    const TransferFunction1Dc tf( vrParameters->transferFunction );
+    const TransferFunction1Dc tf( params.transferFunction );
     renderSettings->setTransferFunction( tf );
 
     _impl->framedata.registerObjects();
@@ -183,7 +184,8 @@ bool Config::init( const int argc LB_UNUSED, char** argv LB_UNUSED )
     if( !_registerFrameData( ))
         return false;
 
-    if( vrParameters->synchronousMode )
+    ConstVolumeRendererParametersPtr vrParameters = framedata.getVRParameters();
+    if( vrParameters->getSynchronousMode( ))
         setLatency( 0 );
 
     if( !eq::Config::init( _impl->framedata.getID( )))
@@ -192,6 +194,8 @@ bool Config::init( const int argc LB_UNUSED, char** argv LB_UNUSED )
         _deregisterFrameData();
         return false;
     }
+
+    _impl->defaultLatency = getLatency();
 
     const eq::Canvases& canvases = getCanvases();
     _impl->currentCanvas = canvases.empty() ? 0 : canvases.front();
@@ -216,6 +220,11 @@ bool Config::frame()
 
     frameSettings->setFrameNumber( current );
     const eq::uint128_t& version = _impl->framedata.commit();
+
+    if( _impl->framedata.getVRParameters()->getSynchronousMode( ))
+        setLatency( 0 );
+    else
+        setLatency( _impl->defaultLatency );
 
     // reset data and advance current frame
     frameSettings->setGrabFrame( false );

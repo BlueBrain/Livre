@@ -50,7 +50,7 @@ struct Client::Impl
         VolumeDataSource::unloadPlugins();
     }
 
-    bool parseArguments( const int32_t argc, char** argv )
+    bool parseArguments( const int32_t argc, const char** argv )
     {
         if( !_applicationParameters.initialize( argc, argv ) ||
             !_rendererParameters.initialize( argc, argv ))
@@ -91,7 +91,7 @@ struct Client::Impl
 
     bool initLocal( const int argc, char** argv )
     {
-        if( !parseArguments( argc, argv ))
+        if( !parseArguments( argc, const_cast< const char** >( argv )))
             return false;
 
         VolumeDataSource::loadPlugins(); //initLocal on render clients never returns
@@ -176,7 +176,7 @@ int Client::run( const int argc, char** argv )
     }
 
     FrameData& frameData = config->getFrameData();
-    frameData.setup( _impl->_applicationParameters, _impl->_rendererParameters );
+    frameData.setup( _impl->_rendererParameters );
     frameData.getVolumeSettings()->setURI( _impl->_applicationParameters.dataFileName);
 
     // 3. init config

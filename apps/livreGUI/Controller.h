@@ -24,6 +24,7 @@
 #define _Controller_h_
 
 #include <zeq/types.h>
+#include <zerobuf/Types.h>
 
 namespace livre
 {
@@ -47,6 +48,13 @@ public:
     bool publish( const zeq::Event& event );
 
     /**
+     * @param zerobuf the ZeroBuf object to publish
+     * @return true if the publication of the object was successful, false
+     *         otherwise
+     */
+    bool publish( const ::zerobuf::Zerobuf& zerobuf );
+
+    /**
      * Register the handler for the given event and publish requests for that
      * event as well.
      *
@@ -62,6 +70,23 @@ public:
      * @return true if function was successfully deregistered
      */
     bool deregisterHandler( const zeq::uint128_t& event );
+
+    /**
+     * Subscribe the given ZeroBuf object and publish a request for a first-time
+     * init of that object.
+     *
+     * @param zerobuf the ZeroBuf object to subscribe for updates
+     * @return true if the object was successfully subscribed
+     */
+    bool subscribe( ::zerobuf::Zerobuf& zerobuf );
+
+    /**
+     * Unsubscribe the given ZeroBuf object from receival of updates.
+     *
+     * @param zerobuf the ZeroBuf object to unsubscribe
+     * @return true if the objec twas successfully unsubscribed
+     */
+    bool unsubscribe( const ::zerobuf::Zerobuf& zerobuf );
 
 private:
     class Impl;

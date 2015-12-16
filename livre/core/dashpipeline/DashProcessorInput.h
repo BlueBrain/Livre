@@ -21,7 +21,6 @@
 #define _DashProcessorInput_h_
 
 #include <livre/core/api.h>
-#include <livre/lib/types.h>
 #include <livre/core/dashTypes.h>
 #include <livre/core/pipeline/ProcessorInput.h>
 #include <livre/core/dash/DashContextTrait.h>

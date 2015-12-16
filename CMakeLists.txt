@@ -18,9 +18,9 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
 include(GitExternal)
 
 set(VERSION_MAJOR "0")
-set(VERSION_MINOR "4")
+set(VERSION_MINOR "5")
 set(VERSION_PATCH "0")
-set(VERSION_ABI 3) # OFF or ABI version
+set(VERSION_ABI 4)
 
 set(LIVRE_namespace livre)
 set(LIVRE_INCLUDE_NAME livre/core)
@@ -67,6 +67,7 @@ common_package(Threads REQUIRED)
 common_package(Tuvok)
 common_package(VTune)
 common_package(zeq)
+common_package(ZeroBuf REQUIRED)
 
 if(ZEQ_FOUND AND FlatBuffers_FOUND)
   list(APPEND COMMON_PACKAGE_DEFINES LIVRE_USE_REMOTE_DATASOURCE)
@@ -76,7 +77,7 @@ endif()
 common_package_post()
 
 include(EqGLLibraries)
-set(LIVRE_DEPENDENT_LIBRARIES vmmlib Lunchbox dash Equalizer)
+set(LIVRE_DEPENDENT_LIBRARIES vmmlib Lunchbox dash Equalizer ZeroBuf)
 
 add_definitions(-DBOOST_PROGRAM_OPTIONS_DYN_LINK) # Fix for windows and shared boost.
 add_subdirectory(livre)

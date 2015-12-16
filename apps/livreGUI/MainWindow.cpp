@@ -22,10 +22,9 @@
 #include <livreGUI/ui_MainWindow.h>
 
 #include "animationController/AnimationController.h"
+#include "renderParametersController/RenderParametersController.h"
 #include "tfEditor/TransferFunctionEditor.h"
 #include "Controller.h"
-
-#include <zeq/zeq.h>
 
 #ifdef LIVRE_USE_MONSTEER
 #  include <monsteer/qt/SteeringWidget.h>
@@ -50,6 +49,12 @@ struct MainWindow::Impl
 
         _ui.animationDockWidget->setWidget(
                     new AnimationController( controller ));
+
+        _ui.renderParametersDockWidget->setWidget( new RenderParametersController( controller ));
+
+        if( !_ui.simulationDockWidget->isHidden( ))
+            parent->tabifyDockWidget( _ui.simulationDockWidget,
+                                      _ui.renderParametersDockWidget);
     }
 
     ~Impl()

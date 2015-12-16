@@ -25,7 +25,6 @@
 #include <livre/eq/settings/CameraSettings.h>
 #include <livre/eq/settings/VolumeSettings.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
-#include <livre/lib/configuration/ClientParameters.h>
 
 namespace livre
 {
@@ -63,9 +62,6 @@ public:
             break;
         case SMI_VOLUME_SETTINGS:
             object = new VolumeSettings();
-            break;
-        case SMI_CLIENT_PARAMETERS:
-            object = new ClientParameters();
             break;
         case SMI_VR_PARAMETERS:
             object = new VolumeRendererParameters();
@@ -121,8 +117,6 @@ FrameData::FrameData( )
                         ( objectFactoryPtr_->createObject( SMI_CAMERA_SETTINGS ) ) )
     , volumeSettingsPtr_( static_cast< VolumeSettings* >
                         ( objectFactoryPtr_->createObject( SMI_VOLUME_SETTINGS ) ) )
-    , clientParametersPtr_( static_cast< ClientParameters* >
-                         ( objectFactoryPtr_->createObject( SMI_CLIENT_PARAMETERS ) ) )
     , vrParametersPtr_( static_cast< VolumeRendererParameters* >
                       ( objectFactoryPtr_->createObject( SMI_VR_PARAMETERS ) ) )
 {
@@ -135,7 +129,6 @@ void FrameData::registerObjects( )
     LBCHECK( registerObject( objectMapPtr_, renderSettingsPtr_, SMI_RENDER_SETTINGS ) );
     LBCHECK( registerObject( objectMapPtr_, cameraSettingsPtr_, SMI_CAMERA_SETTINGS ) );
     LBCHECK( registerObject( objectMapPtr_, volumeSettingsPtr_, SMI_VOLUME_SETTINGS ) );
-    LBCHECK( registerObject( objectMapPtr_, clientParametersPtr_, SMI_CLIENT_PARAMETERS ) );
     LBCHECK( registerObject( objectMapPtr_, vrParametersPtr_, SMI_VR_PARAMETERS ) );
 }
 
@@ -146,7 +139,6 @@ void FrameData::deregisterObjects( )
     LBCHECK( deregisterObject( objectMapPtr_, renderSettingsPtr_ ) );
     LBCHECK( deregisterObject( objectMapPtr_, cameraSettingsPtr_ ) );
     LBCHECK( deregisterObject( objectMapPtr_, volumeSettingsPtr_ ) );
-    LBCHECK( deregisterObject( objectMapPtr_, clientParametersPtr_ ) );
     LBCHECK( deregisterObject( objectMapPtr_, vrParametersPtr_ ) );
 }
 
@@ -175,11 +167,6 @@ void FrameData::mapObjects( )
 
     LBCHECK( mapObject( objectMapPtr_,
                         objectFactoryPtr_,
-                        clientParametersPtr_,
-                        SMI_CLIENT_PARAMETERS ) );
-
-    LBCHECK( mapObject( objectMapPtr_,
-                        objectFactoryPtr_,
                         vrParametersPtr_,
                         SMI_VR_PARAMETERS ) );
 }
@@ -192,7 +179,6 @@ void FrameData::unmapObjects( )
     LBCHECK( objectMapPtr_->unmap( renderSettingsPtr_.get() ) );
     LBCHECK( objectMapPtr_->unmap( cameraSettingsPtr_.get() ) );
     LBCHECK( objectMapPtr_->unmap( volumeSettingsPtr_.get() ) );
-    LBCHECK( objectMapPtr_->unmap( clientParametersPtr_.get() ) );
     LBCHECK( objectMapPtr_->unmap( vrParametersPtr_.get() ) );
     objectMapPtr_->clear();
 }
@@ -203,10 +189,8 @@ void FrameData::initialize( eq::Config* eqConfig )
     objectMapPtr_.reset( new co::ObjectMap( *eqConfig, *objectFactoryPtr_ ) );
 }
 
-void FrameData::setup( const ClientParameters& clientParams,
-                       const VolumeRendererParameters& rendererParams )
+void FrameData::setup( const VolumeRendererParameters& rendererParams )
 {
-    *clientParametersPtr_ = clientParams;
     *vrParametersPtr_ = rendererParams;
 }
 
@@ -230,12 +214,12 @@ VolumeSettingsPtr FrameData::getVolumeSettings() const
     return volumeSettingsPtr_;
 }
 
-ConstClientParametersPtr FrameData::getClientParameters() const
+ConstVolumeRendererParametersPtr FrameData::getVRParameters() const
 {
-    return clientParametersPtr_;
+    return vrParametersPtr_;
 }
 
-ConstVolumeRendererParametersPtr FrameData::getVRParameters() const
+VolumeRendererParametersPtr FrameData::getVRParameters()
 {
     return vrParametersPtr_;
 }

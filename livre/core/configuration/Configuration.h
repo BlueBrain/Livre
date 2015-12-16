@@ -134,7 +134,7 @@ public:
      * @param argc Number of arguments.
      * @param argv Arguments array.
      */
-    LIVRECORE_API void parseCommandLine( int32_t argc, char **argv );
+    LIVRECORE_API void parseCommandLine( int32_t argc, const char **argv );
 
     /**
      * Parses a config file.
@@ -143,19 +143,18 @@ public:
     LIVRECORE_API void parseConfigFile( const std::string& configFile );
 
     /**
-     * Gets the value of a key from the disctionary.
+     * Gets the value of a key from the dictionary.
      * @param key Key to the value in the dictionary.
-     * @param value The value to read into.
-     * @return True if key is in the dictionary.
+     * @param defaultValue The default value to use if key not in dictionary
+     * @return The value if found in the dictionary, defaultValue otherwise
      */
     template< class T >
-    bool getValue( const std::string& key, T& value  ) const
+    T getValue( const std::string& key, const T& defaultValue ) const
     {
         if( !programOptionsMap_.count( key ))
-            return false;
+            return defaultValue;
 
-        value = programOptionsMap_[ key ].as< T >( );
-        return true;
+        return programOptionsMap_[ key ].as< T >( );
     }
 
     /**

@@ -49,10 +49,11 @@ public:
     ~RayCastRenderer();
 
     /**
-     * Modifies the transfer function.
-     * @param transferFunction Transfer function.
+     * Updates the renderer state with new values wrt samples per ray & pixel
+     * and transfer function.
+     * @param frameData the current frame data containing new values
      */
-    void initTransferFunction( const TransferFunction1D< uint8_t >& transferFunction );
+    void update( const FrameData& frameData );
 
 private:
 

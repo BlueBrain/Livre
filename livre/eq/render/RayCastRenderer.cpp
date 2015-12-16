@@ -28,9 +28,13 @@
 #include <livre/core/render/GLWidget.h>
 #include <livre/core/render/View.h>
 
-#include <livre/eq/render/shaders/vertRayCast.glsl.h>
-#include <livre/eq/render/shaders/fragRayCast.glsl.h>
+#include <livre/lib/configuration/VolumeRendererParameters.h>
+
+#include <livre/eq/FrameData.h>
 #include <livre/eq/render/RayCastRenderer.h>
+#include <livre/eq/render/shaders/fragRayCast.glsl.h>
+#include <livre/eq/render/shaders/vertRayCast.glsl.h>
+#include <livre/eq/settings/RenderSettings.h>
 
 #include <eq/eq.h>
 #include <eq/gl.h>
@@ -78,6 +82,14 @@ struct RayCastRenderer::Impl
     ~Impl()
     {
         _framebufferTexture->flush();
+    }
+
+    void update( const FrameData& frameData )
+    {
+        initTransferFunction( frameData.getRenderSettings()->getTransferFunction( ));
+        _nSamplesPerRay = frameData.getVRParameters()->getSamplesPerRay();
+        _computedSamplesPerRay = _nSamplesPerRay;
+        _nSamplesPerPixel = frameData.getVRParameters()->getSamplesPerPixel();
     }
 
     void initTransferFunction(
@@ -272,8 +284,8 @@ struct RayCastRenderer::Impl
 
     std::unique_ptr< eq::util::Texture > _framebufferTexture;
     GLSLShadersPtr _shaders;
-    const uint32_t _nSamplesPerRay;
-    const uint32_t _nSamplesPerPixel;
+    uint32_t _nSamplesPerRay;
+    uint32_t _nSamplesPerPixel;
     uint32_t _computedSamplesPerRay;
     const VolumeInformation& _volInfo;
     uint32_t _transferFunctionTexture;
@@ -295,10 +307,9 @@ RayCastRenderer::RayCastRenderer( uint32_t samplesPerRay,
 RayCastRenderer::~RayCastRenderer()
 {}
 
-void RayCastRenderer::initTransferFunction(
-        const TransferFunction1Dc& transferFunction )
+void RayCastRenderer::update( const FrameData& frameData )
 {
-    _impl->initTransferFunction( transferFunction );
+    _impl->update( frameData );
 }
 
 void RayCastRenderer::onFrameStart_( const GLWidget& glWidget,

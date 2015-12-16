@@ -1,6 +1,5 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
- *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
- *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+/* Copyright (c) 2015, EPFL/Blue Brain Project
+ *                     Daniel.Nachbaur@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -18,32 +17,39 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _VolumeRendererParameters_h_
-#define _VolumeRendererParameters_h_
 
-#include <livre/core/configuration/Parameters.h>
-#include <livre/lib/api.h>
+#ifndef _RenderParametersController_h_
+#define _RenderParametersController_h_
+
+#include <livreGUI/types.h>
 #include <livre/lib/zerobuf/volumeRendererParameters.h>
-#include <co/zerobuf.h>
+#include <QWidget>
 
 namespace livre
 {
 
-/**
- * Enhance the ZeroBuf VolumeRendererParameters for Collage serialization and
- * initialization from config file and/or commandline parameters.
- */
-class VolumeRendererParameters
-        : public co::ZeroBuf< zerobuf::VolumeRendererParameters >,
-          public Parameters
+/** A widget with shows the renderer parameters that can be changed in Livre. */
+class RenderParametersController : public QWidget
 {
-public:
-    LIVRE_API VolumeRendererParameters();
+    Q_OBJECT
 
-protected:
-    void initialize_() final;
+public:
+    /**
+     * @param controller The GUI connection to zeq world.
+     * @param parentWgt Parent widget.
+     */
+    RenderParametersController( Controller& controller,
+                                QWidget *parentWgt = nullptr );
+    ~RenderParametersController( );
+
+private Q_SLOTS:
+    void onNewParamsReceived();
+
+private:
+    struct Impl;
+    std::unique_ptr< Impl > _impl;
 };
 
 }
 
-#endif // _VolumeRendererParameters_h_
+#endif
