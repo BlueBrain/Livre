@@ -107,13 +107,11 @@ public:
         const auto& frameSettings = _config.getFrameData().getFrameSettings();
         const auto& params = _config.getApplicationParameters();
 
-        const Vector2ui& frameRange( _config.getFrameUtils().getFrameRange( ));
-
         const ::zeq::Event& frame = ::zeq::hbp::serializeFrame(
                                         ::zeq::hbp::data::Frame(
-                                            frameRange[0],
+                                            params.frames[0],
                                             frameSettings->getFrameNumber(),
-                                            frameRange[1],
+                                            params.frames[1],
                                             params.animation ));
         _publisher->publish( frame );
     }
