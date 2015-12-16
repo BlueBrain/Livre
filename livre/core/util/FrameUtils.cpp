@@ -58,7 +58,7 @@ uint32_t FrameUtils::getNext( uint32_t current, const int32_t delta ) const
     if( _frameRange == INVALID_FRAME_RANGE )
         return INVALID_FRAME;
 
-    const uint32_t interval = std::abs( _frameRange[1] - _frameRange[0] );
+    const uint32_t interval = _frameRange[1] - _frameRange[0];
 
     // If current is at the beginning and animation is reverse,
     // set current to the end
