@@ -48,12 +48,12 @@ BOOST_AUTO_TEST_CASE(genericParams)
 {
     livre::VolumeRendererParameters params;
     params.setMinLOD( 2 );
-    BOOST_CHECK( !params.isEmptyZerobuf( ));
-    BOOST_CHECK( params.isStaticZerobuf( ));
+    BOOST_CHECK( params.getZerobufSize() > 0 );
+    BOOST_CHECK_EQUAL( params.getZerobufNumDynamics(), 0 );
 
-    ::zerobuf::Generic generic( params.getSchema( ));
+    ::zerobuf::Generic generic( params.getSchemas( ));
     BOOST_CHECK_EQUAL( generic.getZerobufType(), params.getZerobufType( ));
-    generic.setZerobufData( params.getZerobufData(), params.getZerobufSize( ));
+    generic.copyZerobufData( params.getZerobufData(), params.getZerobufSize( ));
     BOOST_CHECK( generic == params );
 }
 
