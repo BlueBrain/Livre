@@ -1,8 +1,8 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
- *                     Maxim Makhinya <maxmah@gmail.com>
- *                     David Steiner  <steiner@ifi.uzh.ch>
- *                     Fatih Erol
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                          Maxim Makhinya <maxmah@gmail.com>
+ *                          David Steiner  <steiner@ifi.uzh.ch>
+ *                          Fatih Erol
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -24,7 +24,7 @@
 #define _Controller_h_
 
 #include <zeq/types.h>
-#include <zerobuf/Types.h>
+#include <zerobuf/types.h>
 
 namespace livre
 {
