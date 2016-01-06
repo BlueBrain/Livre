@@ -157,15 +157,15 @@ public:
 
 private:
 
-    CoObjectFactoryPtr objectFactoryPtr_;
-    CoObjectMapPtr objectMapPtr_;
+    CoObjectFactoryPtr _objectFactory;
+    CoObjectMapPtr _objectMap;
 
-    FrameSettingsPtr frameSettingsPtr_;
-    RenderSettingsPtr renderSettingsPtr_;
-    CameraSettingsPtr cameraSettingsPtr_;
-    VolumeSettingsPtr volumeSettingsPtr_;
+    FrameSettingsPtr _frameSettings;
+    RenderSettingsPtr _renderSettings;
+    CameraSettingsPtr _cameraSettings;
+    VolumeSettingsPtr _volumeSettings;
 
-    VolumeRendererParametersPtr vrParametersPtr_;
+    VolumeRendererParametersPtr _vrParameters;
 };
 
 }

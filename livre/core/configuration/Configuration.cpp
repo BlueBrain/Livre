@@ -1,5 +1,6 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                          Stefan.Eilemann@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -43,13 +44,13 @@ void Configuration::parseCommandLine( int32_t argc, const char **argv )
             allow_unregistered();
 
     boost::program_options::parsed_options filtopts = clp.run( );
-    boost::program_options::store( filtopts, programOptionsMap_ );
-    boost::program_options::notify( programOptionsMap_ );
+    boost::program_options::store( filtopts, _options );
+    boost::program_options::notify( _options );
 
     // If config file is given, parameters are taken from the config file
-    if( programOptionsMap_.count( CONFIGFILE_PARAM ) )
+    if( _options.count( CONFIGFILE_PARAM ) )
     {
-        parseConfigFile( programOptionsMap_[ CONFIGFILE_PARAM ].as< std::string >( )  );
+        parseConfigFile( _options[ CONFIGFILE_PARAM ].as< std::string >( )  );
     }
 }
 
@@ -62,8 +63,8 @@ void Configuration::parseConfigFile( const std::string &configFile )
     boost::program_options::store(
                 boost::program_options::parse_config_file< char >( configStream,
                                                                    descripton, true ),
-                                        programOptionsMap_ );
-    boost::program_options::notify( programOptionsMap_ );
+                                        _options );
+    boost::program_options::notify( _options );
 }
 
 void Configuration::addDescription( const Configuration &config )
@@ -75,19 +76,19 @@ void Configuration::addDescription( const Configuration &config )
         if( it->first == HIDDEN_PROGRAMDESCRIPTION_STR )
             continue;
 
-        descriptionMap_.insert( *it );
+        _descriptions.insert( *it );
     }
 }
 
 const ProgramOptionsDescriptionMap &Configuration::getDescriptionMap_( ) const
 {
-    return descriptionMap_;
+    return _descriptions;
 }
 
 std::ostream& operator<<( std::ostream& os, const Configuration& configuration )
 {
-    for( ProgramOptionsDescriptionMap::const_iterator it = configuration.descriptionMap_.begin();
-         it != configuration.descriptionMap_.end(); ++it )
+    for( ProgramOptionsDescriptionMap::const_iterator it = configuration._descriptions.begin();
+         it != configuration._descriptions.end(); ++it )
     {
         os << it->first << std::endl;
         it->second.print( os );
@@ -97,27 +98,34 @@ std::ostream& operator<<( std::ostream& os, const Configuration& configuration )
     return os;
 }
 
-ProgramOptionsDescription& Configuration::getGroup_( const std::string &groupName )
+ProgramOptionsDescription& Configuration::getGroup_( const std::string& groupName )
 {
-    ProgramOptionsDescriptionMap::iterator it = descriptionMap_.find( groupName );
-    if( it == descriptionMap_.end() )
-    {
-        ProgramOptionsDescription description;
-        descriptionMap_.insert( std::pair< std::string, ProgramOptionsDescription >( groupName, description ) );
-    }
-    return  descriptionMap_[ groupName ];
+    return _descriptions[ groupName ];
 }
 
 void Configuration::processDescriptionMap_( ProgramOptionsDescription& description, bool doNotProcessHidden ) const
 {
-    for( ProgramOptionsDescriptionMap::const_iterator it = descriptionMap_.begin();
-         it != descriptionMap_.end(); ++it )
+    for( ProgramOptionsDescriptionMap::const_iterator it = _descriptions.begin();
+         it != _descriptions.end(); ++it )
     {
         if( doNotProcessHidden && it->first == HIDDEN_PROGRAMDESCRIPTION_STR )
             continue;
 
         description.add( it->second );
     }
+}
+
+Configuration& Configuration::operator = ( const Configuration& rhs )
+{
+    if( this == &rhs )
+        return *this;
+
+    _options = rhs._options;
+    _descriptions.clear();
+    for( const auto& item : rhs._descriptions )
+        _descriptions.insert( item );
+
+    return *this;
 }
 
 }
