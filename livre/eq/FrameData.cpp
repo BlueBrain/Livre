@@ -1,5 +1,5 @@
 /**
- * Copyright (c) BBP/EPFL 2011-2015 Ahmet.Bilgili@epfl.ch
+ * Copyright (c) BBP/EPFL 2011-2016 Ahmet.Bilgili@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -108,160 +108,146 @@ bool deregisterObject( CoObjectMapPtr objectMapPtr,
 }
 
 FrameData::FrameData( )
-    : objectFactoryPtr_( new ObjectFactory() )
-    , frameSettingsPtr_( static_cast< FrameSettings* >
-                       ( objectFactoryPtr_->createObject( SMI_FRAME_SETTINGS ) ) )
-    , renderSettingsPtr_( static_cast< RenderSettings* >
-                        ( objectFactoryPtr_->createObject( SMI_RENDER_SETTINGS ) ) )
-    , cameraSettingsPtr_( static_cast< CameraSettings* >
-                        ( objectFactoryPtr_->createObject( SMI_CAMERA_SETTINGS ) ) )
-    , volumeSettingsPtr_( static_cast< VolumeSettings* >
-                        ( objectFactoryPtr_->createObject( SMI_VOLUME_SETTINGS ) ) )
-    , vrParametersPtr_( static_cast< VolumeRendererParameters* >
-                      ( objectFactoryPtr_->createObject( SMI_VR_PARAMETERS ) ) )
+    : _objectFactory( new ObjectFactory )
+    , _frameSettings( static_cast< FrameSettings* >
+                      ( _objectFactory->createObject( SMI_FRAME_SETTINGS )))
+    , _renderSettings( static_cast< RenderSettings* >
+                       ( _objectFactory->createObject( SMI_RENDER_SETTINGS )))
+    , _cameraSettings( static_cast< CameraSettings* >
+                       ( _objectFactory->createObject( SMI_CAMERA_SETTINGS )))
+    , _volumeSettings( static_cast< VolumeSettings* >
+                       ( _objectFactory->createObject( SMI_VOLUME_SETTINGS )))
+    , _vrParameters( static_cast< VolumeRendererParameters* >
+                     ( _objectFactory->createObject( SMI_VR_PARAMETERS )))
 {
 }
 
 void FrameData::registerObjects( )
 {
-    LBASSERT( objectMapPtr_ );
-    LBCHECK( registerObject( objectMapPtr_, frameSettingsPtr_, SMI_FRAME_SETTINGS ) );
-    LBCHECK( registerObject( objectMapPtr_, renderSettingsPtr_, SMI_RENDER_SETTINGS ) );
-    LBCHECK( registerObject( objectMapPtr_, cameraSettingsPtr_, SMI_CAMERA_SETTINGS ) );
-    LBCHECK( registerObject( objectMapPtr_, volumeSettingsPtr_, SMI_VOLUME_SETTINGS ) );
-    LBCHECK( registerObject( objectMapPtr_, vrParametersPtr_, SMI_VR_PARAMETERS ) );
+    LBASSERT( _objectMap );
+    LBCHECK( registerObject( _objectMap, _frameSettings, SMI_FRAME_SETTINGS ));
+    LBCHECK( registerObject( _objectMap, _renderSettings, SMI_RENDER_SETTINGS ));
+    LBCHECK( registerObject( _objectMap, _cameraSettings, SMI_CAMERA_SETTINGS ));
+    LBCHECK( registerObject( _objectMap, _volumeSettings, SMI_VOLUME_SETTINGS ));
+    LBCHECK( registerObject( _objectMap, _vrParameters, SMI_VR_PARAMETERS ));
 }
 
 void FrameData::deregisterObjects( )
 {
-    LBASSERT( objectMapPtr_ );
-    LBCHECK( deregisterObject( objectMapPtr_, frameSettingsPtr_ ) );
-    LBCHECK( deregisterObject( objectMapPtr_, renderSettingsPtr_ ) );
-    LBCHECK( deregisterObject( objectMapPtr_, cameraSettingsPtr_ ) );
-    LBCHECK( deregisterObject( objectMapPtr_, volumeSettingsPtr_ ) );
-    LBCHECK( deregisterObject( objectMapPtr_, vrParametersPtr_ ) );
+    LBASSERT( _objectMap );
+    LBCHECK( deregisterObject( _objectMap, _frameSettings ));
+    LBCHECK( deregisterObject( _objectMap, _renderSettings ));
+    LBCHECK( deregisterObject( _objectMap, _cameraSettings ));
+    LBCHECK( deregisterObject( _objectMap, _volumeSettings ));
+    LBCHECK( deregisterObject( _objectMap, _vrParameters ));
 }
 
 void FrameData::mapObjects( )
 {
-    LBASSERT( objectMapPtr_ );
-    LBCHECK( mapObject( objectMapPtr_,
-                        objectFactoryPtr_,
-                        frameSettingsPtr_,
-                        SMI_FRAME_SETTINGS ) );
-
-    LBCHECK( mapObject( objectMapPtr_,
-                        objectFactoryPtr_,
-                        renderSettingsPtr_,
-                        SMI_RENDER_SETTINGS ) );
-
-    LBCHECK( mapObject( objectMapPtr_,
-                        objectFactoryPtr_,
-                        cameraSettingsPtr_,
-                        SMI_CAMERA_SETTINGS ) );
-
-    LBCHECK( mapObject( objectMapPtr_,
-                        objectFactoryPtr_,
-                        volumeSettingsPtr_,
-                        SMI_VOLUME_SETTINGS ) );
-
-    LBCHECK( mapObject( objectMapPtr_,
-                        objectFactoryPtr_,
-                        vrParametersPtr_,
-                        SMI_VR_PARAMETERS ) );
+    LBASSERT( _objectMap );
+    LBCHECK( mapObject( _objectMap, _objectFactory, _frameSettings,
+                        SMI_FRAME_SETTINGS ));
+    LBCHECK( mapObject( _objectMap, _objectFactory, _renderSettings,
+                        SMI_RENDER_SETTINGS ));
+    LBCHECK( mapObject( _objectMap, _objectFactory, _cameraSettings,
+                        SMI_CAMERA_SETTINGS ));
+    LBCHECK( mapObject( _objectMap, _objectFactory, _volumeSettings,
+                        SMI_VOLUME_SETTINGS ));
+    LBCHECK( mapObject( _objectMap, _objectFactory, _vrParameters,
+                        SMI_VR_PARAMETERS ));
 }
 
 void FrameData::unmapObjects( )
 {
-    if( !objectMapPtr_ )
+    if( !_objectMap )
         return;
-    LBCHECK( objectMapPtr_->unmap( frameSettingsPtr_.get() ) );
-    LBCHECK( objectMapPtr_->unmap( renderSettingsPtr_.get() ) );
-    LBCHECK( objectMapPtr_->unmap( cameraSettingsPtr_.get() ) );
-    LBCHECK( objectMapPtr_->unmap( volumeSettingsPtr_.get() ) );
-    LBCHECK( objectMapPtr_->unmap( vrParametersPtr_.get() ) );
-    objectMapPtr_->clear();
+    LBCHECK( _objectMap->unmap( _frameSettings.get( )));
+    LBCHECK( _objectMap->unmap( _renderSettings.get( )));
+    LBCHECK( _objectMap->unmap( _cameraSettings.get( )));
+    LBCHECK( _objectMap->unmap( _volumeSettings.get( )));
+    LBCHECK( _objectMap->unmap( _vrParameters.get( )));
+    _objectMap->clear();
 }
 
 void FrameData::initialize( eq::Config* eqConfig )
 {
-    LBASSERT( !objectMapPtr_ );
-    objectMapPtr_.reset( new co::ObjectMap( *eqConfig, *objectFactoryPtr_ ) );
+    LBASSERT( !_objectMap );
+    _objectMap.reset( new co::ObjectMap( *eqConfig, *_objectFactory ) );
 }
 
 void FrameData::setup( const VolumeRendererParameters& rendererParams )
 {
-    *vrParametersPtr_ = rendererParams;
+    *_vrParameters = rendererParams;
 }
 
 FrameSettingsPtr FrameData::getFrameSettings() const
 {
-    return frameSettingsPtr_;
+    return _frameSettings;
 }
 
 RenderSettingsPtr FrameData::getRenderSettings() const
 {
-    return renderSettingsPtr_;
+    return _renderSettings;
 }
 
 CameraSettingsPtr FrameData::getCameraSettings() const
 {
-    return cameraSettingsPtr_;
+    return _cameraSettings;
 }
 
 VolumeSettingsPtr FrameData::getVolumeSettings() const
 {
-    return volumeSettingsPtr_;
+    return _volumeSettings;
 }
 
 ConstVolumeRendererParametersPtr FrameData::getVRParameters() const
 {
-    return vrParametersPtr_;
+    return _vrParameters;
 }
 
 VolumeRendererParametersPtr FrameData::getVRParameters()
 {
-    return vrParametersPtr_;
+    return _vrParameters;
 }
 
 const eq::uint128_t& FrameData::getID() const
 {
-    return objectMapPtr_->getID();
+    return _objectMap->getID();
 }
 
 eq::uint128_t FrameData::commit()
 {
-    return objectMapPtr_->commit( );
+    return _objectMap->commit( );
 }
 
 eq::uint128_t FrameData::sync( const eq::uint128_t& version )
 {
-    LBASSERT( objectMapPtr_ );
-    return objectMapPtr_->sync( version );
+    LBASSERT( _objectMap );
+    return _objectMap->sync( version );
 }
 
 bool FrameData::map( eq::Config* config, const eq::uint128_t& uuid )
 {
     LBVERB << "Mapping object map to UUID : " << uuid << std::endl;
-    return config->mapObject( objectMapPtr_.get(), uuid );
+    return config->mapObject( _objectMap.get(), uuid );
 }
 
 void FrameData::unmap( eq::Config* config )
 {
-    if( objectMapPtr_ )
-        config->unmapObject( objectMapPtr_.get() );
+    if( _objectMap )
+        config->unmapObject( _objectMap.get() );
 }
 
 bool FrameData::registerToConfig_( eq::Config* config )
 {
-    LBVERB << "Registering object map UUID : " << objectMapPtr_->getID() << std::endl;
-    return config->registerObject( objectMapPtr_.get() );
+    LBVERB << "Registering object map UUID : " << _objectMap->getID() << std::endl;
+    return config->registerObject( _objectMap.get() );
 }
 
 bool FrameData::deregisterFromConfig_( eq::Config *config )
 {
-    LBVERB << "Deregistering object map UUID : " << objectMapPtr_->getID() << std::endl;
-    config->deregisterObject( objectMapPtr_.get() );
+    LBVERB << "Deregistering object map UUID : " << _objectMap->getID() << std::endl;
+    config->deregisterObject( _objectMap.get() );
     return true;
 }
 

@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -20,18 +20,11 @@
 #ifndef _Configuration_h_
 #define _Configuration_h_
 
-#include <boost/program_options.hpp>
-#include <boost/program_options/options_description.hpp>
-
 #include <livre/core/api.h>
 #include <livre/core/types.h>
 
 namespace livre
 {
-
-typedef boost::program_options::variables_map ProgramOptionsMap;
-typedef boost::program_options::options_description ProgramOptionsDescription;
-typedef std::map< std::string, ProgramOptionsDescription > ProgramOptionsDescriptionMap;
 
 /**
  * The Configuration class is used to have a dictionary of variadic data types with names.
@@ -39,7 +32,7 @@ typedef std::map< std::string, ProgramOptionsDescription > ProgramOptionsDescrip
 class Configuration
 {
 public:
-     LIVRECORE_API Configuration( );
+    LIVRECORE_API Configuration();
 
     /**
      * Adds description for a dictionary item.
@@ -49,11 +42,11 @@ public:
      * @warning Before file parsing and/or command line parsing descriptions should be added
      */
     LIVRECORE_API void addDescription( const std::string& groupName,
-                                   const std::string& shortDesc,
-                                   const std::string& longDesc )
+                                       const std::string& shortDesc,
+                                       const std::string& longDesc )
     {
-        getGroup_( groupName ).add_options( )( shortDesc.c_str(),
-                                               longDesc.c_str( ));
+        getGroup_( groupName ).add_options()( shortDesc.c_str(),
+                                              longDesc.c_str( ));
     }
 
     /**
@@ -68,9 +61,9 @@ public:
                          const std::string& shortDesc,
                          const std::string& longDesc )
     {
-        getGroup_( groupName ).add_options( ) ( shortDesc.c_str(),
+        getGroup_( groupName ).add_options() ( shortDesc.c_str(),
                                            boost::program_options::value< T >(),
-                                                longDesc.c_str() );
+                                               longDesc.c_str() );
     }
 
     /**
@@ -89,9 +82,9 @@ public:
                          const std::string& longDesc,
                          T defaultValue )
     {
-        getGroup_( groupName ).add_options( )( shortDesc.c_str(),
+        getGroup_( groupName ).add_options()( shortDesc.c_str(),
             boost::program_options::value< T >()->default_value( defaultValue ),
-                                               longDesc.c_str() );
+                                              longDesc.c_str() );
     }
 
     /**
@@ -111,11 +104,11 @@ public:
                          const std::string& longDesc,
                          T defaultValue, T implicitValue )
     {
-        getGroup_( groupName ).add_options( )( shortDesc.c_str(),
+        getGroup_( groupName ).add_options()( shortDesc.c_str(),
                                            boost::program_options::value< T >()
-                                               ->default_value( defaultValue )
-                                               ->implicit_value( implicitValue),
-                                               longDesc.c_str() );
+                                              ->default_value( defaultValue )
+                                              ->implicit_value( implicitValue),
+                                              longDesc.c_str() );
     }
 
     // Specialization for boolean parameters
@@ -124,9 +117,9 @@ public:
                          const std::string& longDesc,
                          bool defaultValue )
     {
-        getGroup_( groupName ).add_options( )( shortDesc.c_str(),
+        getGroup_( groupName ).add_options()( shortDesc.c_str(),
            boost::program_options::bool_switch()->default_value( defaultValue ),
-                                               longDesc.c_str() );
+                                              longDesc.c_str() );
     }
 
     /**
@@ -151,10 +144,10 @@ public:
     template< class T >
     T getValue( const std::string& key, const T& defaultValue ) const
     {
-        if( !programOptionsMap_.count( key ))
+        if( !_options.count( key ))
             return defaultValue;
 
-        return programOptionsMap_[ key ].as< T >( );
+        return _options[ key ].as< T >( );
     }
 
     /**
@@ -164,13 +157,13 @@ public:
      */
     LIVRECORE_API bool getValue( const std::string& key ) const
     {
-        return programOptionsMap_.count( key );
+        return _options.count( key );
     }
 
     /**
      * @return True if dictionary is empty.
      */
-    LIVRECORE_API bool empty( ) const { return descriptionMap_.empty(); }
+    LIVRECORE_API bool empty() const { return _descriptions.empty(); }
 
     /**
      * Adds global parameters ( help, config file ... to global configuration )
@@ -190,9 +183,11 @@ public:
     LIVRECORE_API friend std::ostream& operator<<( std::ostream& ostream,
                                                    const Configuration& configuration );
 
+    LIVRECORE_API Configuration& operator = ( const Configuration& );
+
 private:
-    ProgramOptionsMap programOptionsMap_;
-    ProgramOptionsDescriptionMap descriptionMap_;
+    ProgramOptionsMap _options;
+    ProgramOptionsDescriptionMap _descriptions;
 
     LIVRECORE_API ProgramOptionsDescription& getGroup_( const std::string& groupName );
     void processDescriptionMap_( ProgramOptionsDescription& description ,

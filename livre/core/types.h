@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -29,6 +29,8 @@
 
 #include <boost/foreach.hpp>
 #include <boost/intrusive_ptr.hpp>
+#include <boost/program_options.hpp>
+#include <boost/program_options/options_description.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/locks.hpp>
@@ -242,8 +244,12 @@ const uint32_t INVALID_FRAME = ( 1u << NODEID_FRAME_BITS ) - 1; //!< Invalid tre
 const uint32_t LATEST_FRAME = INT_MAX; //!< Maximum frame number
 
 
-#define HIDDEN_PROGRAMDESCRIPTION_STR "_HIDDEN_"
-
+// Program Options
+typedef boost::program_options::variables_map ProgramOptionsMap;
+typedef boost::program_options::options_description ProgramOptionsDescription;
+typedef std::map< std::string,
+                  ProgramOptionsDescription > ProgramOptionsDescriptionMap;
+static const std::string HIDDEN_PROGRAMDESCRIPTION_STR("_HIDDEN_");
 }
 
 #endif // _coreTypes_h_
