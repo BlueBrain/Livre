@@ -9,8 +9,7 @@
 #version 120
 #extension GL_ARB_texture_rectangle : enable
 
-#define EARLY_EXIT 0.99
-#define DEFAULT_NSAMPLES_PER_RAY 32
+#define EARLY_EXIT 0.999
 #define EPSILON 0.0000000001f
 
 uniform sampler3D volumeTex; //gx, gy, gz, v
@@ -34,21 +33,25 @@ uniform vec3 worldEyePosition;
 uniform vec2 depthRange;
 
 uniform int nSamplesPerRay;
+uniform int maxSamplesPerRay;
 uniform int nSamplesPerPixel;
 uniform float shininess;
 uniform int refLevel;
 
-struct Ray {
+struct Ray
+{
     vec3 Origin;
     vec3 Dir;
 };
 
-struct AABB {
+struct AABB
+{
     vec3 Min;
     vec3 Max;
 };
 
-float rand(vec2 co){
+float rand(vec2 co)
+{
   return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
 }
 
@@ -98,8 +101,9 @@ bool intersectBox( Ray r, AABB aabb, out float t0, out float t1 )
 
 vec4 composite( vec4 src, vec4 dst, float alphaCorrection )
 {
-    float alpha = 1.0 - pow( ( 1.0 - src.a ), alphaCorrection );
-    dst.rgb = dst.rgb + src.rgb * alpha * ( 1.0 - dst.a );
+    // The alpha correction function behaves badly around maximum alpha
+    float alpha = 1.0 - pow( 1.0 - min( src.a, 1.0 - 1.0 / 256.0), alphaCorrection );
+    dst.rgb += src.rgb * alpha * ( 1.0 - dst.a );
     dst.a += alpha * ( 1.0 - dst.a );
     return dst;
 }
@@ -111,7 +115,7 @@ void main( void )
     if( result.a > EARLY_EXIT )
          discard;
 
-    vec4 brickResult = vec4( 0.0, 0.0, 0.0, 0.0 );
+    vec4 brickResult = vec4( 0.0f );
 
     for( int i = 0; i < nSamplesPerPixel; i++ )
     {
@@ -154,7 +158,8 @@ void main( void )
         vec3 rayStart = eye.Origin + eye.Dir * tnear;
         vec3 rayStop = eye.Origin + eye.Dir * tfar;
 
-        float alphaCorrection = float( DEFAULT_NSAMPLES_PER_RAY ) / float( nSamplesPerRay );
+        // http://stackoverflow.com/questions/12494439/opacity-correction-in-raycasting-volume-rendering
+        float alphaCorrection = float( maxSamplesPerRay) / float( nSamplesPerRay );
 
         vec3 pos = rayStart;
         vec3 step = normalize( rayStop - rayStart ) * stepSize;

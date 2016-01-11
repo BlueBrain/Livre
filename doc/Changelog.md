@@ -3,7 +3,8 @@ Changelog {#Changelog}
 
 # master {#master}
 
-
+* [#236](https://github.com/BlueBrain/Livre/pull/236):
+  Fix #225. Adapted shader alpha correction to the minimum number of samples
 * [#238](https://github.com/BlueBrain/Livre/pull/238):
   Fix #230. The caches reporting different sizes
 * [#234](https://github.com/BlueBrain/Livre/pull/234):
