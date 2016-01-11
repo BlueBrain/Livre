@@ -275,14 +275,6 @@ public:
         _renderViewPtr->setViewport( viewport );
 
         livre::Window* window = static_cast< livre::Window* >( _channel->getWindow( ));
-        AvailableSetGenerator generateSet( node->getDashTree(),
-                                           window->getTextureCache( ));
-
-        _frameInfo.clear();
-        for( const auto& visible : visibles )
-            _frameInfo.allNodes.push_back( visible.getLODNode().getNodeId( ));
-        generateSet.generateRenderingSet( _frameInfo );
-
         const livre::Pipe* pipe = static_cast< const livre::Pipe* >( _channel->getPipe( ));
 
         const bool isSynchronous = pipe->getFrameData()->getVRParameters()->getSynchronousMode();
@@ -299,12 +291,15 @@ public:
             // node with their own frustum.
             if( !isSynchronous && receivedFrustum != _currentFrustum )
                 _channel->getConfig()->sendEvent( REDRAW );
-
-            _frameInfo.clear();
-            for( const auto& visible : visibles )
-                _frameInfo.allNodes.push_back(visible.getLODNode().getNodeId());
-            generateSet.generateRenderingSet( _frameInfo );
         }
+
+        const AvailableSetGenerator generateSet( node->getDashTree(),
+                                                 window->getTextureCache( ));
+
+        _frameInfo.clear();
+        for( const auto& visible : visibles )
+            _frameInfo.allNodes.push_back(visible.getLODNode().getNodeId());
+        generateSet.generateRenderingSet( _frameInfo );
 
         EqRenderViewPtr renderViewPtr =
                 boost::static_pointer_cast< EqRenderView >( _renderViewPtr );

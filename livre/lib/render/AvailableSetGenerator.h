@@ -46,7 +46,7 @@ public:
      * Generates the rendering set according to the given frustum.
      * @param frameInfo Keeps the frame information
      */
-    LIVRE_API void generateRenderingSet( FrameInfo& frameInfo );
+    LIVRE_API void generateRenderingSet( FrameInfo& frameInfo ) const;
 
 private:
 

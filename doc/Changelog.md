@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # master {#master}
 
+* [#234](https://github.com/BlueBrain/Livre/pull/234):
+  Fix #227. Rendering set generation is only done once
 * [#220](https://github.com/BlueBrain/Livre/pull/220):
   LivreGUI: Add renderer parameters panel
 * [#219](https://github.com/BlueBrain/Livre/pull/219):

@@ -44,7 +44,7 @@ struct AvailableSetGenerator::Impl
     {}
 
     bool hasParentInMap( const NodeId& childRenderNode,
-                         const ConstCacheMap& cacheMap )
+                         const ConstCacheMap& cacheMap ) const
     {
         const NodeIds& parentNodeIds = childRenderNode.getParents();
 
@@ -56,7 +56,7 @@ struct AvailableSetGenerator::Impl
     }
 
     void collectLoadedTextures( const NodeId& nodeId, ConstCacheMap& cacheMap,
-                                NodeIds& notAvailableRenderNodes )
+                                NodeIds& notAvailableRenderNodes ) const
     {
         NodeId current = nodeId;
         while( current.isValid( ))
@@ -80,7 +80,7 @@ struct AvailableSetGenerator::Impl
             notAvailableRenderNodes.push_back( nodeId );
     }
 
-    void generateRenderingSet( FrameInfo& frameInfo )
+    void generateRenderingSet( FrameInfo& frameInfo ) const
     {
         ConstCacheMap cacheMap;
         for( const NodeId& nodeId : frameInfo.allNodes )
@@ -131,7 +131,7 @@ AvailableSetGenerator::~AvailableSetGenerator()
     delete _impl;
 }
 
-void AvailableSetGenerator::generateRenderingSet( FrameInfo& frameInfo )
+void AvailableSetGenerator::generateRenderingSet( FrameInfo& frameInfo ) const
 {
     _impl->generateRenderingSet( frameInfo );
 }
