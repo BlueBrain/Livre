@@ -261,7 +261,7 @@ public:
     void updateRegions( const RenderBricks& bricks )
     {
         const Matrix4f& mvpMatrix = _currentFrustum.getModelViewProjectionMatrix();
-        BOOST_FOREACH( const RenderBrickPtr& brick, bricks )
+        for( const RenderBrickPtr& brick : bricks )
         {
             const Vector3f& min = brick->getLODNode()->getWorldBox().getMin();
             const Vector3f& max = brick->getLODNode()->getWorldBox().getMax();
@@ -291,7 +291,7 @@ public:
                 region[3] = std::max( corner[1], region[3] );
             }
 
-            // transform region of interest from [ -1 -1 1 1 ] to normalized viewport
+            // transform ROI from [ -1 -1 1 1 ] to normalized viewport
             const Vector4f normalized( region[0] * .5f + .5f,
                                        region[1] * .5f + .5f,
                                        ( region[2] - region[0] ) * .5f,
@@ -299,6 +299,9 @@ public:
 
             _channel->declareRegion( eq::Viewport( normalized ));
         }
+#ifndef NDEBUG
+        _channel->outlineViewport();
+#endif
     }
 
     void frameDraw( const eq::uint128_t& )
