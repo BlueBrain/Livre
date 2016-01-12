@@ -203,9 +203,9 @@ size_t TextureObject::getCacheSize( ) const
             break;
     }
 
-    const Vector3i textureSize = textureState_->texturePoolPtr->getMaxBlockSize();
-    const uint32_t cacheSize = textureSize[ 0 ] * textureSize[ 1 ] * textureSize[ 2 ] * elementSize;
-    return cacheSize;
+    const Vector3ui& textureSize =
+            textureState_->texturePoolPtr->getMaxBlockSize();
+    return textureSize.product() * elementSize;
 }
 
 const TextureDataObject& TextureObject::getTextureDataObject_( ) const

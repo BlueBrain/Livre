@@ -86,8 +86,13 @@ size_t TextureDataObject::getDataSize_() const
     if( !isValid() )
         return 0;
 
-    const Vector3i& voxSizeVec = lodNodePtr_->getVoxelBox( ).getDimension( );
-    return voxSizeVec[0] * voxSizeVec[1] * voxSizeVec[2];
+    const Vector3ui& overlap =
+                dataSourcePtr_->getVolumeInformation().overlap;
+    const uint32_t elemSize =
+                dataSourcePtr_->getVolumeInformation().getBytesPerVoxel();
+    const Vector3ui blockSize =
+                lodNodePtr_->getBlockSize() + overlap * 2;
+    return blockSize.product() * elemSize;
 }
 
 size_t TextureDataObject::getCacheSize() const

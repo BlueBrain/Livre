@@ -3,6 +3,9 @@ Changelog {#Changelog}
 
 # master {#master}
 
+
+* [#238](https://github.com/BlueBrain/Livre/pull/238):
+  Fix #230. The caches reporting different sizes
 * [#234](https://github.com/BlueBrain/Livre/pull/234):
   Fix #227. Rendering set generation is only done once
 * [#220](https://github.com/BlueBrain/Livre/pull/220):
