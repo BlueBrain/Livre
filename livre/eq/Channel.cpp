@@ -545,8 +545,7 @@ public:
 
         try // blend DB frames in computed order
         {
-            eq::Compositor::assembleFramesSorted( dbFrames, _channel, 0,
-                                                  true /* blendAlpha */ );
+            eq::Compositor::blendFrames( dbFrames, _channel, 0 );
         }
         catch( const std::exception& e )
         {
