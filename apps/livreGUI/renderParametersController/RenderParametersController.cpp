@@ -1,5 +1,5 @@
-/* Copyright (c) 2015, EPFL/Blue Brain Project
- *                     Daniel.Nachbaur@epfl.ch
+/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+ *                          Daniel.Nachbaur@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -18,7 +18,6 @@
  */
 
 #include "RenderParametersController.h"
-#include "RenderParameters.h"
 #include <livreGUI/ui_RenderParametersController.h>
 #include <livreGUI/Controller.h>
 
@@ -33,6 +32,8 @@ struct RenderParametersController::Impl
     {
         _ui.setupUi( parent );
 
+        _params.setUpdatedFunction(
+            [parent]() { emit parent->paramsUpdated(); } );
         _controller.subscribe( _params );
     }
 
@@ -41,7 +42,7 @@ struct RenderParametersController::Impl
         _controller.unsubscribe( _params );
     }
 
-    void onNewParamsReceived()
+    void onParamsUpdated()
     {
         _ui.maxLODSpinBox->blockSignals( true );
         _ui.maxLODSpinBox->setValue( _params.getMaxLOD( ));
@@ -82,7 +83,7 @@ struct RenderParametersController::Impl
     Ui::renderParametersController _ui;
     RenderParametersController* _parent;
     Controller& _controller;
-    RenderParameters _params;
+    zerobuf::VolumeRendererParameters _params;
 };
 
 RenderParametersController::RenderParametersController( Controller& controller,
@@ -90,8 +91,8 @@ RenderParametersController::RenderParametersController( Controller& controller,
     : QWidget( parentWgt )
     , _impl( new RenderParametersController::Impl( this, controller ))
 {
-    connect( &_impl->_params, &RenderParameters::received,
-             this, &RenderParametersController::onNewParamsReceived );
+    connect( this, &RenderParametersController::paramsUpdated,
+             this, &RenderParametersController::onParamsUpdated );
 
     connect( _impl->_ui.maxLODSpinBox,
              static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
@@ -116,9 +117,9 @@ RenderParametersController::~RenderParametersController( )
 {
 }
 
-void RenderParametersController::onNewParamsReceived()
+void RenderParametersController::onParamsUpdated()
 {
-    _impl->onNewParamsReceived();
+    _impl->onParamsUpdated();
 }
 
 }

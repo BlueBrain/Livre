@@ -19,7 +19,6 @@ endif()
 set(LIVREGUI_MOC_HEADERS
   MainWindow.h
   animationController/AnimationController.h
-  renderParametersController/RenderParameters.h
   renderParametersController/RenderParametersController.h
   tfEditor/ColorMapWidget.h
   tfEditor/HoverPoints.h

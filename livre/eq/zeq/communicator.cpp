@@ -280,7 +280,7 @@ private:
                 std::bind( &Impl::requestExit, this );
         _requests[::zeq::vocabulary::EVENT_VOCABULARY] =
                 std::bind( &Impl::publishVocabulary, this );
-        _requests[_config.getFrameData().getVRParameters()->getZerobufType()] =
+        _requests[_config.getFrameData().getVRParameters()->getTypeIdentifier()] =
                 std::bind( &Impl::publishVolumeRendererParameters, this );
     }
 

@@ -1,5 +1,5 @@
-/* Copyright (c) 2015, EPFL/Blue Brain Project
- *                     Daniel.Nachbaur@epfl.ch
+/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+ *                          Daniel.Nachbaur@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -42,12 +42,16 @@ public:
                                 QWidget *parentWgt = nullptr );
     ~RenderParametersController( );
 
+signals:
+    void paramsUpdated();
+
 private Q_SLOTS:
-    void onNewParamsReceived();
+    void onParamsUpdated();
 
 private:
     struct Impl;
     std::unique_ptr< Impl > _impl;
+
 };
 
 }
