@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
@@ -24,7 +24,7 @@
 #include <livre/core/configuration/Parameters.h>
 #include <livre/lib/api.h>
 #include <livre/lib/zerobuf/volumeRendererParameters.h>
-#include <co/zerobuf.h>
+#include <co/distributable.h>
 
 namespace livre
 {
@@ -34,7 +34,7 @@ namespace livre
  * initialization from config file and/or commandline parameters.
  */
 class VolumeRendererParameters
-        : public co::ZeroBuf< zerobuf::VolumeRendererParameters >,
+        : public co::Distributable< zerobuf::VolumeRendererParameters >,
           public Parameters
 {
 public:

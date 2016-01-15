@@ -113,8 +113,8 @@ public:
         if( !_subscriber.subscribe( zerobuf ))
             return false;
 
-        _requests.push_back( zerobuf.getZerobufType( ));
-        return _replySubscriber.registerHandler( zerobuf.getZerobufType(),
+        _requests.push_back( zerobuf.getTypeIdentifier( ));
+        return _replySubscriber.registerHandler( zerobuf.getTypeIdentifier(),
                                                 std::bind( &Impl::onReply, this,
                                                        std::placeholders::_1 ));
     }
@@ -125,11 +125,11 @@ public:
             return false;
 
         const auto& i = std::find( _requests.begin(), _requests.end(),
-                                   zerobuf.getZerobufType( ));
+                                   zerobuf.getTypeIdentifier( ));
         if( i != _requests.end( ))
         {
             _requests.erase( i );
-            _replySubscriber.deregisterHandler( zerobuf.getZerobufType( ));
+            _replySubscriber.deregisterHandler( zerobuf.getTypeIdentifier( ));
         }
 
         return true;
