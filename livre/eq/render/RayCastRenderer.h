@@ -22,7 +22,6 @@
 
 #include <livre/eq/types.h>
 #include <livre/core/render/Renderer.h>
-#include <livre/core/render/TransferFunction1D.h>
 
 namespace livre
 {

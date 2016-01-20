@@ -67,7 +67,7 @@ struct RayCastRenderer::Impl
         , _volInfo( volInfo )
         , _transferFunctionTexture( 0 )
     {
-        TransferFunction1D< unsigned char > transferFunction;
+        TransferFunction1D transferFunction;
         initTransferFunction( transferFunction );
 
         // TODO: Add the shaders from resource directory
@@ -93,7 +93,7 @@ struct RayCastRenderer::Impl
     }
 
     void initTransferFunction(
-        const TransferFunction1Dc& transferFunction )
+        const TransferFunction1D& transferFunction )
     {
         assert( transferFunction.getNumChannels() == 4u );
 

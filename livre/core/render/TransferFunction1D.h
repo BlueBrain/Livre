@@ -34,9 +34,7 @@ namespace livre
 
 /**
  * The TransferFunction1D class holds the color and transparency for an RGBA 1 dimensional Transfer Function ( TF ).
- * The data type can be templated by parameter T.
  */
-template< class T  >
 class TransferFunction1D
 {
 public:
@@ -67,7 +65,7 @@ public:
      * Copy a transfer function.
      * @param tf The transfer function to be copied.
      */
-    explicit TransferFunction1D( const TransferFunction1D< T >& tf )
+    explicit TransferFunction1D( const TransferFunction1D& tf )
         : rgba_( tf.rgba_ )
     {}
 
@@ -75,11 +73,11 @@ public:
      * Create a transfer function.
      * @param rgba A std::vector with samples of the transfer function.
      */
-    explicit TransferFunction1D( const std::vector< T >& rgba )
+    explicit TransferFunction1D( const std::vector< uint8_t >& rgba )
         : rgba_( rgba )
     {}
 
-    TransferFunction1D& operator=( const TransferFunction1D< T >& rhs )
+    TransferFunction1D& operator=( const TransferFunction1D& rhs )
     {
         if( this == &rhs )
             return *this;
@@ -108,33 +106,22 @@ public:
 private:
     std::vector< T > rgba_;
 
-    template <typename U>
-    friend co::DataOStream& operator<<( co::DataOStream& os, const TransferFunction1D< U >& tf );
-
-    template <typename U>
-    friend co::DataIStream& operator>>( co::DataIStream& is, TransferFunction1D< U >& tf );
+    friend co::DataOStream& operator<<( co::DataOStream& os,
+                                        const TransferFunction1D& tf );
+    friend co::DataIStream& operator>>( co::DataIStream& is,
+                                        TransferFunction1D& tf );
 
     LIVRECORE_API void createCustomTF_( const uint32_t size );
 
     LIVRECORE_API void createTfFromFile_( const std::string& file );
 };
 
-/**
-  * Typedefs for templates
-  */
-typedef TransferFunction1D< uint8_t > TransferFunction1Dc;
-typedef TransferFunction1D< float > TransferFunction1Df;
-typedef boost::shared_ptr< TransferFunction1Df > TransferFunction1DfPtr;
-
-template < class U >
-co::DataOStream& operator<<( co::DataOStream& os,
-                             const TransferFunction1D< U >& tf )
+co::DataOStream& operator<<( co::DataOStream& os, const TransferFunction1D& tf )
 {
     return os << tf.getData();
 }
 
-template < class U >
-co::DataIStream& operator>>( co::DataIStream& is, TransferFunction1D< U >& tf )
+co::DataIStream& operator>>( co::DataIStream& is, TransferFunction1D& tf )
 {
     return is >> tf.getData();
 }

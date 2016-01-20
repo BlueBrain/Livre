@@ -176,7 +176,7 @@ bool Config::init( const int argc LB_UNUSED, char** argv LB_UNUSED )
     frameSettings->setFrameNumber( params.frames.x( ));
 
     RenderSettingsPtr renderSettings = framedata.getRenderSettings();
-    const TransferFunction1Dc tf( params.transferFunction );
+    const TransferFunction1D tf( params.transferFunction );
     renderSettings->setTransferFunction( tf );
 
     _impl->framedata.registerObjects();

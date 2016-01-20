@@ -213,7 +213,7 @@ public:
 
     void onLookupTable1D( const ::zeq::Event& event )
     {
-        const TransferFunction1Dc transferFunction(
+        const TransferFunction1D transferFunction(
             ::zeq::hbp::deserializeLookupTable1D( event ));
         auto renderSettings = _config.getFrameData().getRenderSettings();
         renderSettings->setTransferFunction( transferFunction );
