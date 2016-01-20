@@ -32,17 +32,11 @@ const std::string& tfDir = lunchbox::getRootPath() +
 BOOST_AUTO_TEST_CASE( testTransferFunction )
 {
     const size_t defaultSize = TF_NCHANNELS * 256;
-    livre::TransferFunction1Dc tf_default;
+    livre::TransferFunction1D tf_default;
     BOOST_CHECK_EQUAL( tf_default.getData().size(), defaultSize );
 
-    livre::TransferFunction1Dc tf_size( 5 );
+    livre::TransferFunction1D tf_size( 5 );
     BOOST_CHECK_EQUAL( tf_size.getData().size(), TF_NCHANNELS * 5 );
-
-    const std::vector< float > floatVec( 20, 1.0f );
-    livre::TransferFunction1Df tf_float( floatVec );
-    BOOST_CHECK_EQUAL( tf_float.getData().size(), floatVec.size( ));
-    BOOST_CHECK( std::equal( floatVec.begin(), floatVec.end(),
-                             tf_float.getData().begin( )));
 
     tf_default = tf_size;
     BOOST_CHECK_EQUAL( tf_default.getData().size(), tf_size.getData().size( ));
@@ -67,11 +61,11 @@ std::vector< uint8_t > readFileToVec( const std::string& file )
 BOOST_AUTO_TEST_CASE( testLoadTransferFunctionFile )
 {
     std::vector< uint8_t > values = readFileToVec( tfDir + "tf_f.1dt" );
-    livre::TransferFunction1Dc tfFile( tfDir + "tf_f.1dt" );
+    livre::TransferFunction1D tfFile( tfDir + "tf_f.1dt" );
     BOOST_CHECK_EQUAL( values.size(), tfFile.getData().size( ));
 
     values = readFileToVec( tfDir + "tf_c.1dt" );
-    tfFile = livre::TransferFunction1Dc( tfDir + "tf_c.1dt" );
+    tfFile = livre::TransferFunction1D( tfDir + "tf_c.1dt" );
     BOOST_CHECK_EQUAL( values.size(), tfFile.getData().size( ));
     BOOST_CHECK( std::equal( values.begin(), values.end(),
                              tfFile.getData().begin( )));
@@ -79,17 +73,16 @@ BOOST_AUTO_TEST_CASE( testLoadTransferFunctionFile )
 
 BOOST_AUTO_TEST_CASE( testLoadWrongTransferFunctionFile )
 {
-    livre::TransferFunction1Dc defaultTf;
-    livre::TransferFunction1Dc tfFile( tfDir + "wrong_file_format.txt" );
+    livre::TransferFunction1D defaultTf;
+    livre::TransferFunction1D tfFile( tfDir + "wrong_file_format.txt" );
     BOOST_CHECK_EQUAL( defaultTf.getData().size(), tfFile.getData().size( ));
     BOOST_CHECK( std::equal( defaultTf.getData().begin(),
                              defaultTf.getData().end(),
                              tfFile.getData().begin( )));
 
-    tfFile = livre::TransferFunction1Dc( tfDir + "inexistent_file.1dt" );
+    tfFile = livre::TransferFunction1D( tfDir + "inexistent_file.1dt" );
     BOOST_CHECK_EQUAL( defaultTf.getData().size(), tfFile.getData().size( ));
     BOOST_CHECK( std::equal( defaultTf.getData().begin(),
                              defaultTf.getData().end(),
                              tfFile.getData().begin( )));
 }
-

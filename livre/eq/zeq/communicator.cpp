@@ -284,7 +284,7 @@ private:
                 std::bind( &Impl::publishVolumeRendererParameters, this );
     }
 
-    void _setupRESTBridge( const int argc, char** argv )
+    void _setupRESTBridge( const int argc LB_UNUSED, char** argv LB_UNUSED )
     {
 #ifdef LIVRE_USE_RESTBRIDGE
         _restBridge = restbridge::RestBridge::parse( *_publisher, argc, argv );

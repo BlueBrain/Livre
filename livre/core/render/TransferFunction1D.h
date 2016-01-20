@@ -94,17 +94,17 @@ public:
     /**
      * @return The RGBA data vector. The data array is rgba_[] = { R, G, B, A, R, G, B, A, R ... }.
      */
-    std::vector< T >& getData() { return rgba_; }
+    std::vector< uint8_t >& getData() { return rgba_; }
 
     /**
      * @return The RGBA data vector. The data array is rgba_[] = { R, G, B, A, R, G, B, A, R ... }.
      */
-    const std::vector< T >& getData() const { return rgba_; }
+    const std::vector< uint8_t >& getData() const { return rgba_; }
 
     static uint32_t getNumChannels() { return TF_NCHANNELS; }
 
 private:
-    std::vector< T > rgba_;
+    std::vector< uint8_t > rgba_;
 
     friend co::DataOStream& operator<<( co::DataOStream& os,
                                         const TransferFunction1D& tf );
@@ -116,11 +116,13 @@ private:
     LIVRECORE_API void createTfFromFile_( const std::string& file );
 };
 
+inline
 co::DataOStream& operator<<( co::DataOStream& os, const TransferFunction1D& tf )
 {
     return os << tf.getData();
 }
 
+inline
 co::DataIStream& operator>>( co::DataIStream& is, TransferFunction1D& tf )
 {
     return is >> tf.getData();

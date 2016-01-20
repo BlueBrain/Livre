@@ -92,8 +92,7 @@ struct RayCastRenderer::Impl
         _nSamplesPerPixel = frameData.getVRParameters()->getSamplesPerPixel();
     }
 
-    void initTransferFunction(
-        const TransferFunction1D& transferFunction )
+    void initTransferFunction( const TransferFunction1D& transferFunction )
     {
         assert( transferFunction.getNumChannels() == 4u );
 
