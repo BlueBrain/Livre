@@ -130,22 +130,25 @@ public:
     /**
      * @return The frame settings.
      */
-    FrameSettingsPtr getFrameSettings() const;
+    FrameSettingsPtr getFrameSettings();
+    ConstFrameSettingsPtr getFrameSettings() const;
 
     /**
      * @return The render settings.
      */
-    RenderSettingsPtr getRenderSettings() const;
+    RenderSettingsPtr getRenderSettings();
+    ConstRenderSettingsPtr getRenderSettings() const;
 
     /**
      * @return The camera settings.
      */
-    CameraSettingsPtr getCameraSettings() const;
+    ConstCameraSettingsPtr getCameraSettings() const;
+    CameraSettingsPtr getCameraSettings();
 
     /**
      * @return The volume settings.
      */
-    VolumeSettingsPtr getVolumeSettings() const;
+    VolumeSettingsPtr getVolumeSettings();
 
     /**
      * @return The volume rendering parameters.

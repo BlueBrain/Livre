@@ -180,22 +180,37 @@ void FrameData::setup( const VolumeRendererParameters& rendererParams )
     *_vrParameters = rendererParams;
 }
 
-FrameSettingsPtr FrameData::getFrameSettings() const
+FrameSettingsPtr FrameData::getFrameSettings()
 {
     return _frameSettings;
 }
 
-RenderSettingsPtr FrameData::getRenderSettings() const
+ConstFrameSettingsPtr FrameData::getFrameSettings() const
+{
+    return _frameSettings;
+}
+
+RenderSettingsPtr FrameData::getRenderSettings()
 {
     return _renderSettings;
 }
 
-CameraSettingsPtr FrameData::getCameraSettings() const
+ConstRenderSettingsPtr FrameData::getRenderSettings() const
+{
+    return _renderSettings;
+}
+
+ConstCameraSettingsPtr FrameData::getCameraSettings() const
 {
     return _cameraSettings;
 }
 
-VolumeSettingsPtr FrameData::getVolumeSettings() const
+CameraSettingsPtr FrameData::getCameraSettings()
+{
+    return _cameraSettings;
+}
+
+VolumeSettingsPtr FrameData::getVolumeSettings()
 {
     return _volumeSettings;
 }

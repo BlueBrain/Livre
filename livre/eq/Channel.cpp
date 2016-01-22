@@ -407,8 +407,8 @@ public:
         _channel->applyBuffer();
         _channel->applyViewport();
 
-        FrameSettingsPtr frameSettingsPtr = getFrameData()->getFrameSettings();
-        if( frameSettingsPtr->getStatistics( ))
+        ConstFrameSettingsPtr frameSettings = getFrameData()->getFrameSettings();
+        if( frameSettings->getStatistics( ))
         {
             _channel->drawStatistics();
             drawCacheStatistics();
