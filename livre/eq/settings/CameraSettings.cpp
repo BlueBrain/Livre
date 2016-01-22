@@ -29,70 +29,86 @@ namespace livre
 {
 
 CameraSettings::CameraSettings()
-    : cameraPosition_( 0.f, 0.f, 1.5f )
-{
-}
+{}
 
-void CameraSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
+void CameraSettings::spinModel( const float x, const float y )
 {
-    co::Serializable::serialize( os, dirtyBits );
-    os << modelRotation_ << cameraPosition_;
-}
-
-void CameraSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits )
-{
-    co::Serializable::deserialize( is, dirtyBits );
-    is >> modelRotation_ >> cameraPosition_;
-}
-
-void CameraSettings::spinModel( const float x, const float y, const float z )
-{
-    if( x == 0.f && y == 0.f && z == 0.f )
+    if( x == 0.f && y == 0.f )
         return;
 
-    modelRotation_.pre_rotate_x( x );
-    modelRotation_.pre_rotate_y( y );
-    modelRotation_.pre_rotate_z( z );
-    setDirty( DIRTY_ALL );
+    ::zerobuf::render::Vector3f& pos = getOrigin();
+    ::zerobuf::render::Vector3f& lookat = getLookAt();
+
+    Vector3f look( pos.getX() - lookat.getX(), pos.getY() - lookat.getY(),
+                   pos.getZ() - lookat.getZ( ));
+    const float length = look.length();
+
+    const Vector3f up( getUp().getX(),  getUp().getY(),  getUp().getZ( ));
+    const Vector3f left = vmml::cross( look, up );
+    std::cout << *this;
+    look.rotate( -x, up );
+    look.rotate( -y, left );
+    look *= length / look.length();
+
+    pos.setX( look.x() + lookat.getX( ));
+    pos.setY( look.y() + lookat.getY( ));
+    pos.setZ( look.z() + lookat.getZ( ));
+    std::cout << " -> " << *this << std::endl;
 }
 
 void CameraSettings::moveCamera( const float x, const float y, const float z )
 {
-    cameraPosition_ += Vector3f( x, y, z );
-    setDirty( DIRTY_ALL );
+    ::zerobuf::render::Vector3f& pos = getOrigin();
+    pos.setX( pos.getX() + x );
+    pos.setY( pos.getY() + y );
+    pos.setZ( pos.getZ() + z );
+
+    ::zerobuf::render::Vector3f& lookat = getLookAt();
+    lookat.setX( lookat.getX() + x );
+    lookat.setY( lookat.getY() + y );
+    lookat.setZ( lookat.getZ() + z );
+    std::cout << pos << std::endl;
 }
 
-void CameraSettings::setCameraPosition( const Vector3f& position )
+void CameraSettings::setCameraPosition( const Vector3f& pos )
 {
-    cameraPosition_ = position;
-    setDirty( DIRTY_ALL );
+    setOrigin( ::zerobuf::render::Vector3f( pos.x(), pos.y(), pos.z( )));
 }
 
 void CameraSettings::setCameraLookAt( const Vector3f& lookAt )
 {
-    setModelViewMatrix( maths::computeModelViewMatrix( cameraPosition_, lookAt ));
+    setLookAt( ::zerobuf::render::Vector3f( lookAt.x(), lookAt.y(),
+                                            lookAt.z( )));
 }
 
-void CameraSettings::setModelViewMatrix( const Matrix4f& modelViewMatrix )
+Matrix4f CameraSettings::computeMatrix() const
 {
-    Matrix3f rotationMatrix;
-    maths::getRotationAndEyePositionFromModelView( modelViewMatrix,
-                                                   rotationMatrix,
-                                                   cameraPosition_ );
-    const Matrix3f& inverseRotation = vmml::transpose( rotationMatrix );
-    modelRotation_ = inverseRotation;
-    modelRotation_( 3, 3 ) = 1;
-    cameraPosition_ = inverseRotation * -cameraPosition_;
+    // see 'man gluLookAt'
+    Vector3f f( getLookAt().getX() - getOrigin().getX(),
+                getLookAt().getY() - getOrigin().getY(),
+                getLookAt().getZ() - getOrigin().getZ( ));
+    f.normalize();
 
-    setDirty( DIRTY_ALL );
+    Vector3f up( getUp().getX(), getUp().getY(), getUp().getZ( ));
+    up.normalize();
+
+    const Vector3f s = vmml::cross( f, up );
+    const Vector3f u = vmml::cross( s, f );
+    const float matrix[16] = { s.x(), u.x(), -f.x(), 0.f,
+                               s.y(), u.y(), -f.y(), 0.f,
+                               s.z(), u.z(), -f.z(), 0.f,
+                               0.f, 0.f, 0.f, 1.f };
+    const Matrix4f rotation( matrix, matrix + 16 );
+    Matrix4f translation;
+    translation.set_translation( Vector3f( -getOrigin().getX(),
+                                           -getOrigin().getY(),
+                                           -getOrigin().getZ( )));
+
+    const Matrix4f m = rotation * translation;
+    std::cout << *this << " = " << m << std::endl
+              << std::atan( m.at( 3, 2 ) / m.at( 3, 3 )) << std::endl
+              << -std::asin( m.at( 3, 1 )) << std::endl
+              << std::atan( m.at( 2, 1 ) / m.at( 1, 1 )) << std::endl;
+    return m;
 }
-
-Matrix4f CameraSettings::getModelViewMatrix() const
-{
-    Matrix4f modelView;
-    modelView = modelRotation_;
-    modelView.setTranslation( cameraPosition_ );
-    return modelView;
-}
-
 }

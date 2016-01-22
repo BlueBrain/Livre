@@ -61,7 +61,9 @@ public:
     /**
      * @return Returns the transfer function.
      */
-    const TransferFunction1D& getTransferFunction( ) const;
+    TransferFunction1D& getTransferFunction() { return transferFunction_; }
+    const TransferFunction1D& getTransferFunction( ) const
+        { return transferFunction_; }
 
     /**
      * @param depth Sets the maximum rendering depth.

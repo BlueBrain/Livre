@@ -79,7 +79,6 @@ set(LIVRECORE_SOURCES
   dashpipeline/DashProcessorInput.cpp
   dashpipeline/DashProcessorOutput.cpp
   events/EventMapper.cpp
-  maths/maths.cpp
   pipeline/Processor.cpp
   pipeline/ProcessorInput.cpp
   pipeline/ProcessorOutput.cpp
@@ -99,7 +98,7 @@ set(LIVRECORE_SOURCES
   visitor/VisitState.cpp)
 
 set(LIVRECORE_LINK_LIBRARIES
-  PUBLIC ${Boost_LIBRARIES} dash Collage Lunchbox vmmlib
+  PUBLIC ${Boost_LIBRARIES} dash Collage Lunchbox vmmlib ZeroBufRender
   PRIVATE Equalizer ${GLEW_MX_LIBRARIES})
 
 set(LIVRECORE_INCLUDE_NAME livre/core)

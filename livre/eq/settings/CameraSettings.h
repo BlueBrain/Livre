@@ -23,15 +23,16 @@
 #define _CameraSettings_h_
 
 #include <livre/core/mathTypes.h>
-#include <co/serializable.h>
 #include <eq/fabric/vmmlib.h>
+#include <co/distributable.h> // base class
+#include <zerobuf/render/camera.h> // base class
 
 namespace livre
 {
 /**
  * The CameraSettings class is the information sent from app node to the clients for camera operations
  */
-class CameraSettings : public co::Serializable
+class CameraSettings : public co::Distributable< ::zerobuf::render::Camera >
 {
 public:
     /**
@@ -45,7 +46,7 @@ public:
      * @param y y component.
      * @param z z component.
      */
-    void spinModel( float x, float y, float z );
+    void spinModel( const float x, const float y );
 
     /**
      * Moves the camera to (x,y,z) amount.
@@ -53,7 +54,7 @@ public:
      * @param y y amount.
      * @param z z amount.
      */
-    void moveCamera( float x, float y, float z );
+    void moveCamera( const float x, const float y, const float z );
 
     /**
      * Sets the camera position.
@@ -67,33 +68,8 @@ public:
      */
     void setCameraLookAt( const Vector3f& lookAt );
 
-    /**
-     * Sets the modelviewmatrix.
-     * @param modelviewMatrix
-     */
-    void setModelViewMatrix( const Matrix4f& modelViewMatrix );
-
-    /**
-     * @return Returns model rotation matrix.
-     */
-    const Matrix4f& getModelRotation() const { return modelRotation_; }
-
-    /**
-     * @return Returns the camera position in x,y and z.
-     */
-    const Vector3f& getCameraPosition() const { return cameraPosition_; }
-
-    /**
-     * @return the modelview matrix is computed using the model and camera matrix.
-     */
-    Matrix4f getModelViewMatrix() const;
-
-private:
-    void serialize( co::DataOStream& os, const uint64_t dirtyBits ) final;
-    void deserialize( co::DataIStream& is, const uint64_t dirtyBits ) final;
-
-    Matrix4f modelRotation_;
-    Vector3f cameraPosition_;
+    /** @return the camera transformation */
+    Matrix4f computeMatrix() const;
 };
 
 }

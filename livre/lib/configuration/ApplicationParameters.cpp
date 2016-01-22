@@ -49,7 +49,7 @@ const std::string TRANSFERFUNCTION_PARAM = "transfer-function";
 
 ApplicationParameters::ApplicationParameters()
     : Parameters( "Application Parameters" )
-    , cameraPosition( 0, 0, 1.5 )
+    , cameraPosition( 0, 0, -1.5 )
     , cameraLookAt( 0, 0, 0 )
     , frames( FULL_FRAME_RANGE )
     , maxFrames( std::numeric_limits< uint32_t >::max( ))

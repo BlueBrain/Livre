@@ -118,13 +118,6 @@ public:
      */
     void switchLayout( const int32_t increment );
 
-    /**
-     * Convert micron (from HBP applications) to meter camera (used by Livre).
-     * @param modelViewMatrix HBP micron modelview matrix
-     * @return modelview matrix in meter
-     */
-    Matrix4f convertFromHBPCamera( const Matrix4f& modelViewMatrix ) const;
-
     void handleEvents() final;
     bool handleEvent( eq::EventICommand command ) final;
 

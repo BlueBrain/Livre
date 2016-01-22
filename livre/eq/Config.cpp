@@ -58,45 +58,6 @@ public:
         , dataFrameRange( INVALID_FRAME_RANGE )
     {}
 
-    void publishModelView()
-    {
-#ifdef LIVRE_USE_ZEROEQ
-        const CameraSettings& cameraSettings = framedata.getCameraSettings();
-        Matrix4f modelView = cameraSettings.getModelViewMatrix();
-
-        Matrix3f rotation;
-        Vector3f eyePos;
-        maths::getRotationAndEyePositionFromModelView( modelView,
-                                                       rotation,
-                                                       eyePos );
-
-        const Vector3f& circuitCenter = volumeBBox.getCenter();
-        const Vector3f& circuitSize = volumeBBox.getSize();
-        const float isotropicScale = circuitSize.find_max();
-
-        eyePos = ( eyePos * isotropicScale ) + circuitCenter;
-
-        modelView = maths::computeModelViewMatrix( rotation, eyePos );
-        communicator->publishModelView( modelView );
-#endif
-    }
-
-    Matrix4f convertFromHBPCamera( const Matrix4f& modelViewMatrix ) const
-    {
-        const Vector3f circuitCenter = volumeBBox.getCenter();
-        const Vector3f circuitSize = volumeBBox.getSize();
-        const float isotropicScale = circuitSize.find_max();
-
-        Matrix3f rotation;
-        Vector3f eyePos;
-        maths::getRotationAndEyePositionFromModelView( modelViewMatrix,
-                                                       rotation,
-                                                       eyePos );
-
-        eyePos = ( eyePos - circuitCenter ) / isotropicScale;
-        return maths::computeModelViewMatrix( rotation, eyePos );
-    }
-
     Config* config;
     uint32_t defaultLatency;
     eq::Canvas* currentCanvas;
@@ -159,7 +120,9 @@ void Config::resetCamera()
         getApplicationParameters().cameraPosition );
     _impl->framedata.getCameraSettings().setCameraLookAt(
         getApplicationParameters().cameraLookAt );
-    _impl->publishModelView();
+#ifdef LIVRE_USE_ZEROEQ
+    _impl->communicator->publishCamera();
+#endif
 }
 
 bool Config::init( const int argc LB_UNUSED, char** argv LB_UNUSED )
@@ -372,16 +335,10 @@ void Config::handleEvents()
 #endif
 }
 
-Matrix4f Config::convertFromHBPCamera( const Matrix4f& modelViewMatrix ) const
-{
-    return _impl->convertFromHBPCamera( modelViewMatrix );
-}
-
 bool Config::handleEvent( const eq::ConfigEvent* event )
 {
 #ifdef LIVRE_USE_ZEROEQ
-    const CameraSettings& cameraSettings = _impl->framedata.getCameraSettings();
-    const Matrix4f& oldModelViewMatrix = cameraSettings.getModelViewMatrix();
+    CameraSettings cameraSettings = _impl->framedata.getCameraSettings();
 #endif
 
     EqEventInfo eventInfo( this, event );
@@ -411,8 +368,8 @@ bool Config::handleEvent( const eq::ConfigEvent* event )
     if( hasEvent )
     {
 #ifdef LIVRE_USE_ZEROEQ
-        if( cameraSettings.getModelViewMatrix() != oldModelViewMatrix )
-            _impl->publishModelView();
+        if( _impl->framedata.getCameraSettings() != cameraSettings )
+            _impl->communicator->publishCamera();
 #endif
         _impl->redraw = true;
         return true;

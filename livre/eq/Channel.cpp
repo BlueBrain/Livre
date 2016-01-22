@@ -123,9 +123,7 @@ public:
     {
         const CameraSettings& cameraSettings =
             getFrameData()->getCameraSettings();
-        Matrix4f modelView = cameraSettings.getModelViewMatrix();
-        modelView = _channel->getHeadTransform() * modelView;
-        return modelView;
+        return _channel->getHeadTransform() * cameraSettings.computeMatrix();
     }
 
     void clearViewport( const eq::PixelViewport &pvp )
@@ -321,7 +319,7 @@ public:
     {
         const CameraSettings& cameraSettings =
             getFrameData()->getCameraSettings();
-        glMultMatrixf( cameraSettings.getModelViewMatrix().array );
+        glMultMatrixf( cameraSettings.computeMatrix().array );
     }
 
     void configInit()

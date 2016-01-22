@@ -45,19 +45,17 @@ public:
      */
     void publishImageJPEG( const uint8_t* data, const uint64_t size );
 
-    /**
-     * Publish EVENT_CAMERA on the hbp schema.
-     * @param modelView modelView matrix in micron
-     */
-    void publishModelView( const Matrix4f& modelView );
-
     /** Publish EVENT_HEARTBEAT on the REST schema. */
     void publishHeartbeat();
 
     /** Publish EVENT_EXIT on the REST schema. */
     void publishExit();
 
+    /** Publish frame (start, current, end, delta) parameters */
     void publishFrame();
+
+    /** Publish Camera */
+    void publishCamera();
 
     /** Non-blocking receive & handle of all pending events. */
     void handleEvents();

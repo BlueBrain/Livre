@@ -1,6 +1,7 @@
-/* Copyright (c) 2015, EPFL/Blue Brain Project
- *                     Marwan Abdellah <marwan.abdellah@epfl.ch>
- *                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
+/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+ *                          Marwan Abdellah <marwan.abdellah@epfl.ch>
+ *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
+ *                          Stefan.Eilemann@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -25,9 +26,6 @@
 #include <livreGUI/ui_TransferFunctionEditor.h>
 #include <livreGUI/Controller.h>
 
-#include <zeroeq/event.h>
-#include <zeroeq/hbp/vocabulary.h>
-
 #include <QMessageBox>
 
 namespace livre
@@ -38,7 +36,6 @@ TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
     : QWidget( tfParentWidget )
     , _controller( controller )
     , _ui( new Ui::TransferFunctionEditor )
-    , _tfReceived( false )
     , _redWidget( new ColorMapWidget( ColorMapWidget::RED_SHADE, this ))
     , _greenWidget( new ColorMapWidget( ColorMapWidget::GREEN_SHADE, this ))
     , _blueWidget( new ColorMapWidget( ColorMapWidget::BLUE_SHADE, this ))
@@ -74,15 +71,14 @@ TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
 
     QTimer::singleShot( 50, this, SLOT( _setDefault()));
 
-    _controller.registerHandler( zeroeq::hbp::EVENT_LOOKUPTABLE1D,
-                                 std::bind( &TransferFunctionEditor::_onTransferFunction,
-                                              this, std::placeholders::_1 ));
+    _controller.subscribe( _lut );
+    _lut.setUpdatedFunction(
+        std::bind( &TransferFunctionEditor::_onTransferFunction, this ));
 }
 
 TransferFunctionEditor::~TransferFunctionEditor()
 {
-    _controller.deregisterHandler( zeroeq::hbp::EVENT_LOOKUPTABLE1D );
-
+    _controller.unsubscribe( _lut );
     delete _ui;
 }
 
@@ -178,43 +174,33 @@ void TransferFunctionEditor::_setDefault()
 
 void TransferFunctionEditor::_publishTransferFunction()
 {
-    if( ! _tfReceived )
-        return;
-
     const UInt8s& redCurve =  _redWidget->getCurve();
     const UInt8s& greenCurve =  _greenWidget->getCurve();
     const UInt8s& blueCurve =  _blueWidget->getCurve();
     const UInt8s& alphaCurve =  _alphaWidget->getCurve();
 
     if( redCurve.empty() || greenCurve.empty() || blueCurve.empty() ||
-        alphaCurve.empty( ))
+        alphaCurve.empty() || redCurve.size() * 4 != _lut.getLutSize( ))
     {
         return;
     }
 
-    UInt8s transferFunction;
-    transferFunction.reserve( redCurve.size() * 4u );
+    uint8_t* lut = _lut.getLut();
     for( uint32_t i = 0; i < redCurve.size(); ++i )
     {
-        transferFunction.push_back( redCurve[i] );
-        transferFunction.push_back( greenCurve[i] );
-        transferFunction.push_back( blueCurve[i] );
-        transferFunction.push_back( alphaCurve[i] );
+        lut[ 4*i + 0 ] = redCurve[i];
+        lut[ 4*i + 1 ] = greenCurve[i];
+        lut[ 4*i + 2 ] = blueCurve[i];
+        lut[ 4*i + 3 ] = alphaCurve[i];
     }
 
-    if( transferFunction.size() == 1024 )
-    {
-        _controller.publish( zeroeq::hbp::serializeLookupTable1D( transferFunction ));
-    }
+    _controller.publish( _lut );
 }
 
-void TransferFunctionEditor::_onTransferFunction( const zeroeq::Event& tfEvent )
+void TransferFunctionEditor::_onTransferFunction()
 {
-    if( !_tfReceived )
-    {
-        emit transferFunctionChanged( zeroeq::hbp::deserializeLookupTable1D( tfEvent ));
-    }
-    _tfReceived = true;
+    emit transferFunctionChanged();
+    _lut.setUpdatedFunction( servus::Serializable::ChangeFunc( ));
 }
 
 void TransferFunctionEditor::_clear()
@@ -343,17 +329,19 @@ QPolygonF _convertPoints( const QPolygon& points, const int width, const int hei
 }
 }
 
-void TransferFunctionEditor::_onTransferFunctionChanged( UInt8s tf )
+void TransferFunctionEditor::_onTransferFunctionChanged()
 {
     QGradientStops stops;
     QPolygon redPoints, bluePoints, greenPoints, alphaPoints;
-    for( size_t i = 0; i < 256; ++i )
+    const uint8_t* lut = _lut.getLut();
+    for( size_t i = 0; i < _lut.getLutSize(); i += 4 )
     {
-        redPoints << QPoint(i, tf[i*4]);
-        greenPoints << QPoint(i, tf[i*4+1]);
-        bluePoints << QPoint(i, tf[i*4+2]);
-        alphaPoints << QPoint(i, tf[i*4+3]);
-        stops << QGradientStop( float(i) / 255.f , QColor( tf[i*4], tf[i*4+1], tf[i*4+2], tf[i*4+3]));
+        redPoints << QPoint(i, lut[i+0]);
+        greenPoints << QPoint(i, lut[i+1]);
+        bluePoints << QPoint(i, lut[i+2]);
+        alphaPoints << QPoint(i, lut[i+3]);
+        stops << QGradientStop( float(i/4) / 255.f,
+                                QColor( lut[i+0], lut[i+1], lut[i+2], lut[i+3]));
     }
 
     QPolygonF redPointsF = _convertPoints( _filterPoints( redPoints ),

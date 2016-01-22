@@ -26,11 +26,7 @@ namespace livre
 RenderSettings::RenderSettings( )
     :  depth_( 0 )
 {
-}
-
-const TransferFunction1D& RenderSettings::getTransferFunction( ) const
-{
-    return transferFunction_;
+    transferFunction_.setUpdatedFunction( [this] { setDirty( DIRTY_TF ); });
 }
 
 void RenderSettings::resetTransferFunction( )

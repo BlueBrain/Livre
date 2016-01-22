@@ -1,5 +1,6 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                          Stefan.Eilemann@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -27,105 +28,62 @@
 #include <livre/core/types.h>
 #include <livre/core/mathTypes.h>
 
-#define TF_NCHANNELS 4u
+#include <zerobuf/render/lookupTable1D.h>
 
 namespace livre
 {
 
-/**
- * The TransferFunction1D class holds the color and transparency for an RGBA 1 dimensional Transfer Function ( TF ).
- */
-class TransferFunction1D
+/** Color and transparency for an RGBA 1 dimensional Transfer Function ( TF ). */
+class TransferFunction1D : public ::zerobuf::render::LookupTable1D
 {
+    static const size_t NCHANNELS = 4;
+
 public:
-    /**
-     * Create the transfer function with default parameters.
-     */
-    TransferFunction1D() { reset(); }
+    /** Create the transfer function with default parameters. */
+    LIVRECORE_API TransferFunction1D();
 
     /**
-     * Create a transfer function.
-     * @param size The number of samples in the transfer function.
-     */
-    explicit TransferFunction1D( const uint32_t size ) { createCustomTF_( size ); }
-
-    /**
-     * Load transfer function from an ASCII "1dt" file. The content of the file
-     * consists of a first line with the number of sample points in the transfer
-     * function and their format, and then all the values in 'R G B A' format.
-     * Currently both float [0.0f, 1.0f] and 8-bit unsigned integers [0, 255]
-     * values are supported. If the format is unspecified, float is used.
-     * If the file extension or format is not supported or the file could not be
-     * opened, a default transfer function is generated.
+     * Load transfer function.
+     *
+     * Supported are ASCII "1dt", as well as ascii and binary files of
+     * servus::Serializable (.lba, .lbb).
+     *
+     * The content of the ASCII file consists of a first line with the number of
+     * sample points in the transfer function and their format, and then all the
+     * values in 'R G B A' format.  Currently both float [0.0f, 1.0f] and 8-bit
+     * unsigned integers [0, 255] values are supported. If the format is
+     * unspecified, float is used.  If the file extension or format is not
+     * supported or the file could not be opened, a default transfer function is
+     * generated.
      * @param file Path to the transfer function file.
      */
-    explicit TransferFunction1D( const std::string& file ) { createTfFromFile_( file ); }
+    explicit TransferFunction1D( const std::string& file )
+        : TransferFunction1D() { _createTfFromFile( file ); }
 
     /**
      * Copy a transfer function.
      * @param tf The transfer function to be copied.
      */
     explicit TransferFunction1D( const TransferFunction1D& tf )
-        : rgba_( tf.rgba_ )
-    {}
+        : ::zerobuf::render::LookupTable1D( tf ) {}
 
     /**
      * Create a transfer function.
      * @param rgba A std::vector with samples of the transfer function.
      */
     explicit TransferFunction1D( const std::vector< uint8_t >& rgba )
-        : rgba_( rgba )
-    {}
+        : ::zerobuf::render::LookupTable1D( rgba ) {}
 
     TransferFunction1D& operator=( const TransferFunction1D& rhs )
     {
-        if( this == &rhs )
-            return *this;
-
-        rgba_ = rhs.rgba_;
+        ::zerobuf::render::LookupTable1D::operator = ( rhs );
         return *this;
     }
 
-    /**
-     * Resets the transfer function with default parameters.
-     */
-    LIVRECORE_API void reset();
-
-    /**
-     * @return The RGBA data vector. The data array is rgba_[] = { R, G, B, A, R, G, B, A, R ... }.
-     */
-    std::vector< uint8_t >& getData() { return rgba_; }
-
-    /**
-     * @return The RGBA data vector. The data array is rgba_[] = { R, G, B, A, R, G, B, A, R ... }.
-     */
-    const std::vector< uint8_t >& getData() const { return rgba_; }
-
-    static uint32_t getNumChannels() { return TF_NCHANNELS; }
+    static uint32_t getNumChannels() { return NCHANNELS; }
 
 private:
-    std::vector< uint8_t > rgba_;
-
-    friend co::DataOStream& operator<<( co::DataOStream& os,
-                                        const TransferFunction1D& tf );
-    friend co::DataIStream& operator>>( co::DataIStream& is,
-                                        TransferFunction1D& tf );
-
-    LIVRECORE_API void createCustomTF_( const uint32_t size );
-
-    LIVRECORE_API void createTfFromFile_( const std::string& file );
+    LIVRECORE_API void _createTfFromFile( const std::string& file );
 };
-
-inline
-co::DataOStream& operator<<( co::DataOStream& os, const TransferFunction1D& tf )
-{
-    return os << tf.getData();
-}
-
-inline
-co::DataIStream& operator>>( co::DataIStream& is, TransferFunction1D& tf )
-{
-    return is >> tf.getData();
-}
 }
 #endif // _TransferFunction1D_h_
