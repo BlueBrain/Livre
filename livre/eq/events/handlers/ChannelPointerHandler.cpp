@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -86,14 +86,10 @@ bool ChannelPointerHandler::operator ()( EqEventInfo& eqEventInfo )
                   spinX_ = 0;
                   spinY_ = 0;
 
-                  if( cameraSettings->getPilotMode())
-                      cameraSettings->spinCamera(
-                          -ROTATE_AND_ZOOM_SPEED * event->data.pointerMotion.dy,
-                          -ROTATE_AND_ZOOM_SPEED * event->data.pointerMotion.dx );
-                  else
-                      cameraSettings->spinModel(
-                          -ROTATE_AND_ZOOM_SPEED * event->data.pointerMotion.dy,
-                          -ROTATE_AND_ZOOM_SPEED * event->data.pointerMotion.dx, 0.f );
+                  cameraSettings->spinModel(
+                      -ROTATE_AND_ZOOM_SPEED * event->data.pointerMotion.dy,
+                      -ROTATE_AND_ZOOM_SPEED * event->data.pointerMotion.dx,
+                      0.f );
                   return true;
 
               case eq::PTR_BUTTON2:

@@ -92,11 +92,6 @@ bool KeyboardHandler::operator ()( EqEventInfo& eqEventInfo )
             config->switchLayout( -1 );
             return true;
 
-        case 'm':
-        case 'M':
-            cameraSettings->togglePilotMode();
-            return true;
-
         case 'p':
         case 'P':
             frameSettings->makeScreenshot();

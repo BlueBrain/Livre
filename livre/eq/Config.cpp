@@ -1,4 +1,4 @@
-/* Copyright (c) 2006-2015, Stefan Eilemann <eile@equalizergraphics.com>
+/* Copyright (c) 2006-2016, Stefan Eilemann <eile@equalizergraphics.com>
  *                          Maxim Makhinya  <maxmah@gmail.com>
  *                          David Steiner   <steiner@ifi.uzh.ch>
  *
@@ -158,7 +158,10 @@ void Config::unmapFrameData()
 
 void Config::resetCamera()
 {
-    _impl->framedata.getCameraSettings()->reset();
+    _impl->framedata.getCameraSettings()->setCameraPosition(
+        getApplicationParameters().cameraPosition );
+    _impl->framedata.getCameraSettings()->setCameraLookAt(
+        getApplicationParameters().cameraLookAt );
     _impl->publishModelView();
 }
 

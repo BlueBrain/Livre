@@ -1,7 +1,7 @@
 
-/* Copyright (c) 2006-2015, Stefan Eilemann <eile@equalizergraphics.com>
- *                    2011, Maxim Makhinya  <maxmah@gmail.com>
- *                    2013, Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2006-2016, Stefan Eilemann <eile@equalizergraphics.com>
+ *                          Maxim Makhinya  <maxmah@gmail.com>
+ *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -193,10 +193,7 @@ int Client::run( const int argc, char** argv )
 
     // 4. run main loop
     uint32_t maxFrames = _impl->_applicationParameters.maxFrames;
-    frameData.getCameraSettings()->setDefaultCameraPosition(
-        _impl->_applicationParameters.cameraPosition );
-    frameData.getCameraSettings()->setDefaultCameraLookAt(
-        _impl->_applicationParameters.cameraLookAt );
+    config->resetCamera();
 
     clock.reset();
     while( config->isRunning() && maxFrames-- )
@@ -267,4 +264,3 @@ void Client::clientLoop()
 }
 
 }
-

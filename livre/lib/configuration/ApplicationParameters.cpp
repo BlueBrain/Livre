@@ -55,7 +55,6 @@ ApplicationParameters::ApplicationParameters()
     , maxFrames( -1u )
     , animation( 0 )
     , isResident( false )
-    , syncCamera( false )
 {
     configuration_.addDescription( configGroupName_, ANIMATION_PARAM,
                                    "Enable animation mode (optional frame delta for animation speed, use --animation=-<int> for reverse animation)", animation, 1 );
@@ -74,11 +73,6 @@ ApplicationParameters::ApplicationParameters()
     configuration_.addDescription( configGroupName_, TRANSFERFUNCTION_PARAM,
                                 ".1dt transfer function file (from ImageVis3D)",
                                    transferFunction );
-#ifdef LIVRE_USE_ZEQ
-    configuration_.addDescription( configGroupName_, SYNC_CAMERA_PARAM,
-                                   "Synchronize camera with other applications",
-                                   syncCamera );
-#endif
 }
 
 ApplicationParameters& ApplicationParameters::operator = (
@@ -93,7 +87,6 @@ ApplicationParameters& ApplicationParameters::operator = (
     maxFrames = parameters.maxFrames;
     animation = parameters.animation;
     isResident = parameters.isResident;
-    syncCamera = parameters.syncCamera;
     dataFileName = parameters.dataFileName;
     transferFunction = parameters.transferFunction;
 
@@ -110,9 +103,6 @@ void ApplicationParameters::initialize_()
     dataFileName = configuration_.getValue( DATAFILE_PARAM, dataFileName );
     transferFunction = configuration_.getValue( TRANSFERFUNCTION_PARAM,
                                                 transferFunction );
-#ifdef LIVRE_USE_ZEQ
-    syncCamera = configuration_.getValue( SYNC_CAMERA_PARAM, syncCamera );
-#endif
     bool animationFollowData = false;
     animationFollowData = configuration_.getValue( ANIMATION_FOLLOW_DATA_PARAM,
                                                    animationFollowData );

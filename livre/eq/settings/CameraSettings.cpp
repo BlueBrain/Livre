@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2006-2015, Stefan Eilemann <eile@equalizergraphics.com>
+/* Copyright (c) 2006-2016, Stefan Eilemann <eile@equalizergraphics.com>
  *                          Maxim Makhinya  <maxmah@gmail.com>
  *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
  *                          Daniel.Nachbaur@epfl.ch
@@ -29,53 +29,21 @@ namespace livre
 {
 
 CameraSettings::CameraSettings()
-    : defaultCameraPosition_( Vector3f( 0.f, 0.f, 1.f ))
-    , defaultCameraLookAt_( Vector3f::ZERO )
-    , cameraRotation_( Matrix4f::IDENTITY )
-    , modelRotation_( Matrix4f::IDENTITY )
-    , cameraPosition_( defaultCameraPosition_ )
-    , pilotMode_( false )
+    : modelRotation_( Matrix4f::IDENTITY )
+    , cameraPosition_( 0.f, 0.f, 1.f )
 {
-}
-
-void CameraSettings::reset()
-{
-    pilotMode_ = false;
-    cameraPosition_ = defaultCameraPosition_;
-    cameraRotation_ = Matrix4f::IDENTITY;
-    modelRotation_ = Matrix4f::IDENTITY;
-
-    setCameraLookAt( defaultCameraLookAt_ );
-
-    setDirty( DIRTY_ALL );
 }
 
 void CameraSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
 {
     co::Serializable::serialize( os, dirtyBits );
-
-    os << cameraRotation_
-       << modelRotation_
-       << cameraPosition_
-       << pilotMode_;
+    os << modelRotation_ << cameraPosition_;
 }
 
 void CameraSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits )
 {
     co::Serializable::deserialize( is, dirtyBits );
-
-    is >> cameraRotation_
-       >> modelRotation_
-       >> cameraPosition_
-       >> pilotMode_;
-}
-
-void CameraSettings::spinCamera( const float x, const float y )
-{
-    cameraRotation_.pre_rotate_x( x );
-    cameraRotation_.pre_rotate_y( y );
-
-    setDirty( DIRTY_ALL );
+    is >> modelRotation_ >> cameraPosition_;
 }
 
 void CameraSettings::spinModel( const float x, const float y, const float z )
@@ -83,65 +51,21 @@ void CameraSettings::spinModel( const float x, const float y, const float z )
     if( x == 0.f && y == 0.f && z == 0.f )
         return;
 
-    Matrix4f matInverse;
-    cameraRotation_.inverse( matInverse );
-    Vector4f shift = matInverse * Vector4f( x, y, z, 1 );
-    modelRotation_.pre_rotate_x( shift.x( ));
-    modelRotation_.pre_rotate_y( shift.y( ));
-    modelRotation_.pre_rotate_z( shift.z( ));
-
+    modelRotation_.pre_rotate_x( x );
+    modelRotation_.pre_rotate_y( y );
+    modelRotation_.pre_rotate_z( z );
     setDirty( DIRTY_ALL );
 }
 
 void CameraSettings::moveCamera( const float x, const float y, const float z )
 {
-    Vector3f oldPos = cameraPosition_;
-
-    Matrix4f matInverse;
-    cameraRotation_.inverse( matInverse );
-    Vector4f shift = matInverse * Vector4f( x, y, z, 1 );
-    cameraPosition_ += shift;
-
-    oldPos -= cameraPosition_;
-
+    cameraPosition_ += Vector3f( x, y, z );
     setDirty( DIRTY_ALL );
-}
-
-void CameraSettings::setDefaultCameraPosition( const Vector3f& position )
-{
-    defaultCameraPosition_ = position;
-    setCameraPosition( position );
-}
-
-void CameraSettings::setDefaultCameraLookAt( const Vector3f& lookAt )
-{
-    defaultCameraLookAt_ = lookAt;
-    setCameraLookAt( lookAt );
 }
 
 void CameraSettings::setCameraPosition( const Vector3f& position )
 {
     cameraPosition_ = position;
-    setDirty( DIRTY_ALL );
-}
-
-void CameraSettings::togglePilotMode()
-{
-    pilotMode_ = !pilotMode_;
-    setDirty( DIRTY_ALL );
-}
-
-bool CameraSettings::getPilotMode( ) const
-{
-    return pilotMode_;
-}
-
-void CameraSettings::setCameraRotation( const Vector3f& rotation )
-{
-    cameraRotation_ = Matrix4f::IDENTITY;
-    cameraRotation_.rotate_x( rotation.x() );
-    cameraRotation_.rotate_y( rotation.y() );
-    cameraRotation_.rotate_z( rotation.z() );
     setDirty( DIRTY_ALL );
 }
 
@@ -156,23 +80,11 @@ void CameraSettings::setModelViewMatrix( const Matrix4f& modelViewMatrix )
     maths::getRotationAndEyePositionFromModelView( modelViewMatrix,
                                                    rotationMatrix,
                                                    cameraPosition_ );
-    if( pilotMode_ )
-    {
-        cameraPosition_ = -cameraPosition_;
-        Matrix3f transpose = Matrix4f::IDENTITY;
-        rotationMatrix.transpose_to( transpose );
-        cameraRotation_.set_sub_matrix( transpose, 0, 0 );
-        modelRotation_ = Matrix4f::IDENTITY;
-    }
-    else
-    {
-        Matrix3f inverseRotation = Matrix4f::IDENTITY;
-        rotationMatrix.transpose_to( inverseRotation );
-        modelRotation_ = inverseRotation;
-        modelRotation_( 3, 3 ) = 1;
-        cameraPosition_ = inverseRotation * -cameraPosition_;
-        cameraRotation_ = Matrix4f::IDENTITY;
-    }
+    Matrix3f inverseRotation = Matrix4f::IDENTITY;
+    rotationMatrix.transpose_to( inverseRotation );
+    modelRotation_ = inverseRotation;
+    modelRotation_( 3, 3 ) = 1;
+    cameraPosition_ = inverseRotation * -cameraPosition_;
 
     setDirty( DIRTY_ALL );
 }
@@ -182,8 +94,6 @@ Matrix4f CameraSettings::getModelViewMatrix() const
     Matrix4f modelView;
     modelView = modelRotation_;
     modelView.set_translation( cameraPosition_ );
-    modelView = cameraRotation_ * modelView;
-
     return modelView;
 }
 
