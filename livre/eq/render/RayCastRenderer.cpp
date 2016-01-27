@@ -86,10 +86,10 @@ struct RayCastRenderer::Impl
 
     void update( const FrameData& frameData )
     {
-        initTransferFunction( frameData.getRenderSettings()->getTransferFunction( ));
-        _nSamplesPerRay = frameData.getVRParameters()->getSamplesPerRay();
+        initTransferFunction( frameData.getRenderSettings().getTransferFunction( ));
+        _nSamplesPerRay = frameData.getVRParameters().getSamplesPerRay();
         _computedSamplesPerRay = _nSamplesPerRay;
-        _nSamplesPerPixel = frameData.getVRParameters()->getSamplesPerPixel();
+        _nSamplesPerPixel = frameData.getVRParameters().getSamplesPerPixel();
     }
 
     void initTransferFunction( const TransferFunction1D& transferFunction )

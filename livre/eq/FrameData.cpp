@@ -1,5 +1,6 @@
 /**
  * Copyright (c) BBP/EPFL 2011-2016 Ahmet.Bilgili@epfl.ch
+ *                                  Stefan.Eilemann@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -17,8 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <eq/eq.h>
-
 #include <livre/eq/FrameData.h>
 #include <livre/eq/settings/FrameSettings.h>
 #include <livre/eq/settings/RenderSettings.h>
@@ -26,243 +25,167 @@
 #include <livre/eq/settings/VolumeSettings.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 
+#include <eq/eq.h>
+#include <seq/objectType.h>
+
+
 namespace livre
 {
-
-/**
- * magicNumber To initialize the co::Objects with a randomized number.
- */
-const uint64_t magicNumber = 18382873472383;
-
-/**
- * The ObjectFactory class is a class to generate objects for the internal \see co::ObjectMap in \see InitData.
- */
-class ObjectFactory : public co::ObjectFactory
+class FrameData::Impl : public co::ObjectMap
 {
 public:
-
-    lunchbox::uint128_t generateID( const uint32_t type ) const
+    Impl( co::ObjectHandler& handler, co::ObjectFactory& factory )
+        : co::ObjectMap( handler, factory )
     {
-         return lunchbox::uint128_t( magicNumber, type );
+        frameSettings.setID( servus::make_uint128( "eq::FrameSettings" ));
+        renderSettings.setID( servus::make_uint128( "eq::RenderSettings" ));
+        cameraSettings.setID( servus::make_uint128( "eq::CameraSettings" ));
+        volumeSettings.setID( servus::make_uint128( "eq::VolumeSettings" ));
+        vrParameters.setID(
+            servus::make_uint128( "eq::VolumeRendererParameters" ));
     }
 
-    virtual co::Object* createObject( const uint32_t type )
-    {
-        co::Object *object = 0;
-        switch( type )
-        {
-        case SMI_FRAME_SETTINGS:
-            object = new FrameSettings();
-            break;
-        case SMI_RENDER_SETTINGS:
-            object = new RenderSettings();
-            break;
-        case SMI_CAMERA_SETTINGS:
-            object = new CameraSettings();
-            break;
-        case SMI_VOLUME_SETTINGS:
-            object = new VolumeSettings();
-            break;
-        case SMI_VR_PARAMETERS:
-            object = new VolumeRendererParameters();
-            break;
-        }
-
-        if( object )
-        {
-            object->setID( generateID( type ) );
-        }
-
-        return object;
-    }
+    FrameSettings frameSettings;
+    RenderSettings renderSettings;
+    CameraSettings cameraSettings;
+    VolumeSettings volumeSettings;
+    VolumeRendererParameters vrParameters;
 };
 
-typedef std::shared_ptr< ObjectFactory > ObjectFactoryPtr;
+FrameData::FrameData()
+{}
 
-template< class T >
-bool mapObject( CoObjectMapPtr objectMapPtr,
-                CoObjectFactoryPtr objectFactoryPtr,
-                boost::shared_ptr< T > objectPtr,
-                const uint32_t type )
+void FrameData::registerObjects()
 {
-    ObjectFactoryPtr objectFactory =  std::static_pointer_cast< ObjectFactory >( objectFactoryPtr );
-    LBVERB << "Mapping object : " << objectPtr->getID() << std::endl;
-    return objectMapPtr->map( objectFactory->generateID( type ), objectPtr.get() );
+    LBCHECK( _impl->register_( &_impl->frameSettings, seq::OBJECTTYPE_CUSTOM ));
+    LBCHECK( _impl->register_( &_impl->renderSettings, seq::OBJECTTYPE_CUSTOM));
+    LBCHECK( _impl->register_( &_impl->cameraSettings, seq::OBJECTTYPE_CUSTOM));
+    LBCHECK( _impl->register_( &_impl->volumeSettings, seq::OBJECTTYPE_CUSTOM));
+    LBCHECK( _impl->register_( &_impl->vrParameters, seq::OBJECTTYPE_CUSTOM ));
 }
 
-template< class T >
-bool registerObject( CoObjectMapPtr objectMapPtr,
-                     boost::shared_ptr< T > objectPtr,
-                     const uint32_t type )
+void FrameData::deregisterObjects()
 {
-    LBVERB << "Registering object : " << objectPtr->getID() << std::endl;
-    return objectMapPtr->register_( objectPtr.get(), type );
+    LBCHECK( _impl->deregister( &_impl->frameSettings ));
+    LBCHECK( _impl->deregister( &_impl->renderSettings ));
+    LBCHECK( _impl->deregister( &_impl->cameraSettings ));
+    LBCHECK( _impl->deregister( &_impl->volumeSettings ));
+    LBCHECK( _impl->deregister( &_impl->vrParameters ));
 }
 
-template< class T >
-bool deregisterObject( CoObjectMapPtr objectMapPtr,
-                       boost::shared_ptr< T > objectPtr )
+void FrameData::mapObjects()
 {
-    LBVERB << "Deregistering object : " << objectPtr->getID() << std::endl;
-    return objectMapPtr->deregister( objectPtr.get() );
+    LBCHECK( _impl->map( _impl->frameSettings.getID(), &_impl->frameSettings ));
+    LBCHECK( _impl->map( _impl->renderSettings.getID(),
+                         &_impl->renderSettings ));
+    LBCHECK( _impl->map( _impl->cameraSettings.getID(),
+                         &_impl->cameraSettings ));
+    LBCHECK( _impl->map( _impl->volumeSettings.getID(),
+                         &_impl->volumeSettings ));
+    LBCHECK( _impl->map( _impl->vrParameters.getID(), &_impl->vrParameters ));
 }
 
-FrameData::FrameData( )
-    : _objectFactory( new ObjectFactory )
-    , _frameSettings( static_cast< FrameSettings* >
-                      ( _objectFactory->createObject( SMI_FRAME_SETTINGS )))
-    , _renderSettings( static_cast< RenderSettings* >
-                       ( _objectFactory->createObject( SMI_RENDER_SETTINGS )))
-    , _cameraSettings( static_cast< CameraSettings* >
-                       ( _objectFactory->createObject( SMI_CAMERA_SETTINGS )))
-    , _volumeSettings( static_cast< VolumeSettings* >
-                       ( _objectFactory->createObject( SMI_VOLUME_SETTINGS )))
-    , _vrParameters( static_cast< VolumeRendererParameters* >
-                     ( _objectFactory->createObject( SMI_VR_PARAMETERS )))
+void FrameData::unmapObjects()
 {
-}
-
-void FrameData::registerObjects( )
-{
-    LBASSERT( _objectMap );
-    LBCHECK( registerObject( _objectMap, _frameSettings, SMI_FRAME_SETTINGS ));
-    LBCHECK( registerObject( _objectMap, _renderSettings, SMI_RENDER_SETTINGS ));
-    LBCHECK( registerObject( _objectMap, _cameraSettings, SMI_CAMERA_SETTINGS ));
-    LBCHECK( registerObject( _objectMap, _volumeSettings, SMI_VOLUME_SETTINGS ));
-    LBCHECK( registerObject( _objectMap, _vrParameters, SMI_VR_PARAMETERS ));
-}
-
-void FrameData::deregisterObjects( )
-{
-    LBASSERT( _objectMap );
-    LBCHECK( deregisterObject( _objectMap, _frameSettings ));
-    LBCHECK( deregisterObject( _objectMap, _renderSettings ));
-    LBCHECK( deregisterObject( _objectMap, _cameraSettings ));
-    LBCHECK( deregisterObject( _objectMap, _volumeSettings ));
-    LBCHECK( deregisterObject( _objectMap, _vrParameters ));
-}
-
-void FrameData::mapObjects( )
-{
-    LBASSERT( _objectMap );
-    LBCHECK( mapObject( _objectMap, _objectFactory, _frameSettings,
-                        SMI_FRAME_SETTINGS ));
-    LBCHECK( mapObject( _objectMap, _objectFactory, _renderSettings,
-                        SMI_RENDER_SETTINGS ));
-    LBCHECK( mapObject( _objectMap, _objectFactory, _cameraSettings,
-                        SMI_CAMERA_SETTINGS ));
-    LBCHECK( mapObject( _objectMap, _objectFactory, _volumeSettings,
-                        SMI_VOLUME_SETTINGS ));
-    LBCHECK( mapObject( _objectMap, _objectFactory, _vrParameters,
-                        SMI_VR_PARAMETERS ));
-}
-
-void FrameData::unmapObjects( )
-{
-    if( !_objectMap )
-        return;
-    LBCHECK( _objectMap->unmap( _frameSettings.get( )));
-    LBCHECK( _objectMap->unmap( _renderSettings.get( )));
-    LBCHECK( _objectMap->unmap( _cameraSettings.get( )));
-    LBCHECK( _objectMap->unmap( _volumeSettings.get( )));
-    LBCHECK( _objectMap->unmap( _vrParameters.get( )));
-    _objectMap->clear();
+    LBCHECK( _impl->unmap( &_impl->frameSettings ));
+    LBCHECK( _impl->unmap( &_impl->renderSettings ));
+    LBCHECK( _impl->unmap( &_impl->cameraSettings ));
+    LBCHECK( _impl->unmap( &_impl->volumeSettings ));
+    LBCHECK( _impl->unmap( &_impl->vrParameters ));
+    _impl->clear();
 }
 
 void FrameData::initialize( eq::Config* eqConfig )
 {
-    LBASSERT( !_objectMap );
-    _objectMap.reset( new co::ObjectMap( *eqConfig, *_objectFactory ) );
+    LBASSERT( !_impl );
+    _impl.reset( new Impl( *eqConfig, _factory ));
 }
 
 void FrameData::setup( const VolumeRendererParameters& rendererParams )
 {
-    *_vrParameters = rendererParams;
+    _impl->vrParameters = rendererParams;
 }
 
-FrameSettingsPtr FrameData::getFrameSettings()
+FrameSettings& FrameData::getFrameSettings()
 {
-    return _frameSettings;
+    return _impl->frameSettings;
 }
 
-ConstFrameSettingsPtr FrameData::getFrameSettings() const
+const FrameSettings& FrameData::getFrameSettings() const
 {
-    return _frameSettings;
+    return _impl->frameSettings;
 }
 
-RenderSettingsPtr FrameData::getRenderSettings()
+RenderSettings& FrameData::getRenderSettings()
 {
-    return _renderSettings;
+    return _impl->renderSettings;
 }
 
-ConstRenderSettingsPtr FrameData::getRenderSettings() const
+const RenderSettings& FrameData::getRenderSettings() const
 {
-    return _renderSettings;
+    return _impl->renderSettings;
 }
 
-ConstCameraSettingsPtr FrameData::getCameraSettings() const
+const CameraSettings& FrameData::getCameraSettings() const
 {
-    return _cameraSettings;
+    return _impl->cameraSettings;
 }
 
-CameraSettingsPtr FrameData::getCameraSettings()
+CameraSettings& FrameData::getCameraSettings()
 {
-    return _cameraSettings;
+    return _impl->cameraSettings;
 }
 
-VolumeSettingsPtr FrameData::getVolumeSettings()
+VolumeSettings& FrameData::getVolumeSettings()
 {
-    return _volumeSettings;
+    return _impl->volumeSettings;
 }
 
-ConstVolumeRendererParametersPtr FrameData::getVRParameters() const
+const VolumeRendererParameters& FrameData::getVRParameters() const
 {
-    return _vrParameters;
+    return _impl->vrParameters;
 }
 
-VolumeRendererParametersPtr FrameData::getVRParameters()
+VolumeRendererParameters& FrameData::getVRParameters()
 {
-    return _vrParameters;
+    return _impl->vrParameters;
 }
 
 const eq::uint128_t& FrameData::getID() const
 {
-    return _objectMap->getID();
+    return _impl->getID();
 }
 
 eq::uint128_t FrameData::commit()
 {
-    return _objectMap->commit( );
+    return _impl->commit();
 }
 
 eq::uint128_t FrameData::sync( const eq::uint128_t& version )
 {
-    LBASSERT( _objectMap );
-    return _objectMap->sync( version );
+    return _impl->sync( version );
 }
 
 bool FrameData::map( eq::Config* config, const eq::uint128_t& uuid )
 {
-    LBVERB << "Mapping object map to UUID : " << uuid << std::endl;
-    return config->mapObject( _objectMap.get(), uuid );
+    return config->mapObject( _impl.get(), uuid );
 }
 
 void FrameData::unmap( eq::Config* config )
 {
-    if( _objectMap )
-        config->unmapObject( _objectMap.get() );
+    LBASSERT( _impl );
+    if( _impl )
+        config->unmapObject( _impl.get() );
 }
 
 bool FrameData::registerToConfig_( eq::Config* config )
 {
-    LBVERB << "Registering object map UUID : " << _objectMap->getID() << std::endl;
-    return config->registerObject( _objectMap.get() );
+    return config->registerObject( _impl.get() );
 }
 
 bool FrameData::deregisterFromConfig_( eq::Config *config )
 {
-    LBVERB << "Deregistering object map UUID : " << _objectMap->getID() << std::endl;
-    config->deregisterObject( _objectMap.get() );
+    config->deregisterObject( _impl.get() );
     return true;
 }
 

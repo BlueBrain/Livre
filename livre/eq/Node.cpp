@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2011-2015, Maxim Makhinya <maxmah@gmail.com>
+/* Copyright (c) 2011-2016, Maxim Makhinya <maxmah@gmail.com>
  *                          David Steiner <steiner@ifi.uzh.ch>
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
@@ -60,19 +60,19 @@ public:
         _textureDataCachePtr.reset(
                new livre::TextureDataCache( _dataSourcePtr, GL_UNSIGNED_BYTE ));
 
-        ConstVolumeRendererParametersPtr vrRenderParametersPtr =
+        const VolumeRendererParameters& vrRenderParameters =
                 _config->getFrameData().getVRParameters();
         _textureDataCachePtr->setMaximumMemory(
-                    vrRenderParametersPtr->getMaxCPUCacheMemoryMB() * LB_1MB );
+                    vrRenderParameters.getMaxCPUCacheMemoryMB() * LB_1MB );
     }
 
     bool initializeVolume()
     {
         try
         {
-            VolumeSettingsPtr volumeSettingsPtr =
+            const VolumeSettings& volumeSettings =
                     _config->getFrameData().getVolumeSettings();
-            const lunchbox::URI& uri = lunchbox::URI( volumeSettingsPtr->getURI( ));
+            const lunchbox::URI& uri = lunchbox::URI( volumeSettings.getURI( ));
             dash::Context::getMain(); // Create the main context
             _dataSourcePtr.reset( new livre::VolumeDataSource( uri ));
             _dashTreePtr.reset( new livre::DashTree( _dataSourcePtr ));

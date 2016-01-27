@@ -111,7 +111,7 @@ private:
 TextureUploadProcessor::TextureUploadProcessor( DashTreePtr dashTree,
                                                 GLContextPtr shareContext,
                                                 GLContextPtr context,
-                                                ConstVolumeRendererParametersPtr vrParameters )
+                                                const VolumeRendererParameters& vrParameters )
     : GLContextTrait( context )
     , _dashTree( dashTree )
     , _shareContext( shareContext )
@@ -133,7 +133,7 @@ const TextureCache& TextureUploadProcessor::getTextureCache() const
 bool TextureUploadProcessor::initializeThreadRun_()
 {
     setName( "TexUp" );
-    _textureCache.setMaximumMemory( _vrParameters->getMaxGPUCacheMemoryMB() * LB_1MB );
+    _textureCache.setMaximumMemory( _vrParameters.getMaxGPUCacheMemoryMB() * LB_1MB );
     LBASSERT( getGLContext( ));
     _shareContext->shareContext( getGLContext( ));
     return DashProcessor::initializeThreadRun_();
@@ -160,13 +160,13 @@ void TextureUploadProcessor::_loadData()
                                       processorInputPtr_, processorOutputPtr_,
                                       _needRedraw );
 
-    loadVisitor.setSynchronous( _vrParameters->getSynchronousMode( ));
+    loadVisitor.setSynchronous( _vrParameters.getSynchronousMode( ));
 
     DFSTraversal traverser;
     const RootNode& rootNode = _dashTree->getDataSource()->getVolumeInformation().rootNode;
     traverser.traverse( rootNode, loadVisitor, _currentFrameID );
 
-    if(  _vrParameters->getSynchronousMode( ))
+    if(  _vrParameters.getSynchronousMode( ))
         _allDataLoaded = loadVisitor.isAllDataLoaded();
     else
         _allDataLoaded = true;

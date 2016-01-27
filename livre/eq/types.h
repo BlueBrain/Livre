@@ -75,10 +75,6 @@ typedef boost::shared_ptr< const CameraSettings > ConstCameraSettingsPtr;
 typedef boost::shared_ptr< RenderSettings > RenderSettingsPtr;
 typedef boost::shared_ptr< const RenderSettings > ConstRenderSettingsPtr;
 typedef boost::shared_ptr< RayCastRenderer > RayCastRendererPtr;
-typedef boost::shared_ptr< const VolumeSettings > ConstVolumeSettingsPtr;
-typedef boost::shared_ptr< const FrameSettings > ConstFrameSettingsPtr;
-typedef boost::shared_ptr< const CameraSettings > ConstCameraSettingsPtr;
-typedef boost::shared_ptr< const RenderSettings > ConstRenderSettingsPtr;
 
 }
 

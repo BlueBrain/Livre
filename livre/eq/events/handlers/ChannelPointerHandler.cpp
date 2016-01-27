@@ -48,7 +48,7 @@ bool ChannelPointerHandler::operator ()( EqEventInfo& eqEventInfo )
     const eq::ConfigEvent* event = eqEventInfo.configEvent;
     Config* config = eqEventInfo.config;
 
-    CameraSettingsPtr cameraSettings = config->getFrameData().getCameraSettings();
+    CameraSettings& cameraSettings = config->getFrameData().getCameraSettings();
 
     switch( event->data.type )
     {
@@ -86,7 +86,7 @@ bool ChannelPointerHandler::operator ()( EqEventInfo& eqEventInfo )
                   spinX_ = 0;
                   spinY_ = 0;
 
-                  cameraSettings->spinModel(
+                  cameraSettings.spinModel(
                       -ROTATE_AND_ZOOM_SPEED * event->data.pointerMotion.dy,
                       -ROTATE_AND_ZOOM_SPEED * event->data.pointerMotion.dx,
                       0.f );
@@ -94,14 +94,14 @@ bool ChannelPointerHandler::operator ()( EqEventInfo& eqEventInfo )
 
               case eq::PTR_BUTTON2:
                   advance_ = -event->data.pointerMotion.dy;
-                  cameraSettings->moveCamera( 0.f, 0.f,
+                  cameraSettings.moveCamera( 0.f, 0.f,
                                               ROTATE_AND_ZOOM_SPEED * advance_ );
                   return true;
 
               case eq::PTR_BUTTON3:
-                  cameraSettings->moveCamera(  PAN_SPEED * event->data.pointerMotion.dx,
-                                              -PAN_SPEED * event->data.pointerMotion.dy,
-                                                0.f );
+                  cameraSettings.moveCamera( PAN_SPEED * event->data.pointerMotion.dx,
+                                             -PAN_SPEED * event->data.pointerMotion.dy,
+                                             0.f );
                   return true;
             }
             break;
@@ -109,9 +109,9 @@ bool ChannelPointerHandler::operator ()( EqEventInfo& eqEventInfo )
 
         case eq::Event::CHANNEL_POINTER_WHEEL:
         {
-            cameraSettings->moveCamera( -ADVANCE_SPEED * event->data.pointerWheel.xAxis,
-                                         0.f,
-                                         ADVANCE_SPEED * event->data.pointerWheel.yAxis );
+            cameraSettings.moveCamera( -ADVANCE_SPEED * event->data.pointerWheel.xAxis,
+                                       0.f,
+                                       ADVANCE_SPEED * event->data.pointerWheel.yAxis );
             break;
         }
     }

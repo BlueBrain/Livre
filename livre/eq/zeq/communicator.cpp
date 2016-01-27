@@ -73,11 +73,8 @@ public:
 
     void publishCamera()
     {
-        if( !_publisher )
-            return;
-
-        const auto cameraSettings = _config.getFrameData().getCameraSettings();
-        const Matrix4f& modelView = cameraSettings->getModelViewMatrix();
+        const auto& cameraSettings = _getFrameData().getCameraSettings();
+        const Matrix4f& modelView = cameraSettings.getModelViewMatrix();
         const FloatVector matrix( modelView.begin(), modelView.end( ));
         _publisher->publish( ::zeq::hbp::serializeCamera( matrix ));
     }
@@ -111,7 +108,7 @@ public:
         const ::zeq::Event& frame = ::zeq::hbp::serializeFrame(
                                         ::zeq::hbp::data::Frame(
                                             params.frames[0],
-                                            frameSettings->getFrameNumber(),
+                                            frameSettings.getFrameNumber(),
                                             params.frames[1],
                                             params.animation ));
         _publisher->publish( frame );
@@ -194,8 +191,8 @@ public:
         const auto& matrix = ::zeq::hbp::deserializeCamera( event );
         Matrix4f modelViewMatrix;
         modelViewMatrix.set( matrix.begin(), matrix.end(), false );
-        auto cameraSettings = _config.getFrameData().getCameraSettings();
-        cameraSettings->setModelViewMatrix( modelViewMatrix );
+        auto& cameraSettings = _getFrameData().getCameraSettings();
+        cameraSettings.setModelViewMatrix( modelViewMatrix );
     }
 
     // HBP 'micron' camera from other brain applications
@@ -207,8 +204,8 @@ public:
 
         const auto& modelViewMatrix =
                 _config.convertFromHBPCamera( modelViewMatrixMicron );
-        auto cameraSettings = _config.getFrameData().getCameraSettings();
-        cameraSettings->setModelViewMatrix( modelViewMatrix );
+        auto& cameraSettings = _getFrameData().getCameraSettings();
+        cameraSettings.setModelViewMatrix( modelViewMatrix );
     }
 
     void onLookupTable1D( const ::zeq::Event& event )
@@ -226,10 +223,10 @@ public:
         if( _config.getDataFrameCount() == 0 )
             return;
 
-        auto frameSettings = _config.getFrameData().getFrameSettings();
+        auto& frameSettings = _getFrameData().getFrameSettings();
         auto& params = _config.getApplicationParameters();
 
-        if( frame.current == frameSettings->getFrameNumber() &&
+        if( frame.current == frameSettings.getFrameNumber() &&
             frame.delta == params.animation &&
             frame.start == params.frames.x() &&
             frame.end == params.frames.y( ))
@@ -237,14 +234,15 @@ public:
             return;
         }
 
-        frameSettings->setFrameNumber( frame.current );
+        frameSettings.setFrameNumber( frame.current );
         params.animation = frame.delta;
         params.frames = { frame.start, frame.end };
     }
 
     void requestImageJPEG()
     {
-        _config.getFrameData().getFrameSettings()->setGrabFrame( true );
+        _getFrameData().getFrameSettings().setGrabFrame( true );
+        return true;
     }
 
     void requestExit()
@@ -269,19 +267,17 @@ private:
     void _setupRequests()
     {
         _requests[::zeq::hbp::EVENT_CAMERA] =
-                std::bind( &Impl::publishCamera, this );
+            std::bind( &Impl::publishCamera, this );
         _requests[::zeq::hbp::EVENT_FRAME] =
-                std::bind( &Impl::publishFrame, this );
+            std::bind( &Impl::publishFrame, this );
         _requests[::zeq::hbp::EVENT_LOOKUPTABLE1D] =
-                std::bind( &Impl::publishLookupTable1D, this );
+            std::bind( &Impl::publishLookupTable1D, this );
         _requests[::zeq::hbp::EVENT_IMAGEJPEG] =
-                std::bind( &Impl::requestImageJPEG, this );
+            std::bind( &Impl::requestImageJPEG, this );
         _requests[::zeq::vocabulary::EVENT_EXIT] =
-                std::bind( &Impl::requestExit, this );
-        _requests[::zeq::vocabulary::EVENT_VOCABULARY] =
-                std::bind( &Impl::publishVocabulary, this );
-        _requests[_config.getFrameData().getVRParameters()->getTypeIdentifier()] =
-                std::bind( &Impl::publishVolumeRendererParameters, this );
+            std::bind( &Impl::requestExit, this );
+        _requests[ VolumeRendererParameters::TYPE_IDENTIFIER() ] = [&]
+            { return _publisher.publish( _getFrameData().getVRParameters( )); };
     }
 
     void _setupRESTBridge( const int argc LB_UNUSED, char** argv LB_UNUSED )
@@ -329,7 +325,7 @@ private:
         subscriber->registerHandler( ::zeq::vocabulary::EVENT_REQUEST,
                                      std::bind( &Impl::onRequest,
                                                 this, std::placeholders::_1 ));
-        subscriber->subscribe( *_config.getFrameData().getVRParameters( ));
+        subscriber->subscribe( _config.getFrameData().getVRParameters( ));
     }
 
     typedef std::shared_ptr< ::zeq::Subscriber > SubscriberPtr;

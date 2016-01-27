@@ -177,7 +177,8 @@ int Client::run( const int argc, char** argv )
 
     FrameData& frameData = config->getFrameData();
     frameData.setup( _impl->_rendererParameters );
-    frameData.getVolumeSettings()->setURI( _impl->_applicationParameters.dataFileName);
+    frameData.getVolumeSettings().setURI(
+        _impl->_applicationParameters.dataFileName );
 
     // 3. init config
     lunchbox::Clock clock;
