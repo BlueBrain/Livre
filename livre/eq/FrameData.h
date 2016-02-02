@@ -33,7 +33,7 @@ namespace livre
 class FrameData
 {
 public:
-    FrameData( );
+    FrameData();
 
     /**
      * Initializes the FrameData.
@@ -47,33 +47,33 @@ public:
     /**
      * Registers objects to the internal \see co::ObjectMap.
      */
-    void registerObjects( );
+    void registerObjects();
 
     /**
      * Deregisters objects from the internal \see co::ObjectMap.
      */
-    void deregisterObjects( );
+    void deregisterObjects();
 
     /**
      * Maps objects to the \see co::ObjectMap.
      */
-    void mapObjects( );
+    void mapObjects();
 
     /**
      * Unmaps objects from the \see co::ObjectMap.
      */
-    void unmapObjects( );
+    void unmapObjects();
 
     /**
      * @return The UUID of the wrapped map ptr
      */
-    const eq::uint128_t& getID( ) const;
+    const eq::uint128_t& getID() const;
 
     /**
      * Commits changes.
      * @return The commited version.
      */
-    eq::uint128_t commit( );
+    eq::uint128_t commit();
 
     /**
      * Syncs with the application node object.

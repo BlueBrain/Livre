@@ -18,8 +18,8 @@
  */
 
 #include <livre/core/api.h>
+#include <livre/core/mathTypes.h>
 #include <livre/core/types.h>
-#include <livre/core/maths/Plane.h>
 
 namespace livre
 {
@@ -51,32 +51,6 @@ LIVRECORE_API Matrix4f computeModelViewMatrix( const Matrix3f& rotationMatrix, c
  * @return return 4x4 model view matrix.
  */
 LIVRECORE_API Matrix4f computeModelViewMatrix( const Vector3f& eye, const Vector3f& center );
-/**
- * computeModelViewMatrix computes the model view matrix from a quaternion.
- * @param quat is the quaternion.
- * @param eye vector in world space.
- * @return The model view matrix.
- */
-LIVRECORE_API Matrix4f computeModelViewMatrix( const Quaternionf& quat, const Vector3f& eye );
-
-/**
- * Computes intersection between three planes.
- * @param plane0 is the first plane.
- * @param plane1 is the second plane.
- * @param plane2 is the third plane.
- * @return The intersection point.
- * @warning Parallel planes are not checked.
- */
-LIVRECORE_API Vector3f computePlaneIntersection( const Plane& plane0, const Plane& plane1, const Plane& plane2 );
-
-/**
- * Computes a point bewteen two points, on the parametric value t [ 0..1 ]
- * @param p0 begining point.
- * @param p1 end point.
- * @param t parametric value [ 0..1 ]
- * @return The point.
- */
-LIVRECORE_API Vector3f computePointOnLine( const Vector3f& p0, const Vector3f& p1, float t );
 
 /**
  * Clamps a number between limits.

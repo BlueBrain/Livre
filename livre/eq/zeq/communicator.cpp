@@ -73,7 +73,10 @@ public:
 
     void publishCamera()
     {
-        const auto& cameraSettings = _getFrameData().getCameraSettings();
+        if( !_publisher )
+            return;
+
+        const auto& cameraSettings = _config.getFrameData().getCameraSettings();
         const Matrix4f& modelView = cameraSettings.getModelViewMatrix();
         const FloatVector matrix( modelView.begin(), modelView.end( ));
         _publisher->publish( ::zeq::hbp::serializeCamera( matrix ));
@@ -93,7 +96,7 @@ public:
             return;
 
         const auto& renderSettings = _config.getFrameData().getRenderSettings();
-        const auto& lut = renderSettings->getTransferFunction().getData();
+        const auto& lut = renderSettings.getTransferFunction().getData();
         _publisher->publish( ::zeq::hbp::serializeLookupTable1D( lut ) );
     }
 
@@ -116,7 +119,7 @@ public:
 
     void publishVolumeRendererParameters()
     {
-         _publisher->publish( *_config.getFrameData().getVRParameters( ));
+         _publisher->publish( _config.getFrameData().getVRParameters( ));
     }
 
     void publishVocabulary()
@@ -191,7 +194,7 @@ public:
         const auto& matrix = ::zeq::hbp::deserializeCamera( event );
         Matrix4f modelViewMatrix;
         modelViewMatrix.set( matrix.begin(), matrix.end(), false );
-        auto& cameraSettings = _getFrameData().getCameraSettings();
+        auto& cameraSettings = _config.getFrameData().getCameraSettings();
         cameraSettings.setModelViewMatrix( modelViewMatrix );
     }
 
@@ -204,7 +207,7 @@ public:
 
         const auto& modelViewMatrix =
                 _config.convertFromHBPCamera( modelViewMatrixMicron );
-        auto& cameraSettings = _getFrameData().getCameraSettings();
+        auto& cameraSettings = _config.getFrameData().getCameraSettings();
         cameraSettings.setModelViewMatrix( modelViewMatrix );
     }
 
@@ -212,8 +215,8 @@ public:
     {
         const TransferFunction1D transferFunction(
             ::zeq::hbp::deserializeLookupTable1D( event ));
-        auto renderSettings = _config.getFrameData().getRenderSettings();
-        renderSettings->setTransferFunction( transferFunction );
+        auto& renderSettings = _config.getFrameData().getRenderSettings();
+        renderSettings.setTransferFunction( transferFunction );
     }
 
     void onFrame( const ::zeq::Event& event )
@@ -223,7 +226,7 @@ public:
         if( _config.getDataFrameCount() == 0 )
             return;
 
-        auto& frameSettings = _getFrameData().getFrameSettings();
+        auto& frameSettings = _config.getFrameData().getFrameSettings();
         auto& params = _config.getApplicationParameters();
 
         if( frame.current == frameSettings.getFrameNumber() &&
@@ -241,8 +244,7 @@ public:
 
     void requestImageJPEG()
     {
-        _getFrameData().getFrameSettings().setGrabFrame( true );
-        return true;
+        _config.getFrameData().getFrameSettings().setGrabFrame( true );
     }
 
     void requestExit()
@@ -277,7 +279,7 @@ private:
         _requests[::zeq::vocabulary::EVENT_EXIT] =
             std::bind( &Impl::requestExit, this );
         _requests[ VolumeRendererParameters::TYPE_IDENTIFIER() ] = [&]
-            { return _publisher.publish( _getFrameData().getVRParameters( )); };
+            { _publisher->publish( _config.getFrameData().getVRParameters( )); };
     }
 
     void _setupRESTBridge( const int argc LB_UNUSED, char** argv LB_UNUSED )
@@ -310,12 +312,9 @@ private:
         SubscriberPtr subscriber( new ::zeq::Subscriber );
 
         subscribers.push_back( subscriber );
-        if( _config.getApplicationParameters().syncCamera )
-        {
-            subscriber->registerHandler( ::zeq::hbp::EVENT_CAMERA,
-                                         std::bind( &Impl::onHBPCamera,
-                                                 this, std::placeholders::_1 ));
-        }
+        subscriber->registerHandler( ::zeq::hbp::EVENT_CAMERA,
+                                     std::bind( &Impl::onHBPCamera,
+                                                this, std::placeholders::_1 ));
         subscriber->registerHandler( ::zeq::hbp::EVENT_LOOKUPTABLE1D,
                                      std::bind( &Impl::onLookupTable1D,
                                                 this, std::placeholders::_1 ));

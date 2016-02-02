@@ -127,7 +127,7 @@ public:
     explicit Channel( livre::Channel* channel )
           : _channel( channel )
           , _glWidgetPtr( new EqGLWidget( channel ))
-          , _frameInfo( _currentFrustum )
+          , _frameInfo( _frustum )
     {}
 
     void initializeFrame()
@@ -173,15 +173,14 @@ public:
         _renderViewPtr->setRenderer( renderer);
     }
 
-    const Frustum& initializeLivreFrustum()
+    const Frustum& setupFrustum()
     {
         const eq::Matrix4f& modelView = computeModelView();
         const eq::Frustumf& eqFrustum = _channel->getFrustum();
         const eq::Matrix4f& projection = eqFrustum.compute_matrix();
 
-        _currentFrustum.reset();
-        _currentFrustum.initialize( modelView, projection );
-        return _currentFrustum;
+        _frustum.setup( modelView, projection );
+        return _frustum;
     }
 
     eq::Matrix4f computeModelView() const
@@ -240,7 +239,7 @@ public:
         const uint32_t volumeDepth = volInfo.rootNode.getDepth();
         _drawRange = _channel->getRange();
 
-        SelectVisibles visitor( dashTree, _currentFrustum,
+        SelectVisibles visitor( dashTree, _frustum,
                                 _channel->getPixelViewport().h,
                                 screenSpaceError, worldSpacePerVoxel,
                                 volumeDepth, minLOD, maxLOD,
@@ -255,7 +254,7 @@ public:
 
     void updateRegions( const RenderBricks& bricks )
     {
-        const Matrix4f& mvpMatrix = _currentFrustum.getModelViewProjectionMatrix();
+        const Matrix4f& mvpMatrix = _frustum.getModelViewProjectionMatrix();
         for( const RenderBrickPtr& brick : bricks )
         {
             const Vector3f& min = brick->getLODNode()->getWorldBox().getMin();
@@ -308,7 +307,7 @@ public:
             return;
 
         applyCamera();
-        initializeLivreFrustum();
+        setupFrustum();
         const DashRenderNodes& visibles = requestData();
 
         const eq::fabric::Viewport& vp = _channel->getViewport( );
@@ -331,7 +330,7 @@ public:
             // If there are multiple channels, this may cause the ping-pong
             // because every channel will try to update the same DashTree in
             // node with their own frustum.
-            if( !isSynchronous && receivedFrustum != _currentFrustum )
+            if( !isSynchronous && receivedFrustum != _frustum )
                 _channel->getConfig()->sendEvent( REDRAW );
         }
 
@@ -478,7 +477,7 @@ public:
     {
         livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
         DashRenderStatus& renderStatus = node->getDashTree()->getRenderStatus();
-        renderStatus.setFrustum( _currentFrustum );
+        renderStatus.setFrustum( _frustum );
     }
 
     void frameReadback( const eq::Frames& frames ) const
@@ -637,7 +636,7 @@ public:
     livre::Channel* const _channel;
     eq::Range _drawRange;
     eq::Frame _frame;
-    Frustum _currentFrustum;
+    Frustum _frustum;
     ViewPtr _renderViewPtr;
     GLWidgetPtr _glWidgetPtr;
     FrameGrabber _frameGrabber;
@@ -652,7 +651,7 @@ EqRenderView::EqRenderView( Channel* channel,
 
 const Frustum& EqRenderView::getFrustum() const
 {
-    return _channel->initializeLivreFrustum();
+    return _channel->setupFrustum();
 }
 
 }

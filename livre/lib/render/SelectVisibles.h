@@ -65,9 +65,8 @@ protected:
             return;
         }
 
-        const Plane& nearPlane = _frustum.getWPlane( PL_NEAR );
         Vector3f vmin, vmax;
-        nearPlane.getNearFarPoints( worldBox, vmin, vmax );
+        worldBox.computeNearFar( _frustum.getNearPlane(), vmin, vmax );
 
         const uint32_t lod =
             _lodEvaluator.getLODForPoint( _frustum, _volumeDepth, vmin );

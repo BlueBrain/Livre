@@ -62,7 +62,7 @@ Matrix4f computeModelViewMatrix( const Vector3f& eye, const Vector3f& center )
         up.normalize();
     }
 
-    const Vector3f xAxis = vmml::normalize( vmml::cross( xAxis, zAxis ));
+    const Vector3f xAxis = vmml::normalize( vmml::cross( up, zAxis ));
     const Vector3f yAxis = vmml::cross( zAxis, xAxis );
 
     Matrix3f rotationMatrix = Matrix4f::IDENTITY;
@@ -71,40 +71,6 @@ Matrix4f computeModelViewMatrix( const Vector3f& eye, const Vector3f& center )
     rotationMatrix.set_column( 2, zAxis );
 
     return computeModelViewMatrix( rotationMatrix, eye );
-}
-
-Matrix4f computeModelViewMatrix( const Quaternionf& quat, const Vector3f& eye )
-{
-    Matrix3f rotationMatrix;
-    quat.get_rotation_matrix( rotationMatrix );
-    return computeModelViewMatrix( rotationMatrix, eye );
-}
-
-Vector3f computePlaneIntersection( const Plane& plane0, const Plane& plane1, const Plane& plane2 )
-{
-    // TODO: Paralllel planes, whew !
-
-    Matrix3f linSolve;
-    linSolve.set_row( 0, plane0.getNormal() );
-    linSolve.set_row( 1, plane1.getNormal() );
-    linSolve.set_row( 2, plane2.getNormal() );
-
-    Matrix3f ilinSolve;
-    linSolve.inverse( ilinSolve );
-
-    Vector3f bSolve( -plane0.getd(),
-                     -plane1.getd(),
-                     -plane2.getd() );
-
-    return ilinSolve * bSolve;
-}
-
-Vector3f computePointOnLine( const Vector3f& p0, const Vector3f& p1, float t )
-{
-    const Vector3f diff = p1 - p0;
-    const Vector3f add = diff * t;
-    const Vector3f ret = p0 + add;
-    return ret;
 }
 
 }
