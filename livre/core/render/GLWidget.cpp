@@ -38,7 +38,7 @@ Viewport GLWidget::getViewport( const View& view  ) const
 {
     const Vector2f window( getWidth(), getHeight() );
     const Vector2i& pos = view.getViewport().get_sub_vector< 2 >() * window;
-    const Vector2i& size = view.getViewport().get_sub_vector< 2 >( 2 ) * window;
+    const Vector2i& size = view.getViewport().get_sub_vector< 2, 2 >() * window;
 
     return Viewport( pos.x(), pos.y(), size.x(), size.y( ));
 }

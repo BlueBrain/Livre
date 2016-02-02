@@ -62,8 +62,8 @@ Matrix4f computeModelViewMatrix( const Vector3f& eye, const Vector3f& center )
         up.normalize();
     }
 
-    const Vector3f xAxis = vmml::normalize( up.cross( zAxis ));
-    const Vector3f yAxis = zAxis.cross( xAxis );
+    const Vector3f xAxis = vmml::normalize( vmml::cross( xAxis, zAxis ));
+    const Vector3f yAxis = vmml::cross( zAxis, xAxis );
 
     Matrix3f rotationMatrix = Matrix4f::IDENTITY;
     rotationMatrix.set_column( 0, xAxis );
