@@ -271,44 +271,31 @@ public:
              memUnitPtr.reset( new ConstMemoryUnit( dataPtr,
                                         blockInfo.m_iLength / sizeof( T ) ) );
         }
-        else if( blockInfo.m_eCompression == CT_ZLIB )
-        {
-            const Vector3i dimensions = node.getVoxelBox().getDimension();
-            const uint32_t uncompressedSize = dimensions[ 0 ] *
-                                              dimensions[ 1 ] *
-                                              dimensions[ 2 ] * _volumeInfo.compCount;
-
-            std::vector< T > tuvokData;
-            tuvokData.resize( uncompressedSize );
-            const void* dataPtr =
-                    _tuvokLargeMMapFilePtr->rd( _offset + blockInfo.m_iOffset,
-                                                blockInfo.m_iLength ).get( );
-
-            // The below piece of "art" is because of the zDecompress(...)
-            // API from TUVOK, a ref to a shared ptr ? wow
-            // void zDecompress(std::shared_ptr<uint8_t> src,
-            // std::shared_ptr<uint8_t>& dst,size_t uncompressedBytes)
-            std::shared_ptr< std::uint8_t > src( (std::uint8_t *)dataPtr,
-                                                    DontDeleteObject< std::uint8_t >() );
-            std::shared_ptr< std::uint8_t > dst( (std::uint8_t *)&tuvokData[ 0 ],
-                                                   DontDeleteObject< std::uint8_t >() );
-            zDecompress( src, dst, uncompressedSize );
-
-            AllocMemoryUnit *allocUnit = new AllocMemoryUnit( );
-            allocUnit->allocAndSetData< T >( tuvokData );
-            memUnitPtr.reset( allocUnit );
-        }
         else
         {
-            const Vector3i dimensions = node.getVoxelBox().getDimension();
-            const uint32_t uncompressedSize = dimensions[ 0 ] *
-                                              dimensions[ 1 ] *
-                                              dimensions[ 2 ] * _volumeInfo.compCount;
+            const Vector3ui dimensions = node.getVoxelBox().getDimension()
+                                        + _volumeInfo.overlap * 2;
+            const uint32_t uncompressedSize = dimensions.product()
+                                              * _volumeInfo.compCount
+                                              * _volumeInfo.getBytesPerVoxel();
 
             std::vector< T > tuvokData;
             tuvokData.resize( uncompressedSize );
 
-            AllocMemoryUnit *allocUnit = new AllocMemoryUnit( );
+            if( blockInfo.m_eCompression == CT_ZLIB )
+            {
+                const void* dataPtr =
+                        _tuvokLargeMMapFilePtr->rd( _offset + blockInfo.m_iOffset,
+                                                    blockInfo.m_iLength ).get( );
+
+                std::shared_ptr< std::uint8_t > src( (std::uint8_t *)dataPtr,
+                                                        DontDeleteObject< std::uint8_t >() );
+                std::shared_ptr< std::uint8_t > dst( (std::uint8_t *)&tuvokData[ 0 ],
+                                                       DontDeleteObject< std::uint8_t >() );
+                zDecompress( src, dst, uncompressedSize );
+            }
+
+            AllocMemoryUnit* allocUnit = new AllocMemoryUnit( );
             allocUnit->allocAndSetData< T >( tuvokData );
             memUnitPtr.reset( allocUnit );
         }
