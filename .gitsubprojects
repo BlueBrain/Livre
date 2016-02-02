@@ -1,8 +1,8 @@
 # -*- mode: cmake -*-
-git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git 0c5a630)
+git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git aa863c4)
 git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git 639ccfd)
-git_subproject(zeq https://github.com/HBPVis/zeq.git bc791da)
+git_subproject(zeq https://github.com/HBPVis/zeq.git 9f7bfdf)
 git_subproject(Lunchbox https://github.com/Eyescale/Lunchbox.git 7d3b9b2)
 git_subproject(dash https://github.com/BlueBrain/dash.git dd7877d)
-git_subproject(Collage https://github.com/Eyescale/Collage.git a2750f8)
-git_subproject(Equalizer https://github.com/Eyescale/Equalizer.git e09a647)
+git_subproject(Collage https://github.com/Eyescale/Collage.git 83e419e)
+git_subproject(Equalizer https://github.com/Eyescale/Equalizer.git 71c8673)
