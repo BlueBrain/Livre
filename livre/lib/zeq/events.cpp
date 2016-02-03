@@ -165,7 +165,7 @@ LODNodeSample deserializeDataSample( const ::zeq::Event& event )
     auto data = GetLODNode( event.getData( ));
     sample.second = livre::LODNode(
         NodeId( data->nodeId( )),
-        _deserializeVector3< int32_t >( data->blockSize( )),
+        _deserializeVector3< uint32_t >( data->blockSize( )),
         Boxf( _deserializeVector3< float >( data->worldBoxMin( )),
               _deserializeVector3< float >( data->worldBoxMax( ))));
 
