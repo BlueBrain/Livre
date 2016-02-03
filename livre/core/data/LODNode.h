@@ -44,9 +44,9 @@ public:
      * @param levelTotalBlockDimensions Total number of blocks in the
      *                                  corresponding tree level.
      */
-    LIVRECORE_API LODNode( const NodeId nodeId,
-                           const Vector3i& blockSize,
-                           const Vector3i& levelTotalBlockDimensions );
+    LIVRECORE_API LODNode( const NodeId& nodeId,
+                           const Vector3ui& blockSize,
+                           const Vector3ui& levelTotalBlockDimensions );
 
     /**
      * Compute the world position from given information.
@@ -54,8 +54,8 @@ public:
      * @param blockSize Block size in voxels.
      * @param worldBox Node position in the world space.
      */
-    LIVRECORE_API LODNode( const NodeId nodeId,
-                           const Vector3i& blockSize,
+    LIVRECORE_API LODNode( const NodeId& nodeId,
+                           const Vector3ui& blockSize,
                            const Boxf& worldBox );
 
     /**
@@ -66,7 +66,7 @@ public:
      *
      * @return Blockwise position level resolution.
      */
-    LIVRECORE_API Vector3i getAbsolutePosition() const { return nodeId_.getPosition(); }
+    LIVRECORE_API Vector3ui getAbsolutePosition() const { return nodeId_.getPosition(); }
 
     /** @return the relative node position in normalized coordinates. */
     LIVRECORE_API Vector3f getRelativePosition() const;
@@ -91,7 +91,7 @@ public:
      */
     LIVRECORE_API NodeId getNodeId( ) const { return nodeId_; }
 
-    LIVRECORE_API const Vector3i& getBlockSize() const { return blockSize_; } //!< @internal
+    LIVRECORE_API const Vector3ui& getBlockSize() const { return blockSize_; } //!< @internal
 
     /**
      * @return True if node is valid.
@@ -118,7 +118,7 @@ public:
 private:
 
     NodeId nodeId_; //!< Node id.
-    Vector3i blockSize_; //!< Number of blocks in each dimension.
+    Vector3ui blockSize_; //!< Number of blocks in each dimension.
     Boxui localVoxelBox_; //!< Voxelwise position and dimension in reflevel resolution in model space.
     Boxf worldBox_; //!< World box.
     void initialize_( ); //!< Computes the internal values of LODBox (voxel extents, block extents, etc ).

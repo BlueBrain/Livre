@@ -54,8 +54,8 @@ namespace detail
 class UVFDataSource
 {
 public:
-    UVFDataSource(  VolumeInformation& volumeInfo,
-                    const VolumeDataSourcePluginData& initData )
+    UVFDataSource( VolumeInformation& volumeInfo,
+                   const VolumeDataSourcePluginData& initData )
         : _uvfTOCBlock( 0 ),
           _volumeInfo( volumeInfo )
     {
@@ -69,7 +69,7 @@ public:
             _tuvokLargeMMapFilePtr.reset( new LargeFileMMap( path ));
 
             // Determine the depth of the LOD tree structure
-            uint32_t depth = -1;
+            uint32_t depth = 0;
             UINTVECTOR3 lodSize;
             do
             {
@@ -122,30 +122,28 @@ public:
                                                       maxBrickSize[2] );
 
             const UINTVECTOR3& overlap = _uvfDataSetPtr->GetBrickOverlapSize( );
-            _volumeInfo.overlap = Vector3i( overlap[0], overlap[1], overlap[2] );
+            _volumeInfo.overlap = Vector3ui( overlap[0], overlap[1], overlap[2] );
 
             const UINT64VECTOR3& domainSize = _uvfDataSetPtr->GetDomainSize( );
             _volumeInfo.worldSpacePerVoxel = 1.0f / (float)domainSize.maxVal();
 
-            _volumeInfo.voxels = Vector3i( domainSize[0],
-                                           domainSize[1],
-                                           domainSize[2] );
+            _volumeInfo.voxels = Vector3ui( domainSize[0],
+                                            domainSize[1],
+                                            domainSize[2] );
             _volumeInfo.worldSize = Vector3f( domainSize[0],
                                               domainSize[1],
                                               domainSize[2] ) / (float)domainSize.maxVal();
 
-            _readTOCBlock( initData.getURI().getPath());
+            readTOCBlock( initData.getURI().getPath());
 
             _volumeInfo.frameRange = Vector2ui( 0, _uvfDataSetPtr->GetNumberOfTimesteps( ));
          }
         catch( ... )
-        {
             LBTHROW( std::runtime_error( "UVF data format initialization failed" ));
-        }
+
         if( !_uvfTOCBlock )
-        {
-        LBTHROW( std::runtime_error( "UVF TOC block not found in data set" ));
-        }
+            LBTHROW( std::runtime_error( "UVF TOC block not found in data set" ));
+
     }
 
     ~UVFDataSource()
@@ -154,7 +152,7 @@ public:
             _tuvokLargeMMapFilePtr->close();
     }
 
-    void _readTOCBlock( const std::string& uri )
+    void readTOCBlock( const std::string& uri )
     {
         const UVF* uvfFile = _uvfDataSetPtr->GetUVFFile();
         for( uint32_t iBlocks = 0; iBlocks < uvfFile->GetDataBlockCount(); ++iBlocks )
@@ -202,12 +200,12 @@ public:
         const Vector3i& minPos = node.getAbsolutePosition();
         const UINTVECTOR3& tuvokBricksInThisLod =
                 _uvfDataSetPtr->GetBrickLayout(
-                    _treeLevelToTuvokLevel( node.getRefLevel( )), 0 );
-        const Vector3i bricksInThisLod(  tuvokBricksInThisLod.x,
-                                         tuvokBricksInThisLod.y,
-                                         tuvokBricksInThisLod.z );
+                    treeLevelToTuvokLevel( node.getRefLevel( )), 0 );
+        const Vector3ui bricksInThisLod(  tuvokBricksInThisLod.x,
+                                          tuvokBricksInThisLod.y,
+                                          tuvokBricksInThisLod.z );
 
-        uint32_t brickIndex = _getBrickIndex( minPos[ 0 ],
+        uint32_t brickIndex = getBrickIndex( minPos[ 0 ],
                                               minPos[ 1 ],
                                               minPos[ 2 ],
                                               bricksInThisLod );
@@ -216,28 +214,28 @@ public:
         switch( _volumeInfo.dataType )
         {
             case  DT_FLOAT32 :
-              memUnitPtr = _tuvokBrickToMemoryUnit< float >( node, brickIndex );
+              memUnitPtr = tuvokBrickToMemoryUnit< float >( node, brickIndex );
               break;
             case  DT_FLOAT64 :
-              memUnitPtr = _tuvokBrickToMemoryUnit< double >( node, brickIndex );
+              memUnitPtr = tuvokBrickToMemoryUnit< double >( node, brickIndex );
               break;
             case  DT_UINT8 :
-              memUnitPtr = _tuvokBrickToMemoryUnit< uint8_t >( node,brickIndex );
+              memUnitPtr = tuvokBrickToMemoryUnit< uint8_t >( node,brickIndex );
               break;
             case  DT_UINT16 :
-              memUnitPtr = _tuvokBrickToMemoryUnit< uint16_t >( node, brickIndex );
+              memUnitPtr = tuvokBrickToMemoryUnit< uint16_t >( node, brickIndex );
               break;
             case  DT_UINT32 :
-              memUnitPtr = _tuvokBrickToMemoryUnit< uint32_t >( node, brickIndex );
+              memUnitPtr = tuvokBrickToMemoryUnit< uint32_t >( node, brickIndex );
               break;
             case  DT_INT8 :
-              memUnitPtr = _tuvokBrickToMemoryUnit< int8_t >( node, brickIndex );
+              memUnitPtr = tuvokBrickToMemoryUnit< int8_t >( node, brickIndex );
               break;
             case  DT_INT16 :
-              memUnitPtr = _tuvokBrickToMemoryUnit< int16_t >( node, brickIndex );
+              memUnitPtr = tuvokBrickToMemoryUnit< int16_t >( node, brickIndex );
               break;
             case  DT_INT32 :
-              memUnitPtr = _tuvokBrickToMemoryUnit< int32_t >( node, brickIndex );
+              memUnitPtr = tuvokBrickToMemoryUnit< int32_t >( node, brickIndex );
               break;
             case  DT_UNDEFINED :
               LBERROR << "Undefined data type" << std::endl;
@@ -247,12 +245,12 @@ public:
     }
 
     template< class T >
-    MemoryUnitPtr _tuvokBrickToMemoryUnit( const LODNode& node,
+    MemoryUnitPtr tuvokBrickToMemoryUnit( const LODNode& node,
                                            const uint32_t brickIndex ) const
     {
         const uint32_t frame = node.getNodeId().getFrame();
         const tuvok::BrickKey brickKey =
-                tuvok::BrickKey( frame, _treeLevelToTuvokLevel(
+                tuvok::BrickKey( frame, treeLevelToTuvokLevel(
                                             node.getRefLevel( )), brickIndex );
 
         const UINT64VECTOR4 coords = _uvfDataSetPtr->KeyToTOCVector( brickKey );
@@ -307,7 +305,7 @@ public:
                                 LODNode& lodNode ) const
     {
         const uint32_t frame = internalNode.getFrame();
-        const uint32_t lod = _treeLevelToTuvokLevel( internalNode.getLevel() );
+        const uint32_t lod = treeLevelToTuvokLevel( internalNode.getLevel() );
         const UINTVECTOR3& tuvokBricksInLod =
                 _uvfDataSetPtr->GetBrickLayout( lod, frame );
 
@@ -327,7 +325,7 @@ public:
 
         const tuvok::BrickKey brickKey( frame,
                                         lod,
-                                        _getBrickIndex( localBlockPosition.x(),
+                                        getBrickIndex( localBlockPosition.x(),
                                                         localBlockPosition.y(),
                                                         localBlockPosition.z(),
                                                         bricksInLod ));
@@ -354,29 +352,29 @@ public:
                                                    brickInfo.extents[ 1 ],
                                                    brickInfo.extents[ 2 ] );
         const Boxf worldBox( boxMin, boxMax );
-        const Vector3i blockSize = Vector3i( brickInfo.n_voxels[ 0 ],
-                                             brickInfo.n_voxels[ 1 ],
-                                             brickInfo.n_voxels[ 2 ] );
+        const Vector3ui blockSize( brickInfo.n_voxels[ 0 ],
+                                   brickInfo.n_voxels[ 1 ],
+                                   brickInfo.n_voxels[ 2 ] );
 
         lodNode = LODNode( internalNode, blockSize, worldBox );
     }
 
-    uint32_t _getBrickIndex( const uint32_t x,
+    uint32_t getBrickIndex( const uint32_t x,
                              const uint32_t y,
                              const uint32_t z,
-                             const Vector3i &max ) const
+                             const Vector3i& max ) const
     {
         return x + y * max[ 0 ] + z * max[ 0 ] * max[ 1 ];
     }
 
-    uint32_t _tuvokLODLevelToTreeLevel( const uint32_t tuvokLevel,
+    uint32_t tuvokLODLevelToTreeLevel( const uint32_t tuvokLevel,
                                         const uint32_t depth ) const
     {
         return depth - tuvokLevel - 1;
     }
 
 
-    uint32_t _treeLevelToTuvokLevel( const uint32_t treeLevel ) const
+    uint32_t treeLevelToTuvokLevel( const uint32_t treeLevel ) const
     {
         return _volumeInfo.rootNode.getDepth() - treeLevel - 1;
     }
@@ -384,10 +382,10 @@ public:
     TOCBlock* _uvfTOCBlock;
     uint64_t _offset;
 
-    typedef boost::scoped_ptr< tuvok::UVFDataset > UVFDatasetPtr;
+    typedef std::unique_ptr< tuvok::UVFDataset > UVFDatasetPtr;
     UVFDatasetPtr _uvfDataSetPtr;
 
-    typedef boost::scoped_ptr< LargeFileMMap > LargeFileMMapPtr;
+    typedef std::unique_ptr< LargeFileMMap > LargeFileMMapPtr;
     LargeFileMMapPtr _tuvokLargeMMapFilePtr;
 
     VolumeInformation& _volumeInfo;

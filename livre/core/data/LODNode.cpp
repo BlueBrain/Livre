@@ -26,12 +26,12 @@ namespace livre
 LODNode LODNode::empty = LODNode();
 
 LODNode::LODNode( ) :
-    blockSize_( 0 )
+    blockSize_( 0u )
 {}
 
-LODNode::LODNode( const NodeId nodeId,
-                  const Vector3i& blockSize,
-                  const Vector3i& levelTotalBlockDimensions )
+LODNode::LODNode( const NodeId& nodeId,
+                  const Vector3ui& blockSize,
+                  const Vector3ui& levelTotalBlockDimensions )
    : nodeId_( nodeId )
    , blockSize_( blockSize )
 {
@@ -39,8 +39,8 @@ LODNode::LODNode( const NodeId nodeId,
     computeWorldBox_( levelTotalBlockDimensions );
 }
 
-LODNode::LODNode( const NodeId nodeId,
-                  const Vector3i& blockSize,
+LODNode::LODNode( const NodeId& nodeId,
+                  const Vector3ui& blockSize,
                   const Boxf& worldBox )
    : nodeId_( nodeId )
    , blockSize_( blockSize )
@@ -52,7 +52,7 @@ LODNode::LODNode( const NodeId nodeId,
 void LODNode::computeWorldBox_( const Vector3ui& levelTotalBlockDimensions )
 {
     Vector3f lBoxCoordMin = getAbsolutePosition();
-    Vector3f lBoxCoordMax( lBoxCoordMin + Vector3i( 1 ));
+    Vector3f lBoxCoordMax( lBoxCoordMin + Vector3ui( 1 ));
     const size_t index = levelTotalBlockDimensions.find_max_index();
 
     lBoxCoordMin = lBoxCoordMin / levelTotalBlockDimensions[index];

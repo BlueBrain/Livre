@@ -3,7 +3,7 @@ namespace livre.zeq;
 
 table LODNode {
   nodeId:ulong;
-  blockSize:[int];
+  blockSize:[uint];
   worldBoxMin:[float];
   worldBoxMax:[float];
 }
