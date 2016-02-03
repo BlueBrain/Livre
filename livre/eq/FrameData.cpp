@@ -87,6 +87,9 @@ void FrameData::mapObjects()
 
 void FrameData::unmapObjects()
 {
+    if( !_impl )
+        return;
+
     LBCHECK( _impl->unmap( &_impl->frameSettings ));
     LBCHECK( _impl->unmap( &_impl->renderSettings ));
     LBCHECK( _impl->unmap( &_impl->cameraSettings ));
@@ -173,7 +176,6 @@ bool FrameData::map( eq::Config* config, const eq::uint128_t& uuid )
 
 void FrameData::unmap( eq::Config* config )
 {
-    LBASSERT( _impl );
     if( _impl )
         config->unmapObject( _impl.get() );
 }
