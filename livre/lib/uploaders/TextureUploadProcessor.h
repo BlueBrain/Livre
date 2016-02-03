@@ -48,7 +48,7 @@ public:
     LIVRE_API TextureUploadProcessor( DashTreePtr dashTree,
                                       GLContextPtr shareContext,
                                       GLContextPtr context,
-                                      ConstVolumeRendererParametersPtr vrParameters );
+                                      const VolumeRendererParameters& vrParameters );
 
     /** @return the texture cache */
     LIVRE_API const TextureCache& getTextureCache() const;
@@ -72,7 +72,7 @@ private:
     uint64_t _currentFrameID;
     ThreadOperation _threadOp;
     CacheIdSet _protectUnloading;
-    ConstVolumeRendererParametersPtr _vrParameters;
+    const VolumeRendererParameters& _vrParameters;
     bool _allDataLoaded;
     bool _needRedraw;
 };

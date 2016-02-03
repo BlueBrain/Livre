@@ -1,7 +1,7 @@
 
-/* Copyright (c) 2006-2011, Stefan Eilemann <eile@equalizergraphics.com>
- *               2007-2011, Maxim Makhinya  <maxmah@gmail.com>
- *               2013, Ahmet Bilgili        <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2006-2016, Stefan Eilemann <eile@equalizergraphics.com>
+ *                          Maxim Makhinya  <maxmah@gmail.com>
+ *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -40,30 +40,6 @@ public:
     CameraSettings();
 
     /**
-     * Resets the camera state.
-     */
-    void reset();
-
-    /**
-     * Sets the initial camera position, used also when reset() is called.
-     * @param position camera position in world space.
-     */
-    void setDefaultCameraPosition( const Vector3f& position );
-
-    /**
-     * Sets the initial camera lookAt, used also when reset() is called.
-     * @param lookAt camera lookAt vector in world space.
-     */
-    void setDefaultCameraLookAt( const Vector3f& lookAt );
-
-    /**
-     * Spins the camera around ( x, y )
-     * @param x x position.
-     * @param y y position.
-     */
-    void spinCamera( const float x, const float y );
-
-    /**
      * Spins the camera around (x,y,z) axis.
      * @param x x component.
      * @param y y component.
@@ -78,12 +54,6 @@ public:
      * @param z z amount.
      */
     void moveCamera( const float x, const float y, const float z );
-
-    /**
-     * Sets the camera rotation.
-     * @param rotation Rotation in x, y an z angles.
-     */
-    void setCameraRotation( const Vector3f& rotation );
 
     /**
      * Sets the camera position.
@@ -104,21 +74,6 @@ public:
     void setModelViewMatrix( const Matrix4f& modelViewMatrix );
 
     /**
-     * @return true if pilot mode is on.
-     */
-    bool getPilotMode() const;
-
-    /**
-     * Inverts the pilot mode.
-     */
-    void togglePilotMode();
-
-    /**
-     * @return camera rotation matrix.
-     */
-    const Matrix4f& getCameraRotation() const { return cameraRotation_; }
-
-    /**
      * @return Returns model rotation matrix.
      */
     const Matrix4f& getModelRotation() const { return modelRotation_; }
@@ -137,14 +92,8 @@ private:
     void serialize( co::DataOStream& os, const uint64_t dirtyBits ) final;
     void deserialize( co::DataIStream& is, const uint64_t dirtyBits ) final;
 
-    Vector3f defaultCameraPosition_;
-    Vector3f defaultCameraLookAt_;
-
-    Matrix4f cameraRotation_;
     Matrix4f modelRotation_;
     Vector3f cameraPosition_;
-
-    bool pilotMode_;
 };
 
 }

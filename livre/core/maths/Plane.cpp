@@ -80,9 +80,7 @@ Vector4f Plane::getPlaneCoeffs() const { return Vector4f( a_, b_, c_, d_ ); }
 #undef far
 #undef near
 
-void Plane::getNearFarPoints( const Boxf& bb,
-                              Vector3f& near,
-                              Vector3f& far) const
+void Plane::getNearFarPoints( const Boxf& bb, Vector3f& near, Vector3f& far) const
 {
     const Vector3f& normal = getNormal();
     const Vector3f& minPos = bb.getMin();

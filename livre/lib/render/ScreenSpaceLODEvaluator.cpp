@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
- *                  Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -41,15 +41,15 @@ uint32_t ScreenSpaceLODEvaluator::getLODForPoint( const Frustum& frustum,
                                                   const uint32_t volumeDepth,
                                                   const Vector3f& worldCoord ) const
 {
-    const float t = frustum.getFrustumLimits( PL_TOP );
-    const float b = frustum.getFrustumLimits( PL_BOTTOM );
+    const float t = frustum.top();
+    const float b = frustum.bottom();
 
-    const float worldSpacePerPixel = (  t - b ) / _windowHeight;
+    const float worldSpacePerPixel = ( t - b ) / _windowHeight;
     const float voxelPerPixel = worldSpacePerPixel  / _worldSpacePerVoxel * _screenSpaceError;
 
-    const float distance = std::abs( frustum.getWPlane( PL_NEAR ).distance( worldCoord ));
+    const float distance = std::abs( frustum.getNearPlane().distance( worldCoord ));
 
-    const float n = frustum.getFrustumLimits( PL_NEAR );
+    const float n = frustum.near_plane();
     const float voxelPerPixelInDistance = voxelPerPixel * distance / n;
 
     const uint32_t minLOD = std::min( _minLOD, volumeDepth );
@@ -63,4 +63,3 @@ uint32_t ScreenSpaceLODEvaluator::getLODForPoint( const Frustum& frustum,
 }
 
 }
-

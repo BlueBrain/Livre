@@ -46,7 +46,6 @@ set(LIVRECORE_HEADERS
   events/EventInfo.h
   events/EventMapper.h
   maths/maths.h
-  maths/Plane.h
   maths/Quantizer.h
   pipeline/Connection.h
   pipeline/Processor.h
@@ -92,7 +91,6 @@ set(LIVRECORE_SOURCES
   dashpipeline/DashProcessorOutput.cpp
   events/EventMapper.cpp
   maths/maths.cpp
-  maths/Plane.cpp
   pipeline/Processor.cpp
   pipeline/ProcessorInput.cpp
   pipeline/ProcessorOutput.cpp

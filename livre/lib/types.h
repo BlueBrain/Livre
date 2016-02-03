@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
@@ -39,9 +39,6 @@ struct EFPrefetchAlgorithmParameters;
 struct RESTParameters;
 
 /** SmartPtr definitions */
-typedef boost::shared_ptr< VolumeRendererParameters > VolumeRendererParametersPtr;
-typedef boost::shared_ptr< const VolumeRendererParameters > ConstVolumeRendererParametersPtr;
-
 typedef boost::shared_ptr< RESTParameters > RESTParametersPtr;
 typedef boost::shared_ptr< const RESTParameters > ConstRESTParametersPtr;
 

@@ -144,7 +144,7 @@ SamplePointsType readTransferFunction( const std::string& file,
 }
 }
 
-template<> void TransferFunction1D< uint8_t >::reset()
+void TransferFunction1D::reset()
 {
     const FloatVector defaultTF = createDefault2ColorTF();
     const float maxVal = std::numeric_limits< uint8_t >::max();
@@ -155,13 +155,7 @@ template<> void TransferFunction1D< uint8_t >::reset()
         rgba_[i] = maxVal * defaultTF[i];
 }
 
-template<> void TransferFunction1D< float >::reset()
-{
-    rgba_ = createDefault2ColorTF();
-}
-
-template<>
-void TransferFunction1D< uint8_t >::createCustomTF_( const uint32_t size )
+void TransferFunction1D::createCustomTF_( const uint32_t size )
 {
     rgba_.resize( size * TF_NCHANNELS );
 
@@ -178,26 +172,7 @@ void TransferFunction1D< uint8_t >::createCustomTF_( const uint32_t size )
     }
 }
 
-template<>
-void TransferFunction1D< float >::createCustomTF_( const uint32_t size )
-{
-    rgba_.resize( size * TF_NCHANNELS );
-
-    rgba_[0] = 0.0f;
-    rgba_[1] = 0.0f;
-    rgba_[2] = 0.0f;
-    rgba_[3] = 0.0f;
-    for( size_t i = 1; i < size; ++i )
-    {
-        rgba_[ i * TF_NCHANNELS ] = 0.0f;
-        rgba_[ i * TF_NCHANNELS + 1 ] = 0.0f;
-        rgba_[ i * TF_NCHANNELS + 2 ] = 1.0f;
-        rgba_[ i * TF_NCHANNELS + 3 ] = 0.08f;
-    }
-}
-
-template<>
-void TransferFunction1D< uint8_t >::createTfFromFile_( const std::string& file )
+void TransferFunction1D::createTfFromFile_( const std::string& file )
 {
     FloatVector transferFunction;
     const SamplePointsType& format = readTransferFunction( file, transferFunction );

@@ -19,7 +19,6 @@
 
 #include <livre/eq/Config.h>
 #include <livre/eq/FrameData.h>
-#include <livre/eq/settings/CameraSettings.h>
 #include <livre/eq/settings/FrameSettings.h>
 #include <livre/eq/settings/RenderSettings.h>
 
@@ -41,13 +40,12 @@ bool KeyboardHandler::operator ()( EqEventInfo& eqEventInfo )
     Config* config = eqEventInfo.config;
     const eq::KeyEvent& event = eqEventInfo.configEvent->data.keyPress;
 
-    RenderSettingsPtr renderSettings = config->getFrameData().getRenderSettings();
-    FrameSettingsPtr frameSettings = config->getFrameData().getFrameSettings();
-    CameraSettingsPtr cameraSettings = config->getFrameData().getCameraSettings();
+    RenderSettings& renderSettings = config->getFrameData().getRenderSettings();
+    FrameSettings& frameSettings = config->getFrameData().getFrameSettings();
 
     if( event.key >= '1' && event.key <= '9' )
     {
-        renderSettings->setMaxTreeDepth( 1 + event.key-'1' );
+        renderSettings.setMaxTreeDepth( 1 + event.key-'1' );
         return true;
     }
 
@@ -55,23 +53,23 @@ bool KeyboardHandler::operator ()( EqEventInfo& eqEventInfo )
     {
         case '+':
         case '=':
-            renderSettings->setMaxTreeDepth( renderSettings->getMaxTreeDepth() + 1 );
+            renderSettings.setMaxTreeDepth( renderSettings.getMaxTreeDepth()+1);
             return true;
 
         case '-':
         case '_':
-            renderSettings->setMaxTreeDepth( renderSettings->getMaxTreeDepth() - 1 );
+            renderSettings.setMaxTreeDepth( renderSettings.getMaxTreeDepth()-1);
             return true;
 
         case eq::KC_F1:
         case 'h':
         case 'H':
-            frameSettings->toggleHelp();
+            frameSettings.toggleHelp();
             return true;
 
         case 'r':
         case 'R':
-            frameSettings->toggleRecording();
+            frameSettings.toggleRecording();
             return true;
 
         case ' ':
@@ -81,7 +79,7 @@ bool KeyboardHandler::operator ()( EqEventInfo& eqEventInfo )
 
         case 's':
         case 'S':
-            frameSettings->toggleStatistics();
+            frameSettings.toggleStatistics();
             return true;
 
         case 'l':
@@ -92,14 +90,9 @@ bool KeyboardHandler::operator ()( EqEventInfo& eqEventInfo )
             config->switchLayout( -1 );
             return true;
 
-        case 'm':
-        case 'M':
-            cameraSettings->togglePilotMode();
-            return true;
-
         case 'p':
         case 'P':
-            frameSettings->makeScreenshot();
+            frameSettings.makeScreenshot();
             return true;
 
         case 'c':

@@ -36,7 +36,7 @@ RenderSettings::RenderSettings( )
     setDirty( DIRTY_RENDERER_TYPE );
 }
 
-const TransferFunction1D< uint8_t>& RenderSettings::getTransferFunction( ) const
+const TransferFunction1D& RenderSettings::getTransferFunction( ) const
 {
     return transferFunction_;
 }
@@ -52,7 +52,7 @@ void RenderSettings::resetTransferFunction( )
     setDirty( DIRTY_TF );
 }
 
-void RenderSettings::setTransferFunction( const TransferFunction1Dc& tf )
+void RenderSettings::setTransferFunction( const TransferFunction1D& tf )
 {
     transferFunction_ = tf;
     setDirty( DIRTY_TF );

@@ -53,7 +53,7 @@ public:
      * @brief setTransferFunction Sets the transfer function.
      * @param tf Transfer function.
      */
-    void setTransferFunction( const TransferFunction1Dc& tf );
+    void setTransferFunction( const TransferFunction1D& tf );
 
     /**
      * @brief resetTransferFunction Resets the transfer function.
@@ -69,7 +69,7 @@ public:
     /**
      * @return Returns the transfer function.
      */
-    const TransferFunction1D< uint8_t >& getTransferFunction( ) const;
+    const TransferFunction1D& getTransferFunction( ) const;
 
     /**
      * @return Returns the renderer type.
@@ -107,7 +107,7 @@ private:
     virtual void serialize(   co::DataOStream& os, const uint64_t dirtyBits );
     virtual void deserialize( co::DataIStream& is, const uint64_t dirtyBits );
 
-    TransferFunction1Dc transferFunction_;
+    TransferFunction1D transferFunction_;
     RendererType rendererType_;
     uint8_t depth_;
 };

@@ -56,7 +56,7 @@ public:
                               DashTreePtr dashTree,
                               GLContextPtr shareContext,
                               GLContextPtr context,
-                              ConstVolumeRendererParametersPtr parameters )
+                              const VolumeRendererParameters& parameters )
         : TextureUploadProcessor( dashTree, shareContext, context, parameters )
         , _config( config )
     {}
@@ -121,7 +121,7 @@ public:
 
         const Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
         const uint32_t frame =
-                pipe->getFrameData()->getFrameSettings()->getFrameNumber();
+                pipe->getFrameData()->getFrameSettings().getFrameNumber();
         renderStatus.setFrameID( frame );
     }
 

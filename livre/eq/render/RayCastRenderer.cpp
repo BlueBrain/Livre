@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -67,7 +67,7 @@ struct RayCastRenderer::Impl
         , _volInfo( volInfo )
         , _transferFunctionTexture( 0 )
     {
-        TransferFunction1D< unsigned char > transferFunction;
+        TransferFunction1D transferFunction;
         initTransferFunction( transferFunction );
 
         // TODO: Add the shaders from resource directory
@@ -86,14 +86,13 @@ struct RayCastRenderer::Impl
 
     void update( const FrameData& frameData )
     {
-        initTransferFunction( frameData.getRenderSettings()->getTransferFunction( ));
-        _nSamplesPerRay = frameData.getVRParameters()->getSamplesPerRay();
+        initTransferFunction( frameData.getRenderSettings().getTransferFunction( ));
+        _nSamplesPerRay = frameData.getVRParameters().getSamplesPerRay();
         _computedSamplesPerRay = _nSamplesPerRay;
-        _nSamplesPerPixel = frameData.getVRParameters()->getSamplesPerPixel();
+        _nSamplesPerPixel = frameData.getVRParameters().getSamplesPerPixel();
     }
 
-    void initTransferFunction(
-        const TransferFunction1Dc& transferFunction )
+    void initTransferFunction( const TransferFunction1D& transferFunction )
     {
         assert( transferFunction.getNumChannels() == 4u );
 
@@ -207,7 +206,7 @@ struct RayCastRenderer::Impl
         glUniform1i( tParamNameGL, _nSamplesPerPixel );
 
         tParamNameGL = glGetUniformLocation( program, "nearPlaneDist" );
-        glUniform1f( tParamNameGL, frustum.getFrustumLimits( PL_NEAR ));
+        glUniform1f( tParamNameGL, frustum.near_plane( ));
 
         // Disable shader
         glUseProgram( 0 );

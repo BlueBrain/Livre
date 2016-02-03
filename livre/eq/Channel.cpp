@@ -127,7 +127,7 @@ public:
     explicit Channel( livre::Channel* channel )
           : _channel( channel )
           , _glWidgetPtr( new EqGLWidget( channel ))
-          , _frameInfo( _currentFrustum )
+          , _frameInfo( _frustum )
     {}
 
     void initializeFrame()
@@ -149,10 +149,10 @@ public:
     void initializeRenderer()
     {
         const uint32_t nSamplesPerRay =
-            getFrameData()->getVRParameters()->getSamplesPerRay();
+            getFrameData()->getVRParameters().getSamplesPerRay();
 
         const uint32_t nSamplesPerPixel =
-            getFrameData()->getVRParameters()->getSamplesPerPixel();
+            getFrameData()->getVRParameters().getSamplesPerPixel();
 
         const livre::Node* node =
                 static_cast< livre::Node* >( _channel->getNode( ));
@@ -173,28 +173,21 @@ public:
         _renderViewPtr->setRenderer( renderer);
     }
 
-    const Frustum& initializeLivreFrustum()
+    const Frustum& setupFrustum()
     {
         const eq::Matrix4f& modelView = computeModelView();
         const eq::Frustumf& eqFrustum = _channel->getFrustum();
         const eq::Matrix4f& projection = eqFrustum.compute_matrix();
 
-        _currentFrustum.reset();
-        _currentFrustum.initialize( modelView, projection );
-        return _currentFrustum;
+        _frustum.setup( modelView, projection );
+        return _frustum;
     }
 
     eq::Matrix4f computeModelView() const
     {
-        ConstCameraSettingsPtr cameraSettings =
-                getFrameData()->getCameraSettings();
-        const Matrix4f& cameraRotation = cameraSettings->getCameraRotation();
-        const Matrix4f& modelRotation = cameraSettings->getModelRotation();
-        const Vector3f& cameraPosition = cameraSettings->getCameraPosition();
-
-        Matrix4f modelView = modelRotation;
-        modelView.set_translation( cameraPosition );
-        modelView = cameraRotation * modelView;
+        const CameraSettings& cameraSettings =
+            getFrameData()->getCameraSettings();
+        Matrix4f modelView = cameraSettings.getModelViewMatrix();
         modelView = _channel->getHeadTransform() * modelView;
         return modelView;
     }
@@ -232,10 +225,11 @@ public:
         livre::Window* window = static_cast< livre::Window* >( _channel->getWindow( ));
         livre::Pipe* pipe = static_cast< livre::Pipe* >( window->getPipe( ));
 
-        ConstVolumeRendererParametersPtr vrParams = pipe->getFrameData()->getVRParameters();
-        const uint32_t minLOD = vrParams->getMinLOD();
-        const uint32_t maxLOD = vrParams->getMaxLOD();
-        const float screenSpaceError = vrParams->getSSE();
+        const VolumeRendererParameters& vrParams =
+            pipe->getFrameData()->getVRParameters();
+        const uint32_t minLOD = vrParams.getMinLOD();
+        const uint32_t maxLOD = vrParams.getMaxLOD();
+        const float screenSpaceError = vrParams.getSSE();
 
         DashTreePtr dashTree = node->getDashTree();
 
@@ -245,7 +239,7 @@ public:
         const uint32_t volumeDepth = volInfo.rootNode.getDepth();
         _drawRange = _channel->getRange();
 
-        SelectVisibles visitor( dashTree, _currentFrustum,
+        SelectVisibles visitor( dashTree, _frustum,
                                 _channel->getPixelViewport().h,
                                 screenSpaceError, worldSpacePerVoxel,
                                 volumeDepth, minLOD, maxLOD,
@@ -260,7 +254,7 @@ public:
 
     void updateRegions( const RenderBricks& bricks )
     {
-        const Matrix4f& mvpMatrix = _currentFrustum.getModelViewProjectionMatrix();
+        const Matrix4f& mvpMatrix = _frustum.getModelViewProjectionMatrix();
         for( const RenderBrickPtr& brick : bricks )
         {
             const Vector3f& min = brick->getLODNode()->getWorldBox().getMin();
@@ -313,7 +307,7 @@ public:
             return;
 
         applyCamera();
-        initializeLivreFrustum();
+        setupFrustum();
         const DashRenderNodes& visibles = requestData();
 
         const eq::fabric::Viewport& vp = _channel->getViewport( );
@@ -323,7 +317,8 @@ public:
         livre::Window* window = static_cast< livre::Window* >( _channel->getWindow( ));
         const livre::Pipe* pipe = static_cast< const livre::Pipe* >( _channel->getPipe( ));
 
-        const bool isSynchronous = pipe->getFrameData()->getVRParameters()->getSynchronousMode();
+        const bool isSynchronous =
+            pipe->getFrameData()->getVRParameters().getSynchronousMode();
 
         // #75: only wait for data in synchronous mode
         const bool dashTreeUpdated = window->apply( isSynchronous );
@@ -335,7 +330,7 @@ public:
             // If there are multiple channels, this may cause the ping-pong
             // because every channel will try to update the same DashTree in
             // node with their own frustum.
-            if( !isSynchronous && receivedFrustum != _currentFrustum )
+            if( !isSynchronous && receivedFrustum != _frustum )
                 _channel->getConfig()->sendEvent( REDRAW );
         }
 
@@ -363,16 +358,9 @@ public:
 
     void applyCamera()
     {
-        ConstCameraSettingsPtr cameraSettings = getFrameData()->getCameraSettings( );
-
-        const Matrix4f& cameraRotation = cameraSettings->getCameraRotation( );
-        const Matrix4f& modelRotation = cameraSettings->getModelRotation( );
-        const Vector3f& cameraPosition = cameraSettings->getCameraPosition( );
-
-        EQ_GL_CALL( glMultMatrixf( cameraRotation.array ) );
-        EQ_GL_CALL( glTranslatef( cameraPosition[ 0 ], cameraPosition[ 1 ],
-                                  cameraPosition[ 2 ] ) );
-        EQ_GL_CALL( glMultMatrixf( modelRotation.array ) );
+        const CameraSettings& cameraSettings =
+            getFrameData()->getCameraSettings();
+        glMultMatrixf( cameraSettings.getModelViewMatrix().array );
     }
 
     void configInit()
@@ -392,13 +380,13 @@ public:
 
     void addImageListener()
     {
-        if( getFrameData( )->getFrameSettings()->getGrabFrame( ))
+        if( getFrameData()->getFrameSettings().getGrabFrame( ))
             _channel->addResultImageListener( &_frameGrabber );
     }
 
     void removeImageListener()
     {
-        if( getFrameData()->getFrameSettings()->getGrabFrame() )
+        if( getFrameData()->getFrameSettings().getGrabFrame() )
             _channel->removeResultImageListener( &_frameGrabber );
     }
 
@@ -407,8 +395,8 @@ public:
         _channel->applyBuffer();
         _channel->applyViewport();
 
-        FrameSettingsPtr frameSettingsPtr = getFrameData()->getFrameSettings();
-        if( frameSettingsPtr->getStatistics( ))
+        const FrameSettings& frameSettings = getFrameData()->getFrameSettings();
+        if( frameSettings.getStatistics( ))
         {
             _channel->drawStatistics();
             drawCacheStatistics();
@@ -489,7 +477,7 @@ public:
     {
         livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
         DashRenderStatus& renderStatus = node->getDashTree()->getRenderStatus();
-        renderStatus.setFrustum( _currentFrustum );
+        renderStatus.setFrustum( _frustum );
     }
 
     void frameReadback( const eq::Frames& frames ) const
@@ -648,7 +636,7 @@ public:
     livre::Channel* const _channel;
     eq::Range _drawRange;
     eq::Frame _frame;
-    Frustum _currentFrustum;
+    Frustum _frustum;
     ViewPtr _renderViewPtr;
     GLWidgetPtr _glWidgetPtr;
     FrameGrabber _frameGrabber;
@@ -663,7 +651,7 @@ EqRenderView::EqRenderView( Channel* channel,
 
 const Frustum& EqRenderView::getFrustum() const
 {
-    return _channel->initializeLivreFrustum();
+    return _channel->setupFrustum();
 }
 
 }

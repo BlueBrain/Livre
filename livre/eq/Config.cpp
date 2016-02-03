@@ -1,4 +1,4 @@
-/* Copyright (c) 2006-2015, Stefan Eilemann <eile@equalizergraphics.com>
+/* Copyright (c) 2006-2016, Stefan Eilemann <eile@equalizergraphics.com>
  *                          Maxim Makhinya  <maxmah@gmail.com>
  *                          David Steiner   <steiner@ifi.uzh.ch>
  *
@@ -61,10 +61,8 @@ public:
     void publishModelView()
     {
 #ifdef LIVRE_USE_ZEQ
-        CameraSettingsPtr cameraSettings = framedata.getCameraSettings();
-        Matrix4f modelView = cameraSettings->getModelRotation();
-        modelView.set_translation( cameraSettings->getCameraPosition() );
-        modelView = cameraSettings->getCameraRotation() * modelView;
+        const CameraSettings& cameraSettings = framedata.getCameraSettings();
+        Matrix4f modelView = cameraSettings.getModelViewMatrix();
 
         Matrix3f rotation;
         Vector3f eyePos;
@@ -79,7 +77,6 @@ public:
         eyePos = ( eyePos * isotropicScale ) + circuitCenter;
 
         modelView = maths::computeModelViewMatrix( rotation, eyePos );
-
         communicator->publishModelView( modelView );
 #endif
     }
@@ -158,7 +155,10 @@ void Config::unmapFrameData()
 
 void Config::resetCamera()
 {
-    _impl->framedata.getCameraSettings()->reset();
+    _impl->framedata.getCameraSettings().setCameraPosition(
+        getApplicationParameters().cameraPosition );
+    _impl->framedata.getCameraSettings().setCameraLookAt(
+        getApplicationParameters().cameraLookAt );
     _impl->publishModelView();
 }
 
@@ -171,21 +171,21 @@ bool Config::init( const int argc LB_UNUSED, char** argv LB_UNUSED )
     resetCamera();
     _initEvents();
     FrameData& framedata = _impl->framedata;
-    FrameSettingsPtr frameSettings = framedata.getFrameSettings();
+    FrameSettings& frameSettings = framedata.getFrameSettings();
     const ApplicationParameters& params = getApplicationParameters();
-    frameSettings->setFrameNumber( params.frames.x( ));
+    frameSettings.setFrameNumber( params.frames.x( ));
 
-    RenderSettingsPtr renderSettings = framedata.getRenderSettings();
-    const TransferFunction1Dc tf( params.transferFunction );
-    renderSettings->setTransferFunction( tf );
+    RenderSettings& renderSettings = framedata.getRenderSettings();
+    const TransferFunction1D tf( params.transferFunction );
+    renderSettings.setTransferFunction( tf );
 
     _impl->framedata.registerObjects();
 
     if( !_registerFrameData( ))
         return false;
 
-    ConstVolumeRendererParametersPtr vrParameters = framedata.getVRParameters();
-    if( vrParameters->getSynchronousMode( ))
+    const VolumeRendererParameters& vrParameters = framedata.getVRParameters();
+    if( vrParameters.getSynchronousMode( ))
         setLatency( 0 );
 
     if( !eq::Config::init( _impl->framedata.getID( )))
@@ -208,7 +208,7 @@ bool Config::frame()
         return false;
 
     ApplicationParameters& params = getApplicationParameters();
-    FrameSettingsPtr frameSettings = _impl->framedata.getFrameSettings();
+    FrameSettings& frameSettings = _impl->framedata.getFrameSettings();
 
     const FrameUtils frameUtils( params.frames, _impl->dataFrameRange );
     params.frames = frameUtils.getFrameRange();
@@ -216,22 +216,22 @@ bool Config::frame()
     // Set current frame (start/end may have changed)
     const bool keepToLatest = params.animation == LATEST_FRAME;
     const uint32_t current =
-            frameUtils.getCurrent( frameSettings->getFrameNumber(), keepToLatest );
+            frameUtils.getCurrent( frameSettings.getFrameNumber(), keepToLatest );
 
-    frameSettings->setFrameNumber( current );
+    frameSettings.setFrameNumber( current );
     const eq::uint128_t& version = _impl->framedata.commit();
 
-    if( _impl->framedata.getVRParameters()->getSynchronousMode( ))
+    if( _impl->framedata.getVRParameters().getSynchronousMode( ))
         setLatency( 0 );
     else
         setLatency( _impl->defaultLatency );
 
     // reset data and advance current frame
-    frameSettings->setGrabFrame( false );
+    frameSettings.setGrabFrame( false );
 
     if( !keepToLatest )
-        frameSettings->setFrameNumber( frameUtils.getNext( current, params.animation ));
-
+        frameSettings.setFrameNumber( frameUtils.getNext( current,
+                                                          params.animation ));
     _impl->redraw = false;
 
 #ifdef LIVRE_USE_ZEQ
@@ -269,13 +269,12 @@ bool Config::exit()
 
 bool Config::switchCanvas()
 {
-    FrameSettingsPtr frameSettings = _impl->framedata.getFrameSettings();
-
     const eq::Canvases& canvases = getCanvases();
     if( canvases.empty( ))
         return true;
 
-    frameSettings->setCurrentViewId( lunchbox::uint128_t( 0 ) );
+    FrameSettings& frameSettings = _impl->framedata.getFrameSettings();
+    frameSettings.setCurrentViewId( lunchbox::uint128_t( 0 ) );
 
     if( !_impl->currentCanvas )
     {
@@ -299,11 +298,9 @@ bool Config::switchCanvas()
 
 bool Config::switchView()
 {
-    FrameSettingsPtr frameSettings = _impl->framedata.getFrameSettings();
-
     const eq::Canvases& canvases = getCanvases();
     if( !_impl->currentCanvas && !canvases.empty( ) )
-        _impl->currentCanvas= canvases.front();
+        _impl->currentCanvas = canvases.front();
 
     if( !_impl->currentCanvas )
         return true;
@@ -312,36 +309,36 @@ bool Config::switchView()
     if( !layout )
         return true;
 
-    const eq::View* current = find< eq::View >( frameSettings->getCurrentViewId( ));
+    FrameSettings& frameSettings = _impl->framedata.getFrameSettings();
+    const eq::View* current = find< eq::View >( frameSettings.getCurrentViewId( ));
 
     const eq::Views& views = layout->getViews();
     LBASSERT( !views.empty( ))
 
     if( !current )
     {
-        frameSettings->setCurrentViewId( views.front()->getID( ));
+        frameSettings.setCurrentViewId( views.front()->getID( ));
         return true;
     }
 
-    eq::Views::const_iterator i = std::find( views.begin(),
-                                                  views.end(),
-                                                  current );
+    eq::Views::const_iterator i = std::find( views.begin(), views.end(),
+                                             current );
     LBASSERT( i != views.end( ));
 
     ++i;
     if( i == views.end( ))
-        frameSettings->setCurrentViewId( lunchbox::uint128_t( 0 ) );
+        frameSettings.setCurrentViewId( lunchbox::uint128_t( 0 ) );
     else
-        frameSettings->setCurrentViewId( (*i)->getID( ));
+        frameSettings.setCurrentViewId( (*i)->getID( ));
 
     return true;
 }
 
 bool Config::switchToViewCanvas( const eq::uint128_t& viewID )
 {
-    FrameSettingsPtr frameSettings = _impl->framedata.getFrameSettings();
+    FrameSettings& frameSettings = _impl->framedata.getFrameSettings();
+    frameSettings.setCurrentViewId( viewID );
 
-    frameSettings->setCurrentViewId( viewID );
     if( viewID == 0 )
     {
         _impl->currentCanvas = 0;
@@ -383,8 +380,8 @@ Matrix4f Config::convertFromHBPCamera( const Matrix4f& modelViewMatrix ) const
 bool Config::handleEvent( const eq::ConfigEvent* event )
 {
 #ifdef LIVRE_USE_ZEQ
-    CameraSettingsPtr cameraSettings = _impl->framedata.getCameraSettings();
-    const Matrix4f& oldModelViewMatrix = cameraSettings->getModelViewMatrix();
+    const CameraSettings& cameraSettings = _impl->framedata.getCameraSettings();
+    const Matrix4f& oldModelViewMatrix = cameraSettings.getModelViewMatrix();
 #endif
 
     EqEventInfo eventInfo( this, event );
@@ -414,7 +411,7 @@ bool Config::handleEvent( const eq::ConfigEvent* event )
     if( hasEvent )
     {
 #ifdef LIVRE_USE_ZEQ
-        if( cameraSettings->getModelViewMatrix() != oldModelViewMatrix )
+        if( cameraSettings.getModelViewMatrix() != oldModelViewMatrix )
             _impl->publishModelView();
 #endif
         _impl->redraw = true;
@@ -480,7 +477,7 @@ void Config::switchLayout( const int32_t increment )
     if( !_impl->currentCanvas )
         return;
 
-    _impl->framedata.getFrameSettings()->setCurrentViewId( lunchbox::uint128_t(0));
+    _impl->framedata.getFrameSettings().setCurrentViewId( lunchbox::uint128_t(0));
 
     size_t index = _impl->currentCanvas->getActiveLayoutIndex() + increment;
     const eq::Layouts& layouts = _impl->currentCanvas->getLayouts();

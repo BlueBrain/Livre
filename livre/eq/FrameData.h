@@ -1,5 +1,6 @@
 /**
- * Copyright (c) BBP/EPFL 2005-2015 Ahmet.Bilgili@epfl.ch
+ * Copyright (c) BBP/EPFL 2005-2016 Ahmet.Bilgili@epfl.ch
+ *                                  Stefan.Eilemann@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -20,32 +21,19 @@
 #ifndef _FrameData_h_
 #define _FrameData_h_
 
-#include <co/objectHandler.h>
 #include <livre/eq/types.h>
 #include <livre/lib/types.h>
 #include <livre/eq/coTypes.h>
+#include <co/objectFactory.h> // member
 
 namespace livre
 {
 
-enum SerializationMapIds
-{
-    SMI_FRAME_SETTINGS = 1u,
-    SMI_RENDER_SETTINGS,
-    SMI_CAMERA_SETTINGS,
-    SMI_VOLUME_SETTINGS,
-    SMI_VR_PARAMETERS
-};
-
-/**
- * The FrameData class handles registering/mapping/unmpapping/syncing of dynamic data
- * between client and renderer.
- */
+/** Handles frame-specific, distributed data. */
 class FrameData
 {
 public:
-
-    FrameData( );
+    FrameData();
 
     /**
      * Initializes the FrameData.
@@ -59,33 +47,33 @@ public:
     /**
      * Registers objects to the internal \see co::ObjectMap.
      */
-    void registerObjects( );
+    void registerObjects();
 
     /**
      * Deregisters objects from the internal \see co::ObjectMap.
      */
-    void deregisterObjects( );
+    void deregisterObjects();
 
     /**
      * Maps objects to the \see co::ObjectMap.
      */
-    void mapObjects( );
+    void mapObjects();
 
     /**
      * Unmaps objects from the \see co::ObjectMap.
      */
-    void unmapObjects( );
+    void unmapObjects();
 
     /**
      * @return The UUID of the wrapped map ptr
      */
-    const eq::uint128_t& getID( ) const;
+    const eq::uint128_t& getID() const;
 
     /**
      * Commits changes.
      * @return The commited version.
      */
-    eq::uint128_t commit( );
+    eq::uint128_t commit();
 
     /**
      * Syncs with the application node object.
@@ -130,42 +118,38 @@ public:
     /**
      * @return The frame settings.
      */
-    FrameSettingsPtr getFrameSettings() const;
+    FrameSettings& getFrameSettings();
+    const FrameSettings& getFrameSettings() const;
 
     /**
      * @return The render settings.
      */
-    RenderSettingsPtr getRenderSettings() const;
+    RenderSettings& getRenderSettings();
+    const RenderSettings& getRenderSettings() const;
 
     /**
      * @return The camera settings.
      */
-    CameraSettingsPtr getCameraSettings() const;
+    CameraSettings& getCameraSettings();
+    const CameraSettings& getCameraSettings() const;
 
     /**
      * @return The volume settings.
      */
-    VolumeSettingsPtr getVolumeSettings() const;
+    VolumeSettings& getVolumeSettings();
 
     /**
      * @return The volume rendering parameters.
      */
-    ConstVolumeRendererParametersPtr getVRParameters() const;
-    VolumeRendererParametersPtr getVRParameters();
+    VolumeRendererParameters& getVRParameters();
+    const VolumeRendererParameters& getVRParameters() const;
 
     virtual ~FrameData();
 
 private:
-
-    CoObjectFactoryPtr _objectFactory;
-    CoObjectMapPtr _objectMap;
-
-    FrameSettingsPtr _frameSettings;
-    RenderSettingsPtr _renderSettings;
-    CameraSettingsPtr _cameraSettings;
-    VolumeSettingsPtr _volumeSettings;
-
-    VolumeRendererParametersPtr _vrParameters;
+    class Impl;
+    std::unique_ptr< Impl > _impl;
+    co::ObjectFactory _factory;
 };
 
 }

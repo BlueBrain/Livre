@@ -41,7 +41,6 @@ struct ApplicationParameters : public Parameters
     uint32_t maxFrames; //!< Max number of frames to render.
     int32_t animation; //!< animation forward/backward speed
     bool isResident; //!< Is the main app resident.
-    bool syncCamera; //!< Synchronize camera with other applications using ZEQ.
     std::string dataFileName; //!< Data file name.
     std::string transferFunction; //!< Path to transfer function file
 

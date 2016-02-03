@@ -78,7 +78,6 @@ class LODEvaluator;
 class MemoryUnit;
 class NodeId;
 class Parameter;
-class Plane;
 class Processor;
 class ProcessorInput;
 class ProcessorOutput;
