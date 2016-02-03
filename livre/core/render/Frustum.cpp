@@ -68,26 +68,15 @@ Matrix4f Frustum::getModelViewProjectionMatrix() const
     return projectionMatrix_ * modelViewMatrix_;
 }
 
-float Frustum::getFrustumLimits( const PlaneId planeId ) const
-{
-    return vmmlFrustum_.array[ planeId ];
-}
-
 const Vector3f& Frustum::getEyeCoords() const
 {
     return eye_;
 }
 
-bool Frustum::operator==( const Frustum& frustum ) const
+bool Frustum::operator==( const Frustum& rhs ) const
 {
-    const Matrix4f& mv = frustum.getModelViewMatrix();
-
-    for( uint32_t i = 0; i < 15; ++i )
-    {
-        if( std::abs( modelViewMatrix_.array[ i ] - mv.array[ i ] ) > std::numeric_limits< float >::epsilon() )
-            return false;
-    }
-    return true;
+    return modelViewMatrix_.equals( rhs.getModelViewMatrix(),
+                                    std::numeric_limits< float >::epsilon( ));
 }
 
 
@@ -114,8 +103,7 @@ void Frustum::computeLimitsFromProjectionMatrix_()
     const float t = n * ( projectionMatrix_[1][2] + 1.0 ) / projectionMatrix_[1][1];
     const float l = n * ( projectionMatrix_[0][2] - 1.0 ) / projectionMatrix_[0][0];
     const float r = n * ( projectionMatrix_[0][2] + 1.0 ) / projectionMatrix_[0][0];
-    vmmlFrustum_.set( l, r ,b, t, n, f);
-
+    set( l, r ,b, t, n, f);
 }
 
 }

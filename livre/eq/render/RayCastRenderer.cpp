@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -206,7 +206,7 @@ struct RayCastRenderer::Impl
         glUniform1i( tParamNameGL, _nSamplesPerPixel );
 
         tParamNameGL = glGetUniformLocation( program, "nearPlaneDist" );
-        glUniform1f( tParamNameGL, frustum.getFrustumLimits( PL_NEAR ));
+        glUniform1f( tParamNameGL, frustum.near_plane( ));
 
         // Disable shader
         glUseProgram( 0 );

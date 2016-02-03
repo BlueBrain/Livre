@@ -29,32 +29,15 @@ namespace livre
 {
 
 /**
- * The PlaneId enum is used to identify the planes of the Frustum. OpenGL function glFrustum() has the same
- * order.
- */
-enum PlaneId
-{
-    PL_LEFT,
-    PL_RIGHT,
-    PL_BOTTOM,
-    PL_TOP,
-    PL_NEAR,
-    PL_FAR
-};
-
-/**
  * The Frustum class holds the information about the viewing frustum in world, eye and projection spaces.
  * All information is kept in OpenGL default coordinate systems.
  */
-class Frustum
+class Frustum : public Frustumf
 {
 public:
     LIVRECORE_API Frustum();
 
-    /**
-     * @param id The plane id.
-     * @return The frustum plane information in world coordinates.
-     */
+    /** @return The frustum plane information in world coordinates. */
     LIVRECORE_API const Plane& getNearPlane() const;
 
     /**
@@ -97,22 +80,16 @@ public:
     LIVRECORE_API Matrix4f getModelViewProjectionMatrix() const;
 
     /**
-     * @param planeId The plane to get the distance of.
-     * @return The plane distance to eye.
-     */
-    LIVRECORE_API float getFrustumLimits( const PlaneId planeId ) const;
-
-    /**
      * @return The eye coordinates in world space.
      */
     LIVRECORE_API const Vector3f& getEyeCoords() const;
 
     /** @return True if the two frustums are the same. */
-    LIVRECORE_API bool operator == ( const Frustum& frustum ) const;
+    LIVRECORE_API bool operator == ( const Frustum& rhs ) const;
 
     /** @return True if the two frustums are not the same. */
-    LIVRECORE_API bool operator != ( const Frustum& frustum ) const
-        { return !(*this == frustum); }
+    LIVRECORE_API bool operator != ( const Frustum& rhs ) const
+        { return !(*this == rhs); }
 
 private:
     Matrix4f modelViewMatrix_;
@@ -120,7 +97,6 @@ private:
     Matrix4f projectionMatrix_;
     Matrix4f invProjectionMatrix_;
     Vector3f eye_;
-    Frustumf vmmlFrustum_;
     FrustumCullerf _culler;
 
     void computeLimitsFromProjectionMatrix_();

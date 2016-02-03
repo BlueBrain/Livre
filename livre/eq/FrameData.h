@@ -130,8 +130,8 @@ public:
     /**
      * @return The camera settings.
      */
-    const CameraSettings& getCameraSettings() const;
     CameraSettings& getCameraSettings();
+    const CameraSettings& getCameraSettings() const;
 
     /**
      * @return The volume settings.
@@ -141,8 +141,8 @@ public:
     /**
      * @return The volume rendering parameters.
      */
-    const VolumeRendererParameters& getVRParameters() const;
     VolumeRendererParameters& getVRParameters();
+    const VolumeRendererParameters& getVRParameters() const;
 
     virtual ~FrameData();
 
