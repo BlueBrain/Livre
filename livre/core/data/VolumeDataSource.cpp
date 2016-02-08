@@ -51,7 +51,7 @@ public:
                       VolumeDataSourcePluginData( uri, accessMode )))
     {}
 
-    ConstLODNodePtr getNode( const NodeId nodeId ) const
+    ConstLODNodePtr getNode( const NodeId& nodeId ) const
     {
         return plugin->getNode( nodeId );
     }
@@ -90,7 +90,7 @@ void VolumeDataSource::unloadPlugins()
         detail::VolumeDataSource::PluginFactory::getInstance().unload( plugin );
 }
 
-ConstLODNodePtr VolumeDataSource::getNode( const NodeId nodeId ) const
+ConstLODNodePtr VolumeDataSource::getNode( const NodeId& nodeId ) const
 {
     return _impl->getNode( nodeId );
 }

@@ -45,13 +45,13 @@ public:
      * @return A valid cache object if id is valid or data source includes the information for cache id.
      * If there is not, the object is constructed.
      */
-    TextureObject& getNodeTexture( const CacheId cacheID );
+    TextureObject& getNodeTexture( const CacheId& cacheID );
 
     /**
      * @param cacheID The cacheId of the node.
      * @return A valid cache object if id is valid or data source includes the information for cache id.
      */
-    TextureObject& getNodeTexture( const CacheId cacheID ) const;
+    TextureObject& getNodeTexture( const CacheId& cacheID ) const;
 
     /**
      * @param maxBlockSize Max block size of the texture.
@@ -65,7 +65,7 @@ public:
 
 private:
 
-    CacheObject *generateCacheObjectFromID_(const CacheId cacheID );
+    CacheObject *generateCacheObjectFromID_(const CacheId& cacheID );
     TexturePoolFactory texturePoolFactory_;
 };
 

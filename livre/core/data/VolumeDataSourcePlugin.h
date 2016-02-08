@@ -89,7 +89,7 @@ public:
      * @param internalNode Internal node.
      * @param lodNode Destination lod node.
      */
-    LIVRECORE_API virtual void internalNodeToLODNode( const NodeId internalNode,
+    LIVRECORE_API virtual void internalNodeToLODNode( const NodeId& internalNode,
                                                       LODNode& lodNode ) const;
 
     /**
@@ -102,11 +102,11 @@ public:
      * @param nodeId The nodeId to get the node for.
      * @return The LODNode for the ID or 0 if not found.
      */
-    ConstLODNodePtr getNode( const NodeId nodeId ) const;
+    ConstLODNodePtr getNode( const NodeId& nodeId ) const;
 
 protected:
     /**
-     * will be generated and mapped, where it can be modified with the derived
+     * LODNode will be generated and mapped, where it can be modified with the derived
      * class.
      * @param nodeId The nodeId to get the node for.
      * @return The LODNode for the ID. If not found, an invalid node is returned.

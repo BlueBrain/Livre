@@ -28,12 +28,12 @@
 namespace livre
 {
 
-CacheObjectPtr Cache::getObjectFromCache( const CacheId cacheObjectID )
+CacheObjectPtr Cache::getObjectFromCache( const CacheId& cacheObjectID )
 {
     return getObjectFromCache_( cacheObjectID );
 }
 
-CacheObjectPtr Cache::getObjectFromCache( const CacheId cacheObjectID ) const
+CacheObjectPtr Cache::getObjectFromCache( const CacheId& cacheObjectID ) const
 {
     return getObjectFromCache_( cacheObjectID );
 }
@@ -84,7 +84,7 @@ Cache::~Cache()
     }
 }
 
-CacheObjectPtr Cache::getObjectFromCache_( const CacheId cacheObjectID )
+CacheObjectPtr Cache::getObjectFromCache_( const CacheId& cacheObjectID )
 {
     LBASSERT( cacheObjectID != INVALID_CACHE_ID );
 
@@ -103,7 +103,7 @@ CacheObjectPtr Cache::getObjectFromCache_( const CacheId cacheObjectID )
     return cacheMap_[ cacheObjectID ];
 }
 
-CacheObjectPtr Cache::getObjectFromCache_( const CacheId cacheObjectID ) const
+CacheObjectPtr Cache::getObjectFromCache_( const CacheId& cacheObjectID ) const
 {
     ReadLock readLock( mutex_ );
     CacheMap::const_iterator it = cacheMap_.find( cacheObjectID );
