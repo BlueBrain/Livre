@@ -26,7 +26,7 @@ namespace livre
 VolumeDataSourcePlugin::VolumeDataSourcePlugin()
 {}
 
-ConstLODNodePtr VolumeDataSourcePlugin::getNode( const NodeId nodeId ) const
+ConstLODNodePtr VolumeDataSourcePlugin::getNode( const NodeId& nodeId ) const
 {
     NodeIDLODNodePtrMap::iterator it = _lodNodeMap.find( nodeId );
     if( it == _lodNodeMap.end( ) || !it->second )
@@ -45,7 +45,7 @@ const VolumeInformation& VolumeDataSourcePlugin::getVolumeInformation() const
 }
 
 void VolumeDataSourcePlugin::internalNodeToLODNode(
-    const NodeId internalNode, LODNode& lodNode ) const
+    const NodeId& internalNode, LODNode& lodNode ) const
 {
     const uint32_t refLevel = internalNode.getLevel();
     const Vector3ui& bricksInRefLevel = _volumeInfo.rootNode.getBlockSize( refLevel );

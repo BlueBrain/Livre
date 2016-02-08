@@ -36,12 +36,12 @@ TextureCache::TextureCache( const GLint internalTextureFormat )
     statisticsPtr_->setStatisticsName( "Texture cache GPU");
 }
 
-CacheObject *TextureCache::generateCacheObjectFromID_( const CacheId cacheID LB_UNUSED )
+CacheObject *TextureCache::generateCacheObjectFromID_( const CacheId& cacheID LB_UNUSED )
 {
     return new TextureObject( TextureCachePtr( this, DontDeleteObject< TextureCache >() ) );
 }
 
-TextureObject& TextureCache::getNodeTexture( const CacheId cacheID  )
+TextureObject& TextureCache::getNodeTexture( const CacheId& cacheID  )
 {
     if( cacheID == INVALID_CACHE_ID )
         return *TextureObject::getEmptyPtr();
@@ -53,7 +53,7 @@ TextureObject& TextureCache::getNodeTexture( const CacheId cacheID  )
 }
 
 
-TextureObject& TextureCache::getNodeTexture( const CacheId cacheID  ) const
+TextureObject& TextureCache::getNodeTexture( const CacheId& cacheID  ) const
 {
     if( cacheID == INVALID_CACHE_ID )
         return *TextureObject::getEmptyPtr();

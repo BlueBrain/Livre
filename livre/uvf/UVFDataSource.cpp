@@ -414,7 +414,7 @@ MemoryUnitPtr UVFDataSource::getData( const LODNode& node )
 }
 
 void UVFDataSource::internalNodeToLODNode(
-    const NodeId internalNode, LODNode& lodNode ) const
+    const NodeId& internalNode, LODNode& lodNode ) const
 {
     return _impl->internalNodeToLODNode( internalNode, lodNode );
 }

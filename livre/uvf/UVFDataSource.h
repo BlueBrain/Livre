@@ -43,8 +43,8 @@ public:
 private:
 
     MemoryUnitPtr getData( const LODNode& node ) final;
-    void internalNodeToLODNode( const NodeId internalNode,
-                                LODNode &lodNode ) const final;
+    void internalNodeToLODNode( const NodeId& internalNode,
+                                LODNode& lodNode ) const final;
 
     detail::UVFDataSource* _impl;
 };
