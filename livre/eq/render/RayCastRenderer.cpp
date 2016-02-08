@@ -51,6 +51,10 @@ std::string where( const char* file, const int line )
     return std::string( " in " ) + std::string( file ) + ":" +
            boost::lexical_cast< std::string >( line );
 }
+
+const uint32_t maxSamplesPerRay = 32;
+const uint32_t minSamplesPerRay = 512;
+
 }
 
 struct RayCastRenderer::Impl
@@ -151,10 +155,10 @@ struct RayCastRenderer::Impl
             }
 
             const float maxVoxelDim = _volInfo.voxels.find_max();
-            const float maxVoxelsAtLOD = ( maxVoxelDim * std::sqrt( 2.0f )) /
-                    (float)( 1u << ( _volInfo.rootNode.getDepth() - maxLOD ));
+            const float maxVoxelsAtLOD = maxVoxelDim /
+                    (float)( 1u << ( _volInfo.rootNode.getDepth() - maxLOD - 1 ));
             // Nyquist limited nb of samples according to voxel size
-            _computedSamplesPerRay = std::max( 2.0f * maxVoxelsAtLOD, 512.f );
+            _computedSamplesPerRay = std::max( maxVoxelsAtLOD, (float)minSamplesPerRay );
         }
 
         glDisable( GL_LIGHTING );
@@ -201,6 +205,9 @@ struct RayCastRenderer::Impl
 
         tParamNameGL = glGetUniformLocation( program, "nSamplesPerRay" );
         glUniform1i( tParamNameGL, _computedSamplesPerRay );
+
+        tParamNameGL = glGetUniformLocation( program, "maxSamplesPerRay" );
+        glUniform1i( tParamNameGL, maxSamplesPerRay );
 
         tParamNameGL = glGetUniformLocation( program, "nSamplesPerPixel" );
         glUniform1i( tParamNameGL, _nSamplesPerPixel );
@@ -289,7 +296,6 @@ struct RayCastRenderer::Impl
     const VolumeInformation& _volInfo;
     uint32_t _transferFunctionTexture;
     std::vector< uint32_t > _usedTextures[2]; // last, current frame
-
 };
 
 RayCastRenderer::RayCastRenderer( uint32_t samplesPerRay,
