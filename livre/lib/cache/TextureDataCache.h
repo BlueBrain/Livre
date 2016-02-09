@@ -47,13 +47,13 @@ public:
      * @return A valid cache object if id is valid or data source includes the information for cache id.
      * If there is not, the object is constructed.
      */
-    LIVRE_API TextureDataObject& getNodeTextureData( const CacheId& cacheID ) const;
+    LIVRE_API TextureDataObject& getNodeTextureData( const CacheId& cacheId ) const;
 
     /**
      * @param cacheID The cacheId of the node.
      * @return A valid cache object if id is valid or data source includes the information for cache id.
      */
-    LIVRE_API TextureDataObject& getNodeTextureData( const CacheId& cacheID );
+    LIVRE_API TextureDataObject& getNodeTextureData( const CacheId& cacheId );
 
     /** @return the data source. */
     VolumeDataSourcePtr getDataSource();

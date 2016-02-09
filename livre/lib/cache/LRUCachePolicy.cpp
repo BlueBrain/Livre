@@ -76,7 +76,7 @@ void LRUCachePolicy::apply_( const Cache& cache LB_UNUSED,
     {
         CacheObject* cacheObject = *it;
         const CacheIdSet::const_iterator& itCacheObject =
-                protectUnloadingList_.find( cacheObject->getCacheID() );
+                protectUnloadingList_.find( cacheObject->getCacheId() );
         if( itCacheObject == protectUnloadingList_.end() )
             modifiedObjectList.push_back( cacheObject );
     }

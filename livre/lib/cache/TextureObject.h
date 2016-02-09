@@ -32,14 +32,14 @@ namespace livre
 /**
  * The TextureObject class holds the informarmation for the data which is on the GPU.
   */
-class TextureObject : public CacheObject, public LODNodeTrait
+class TextureObject : public CacheObject
 {
     friend class TextureCache;
 
 public:
     LIVRE_API TextureObject();
 
-    LIVRE_API virtual ~TextureObject( );
+    LIVRE_API virtual ~TextureObject();
 
     /**
      * @return True if two data object has the same cache id.
@@ -47,14 +47,9 @@ public:
     LIVRE_API bool operator==( const TextureObject& texture ) const;
 
     /**
-     * @return The cache id.
-     */
-    LIVRE_API CacheId getCacheID() const override;
-
-    /**
      * @return The GPU memory usage.
      */
-    size_t getCacheSize( ) const override;
+    size_t getCacheSize() const final;
 
     /**
      * @return The texture type.
@@ -64,12 +59,12 @@ public:
     /**
      * @return The texture state.
      */
-    LIVRE_API TextureStatePtr getTextureState( );
+    LIVRE_API TextureStatePtr getTextureState();
 
     /**
      * @return The texture state ( const ).
      */
-    LIVRE_API ConstTextureStatePtr getTextureState( ) const;
+    LIVRE_API ConstTextureStatePtr getTextureState() const;
 
     /**
      * Sets the texture data object for data retrieval.
@@ -83,28 +78,20 @@ public:
     static TextureObject* getEmptyPtr();
 
 private:
-    TextureObject( TextureCachePtr textureCachePtr );
 
-    const TextureDataObject& getTextureDataObject_( ) const;
+    TextureObject( const CacheId& cacheId,
+                   TextureCachePtr textureCachePtr );
+    const TextureDataObject& getTextureDataObject_() const;
 
-    bool load_( ) override;
-
-    void unload_( ) override;
-
-    bool isLoaded_( ) const override;
-
-    bool isValid_( ) const override;
-
+    bool load_( ) final;
+    void unload_( ) final;
+    bool isLoaded_( ) const final;
     bool loadTextureToGPU_( ) const;
-
     void initialize_( );
 
     TextureCachePtr textureCachePtr_;
-
     TextureStatePtr textureState_;
-
     ConstTextureDataObjectPtr lodTextureData_;
-
     ConstVolumeDataSourcePtr dataSourcePtr_;
 };
 

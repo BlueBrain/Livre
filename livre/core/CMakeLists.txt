@@ -35,7 +35,6 @@ set(LIVRECORE_HEADERS
   dash/DashRenderNode.h
   dash/DashRenderStatus.h
   dash/DashTree.h
-  data/LODNodeTrait.h
   data/VolumeDataSource.h
   dashpipeline/DashConnection.h
   dashpipeline/DashProcessor.h
@@ -79,7 +78,6 @@ set(LIVRECORE_SOURCES
   dash/DashRenderStatus.cpp
   dash/DashTree.cpp
   data/LODNode.cpp
-  data/LODNodeTrait.cpp
   data/MemoryUnit.cpp
   data/NodeId.cpp
   data/VolumeDataSource.cpp

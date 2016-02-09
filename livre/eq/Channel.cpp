@@ -207,13 +207,21 @@ public:
     void generateRenderBricks( const ConstCacheObjects& renderNodes,
                                RenderBricks& renderBricks )
     {
+
         renderBricks.reserve( renderNodes.size( ));
-        BOOST_FOREACH( const ConstCacheObjectPtr& cacheObject, renderNodes )
+
+        livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
+        DashTreePtr dashTree = node->getDashTree();
+
+        for( const ConstCacheObjectPtr& cacheObject: renderNodes )
         {
             const ConstTextureObjectPtr texture =
                 boost::static_pointer_cast< const TextureObject >( cacheObject );
 
-            RenderBrickPtr renderBrick( new RenderBrick( texture->getLODNode(),
+            const ConstLODNodePtr& lodNode =
+                    dashTree->getDataSource()->getNode( NodeId( cacheObject->getCacheId( )));
+
+            RenderBrickPtr renderBrick( new RenderBrick( lodNode,
                                                          texture->getTextureState( )));
             renderBricks.push_back( renderBrick );
         }

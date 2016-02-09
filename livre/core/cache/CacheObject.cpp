@@ -30,22 +30,24 @@ namespace livre
 
 struct CacheObject::CacheInfo : public CacheObjectListener
 {
-    CacheInfo( ) :
+    CacheInfo( const CacheId& cacheId_ ) :
         referenceCount( 0 ),
         lastUsedTime( 0.0 ),
         loadTime( 0.0 ),
-        unloadable( true )
+        unloadable( true ),
+        cacheId( cacheId_ )
     { }
 
     uint32_t referenceCount;
     double lastUsedTime;
     double loadTime;
     bool unloadable;
+    CacheId cacheId;
     ReadWriteMutex mutex;
 };
 
-CacheObject::CacheObject( )
-    : commonInfoPtr_( new CacheInfo( ) )
+CacheObject::CacheObject( const CacheId& cacheId )
+    : commonInfoPtr_( new CacheInfo( cacheId ) )
 {
 }
 
@@ -104,6 +106,11 @@ bool CacheObject::isValid() const
     return ( commonInfoPtr_ ? isValid_() : false );
 }
 
+CacheId CacheObject::getCacheId() const
+{
+    return commonInfoPtr_->cacheId;
+}
+
 void CacheObject::cacheLoad()
 {
     WriteLock lock( commonInfoPtr_->mutex );
@@ -146,20 +153,20 @@ void CacheObject::cacheUnload( )
     }
 
     unload_( );
-    resetLastUsed_();
+    commonInfoPtr_->lastUsedTime = 0;
 }
 
-double CacheObject::getLastUsed( ) const
+double CacheObject::getLastUsed() const
 {
     return commonInfoPtr_->lastUsedTime;
 }
 
-double CacheObject::getLoadTime( ) const
+double CacheObject::getLoadTime() const
 {
     return commonInfoPtr_->loadTime;
 }
 
-bool CacheObject::isUnloadable( ) const
+bool CacheObject::isUnloadable() const
 {
     return commonInfoPtr_->unloadable;
 }
@@ -184,19 +191,19 @@ void CacheObject::unregisterObserver( CacheObjectObserver* observer )
     commonInfoPtr_->unregisterObserver( observer );
 }
 
-void CacheObject::updateLastUsed_( const double lastUsedTime )
+bool CacheObject::isValid_() const
 {
-    commonInfoPtr_->lastUsedTime = lastUsedTime;
+    return commonInfoPtr_->cacheId != INVALID_CACHE_ID;
 }
 
-void CacheObject::resetLastUsed_( )
+bool CacheObject::operator==( const CacheObject& cacheObject ) const
 {
-    updateLastUsed_( 0.0 );
+    return commonInfoPtr_->cacheId == cacheObject.getCacheId();
 }
 
-void CacheObject::updateLastUsedWithCurrentTime_( )
+void CacheObject::updateLastUsedWithCurrentTime_()
 {
-    updateLastUsed_( ThreadClock::getClock().getTimef() );
+     commonInfoPtr_->lastUsedTime = ThreadClock::getClock().getTimef();
 }
 
 }

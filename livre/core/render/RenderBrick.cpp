@@ -58,16 +58,12 @@ namespace livre
 {
 
 
-RenderBrick::RenderBrick( ConstLODNodePtr lodNodePtr,
-                          ConstTextureStatePtr textureState )
-    : LODNodeTrait( lodNodePtr ),
-      textureState_( textureState )
-{
-}
+RenderBrick::RenderBrick( const ConstLODNodePtr& lodNode,
+                          const ConstTextureStatePtr& textureState )
+    : _lodNode( lodNode )
+    , _textureState( textureState )
 
-ConstTextureStatePtr RenderBrick::getTextureState() const
 {
-    return textureState_;
 }
 
 void RenderBrick::getScreenCoordinates( const Frustum& frustum,
@@ -75,8 +71,8 @@ void RenderBrick::getScreenCoordinates( const Frustum& frustum,
                                         Vector2i& minScreenPos,
                                         Vector2i& maxScreenPos ) const
 {
-    const Vector3f& minPos = lodNodePtr_->getWorldBox().getMin();
-    const Vector3f& maxPos = lodNodePtr_->getWorldBox().getMax();
+    const Vector3f& minPos = _lodNode->getWorldBox().getMin();
+    const Vector3f& maxPos = _lodNode->getWorldBox().getMax();
 
     const double x[ 2 ] = { minPos[ 0 ], maxPos[ 0 ] };
     const double y[ 2 ] = { minPos[ 1 ], maxPos[ 1 ] };
@@ -155,7 +151,7 @@ void RenderBrick::drawBrick( bool front, bool back  ) const
         glCullFace( GL_FRONT );
     }
 
-    const Boxf& worldBox = lodNodePtr_->getWorldBox();
+    const Boxf& worldBox = _lodNode->getWorldBox();
     const Vector3f& minPos = worldBox.getMin();
     const Vector3f& maxPos = worldBox.getMax();
 

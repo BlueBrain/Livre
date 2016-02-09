@@ -38,15 +38,12 @@ TextureDataCache::TextureDataCache( VolumeDataSourcePtr volumeDataSourcePtr,
     statisticsPtr_->setStatisticsName( "Data cache CPU");
 }
 
-CacheObject* TextureDataCache::generateCacheObjectFromID_( const CacheId& cacheID )
+CacheObject* TextureDataCache::generateCacheObjectFromID_( const CacheId& cacheId )
 {
-    ConstLODNodePtr lodNodePtr =
-            volumeDataSourcePtr_->getNode( NodeId( cacheID ));
-
-    if( !lodNodePtr->isValid() )
+    if( cacheId == INVALID_CACHE_ID )
         return static_cast< CacheObject* >( TextureDataObject::getEmptyPtr( ));
 
-    return new TextureDataObject( volumeDataSourcePtr_, lodNodePtr, type_ );
+    return new TextureDataObject( cacheId, volumeDataSourcePtr_, type_ );
 }
 
 TextureDataObject& TextureDataCache::getNodeTextureData( const CacheId& cacheId )
@@ -55,7 +52,7 @@ TextureDataObject& TextureDataCache::getNodeTextureData( const CacheId& cacheId 
         return *TextureDataObject::getEmptyPtr();
 
     TextureDataObject* internalTextureData =
-            static_cast< TextureDataObject *>( getObjectFromCache_( cacheId ).get( ) );
+            static_cast< TextureDataObject *>( getObjectFromCache_( cacheId ).get( ));
 
     return *internalTextureData;
 }
@@ -66,7 +63,7 @@ TextureDataObject& TextureDataCache::getNodeTextureData( const CacheId& cacheId 
         return *TextureDataObject::getEmptyPtr();
 
     TextureDataObject* internalTextureData =
-            static_cast< TextureDataObject *>( getObjectFromCache_( cacheId ).get( ) );
+            static_cast< TextureDataObject *>( getObjectFromCache_( cacheId ).get( ));
 
     return internalTextureData != NULL ? *internalTextureData : *TextureDataObject::getEmptyPtr();
 }

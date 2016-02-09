@@ -37,6 +37,8 @@ namespace livre
 class CacheObject
 {
 public:
+    LIVRECORE_API virtual ~CacheObject() { }
+
     /**
      * @return True if the object is valid.
      */
@@ -45,13 +47,13 @@ public:
     /**
      * @return The unique cache id.
      */
-    virtual CacheId getCacheID() const = 0;
+    CacheId getCacheId() const;
 
     /**
      * Loads the object to cache ( if the reference count is more than 1, it is not unloaded ).
      * Function is thread safe for loading.
      */
-    LIVRECORE_API void cacheLoad( );
+    LIVRECORE_API void cacheLoad();
 
     /**
      * Unloads the object from the memory, if there are not any references. Function is threadsafe
@@ -97,24 +99,6 @@ public:
     LIVRECORE_API uint32_t getReferenceCount_() const;
 
     /**
-     * updateLastUsed_ Should not be called by user.
-     * @param lastUsedTime Update the last used time.
-     */
-    void updateLastUsed_( const double lastUsedTime );
-
-    /**
-     * updateLastUsedWithCurrentTime_ Updates the last used time with current time.
-     */
-    LIVRECORE_API void updateLastUsedWithCurrentTime_();
-
-    /**
-     * resetLastUsed_ Resets the last used time to 0.
-     */
-    void resetLastUsed_();
-
-    LIVRECORE_API virtual ~CacheObject() { }
-
-    /**
      * Register an observer for operations done on the object.
      * @param observer The observer to add.
      */
@@ -126,12 +110,18 @@ public:
      */
     LIVRECORE_API void unregisterObserver( CacheObjectObserver* observer );
 
+    /**
+     * Should not be called by user.
+     * updateLastUsedWithCurrentTime_ Updates the last used time with current time.
+     */
+    LIVRECORE_API void updateLastUsedWithCurrentTime_();
+
 protected:
 
     friend class Cache;
     friend class CacheStatistics;
 
-    LIVRECORE_API CacheObject();
+    LIVRECORE_API CacheObject( const CacheId& cacheId = INVALID_CACHE_ID );
 
     /**
      * Implemented by the derived class, for loading data to memory. Thread safety is satisfied for
@@ -149,7 +139,7 @@ protected:
     /**
      * @return The validity of derived class.
      */
-    virtual bool isValid_() const = 0;
+    virtual bool isValid_() const;
 
     /**
      * @return True if object is loaded into memory.
@@ -160,6 +150,11 @@ protected:
      * @return The unconst object.
      */
     CacheObject* getUnconst_() const { return const_cast< CacheObject * >( this ); }
+
+    /**
+     * @return On default returns true if cache ids are same
+     */
+    virtual bool operator==( const CacheObject& cacheObject ) const;
 
 private:
     LIVRECORE_API void increaseReference_();
