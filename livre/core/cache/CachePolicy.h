@@ -36,9 +36,9 @@ class CachePolicy
 
 protected:
 
-    CachePolicy( )  { }
+    CachePolicy()  {}
 
-    virtual ~CachePolicy() { }
+    virtual ~CachePolicy() {}
 
     /**
      * Checks whether the policy will be activated for current state of \see Cache.
@@ -60,9 +60,9 @@ protected:
      * @param cacheObjectList The incoming list of objects from \see Cache to order for unloading.
      * @param modifiedObjectList The output list to unload.
      */
-    virtual void apply_( const Cache& cache,
-                         const std::vector< CacheObject * >& cacheObjectList,
-                         std::vector< CacheObject * >& modifiedObjectList ) = 0;
+    virtual void _apply( const Cache& cache,
+                         const std::vector< CacheObject * >& cacheObjects,
+                         std::vector< CacheObject * >& modifiedObjects ) = 0;
 
 
 

@@ -219,7 +219,7 @@ public:
                 boost::static_pointer_cast< const TextureObject >( cacheObject );
 
             const ConstLODNodePtr& lodNode =
-                    dashTree->getDataSource()->getNode( NodeId( cacheObject->getCacheId( )));
+                    dashTree->getDataSource()->getNode( NodeId( cacheObject->getId( )));
 
             RenderBrickPtr renderBrick( new RenderBrick( lodNode,
                                                          texture->getTextureState( )));

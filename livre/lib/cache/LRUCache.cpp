@@ -26,30 +26,20 @@ LRUCache::LRUCache()
 {
 }
 
-void LRUCache::onLoaded_( const CacheObject &cacheObject LB_UNUSED )
+void LRUCache::_onLoaded( const CacheObject& cacheObject LB_UNUSED )
 {
-    applyPolicy( cachePolicy_ );
+    applyPolicy( _cachePolicy );
 }
 
-void LRUCache::setProtectList( const CacheIdSet& protectUnloadingList )
+void LRUCache::setMaximumMemory( const size_t maxMemBytes )
 {
-    cachePolicy_.setProtectList( protectUnloadingList );
-}
-
-void LRUCache::clearProtectList( )
-{
-    cachePolicy_.setProtectList( CacheIdSet() );
-}
-
-void LRUCache::setMaximumMemory( const size_t maxMemoryInBytes )
-{
-    cachePolicy_.setMaximumMemory( maxMemoryInBytes );
-    getStatistics().setMaximumMemory( maxMemoryInBytes );
+    _cachePolicy.setMaximumMemory( maxMemBytes );
+    getStatistics().setMaximumMemory( maxMemBytes );
 }
 
 void LRUCache::setCleanupRatio( float cleanUpRatio )
 {
-   cachePolicy_.setCleanupRatio( cleanUpRatio );
+   _cachePolicy.setCleanupRatio( cleanUpRatio );
 }
 
 }

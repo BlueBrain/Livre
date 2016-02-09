@@ -33,7 +33,7 @@ public:
         : unloaded_( false )
     {}
 
-    void onUnload_( const livre::CacheObject& ) final { unloaded_ = true; }
+    void _onUnload( const livre::CacheObject& ) final { unloaded_ = true; }
     bool isUnloaded( ) const { return unloaded_; }
 
 private:

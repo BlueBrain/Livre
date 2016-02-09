@@ -85,27 +85,14 @@ private:
 class CollectVisiblesVisitor : public RenderNodeVisitor
 {
 public:
-    CollectVisiblesVisitor( DashTreePtr dashTree,
-                            CacheIdSet& currentVisibleSet )
-     : RenderNodeVisitor( dashTree ),
-       currentVisibleSet_( currentVisibleSet ) {}
+    CollectVisiblesVisitor( DashTreePtr dashTree )
+     : RenderNodeVisitor( dashTree ) {}
 
     void visit( DashRenderNode& renderNode, VisitState& state ) final
     {
-        const LODNode& lodNode = renderNode.getLODNode();
-
-        if( !renderNode.isInFrustum( ))
+        if( !renderNode.isInFrustum( ) || renderNode.isLODVisible( ))
              state.setVisitChild( false );
-
-        if( renderNode.isLODVisible( ))
-        {
-            currentVisibleSet_.insert( lodNode.getNodeId().getId( ));
-            state.setVisitChild( false );
-        }
     }
-
-private:
-    CacheIdSet& currentVisibleSet_;
 };
 
 TextureUploadProcessor::TextureUploadProcessor( DashTreePtr dashTree,
@@ -189,13 +176,11 @@ void TextureUploadProcessor::runLoop_()
     if( renderStatus.getFrameID() != _currentFrameID )
     {
         _protectUnloading.clear();
-        CollectVisiblesVisitor collectVisibles( _dashTree,
-                                                _protectUnloading );
+        CollectVisiblesVisitor collectVisibles( _dashTree );
         DFSTraversal traverser;
         const RootNode& rootNode =
                 _dashTree->getDataSource()->getVolumeInformation().rootNode;
         traverser.traverse( rootNode, collectVisibles, renderStatus.getFrameID( ));
-        _textureCache.setProtectList( _protectUnloading );
         _currentFrameID = renderStatus.getFrameID();
     }
     _loadData();
@@ -261,7 +246,7 @@ void TextureLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state 
             TextureObject& lodTexture = _cache.getNodeTexture( lodNode.getNodeId().getId( ));
             lodTexture.setTextureDataObject(
                             static_cast< const TextureDataObject * >( textureData.get() ) );
-            lodTexture.cacheLoad();
+            lodTexture.load();
 
 #ifdef _ITT_DEBUG_
             __itt_task_end( ittTextureLoadDomain );

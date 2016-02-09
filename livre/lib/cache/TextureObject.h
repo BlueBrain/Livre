@@ -80,19 +80,19 @@ public:
 private:
 
     TextureObject( const CacheId& cacheId,
-                   TextureCachePtr textureCachePtr );
-    const TextureDataObject& getTextureDataObject_() const;
+                   TextureCachePtr textureCache );
+    const TextureDataObject& _getTextureDataObject() const;
 
-    bool load_( ) final;
-    void unload_( ) final;
-    bool isLoaded_( ) const final;
-    bool loadTextureToGPU_( ) const;
-    void initialize_( );
+    bool _load( ) final;
+    void _unload( ) final;
+    bool _isLoaded( ) const final;
+    bool _loadTextureToGPU( ) const;
+    void _initialize( );
 
-    TextureCachePtr textureCachePtr_;
-    TextureStatePtr textureState_;
-    ConstTextureDataObjectPtr lodTextureData_;
-    ConstVolumeDataSourcePtr dataSourcePtr_;
+    TextureCachePtr _textureCache;
+    TextureStatePtr _textureState;
+    ConstTextureDataObjectPtr _lodTextureData;
+    ConstVolumeDataSourcePtr _dataSource;
 };
 
 }

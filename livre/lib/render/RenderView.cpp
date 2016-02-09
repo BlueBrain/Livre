@@ -53,7 +53,7 @@ struct RenderView::Impl
         BOOST_FOREACH( const ConstCacheObjectPtr& cacheObject,
                        frameInfo.renderNodes )
         {
-            const NodeId nodeId(cacheObject->getCacheId( ));
+            const NodeId nodeId(cacheObject->getId( ));
             freeTexture( nodeId );
         }
 

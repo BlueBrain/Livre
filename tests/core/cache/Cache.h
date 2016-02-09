@@ -32,7 +32,7 @@ class Cache : public livre::LRUCache
 
 private:
 
-    livre::CacheObject* generateCacheObjectFromID_( const livre::CacheId& cacheId )
+    livre::CacheObject* _generate( const livre::CacheId& cacheId )
     {
         ValidCacheObject* cacheObject =  new test::ValidCacheObject( cacheId );
         return cacheObject;

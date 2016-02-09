@@ -37,21 +37,25 @@ class TextureDataCache : public LRUCache
 {
 public:
     /**
-     * @param volumeDataSource The source where the volume data should be loaded from
+     * @param volumeDataSource The source where the volume data should
+     * be loaded from
      * @param type The type of the data for the GPU.
      */
-    LIVRE_API TextureDataCache( VolumeDataSourcePtr volumeDataSource, uint32_t type );
+    LIVRE_API TextureDataCache( VolumeDataSourcePtr dataSource,
+                                const uint32_t textureType  );
 
     /**
      * @param cacheID The cacheId of the node.
-     * @return A valid cache object if id is valid or data source includes the information for cache id.
+     * @return A valid cache object if id is valid or data source includes
+     * the information for cache id.
      * If there is not, the object is constructed.
      */
     LIVRE_API TextureDataObject& getNodeTextureData( const CacheId& cacheId ) const;
 
     /**
      * @param cacheID The cacheId of the node.
-     * @return A valid cache object if id is valid or data source includes the information for cache id.
+     * @return A valid cache object if id is valid or data source includes
+     * the information for cache id.
      */
     LIVRE_API TextureDataObject& getNodeTextureData( const CacheId& cacheId );
 
@@ -61,13 +65,13 @@ public:
     /**
      * @return The GPU data type.
      */
-    LIVRE_API uint32_t getTextureType( ) const { return type_; }
+    LIVRE_API uint32_t getTextureType() const { return _textureType; }
 
 private:
-    CacheObject *generateCacheObjectFromID_( const CacheId& cacheID );
+    CacheObject* _generate( const CacheId& cacheId );
 
-    VolumeDataSourcePtr volumeDataSourcePtr_;
-    const uint32_t type_;
+    VolumeDataSourcePtr _dataSource;
+    const uint32_t _textureType;
 };
 
 }

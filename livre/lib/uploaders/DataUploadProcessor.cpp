@@ -258,7 +258,7 @@ void DataLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state )
 #endif //_ITT_DEBUG_
     TextureDataObject& textureData =
         _cache.getNodeTextureData( node.getNodeId().getId( ));
-    textureData.cacheLoad( );
+    textureData.load( );
     if( _clock.getTime64() > 1000 ) // commit once every second
     {
         _clock.reset();
@@ -320,7 +320,7 @@ void DepthSortedDataLoaderVisitor::visit( DashRenderNode& renderNode,
     TextureDataObject& textureData =
             static_cast< const TextureDataCache& >
             ( _cache ).getNodeTextureData( lodNode.getNodeId().getId( ));
-    textureData.cacheLoad();
+    textureData.load();
 
 #ifdef _ITT_DEBUG_
     __itt_task_end( ittDataLoadDomain );

@@ -33,23 +33,23 @@ BOOST_AUTO_TEST_CASE( testCacheObject )
     livre::CacheObjectPtr cacheObject( new test::ValidCacheObject( cacheId ) );
 
     BOOST_CHECK( cacheObject->isValid() );
-    BOOST_CHECK( cacheObject->getCacheId() == cacheId );
+    BOOST_CHECK( cacheObject->getId() == cacheId );
     BOOST_CHECK( !cacheObject->isLoaded() );
     BOOST_CHECK( cacheObject->getReferenceCount_() == 1 );
 
     livre::CacheObjectPtr refCacheObject = cacheObject;
     BOOST_CHECK( cacheObject->getReferenceCount_() == 2 );
 
-    refCacheObject->cacheLoad();
+    refCacheObject->load();
     BOOST_CHECK( refCacheObject->isLoaded() );
 
     refCacheObject.reset();
     BOOST_CHECK( cacheObject->getReferenceCount_() == 1 );
 
-    cacheObject->cacheUnload();
+    cacheObject->unload();
     BOOST_CHECK( !cacheObject->isLoaded() );
 
-    cacheObject->cacheLoad();
+    cacheObject->load();
     BOOST_CHECK( cacheObject->isLoaded() );
 
     test::CacheObjectObserver observer;
@@ -66,25 +66,25 @@ BOOST_AUTO_TEST_CASE( testCache )
     BOOST_CHECK( cache.getNumberOfCacheObjects() == 0 );
 
     livre::CacheObjectPtr validCacheObject( new test::ValidCacheObject( 0 ) );
-    BOOST_CHECK( validCacheObject->getCacheId() == 0 );
+    BOOST_CHECK( validCacheObject->getId() == 0 );
 
     livre::CacheObjectPtr cacheObject = cache.getObjectFromCache( 1 );
 
     BOOST_CHECK( cacheObject );
     BOOST_CHECK( cache.getNumberOfCacheObjects() == 1 );
-    BOOST_CHECK( boost::static_pointer_cast< test::ValidCacheObject >( cacheObject )->getCacheId() == 1 );
+    BOOST_CHECK( boost::static_pointer_cast< test::ValidCacheObject >( cacheObject )->getId() == 1 );
     BOOST_CHECK( cacheObject->getReferenceCount_() == 2 );
 
     cacheObject = cache.getObjectFromCache( 2 );
     BOOST_CHECK( cacheObject );
     BOOST_CHECK( cache.getNumberOfCacheObjects() == 2 );
-    BOOST_CHECK( boost::static_pointer_cast< test::ValidCacheObject >( cacheObject )->getCacheId() == 2 );
+    BOOST_CHECK( boost::static_pointer_cast< test::ValidCacheObject >( cacheObject )->getId() == 2 );
     BOOST_CHECK( cacheObject->getReferenceCount_() == 2 );
 
     cacheObject = cache.getObjectFromCache( 1 );
     BOOST_CHECK( cacheObject );
     BOOST_CHECK( cache.getNumberOfCacheObjects() == 2 );
-    BOOST_CHECK( boost::static_pointer_cast< test::ValidCacheObject >( cacheObject )->getCacheId() == 1 );
+    BOOST_CHECK( boost::static_pointer_cast< test::ValidCacheObject >( cacheObject )->getId() == 1 );
     BOOST_CHECK( cacheObject->getReferenceCount_() == 2 );
 
 }

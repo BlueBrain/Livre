@@ -36,22 +36,22 @@ public:
     /**
      * @return Number of objects in the corresponding \see Cache.
      */
-    size_t getBlockCount() const { return blockCount_; }
+    size_t getBlockCount() const { return _objCount; }
 
     /**
      * @return Used memory in bytes used by the \see Cache.
      */
-    size_t getUsedMemory() const { return usedMemoryInBytes_; }
+    size_t getUsedMemory() const { return _usedMemBytes; }
 
     /**
      * @param statisticsName The name of the statistics.
      */
     void setStatisticsName( const std::string& statisticsName )
-        { statisticsName_ = statisticsName; }
+        { _name = statisticsName; }
 
     /** @param Maximum memory in bytes used by the associated cache. */
-    void setMaximumMemory( const size_t maxMemoryInBytes )
-        { maxMemoryInBytes_ = maxMemoryInBytes; }
+    void setMaximumMemory( const size_t maxMemBytes )
+        { _maxMemBytes = maxMemBytes; }
 
     /**
      * @param stream Output stream.
@@ -70,25 +70,25 @@ private:
     CacheStatistics( const std::string& statisticsName,
                      const size_t queueSize );
 
-    void onLoaded_( const CacheObject& cacheObject ) final;
-    void onUnload_( const CacheObject& cacheObject ) final;
+    void _onLoaded( const CacheObject& cacheObject ) final;
+    void _onUnload( const CacheObject& cacheObject ) final;
 
-    void onCacheMiss_( const CacheObject& ) final { ++cacheMiss_; }
-    void onCacheHit_( const CacheObject& ) final { ++cacheHit_; }
+    void _onCacheMiss( const CacheObject& ) final { ++_cacheMiss; }
+    void _onCacheHit( const CacheObject& ) final { ++_cacheHit; }
 
-    std::string statisticsName_;
-    size_t usedMemoryInBytes_;
-    size_t maxMemoryInBytes_;
-    size_t blockCount_;
-    size_t cacheHit_;
-    size_t cacheMiss_;
+    std::string _name;
+    size_t _usedMemBytes;
+    size_t _maxMemBytes;
+    size_t _objCount;
+    size_t _cacheHit;
+    size_t _cacheMiss;
 
     struct LoadInfo;
     typedef boost::shared_ptr< LoadInfo > LoadInfoPtr;
     typedef lunchbox::MTQueue< LoadInfoPtr > LoadInfoPtrQueue;
 
-    LoadInfoPtrQueue ioQueue_;
-    const size_t queueSize_;
+    LoadInfoPtrQueue _ioQueue;
+    const size_t _queueSize;
 };
 
 }

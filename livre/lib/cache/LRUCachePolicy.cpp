@@ -27,61 +27,47 @@ namespace livre
 
 struct LastUsedOrderOperator
 {
-    bool operator()( const CacheObject* object1, const CacheObject* object2 )
+    bool operator()( const CacheObject* obj1, const CacheObject* obj2 )
     {
-        return  object1->getLastUsed( ) < object2->getLastUsed( );
+        return  obj1->getLastUsed( ) < obj2->getLastUsed( );
     }
 };
 
 LRUCachePolicy::LRUCachePolicy()
-    : maxMemoryInBytes_( 0 ),
-      cleanUpRatio_( 1.0 )
+    : _maxMemBytes( 0 ),
+      _cleanUpRatio( 1.0 )
 {}
 
-void LRUCachePolicy::setProtectList( const CacheIdSet& protectUnloadingList )
+void LRUCachePolicy::setMaximumMemory( const size_t maxMemBytes )
 {
-    protectUnloadingList_ = protectUnloadingList;
-}
-
-void LRUCachePolicy::setMaximumMemory( const size_t maxMemoryInBytes )
-{
-    maxMemoryInBytes_ = maxMemoryInBytes;
+    _maxMemBytes = maxMemBytes;
 }
 
 void LRUCachePolicy::setCleanupRatio( float cleanUpRatio )
 {
-   cleanUpRatio_ = cleanUpRatio;
+   _cleanUpRatio = cleanUpRatio;
 }
 
 bool LRUCachePolicy::willPolicyBeActivated( const Cache& cache ) const
 {
     const size_t usedMemoryInBytes = cache.getStatistics().getUsedMemory();
-    return usedMemoryInBytes >= maxMemoryInBytes_;
+    return usedMemoryInBytes >= _maxMemBytes;
 }
 
 bool LRUCachePolicy::isPolicySatisfied( const Cache& cache ) const
 {
     const size_t usedMemoryInBytes = cache.getStatistics().getUsedMemory();
-    return usedMemoryInBytes < ( 1.0f - cleanUpRatio_ ) * maxMemoryInBytes_;
+    return usedMemoryInBytes < ( 1.0f - _cleanUpRatio ) * _maxMemBytes;
 }
 
-void LRUCachePolicy::apply_( const Cache& cache LB_UNUSED,
-                             const std::vector< CacheObject * >& cacheObjectList,
-                             std::vector< CacheObject * >& modifiedObjectList )
+void LRUCachePolicy::_apply( const Cache& cache LB_UNUSED,
+                             const std::vector< CacheObject * >& cacheObjects,
+                             std::vector< CacheObject * >& modifiedObjects )
 {
-    modifiedObjectList.reserve( cacheObjectList.size() );
-
-    for( std::vector< CacheObject *>::const_iterator it = cacheObjectList.begin();
-         it != cacheObjectList.end(); ++it )
-    {
-        CacheObject* cacheObject = *it;
-        const CacheIdSet::const_iterator& itCacheObject =
-                protectUnloadingList_.find( cacheObject->getCacheId() );
-        if( itCacheObject == protectUnloadingList_.end() )
-            modifiedObjectList.push_back( cacheObject );
-    }
-
-    std::sort( modifiedObjectList.begin( ), modifiedObjectList.end( ), LastUsedOrderOperator() );
+    modifiedObjects = cacheObjects;
+    std::sort( modifiedObjects.begin(),
+               modifiedObjects.end(),
+               LastUsedOrderOperator( ));
 
 }
 

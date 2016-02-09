@@ -33,7 +33,7 @@ class LRUCachePolicy : public CachePolicy
 {
 public:
 
-    LRUCachePolicy( );
+    LRUCachePolicy();
 
     /**
      * Checks whether the policy will be activated for current state of \see Cache.
@@ -50,16 +50,10 @@ public:
     virtual bool isPolicySatisfied( const Cache& cache ) const;
 
     /**
-     * Sets a list of node ids to be protected from unloading.
-     * @param protectUnloadingList The set of node ids.
-     */
-    void setProtectList( const CacheIdSet& protectUnloadingList );
-
-    /**
      * Sets the maximum memory.
-     * @param maxMemoryInBytes Maximum memory in bytes.
+     * @param maxMemBytes Maximum memory in bytes.
      */
-    void setMaximumMemory( const size_t maxMemoryInBytes );
+    void setMaximumMemory( const size_t maxMemBytes );
 
     /**
      * Sets the clean up ratio.
@@ -69,14 +63,12 @@ public:
 
 private:
 
-    virtual void apply_( const Cache& cache,
-                         const std::vector< CacheObject * >& cacheObjectList,
-                         std::vector< CacheObject * >& modifiedObjectList );
+    virtual void _apply( const Cache& cache,
+                         const std::vector< CacheObject * >& cacheObjects,
+                         std::vector< CacheObject * >& modifiedObjects );
 
-    size_t maxMemoryInBytes_;
-    float cleanUpRatio_;
-
-    CacheIdSet protectUnloadingList_;
+    size_t _maxMemBytes;
+    float _cleanUpRatio;
 };
 
 }

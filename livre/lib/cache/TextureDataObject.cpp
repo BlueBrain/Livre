@@ -31,9 +31,9 @@ namespace livre
 {
 TextureDataObject::TextureDataObject()
     : CacheObject()
-    , data_( new AllocMemoryUnit( ))
-    , dataSourcePtr_()
-    , gpuDataType_( 0 )
+    , _data( new AllocMemoryUnit( ))
+    , _dataSource()
+    , _gpuDataType( 0 )
 {
 }
 
@@ -41,11 +41,11 @@ TextureDataObject::TextureDataObject( const CacheId& cacheId,
                                       VolumeDataSourcePtr dataSourcePtr,
                                       const uint32_t gpuDataType )
     : CacheObject( cacheId )
-    , data_( new AllocMemoryUnit( ))
-    , dataSourcePtr_( dataSourcePtr )
-    , gpuDataType_( gpuDataType )
+    , _data( new AllocMemoryUnit( ))
+    , _dataSource( dataSourcePtr )
+    , _gpuDataType( gpuDataType )
 {
-    if( NodeId( getCacheId( )).getLevel() ==  0 )
+    if( NodeId( getId( )).getLevel() ==  0 )
         setUnloadable( false );
 }
 
@@ -61,26 +61,26 @@ TextureDataObject* TextureDataObject::getEmptyPtr()
 
 bool TextureDataObject::operator==( const TextureDataObject& data ) const
 {
-    return getCacheId() == data.getCacheId();
+    return getId() == data.getId();
 }
 
-bool TextureDataObject::isLoaded_( ) const
+bool TextureDataObject::_isLoaded( ) const
 {
-    return data_->getMemSize();
+    return _data->getMemSize();
 }
 
-size_t TextureDataObject::getDataSize_() const
+size_t TextureDataObject::_getDataSize() const
 {
     if( !isValid() )
         return 0;
 
     const ConstLODNodePtr& lodNode =
-            dataSourcePtr_->getNode( NodeId( getCacheId( )));
+            _dataSource->getNode( NodeId( getId( )));
 
     const Vector3ui& overlap =
-                dataSourcePtr_->getVolumeInformation().overlap;
-    const size_t elemSize =
-                dataSourcePtr_->getVolumeInformation().getBytesPerVoxel();
+                _dataSource->getVolumeInformation().overlap;
+    const uint32_t elemSize =
+                _dataSource->getVolumeInformation().getBytesPerVoxel();
     const Vector3ui blockSize =
                 lodNode->getBlockSize() + overlap * 2;
     return blockSize.product() * elemSize;
@@ -91,33 +91,33 @@ size_t TextureDataObject::getCacheSize() const
     if( !isValid() )
         return 0;
 
-    return data_->getAllocSize();
+    return _data->getAllocSize();
 }
 
 ConstVolumeDataSourcePtr TextureDataObject::getDataSource() const
 {
-    return dataSourcePtr_;
+    return _dataSource;
 }
 
 GLenum TextureDataObject::getGPUDataType() const
 {
-    return gpuDataType_;
+    return _gpuDataType;
 }
 
 const void* TextureDataObject::getDataPtr() const
 {
-    getUnconst_()->updateLastUsedWithCurrentTime_();
-    return data_->getData< void >();
+    _getUnconst()->updateLastUsedWithCurrentTime_();
+    return _data->getData< void >();
 }
 
 template< class T >
-bool TextureDataObject::setTextureData_( const bool quantize )
+bool TextureDataObject::_setTextureData( const bool quantize )
 {
-    getUnconst_()->updateLastUsedWithCurrentTime_();
+    _getUnconst()->updateLastUsedWithCurrentTime_();
     const ConstLODNodePtr& lodNode =
-            dataSourcePtr_->getNode( NodeId( getCacheId( )));
+            _dataSource->getNode( NodeId( getId( )));
 
-    ConstMemoryUnitPtr data = dataSourcePtr_->getData( *lodNode );
+    ConstMemoryUnitPtr data = _dataSource->getData( *lodNode );
     if( !data )
         return false;
 
@@ -125,22 +125,22 @@ bool TextureDataObject::setTextureData_( const bool quantize )
     if( quantize )
     {
         std::vector< T > textureData;
-        getQuantizedData_< T >( rawData, textureData );
-        data_->allocAndSetData( textureData );
+        _getQuantizedData< T >( rawData, textureData );
+        _data->allocAndSetData( textureData );
     }
     else
-        data_->allocAndSetData( rawData, getRawDataSize_( ));
+        _data->allocAndSetData( rawData, _getRawDataSize( ));
     return true;
 }
 
 template< class T >
-void TextureDataObject::getQuantizedData_( const T* rawData,
+void TextureDataObject::_getQuantizedData( const T* rawData,
                                          std::vector< T >& formattedData ) const
 {
-    const VolumeInformation& volumeInfo = dataSourcePtr_->getVolumeInformation();
+    const VolumeInformation& volumeInfo = _dataSource->getVolumeInformation();
     const uint32_t compCount = volumeInfo.compCount;
     const DataType dataType = volumeInfo.dataType;
-    const size_t dataSize = getRawDataSize_();
+    const size_t dataSize = _getRawDataSize();
 
     formattedData.resize( dataSize );
 
@@ -203,33 +203,33 @@ void TextureDataObject::getQuantizedData_( const T* rawData,
     }
 }
 
-size_t TextureDataObject::getRawDataSize_() const
+size_t TextureDataObject::_getRawDataSize() const
 {
-    const VolumeInformation& volumeInfo = dataSourcePtr_->getVolumeInformation();
-    return getDataSize_() * volumeInfo.compCount * volumeInfo.getBytesPerVoxel();
+    const VolumeInformation& volumeInfo = _dataSource->getVolumeInformation();
+    return _getDataSize() * volumeInfo.compCount * volumeInfo.getBytesPerVoxel();
 }
 
-bool TextureDataObject::load_( )
+bool TextureDataObject::_load( )
 {
-    const DataType dataType = dataSourcePtr_->getVolumeInformation().dataType;
-    switch( gpuDataType_ )
+    const DataType dataType = _dataSource->getVolumeInformation().dataType;
+    switch( _gpuDataType )
     {
         case GL_UNSIGNED_BYTE:
-            return setTextureData_< uint8_t >( dataType != DT_UINT8 );
+            return _setTextureData< uint8_t >( dataType != DT_UINT8 );
         case GL_FLOAT:
-            return setTextureData_< float >( dataType != DT_FLOAT32 );
+            return _setTextureData< float >( dataType != DT_FLOAT32 );
         case GL_UNSIGNED_SHORT:
-            return setTextureData_< uint16_t >( dataType != DT_UINT16 );
+            return _setTextureData< uint16_t >( dataType != DT_UINT16 );
     }
     return false;
 }
 
-void TextureDataObject::unload_( )
+void TextureDataObject::_unload( )
 {
-    data_->release();
+    _data->release();
 
     const ConstLODNodePtr& lodNode =
-            dataSourcePtr_->getNode( NodeId( getCacheId( )));
+            _dataSource->getNode( NodeId( getId( )));
 
     LBVERB << "Texture Data released: " << lodNode->getNodeId()
            << std::endl;

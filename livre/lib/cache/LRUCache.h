@@ -35,21 +35,10 @@ class LRUCache : public Cache
 {
 public:
     /**
-     * Sets a list of node ids to be protected from unloading.
-     * @param protectUnloadingList The set of node ids.
-     */
-    LIVRE_API void setProtectList( const CacheIdSet& protectUnloadingList );
-
-    /**
-     * Clears the list of node ids to be protected.
-     */
-    LIVRE_API void clearProtectList( );
-
-    /**
      * Sets the maximum memory.
      * @param maxMemoryInBytes Maximum memory in bytes.
      */
-    LIVRE_API void setMaximumMemory( const size_t maxMemoryInBytes );
+    LIVRE_API void setMaximumMemory( const size_t maxMemBytes );
 
     /**
      * Sets the clean up ratio.
@@ -61,8 +50,8 @@ protected:
     LIVRE_API LRUCache();
 
 private:
-    LIVRE_API void onLoaded_( const CacheObject &cacheObject );
-    LRUCachePolicy cachePolicy_;
+    LIVRE_API void _onLoaded( const CacheObject& cacheObject );
+    LRUCachePolicy _cachePolicy;
 };
 
 }

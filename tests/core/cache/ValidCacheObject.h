@@ -44,18 +44,18 @@ public:
 private:
 
 
-    virtual bool load_( )
+    virtual bool _load( )
     {
         isLoadedVar_ = true;
         return true;
     }
 
-    virtual void unload_( )
+    virtual void _unload( )
     {
         isLoadedVar_ = false;
     }
 
-    virtual bool isLoaded_( ) const
+    virtual bool _isLoaded( ) const
     {
         return isLoadedVar_;
     }

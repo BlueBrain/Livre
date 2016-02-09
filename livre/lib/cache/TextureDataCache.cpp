@@ -30,20 +30,20 @@
 namespace livre
 {
 
-TextureDataCache::TextureDataCache( VolumeDataSourcePtr volumeDataSourcePtr,
-                                    const uint32_t type )
-    : volumeDataSourcePtr_( volumeDataSourcePtr )
-    , type_( type )
+TextureDataCache::TextureDataCache( VolumeDataSourcePtr dataSource,
+                                    const uint32_t textureType )
+    : _dataSource( dataSource )
+    , _textureType( textureType )
 {
-    statisticsPtr_->setStatisticsName( "Data cache CPU");
+    _statistics->setStatisticsName( "Data cache CPU");
 }
 
-CacheObject* TextureDataCache::generateCacheObjectFromID_( const CacheId& cacheId )
+CacheObject* TextureDataCache::_generate( const CacheId& cacheId )
 {
     if( cacheId == INVALID_CACHE_ID )
         return static_cast< CacheObject* >( TextureDataObject::getEmptyPtr( ));
 
-    return new TextureDataObject( cacheId, volumeDataSourcePtr_, type_ );
+    return new TextureDataObject( cacheId, _dataSource, _textureType );
 }
 
 TextureDataObject& TextureDataCache::getNodeTextureData( const CacheId& cacheId )
@@ -52,7 +52,7 @@ TextureDataObject& TextureDataCache::getNodeTextureData( const CacheId& cacheId 
         return *TextureDataObject::getEmptyPtr();
 
     TextureDataObject* internalTextureData =
-            static_cast< TextureDataObject *>( getObjectFromCache_( cacheId ).get( ));
+            static_cast< TextureDataObject *>( _get( cacheId ).get( ));
 
     return *internalTextureData;
 }
@@ -63,14 +63,14 @@ TextureDataObject& TextureDataCache::getNodeTextureData( const CacheId& cacheId 
         return *TextureDataObject::getEmptyPtr();
 
     TextureDataObject* internalTextureData =
-            static_cast< TextureDataObject *>( getObjectFromCache_( cacheId ).get( ));
+            static_cast< TextureDataObject *>( _get( cacheId ).get( ));
 
     return internalTextureData != NULL ? *internalTextureData : *TextureDataObject::getEmptyPtr();
 }
 
 VolumeDataSourcePtr TextureDataCache::getDataSource()
 {
-    return volumeDataSourcePtr_;
+    return _dataSource;
 }
 
 }

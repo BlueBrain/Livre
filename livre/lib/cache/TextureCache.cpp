@@ -31,15 +31,15 @@ namespace livre
 {
 
 TextureCache::TextureCache( const GLint internalTextureFormat )
-    : texturePoolFactory_( internalTextureFormat )
+    : _texturePoolFactory( internalTextureFormat )
 {
-    statisticsPtr_->setStatisticsName( "Texture cache GPU");
+    _statistics->setStatisticsName( "Texture cache GPU");
 }
 
-CacheObject *TextureCache::generateCacheObjectFromID_( const CacheId& cacheId )
+CacheObject* TextureCache::_generate( const CacheId& cacheId  )
 {
     return new TextureObject( cacheId,
-                              TextureCachePtr( this, DontDeleteObject< TextureCache >() ) );
+                              TextureCachePtr( this, DontDeleteObject< TextureCache >( )));
 }
 
 TextureObject& TextureCache::getNodeTexture( const CacheId& cacheId )
@@ -48,7 +48,7 @@ TextureObject& TextureCache::getNodeTexture( const CacheId& cacheId )
         return *TextureObject::getEmptyPtr();
 
     TextureObject* internalTexture = static_cast< TextureObject *>(
-                getObjectFromCache_( cacheId ).get() );
+                _get( cacheId ).get( ));
 
     return *internalTexture;
 }
@@ -58,16 +58,19 @@ TextureObject& TextureCache::getNodeTexture( const CacheId& cacheId ) const
     if( cacheId == INVALID_CACHE_ID )
         return *TextureObject::getEmptyPtr();
 
-    TextureObject* internalTexture = static_cast< TextureObject *>( getObjectFromCache_( cacheId ).get() );
+    TextureObject* internalTexture =
+            static_cast< TextureObject* >( _get( cacheId ).get( ));
 
     return internalTexture != NULL ? *internalTexture : *TextureObject::getEmptyPtr();
 }
 
-TexturePoolPtr TextureCache::getTexturePool( const Vector3i& maxBlockSize,
+TexturePoolPtr TextureCache::getTexturePool( const Vector3ui& maxBlockSize,
                                              const GLenum format,
                                              const GLenum gpuDataType)
 {
-    return texturePoolFactory_.findTexturePool( maxBlockSize, format, gpuDataType );
+    return _texturePoolFactory.findTexturePool( maxBlockSize,
+                                                format,
+                                                gpuDataType );
 }
 
 }

@@ -54,21 +54,22 @@ public:
 
 private:
     friend class TextureDataCache;
+
     TextureDataObject();
     TextureDataObject( const CacheId& cacheId,
                        VolumeDataSourcePtr dataSourcePtr,
                        uint32_t gpuDataType );
 
-    bool load_() final;
-    void unload_() final;
-    bool isLoaded_() const final;
+    bool _load() final;
+    void _unload() final;
+    bool _isLoaded() const final;
     size_t getCacheSize() const final;
 
     template< class T >
-    bool setTextureData_( bool quantize );
+    bool _setTextureData( bool quantize );
 
-    size_t getDataSize_() const;
-    size_t getRawDataSize_() const;
+    size_t _getDataSize() const;
+    size_t _getRawDataSize() const;
 
     /**
      * Quantizes data into the given format with T.
@@ -76,12 +77,12 @@ private:
      * @param formattedData The quantized data is dumped into the vector.
      */
     template< class T >
-    void getQuantizedData_( const T* rawData,
+    void _getQuantizedData( const T* rawData,
                             std::vector< T >& formattedData ) const;
 
-    AllocMemoryUnitPtr data_;
-    ConstVolumeDataSourcePtr dataSourcePtr_;
-    uint32_t gpuDataType_;
+    AllocMemoryUnitPtr _data;
+    ConstVolumeDataSourcePtr _dataSource;
+    uint32_t _gpuDataType;
 };
 
 }

@@ -59,14 +59,14 @@ public:
      * @param gpuDataType Data type of the texture data.
      * @return A texture pool for specific type of texture.
      */
-    TexturePoolPtr getTexturePool( const Vector3i& maxBlockSize,
-                                   const uint32_t format,
-                                   const uint32_t gpuDataType );
+    TexturePoolPtr getTexturePool( const Vector3ui& maxBlockSize,
+                                   uint32_t format,
+                                   uint32_t gpuDataType );
 
 private:
 
-    CacheObject *generateCacheObjectFromID_(const CacheId& cacheID );
-    TexturePoolFactory texturePoolFactory_;
+    CacheObject* _generate( const CacheId& cacheID );
+    TexturePoolFactory _texturePoolFactory;
 };
 
 }
