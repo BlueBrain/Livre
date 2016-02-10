@@ -39,13 +39,13 @@ public:
      * @param lodNodePtr livre::LODNode is used for spatial information of rendered block.
      * @param textureState TextureState is used to hold the information of OpenGL texture and coordinates.
      */
-    LIVRECORE_API RenderBrick( const ConstLODNodePtr& lodNode,
+    LIVRECORE_API RenderBrick( const LODNode& lodNode,
                                const ConstTextureStatePtr& textureState );
 
     /**
      * @return Return LODNode.
      */
-    LIVRECORE_API ConstLODNodePtr getLODNode() const { return _lodNode; }
+    const LODNode& getLODNode() const { return _lodNode; }
 
     /**
      * @return The information of OpenGL texture and coordinates.
@@ -73,7 +73,7 @@ public:
 
 private:
 
-    const ConstLODNodePtr _lodNode;
+    const LODNode _lodNode;
     const ConstTextureStatePtr _textureState;
 };
 

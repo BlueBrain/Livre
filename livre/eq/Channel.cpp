@@ -218,7 +218,7 @@ public:
             const ConstTextureObjectPtr texture =
                 boost::static_pointer_cast< const TextureObject >( cacheObject );
 
-            const ConstLODNodePtr& lodNode =
+            const LODNode& lodNode =
                     dashTree->getDataSource()->getNode( NodeId( cacheObject->getId( )));
 
             RenderBrickPtr renderBrick( new RenderBrick( lodNode,
@@ -265,8 +265,9 @@ public:
         const Matrix4f& mvpMatrix = _frustum.getModelViewProjectionMatrix();
         for( const RenderBrickPtr& brick : bricks )
         {
-            const Vector3f& min = brick->getLODNode()->getWorldBox().getMin();
-            const Vector3f& max = brick->getLODNode()->getWorldBox().getMax();
+            const Boxf& worldBox = brick->getLODNode().getWorldBox();
+            const Vector3f& min = worldBox.getMin();
+            const Vector3f& max = worldBox.getMax();
             const Vector3f corners[8] =
             {
                 Vector3f( min[0], min[1], min[2] ),

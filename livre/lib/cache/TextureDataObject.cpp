@@ -74,7 +74,7 @@ size_t TextureDataObject::_getDataSize() const
     if( !isValid() )
         return 0;
 
-    const ConstLODNodePtr& lodNode =
+    const LODNode& lodNode =
             _dataSource->getNode( NodeId( getId( )));
 
     const Vector3ui& overlap =
@@ -82,7 +82,7 @@ size_t TextureDataObject::_getDataSize() const
     const uint32_t elemSize =
                 _dataSource->getVolumeInformation().getBytesPerVoxel();
     const Vector3ui blockSize =
-                lodNode->getBlockSize() + overlap * 2;
+                lodNode.getBlockSize() + overlap * 2;
     return blockSize.product() * elemSize;
 }
 
@@ -114,10 +114,8 @@ template< class T >
 bool TextureDataObject::_setTextureData( const bool quantize )
 {
     _getUnconst()->touch();
-    const ConstLODNodePtr& lodNode =
-            _dataSource->getNode( NodeId( getId( )));
-
-    ConstMemoryUnitPtr data = _dataSource->getData( *lodNode );
+    const NodeId nodeId( getId( ));
+    ConstMemoryUnitPtr data = _dataSource->getData( nodeId );
     if( !data )
         return false;
 
@@ -228,10 +226,8 @@ void TextureDataObject::_unload( )
 {
     _data->release();
 
-    const ConstLODNodePtr& lodNode =
-            _dataSource->getNode( NodeId( getId( )));
-
-    LBVERB << "Texture Data released: " << lodNode->getNodeId()
+    const NodeId nodeId( getId( ));
+       LBVERB << "Texture Data released: " << nodeId
            << std::endl;
 }
 

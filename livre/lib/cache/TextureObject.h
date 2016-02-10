@@ -23,7 +23,6 @@
 #include <livre/lib/api.h>
 #include <livre/lib/types.h>
 #include <livre/core/mathTypes.h>
-#include <livre/core/data/LODNodeTrait.h>
 #include <livre/core/cache/CacheObject.h>
 
 namespace livre

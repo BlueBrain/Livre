@@ -156,10 +156,10 @@ void TextureObject::_initialize( )
     // TODO: The internal format size should be calculated correctly
     const Vector3f& overlap = _dataSource->getVolumeInformation().overlap;
 
-    const ConstLODNodePtr& lodNode =
+    const LODNode& lodNode =
             _dataSource->getNode( NodeId( getId( )));
 
-    const Vector3f& size = lodNode->getVoxelBox().getDimension();
+    const Vector3f& size = lodNode.getVoxelBox().getDimension();
     const Vector3f& maxSize = _textureState->texturePoolPtr->getMaxBlockSize();
     const Vector3f& overlapf = overlap / maxSize;
     _textureState->textureCoordsMax = size / maxSize;
@@ -209,16 +209,18 @@ const TextureDataObject& TextureObject::_getTextureDataObject() const
 
 bool TextureObject::_loadTextureToGPU() const
 {
-    const ConstLODNodePtr& lodNode =
+    const NodeId nodeId( getId( ));
+    const LODNode& lodNode =
             _dataSource->getNode( NodeId( getId( )));
 
 #ifdef LIVRE_DEBUG_RENDERING
-    std::cout << "Upload "  << NodeId( getId( )).getLevel() << ' '
-              << lodNode->getRelativePosition() << " to "
+    std::cout << "Upload "  << nodeId.getLevel() << ' '
+              << lodNode.getRelativePosition() << " to "
               << _textureState->textureId << std::endl;
 #endif
 
-    const Vector3i& voxSizeVec = lodNode->getVoxelBox().getDimension();
+    const Vector3ui& voxSizeVec =
+            lodNode.getVoxelBox().getDimension();
 
     _textureState->bind( );
     glTexSubImage3D( GL_TEXTURE_3D, 0, 0, 0, 0,

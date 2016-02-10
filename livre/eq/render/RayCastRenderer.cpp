@@ -149,7 +149,7 @@ struct RayCastRenderer::Impl
             uint32_t maxLOD = 0;
             for( const RenderBrickPtr& rb : renderBricks )
             {
-                const uint32_t level = rb->getLODNode()->getRefLevel();
+                const uint32_t level = rb->getLODNode().getRefLevel();
                 if( level > maxLOD )
                     maxLOD = level;
             }
@@ -230,28 +230,29 @@ struct RayCastRenderer::Impl
         // Enable shaders
         glUseProgram( program );
 
-        if( rb.getTextureState( )->textureId == INVALID_TEXTURE_ID )
+        const ConstTextureStatePtr& texState = rb.getTextureState();
+        const LODNode& lodNode = rb.getLODNode();
+        if( texState->textureId == INVALID_TEXTURE_ID )
         {
-            LBERROR << "Invalid texture for node : " << rb.getLODNode( )->getNodeId( ) << std::endl;
+            LBERROR << "Invalid texture for node : "
+                    << lodNode.getNodeId() << std::endl;
             return;
         }
 
         GLint tParamNameGL = glGetUniformLocation( program, "aabbMin" );
-        const ConstLODNodePtr& lodNodePtr = rb.getLODNode( );
-        glUniform3fv( tParamNameGL, 1, lodNodePtr->getWorldBox( ).getMin( ).array );
+        glUniform3fv( tParamNameGL, 1, lodNode.getWorldBox().getMin().array );
 
         tParamNameGL = glGetUniformLocation( program, "aabbMax" );
-        glUniform3fv( tParamNameGL, 1, lodNodePtr->getWorldBox( ).getMax( ).array );
+        glUniform3fv( tParamNameGL, 1, lodNode.getWorldBox().getMax().array );
 
         tParamNameGL = glGetUniformLocation( program, "textureMin" );
-        ConstTextureStatePtr texState = rb.getTextureState( );
         glUniform3fv( tParamNameGL, 1, texState->textureCoordsMin.array );
 
         tParamNameGL = glGetUniformLocation( program, "textureMax" );
         glUniform3fv( tParamNameGL, 1, texState->textureCoordsMax.array );
 
         const Vector3f& voxSize =
-                rb.getTextureState( )->textureSize / lodNodePtr->getWorldBox( ).getDimension( );
+                rb.getTextureState( )->textureSize / lodNode.getWorldBox( ).getDimension( );
         tParamNameGL = glGetUniformLocation( program, "voxelSpacePerWorldSpace" );
         glUniform3fv( tParamNameGL, 1, voxSize.array );
 
@@ -275,7 +276,7 @@ struct RayCastRenderer::Impl
         tParamNameGL = glGetUniformLocation( program, "volumeTex" );
         glUniform1i( tParamNameGL, 0 ); //f-shader
 
-        const uint32_t refLevel = lodNodePtr->getRefLevel();
+        const uint32_t refLevel = lodNode.getRefLevel();
 
         tParamNameGL = glGetUniformLocation( program, "refLevel" );
         glUniform1i( tParamNameGL, refLevel );
