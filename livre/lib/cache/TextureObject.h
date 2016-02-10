@@ -49,7 +49,7 @@ public:
     /**
      * @return The GPU memory usage.
      */
-    size_t getCacheSize() const final;
+    size_t getSize() const final;
 
     /**
      * @return The texture type.

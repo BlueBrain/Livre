@@ -176,17 +176,17 @@ void CacheObject::setUnloadable( bool unloadable )
     _status->unloadable = unloadable;
 }
 
-uint32_t CacheObject::getReferenceCount_( ) const
+uint32_t CacheObject::getRefCount( ) const
 {
     return _status->nRef;
 }
 
-void CacheObject::registerObserver( CacheObjectObserver* observer )
+void CacheObject::_registerObserver( CacheObjectObserver* observer )
 {
     _status->registerObserver( observer );
 }
 
-void CacheObject::unregisterObserver( CacheObjectObserver* observer )
+void CacheObject::_unregisterObserver( CacheObjectObserver* observer )
 {
     _status->unregisterObserver( observer );
 }
@@ -201,7 +201,7 @@ bool CacheObject::operator==( const CacheObject& cacheObject ) const
     return _status->cacheId == cacheObject.getId();
 }
 
-void CacheObject::updateLastUsedWithCurrentTime_()
+void CacheObject::touch()
 {
      _status->lastUsedTime = ThreadClock::getClock().getTimef();
 }

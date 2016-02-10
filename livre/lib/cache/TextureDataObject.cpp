@@ -86,7 +86,7 @@ size_t TextureDataObject::_getDataSize() const
     return blockSize.product() * elemSize;
 }
 
-size_t TextureDataObject::getCacheSize() const
+size_t TextureDataObject::getSize() const
 {
     if( !isValid() )
         return 0;
@@ -106,14 +106,14 @@ GLenum TextureDataObject::getGPUDataType() const
 
 const void* TextureDataObject::getDataPtr() const
 {
-    _getUnconst()->updateLastUsedWithCurrentTime_();
+    _getUnconst()->touch();
     return _data->getData< void >();
 }
 
 template< class T >
 bool TextureDataObject::_setTextureData( const bool quantize )
 {
-    _getUnconst()->updateLastUsedWithCurrentTime_();
+    _getUnconst()->touch();
     const ConstLODNodePtr& lodNode =
             _dataSource->getNode( NodeId( getId( )));
 

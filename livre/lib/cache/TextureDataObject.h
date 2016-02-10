@@ -63,7 +63,7 @@ private:
     bool _load() final;
     void _unload() final;
     bool _isLoaded() const final;
-    size_t getCacheSize() const final;
+    size_t getSize() const final;
 
     template< class T >
     bool _setTextureData( bool quantize );

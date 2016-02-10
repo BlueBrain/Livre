@@ -173,7 +173,7 @@ GLenum TextureObject::getTextureType() const
     return _textureState->texturePoolPtr->getGPUDataType();
 }
 
-size_t TextureObject::getCacheSize( ) const
+size_t TextureObject::getSize( ) const
 {
     if( !isValid() )
         return 0;

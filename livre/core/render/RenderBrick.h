@@ -50,7 +50,7 @@ public:
     /**
      * @return The information of OpenGL texture and coordinates.
      */
-    LIVRECORE_API ConstTextureStatePtr getTextureState() const { return _textureState; }
+    ConstTextureStatePtr getTextureState() const { return _textureState; }
 
     /**
      * Computes the screen coordinates of an LOD block.

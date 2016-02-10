@@ -64,7 +64,7 @@ public:
     /**
      * @return The memory size of the object in bytes.
      */
-    virtual size_t getCacheSize() const = 0;
+    virtual size_t getSize() const = 0;
 
     /**
      * @return The last time object is used.
@@ -93,28 +93,14 @@ public:
     LIVRECORE_API void setUnloadable( bool unloadable );
 
     /**
-     * getReferenceCount_ Should not be called by user. The function is threadsafe.
      * @return The number of references to CacheObject.
      */
-    LIVRECORE_API uint32_t getReferenceCount_() const;
+    LIVRECORE_API uint32_t getRefCount() const;
 
     /**
-     * Register an observer for operations done on the object.
-     * @param observer The observer to add.
+     * Updates the last used time with current time.
      */
-    LIVRECORE_API void registerObserver( CacheObjectObserver* observer );
-
-    /**
-     * Unregisters an observer from the object
-     * @param observer The observer to remove.
-     */
-    LIVRECORE_API void unregisterObserver( CacheObjectObserver* observer );
-
-    /**
-     * Should not be called by user.
-     * updateLastUsedWithCurrentTime_ Updates the last used time with current time.
-     */
-    LIVRECORE_API void updateLastUsedWithCurrentTime_();
+    LIVRECORE_API void touch();
 
 protected:
 
@@ -156,7 +142,18 @@ protected:
      */
     virtual bool operator==( const CacheObject& cacheObject ) const;
 
+    /**
+     * @param observer is added to list of observers.
+     */
+    void _registerObserver( CacheObjectObserver* observer );
+
+    /**
+     * @param observer is removed from list of observer
+     */
+    void _unregisterObserver( CacheObjectObserver* observer );
+
 private:
+
     LIVRECORE_API void _increaseReference();
     LIVRECORE_API void _decreaseReference();
 

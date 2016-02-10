@@ -51,14 +51,14 @@ public:
      * @param cacheObjectID The object cache id to be queried.
      * @return The cache object from cache, if object is not in the list it is created with given cache id.
      */
-    LIVRECORE_API CacheObjectPtr getObjectFromCache( const CacheId& cacheObjectID );
+    LIVRECORE_API CacheObjectPtr get( const CacheId& cacheObjectID );
 
     /**
      * @param cacheObjectID The object cache id to be queried.
      * @return The cache object from cache, if object is not in the list an empty cache
      * object is returned.
      */
-    LIVRECORE_API CacheObjectPtr getObjectFromCache( const CacheId& cacheObjectID ) const;
+    LIVRECORE_API CacheObjectPtr get( const CacheId& cacheObjectID ) const;
 
     /**
      * Applies a policy to the cache.
@@ -70,7 +70,7 @@ public:
     /**
      * @return The number of cache objects managed ( not the number of loaded objects ).
      */
-    LIVRECORE_API size_t getNumberOfCacheObjects() const;
+    LIVRECORE_API size_t getCount() const;
 
     /**
      * @return Statistics.

@@ -93,7 +93,7 @@ CacheStatistics::CacheStatistics( const std::string& statisticsName,
 void CacheStatistics::_onLoaded( const CacheObject& cacheObject )
 {
    ++_objCount;
-   _usedMemBytes += cacheObject.getCacheSize();
+   _usedMemBytes += cacheObject.getSize();
 
    if( _ioQueue.empty() )
        _ioQueue.push( LoadInfoPtr( new LoadInfo()) );
@@ -104,14 +104,14 @@ void CacheStatistics::_onLoaded( const CacheObject& cacheObject )
    LoadInfoPtr previous;
    _ioQueue.getBack( previous );
    _ioQueue.push( LoadInfoPtr( new LoadInfo( *previous, LoadInfo::OP_LOAD,
-                                             cacheObject.getCacheSize(),
+                                             cacheObject.getSize(),
                                              cacheObject.getLoadTime( ))));
 }
 
 void CacheStatistics::_onUnload( const CacheObject& cacheObject )
 {
     --_objCount;
-    _usedMemBytes -= cacheObject.getCacheSize();
+    _usedMemBytes -= cacheObject.getSize();
 
     if( _ioQueue.getSize() == _queueSize )
         _ioQueue.pop( );
@@ -119,7 +119,7 @@ void CacheStatistics::_onUnload( const CacheObject& cacheObject )
     LoadInfoPtr previous;
     _ioQueue.getBack( previous );
     _ioQueue.push( LoadInfoPtr( new LoadInfo( *previous, LoadInfo::OP_UNLOAD,
-                                              cacheObject.getCacheSize( ))));
+                                              cacheObject.getSize( ))));
 }
 
 std::ostream& operator<<( std::ostream& stream, const CacheStatistics& cacheStatistics )

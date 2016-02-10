@@ -45,7 +45,7 @@ public:
     /**
      * @return The empty size.
      */
-    virtual size_t getCacheSize( ) const { return 0; }
+    virtual size_t getSize( ) const { return 0; }
 
 private:
 

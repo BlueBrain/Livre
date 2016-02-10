@@ -35,16 +35,16 @@ BOOST_AUTO_TEST_CASE( testCacheObject )
     BOOST_CHECK( cacheObject->isValid() );
     BOOST_CHECK( cacheObject->getId() == cacheId );
     BOOST_CHECK( !cacheObject->isLoaded() );
-    BOOST_CHECK( cacheObject->getReferenceCount_() == 1 );
+    BOOST_CHECK( cacheObject->getRefCount() == 1 );
 
     livre::CacheObjectPtr refCacheObject = cacheObject;
-    BOOST_CHECK( cacheObject->getReferenceCount_() == 2 );
+    BOOST_CHECK( cacheObject->getRefCount() == 2 );
 
     refCacheObject->load();
     BOOST_CHECK( refCacheObject->isLoaded() );
 
     refCacheObject.reset();
-    BOOST_CHECK( cacheObject->getReferenceCount_() == 1 );
+    BOOST_CHECK( cacheObject->getRefCount() == 1 );
 
     cacheObject->unload();
     BOOST_CHECK( !cacheObject->isLoaded() );
@@ -53,54 +53,56 @@ BOOST_AUTO_TEST_CASE( testCacheObject )
     BOOST_CHECK( cacheObject->isLoaded() );
 
     test::CacheObjectObserver observer;
-    cacheObject->registerObserver( &observer );
+    test::ValidCacheObject validCacheObject( 42 );
+    validCacheObject.registerObserver( &observer );
+    validCacheObject.load();
 
     BOOST_CHECK( !observer.isUnloaded() );
-    cacheObject.reset();
+    validCacheObject.unload();
     BOOST_CHECK( observer.isUnloaded() );
 }
 
 BOOST_AUTO_TEST_CASE( testCache )
 {
     test::Cache cache( 2048 );
-    BOOST_CHECK( cache.getNumberOfCacheObjects() == 0 );
+    BOOST_CHECK( cache.getCount() == 0 );
 
     livre::CacheObjectPtr validCacheObject( new test::ValidCacheObject( 0 ) );
     BOOST_CHECK( validCacheObject->getId() == 0 );
 
-    livre::CacheObjectPtr cacheObject = cache.getObjectFromCache( 1 );
+    livre::CacheObjectPtr cacheObject = cache.get( 1 );
 
     size_t cacheSize = 0;
     BOOST_CHECK( cacheObject );
-    BOOST_CHECK( cache.getNumberOfCacheObjects() == 1 );
+    BOOST_CHECK( cache.getCount() == 1 );
     BOOST_CHECK( boost::static_pointer_cast< test::ValidCacheObject >( cacheObject )->getId() == 1 );
-    BOOST_CHECK( cacheObject->getReferenceCount_() == 2 );
+    BOOST_CHECK( cacheObject->getRefCount() == 2 );
     cacheObject->load();
-    cacheSize = cacheSize + cacheObject->getCacheSize();
+    cacheSize = cacheSize + cacheObject->getSize();
     BOOST_CHECK( cache.getStatistics().getUsedMemory() == cacheSize );
 
-    cacheObject = cache.getObjectFromCache( 2 );
+    cacheObject = cache.get( 2 );
     BOOST_CHECK( cacheObject );
-    BOOST_CHECK( cache.getNumberOfCacheObjects() == 2 );
+    BOOST_CHECK( cache.getCount() == 2 );
     BOOST_CHECK( boost::static_pointer_cast< test::ValidCacheObject >( cacheObject )->getId() == 2 );
-    BOOST_CHECK( cacheObject->getReferenceCount_() == 2 );
+    BOOST_CHECK( cacheObject->getRefCount() == 2 );
     cacheObject->load();
-    cacheSize = cacheSize + cacheObject->getCacheSize();
+    cacheSize = cacheSize + cacheObject->getSize();
     BOOST_CHECK( cache.getStatistics().getUsedMemory() == cacheSize );
 
-    cacheObject = cache.getObjectFromCache( 1 );
+    cacheObject = cache.get( 1 );
     BOOST_CHECK( cacheObject );
-    BOOST_CHECK( cache.getNumberOfCacheObjects() == 2 );
+    BOOST_CHECK( cache.getCount() == 2 );
     BOOST_CHECK( boost::static_pointer_cast< test::ValidCacheObject >( cacheObject )->getId() == 1 );
-    BOOST_CHECK( cacheObject->getReferenceCount_() == 2 );
+    BOOST_CHECK( cacheObject->getRefCount() == 2 );
     BOOST_CHECK( cache.getStatistics().getUsedMemory() == cacheSize );
 
-    livre::CacheObjectPtr cacheObjectTriggerClean = cache.getObjectFromCache( 3 );
+    livre::CacheObjectPtr cacheObjectTriggerClean = cache.get( 3 );
     BOOST_CHECK( cacheObjectTriggerClean );
 
-    BOOST_CHECK( cache.getNumberOfCacheObjects() == 3 );
+    BOOST_CHECK( cache.getCount() == 3 );
     BOOST_CHECK( boost::static_pointer_cast< test::ValidCacheObject >( cacheObjectTriggerClean )->getId() == 3 );
-    BOOST_CHECK( cacheObjectTriggerClean->getReferenceCount_() == 2 );
+    BOOST_CHECK( cacheObjectTriggerClean->getRefCount() == 2 );
     cacheObjectTriggerClean->load();
     BOOST_CHECK( cache.getStatistics().getUsedMemory() == cacheSize );
 }

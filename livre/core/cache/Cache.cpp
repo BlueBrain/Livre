@@ -28,12 +28,12 @@
 namespace livre
 {
 
-CacheObjectPtr Cache::getObjectFromCache( const CacheId& cacheId )
+CacheObjectPtr Cache::get( const CacheId& cacheId )
 {
     return _get( cacheId );
 }
 
-CacheObjectPtr Cache::getObjectFromCache( const CacheId& cacheId ) const
+CacheObjectPtr Cache::get( const CacheId& cacheId ) const
 {
     return _get( cacheId );
 }
@@ -77,8 +77,8 @@ Cache::~Cache()
     for( CacheMap::iterator it = _cacheMap.begin(); it != _cacheMap.end(); ++it )
     {
         CacheObjectPtr cacheObject = it->second;
-        cacheObject->unregisterObserver( this );
-        cacheObject->unregisterObserver( _statistics.get( ));
+        cacheObject->_unregisterObserver( this );
+        cacheObject->_unregisterObserver( _statistics.get( ));
     }
 }
 
@@ -91,8 +91,8 @@ CacheObjectPtr Cache::_get( const CacheId& cachetId )
     if( it == _cacheMap.end() )
     {
         CacheObjectPtr cacheObject( _generate( cachetId ));
-        cacheObject->registerObserver( this );
-        cacheObject->registerObserver( _statistics.get() );
+        cacheObject->_registerObserver( this );
+        cacheObject->_registerObserver( _statistics.get() );
         _cacheMap[ cachetId ] = cacheObject;
     }
 
@@ -126,7 +126,7 @@ void Cache::_unload( CachePolicy& cachePolicy,
     }
 }
 
-size_t Cache::getNumberOfCacheObjects() const
+size_t Cache::getCount() const
 {
     ReadLock readLock( _mutex );
     return _cacheMap.size();
