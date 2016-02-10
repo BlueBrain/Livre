@@ -36,7 +36,7 @@ public:
      */
     ValidCacheObject( const livre::CacheId& cacheId )
         : livre::CacheObject( cacheId )
-        , isLoadedVar_( false )
+        , _isLoaded_( false )
     { }
 
     size_t getCacheSize( ) const final { return CACHE_SIZE; }
@@ -44,23 +44,23 @@ public:
 private:
 
 
-    virtual bool _load( )
+    bool _load() final
     {
-        isLoadedVar_ = true;
+        _isLoaded_ = true;
         return true;
     }
 
-    virtual void _unload( )
+    void _unload() final
     {
-        isLoadedVar_ = false;
+        _isLoaded_ = false;
     }
 
-    virtual bool _isLoaded( ) const
+    bool _isLoaded() const final
     {
-        return isLoadedVar_;
+        return _isLoaded_;
     }
 
-    bool isLoadedVar_;
+    bool _isLoaded_;
 };
 
 typedef boost::shared_ptr< ValidCacheObject > ValidCacheObjectPtr;

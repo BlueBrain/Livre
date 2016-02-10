@@ -22,24 +22,16 @@
 namespace livre
 {
 
-LRUCache::LRUCache()
-{
-}
-
 void LRUCache::_onLoaded( const CacheObject& cacheObject LB_UNUSED )
 {
     applyPolicy( _cachePolicy );
 }
 
-void LRUCache::setMaximumMemory( const size_t maxMemBytes )
+LRUCache::LRUCache( const size_t maxMemBytes,
+                    float cleanUpRatio /* = 1.0f */ )
+    : _cachePolicy( maxMemBytes, cleanUpRatio )
 {
-    _cachePolicy.setMaximumMemory( maxMemBytes );
     getStatistics().setMaximumMemory( maxMemBytes );
-}
-
-void LRUCache::setCleanupRatio( float cleanUpRatio )
-{
-   _cachePolicy.setCleanupRatio( cleanUpRatio );
 }
 
 }

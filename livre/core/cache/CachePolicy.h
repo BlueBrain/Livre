@@ -61,8 +61,8 @@ protected:
      * @param modifiedObjectList The output list to unload.
      */
     virtual void _apply( const Cache& cache,
-                         const std::vector< CacheObject * >& cacheObjects,
-                         std::vector< CacheObject * >& modifiedObjects ) = 0;
+                         const std::vector< CacheObject* >& cacheObjects,
+                         std::vector< CacheObject* >& modifiedObjects ) = 0;
 
 
 

@@ -102,10 +102,11 @@ TextureUploadProcessor::TextureUploadProcessor( DashTreePtr dashTree,
     : GLContextTrait( context )
     , _dashTree( dashTree )
     , _shareContext( shareContext )
-    , _textureCache( GL_LUMINANCE8 )
     , _currentFrameID( 0 )
     , _threadOp( TO_NONE )
     , _vrParameters( vrParameters )
+    , _textureCache( vrParameters.getMaxGPUCacheMemoryMB() * LB_1MB,
+                     GL_LUMINANCE8 )
     , _allDataLoaded( false )
     , _needRedraw( false )
 {
@@ -120,7 +121,6 @@ const TextureCache& TextureUploadProcessor::getTextureCache() const
 bool TextureUploadProcessor::initializeThreadRun_()
 {
     setName( "TexUp" );
-    _textureCache.setMaximumMemory( _vrParameters.getMaxGPUCacheMemoryMB() * LB_1MB );
     LBASSERT( getGLContext( ));
     _shareContext->shareContext( getGLContext( ));
     return DashProcessor::initializeThreadRun_();

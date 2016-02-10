@@ -20,6 +20,7 @@
 #ifndef _TextureCache_h_
 #define _TextureCache_h_
 
+#include <livre/lib/api.h>
 #include <livre/lib/types.h>
 #include <livre/lib/cache/LRUCache.h>
 #include <livre/core/render/TexturePoolFactory.h>
@@ -36,22 +37,24 @@ class TextureCache : public LRUCache
 public:
 
     /**
+     * @param maxMemBytes Maximum texture memory
      * @param internalTextureFormat Internal texture format of OpenGL, it defines the memory usage.
      */
-    TextureCache( const int internalTextureFormat );
+    LIVRE_API TextureCache( const size_t maxMemBytes,
+                            const int internalTextureFormat );
 
     /**
      * @param cacheID The cacheId of the node.
      * @return A valid cache object if id is valid or data source includes the information for cache id.
      * If there is not, the object is constructed.
      */
-    TextureObject& getNodeTexture( const CacheId& cacheId );
+    LIVRE_API  TextureObject& getNodeTexture( const CacheId& cacheId );
 
     /**
      * @param cacheID The cacheId of the node.
      * @return A valid cache object if id is valid or data source includes the information for cache id.
      */
-    TextureObject& getNodeTexture( const CacheId& cacheId ) const;
+    LIVRE_API  TextureObject& getNodeTexture( const CacheId& cacheId ) const;
 
     /**
      * @param maxBlockSize Max block size of the texture.

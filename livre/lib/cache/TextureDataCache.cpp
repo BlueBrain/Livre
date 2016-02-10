@@ -30,9 +30,11 @@
 namespace livre
 {
 
-TextureDataCache::TextureDataCache( VolumeDataSourcePtr dataSource,
+TextureDataCache::TextureDataCache( const size_t maxMemBytes,
+                                    VolumeDataSourcePtr dataSource,
                                     const uint32_t textureType )
-    : _dataSource( dataSource )
+    : LRUCache( maxMemBytes )
+    , _dataSource( dataSource )
     , _textureType( textureType )
 {
     _statistics->setStatisticsName( "Data cache CPU");

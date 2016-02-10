@@ -33,24 +33,16 @@ namespace livre
  */
 class LRUCache : public Cache
 {
-public:
-    /**
-     * Sets the maximum memory.
-     * @param maxMemoryInBytes Maximum memory in bytes.
-     */
-    LIVRE_API void setMaximumMemory( const size_t maxMemBytes );
-
-    /**
-     * Sets the clean up ratio.
-     * @param cleanUpRatio Once the policy is activated, ( 1.0 - cleanUpRatio ) can be cleaned.
-     */
-    LIVRE_API void setCleanupRatio( float cleanUpRatio );
-
 protected:
-    LIVRE_API LRUCache();
+
+    /**
+     * @param maxMemBytes Maximum memory
+     * @param cleanUpRatio When cache cleanup is triggered, ratio to be cleaned.
+     */
+    LIVRE_API LRUCache( const size_t maxMemBytes, float cleanUpRatio = 1.0f );
 
 private:
-    LIVRE_API void _onLoaded( const CacheObject& cacheObject );
+    LIVRE_API void _onLoaded( const CacheObject& cacheObject ) final;
     LRUCachePolicy _cachePolicy;
 };
 

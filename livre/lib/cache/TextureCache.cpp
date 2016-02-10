@@ -30,8 +30,10 @@
 namespace livre
 {
 
-TextureCache::TextureCache( const GLint internalTextureFormat )
-    : _texturePoolFactory( internalTextureFormat )
+TextureCache::TextureCache( const size_t maxMemBytes,
+                            const GLint internalTextureFormat )
+    : LRUCache( maxMemBytes )
+    , _texturePoolFactory( internalTextureFormat )
 {
     _statistics->setStatisticsName( "Texture cache GPU");
 }

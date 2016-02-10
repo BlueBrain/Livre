@@ -33,41 +33,30 @@ struct LastUsedOrderOperator
     }
 };
 
-LRUCachePolicy::LRUCachePolicy()
-    : _maxMemBytes( 0 ),
-      _cleanUpRatio( 1.0 )
+LRUCachePolicy::LRUCachePolicy( size_t maxMemBytes,
+                                float cleanUpRatio /* = 1.0f */ )
+    : _maxMemBytes( maxMemBytes ),
+      _cleanUpRatio( cleanUpRatio )
 {}
-
-void LRUCachePolicy::setMaximumMemory( const size_t maxMemBytes )
-{
-    _maxMemBytes = maxMemBytes;
-}
-
-void LRUCachePolicy::setCleanupRatio( float cleanUpRatio )
-{
-   _cleanUpRatio = cleanUpRatio;
-}
 
 bool LRUCachePolicy::willPolicyBeActivated( const Cache& cache ) const
 {
-    const size_t usedMemoryInBytes = cache.getStatistics().getUsedMemory();
-    return usedMemoryInBytes >= _maxMemBytes;
+    const size_t usedMemBytes = cache.getStatistics().getUsedMemory();
+    return usedMemBytes >= _maxMemBytes;
 }
 
 bool LRUCachePolicy::isPolicySatisfied( const Cache& cache ) const
 {
-    const size_t usedMemoryInBytes = cache.getStatistics().getUsedMemory();
-    return usedMemoryInBytes < ( 1.0f - _cleanUpRatio ) * _maxMemBytes;
+    const size_t usedMemBytes = cache.getStatistics().getUsedMemory();
+    return usedMemBytes < ( 1.0f - _cleanUpRatio ) * _maxMemBytes;
 }
 
 void LRUCachePolicy::_apply( const Cache& cache LB_UNUSED,
-                             const std::vector< CacheObject * >& cacheObjects,
-                             std::vector< CacheObject * >& modifiedObjects )
+                             const std::vector< CacheObject* >& cacheObjects,
+                             std::vector< CacheObject* >& modifiedObjects )
 {
     modifiedObjects = cacheObjects;
-    std::sort( modifiedObjects.begin(),
-               modifiedObjects.end(),
-               LastUsedOrderOperator( ));
+    std::sort( modifiedObjects.begin( ), modifiedObjects.end( ), LastUsedOrderOperator() );
 
 }
 

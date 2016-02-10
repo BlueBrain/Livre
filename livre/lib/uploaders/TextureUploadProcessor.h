@@ -27,7 +27,6 @@
 #include <livre/core/dashpipeline/DashProcessor.h>
 #include <livre/core/dash/DashRenderStatus.h>
 #include <livre/core/render/GLContextTrait.h>
-#include <livre/lib/cache/LRUCachePolicy.h>
 #include <livre/lib/cache/TextureCache.h>
 
 namespace livre
@@ -67,12 +66,12 @@ private:
 
     DashTreePtr _dashTree;
     GLContextPtr _shareContext;
-    TextureCache _textureCache;
-    LRUCachePolicy _cachePolicy;
+
     uint64_t _currentFrameID;
     ThreadOperation _threadOp;
     CacheIdSet _protectUnloading;
     const VolumeRendererParameters& _vrParameters;
+    TextureCache _textureCache;
     bool _allDataLoaded;
     bool _needRedraw;
 };
