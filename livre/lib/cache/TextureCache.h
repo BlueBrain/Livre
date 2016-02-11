@@ -23,7 +23,6 @@
 #include <livre/lib/api.h>
 #include <livre/lib/types.h>
 #include <livre/lib/cache/LRUCache.h>
-#include <livre/core/render/TexturePoolFactory.h>
 
 namespace livre
 {
@@ -40,36 +39,33 @@ public:
      * @param maxMemBytes Maximum texture memory
      * @param internalTextureFormat Internal texture format of OpenGL, it defines the memory usage.
      */
-    LIVRE_API TextureCache( const size_t maxMemBytes,
-                            const int internalTextureFormat );
+    LIVRE_API TextureCache( TextureDataCache& textureDataCache,
+                            size_t maxMemBytes,
+                            int internalTextureFormat );
+
+    ~TextureCache();
 
     /**
-     * @param cacheID The cacheId of the node.
-     * @return A valid cache object if id is valid or data source includes the information for cache id.
-     * If there is not, the object is constructed.
-     */
-    LIVRE_API  TextureObject& getNodeTexture( const CacheId& cacheId );
-
-    /**
-     * @param cacheID The cacheId of the node.
-     * @return A valid cache object if id is valid or data source includes the information for cache id.
-     */
-    LIVRE_API  TextureObject& getNodeTexture( const CacheId& cacheId ) const;
-
-    /**
-     * @param maxBlockSize Max block size of the texture.
-     * @param format Format of the texture data.
-     * @param gpuDataType Data type of the texture data.
      * @return A texture pool for specific type of texture.
      */
-    TexturePoolPtr getTexturePool( const Vector3ui& maxBlockSize,
-                                   uint32_t format,
-                                   uint32_t gpuDataType );
+    LIVRE_API TexturePool& getTexturePool() const;
+
+    /**
+     * @return the data cache
+     */
+    LIVRE_API TextureDataCache& getDataCache();
+
+    /**
+     * @return the data cache
+     */
+    LIVRE_API const TextureDataCache& getDataCache() const;
 
 private:
 
     CacheObject* _generate( const CacheId& cacheID );
-    TexturePoolFactory _texturePoolFactory;
+
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 
 }

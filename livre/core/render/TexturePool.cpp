@@ -28,14 +28,14 @@ namespace livre
 
 #define glewGetContext() GLContext::glewGetContext()
 
-TexturePool::TexturePool( const Vector3i& maxBlockSize,
+TexturePool::TexturePool( const Vector3ui& maxBlockSize,
                           const GLint internalFormat,
                           const GLenum format,
                           const GLenum gpuDataType )
-    : maxBlockSize_( maxBlockSize )
-    , internalFormat_( internalFormat )
-    , format_( format )
-    , gpuDataType_( gpuDataType )
+    : _maxBlockSize( maxBlockSize )
+    , _internalFormat( internalFormat )
+    , _format( format )
+    , _gpuDataType( gpuDataType )
 {
 }
 
@@ -43,10 +43,10 @@ void TexturePool::generateTexture( TextureStatePtr textureState )
 {
     LBASSERT( textureState->textureId == INVALID_TEXTURE_ID );
 
-    if( !textureStack_.empty() )
+    if( !_textureStack.empty() )
     {
-        textureState->textureId = textureStack_.back();
-        textureStack_.pop_back();
+        textureState->textureId = _textureStack.back();
+        _textureStack.pop_back();
     }
     else
     {
@@ -60,9 +60,9 @@ void TexturePool::generateTexture( TextureStatePtr textureState )
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
         // Allocate a texture
-        glTexImage3D( GL_TEXTURE_3D, 0, internalFormat_,
-                      maxBlockSize_[0], maxBlockSize_[1], maxBlockSize_[2], 0,
-                      format_, gpuDataType_, (GLvoid *)NULL );
+        glTexImage3D( GL_TEXTURE_3D, 0, _internalFormat,
+                      _maxBlockSize[0], _maxBlockSize[1], _maxBlockSize[2], 0,
+                      _format, _gpuDataType, (GLvoid *)NULL );
 
         const GLenum glErr = glGetError();
         if ( glErr != GL_NO_ERROR )
@@ -76,28 +76,23 @@ void TexturePool::releaseTexture( TextureStatePtr textureState )
 {
     LBASSERT( textureState->textureId );
 
-    textureStack_.push_back( textureState->textureId );
+    _textureStack.push_back( textureState->textureId );
     textureState->textureId = INVALID_TEXTURE_ID;
 }
 
 GLint TexturePool::getInternalFormat() const
 {
-    return internalFormat_;
+    return _internalFormat;
 }
 
 GLenum TexturePool::getGPUDataType() const
 {
-    return gpuDataType_;
+    return _gpuDataType;
 }
 
 GLenum TexturePool::getFormat() const
 {
-    return format_;
-}
-
-const Vector3i& TexturePool::getMaxBlockSize( ) const
-{
-    return maxBlockSize_;
+    return _format;
 }
 
 }

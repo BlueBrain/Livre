@@ -18,6 +18,7 @@
  */
 
 #include <livre/lib/cache/TextureCache.h>
+#include <livre/lib/cache/TextureDataCache.h>
 #include <livre/lib/cache/TextureDataObject.h>
 #include <livre/lib/cache/TextureObject.h>
 
@@ -35,17 +36,149 @@ namespace livre
 
 #define glewGetContext() GLContext::glewGetContext()
 
-TextureObject::TextureObject()
-    : _lodTextureData( TextureDataObject::getEmptyPtr( ))
+/**
+ * The TextureObject class holds the informarmation for the data which is on the GPU.
+  */
+struct TextureObject::Impl
 {
-}
+    Impl( TextureObject& textureObject,
+          TextureCache& textureCache )
+       : _textureObject( textureObject )
+       , _textureCache( textureCache )
+       , _dataCache( textureCache.getDataCache( ))
+       , _textureState( new TextureState( ))
+       , _dataSource( textureCache.getDataCache( ).getDataSource( ))
+       , _texturePool( textureCache.getTexturePool( ))
+    {}
+
+    bool isLoaded() const
+    {
+        return _textureState && _textureState->textureId != INVALID_TEXTURE_ID;
+    }
+
+    bool load()
+    {
+        TextureDataObjectPtr rawData =
+                boost::static_pointer_cast< TextureDataObject >(
+                    _dataCache.get( _textureObject.getId( )));
+
+        if( !rawData->isLoaded( ))
+            return false;
+
+        initialize( );
+        _texturePool.generateTexture( _textureState );
+        LBASSERT( _textureState->textureId );
+        loadTextureToGPU( );
+        return true;
+    }
+
+    void unload( )
+    {
+        _texturePool.releaseTexture( _textureState );
+    #ifdef _DEBUG_
+        LBVERB << "Texture released : " << NodeId( getId( ))
+               << " Last used at : " << getLastUsed()
+               << " Number of references : " << getReferenceCount_( )
+               << std::endl;
+
+    #endif //_DEBUG
+    }
+
+    void initialize( )
+    {
+        // TODO: The internal format size should be calculated correctly
+        const Vector3f& overlap = _dataSource.getVolumeInformation().overlap;
+
+        const LODNode& lodNode =
+                _dataSource.getNode( NodeId( _textureObject.getId( )));
+
+        const Vector3f& size = lodNode.getVoxelBox().getDimension();
+        const Vector3f& maxSize = _dataSource.getVolumeInformation().maximumBlockSize;
+        const Vector3f& overlapf = overlap / maxSize;
+        _textureState->textureCoordsMax = size / maxSize;
+        _textureState->textureCoordsMin = overlapf;
+        _textureState->textureCoordsMax= _textureState->textureCoordsMax - overlapf;
+        _textureState->textureSize =
+                _textureState->textureCoordsMax - _textureState->textureCoordsMin;
+    }
+
+    size_t getSize() const
+    {
+        // L (luminance, e.g. greyscale): width * height * type size.
+        // LA (luminance and alpha, common for fonts): width * height * type size bytes.
+        // RGB (color, no alpha): width * height * type size bytes.
+        // RGBA (color with alpha): width * height * type size bytes.
+
+        uint32_t elementSize = 0;
+        switch( _dataCache.getTextureType( ))
+        {
+            case GL_UNSIGNED_BYTE:
+                elementSize = sizeof( char );
+                break;
+            case GL_FLOAT:
+                elementSize = sizeof( float );
+                break;
+            case GL_UNSIGNED_SHORT:
+                elementSize = sizeof( short );
+                break;
+        }
+
+        const Vector3ui& textureSize =
+                _dataSource.getVolumeInformation().maximumBlockSize;
+        return textureSize.product() * elementSize;
+    }
+
+    bool loadTextureToGPU() const
+    {
+        const NodeId nodeId( _textureObject.getId( ));
+        const LODNode& lodNode = _dataSource.getNode( nodeId );
+
+    #ifdef LIVRE_DEBUG_RENDERING
+        std::cout << "Upload "  << nodeId.getLevel() << ' '
+                  << lodNode.getRelativePosition() << " to "
+                  << _textureState->textureId << std::endl;
+    #endif
+
+        const Vector3ui& voxSizeVec =
+                lodNode.getVoxelBox().getDimension();
+
+        TextureDataObjectPtr rawData =
+                boost::static_pointer_cast< TextureDataObject >(
+                    _dataCache.get( _textureObject.getId( )));
+
+        _textureState->bind( );
+        glTexSubImage3D( GL_TEXTURE_3D, 0, 0, 0, 0,
+                         voxSizeVec[0], voxSizeVec[1], voxSizeVec[2],
+                         _texturePool.getFormat() ,
+                         _texturePool.getGPUDataType(),
+                         rawData->getDataPtr( ));
+
+        // Something went wrong with loading the data
+        // TODO: Log message
+        const GLenum glErr = glGetError();
+        if ( glErr != GL_NO_ERROR )
+        {
+            LBERROR << "Error loading the texture into GPU, error number : "  << glErr << std::endl;
+            return false;
+        }
+
+        glFinish( );
+        return true;
+    }
+
+    TextureObject& _textureObject;
+    TextureCache& _textureCache;
+    TextureDataCache& _dataCache;
+    TextureStatePtr _textureState;
+    VolumeDataSource& _dataSource;
+    TexturePool& _texturePool;
+};
+
 
 TextureObject::TextureObject( const CacheId& cacheId,
-                              TextureCachePtr textureCache )
+                              TextureCache& textureCache )
    : CacheObject( cacheId )
-   , _textureCache( textureCache )
-   , _textureState( new TextureState( ))
-   , _lodTextureData( TextureDataObject::getEmptyPtr( ))
+   , _impl( new Impl( *this, textureCache ))
 {
 }
 
@@ -53,193 +186,37 @@ TextureObject::~TextureObject()
 {
 }
 
-TextureObject* TextureObject::getEmptyPtr()
+bool TextureObject::_isLoaded() const
 {
-    static boost::shared_ptr< TextureObject > texture( new TextureObject );
-    return texture.get();
+    return _impl->isLoaded();
 }
 
-bool TextureObject::_isLoaded( ) const
+TextureStatePtr TextureObject::getTextureState()
 {
-    return _textureState->textureId != INVALID_TEXTURE_ID;
+    return _impl->_textureState;
 }
 
-bool TextureObject::operator==( const TextureObject& texture ) const
+ConstTextureStatePtr TextureObject::getTextureState() const
 {
-    return _textureState == texture._textureState;
+    return _impl->_textureState;
 }
 
-TextureStatePtr TextureObject::getTextureState( )
+bool TextureObject::_load()
 {
-    return _textureState;
+    return _impl->load();
 }
 
-ConstTextureStatePtr TextureObject::getTextureState( ) const
+void TextureObject::_unload()
 {
-    return _textureState;
+   return _impl->unload();
 }
 
-void TextureObject::setTextureDataObject( ConstTextureDataObjectPtr lodTextureData )
-{
-    _lodTextureData = lodTextureData;
-    _dataSource = _lodTextureData->getDataSource();
-
-    const NodeId nodeId( getId( ));
-    if( nodeId.getLevel() ==  0 )
-        setUnloadable( false );
-}
-
-bool TextureObject::_load( )
-{
-    if( !_lodTextureData )
-        return false;
-
-    if( !_lodTextureData->isLoaded()
-        || !_lodTextureData->isValid())
-    {
-        LBERROR << "Load texture is executed for invalid or unloaded data" << std::endl;
-        return false;
-    }
-
-    if( !_textureState->texturePoolPtr.get() )
-    {
-        const Vector3i& maxBlockSize = _dataSource->getVolumeInformation().maximumBlockSize;
-        const GLenum gpuDataType = _lodTextureData->getGPUDataType();
-        GLenum format;
-        switch( _dataSource->getVolumeInformation().compCount )
-        {
-            case 1:
-                format = GL_RED;
-                break;
-            case 3:
-                format = GL_RGB;
-                break;
-            default:
-                format = GL_RED;
-                break;
-        }
-
-        TexturePoolPtr pool = _textureCache->getTexturePool( maxBlockSize,
-                                                                format,
-                                                                gpuDataType );
-        _textureState->texturePoolPtr = pool;
-    }
-
-    _initialize( );
-
-    _textureState->texturePoolPtr->generateTexture( _textureState );
-    LBASSERT( _textureState->textureId );
-    _loadTextureToGPU( );
-    _lodTextureData.reset( TextureDataObject::getEmptyPtr() );
-    return true;
-}
-
-void TextureObject::_unload( )
-{
-    LBASSERT( _isValid() );
-
-    if( !_textureState->texturePoolPtr )
-        return;
-
-    _textureState->texturePoolPtr->releaseTexture( _textureState );
-#ifdef _DEBUG_
-    LBVERB << "Texture released : " << NodeId( getId( ))
-           << " Last used at : " << getLastUsed()
-           << " Number of references : " << getReferenceCount_( )
-           << std::endl;
-
-#endif //_DEBUG
-}
-
-void TextureObject::_initialize( )
-{
-    // TODO: The internal format size should be calculated correctly
-    const Vector3f& overlap = _dataSource->getVolumeInformation().overlap;
-
-    const LODNode& lodNode =
-            _dataSource->getNode( NodeId( getId( )));
-
-    const Vector3f& size = lodNode.getVoxelBox().getDimension();
-    const Vector3f& maxSize = _textureState->texturePoolPtr->getMaxBlockSize();
-    const Vector3f& overlapf = overlap / maxSize;
-    _textureState->textureCoordsMax = size / maxSize;
-    _textureState->textureCoordsMin = overlapf;
-    _textureState->textureCoordsMax= _textureState->textureCoordsMax - overlapf;
-    _textureState->textureSize = _textureState->textureCoordsMax - _textureState->textureCoordsMin;
-}
-
-GLenum TextureObject::getTextureType() const
-{
-    return _textureState->texturePoolPtr->getGPUDataType();
-}
-
-size_t TextureObject::getSize( ) const
+size_t TextureObject::getSize() const
 {
     if( !isValid() )
         return 0;
 
-    // L (luminance, e.g. greyscale): width * height * type size.
-    // LA (luminance and alpha, common for fonts): width * height * type size bytes.
-    // RGB (color, no alpha): width * height * type size bytes.
-    // RGBA (color with alpha): width * height * type size bytes.
-
-    uint32_t elementSize = 0;
-    switch( _textureState->texturePoolPtr->getGPUDataType() )
-    {
-        case GL_UNSIGNED_BYTE:
-            elementSize = sizeof( char );
-            break;
-        case GL_FLOAT:
-            elementSize = sizeof( float );
-            break;
-        case GL_UNSIGNED_SHORT:
-            elementSize = sizeof( short );
-            break;
-    }
-
-    const Vector3ui& textureSize =
-            _textureState->texturePoolPtr->getMaxBlockSize();
-    return textureSize.product() * elementSize;
-}
-
-const TextureDataObject& TextureObject::_getTextureDataObject() const
-{
-    return *static_cast< const TextureDataObject* >( _lodTextureData.get( ));
-}
-
-bool TextureObject::_loadTextureToGPU() const
-{
-    const NodeId nodeId( getId( ));
-    const LODNode& lodNode =
-            _dataSource->getNode( NodeId( getId( )));
-
-#ifdef LIVRE_DEBUG_RENDERING
-    std::cout << "Upload "  << nodeId.getLevel() << ' '
-              << lodNode.getRelativePosition() << " to "
-              << _textureState->textureId << std::endl;
-#endif
-
-    const Vector3ui& voxSizeVec =
-            lodNode.getVoxelBox().getDimension();
-
-    _textureState->bind( );
-    glTexSubImage3D( GL_TEXTURE_3D, 0, 0, 0, 0,
-                     voxSizeVec[0], voxSizeVec[1], voxSizeVec[2],
-                     _textureState->texturePoolPtr->getFormat() ,
-                     _textureState->texturePoolPtr->getGPUDataType(),
-                     _getTextureDataObject().getDataPtr( ));
-
-    // Something went wrong with loading the data
-    // TODO: Log message
-    const GLenum glErr = glGetError();
-    if ( glErr != GL_NO_ERROR )
-    {
-        LBERROR << "Error loading the texture into GPU, error number : "  << glErr << std::endl;
-        return false;
-    }
-
-    glFinish( );
-    return true;
+    return _impl->getSize();
 }
 
 }

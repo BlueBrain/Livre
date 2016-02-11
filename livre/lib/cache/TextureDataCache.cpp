@@ -30,49 +30,55 @@
 namespace livre
 {
 
+struct TextureDataCache::Impl
+{
+public:
+    /**
+     * @param maxMemBytes Maximum data memory
+     * @param volumeDataSource The source where the volume data should
+     * be loaded from
+     * @param type The type of the data for the GPU.
+     */
+    Impl( VolumeDataSource& dataSource,
+          const uint32_t textureType  )
+        : _dataSource( dataSource )
+        , _textureType( textureType )
+    {}
+
+    VolumeDataSource& _dataSource;
+    const uint32_t _textureType;
+};
+
 TextureDataCache::TextureDataCache( const size_t maxMemBytes,
-                                    VolumeDataSourcePtr dataSource,
+                                    VolumeDataSource& dataSource,
                                     const uint32_t textureType )
     : LRUCache( maxMemBytes )
-    , _dataSource( dataSource )
-    , _textureType( textureType )
+    , _impl( new Impl( dataSource, textureType ))
 {
-    _statistics->setStatisticsName( "Data cache CPU");
+    _statistics->setName( "Data cache CPU");
 }
 
 CacheObject* TextureDataCache::_generate( const CacheId& cacheId )
 {
-    if( cacheId == INVALID_CACHE_ID )
-        return static_cast< CacheObject* >( TextureDataObject::getEmptyPtr( ));
-
-    return new TextureDataObject( cacheId, _dataSource, _textureType );
+    return new TextureDataObject( cacheId, *this );
 }
 
-TextureDataObject& TextureDataCache::getNodeTextureData( const CacheId& cacheId )
+TextureDataCache::~TextureDataCache()
+{}
+
+VolumeDataSource& TextureDataCache::getDataSource()
 {
-    if( cacheId == INVALID_CACHE_ID )
-        return *TextureDataObject::getEmptyPtr();
-
-    TextureDataObject* internalTextureData =
-            static_cast< TextureDataObject *>( _get( cacheId ).get( ));
-
-    return *internalTextureData;
+    return _impl->_dataSource;
 }
 
-TextureDataObject& TextureDataCache::getNodeTextureData( const CacheId& cacheId ) const
+const VolumeDataSource& TextureDataCache::getDataSource() const
 {
-    if( cacheId == INVALID_CACHE_ID )
-        return *TextureDataObject::getEmptyPtr();
-
-    TextureDataObject* internalTextureData =
-            static_cast< TextureDataObject *>( _get( cacheId ).get( ));
-
-    return internalTextureData != NULL ? *internalTextureData : *TextureDataObject::getEmptyPtr();
+    return _impl->_dataSource;
 }
 
-VolumeDataSourcePtr TextureDataCache::getDataSource()
+uint32_t TextureDataCache::getTextureType() const
 {
-    return _dataSource;
+    return _impl->_textureType;
 }
 
 }

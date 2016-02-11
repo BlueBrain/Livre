@@ -56,8 +56,9 @@ public:
                               DashTreePtr dashTree,
                               GLContextPtr shareContext,
                               GLContextPtr context,
+                              TextureDataCache& textureDataCache,
                               const VolumeRendererParameters& parameters )
-        : TextureUploadProcessor( dashTree, shareContext, context, parameters )
+        : TextureUploadProcessor( dashTree, shareContext, context, textureDataCache, parameters )
         , _config( config )
     {}
 
@@ -194,7 +195,8 @@ public:
         _textureUploader.reset(
             new EqTextureUploadProcessor( *config, dashTree, _windowContext,
                                           textureUploadContext,
-                                     pipe->getFrameData()->getVRParameters( )));
+                                          node->getTextureDataCache( ),
+                                          pipe->getFrameData()->getVRParameters( )));
     }
 
     void releasePipelineProcessors()

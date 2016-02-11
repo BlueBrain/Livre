@@ -30,11 +30,17 @@ namespace livre
 
 CacheObjectPtr Cache::get( const CacheId& cacheId )
 {
+    if( cacheId == INVALID_CACHE_ID )
+        return CacheObjectPtr();
+
     return _get( cacheId );
 }
 
 CacheObjectPtr Cache::get( const CacheId& cacheId ) const
 {
+    if( cacheId == INVALID_CACHE_ID )
+        return CacheObjectPtr();
+
     return _get( cacheId );
 }
 

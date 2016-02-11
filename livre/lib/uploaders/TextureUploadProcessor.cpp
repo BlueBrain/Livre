@@ -98,6 +98,7 @@ public:
 TextureUploadProcessor::TextureUploadProcessor( DashTreePtr dashTree,
                                                 GLContextPtr shareContext,
                                                 GLContextPtr context,
+                                                TextureDataCache& textureDataCache,
                                                 const VolumeRendererParameters& vrParameters )
     : GLContextTrait( context )
     , _dashTree( dashTree )
@@ -105,7 +106,8 @@ TextureUploadProcessor::TextureUploadProcessor( DashTreePtr dashTree,
     , _currentFrameID( 0 )
     , _threadOp( TO_NONE )
     , _vrParameters( vrParameters )
-    , _textureCache( vrParameters.getMaxGPUCacheMemoryMB() * LB_1MB,
+    , _textureCache( textureDataCache,
+                     vrParameters.getMaxGPUCacheMemoryMB() * LB_1MB,
                      GL_LUMINANCE8 )
     , _allDataLoaded( false )
     , _needRedraw( false )
@@ -227,10 +229,10 @@ void TextureLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state 
     if( texPtr->isLoaded( ))
         return;
 
-    TextureObject& texture = _cache.getNodeTexture( lodNode.getNodeId().getId( ));
-    if( texture.isLoaded() )
+    CacheObjectPtr texture = _cache.get( lodNode.getNodeId().getId( ));
+    if( texture->isLoaded() )
     {
-        renderNode.setTextureObject( &texture );
+        renderNode.setTextureObject( texture );
         _output->commit( CONNECTION_ID );
         return;
     }
@@ -243,17 +245,14 @@ void TextureLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state 
             __itt_task_begin ( ittTextureLoadDomain, __itt_null, __itt_null,
                                ittTextureLoadTask );
 #endif //_ITT_DEBUG_
-            TextureObject& lodTexture = _cache.getNodeTexture( lodNode.getNodeId().getId( ));
-            lodTexture.setTextureDataObject(
-                            static_cast< const TextureDataObject * >( textureData.get() ) );
-            lodTexture.load();
+            CacheObjectPtr lodTexture = _cache.get( lodNode.getNodeId().getId( ));
+            lodTexture->load();
 
 #ifdef _ITT_DEBUG_
             __itt_task_end( ittTextureLoadDomain );
 #endif //_ITT_DEBUG_
-            renderNode.setTextureObject( &lodTexture );
-
-            renderNode.setTextureDataObject( TextureDataObject::getEmptyPtr() );
+            renderNode.setTextureObject( lodTexture );
+            renderNode.setTextureDataObject( textureData );
             _output->commit( CONNECTION_ID );
             _needRedraw = true;
         }

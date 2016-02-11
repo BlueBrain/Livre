@@ -45,7 +45,7 @@ struct RenderView::Impl
 
         DashRenderNode renderNode( dashNode );
         if( renderNode.getLODNode().getRefLevel() != 0 )
-            renderNode.setTextureObject( TextureObject::getEmptyPtr( ));
+            renderNode.setTextureObject( EmptyCacheObject::getEmptyPtr( ));
     }
 
     void freeTextures( const FrameInfo& frameInfo )

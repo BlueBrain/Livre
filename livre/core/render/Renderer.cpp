@@ -19,7 +19,6 @@
 
 #include "Renderer.h"
 
-#include <livre/core/render/TexturePoolFactory.h>
 #include <livre/core/render/Frustum.h>
 #include <livre/core/render/RenderBrick.h>
 #include <livre/core/data/LODNode.h>

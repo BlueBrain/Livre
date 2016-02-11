@@ -47,6 +47,7 @@ public:
     LIVRE_API TextureUploadProcessor( DashTreePtr dashTree,
                                       GLContextPtr shareContext,
                                       GLContextPtr context,
+                                      TextureDataCache& textureDataCache,
                                       const VolumeRendererParameters& vrParameters );
 
     /** @return the texture cache */

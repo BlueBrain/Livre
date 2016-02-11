@@ -37,52 +37,23 @@ class TextureDataObject : public CacheObject
 public:
     ~TextureDataObject();
 
-    /** @return True if two data object has the same cache id. */
-    bool operator==( const TextureDataObject& data ) const;
-
-    /** @return The data source. */
-    ConstVolumeDataSourcePtr getDataSource() const;
-
-    /** @return The GPU data type */
-    uint32_t getGPUDataType() const;
-
     /** @return A pointer to the data or 0 if no data is loaded. */
     const void* getDataPtr() const;
-
-    /** @return An empty data object ptr. */
-    static TextureDataObject* getEmptyPtr();
 
 private:
     friend class TextureDataCache;
 
-    TextureDataObject();
     TextureDataObject( const CacheId& cacheId,
-                       VolumeDataSourcePtr dataSourcePtr,
-                       uint32_t gpuDataType );
+                       TextureDataCache& dataCache );
 
     bool _load() final;
     void _unload() final;
     bool _isLoaded() const final;
     size_t getSize() const final;
 
-    template< class T >
-    bool _setTextureData( bool quantize );
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 
-    size_t _getDataSize() const;
-    size_t _getRawDataSize() const;
-
-    /**
-     * Quantizes data into the given format with T.
-     * @param rawData The raw data from the data source to quantize
-     * @param formattedData The quantized data is dumped into the vector.
-     */
-    template< class T >
-    void _getQuantizedData( const T* rawData,
-                            std::vector< T >& formattedData ) const;
-
-    AllocMemoryUnitPtr _data;
-    ConstVolumeDataSourcePtr _dataSource;
-    uint32_t _gpuDataType;
 };
 
 }

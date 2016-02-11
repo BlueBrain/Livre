@@ -36,24 +36,8 @@ class TextureObject : public CacheObject
     friend class TextureCache;
 
 public:
-    LIVRE_API TextureObject();
 
     LIVRE_API virtual ~TextureObject();
-
-    /**
-     * @return True if two data object has the same cache id.
-     */
-    LIVRE_API bool operator==( const TextureObject& texture ) const;
-
-    /**
-     * @return The GPU memory usage.
-     */
-    size_t getSize() const final;
-
-    /**
-     * @return The texture type.
-     */
-    LIVRE_API uint32_t getTextureType() const;
 
     /**
      * @return The texture state.
@@ -65,33 +49,18 @@ public:
      */
     LIVRE_API ConstTextureStatePtr getTextureState() const;
 
-    /**
-     * Sets the texture data object for data retrieval.
-     * @param lodTextureData livre::TextureDataObject.
-     */
-    LIVRE_API void setTextureDataObject( ConstTextureDataObjectPtr lodTextureData );
-
-    /**
-     * @return An empty data object ptr.
-     */
-    static TextureObject* getEmptyPtr();
-
 private:
 
     TextureObject( const CacheId& cacheId,
-                   TextureCachePtr textureCache );
-    const TextureDataObject& _getTextureDataObject() const;
+                   TextureCache& textureCache );
 
     bool _load( ) final;
     void _unload( ) final;
     bool _isLoaded( ) const final;
-    bool _loadTextureToGPU( ) const;
-    void _initialize( );
+    size_t getSize() const final;
 
-    TextureCachePtr _textureCache;
-    TextureStatePtr _textureState;
-    ConstTextureDataObjectPtr _lodTextureData;
-    ConstVolumeDataSourcePtr _dataSource;
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 
 }

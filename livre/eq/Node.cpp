@@ -64,7 +64,7 @@ public:
                 vrRenderParameters.getMaxCPUCacheMemoryMB() * LB_1MB;
 
         _textureDataCache.reset( new livre::TextureDataCache( maxMemBytes,
-                                                              _dataSource,
+                                                              *_dataSource.get(),
                                                               GL_UNSIGNED_BYTE ));
     }
 

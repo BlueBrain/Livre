@@ -85,7 +85,6 @@ class RenderBrick;
 class Renderer;
 class RootNode;
 class TexturePool;
-class TexturePoolFactory;
 class View;
 class VisitState;
 class VolumeDataSource;
@@ -127,7 +126,6 @@ typedef boost::shared_ptr< TextureState > TextureStatePtr;
 typedef boost::shared_ptr< const TextureState > ConstTextureStatePtr;
 typedef boost::shared_ptr< VolumeDataSource > VolumeDataSourcePtr;
 typedef boost::shared_ptr< const VolumeDataSource > ConstVolumeDataSourcePtr;
-typedef boost::shared_ptr< TexturePool > TexturePoolPtr;
 typedef boost::shared_ptr< DashTree > DashTreePtr;
 typedef boost::shared_ptr< const DashTree > ConstDashTreePtr;
 typedef boost::shared_ptr< EventHandler > EventHandlerPtr;
@@ -186,7 +184,6 @@ typedef std::vector< NodeId > NodeIds;
 typedef std::vector< CacheObjectPtr > CacheObjects;
 typedef std::vector< ConstCacheObjectPtr > ConstCacheObjects;
 typedef std::vector< RenderBrickPtr > RenderBricks;
-typedef std::vector< TexturePoolPtr > TexturePools;
 
 /**
  * Map definitions

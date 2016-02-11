@@ -150,8 +150,8 @@ bool DataUploadProcessor::initializeThreadRun_()
     setName( "DataUp" );
     LBASSERT( getGLContext( ));
     _shareContext->shareContext( getGLContext( ));
-    VolumeDataSourcePtr dataSource = _textureDataCache.getDataSource();
-    dataSource->initializeGL();
+    VolumeDataSource& dataSource = _textureDataCache.getDataSource();
+    dataSource.initializeGL();
     return DashProcessor::initializeThreadRun_();
 }
 
@@ -247,18 +247,16 @@ void DataLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state )
     if( texture->isLoaded( ))
         return;
 
-    const TextureDataObject& tData = _cache.getNodeTextureData(
-                                         node.getNodeId().getId( ));
-    if( tData.isLoaded( ))
+    const ConstCacheObjectPtr tData = _cache.get( node.getNodeId().getId( ));
+    if( tData->isLoaded( ))
         return;
 
 #ifdef _ITT_DEBUG_
     __itt_task_begin( ittDataLoadDomain, __itt_null, __itt_null,
                       ittDataLoadTask );
 #endif //_ITT_DEBUG_
-    TextureDataObject& textureData =
-        _cache.getNodeTextureData( node.getNodeId().getId( ));
-    textureData.load( );
+    CacheObjectPtr textureData = _cache.get( node.getNodeId().getId( ));
+    textureData->load( );
     if( _clock.getTime64() > 1000 ) // commit once every second
     {
         _clock.reset();
@@ -296,11 +294,10 @@ void DepthCollectorVisitor::visit( DashRenderNode& renderNode, VisitState& state
         return;
 
     // Triggers creation of the cache object.
-    TextureDataObject& textureData =
-            _cache.getNodeTextureData( lodNode.getNodeId().getId( ));
-    if( textureData.isLoaded() )
+    const ConstCacheObjectPtr textureData = _cache.get( lodNode.getNodeId().getId( ));
+    if( textureData->isLoaded() )
     {
-        renderNode.setTextureDataObject( &textureData );
+        renderNode.setTextureDataObject( textureData );
         _output->commit( CONNECTION_ID );
         return;
     }
@@ -317,16 +314,15 @@ void DepthSortedDataLoaderVisitor::visit( DashRenderNode& renderNode,
     __itt_task_begin( ittDataLoadDomain, __itt_null, __itt_null,
                       ittDataLoadTask );
 #endif //_ITT_DEBUG_
-    TextureDataObject& textureData =
-            static_cast< const TextureDataCache& >
-            ( _cache ).getNodeTextureData( lodNode.getNodeId().getId( ));
-    textureData.load();
+
+    CacheObjectPtr textureData = _cache.get( lodNode.getNodeId().getId( ));
+    textureData->load();
 
 #ifdef _ITT_DEBUG_
     __itt_task_end( ittDataLoadDomain );
 #endif //_ITT_DEBUG_
 
-    renderNode.setTextureDataObject( &textureData );
+    renderNode.setTextureDataObject( textureData );
 
 #ifdef _DEBUG_
     const ConstCacheObjectPtr tData = renderNode.getTextureDataObject();

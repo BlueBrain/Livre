@@ -46,7 +46,7 @@ public:
     /**
      * @param statisticsName The name of the statistics.
      */
-    void setStatisticsName( const std::string& statisticsName )
+    void setName( const std::string& statisticsName )
         { _name = statisticsName; }
 
     /** @param Maximum memory in bytes used by the associated cache. */

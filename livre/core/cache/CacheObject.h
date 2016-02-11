@@ -102,6 +102,11 @@ public:
      */
     LIVRECORE_API void touch();
 
+    /**
+     * @return On default returns true if cache ids are same
+     */
+    virtual bool operator==( const CacheObject& cacheObject ) const;
+
 protected:
 
     friend class Cache;
@@ -136,11 +141,6 @@ protected:
      * @return The unconst object.
      */
     CacheObject* _getUnconst() const { return const_cast< CacheObject * >( this ); }
-
-    /**
-     * @return On default returns true if cache ids are same
-     */
-    virtual bool operator==( const CacheObject& cacheObject ) const;
 
     /**
      * @param observer is added to list of observers.

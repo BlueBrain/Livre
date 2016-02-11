@@ -18,6 +18,7 @@
  */
 
 #include <livre/lib/cache/TextureCache.h>
+#include <livre/lib/cache/TextureDataCache.h>
 #include <livre/lib/cache/TextureDataObject.h>
 #include <livre/lib/cache/TextureObject.h>
 
@@ -29,50 +30,69 @@
 
 namespace livre
 {
+struct TextureCache::Impl
+{
+    Impl( TextureDataCache& dataCache,
+          const int internalTextureFormat )
+        : _dataCache( dataCache )
+    {
+        const VolumeDataSource& dataSource = _dataCache.getDataSource();
+        const VolumeInformation& info = dataSource.getVolumeInformation();
 
-TextureCache::TextureCache( const size_t maxMemBytes,
+        uint32_t format;
+        switch( info.compCount )
+        {
+            case 1:
+                format = GL_RED;
+                break;
+            case 3:
+                format = GL_RGB;
+                break;
+            default:
+                format = GL_RED;
+                break;
+        }
+
+        _texturePool.reset( new TexturePool( info.maximumBlockSize,
+                                             internalTextureFormat,
+                                             format,
+                                             dataCache.getTextureType( )));
+    }
+
+    TextureDataCache& _dataCache;
+    std::unique_ptr< TexturePool > _texturePool;
+};
+
+TextureCache::TextureCache( TextureDataCache& dataCache,
+                            const size_t maxMemBytes,
                             const GLint internalTextureFormat )
     : LRUCache( maxMemBytes )
-    , _texturePoolFactory( internalTextureFormat )
+    , _impl( new Impl( dataCache, internalTextureFormat ))
 {
-    _statistics->setStatisticsName( "Texture cache GPU");
+    _statistics->setName( "Texture cache GPU");
 }
 
 CacheObject* TextureCache::_generate( const CacheId& cacheId  )
 {
-    return new TextureObject( cacheId,
-                              TextureCachePtr( this, DontDeleteObject< TextureCache >( )));
+    return new TextureObject( cacheId, *this );
 }
 
-TextureObject& TextureCache::getNodeTexture( const CacheId& cacheId )
+TextureCache::~TextureCache()
+{}
+
+TexturePool& TextureCache::getTexturePool() const
 {
-    if( cacheId == INVALID_CACHE_ID )
-        return *TextureObject::getEmptyPtr();
-
-    TextureObject* internalTexture = static_cast< TextureObject *>(
-                _get( cacheId ).get( ));
-
-    return *internalTexture;
+    return *_impl->_texturePool.get();
 }
 
-TextureObject& TextureCache::getNodeTexture( const CacheId& cacheId ) const
+TextureDataCache& TextureCache::getDataCache()
 {
-    if( cacheId == INVALID_CACHE_ID )
-        return *TextureObject::getEmptyPtr();
-
-    TextureObject* internalTexture =
-            static_cast< TextureObject* >( _get( cacheId ).get( ));
-
-    return internalTexture != NULL ? *internalTexture : *TextureObject::getEmptyPtr();
+    return _impl->_dataCache;
 }
 
-TexturePoolPtr TextureCache::getTexturePool( const Vector3ui& maxBlockSize,
-                                             const GLenum format,
-                                             const GLenum gpuDataType)
+const TextureDataCache& TextureCache::getDataCache() const
 {
-    return _texturePoolFactory.findTexturePool( maxBlockSize,
-                                                format,
-                                                gpuDataType );
+    return _impl->_dataCache;
 }
 
 }

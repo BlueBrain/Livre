@@ -27,10 +27,10 @@ namespace livre
 
 
 TextureState::TextureState()
-    :  textureCoordsMin( 0.0f ),
-       textureCoordsMax( 0.0f ),
-       textureSize( 0.0f ),
-       textureId( INVALID_TEXTURE_ID )
+    : textureCoordsMin( 0.0f )
+    , textureCoordsMax( 0.0f )
+    , textureSize( 0.0f )
+    , textureId( INVALID_TEXTURE_ID )
 {
 }
 
