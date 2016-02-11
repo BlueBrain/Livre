@@ -20,6 +20,7 @@
 #include "Renderer.h"
 
 #include <livre/core/render/Frustum.h>
+#include <livre/core/render/View.h>
 #include <livre/core/render/RenderBrick.h>
 #include <livre/core/data/LODNode.h>
 #include <eq/gl.h>
@@ -30,36 +31,39 @@ namespace livre
 // Sort helper funtion for sorting the textures with their distances to viewpoint
 struct DistanceOperator
 {
-    explicit DistanceOperator( const Frustum& frustum ) : frustum_( frustum ) { }
+    explicit DistanceOperator( const Frustum& frustum )
+        : _frustum( frustum )
+    { }
+
     bool operator()( const RenderBrickPtr& rb1,
                      const RenderBrickPtr& rb2 )
     {
-        const float distance1 = ( frustum_.getModelViewMatrix() *
+        const float distance1 = ( _frustum.getModelViewMatrix() *
                                   rb1->getLODNode().getWorldBox().getCenter() ).length();
-        const float distance2 = ( frustum_.getModelViewMatrix() *
+        const float distance2 = ( _frustum.getModelViewMatrix() *
                                   rb2->getLODNode().getWorldBox().getCenter() ).length();
         return  distance1 < distance2;
     }
-    const Frustum& frustum_;
+    const Frustum& _frustum;
 };
 
 Renderer::Renderer( const uint32_t nComponents,
                     const GLenum gpuDataType,
                     const GLint internalFormat )
-    : gpuDataType_( gpuDataType ),
-      internalFormat_( internalFormat )
+    : _gpuDataType( gpuDataType ),
+      _internalFormat( internalFormat )
 {
 
     switch( nComponents )
     {
         case 1:
-            format_ = GL_RED;
+            _format = GL_RED;
             break;
         case 3:
-            format_ = GL_RGB;
+            _format = GL_RGB;
             break;
         default:
-            format_ = GL_RED;
+            _format = GL_RED;
             break;
     }
 }
@@ -70,17 +74,17 @@ Renderer::~Renderer()
 
 GLint Renderer::getInternalFormat() const
 {
-    return internalFormat_;
+    return _internalFormat;
 }
 
 GLenum Renderer::getGPUDataType() const
 {
-    return gpuDataType_;
+    return _gpuDataType;
 }
 
 GLenum Renderer::getFormat() const
 {
-    return format_;
+    return _format;
 }
 
 void Renderer::order_( RenderBricks &bricks, const Frustum &frustum ) const
@@ -90,24 +94,23 @@ void Renderer::order_( RenderBricks &bricks, const Frustum &frustum ) const
 }
 
 
-void Renderer::onFrameRender_( const GLWidget& glWidget, const View& view,
-                               const Frustum& frustum,
+void Renderer::_onFrameRender( const GLWidget& glWidget,
+                               const View& view,
                                const RenderBricks &bricks )
 {
     BOOST_FOREACH( const RenderBrickPtr& brick, bricks )
-        renderBrick_( glWidget, view, frustum, *brick );
+        _renderBrick( glWidget, view, *brick );
 }
 
 void Renderer::render( const GLWidget& glWidget,
                        const View& view,
-                       const Frustum& frustum,
                        const RenderBricks& brickList )
 {
     RenderBricks bricks = brickList;
-    order_( bricks, frustum );
-    onFrameStart_( glWidget, view, frustum, bricks );
-    onFrameRender_( glWidget, view, frustum, bricks );
-    onFrameEnd_( glWidget, view, frustum, bricks );
+    order_( bricks, view.getFrustum( ));
+    _onFrameStart( glWidget, view, bricks );
+    _onFrameRender( glWidget, view, bricks );
+    _onFrameEnd( glWidget, view, bricks );
 }
 
 }

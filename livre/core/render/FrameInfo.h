@@ -30,13 +30,14 @@ namespace livre
 /** Keeps the frame information. */
 struct FrameInfo
 {
+    LIVRECORE_API FrameInfo( const Frustum& frustum,
+                             const uint32_t frameId );
+
     NodeIds allNodes; //!< The list of nodes to be rendered.
     NodeIds notAvailableRenderNodes; //!< The unavailable nodes for rendering.
     ConstCacheObjects renderNodes; //!< The list of nodes to be rendered.
-    const Frustum& currentFrustum; //!< The current frustum.
-
-    LIVRECORE_API FrameInfo( const Frustum& cFrustum );
-    LIVRECORE_API void clear();
+    Frustum frustum; //!< The current frustum.
+    uint32_t frameId ; //!< The current frame id.
 };
 }
 

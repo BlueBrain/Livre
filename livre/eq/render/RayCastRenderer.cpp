@@ -59,8 +59,8 @@ const uint32_t minSamplesPerRay = 512;
 
 struct RayCastRenderer::Impl
 {
-    Impl( uint32_t samplesPerRay,
-          uint32_t samplesPerPixel,
+    Impl( const uint32_t samplesPerRay,
+          const uint32_t samplesPerPixel,
           const VolumeInformation& volInfo )
         :  _framebufferTexture(
             new eq::util::Texture( GL_TEXTURE_RECTANGLE_ARB, glewGetContext( )))
@@ -128,7 +128,6 @@ struct RayCastRenderer::Impl
 
     void onFrameStart( const GLWidget& glWidget LB_UNUSED,
                        const View& view LB_UNUSED,
-                       const Frustum& frustum,
                        const RenderBricks& renderBricks )
     {
     #ifdef LIVRE_DEBUG_RENDERING
@@ -172,6 +171,8 @@ struct RayCastRenderer::Impl
         // Enable shaders
         glUseProgram( program );
         GLint tParamNameGL;
+
+        const Frustum& frustum = view.getFrustum();
 
         tParamNameGL = glGetUniformLocation( program, "invProjectionMatrix" );
         glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getInvProjectionMatrix( ).array );
@@ -299,11 +300,11 @@ struct RayCastRenderer::Impl
     std::vector< uint32_t > _usedTextures[2]; // last, current frame
 };
 
-RayCastRenderer::RayCastRenderer( uint32_t samplesPerRay,
-                                  uint32_t samplesPerPixel,
-                                  const VolumeInformation& volInfo,
-                                  uint32_t gpuDataType,
-                                  int32_t internalFormat )
+RayCastRenderer::RayCastRenderer( const uint32_t samplesPerRay,
+                                  const uint32_t samplesPerPixel,
+                                  const uint32_t gpuDataType,
+                                  const int32_t internalFormat,
+                                  const VolumeInformation& volInfo )
     : Renderer( volInfo.compCount, gpuDataType, internalFormat ),
       _impl( new RayCastRenderer::Impl( samplesPerRay,
                                         samplesPerPixel,
@@ -318,18 +319,16 @@ void RayCastRenderer::update( const FrameData& frameData )
     _impl->update( frameData );
 }
 
-void RayCastRenderer::onFrameStart_( const GLWidget& glWidget,
+void RayCastRenderer::_onFrameStart( const GLWidget& glWidget,
                                      const View& view,
-                                     const Frustum& frustum,
                                      const RenderBricks& renderBricks )
 {
-    _impl->onFrameStart( glWidget, view, frustum, renderBricks );
+    _impl->onFrameStart( glWidget, view, renderBricks );
 }
 
 
-void RayCastRenderer::renderBrick_( const GLWidget& glWidget,
+void RayCastRenderer::_renderBrick( const GLWidget& glWidget,
                                     const View& view,
-                                    const Frustum&,
                                     const RenderBrick& renderBrick )
 {
     _impl->renderBrick( glWidget, view, renderBrick );

@@ -39,7 +39,7 @@ public:
     /**
      * @param rendererPtr Sets the renderer.
      */
-    LIVRECORE_API void setRenderer( RendererPtr rendererPtr );
+    LIVRECORE_API void setRenderer( RendererPtr renderer );
 
     /**
      * @param viewport Sets the viewport in the ( 0.f, 0.f, 1.f, 1.f ) normalized coordinates.
@@ -74,25 +74,15 @@ public:
 protected:
 
     /**
-     * Is called after the render list generated, and before the rendering.
-     * @param widget The widget to render to.
-     * @param frameInfo Frame information.
-     */
-    virtual void onPreRender_( const GLWidget& widget LB_UNUSED,
-                               const FrameInfo& frameInfo LB_UNUSED ) {}
-
-    /**
      * Is called after the rendering.
      * @param widget The widget to render to.
      * @param frameInfo Frame information.
      */
-    virtual void onPostRender_( const GLWidget& widget,
+    virtual void _onPostRender( const GLWidget& widget,
                                 const FrameInfo& frameInfo ) = 0;
 
-    RendererPtr rendererPtr_; //!< Renderer.
-    Viewport viewport_; //!< The normalized viewport.
-
-private:
+    RendererPtr _renderer; //!< Renderer.
+    Viewport _viewport; //!< The normalized viewport.
 };
 
 }

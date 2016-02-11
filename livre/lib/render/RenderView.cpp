@@ -75,7 +75,7 @@ RenderView::~RenderView()
     delete _impl;
 }
 
-void RenderView::onPostRender_( const GLWidget&,
+void RenderView::_onPostRender( const GLWidget&,
                                 const FrameInfo& frameInfo )
 {
     _impl->freeTextures( frameInfo );

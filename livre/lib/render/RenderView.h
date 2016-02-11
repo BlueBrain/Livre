@@ -41,7 +41,7 @@ public:
     LIVRE_API ~RenderView();
 
 private:
-    LIVRE_API void onPostRender_( const GLWidget& widget,
+    LIVRE_API void _onPostRender( const GLWidget& widget,
                                   const FrameInfo& frameInfo ) final;
 
     struct Impl;

@@ -21,15 +21,12 @@
 
 namespace livre
 {
-FrameInfo::FrameInfo( const Frustum& cFrustum )
-    : currentFrustum( cFrustum )
-{}
 
-void FrameInfo::clear()
+FrameInfo::FrameInfo( const Frustum& frustum_,
+                      const uint32_t frameId_ )
+    : frustum( frustum_ )
+    , frameId( frameId_ )
 {
-    allNodes.clear();
-    notAvailableRenderNodes.clear();
-    renderNodes.clear();
 }
 
 }

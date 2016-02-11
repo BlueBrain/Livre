@@ -127,7 +127,7 @@ public:
     explicit Channel( livre::Channel* channel )
           : _channel( channel )
           , _glWidgetPtr( new EqGLWidget( channel ))
-          , _frameInfo( _frustum )
+          , _frameInfo( _frustum, INVALID_FRAME )
     {}
 
     void initializeFrame()
@@ -166,11 +166,11 @@ public:
         RendererPtr renderer( new RayCastRenderer(
                                   nSamplesPerRay,
                                   nSamplesPerPixel,
-                                  dataSource->getVolumeInformation(),
                                   GL_UNSIGNED_BYTE,
-                                  GL_LUMINANCE8 ));
+                                  GL_LUMINANCE8,
+                                  dataSource->getVolumeInformation( )));
 
-        _renderViewPtr->setRenderer( renderer);
+        _renderViewPtr->setRenderer( renderer );
     }
 
     const Frustum& setupFrustum()
@@ -317,8 +317,9 @@ public:
 
         applyCamera();
         setupFrustum();
-        const DashRenderNodes& visibles = requestData();
+        _frameInfo = FrameInfo( _frustum, frame );
 
+        const DashRenderNodes& visibles = requestData();
         const eq::fabric::Viewport& vp = _channel->getViewport( );
         const Viewport viewport( vp.x, vp.y, vp.w, vp.h );
         _renderViewPtr->setViewport( viewport );
@@ -346,7 +347,6 @@ public:
         const AvailableSetGenerator generateSet( node->getDashTree(),
                                                  window->getTextureCache( ));
 
-        _frameInfo.clear();
         for( const auto& visible : visibles )
             _frameInfo.allNodes.push_back(visible.getLODNode().getNodeId());
         generateSet.generateRenderingSet( _frameInfo );
