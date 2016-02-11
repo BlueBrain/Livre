@@ -20,6 +20,7 @@
 #ifndef _VolumeInformation_h_
 #define _VolumeInformation_h_
 
+#include <livre/core/api.h>
 #include <livre/core/mathTypes.h>
 #include <livre/core/data/NodeId.h>
 
@@ -45,7 +46,7 @@ enum DataType
 /** Properties of the volumetric data. */
 struct VolumeInformation
 {
-    VolumeInformation();
+    LIVRECORE_API VolumeInformation();
 
     /**
      * The endianness of the data.
@@ -102,7 +103,7 @@ struct VolumeInformation
     RootNode rootNode;
 
     /** @return the number of bytes per element. */
-    size_t getBytesPerVoxel() const;
+    LIVRECORE_API size_t getBytesPerVoxel() const;
 
     /** The frame range for the data sources. If there are no frames,
       * [0,0) range is the default value. In streaming data sources

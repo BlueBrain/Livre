@@ -20,7 +20,10 @@
 #include <iostream>
 #include <fstream>
 
-#include  <livre/lib/animation/CameraPath.h>
+#include <livre/lib/animation/CameraPath.h>
+
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 namespace livre
 {

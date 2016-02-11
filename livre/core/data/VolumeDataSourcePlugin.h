@@ -57,7 +57,7 @@ class VolumeDataSourcePlugin : public boost::noncopyable
 {
 public:
 
-    VolumeDataSourcePlugin();
+    LIVRECORE_API VolumeDataSourcePlugin();
 
     /** Needed by the PluginRegisterer. */
     typedef VolumeDataSourcePlugin PluginT;

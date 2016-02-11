@@ -52,7 +52,7 @@ ApplicationParameters::ApplicationParameters()
     , cameraPosition( 0, 0, 1 )
     , cameraLookAt( 0, 0, 0 )
     , frames( FULL_FRAME_RANGE )
-    , maxFrames( -1u )
+    , maxFrames( std::numeric_limits< uint32_t >::max( ))
     , animation( 0 )
     , isResident( false )
 {

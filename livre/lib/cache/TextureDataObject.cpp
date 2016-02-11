@@ -88,7 +88,7 @@ size_t TextureDataObject::getDataSize_() const
 
     const Vector3ui& overlap =
                 dataSourcePtr_->getVolumeInformation().overlap;
-    const uint32_t elemSize =
+    const size_t elemSize =
                 dataSourcePtr_->getVolumeInformation().getBytesPerVoxel();
     const Vector3ui blockSize =
                 lodNodePtr_->getBlockSize() + overlap * 2;
