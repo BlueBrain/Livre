@@ -120,6 +120,12 @@ public:
         ::memcpy( _rawData.getData(), sourceData, size * sizeof( T ) );
     }
 
+    void allocAndSetData( const void* sourceData, const size_t size )
+    {
+        alloc( sizeof( uint8_t ) * size );
+        ::memcpy( _rawData.getData(), sourceData, size * sizeof( uint8_t ) );
+    }
+
     /**
      * Allocate and copy the data from the given source and size
      * @param sourceData Source data vector.

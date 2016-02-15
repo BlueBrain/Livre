@@ -138,9 +138,10 @@ struct TextureObject::Impl
                   << lodNode.getRelativePosition() << " to "
                   << _textureState->textureId << std::endl;
     #endif
+        const Vector3ui& overlap = _dataSource.getVolumeInformation().overlap;
 
         const Vector3ui& voxSizeVec =
-                lodNode.getVoxelBox().getDimension();
+                lodNode.getBlockSize() + overlap * 2;
 
         TextureDataObjectPtr rawData =
                 boost::static_pointer_cast< TextureDataObject >(

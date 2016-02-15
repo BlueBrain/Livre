@@ -75,7 +75,7 @@ public:
         return _data->getData< void >();
     }
 
-    template< class T >
+    template< class DEST_TYPE >
     bool setTextureData( const bool quantize )
     {
         const NodeId nodeId( _dataObject.getId( ));
@@ -83,11 +83,11 @@ public:
         if( !data )
             return false;
 
-        const T* rawData = data->getData< T >();
+        const void* rawData = data->getData< void >();
         if( quantize )
         {
-            std::vector< T > textureData;
-            getQuantizedData< T >( rawData, textureData );
+            std::vector< DEST_TYPE > textureData;
+            getQuantizedData< DEST_TYPE >( rawData, textureData );
             _data->allocAndSetData( textureData );
         }
         else
@@ -95,9 +95,9 @@ public:
         return true;
     }
 
-    template< class T >
-    void getQuantizedData( const T* rawData,
-                           std::vector< T >& formattedData ) const
+    template< class DEST_TYPE >
+    void getQuantizedData( const void* rawData,
+                           std::vector< DEST_TYPE >& formattedData ) const
     {
         const VolumeInformation& volumeInfo = _dataSource.getVolumeInformation();
         const uint32_t compCount = volumeInfo.compCount;
@@ -110,49 +110,55 @@ public:
         {
            case DT_UINT8:
            {
+                const uint8_t* data = static_cast< const uint8_t* >( rawData );
                 const Vector3f min( std::numeric_limits< uint8_t >::min( ));
                 const Vector3f max( std::numeric_limits< uint8_t >::max( ));
-                unsignedQuantize( rawData, &formattedData[ 0 ], dataSize,
+                unsignedQuantize( data, &formattedData[ 0 ], dataSize,
                                   compCount, min, max );
                 break;
            }
            case DT_UINT16:
            {
+                const uint16_t* data = static_cast< const uint16_t* >( rawData );
                 const Vector3f min( std::numeric_limits< uint16_t >::min( ));
                 const Vector3f max( std::numeric_limits< uint16_t >::max( ));
-                unsignedQuantize( rawData, &formattedData[ 0 ], dataSize,
+                unsignedQuantize( data, &formattedData[ 0 ], dataSize,
                                   compCount, min, max );
                 break;
            }
            case DT_UINT32:
            {
+                const uint32_t* data = static_cast< const uint32_t* >( rawData );
                 const Vector3f min( std::numeric_limits< uint32_t >::min( ));
                 const Vector3f max( std::numeric_limits< uint32_t >::max( ));
-                unsignedQuantize( rawData, &formattedData[ 0 ], dataSize,
+                unsignedQuantize( data, &formattedData[ 0 ], dataSize,
                                   compCount, min, max );
                 break;
            }
            case DT_INT8:
            {
+                const int8_t* data = static_cast< const int8_t* >( rawData );
                 const Vector3f min( std::numeric_limits< int8_t >::min( ));
                 const Vector3f max( std::numeric_limits< int8_t >::max( ));
-                signedQuantize( rawData, &formattedData[ 0 ], dataSize,
+                signedQuantize( data, &formattedData[ 0 ], dataSize,
                                 compCount, min, max );
                 break;
            }
            case DT_INT16:
            {
+                const int16_t* data = static_cast< const int16_t* >( rawData );
                 const Vector3f min( std::numeric_limits< int16_t >::min( ));
                 const Vector3f max( std::numeric_limits< int16_t >::max( ));
-                signedQuantize( rawData, &formattedData[ 0 ], dataSize,
+                signedQuantize( data, &formattedData[ 0 ], dataSize,
                                 compCount, min, max);
                 break;
            }
            case DT_INT32:
            {
+                const int32_t* data = static_cast< const int32_t* >( rawData );
                 const Vector3f min( std::numeric_limits< int32_t >::min( ));
                 const Vector3f max( std::numeric_limits< int32_t >::max( ));
-                signedQuantize( rawData, &formattedData[ 0 ], dataSize,
+                signedQuantize( data, &formattedData[ 0 ], dataSize,
                                 compCount, min, max );
                 break;
            }
