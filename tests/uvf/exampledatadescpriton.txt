@@ -1,0 +1,8 @@
+mouse0: A PET scan of a mouse acquired on a QuadHidac small animal PET
+scanner at 150x150x276 voxels, 16 bit.
+
+This data set has been provided by the Visualization and Computer Graphics
+Research Group, University of Muenster, Germany.
+http://viscg.uni-muenster.de
+
+More data sets can be found at http://www.voreen.org
