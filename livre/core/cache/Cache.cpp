@@ -30,17 +30,11 @@ namespace livre
 
 CacheObjectPtr Cache::get( const CacheId& cacheId )
 {
-    if( cacheId == INVALID_CACHE_ID )
-        return CacheObjectPtr();
-
     return _get( cacheId );
 }
 
 CacheObjectPtr Cache::get( const CacheId& cacheId ) const
 {
-    if( cacheId == INVALID_CACHE_ID )
-        return CacheObjectPtr();
-
     return _get( cacheId );
 }
 
@@ -88,29 +82,32 @@ Cache::~Cache()
     }
 }
 
-CacheObjectPtr Cache::_get( const CacheId& cachetId )
+CacheObjectPtr Cache::_get( const CacheId& cacheId )
 {
-    LBASSERT( cachetId != INVALID_CACHE_ID );
+    LBASSERT( cacheId != INVALID_CACHE_ID );
+
+    if( cacheId == INVALID_CACHE_ID )
+        return CacheObjectPtr();
 
     WriteLock writeLock( _mutex );
-    CacheMap::iterator it = _cacheMap.find( cachetId );
+    CacheMap::iterator it = _cacheMap.find( cacheId );
     if( it == _cacheMap.end() )
     {
-        CacheObjectPtr cacheObject( _generate( cachetId ));
+        CacheObjectPtr cacheObject( _generate( cacheId ));
         cacheObject->_registerObserver( this );
         cacheObject->_registerObserver( _statistics.get() );
-        _cacheMap[ cachetId ] = cacheObject;
+        _cacheMap[ cacheId ] = cacheObject;
     }
 
-    LBASSERT( _cacheMap[ cachetId ]->_status );
+    LBASSERT( _cacheMap[ cacheId ]->_status );
 
-    return _cacheMap[ cachetId ];
+    return _cacheMap[ cacheId ];
 }
 
-CacheObjectPtr Cache::_get( const CacheId& cacheObjectId ) const
+CacheObjectPtr Cache::_get( const CacheId& cacheId ) const
 {
     ReadLock readLock( _mutex );
-    CacheMap::const_iterator it = _cacheMap.find( cacheObjectId );
+    CacheMap::const_iterator it = _cacheMap.find( cacheId );
 
     if( it == _cacheMap.end() )
         return CacheObjectPtr();

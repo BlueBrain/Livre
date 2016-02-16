@@ -30,7 +30,7 @@ namespace test
 class Cache : public livre::LRUCache
 {
 public:
-    Cache( const size_t maxMemBytes )
+    Cache( size_t maxMemBytes )
         : LRUCache( maxMemBytes) {}
 
 private:

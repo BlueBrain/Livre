@@ -42,9 +42,9 @@ public:
      * be loaded from
      * @param type The type of the data for the GPU.
      */
-    LIVRE_API TextureDataCache( const size_t maxMemBytes,
+    LIVRE_API TextureDataCache( size_t maxMemBytes,
                                 VolumeDataSource& dataSource,
-                                const uint32_t textureType  );
+                                uint32_t textureType  );
 
     ~TextureDataCache();
 

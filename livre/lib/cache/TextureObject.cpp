@@ -163,7 +163,6 @@ struct TextureObject::Impl
             return false;
         }
 
-        glFinish( );
         return true;
     }
 

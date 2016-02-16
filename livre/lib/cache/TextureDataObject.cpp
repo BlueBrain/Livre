@@ -76,7 +76,7 @@ public:
     }
 
     template< class DEST_TYPE >
-    bool setTextureData( const bool quantize )
+    bool readTextureData( const bool quantize )
     {
         const NodeId nodeId( _dataObject.getId( ));
         ConstMemoryUnitPtr data = _dataSource.getData( nodeId );
@@ -87,7 +87,7 @@ public:
         if( quantize )
         {
             std::vector< DEST_TYPE > textureData;
-            getQuantizedData< DEST_TYPE >( rawData, textureData );
+            convertData( rawData, textureData );
             _data->allocAndSetData( textureData );
         }
         else
@@ -95,73 +95,64 @@ public:
         return true;
     }
 
-    template< class DEST_TYPE >
-    void getQuantizedData( const void* rawData,
-                           std::vector< DEST_TYPE >& formattedData ) const
+    template< class SRC_TYPE, class DEST_TYPE >
+    void quantizeData( const SRC_TYPE* rawData,
+                       std::vector< DEST_TYPE >& formattedData ) const
     {
         const VolumeInformation& volumeInfo = _dataSource.getVolumeInformation();
         const uint32_t compCount = volumeInfo.compCount;
-        const DataType dataType = volumeInfo.dataType;
         const size_t dataSize = getDataSize();
 
+        const Vector3f min( std::numeric_limits< DEST_TYPE >::min( ));
+        const Vector3f max( std::numeric_limits< DEST_TYPE >::max( ));
+        if( std::is_signed< DEST_TYPE >::value )
+        {
+            signedQuantize( rawData, &formattedData[ 0 ], dataSize,
+                            compCount, min, max );
+        }
+        else
+        {
+            unsignedQuantize( rawData, &formattedData[ 0 ], dataSize,
+                              compCount, min, max );
+        }
+    }
+
+    template< class DEST_TYPE >
+    void convertData( const void* rawData,
+                      std::vector< DEST_TYPE >& formattedData ) const
+    {
+
+        const VolumeInformation& volumeInfo = _dataSource.getVolumeInformation();
+        const DataType dataType = volumeInfo.dataType;
+        const size_t dataSize = getDataSize();
         formattedData.resize( dataSize );
 
         switch( dataType )
         {
            case DT_UINT8:
-           {
-                const uint8_t* data = static_cast< const uint8_t* >( rawData );
-                const Vector3f min( std::numeric_limits< uint8_t >::min( ));
-                const Vector3f max( std::numeric_limits< uint8_t >::max( ));
-                unsignedQuantize( data, &formattedData[ 0 ], dataSize,
-                                  compCount, min, max );
+                quantizeData< uint8_t, DEST_TYPE >( static_cast< const uint8_t* >( rawData ),
+                                                    formattedData );
                 break;
-           }
            case DT_UINT16:
-           {
-                const uint16_t* data = static_cast< const uint16_t* >( rawData );
-                const Vector3f min( std::numeric_limits< uint16_t >::min( ));
-                const Vector3f max( std::numeric_limits< uint16_t >::max( ));
-                unsignedQuantize( data, &formattedData[ 0 ], dataSize,
-                                  compCount, min, max );
+                quantizeData< uint16_t, DEST_TYPE >( static_cast< const uint16_t* >( rawData ),
+                                                     formattedData );
                 break;
-           }
            case DT_UINT32:
-           {
-                const uint32_t* data = static_cast< const uint32_t* >( rawData );
-                const Vector3f min( std::numeric_limits< uint32_t >::min( ));
-                const Vector3f max( std::numeric_limits< uint32_t >::max( ));
-                unsignedQuantize( data, &formattedData[ 0 ], dataSize,
-                                  compCount, min, max );
+                quantizeData< uint32_t, DEST_TYPE >( static_cast< const uint32_t* >( rawData ),
+                                                     formattedData );
                 break;
-           }
            case DT_INT8:
-           {
-                const int8_t* data = static_cast< const int8_t* >( rawData );
-                const Vector3f min( std::numeric_limits< int8_t >::min( ));
-                const Vector3f max( std::numeric_limits< int8_t >::max( ));
-                signedQuantize( data, &formattedData[ 0 ], dataSize,
-                                compCount, min, max );
+                quantizeData< int8_t, DEST_TYPE >( static_cast< const int8_t* >( rawData ),
+                                                   formattedData );
                 break;
-           }
            case DT_INT16:
-           {
-                const int16_t* data = static_cast< const int16_t* >( rawData );
-                const Vector3f min( std::numeric_limits< int16_t >::min( ));
-                const Vector3f max( std::numeric_limits< int16_t >::max( ));
-                signedQuantize( data, &formattedData[ 0 ], dataSize,
-                                compCount, min, max);
+                quantizeData< int16_t, DEST_TYPE >( static_cast< const int16_t* >( rawData ),
+                                                    formattedData );
                 break;
-           }
            case DT_INT32:
-           {
-                const int32_t* data = static_cast< const int32_t* >( rawData );
-                const Vector3f min( std::numeric_limits< int32_t >::min( ));
-                const Vector3f max( std::numeric_limits< int32_t >::max( ));
-                signedQuantize( data, &formattedData[ 0 ], dataSize,
-                                compCount, min, max );
+                quantizeData< int32_t, DEST_TYPE >( static_cast< const int32_t* >( rawData ),
+                                                    formattedData );
                 break;
-           }
            case DT_UNDEFINED:
            case DT_FLOAT32:
            case DT_FLOAT64:
@@ -177,11 +168,11 @@ public:
         switch( _gpuDataType )
         {
             case GL_UNSIGNED_BYTE:
-                return setTextureData< uint8_t >( dataType != DT_UINT8 );
+                return readTextureData< uint8_t >( dataType != DT_UINT8 );
             case GL_FLOAT:
-                return setTextureData< float >( dataType != DT_FLOAT32 );
+                return readTextureData< float >( dataType != DT_FLOAT32 );
             case GL_UNSIGNED_SHORT:
-                return setTextureData< uint16_t >( dataType != DT_UINT16 );
+                return readTextureData< uint16_t >( dataType != DT_UINT16 );
         }
         return false;
     }

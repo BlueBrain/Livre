@@ -39,11 +39,11 @@ public:
      * @param minLOD Minimum LOD to be rendered.
      * @param maxLOD Maximum LOD to be rendered.
      */
-    LIVRE_API ScreenSpaceLODEvaluator( const uint32_t windowHeight,
-                                           const float screenSpaceError,
-                                           const float worldSpacePerVoxel,
-                                           const uint32_t minLOD,
-                                           const uint32_t maxLOD );
+    LIVRE_API ScreenSpaceLODEvaluator( uint32_t windowHeight,
+                                       float screenSpaceError,
+                                       float worldSpacePerVoxel,
+                                       uint32_t minLOD,
+                                       uint32_t maxLOD );
 
     /**
      * Computes the LOD for a world space point.
@@ -53,8 +53,8 @@ public:
      * @return Returns the LOD between min - max LOD.
      */
     LIVRE_API uint32_t getLODForPoint( const Frustum& frustum,
-                                           const uint32_t volumeDepth,
-                                           const Vector3f& worldCoord ) const final;
+                                       uint32_t volumeDepth,
+                                       const Vector3f& worldCoord ) const final;
 
 private:
 

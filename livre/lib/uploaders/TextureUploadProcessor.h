@@ -55,7 +55,6 @@ public:
 
 protected:
     LIVRE_API bool onPreCommit_( uint32_t connection ) override;
-    LIVRE_API void onPostCommit_( uint32_t connection, CommitState state ) override;
     bool needRedraw() const { return _needRedraw; }
 
 private:

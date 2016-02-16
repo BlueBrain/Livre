@@ -49,7 +49,7 @@ struct TextureCache::Impl
                 format = GL_RGB;
                 break;
             default:
-                format = GL_RED;
+                LBTHROW( std::runtime_error( "Unsupported texture format" ));
                 break;
         }
 

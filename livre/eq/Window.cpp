@@ -62,9 +62,11 @@ public:
         , _config( config )
     {}
 
-    void onPostCommit_( uint32_t connection, CommitState state ) final
+    void onPostCommit_( uint32_t connection LB_UNUSED, CommitState state ) final
     {
-        TextureUploadProcessor::onPostCommit_( connection, state );
+        if( state != CommitState::CS_NOCHANGE )
+            glFinish();
+
         if( needRedraw( ))
             _config.sendEvent( REDRAW );
     }

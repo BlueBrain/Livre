@@ -39,7 +39,7 @@ protected:
      * @param maxMemBytes Maximum memory
      * @param cleanUpRatio When cache cleanup is triggered, ratio to be cleaned.
      */
-    LIVRE_API LRUCache( const size_t maxMemBytes, float cleanUpRatio = 1.0f );
+    LIVRE_API LRUCache( size_t maxMemBytes, float cleanUpRatio = 1.0f );
 
 private:
     LIVRE_API void _onLoaded( const CacheObject& cacheObject ) final;

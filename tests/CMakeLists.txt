@@ -9,7 +9,7 @@ if(NOT LIVRE_USE_REMOTE_DATASOURCE)
 endif()
 
 # Libraries to link the tests executables with
-set(TEST_LIBRARIES LivreCore LivreLib LivreEq LivreUVF ${Boost_LIBRARIES})
+set(TEST_LIBRARIES LivreCore LivreLib LivreEq ${Boost_LIBRARIES})
 set(LIVRE_OPTIONAL_LIBRARIES LivreUVF LivreRemote)
 foreach(LIVRE_OPTIONAL_LIBRARY ${LIVRE_OPTIONAL_LIBRARIES})
   if(TARGET ${LIVRE_OPTIONAL_LIBRARY})

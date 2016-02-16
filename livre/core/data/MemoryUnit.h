@@ -122,8 +122,8 @@ public:
 
     void allocAndSetData( const void* sourceData, const size_t size )
     {
-        alloc( sizeof( uint8_t ) * size );
-        ::memcpy( _rawData.getData(), sourceData, size * sizeof( uint8_t ) );
+        allocAndSetData( static_cast< const uint8_t* >( sourceData ),
+                                                        size );
     }
 
     /**

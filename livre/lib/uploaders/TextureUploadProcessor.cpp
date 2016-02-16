@@ -136,13 +136,6 @@ bool TextureUploadProcessor::onPreCommit_( const uint32_t outputConnection LB_UN
     return ret;
 }
 
-void TextureUploadProcessor::onPostCommit_( const uint32_t,
-                                            const CommitState state )
-{
-    if( state != CS_NOCHANGE )
-        glFinish();
-}
-
 void TextureUploadProcessor::_loadData()
 {
     TextureLoaderVisitor loadVisitor( _dashTree, _textureCache,

@@ -63,8 +63,7 @@ Renderer::Renderer( const uint32_t nComponents,
             _format = GL_RGB;
             break;
         default:
-            _format = GL_RED;
-            break;
+            LBTHROW( std::runtime_error( "Unsupported texture format" ));
     }
 }
 

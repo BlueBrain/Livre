@@ -61,7 +61,7 @@ public:
      */
     LIVRE_API void traverse( const RootNode& rootNode,
                              NodeVisitor& visitor,
-                             const uint32_t frame );
+                             uint32_t frame );
 
 private:
     detail::DFSTraversal* _impl;
