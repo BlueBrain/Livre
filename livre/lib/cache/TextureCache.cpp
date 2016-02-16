@@ -78,7 +78,9 @@ CacheObject* TextureCache::_generate( const CacheId& cacheId  )
 }
 
 TextureCache::~TextureCache()
-{}
+{
+    _unloadAll();
+}
 
 TexturePool& TextureCache::getTexturePool() const
 {

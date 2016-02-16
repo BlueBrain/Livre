@@ -125,9 +125,7 @@ ConstMemoryUnitPtr VolumeDataSource::getData( const NodeId& nodeId ) const
     return _impl->plugin->getData( lodNode );
 }
 
-livre::VolumeDataSource::~VolumeDataSource()
-{
-    
-}
+VolumeDataSource::~VolumeDataSource()
+{}
 
 }

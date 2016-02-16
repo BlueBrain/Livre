@@ -98,27 +98,10 @@ public:
         return true;
     }
 
-    void configExit()
-    {
-        releaseCache();
-        releaseVolume();
-    }
-
     void frameStart( const eq::uint128_t &frameId )
     {
         if( !_node->isApplicationNode( ))
             _config->getFrameData().sync( frameId );
-    }
-
-    void releaseVolume()
-    {
-        _dataSource.reset();
-        _dashTree.reset();
-    }
-
-    void releaseCache()
-    {
-        _textureDataCache.reset();
     }
 
     void updateAndSendFrameRange()
@@ -175,8 +158,6 @@ bool Node::configInit( const eq::uint128_t& initId )
 
 bool Node::configExit()
 {
-    _impl->configExit();
-
     if( !isApplicationNode( ))
     {
         Config *config = static_cast< Config *>( getConfig() );

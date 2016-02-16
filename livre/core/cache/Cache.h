@@ -105,6 +105,13 @@ protected:
      */
     virtual CacheObject* _generate( const CacheId& cacheID ) = 0;
 
+    /**
+     * @return Enforce unloading all objects. This function is convinient when
+     * object has references to the parent cache and on cache destruction time
+     * objects want to use their parent caches.
+     */
+    LIVRECORE_API void _unloadAll();
+
     CacheStatisticsPtr _statistics;  //!< The statistics object ptr.
 
 private:

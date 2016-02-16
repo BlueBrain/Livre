@@ -52,9 +52,9 @@ Cache::ApplyResult Cache::applyPolicy( CachePolicy& cachePolicy ) const
 
     for( CacheMap::const_iterator it = _cacheMap.begin(); it != _cacheMap.end(); ++it )
     {
-        CacheObject* object = it->second.get();
+        const CacheObjectPtr& object = it->second;
         if( object && object->isValid() && object->_isLoaded() )
-            cacheObjects.push_back( object );
+            cacheObjects.push_back( object.get( ));
     }
 
     if( cacheObjects.empty( ))
@@ -76,7 +76,7 @@ Cache::~Cache()
 {
     for( CacheMap::iterator it = _cacheMap.begin(); it != _cacheMap.end(); ++it )
     {
-        CacheObjectPtr cacheObject = it->second;
+        CacheObjectPtr& cacheObject = it->second;
         cacheObject->_unregisterObserver( this );
         cacheObject->_unregisterObserver( _statistics.get( ));
     }
@@ -115,6 +115,12 @@ CacheObjectPtr Cache::_get( const CacheId& cacheId ) const
     LBASSERT( it->second->_status );
 
     return it->second;
+}
+
+void Cache::_unloadAll()
+{
+    for( CacheMap::iterator it = _cacheMap.begin(); it != _cacheMap.end(); ++it )
+        it->second->_unload();
 }
 
 void Cache::_unload( CachePolicy& cachePolicy,

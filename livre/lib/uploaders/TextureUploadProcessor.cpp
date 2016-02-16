@@ -98,7 +98,7 @@ public:
 TextureUploadProcessor::TextureUploadProcessor( DashTreePtr dashTree,
                                                 GLContextPtr shareContext,
                                                 GLContextPtr context,
-                                                TextureDataCache& textureDataCache,
+                                                TextureCache& textureCache,
                                                 const VolumeRendererParameters& vrParameters )
     : GLContextTrait( context )
     , _dashTree( dashTree )
@@ -106,9 +106,7 @@ TextureUploadProcessor::TextureUploadProcessor( DashTreePtr dashTree,
     , _currentFrameID( 0 )
     , _threadOp( TO_NONE )
     , _vrParameters( vrParameters )
-    , _textureCache( textureDataCache,
-                     vrParameters.getMaxGPUCacheMemoryMB() * LB_1MB,
-                     GL_LUMINANCE8 )
+    , _textureCache( textureCache )
     , _allDataLoaded( false )
     , _needRedraw( false )
 {

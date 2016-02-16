@@ -383,6 +383,7 @@ public:
 
     void configExit()
     {
+        _frameInfo.renderNodes.clear();
         _frame.getFrameData()->flush();
         _renderViewPtr.reset();
     }

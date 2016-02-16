@@ -45,10 +45,12 @@ struct TextureObject::Impl
           TextureCache& textureCache )
        : _textureObject( textureObject )
        , _textureCache( textureCache )
-       , _dataCache( textureCache.getDataCache( ))
+       , _dataObject( boost::static_pointer_cast< TextureDataObject >(
+                           textureCache.getDataCache( ).get( textureObject.getId( ))))
        , _textureState( new TextureState( ))
        , _dataSource( textureCache.getDataCache( ).getDataSource( ))
        , _texturePool( textureCache.getTexturePool( ))
+       , _textureType( textureCache.getDataCache( ).getTextureType( ))
     {}
 
     bool isLoaded() const
@@ -58,11 +60,7 @@ struct TextureObject::Impl
 
     bool load()
     {
-        TextureDataObjectPtr rawData =
-                boost::static_pointer_cast< TextureDataObject >(
-                    _dataCache.get( _textureObject.getId( )));
-
-        if( !rawData->isLoaded( ))
+        if( !_dataObject->isLoaded( ))
             return false;
 
         initialize( );
@@ -74,6 +72,9 @@ struct TextureObject::Impl
 
     void unload( )
     {
+        if( _textureState && _textureState->textureId == INVALID_TEXTURE_ID )
+            return;
+
         _texturePool.releaseTexture( _textureState );
     #ifdef _DEBUG_
         LBVERB << "Texture released : " << NodeId( getId( ))
@@ -110,7 +111,7 @@ struct TextureObject::Impl
         // RGBA (color with alpha): width * height * type size bytes.
 
         uint32_t elementSize = 0;
-        switch( _dataCache.getTextureType( ))
+        switch( _textureType )
         {
             case GL_UNSIGNED_BYTE:
                 elementSize = sizeof( char );
@@ -143,16 +144,12 @@ struct TextureObject::Impl
         const Vector3ui& voxSizeVec =
                 lodNode.getBlockSize() + overlap * 2;
 
-        TextureDataObjectPtr rawData =
-                boost::static_pointer_cast< TextureDataObject >(
-                    _dataCache.get( _textureObject.getId( )));
-
         _textureState->bind( );
         glTexSubImage3D( GL_TEXTURE_3D, 0, 0, 0, 0,
                          voxSizeVec[0], voxSizeVec[1], voxSizeVec[2],
                          _texturePool.getFormat() ,
                          _texturePool.getGPUDataType(),
-                         rawData->getDataPtr( ));
+                         _dataObject->getDataPtr( ));
 
         // Something went wrong with loading the data
         // TODO: Log message
@@ -168,10 +165,11 @@ struct TextureObject::Impl
 
     TextureObject& _textureObject;
     TextureCache& _textureCache;
-    TextureDataCache& _dataCache;
+    TextureDataObjectPtr _dataObject;
     TextureStatePtr _textureState;
     VolumeDataSource& _dataSource;
     TexturePool& _texturePool;
+    uint32_t _textureType;
 };
 
 
@@ -208,7 +206,7 @@ bool TextureObject::_load()
 
 void TextureObject::_unload()
 {
-   return _impl->unload();
+    _impl->unload();
 }
 
 size_t TextureObject::getSize() const

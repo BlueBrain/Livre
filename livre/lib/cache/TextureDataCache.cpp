@@ -64,7 +64,9 @@ CacheObject* TextureDataCache::_generate( const CacheId& cacheId )
 }
 
 TextureDataCache::~TextureDataCache()
-{}
+{
+    _unloadAll();
+}
 
 VolumeDataSource& TextureDataCache::getDataSource()
 {

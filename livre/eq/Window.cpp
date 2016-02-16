@@ -56,9 +56,10 @@ public:
                               DashTreePtr dashTree,
                               GLContextPtr shareContext,
                               GLContextPtr context,
-                              TextureDataCache& textureDataCache,
+                              TextureCache& textureCache,
                               const VolumeRendererParameters& parameters )
-        : TextureUploadProcessor( dashTree, shareContext, context, textureDataCache, parameters )
+        : TextureUploadProcessor( dashTree, shareContext,
+                                  context, textureCache, parameters )
         , _config( config )
     {}
 
@@ -103,8 +104,7 @@ public:
         if( !_dataUploader.unique() || !_dashProcessor->getDashContext( ))
             return;
 
-        releasePipelineConnections();
-        releasePipelineProcessors();
+        stopUploadProcessors();
     }
 
     void configExit()
@@ -194,21 +194,16 @@ public:
         GLContextPtr textureUploadContext( new EqContext( _window ));
         Config* config = static_cast< Config* >( _window->getConfig( ));
         Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
+
+        _textureCache.reset( new TextureCache( node->getTextureDataCache( ),
+                                               pipe->getFrameData()->getVRParameters( ).getMaxGPUCacheMemoryMB() * LB_1MB,
+                                               GL_LUMINANCE8 ));
+
         _textureUploader.reset(
             new EqTextureUploadProcessor( *config, dashTree, _windowContext,
                                           textureUploadContext,
-                                          node->getTextureDataCache( ),
+                                          *_textureCache,
                                           pipe->getFrameData()->getVRParameters( )));
-    }
-
-    void releasePipelineProcessors()
-    {
-        stopUploadProcessors();
-        _textureUploader->setDashContext( DashContextPtr( ));
-        _dataUploader->setDashContext( DashContextPtr( ));
-        _textureUploader.reset();
-        _dataUploader.reset();
-        _dashProcessor->setDashContext( DashContextPtr( ));
     }
 
     void initializePipelineConnections()
@@ -235,27 +230,12 @@ public:
                 ->addConnection( CONNECTION_ID, pipeOutputConnectionPtr );
     }
 
-    void releasePipelineConnections( )
-    {
-        _dashProcessor->getProcessorOutput_< DashProcessorOutput >()
-                ->removeConnection( CONNECTION_ID );
-        _dataUploader->getProcessorInput_< DashProcessorInput >()
-                ->removeConnection( CONNECTION_ID );
-        _dashProcessor->getProcessorInput_< DashProcessorInput >( )
-                ->removeConnection( CONNECTION_ID );
-        _textureUploader->getProcessorOutput_< DashProcessorOutput >( )
-                ->removeConnection( CONNECTION_ID );
-        _textureUploader->getProcessorInput_< DashProcessorInput >( )
-                ->removeConnection( CONNECTION_ID );
-        _dataUploader->getProcessorOutput_< DashProcessorOutput >( )
-                ->removeConnection( CONNECTION_ID );
-    }
-
     Window* const _window;
     TextureUploadProcessorPtr _textureUploader;
     DataUploadProcessorPtr _dataUploader;
     DashProcessorPtr _dashProcessor;
     GLContextPtr _windowContext;
+    TextureCachePtr _textureCache;
 };
 
 Window::Window( eq::Pipe *parent )
