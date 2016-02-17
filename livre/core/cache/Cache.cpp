@@ -84,8 +84,6 @@ Cache::~Cache()
 
 CacheObjectPtr Cache::_get( const CacheId& cacheId )
 {
-    LBASSERT( cacheId != INVALID_CACHE_ID );
-
     if( cacheId == INVALID_CACHE_ID )
         return CacheObjectPtr();
 
