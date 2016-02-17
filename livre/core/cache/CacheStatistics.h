@@ -22,7 +22,7 @@
 #define _CacheStatistics_h_
 
 #include <livre/core/api.h>
-#include <livre/core/cache/CacheObjectObserver.h>
+#include <livre/core/types.h>
 #include <lunchbox/mtQueue.h>
 
 namespace livre
@@ -30,7 +30,7 @@ namespace livre
 /**
  * The CacheStatistics struct keeps the statistics of the \see Cache.
  */
-class CacheStatistics : public CacheObjectObserver
+class CacheStatistics
 {
 public:
     /**
@@ -70,11 +70,11 @@ private:
     CacheStatistics( const std::string& statisticsName,
                      const size_t queueSize );
 
-    void _onLoaded( const CacheObject& cacheObject ) final;
-    void _onUnload( const CacheObject& cacheObject ) final;
+    void _loaded( const CacheObject& cacheObject );
+    void _unloaded( const CacheObject& cacheObject );
 
-    void _onCacheMiss( const CacheObject& ) final { ++_cacheMiss; }
-    void _onCacheHit( const CacheObject& ) final { ++_cacheHit; }
+    void _miss() { ++_cacheMiss; }
+    void _hit() { ++_cacheHit; }
 
     std::string _name;
     size_t _usedMemBytes;

@@ -38,12 +38,14 @@
 #include <livre/lib/cache/TextureCache.h>
 #include <livre/lib/cache/TextureDataCache.h>
 #include <livre/lib/cache/TextureObject.h>
+
 #include <livre/lib/render/AvailableSetGenerator.h>
 #include <livre/lib/render/RenderView.h>
 #include <livre/lib/render/ScreenSpaceLODEvaluator.h>
 #include <livre/lib/render/SelectVisibles.h>
 #include <livre/lib/visitor/DFSTraversal.h>
 
+#include <livre/core/cache/CacheStatistics.h>
 #include <livre/core/dash/DashRenderStatus.h>
 #include <livre/core/dash/DashTree.h>
 #include <livre/core/dashpipeline/DashProcessorInput.h>

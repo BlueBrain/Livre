@@ -44,9 +44,8 @@ struct CacheStatistics::LoadInfo
 
     LoadInfo(  const LoadInfo& previous,
                Operation operation,
-               const size_t cSize,
-               const float lTime = 0.0f )
-        : op( operation ), cacheSize( cSize ), loadTime( lTime )
+               const size_t cSize )
+        : op( operation ), cacheSize( cSize )
     {
         time = ThreadClock::getClock().getTimed();
         switch( op )
@@ -90,7 +89,7 @@ CacheStatistics::CacheStatistics( const std::string& statisticsName,
 {
 }
 
-void CacheStatistics::_onLoaded( const CacheObject& cacheObject )
+void CacheStatistics::_loaded( const CacheObject& cacheObject )
 {
    ++_objCount;
    _usedMemBytes += cacheObject.getSize();
@@ -104,11 +103,10 @@ void CacheStatistics::_onLoaded( const CacheObject& cacheObject )
    LoadInfoPtr previous;
    _ioQueue.getBack( previous );
    _ioQueue.push( LoadInfoPtr( new LoadInfo( *previous, LoadInfo::OP_LOAD,
-                                             cacheObject.getSize(),
-                                             cacheObject.getLoadTime( ))));
+                                             cacheObject.getSize( ))));
 }
 
-void CacheStatistics::_onUnload( const CacheObject& cacheObject )
+void CacheStatistics::_unloaded( const CacheObject& cacheObject )
 {
     --_objCount;
     _usedMemBytes -= cacheObject.getSize();
@@ -122,7 +120,8 @@ void CacheStatistics::_onUnload( const CacheObject& cacheObject )
                                               cacheObject.getSize( ))));
 }
 
-std::ostream& operator<<( std::ostream& stream, const CacheStatistics& cacheStatistics )
+std::ostream& operator<<( std::ostream& stream,
+                          const CacheStatistics& cacheStatistics )
 {
     const int hits = int(
         100.f * float( cacheStatistics._cacheHit ) /
@@ -143,8 +142,6 @@ std::ostream& operator<<( std::ostream& stream, const CacheStatistics& cacheStat
 }
 
 CacheStatistics::~CacheStatistics()
-{
-
-}
+{}
 
 }

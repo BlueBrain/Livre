@@ -47,12 +47,12 @@ public:
     /**
      * @return The dash node.
      */
-    LIVRECORE_API dash::NodePtr getDashNode( ) const { return _dashNode; }
+    LIVRECORE_API dash::NodePtr getDashNode() const { return _dashNode; }
 
     /**
      * @return The LODNode.
      */
-    LIVRECORE_API const LODNode& getLODNode( ) const;
+    LIVRECORE_API const LODNode& getLODNode() const;
 
     /**
      * @return \see TextureDataObject, if not initialized in the tree, the returned object

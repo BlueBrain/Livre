@@ -24,9 +24,6 @@ set(LIVRECORE_HEADERS
   dashTypes.h
   cache/Cache.h
   cache/CacheObject.h
-  cache/CacheObjectListener.h
-  cache/CacheObjectObserver.h
-  cache/CachePolicy.h
   cache/CacheStatistics.h
   cache/EmptyCacheObject.h
   configuration/Configuration.h

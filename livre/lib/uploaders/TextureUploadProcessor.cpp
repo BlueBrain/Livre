@@ -18,7 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/lib/cache/LRUCachePolicy.h>
 #include <livre/lib/cache/TextureCache.h>
 #include <livre/lib/cache/TextureDataObject.h>
 #include <livre/lib/cache/TextureObject.h>
@@ -217,7 +216,7 @@ void TextureLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state 
     state.setVisitChild( false );
 
     const ConstCacheObjectPtr texPtr = renderNode.getTextureObject();
-    if( texPtr->isLoaded( ))
+    if( texPtr && texPtr->isLoaded( ))
         return;
 
     CacheObjectPtr texture = _cache.get( lodNode.getNodeId().getId( ));
@@ -236,8 +235,7 @@ void TextureLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state 
             __itt_task_begin ( ittTextureLoadDomain, __itt_null, __itt_null,
                                ittTextureLoadTask );
 #endif //_ITT_DEBUG_
-            CacheObjectPtr lodTexture = _cache.get( lodNode.getNodeId().getId( ));
-            lodTexture->load();
+            CacheObjectPtr lodTexture = _cache.load( lodNode.getNodeId().getId( ));
 
 #ifdef _ITT_DEBUG_
             __itt_task_end( ittTextureLoadDomain );

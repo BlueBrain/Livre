@@ -25,6 +25,7 @@
 #include <livre/core/data/LODNode.h>
 #include <livre/core/data/VolumeDataSource.h>
 #include <livre/core/render/Renderer.h>
+#include <livre/core/cache/CacheStatistics.h>
 
 #include <eq/gl.h>
 
@@ -71,10 +72,10 @@ struct TextureCache::Impl
 TextureCache::TextureCache( TextureDataCache& dataCache,
                             const size_t maxMemBytes,
                             const GLint internalTextureFormat )
-    : LRUCache( maxMemBytes )
+    : Cache( maxMemBytes )
     , _impl( new Impl( dataCache, internalTextureFormat ))
 {
-    _statistics->setName( "Texture cache GPU");
+    _getStatistics().setName( "Texture cache GPU");
 }
 
 CacheObject* TextureCache::_generate( const CacheId& cacheId )

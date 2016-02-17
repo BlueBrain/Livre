@@ -20,18 +20,18 @@
 #ifndef _TestCache_h_
 #define _TestCache_h_
 
-#include <livre/lib/cache/LRUCache.h>
-
 #include "ValidCacheObject.h"
+
+#include <livre/core/cache//Cache.h>
 
 namespace test
 {
 
-class Cache : public livre::LRUCache
+class Cache : public livre::Cache
 {
 public:
     Cache( size_t maxMemBytes )
-        : LRUCache( maxMemBytes) {}
+        : livre::Cache( maxMemBytes ) {}
 
 private:
     livre::CacheObject* _generate( const livre::CacheId& cacheId )
@@ -44,4 +44,4 @@ private:
 
 }
 
-#endif // _TestCacheObjectObserver_h_
+#endif // _TestCache_h_

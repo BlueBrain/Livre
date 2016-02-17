@@ -33,7 +33,6 @@
 #include <livre/lib/cache/TextureDataObject.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/lib/visitor/CollectionTraversal.h>
-#include <livre/lib/cache/LRUCachePolicy.h>
 #include <livre/lib/visitor/CollectionTraversal.h>
 
 namespace livre
@@ -244,7 +243,7 @@ void DataLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state )
     state.setVisitChild( false );
 
     const ConstCacheObjectPtr texture = renderNode.getTextureObject();
-    if( texture->isLoaded( ))
+    if( texture && texture->isLoaded( ))
         return;
 
     const ConstCacheObjectPtr tData = _cache.get( node.getNodeId().getId( ));
@@ -255,8 +254,7 @@ void DataLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state )
     __itt_task_begin( ittDataLoadDomain, __itt_null, __itt_null,
                       ittDataLoadTask );
 #endif //_ITT_DEBUG_
-    CacheObjectPtr textureData = _cache.get( node.getNodeId().getId( ));
-    textureData->load( );
+    CacheObjectPtr textureData = _cache.load( node.getNodeId().getId( ));
     if( _clock.getTime64() > 1000 ) // commit once every second
     {
         _clock.reset();
@@ -286,7 +284,7 @@ void DepthCollectorVisitor::visit( DashRenderNode& renderNode, VisitState& state
     state.setVisitChild( false );
 
     const ConstCacheObjectPtr texture = renderNode.getTextureObject();
-    if( texture->isLoaded( ))
+    if( texture && texture->isLoaded( ))
         return;
 
     const ConstCacheObjectPtr tData = renderNode.getTextureDataObject();
@@ -315,9 +313,7 @@ void DepthSortedDataLoaderVisitor::visit( DashRenderNode& renderNode,
                       ittDataLoadTask );
 #endif //_ITT_DEBUG_
 
-    CacheObjectPtr textureData = _cache.get( lodNode.getNodeId().getId( ));
-    textureData->load();
-
+    CacheObjectPtr textureData = _cache.load( lodNode.getNodeId().getId( ));
 #ifdef _ITT_DEBUG_
     __itt_task_end( ittDataLoadDomain );
 #endif //_ITT_DEBUG_
