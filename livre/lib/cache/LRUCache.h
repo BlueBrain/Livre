@@ -33,36 +33,17 @@ namespace livre
  */
 class LRUCache : public Cache
 {
-public:
-    /**
-     * Sets a list of node ids to be protected from unloading.
-     * @param protectUnloadingList The set of node ids.
-     */
-    LIVRE_API void setProtectList( const CacheIdSet& protectUnloadingList );
-
-    /**
-     * Clears the list of node ids to be protected.
-     */
-    LIVRE_API void clearProtectList( );
-
-    /**
-     * Sets the maximum memory.
-     * @param maxMemoryInBytes Maximum memory in bytes.
-     */
-    LIVRE_API void setMaximumMemory( const size_t maxMemoryInBytes );
-
-    /**
-     * Sets the clean up ratio.
-     * @param cleanUpRatio Once the policy is activated, ( 1.0 - cleanUpRatio ) can be cleaned.
-     */
-    LIVRE_API void setCleanupRatio( float cleanUpRatio );
-
 protected:
-    LIVRE_API LRUCache();
+
+    /**
+     * @param maxMemBytes Maximum memory
+     * @param cleanUpRatio When cache cleanup is triggered, ratio to be cleaned.
+     */
+    LIVRE_API LRUCache( size_t maxMemBytes, float cleanUpRatio = 1.0f );
 
 private:
-    LIVRE_API void onLoaded_( const CacheObject &cacheObject );
-    LRUCachePolicy cachePolicy_;
+    LIVRE_API void _onLoaded( const CacheObject& cacheObject ) final;
+    LRUCachePolicy _cachePolicy;
 };
 
 }

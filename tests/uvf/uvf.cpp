@@ -18,38 +18,45 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define BOOST_TEST_MODULE DataSource
+#define BOOST_TEST_MODULE UVFDataSource
 #include <boost/test/unit_test.hpp>
 
+#ifdef LIVRE_USE_TUVOK
+
 #include <livre/core/data/VolumeDataSource.h>
-#include <livre/core/data/NodeId.h>
 #include <livre/core/data/LODNode.h>
-#include <livre/core/data/MemoryUnit.h>
-#include <livre/core/data/VolumeInformation.h>
-#include <livre/core/mathTypes.h>
 
+const uint32_t BLOCK_SIZE = 28;
+const uint32_t OVERLAP_SIZE = 2;
+const uint32_t VOXEL_SIZE_X = 75;
+const uint32_t VOXEL_SIZE_Y = 75;
+const uint32_t VOXEL_SIZE_Z = 138;
 
-namespace
+#include <lunchbox/pluginRegisterer.h>
+#include <livre/uvf/UVFDataSource.h>
+
+// Explicit registration required because the folder of the data source plugin is not
+// in the LD_LIBRARY_PATH of the test executable.
+lunchbox::PluginRegisterer< livre::UVFDataSource > registerer;
+
+BOOST_AUTO_TEST_CASE( UVFDataSource )
 {
-const uint32_t BLOCK_SIZE = 32;
-const uint32_t VOXEL_SIZE_X = 1024;
-const uint32_t VOXEL_SIZE_Y = 1024;
-const uint32_t VOXEL_SIZE_Z = 512;
-
-void _testDataSource( const std::string& uriStr )
-{
-    const lunchbox::URI uri( uriStr );
+    std::cout << "uvf://" UVF_DATA_FILE << std::endl;
+    const lunchbox::URI uri( "uvf://" UVF_DATA_FILE );
     livre::VolumeDataSource source( uri );
     const livre::VolumeInformation& info = source.getVolumeInformation();
 
-     // 32 << depth = 512 - shortest dimension of the volume.
-    BOOST_CHECK( info.rootNode.getDepth() == 5 );
-
-    // Component count per voxel, intensity only 1 channels.
+    BOOST_CHECK( info.rootNode.getDepth() == 2 );
     BOOST_CHECK( info.compCount == 1 );
+    BOOST_CHECK( info.dataType == livre::DT_UINT8 );
+    BOOST_CHECK( info.voxels == livre::Vector3ui( VOXEL_SIZE_X,
+                                                  VOXEL_SIZE_Y,
+                                                  VOXEL_SIZE_Z ));
+
+    BOOST_CHECK( info.overlap == livre::Vector3ui( OVERLAP_SIZE ));
 
     const uint32_t level = 0;
-    const livre::Vector3f position( 0, 0, 0);
+    const livre::Vector3f position( 0, 0, 0 );
     const uint32_t frame = 0;
     const livre::NodeId parentNodeId( level, position, frame );
     const livre::NodeId firstChildNodeId =
@@ -60,7 +67,7 @@ void _testDataSource( const std::string& uriStr )
     BOOST_CHECK( lodNode.getVoxelBox().getDimension() =
                  livre::Vector3ui( BLOCK_SIZE ));
 
-    const livre::Vector3ui blockSize = lodNode.getBlockSize() +
+    const livre::Vector3ui& blockSize = lodNode.getBlockSize() +
                                        livre::Vector3ui( info.overlap ) * 2;
     BOOST_CHECK( blockSize == info.maximumBlockSize );
 
@@ -70,38 +77,4 @@ void _testDataSource( const std::string& uriStr )
 
     BOOST_CHECK_EQUAL( memUnit->getMemSize(), allocSize );
 }
-}
-
-BOOST_AUTO_TEST_CASE( memoryDataSource )
-{
-    std::stringstream volumeName;
-    volumeName << "mem://#" << VOXEL_SIZE_X << "," << VOXEL_SIZE_Y << ","
-               << VOXEL_SIZE_Z << "," << BLOCK_SIZE;
-
-    _testDataSource( volumeName.str( ));
-}
-
-#ifdef LIVRE_USE_REMOTE_DATASOURCE
-BOOST_AUTO_TEST_CASE( remoteMemoryDataSource )
-{
-    char** argv = boost::unit_test::framework::master_test_suite().argv;
-    if( std::string( argv[0] ).find( "perf-" ) == std::string::npos )
-        return;
-
-    std::stringstream volumeName;
-    volumeName << "remotemem://#" << VOXEL_SIZE_X << "," << VOXEL_SIZE_Y << ","
-               << VOXEL_SIZE_Z << "," << BLOCK_SIZE;
-    try
-    {
-        _testDataSource( volumeName.str( ));
-    }
-    catch( const std::runtime_error& e )
-    {
-        const std::string error( e.what( ));
-        const std::string noSource( "Cannot connect to publisher" );
-        if( error != noSource )
-            BOOST_CHECK_EQUAL( error,
-                               std::string( "Empty servus implementation" ));
-    }
-}
-#endif
+#endif // LIVRE_USE_TUVOK

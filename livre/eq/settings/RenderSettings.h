@@ -90,7 +90,7 @@ public:
      * @brief adjustQuality Adjusts the quality.
      * @param delta The adjustment factor.
      */
-    void adjustQuality( const float delta );
+    void adjustQuality( float delta );
 
     /**
      * @brief increaseError Increases the error.

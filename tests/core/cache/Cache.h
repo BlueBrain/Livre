@@ -29,13 +29,15 @@ namespace test
 
 class Cache : public livre::LRUCache
 {
+public:
+    Cache( size_t maxMemBytes )
+        : LRUCache( maxMemBytes) {}
 
 private:
-
-    livre::CacheObject* generateCacheObjectFromID_( const livre::CacheId& cacheID )
+    livre::CacheObject* _generate( const livre::CacheId& cacheId )
     {
-        ValidCacheObject* cacheObject =  new test::ValidCacheObject();
-        cacheObject->setCacheId( cacheID );
+        ValidCacheObject* cacheObject =
+                new test::ValidCacheObject( cacheId );
         return cacheObject;
     }
 };

@@ -30,14 +30,14 @@ class CacheObjectObserver : public livre::CacheObjectObserver
 {
 public:
     CacheObjectObserver()
-        : unloaded_( false )
+        : _unloaded( false )
     {}
 
-    void onUnload_( const livre::CacheObject& ) final { unloaded_ = true; }
-    bool isUnloaded( ) const { return unloaded_; }
+    void _onUnload( const livre::CacheObject& ) final { _unloaded = true; }
+    bool isUnloaded( ) const { return _unloaded; }
 
 private:
-    bool unloaded_;
+    bool _unloaded;
 
 };
 

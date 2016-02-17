@@ -45,19 +45,19 @@ struct RenderView::Impl
 
         DashRenderNode renderNode( dashNode );
         if( renderNode.getLODNode().getRefLevel() != 0 )
-            renderNode.setTextureObject( TextureObject::getEmptyPtr( ));
+            renderNode.setTextureObject( EmptyCacheObject::getEmptyPtr( ));
     }
 
     void freeTextures( const FrameInfo& frameInfo )
     {
-        BOOST_FOREACH( const ConstCacheObjectPtr& cacheObject,
+        for( const ConstCacheObjectPtr& cacheObject:
                        frameInfo.renderNodes )
         {
-            const NodeId nodeId(cacheObject->getCacheID( ));
+            const NodeId nodeId(cacheObject->getId( ));
             freeTexture( nodeId );
         }
 
-        BOOST_FOREACH( const NodeId& nodeId, frameInfo.allNodes )
+        for( const NodeId& nodeId: frameInfo.allNodes )
             freeTexture( nodeId );
     }
 
@@ -75,7 +75,7 @@ RenderView::~RenderView()
     delete _impl;
 }
 
-void RenderView::onPostRender_( const GLWidget&,
+void RenderView::_onPostRender( const GLWidget&,
                                 const FrameInfo& frameInfo )
 {
     _impl->freeTextures( frameInfo );

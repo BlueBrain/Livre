@@ -85,7 +85,6 @@ class RenderBrick;
 class Renderer;
 class RootNode;
 class TexturePool;
-class TexturePoolFactory;
 class View;
 class VisitState;
 class VolumeDataSource;
@@ -105,13 +104,11 @@ typedef std::array< float, 2 > Range;
 /**
  * SmartPtr definitions
  */
-typedef boost::scoped_ptr< GLSLShaders > GLSLShadersPtr;
-typedef boost::scoped_ptr< CacheStatistics > CacheStatisticsPtr;
+typedef std::unique_ptr< GLSLShaders > GLSLShadersPtr;
+typedef std::unique_ptr< CacheStatistics > CacheStatisticsPtr;
 
 typedef boost::shared_ptr< AllocMemoryUnit > AllocMemoryUnitPtr;
 typedef boost::shared_ptr< RenderBrick > RenderBrickPtr;
-typedef boost::shared_ptr< LODNode > LODNodePtr;
-typedef boost::shared_ptr< const LODNode > ConstLODNodePtr;
 typedef boost::shared_ptr< DashConnection > DashConnectionPtr;
 typedef boost::shared_ptr< Processor > ProcessorPtr;
 typedef boost::shared_ptr< DashProcessor > DashProcessorPtr;
@@ -129,13 +126,11 @@ typedef boost::shared_ptr< TextureState > TextureStatePtr;
 typedef boost::shared_ptr< const TextureState > ConstTextureStatePtr;
 typedef boost::shared_ptr< VolumeDataSource > VolumeDataSourcePtr;
 typedef boost::shared_ptr< const VolumeDataSource > ConstVolumeDataSourcePtr;
-typedef boost::shared_ptr< TexturePool > TexturePoolPtr;
 typedef boost::shared_ptr< DashTree > DashTreePtr;
 typedef boost::shared_ptr< const DashTree > ConstDashTreePtr;
 typedef boost::shared_ptr< EventHandler > EventHandlerPtr;
 typedef boost::shared_ptr< EventHandlerFactory > EventHandlerFactoryPtr;
 typedef boost::shared_ptr< EventMapper > EventMapperPtr;
-typedef boost::shared_ptr< DataSourceFactory > DataSourceFactoryPtr;
 typedef boost::shared_ptr< MemoryUnit > MemoryUnitPtr;
 typedef boost::shared_ptr< const MemoryUnit > ConstMemoryUnitPtr;
 
@@ -181,7 +176,6 @@ typedef std::vector< uint32_t > UInt32Vector;
 typedef std::vector< int64_t > Int64Vector;
 typedef std::vector< uint64_t > UInt64Vector;
 
-typedef std::vector< bool > BoolVector;
 typedef std::vector< NodeId > NodeIds;
 
 /**
@@ -190,12 +184,10 @@ typedef std::vector< NodeId > NodeIds;
 typedef std::vector< CacheObjectPtr > CacheObjects;
 typedef std::vector< ConstCacheObjectPtr > ConstCacheObjects;
 typedef std::vector< RenderBrickPtr > RenderBricks;
-typedef std::vector< TexturePoolPtr > TexturePools;
 
 /**
  * Map definitions
  */
-typedef boost::unordered_map< NodeId, LODNodePtr > NodeIDLODNodePtrMap;
 typedef boost::unordered_map< NodeId, dash::NodePtr > NodeIDDashNodePtrMap;
 typedef boost::unordered_map< CacheId, CacheObjectPtr > CacheMap;
 typedef boost::unordered_map< CacheId, ConstCacheObjectPtr > ConstCacheMap;

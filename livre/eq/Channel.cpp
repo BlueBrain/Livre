@@ -127,7 +127,7 @@ public:
     explicit Channel( livre::Channel* channel )
           : _channel( channel )
           , _glWidgetPtr( new EqGLWidget( channel ))
-          , _frameInfo( _frustum )
+          , _frameInfo( _frustum, INVALID_FRAME )
     {}
 
     void initializeFrame()
@@ -166,11 +166,11 @@ public:
         RendererPtr renderer( new RayCastRenderer(
                                   nSamplesPerRay,
                                   nSamplesPerPixel,
-                                  dataSource->getVolumeInformation(),
                                   GL_UNSIGNED_BYTE,
-                                  GL_LUMINANCE8 ));
+                                  GL_LUMINANCE8,
+                                  dataSource->getVolumeInformation( )));
 
-        _renderViewPtr->setRenderer( renderer);
+        _renderViewPtr->setRenderer( renderer );
     }
 
     const Frustum& setupFrustum()
@@ -207,13 +207,21 @@ public:
     void generateRenderBricks( const ConstCacheObjects& renderNodes,
                                RenderBricks& renderBricks )
     {
+
         renderBricks.reserve( renderNodes.size( ));
-        BOOST_FOREACH( const ConstCacheObjectPtr& cacheObject, renderNodes )
+
+        livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
+        DashTreePtr dashTree = node->getDashTree();
+
+        for( const ConstCacheObjectPtr& cacheObject: renderNodes )
         {
             const ConstTextureObjectPtr texture =
                 boost::static_pointer_cast< const TextureObject >( cacheObject );
 
-            RenderBrickPtr renderBrick( new RenderBrick( texture->getLODNode(),
+            const LODNode& lodNode =
+                    dashTree->getDataSource()->getNode( NodeId( cacheObject->getId( )));
+
+            RenderBrickPtr renderBrick( new RenderBrick( lodNode,
                                                          texture->getTextureState( )));
             renderBricks.push_back( renderBrick );
         }
@@ -257,8 +265,9 @@ public:
         const Matrix4f& mvpMatrix = _frustum.getModelViewProjectionMatrix();
         for( const RenderBrickPtr& brick : bricks )
         {
-            const Vector3f& min = brick->getLODNode()->getWorldBox().getMin();
-            const Vector3f& max = brick->getLODNode()->getWorldBox().getMax();
+            const Boxf& worldBox = brick->getLODNode().getWorldBox();
+            const Vector3f& min = worldBox.getMin();
+            const Vector3f& max = worldBox.getMax();
             const Vector3f corners[8] =
             {
                 Vector3f( min[0], min[1], min[2] ),
@@ -308,8 +317,9 @@ public:
 
         applyCamera();
         setupFrustum();
-        const DashRenderNodes& visibles = requestData();
+        _frameInfo = FrameInfo( _frustum, frame );
 
+        const DashRenderNodes& visibles = requestData();
         const eq::fabric::Viewport& vp = _channel->getViewport( );
         const Viewport viewport( vp.x, vp.y, vp.w, vp.h );
         _renderViewPtr->setViewport( viewport );
@@ -337,7 +347,6 @@ public:
         const AvailableSetGenerator generateSet( node->getDashTree(),
                                                  window->getTextureCache( ));
 
-        _frameInfo.clear();
         for( const auto& visible : visibles )
             _frameInfo.allNodes.push_back(visible.getLODNode().getNodeId());
         generateSet.generateRenderingSet( _frameInfo );
@@ -374,6 +383,7 @@ public:
 
     void configExit()
     {
+        _frameInfo.renderNodes.clear();
         _frame.getFrameData()->flush();
         _renderViewPtr.reset();
     }

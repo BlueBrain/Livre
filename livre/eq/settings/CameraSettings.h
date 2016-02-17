@@ -45,7 +45,7 @@ public:
      * @param y y component.
      * @param z z component.
      */
-    void spinModel( const float x, const float y, const float z );
+    void spinModel( float x, float y, float z );
 
     /**
      * Moves the camera to (x,y,z) amount.
@@ -53,7 +53,7 @@ public:
      * @param y y amount.
      * @param z z amount.
      */
-    void moveCamera( const float x, const float y, const float z );
+    void moveCamera( float x, float y, float z );
 
     /**
      * Sets the camera position.

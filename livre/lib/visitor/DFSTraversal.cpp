@@ -54,7 +54,7 @@ public:
         }
 
         const NodeIds& nodeIds = nodeId.getChildren();
-        BOOST_FOREACH( const NodeId& childNodeId, nodeIds )
+        for( const NodeId& childNodeId: nodeIds )
         {
             traverse( childNodeId, depth - 1, visitor );
             if( !_state.getVisitNeighbours() )

@@ -28,175 +28,182 @@
 namespace livre
 {
 
-struct CacheObject::CacheInfo : public CacheObjectListener
+struct CacheObject::Status : public CacheObjectListener
 {
-    CacheInfo( ) :
-        referenceCount( 0 ),
-        lastUsedTime( 0.0 ),
-        loadTime( 0.0 ),
-        unloadable( true )
-    { }
+    Status( const CacheId& cacheId_ )
+        : nRef( 0 )
+        , lastUsedTime( 0.0 )
+        , loadTime( 0.0 )
+        , unloadable( true )
+        , cacheId( cacheId_ )
+    {}
 
-    uint32_t referenceCount;
+    uint32_t nRef;
     double lastUsedTime;
     double loadTime;
     bool unloadable;
+    CacheId cacheId;
     ReadWriteMutex mutex;
 };
 
-CacheObject::CacheObject( )
-    : commonInfoPtr_( new CacheInfo( ) )
+CacheObject::CacheObject( const CacheId& cacheId )
+    : _status( new Status( cacheId ) )
 {
 }
 
-void CacheObject::increaseReference_( )
+void CacheObject::_increaseReference( )
 {
-    WriteLock lock( commonInfoPtr_->mutex );
-    commonInfoPtr_->referenceCount++;
+    WriteLock lock( _status->mutex );
+    _status->nRef++;
 
-    for( CacheObjectObserverSet::iterator it = commonInfoPtr_->getObservers().begin();
-         it != commonInfoPtr_->getObservers().end();
+    for( CacheObjectObserverSet::iterator it = _status->getObservers().begin();
+         it != _status->getObservers().end();
          ++it )
     {
-        (*it)->onReferenced_( *this );
+        (*it)->_onReferenced( *this );
     }
 }
 
-void CacheObject::decreaseReference_( )
+void CacheObject::_decreaseReference( )
 {
-    WriteLock lock( commonInfoPtr_->mutex );
-    commonInfoPtr_->referenceCount--;
+    WriteLock lock( _status->mutex );
+    _status->nRef--;
 
-    if( commonInfoPtr_->referenceCount == 0 && isValid_() )
+    if( _status->nRef == 0 && _isValid() )
     {
-        for( CacheObjectObserverSet::iterator it = commonInfoPtr_->getObservers().begin();
-             it != commonInfoPtr_->getObservers().end();
+        for( CacheObjectObserverSet::iterator it = _status->getObservers().begin();
+             it != _status->getObservers().end();
              ++it )
         {
-            (*it)->onUnload_( *this );
+            (*it)->_onUnload( *this );
         }
-        unload_();
+        _unload();
     }
 
-    for( CacheObjectObserverSet::iterator it = commonInfoPtr_->getObservers().begin();
-         it != commonInfoPtr_->getObservers().end();
+    for( CacheObjectObserverSet::iterator it = _status->getObservers().begin();
+         it != _status->getObservers().end();
          ++it )
     {
-        (*it)->onUnreferenced_( *this );
+        (*it)->_onUnreferenced( *this );
     }
 }
 
 bool CacheObject::isLoaded() const
 {
-    ReadLock lock( commonInfoPtr_->mutex );
-    const bool ret = isValid_( ) && isLoaded_( );
-    for( CacheObjectObserverSet::const_iterator it = commonInfoPtr_->getObservers().begin();
-         it != commonInfoPtr_->getObservers().end();
+    ReadLock lock( _status->mutex );
+    const bool ret = _isValid( ) && _isLoaded( );
+    for( CacheObjectObserverSet::const_iterator it = _status->getObservers().begin();
+         it != _status->getObservers().end();
          ++it )
     {
-        ret ? (*it)->onCacheHit_( *this ) : (*it)->onCacheMiss_( *this );
+        ret ? (*it)->_onCacheHit( *this ) : (*it)->_onCacheMiss( *this );
     }
     return ret;
 }
 
 bool CacheObject::isValid() const
 {
-    return ( commonInfoPtr_ ? isValid_() : false );
+    return ( _status ? _isValid() : false );
 }
 
-void CacheObject::cacheLoad()
+CacheId CacheObject::getId() const
 {
-    WriteLock lock( commonInfoPtr_->mutex );
-    if( isLoaded_( ) )
+    return _status->cacheId;
+}
+
+void CacheObject::load()
+{
+    WriteLock lock( _status->mutex );
+    if( _isLoaded( ) )
         return;
 
     const float start = ThreadClock::getClock().getTimef( );
-    if( !load_( ))
+    if( !_load( ))
         return;
 
-    commonInfoPtr_->loadTime = ThreadClock::getClock().getTimef() - start;
+    _status->loadTime = ThreadClock::getClock().getTimef() - start;
 
-    for( CacheObjectObserverSet::iterator it = commonInfoPtr_->getObservers().begin();
-         it != commonInfoPtr_->getObservers().end();
+    for( CacheObjectObserverSet::iterator it = _status->getObservers().begin();
+         it != _status->getObservers().end();
          ++it )
     {
-        (*it)->onLoaded_( *this );
+        (*it)->_onLoaded( *this );
     }
 }
 
-void CacheObject::cacheUnload( )
+void CacheObject::unload( )
 {
-    WriteLock lock( commonInfoPtr_->mutex, boost::try_to_lock );
+    WriteLock lock( _status->mutex, boost::try_to_lock );
     if( !lock.owns_lock() )
         return;
 
     if( !isUnloadable() )
         return;
 
-    if( !isLoaded_( ) || commonInfoPtr_->referenceCount > 1 )
+    if( !_isLoaded( ) || _status->nRef > 1 )
     {
         return;
     }
 
-    for( CacheObjectObserverSet::iterator it = commonInfoPtr_->getObservers().begin();
-         it != commonInfoPtr_->getObservers().end();
+    for( CacheObjectObserverSet::iterator it = _status->getObservers().begin();
+         it != _status->getObservers().end();
          ++it )
     {
-        (*it)->onUnload_( *this );
+        (*it)->_onUnload( *this );
     }
 
-    unload_( );
-    resetLastUsed_();
+    _unload( );
+    _status->lastUsedTime = 0;
 }
 
-double CacheObject::getLastUsed( ) const
+double CacheObject::getLastUsed() const
 {
-    return commonInfoPtr_->lastUsedTime;
+    return _status->lastUsedTime;
 }
 
-double CacheObject::getLoadTime( ) const
+double CacheObject::getLoadTime() const
 {
-    return commonInfoPtr_->loadTime;
+    return _status->loadTime;
 }
 
-bool CacheObject::isUnloadable( ) const
+bool CacheObject::isUnloadable() const
 {
-    return commonInfoPtr_->unloadable;
+    return _status->unloadable;
 }
 
 void CacheObject::setUnloadable( bool unloadable )
 {
-    commonInfoPtr_->unloadable = unloadable;
+    _status->unloadable = unloadable;
 }
 
-uint32_t CacheObject::getReferenceCount_( ) const
+uint32_t CacheObject::getRefCount( ) const
 {
-    return commonInfoPtr_->referenceCount;
+    return _status->nRef;
 }
 
-void CacheObject::registerObserver( CacheObjectObserver* observer )
+void CacheObject::_registerObserver( CacheObjectObserver* observer )
 {
-    commonInfoPtr_->registerObserver( observer );
+    _status->registerObserver( observer );
 }
 
-void CacheObject::unregisterObserver( CacheObjectObserver* observer )
+void CacheObject::_unregisterObserver( CacheObjectObserver* observer )
 {
-    commonInfoPtr_->unregisterObserver( observer );
+    _status->unregisterObserver( observer );
 }
 
-void CacheObject::updateLastUsed_( const double lastUsedTime )
+bool CacheObject::_isValid() const
 {
-    commonInfoPtr_->lastUsedTime = lastUsedTime;
+    return _status->cacheId != INVALID_CACHE_ID;
 }
 
-void CacheObject::resetLastUsed_( )
+bool CacheObject::operator==( const CacheObject& cacheObject ) const
 {
-    updateLastUsed_( 0.0 );
+    return _status->cacheId == cacheObject.getId();
 }
 
-void CacheObject::updateLastUsedWithCurrentTime_( )
+void CacheObject::touch()
 {
-    updateLastUsed_( ThreadClock::getClock().getTimef() );
+     _status->lastUsedTime = ThreadClock::getClock().getTimef();
 }
 
 }

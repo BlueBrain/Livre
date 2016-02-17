@@ -88,11 +88,13 @@ BOOST_AUTO_TEST_CASE( testRemote )
             const vmml::Vector3ui block( i );
             livre::Boxf worldBox( vmml::Vector3i( 0.f ) ,
                                   vmml::Vector3i( 1.f ));
-            livre::LODNode node( livre::NodeId( 0, block ),
+
+            const livre::NodeId nodeId( 0, block );
+            livre::LODNode node( nodeId,
                                  block,
                                  worldBox );
             clock.reset();
-            livre::MemoryUnitPtr mem = dataSource.getData( node );
+            livre::MemoryUnitPtr mem = dataSource.getData( nodeId );
             const float first = clock.getTimef();
 
             const livre::Vector3ui brickSize = livre::Vector3ui( i ) +
@@ -108,7 +110,7 @@ BOOST_AUTO_TEST_CASE( testRemote )
             clock.reset();
             while( clock.getTimef() < 300.f )
             {
-                mem = dataSource.getData( node );
+                mem = dataSource.getData( nodeId );
                 ++num;
 
                 BOOST_REQUIRE( mem );
@@ -130,7 +132,7 @@ BOOST_AUTO_TEST_CASE( testRemote )
         std::cout << std::endl
                   << "Volume size, setup (ms), MB/s (first brick),  MB/s (other bricks)"
                   << std::endl;
-        BOOST_FOREACH( const std::string& string, result )
+        for( const std::string& string: result )
             std::cout << string << std::endl;
     }
     catch( const std::runtime_error& e )

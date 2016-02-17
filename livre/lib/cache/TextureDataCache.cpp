@@ -30,50 +30,56 @@
 namespace livre
 {
 
-TextureDataCache::TextureDataCache( VolumeDataSourcePtr volumeDataSourcePtr,
-                                    const uint32_t type )
-    : volumeDataSourcePtr_( volumeDataSourcePtr )
-    , type_( type )
+struct TextureDataCache::Impl
 {
-    statisticsPtr_->setStatisticsName( "Data cache CPU");
+public:
+    Impl( VolumeDataSource& dataSource,
+          const uint32_t textureType  )
+        : _dataSource( dataSource )
+        , _textureType( textureType )
+    {}
+
+    CacheObject* generate( const CacheId& cacheId, TextureDataCache& cache )
+    {
+        return new TextureDataObject( cacheId, cache );
+    }
+
+    VolumeDataSource& _dataSource;
+    const uint32_t _textureType;
+};
+
+TextureDataCache::TextureDataCache( const size_t maxMemBytes,
+                                    VolumeDataSource& dataSource,
+                                    const uint32_t textureType )
+    : LRUCache( maxMemBytes )
+    , _impl( new Impl( dataSource, textureType ))
+{
+    _statistics->setName( "Data cache CPU");
 }
 
-CacheObject* TextureDataCache::generateCacheObjectFromID_( const CacheId& cacheID )
+CacheObject* TextureDataCache::_generate( const CacheId& cacheId )
 {
-    ConstLODNodePtr lodNodePtr =
-            volumeDataSourcePtr_->getNode( NodeId( cacheID ));
-
-    if( !lodNodePtr->isValid() )
-        return static_cast< CacheObject* >( TextureDataObject::getEmptyPtr( ));
-
-    return new TextureDataObject( volumeDataSourcePtr_, lodNodePtr, type_ );
+    return _impl->generate( cacheId, *this );
 }
 
-TextureDataObject& TextureDataCache::getNodeTextureData( const CacheId& cacheId )
+TextureDataCache::~TextureDataCache()
 {
-    if( cacheId == INVALID_CACHE_ID )
-        return *TextureDataObject::getEmptyPtr();
-
-    TextureDataObject* internalTextureData =
-            static_cast< TextureDataObject *>( getObjectFromCache_( cacheId ).get( ) );
-
-    return *internalTextureData;
+    _unloadAll();
 }
 
-TextureDataObject& TextureDataCache::getNodeTextureData( const CacheId& cacheId ) const
+VolumeDataSource& TextureDataCache::getDataSource()
 {
-    if( cacheId == INVALID_CACHE_ID )
-        return *TextureDataObject::getEmptyPtr();
-
-    TextureDataObject* internalTextureData =
-            static_cast< TextureDataObject *>( getObjectFromCache_( cacheId ).get( ) );
-
-    return internalTextureData != NULL ? *internalTextureData : *TextureDataObject::getEmptyPtr();
+    return _impl->_dataSource;
 }
 
-VolumeDataSourcePtr TextureDataCache::getDataSource()
+const VolumeDataSource& TextureDataCache::getDataSource() const
 {
-    return volumeDataSourcePtr_;
+    return _impl->_dataSource;
+}
+
+uint32_t TextureDataCache::getTextureType() const
+{
+    return _impl->_textureType;
 }
 
 }

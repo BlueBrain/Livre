@@ -34,43 +34,44 @@ public:
     /**
      * Constructor
      */
-    ValidCacheObject( )
-        : isLoadedVar_( false ),
-          cacheId_( 0 )
+    ValidCacheObject( const livre::CacheId& cacheId )
+        : livre::CacheObject( cacheId )
+        , _isLoaded_( false )
     { }
 
-    void setCacheId( livre::CacheId cacheId ) { cacheId_ = cacheId; }
+    size_t getSize( ) const final { return CACHE_SIZE; }
 
-    virtual livre::CacheId getCacheID() const { return cacheId_; }
+    /**
+     * @param observer is added to list of observers.
+     */
+    void registerObserver( livre::CacheObjectObserver* observer )
+        { _registerObserver( observer ); }
 
-    size_t getCacheSize( ) const final { return CACHE_SIZE; }
+    /**
+     * @param observer is removed from list of observer
+     */
+    void unregisterObserver( livre::CacheObjectObserver* observer )
+        { _unregisterObserver( observer ); }
 
 private:
 
-
-    virtual bool load_( )
+    bool _load() final
     {
-        isLoadedVar_ = true;
+        _isLoaded_ = true;
         return true;
     }
 
-    virtual void unload_( )
+    void _unload() final
     {
-        isLoadedVar_ = false;
+        _isLoaded_ = false;
     }
 
-    virtual bool isLoaded_( ) const
+    bool _isLoaded() const final
     {
-        return isLoadedVar_;
+        return _isLoaded_;
     }
 
-    virtual bool isValid_( ) const
-    {
-        return true;
-    }
-
-    bool isLoadedVar_;
-    livre::CacheId cacheId_;
+    bool _isLoaded_;
 };
 
 typedef boost::shared_ptr< ValidCacheObject > ValidCacheObjectPtr;

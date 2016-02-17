@@ -102,19 +102,16 @@ public:
      * @param nodeId The nodeId to get the node for.
      * @return The LODNode for the ID or 0 if not found.
      */
-    ConstLODNodePtr getNode( const NodeId& nodeId ) const;
+    LODNode getNode( const NodeId& nodeId ) const;
 
 protected:
-    /**
-     * LODNode will be generated and mapped, where it can be modified with the derived
-     * class.
-     * @param nodeId The nodeId to get the node for.
-     * @return The LODNode for the ID. If not found, an invalid node is returned.
-     */
-    LODNodePtr _getNodeFromNodeID( uint32_t nodeId );
 
-    mutable NodeIDLODNodePtrMap _lodNodeMap;
+    typedef boost::unordered_map< NodeId, LODNode > NodeIDLODNodeMap;
+
+    mutable NodeIDLODNodeMap _lodNodeMap;
     VolumeInformation _volumeInfo;
+    mutable ReadWriteMutex _mutex;
+
 };
 
 /**

@@ -137,7 +137,7 @@ public:
             readTOCBlock( initData.getURI().getPath());
 
             _volumeInfo.frameRange = Vector2ui( 0, _uvfDataSetPtr->GetNumberOfTimesteps( ));
-         }
+        }
         catch( ... )
             LBTHROW( std::runtime_error( "UVF data format initialization failed" ));
 
@@ -266,8 +266,7 @@ public:
                      (const unsigned char*)_tuvokLargeMMapFilePtr->rd(
                                                         offset, length ).get( );
 
-             memUnitPtr.reset( new ConstMemoryUnit( dataPtr,
-                                        blockInfo.m_iLength / sizeof( T ) ) );
+             memUnitPtr.reset( new ConstMemoryUnit( dataPtr, blockInfo.m_iLength  ) );
         }
         else
         {
@@ -351,10 +350,13 @@ public:
         const Vector3f boxMax = boxMin + Vector3f( brickInfo.extents[ 0 ],
                                                    brickInfo.extents[ 1 ],
                                                    brickInfo.extents[ 2 ] );
+
+        const Vector3ui& overlap = _volumeInfo.overlap;
+
         const Boxf worldBox( boxMin, boxMax );
-        const Vector3ui blockSize( brickInfo.n_voxels[ 0 ],
-                                   brickInfo.n_voxels[ 1 ],
-                                   brickInfo.n_voxels[ 2 ] );
+        const Vector3ui blockSize( brickInfo.n_voxels[ 0 ] - 2 * overlap[ 0 ],
+                                   brickInfo.n_voxels[ 1 ] - 2 * overlap[ 1 ],
+                                   brickInfo.n_voxels[ 2 ] - 2 * overlap[ 2 ]);
 
         lodNode = LODNode( internalNode, blockSize, worldBox );
     }

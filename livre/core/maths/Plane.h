@@ -94,7 +94,7 @@ public:
      * @param c Plane normal z value.
      * @param d Plane normal d value.
      */
-    LIVRECORE_API void set( const float a, const float b, const float c, const float d );
+    LIVRECORE_API void set( float a, float b, float c, float d );
 
     /**
      * @return The plane parameters.

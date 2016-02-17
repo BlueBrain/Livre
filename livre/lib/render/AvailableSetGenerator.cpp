@@ -64,7 +64,7 @@ struct AvailableSetGenerator::Impl
             const NodeId& currentNodeId = current;
             const ConstTextureObjectPtr texture =
                 boost::static_pointer_cast< const TextureObject >(
-                     _textureCache.getObjectFromCache( currentNodeId.getId( )));
+                     _textureCache.get( currentNodeId.getId( )));
 
             if( texture && texture->isLoaded( ))
             {

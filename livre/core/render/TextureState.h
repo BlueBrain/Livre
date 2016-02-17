@@ -44,8 +44,6 @@ public:
     Vector3f textureCoordsMax; //!< Maximum texture coordinates in the maximum texture block in \see TexturePool.
     Vector3f textureSize; //!< The texture size.
 
-    TexturePoolPtr texturePoolPtr;
-
     uint32_t textureId; //!< The OpenGL texture id.
 };
 

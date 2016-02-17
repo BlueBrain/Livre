@@ -33,38 +33,36 @@ View::~View()
 {
 }
 
-void View::setRenderer( RendererPtr rendererPtr )
+void View::setRenderer( RendererPtr renderer )
 {
-    rendererPtr_ = rendererPtr;
+    _renderer = renderer;
 }
 
 void View::setViewport( const Viewport& viewport )
 {
-    viewport_ = viewport;
+    _viewport = viewport;
 }
 
 RendererPtr View::getRenderer() const
 {
-    return rendererPtr_;
+    return _renderer;
 }
 
 const Viewport& View::getViewport() const
 {
-    return viewport_;
+    return _viewport;
 }
 
 void View::render( const FrameInfo& frameInfo,
                    const RenderBricks& bricks,
                    const GLWidget& widget )
 {
-    if( !rendererPtr_ )
+    if( !_renderer )
         return ;
 
-    onPreRender_( widget, frameInfo );
-
      if( !bricks.empty( ))
-        rendererPtr_->render( widget, *this, frameInfo.currentFrustum, bricks );
+        _renderer->render( widget, *this, bricks );
 
-    onPostRender_( widget, frameInfo );
+    _onPostRender( widget, frameInfo );
 }
 }

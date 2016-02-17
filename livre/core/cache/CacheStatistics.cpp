@@ -80,64 +80,64 @@ struct CacheStatistics::LoadInfo
 
 CacheStatistics::CacheStatistics( const std::string& statisticsName,
                                   const size_t queueSize )
-    : statisticsName_( statisticsName )
-    , usedMemoryInBytes_( 0 )
-    , maxMemoryInBytes_( 0 )
-    , blockCount_( 0 )
-    , cacheHit_( 0 )
-    , cacheMiss_( 0 )
-    , queueSize_( queueSize )
+    : _name( statisticsName )
+    , _usedMemBytes( 0 )
+    , _maxMemBytes( 0 )
+    , _objCount( 0 )
+    , _cacheHit( 0 )
+    , _cacheMiss( 0 )
+    , _queueSize( queueSize )
 {
 }
 
-void CacheStatistics::onLoaded_( const CacheObject& cacheObject )
+void CacheStatistics::_onLoaded( const CacheObject& cacheObject )
 {
-   ++blockCount_;
-   usedMemoryInBytes_ += cacheObject.getCacheSize();
+   ++_objCount;
+   _usedMemBytes += cacheObject.getSize();
 
-   if( ioQueue_.empty() )
-       ioQueue_.push( LoadInfoPtr( new LoadInfo()) );
+   if( _ioQueue.empty() )
+       _ioQueue.push( LoadInfoPtr( new LoadInfo()) );
 
-   if( ioQueue_.getSize() == queueSize_ )
-       ioQueue_.pop( );
+   if( _ioQueue.getSize() == _queueSize )
+       _ioQueue.pop( );
 
    LoadInfoPtr previous;
-   ioQueue_.getBack( previous );
-   ioQueue_.push( LoadInfoPtr( new LoadInfo( *previous, LoadInfo::OP_LOAD,
-                                             cacheObject.getCacheSize(),
+   _ioQueue.getBack( previous );
+   _ioQueue.push( LoadInfoPtr( new LoadInfo( *previous, LoadInfo::OP_LOAD,
+                                             cacheObject.getSize(),
                                              cacheObject.getLoadTime( ))));
 }
 
-void CacheStatistics::onUnload_( const CacheObject& cacheObject )
+void CacheStatistics::_onUnload( const CacheObject& cacheObject )
 {
-    --blockCount_;
-    usedMemoryInBytes_ -= cacheObject.getCacheSize();
+    --_objCount;
+    _usedMemBytes -= cacheObject.getSize();
 
-    if( ioQueue_.getSize() == queueSize_ )
-        ioQueue_.pop( );
+    if( _ioQueue.getSize() == _queueSize )
+        _ioQueue.pop( );
 
     LoadInfoPtr previous;
-    ioQueue_.getBack( previous );
-    ioQueue_.push( LoadInfoPtr( new LoadInfo( *previous, LoadInfo::OP_UNLOAD,
-                                              cacheObject.getCacheSize( ))));
+    _ioQueue.getBack( previous );
+    _ioQueue.push( LoadInfoPtr( new LoadInfo( *previous, LoadInfo::OP_UNLOAD,
+                                              cacheObject.getSize( ))));
 }
 
 std::ostream& operator<<( std::ostream& stream, const CacheStatistics& cacheStatistics )
 {
     const int hits = int(
-        100.f * float( cacheStatistics.cacheHit_ ) /
-        float( cacheStatistics.cacheHit_ + cacheStatistics.cacheMiss_ ));
-    stream << cacheStatistics.statisticsName_ << std::endl;
+        100.f * float( cacheStatistics._cacheHit ) /
+        float( cacheStatistics._cacheHit + cacheStatistics._cacheMiss ));
+    stream << cacheStatistics._name << std::endl;
     stream << "  Used Memory: "
-           << (cacheStatistics.usedMemoryInBytes_ + LB_1MB - 1) / LB_1MB << "/"
-           << (cacheStatistics.maxMemoryInBytes_ + LB_1MB - 1) / LB_1MB << "MB"
+           << (cacheStatistics._usedMemBytes + LB_1MB - 1) / LB_1MB << "/"
+           << (cacheStatistics._maxMemBytes + LB_1MB - 1) / LB_1MB << "MB"
            << std::endl;
     stream << "  Block Count: "
-           << cacheStatistics.blockCount_ << std::endl;
+           << cacheStatistics._objCount << std::endl;
     stream << "  Cache hits: "
-           << cacheStatistics.cacheHit_ << " (" << hits << "%)" << std::endl;
+           << cacheStatistics._cacheHit << " (" << hits << "%)" << std::endl;
     stream << "  Cache misses: "
-           << cacheStatistics.cacheMiss_ << std::endl;
+           << cacheStatistics._cacheMiss << std::endl;
 
     return stream;
 }

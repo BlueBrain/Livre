@@ -48,17 +48,17 @@ public:
     };
 
     /**
-     * @param cacheObjectID The object cache id to be queried.
+     * @param cacheId The object cache id to be queried.
      * @return The cache object from cache, if object is not in the list it is created with given cache id.
      */
-    LIVRECORE_API CacheObjectPtr getObjectFromCache( const CacheId& cacheObjectID );
+    LIVRECORE_API CacheObjectPtr get( const CacheId& cacheId );
 
     /**
-     * @param cacheObjectID The object cache id to be queried.
+     * @param cacheId The object cache id to be queried.
      * @return The cache object from cache, if object is not in the list an empty cache
      * object is returned.
      */
-    LIVRECORE_API CacheObjectPtr getObjectFromCache( const CacheId& cacheObjectID ) const;
+    LIVRECORE_API CacheObjectPtr get( const CacheId& cacheId ) const;
 
     /**
      * Applies a policy to the cache.
@@ -70,17 +70,17 @@ public:
     /**
      * @return The number of cache objects managed ( not the number of loaded objects ).
      */
-    LIVRECORE_API size_t getNumberOfCacheObjects( ) const;
+    LIVRECORE_API size_t getCount() const;
 
     /**
      * @return Statistics.
      */
-    LIVRECORE_API CacheStatistics& getStatistics( );
+    LIVRECORE_API CacheStatistics& getStatistics();
 
     /**
      * @return Statistics.
      */
-    LIVRECORE_API const CacheStatistics& getStatistics( ) const;
+    LIVRECORE_API const CacheStatistics& getStatistics() const;
 
 protected:
     LIVRECORE_API Cache();
@@ -88,32 +88,39 @@ protected:
     LIVRECORE_API virtual ~Cache( );
 
     /**
-     * @param cacheObjectID The object cache id to be queried.
+     * @param cacheId The object cache id to be queried.
      * @return The cache object from cache, if object is not in the list it is created.
      */
-    LIVRECORE_API CacheObjectPtr getObjectFromCache_( const CacheId& cacheObjectID );
+    LIVRECORE_API CacheObjectPtr _get( const CacheId& cacheId );
 
     /**
-     * @param cacheObjectID The object cache id to be queried.
+     * @param cacheId The object cache id to be queried.
      * @return The cache object from cache, if object is not in the list an invalid cache object is returned.
      */
-    LIVRECORE_API CacheObjectPtr getObjectFromCache_( const CacheId& cacheObjectID ) const;
+    LIVRECORE_API CacheObjectPtr _get( const CacheId& cacheId ) const;
 
     /**
-     * @param cacheID The derived class allocates an \see CacheObject with the given ID
+     * @param cacheId The derived class allocates an \see CacheObject with the given ID
      * @return The allocated object.
      */
-    virtual CacheObject* generateCacheObjectFromID_( const CacheId& cacheID ) = 0;
+    virtual CacheObject* _generate( const CacheId& cacheId ) = 0;
 
-    CacheStatisticsPtr statisticsPtr_;  //!< The statistics object ptr.
+    /**
+     * @return Enforce unloading all objects. This function is convinient when
+     * object has references to the parent cache and on cache destruction time
+     * objects want to use their parent caches.
+     */
+    LIVRECORE_API void _unloadAll();
+
+    CacheStatisticsPtr _statistics;  //!< The statistics object ptr.
 
 private:
 
-    void unloadCacheObjectsWithPolicy_( CachePolicy& cachePolicy,
-                                        const std::vector< CacheObject * >& cacheObjectList ) const;
+    void _unload( CachePolicy& cachePolicy,
+                  const std::vector< CacheObject* >& cacheObjects ) const;
 
-    CacheMap cacheMap_;
-    mutable ReadWriteMutex mutex_;
+    CacheMap _cacheMap;
+    mutable ReadWriteMutex _mutex;
 };
 
 }

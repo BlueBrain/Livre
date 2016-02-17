@@ -59,8 +59,8 @@ const uint32_t minSamplesPerRay = 512;
 
 struct RayCastRenderer::Impl
 {
-    Impl( uint32_t samplesPerRay,
-          uint32_t samplesPerPixel,
+    Impl( const uint32_t samplesPerRay,
+          const uint32_t samplesPerPixel,
           const VolumeInformation& volInfo )
         :  _framebufferTexture(
             new eq::util::Texture( GL_TEXTURE_RECTANGLE_ARB, glewGetContext( )))
@@ -128,7 +128,6 @@ struct RayCastRenderer::Impl
 
     void onFrameStart( const GLWidget& glWidget LB_UNUSED,
                        const View& view LB_UNUSED,
-                       const Frustum& frustum,
                        const RenderBricks& renderBricks )
     {
     #ifdef LIVRE_DEBUG_RENDERING
@@ -149,7 +148,7 @@ struct RayCastRenderer::Impl
             uint32_t maxLOD = 0;
             for( const RenderBrickPtr& rb : renderBricks )
             {
-                const uint32_t level = rb->getLODNode()->getRefLevel();
+                const uint32_t level = rb->getLODNode().getRefLevel();
                 if( level > maxLOD )
                     maxLOD = level;
             }
@@ -172,6 +171,8 @@ struct RayCastRenderer::Impl
         // Enable shaders
         glUseProgram( program );
         GLint tParamNameGL;
+
+        const Frustum& frustum = view.getFrustum();
 
         tParamNameGL = glGetUniformLocation( program, "invProjectionMatrix" );
         glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getInvProjectionMatrix( ).array );
@@ -230,28 +231,29 @@ struct RayCastRenderer::Impl
         // Enable shaders
         glUseProgram( program );
 
-        if( rb.getTextureState( )->textureId == INVALID_TEXTURE_ID )
+        const ConstTextureStatePtr& texState = rb.getTextureState();
+        const LODNode& lodNode = rb.getLODNode();
+        if( texState->textureId == INVALID_TEXTURE_ID )
         {
-            LBERROR << "Invalid texture for node : " << rb.getLODNode( )->getNodeId( ) << std::endl;
+            LBERROR << "Invalid texture for node : "
+                    << lodNode.getNodeId() << std::endl;
             return;
         }
 
         GLint tParamNameGL = glGetUniformLocation( program, "aabbMin" );
-        const ConstLODNodePtr& lodNodePtr = rb.getLODNode( );
-        glUniform3fv( tParamNameGL, 1, lodNodePtr->getWorldBox( ).getMin( ).array );
+        glUniform3fv( tParamNameGL, 1, lodNode.getWorldBox().getMin().array );
 
         tParamNameGL = glGetUniformLocation( program, "aabbMax" );
-        glUniform3fv( tParamNameGL, 1, lodNodePtr->getWorldBox( ).getMax( ).array );
+        glUniform3fv( tParamNameGL, 1, lodNode.getWorldBox().getMax().array );
 
         tParamNameGL = glGetUniformLocation( program, "textureMin" );
-        ConstTextureStatePtr texState = rb.getTextureState( );
         glUniform3fv( tParamNameGL, 1, texState->textureCoordsMin.array );
 
         tParamNameGL = glGetUniformLocation( program, "textureMax" );
         glUniform3fv( tParamNameGL, 1, texState->textureCoordsMax.array );
 
         const Vector3f& voxSize =
-                rb.getTextureState( )->textureSize / lodNodePtr->getWorldBox( ).getDimension( );
+                rb.getTextureState( )->textureSize / lodNode.getWorldBox( ).getDimension( );
         tParamNameGL = glGetUniformLocation( program, "voxelSpacePerWorldSpace" );
         glUniform3fv( tParamNameGL, 1, voxSize.array );
 
@@ -275,7 +277,7 @@ struct RayCastRenderer::Impl
         tParamNameGL = glGetUniformLocation( program, "volumeTex" );
         glUniform1i( tParamNameGL, 0 ); //f-shader
 
-        const uint32_t refLevel = lodNodePtr->getRefLevel();
+        const uint32_t refLevel = lodNode.getRefLevel();
 
         tParamNameGL = glGetUniformLocation( program, "refLevel" );
         glUniform1i( tParamNameGL, refLevel );
@@ -298,11 +300,11 @@ struct RayCastRenderer::Impl
     std::vector< uint32_t > _usedTextures[2]; // last, current frame
 };
 
-RayCastRenderer::RayCastRenderer( uint32_t samplesPerRay,
-                                  uint32_t samplesPerPixel,
-                                  const VolumeInformation& volInfo,
-                                  uint32_t gpuDataType,
-                                  int32_t internalFormat )
+RayCastRenderer::RayCastRenderer( const uint32_t samplesPerRay,
+                                  const uint32_t samplesPerPixel,
+                                  const uint32_t gpuDataType,
+                                  const int32_t internalFormat,
+                                  const VolumeInformation& volInfo )
     : Renderer( volInfo.compCount, gpuDataType, internalFormat ),
       _impl( new RayCastRenderer::Impl( samplesPerRay,
                                         samplesPerPixel,
@@ -317,18 +319,16 @@ void RayCastRenderer::update( const FrameData& frameData )
     _impl->update( frameData );
 }
 
-void RayCastRenderer::onFrameStart_( const GLWidget& glWidget,
+void RayCastRenderer::_onFrameStart( const GLWidget& glWidget,
                                      const View& view,
-                                     const Frustum& frustum,
                                      const RenderBricks& renderBricks )
 {
-    _impl->onFrameStart( glWidget, view, frustum, renderBricks );
+    _impl->onFrameStart( glWidget, view, renderBricks );
 }
 
 
-void RayCastRenderer::renderBrick_( const GLWidget& glWidget,
+void RayCastRenderer::_renderBrick( const GLWidget& glWidget,
                                     const View& view,
-                                    const Frustum&,
                                     const RenderBrick& renderBrick )
 {
     _impl->renderBrick( glWidget, view, renderBrick );

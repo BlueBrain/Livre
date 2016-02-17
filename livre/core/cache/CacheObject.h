@@ -37,6 +37,8 @@ namespace livre
 class CacheObject
 {
 public:
+    LIVRECORE_API virtual ~CacheObject() { }
+
     /**
      * @return True if the object is valid.
      */
@@ -45,24 +47,24 @@ public:
     /**
      * @return The unique cache id.
      */
-    virtual CacheId getCacheID() const = 0;
+    CacheId getId() const;
 
     /**
      * Loads the object to cache ( if the reference count is more than 1, it is not unloaded ).
      * Function is thread safe for loading.
      */
-    LIVRECORE_API void cacheLoad( );
+    LIVRECORE_API void load();
 
     /**
      * Unloads the object from the memory, if there are not any references. Function is threadsafe
      * for unloading.
      */
-    LIVRECORE_API void cacheUnload();
+    LIVRECORE_API void unload();
 
     /**
      * @return The memory size of the object in bytes.
      */
-    virtual size_t getCacheSize() const = 0;
+    virtual size_t getSize() const = 0;
 
     /**
      * @return The last time object is used.
@@ -91,88 +93,78 @@ public:
     LIVRECORE_API void setUnloadable( bool unloadable );
 
     /**
-     * getReferenceCount_ Should not be called by user. The function is threadsafe.
      * @return The number of references to CacheObject.
      */
-    LIVRECORE_API uint32_t getReferenceCount_() const;
+    LIVRECORE_API uint32_t getRefCount() const;
 
     /**
-     * updateLastUsed_ Should not be called by user.
-     * @param lastUsedTime Update the last used time.
+     * Updates the last used time with current time.
      */
-    void updateLastUsed_( const double lastUsedTime );
+    LIVRECORE_API void touch();
 
     /**
-     * updateLastUsedWithCurrentTime_ Updates the last used time with current time.
+     * @return On default returns true if cache ids are same
      */
-    LIVRECORE_API void updateLastUsedWithCurrentTime_();
-
-    /**
-     * resetLastUsed_ Resets the last used time to 0.
-     */
-    void resetLastUsed_();
-
-    LIVRECORE_API virtual ~CacheObject() { }
-
-    /**
-     * Register an observer for operations done on the object.
-     * @param observer The observer to add.
-     */
-    LIVRECORE_API void registerObserver( CacheObjectObserver* observer );
-
-    /**
-     * Unregisters an observer from the object
-     * @param observer The observer to remove.
-     */
-    LIVRECORE_API void unregisterObserver( CacheObjectObserver* observer );
+    virtual bool operator==( const CacheObject& cacheObject ) const;
 
 protected:
 
     friend class Cache;
     friend class CacheStatistics;
 
-    LIVRECORE_API CacheObject();
+    LIVRECORE_API CacheObject( const CacheId& cacheId = INVALID_CACHE_ID );
 
     /**
      * Implemented by the derived class, for loading data to memory. Thread safety is satisfied for
      * loading and unloading.
      * @return True if data is loaded.
      */
-    virtual bool load_() = 0;
+    virtual bool _load() = 0;
 
     /**
      * Implemented by the derived class, for unloading data from memory. Thread safety is satisfied for
      * loading and unloading.
      */
-    virtual void unload_() = 0;
+    virtual void _unload() = 0;
 
     /**
      * @return The validity of derived class.
      */
-    virtual bool isValid_() const = 0;
+    virtual bool _isValid() const;
 
     /**
      * @return True if object is loaded into memory.
      */
-    virtual bool isLoaded_() const = 0;
+    virtual bool _isLoaded() const = 0;
 
     /**
      * @return The unconst object.
      */
-    CacheObject* getUnconst_() const { return const_cast< CacheObject * >( this ); }
+    CacheObject* _getMutable() const { return const_cast< CacheObject* >( this ); }
+
+    /**
+     * @param observer is added to list of observers.
+     */
+    void _registerObserver( CacheObjectObserver* observer );
+
+    /**
+     * @param observer is removed from list of observer
+     */
+    void _unregisterObserver( CacheObjectObserver* observer );
 
 private:
-    LIVRECORE_API void increaseReference_();
-    LIVRECORE_API void decreaseReference_();
 
-    friend void intrusive_ptr_add_ref( CacheObject *object ) { object->increaseReference_(); }
-    friend void intrusive_ptr_release( CacheObject *object ) { object->decreaseReference_(); }
+    LIVRECORE_API void _increaseReference();
+    LIVRECORE_API void _decreaseReference();
 
-    friend void intrusive_ptr_add_ref( const CacheObject *object ) { object->getUnconst_()->increaseReference_(); }
-    friend void intrusive_ptr_release( const CacheObject *object ) { object->getUnconst_()->decreaseReference_(); }
+    friend void intrusive_ptr_add_ref( CacheObject* object ) { object->_increaseReference(); }
+    friend void intrusive_ptr_release( CacheObject* object ) { object->_decreaseReference(); }
 
-    struct CacheInfo;
-    mutable boost::shared_ptr< CacheInfo > commonInfoPtr_;
+    friend void intrusive_ptr_add_ref( const CacheObject* object ) { object->_getMutable()->_increaseReference(); }
+    friend void intrusive_ptr_release( const CacheObject* object ) { object->_getMutable()->_decreaseReference(); }
+
+    struct Status;
+    mutable boost::shared_ptr< Status > _status;
 
     LB_TS_VAR( thread_ );
 };

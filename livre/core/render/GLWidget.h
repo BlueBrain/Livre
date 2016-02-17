@@ -34,12 +34,12 @@ class GLWidget : public GLContextTrait
 public:
     virtual Viewport getViewport( const View& view ) const;
 
-    virtual uint32_t getX( ) const = 0;
-    virtual uint32_t getY( ) const = 0;
-    virtual uint32_t getHeight( ) const = 0;
-    virtual uint32_t getWidth( ) const = 0;
+    virtual uint32_t getX() const = 0;
+    virtual uint32_t getY() const = 0;
+    virtual uint32_t getHeight() const = 0;
+    virtual uint32_t getWidth() const = 0;
 
-    virtual void update( ) { }
+    virtual void update() { }
 
 protected:
     LIVRECORE_API GLWidget( );

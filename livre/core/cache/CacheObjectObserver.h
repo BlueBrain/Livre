@@ -38,37 +38,37 @@ protected:
      * Notifies the CacheObserver after loading.
      * @param cacheObject The CacheObject that notifies.
      */
-    virtual void onLoaded_( const CacheObject& cacheObject LB_UNUSED ) { }
+    virtual void _onLoaded( const CacheObject& cacheObject LB_UNUSED ) { }
 
     /**
      * Notifies the CacheObserver before unloading.
      * @param cacheObject The CacheObject that notifies.
      */
-    virtual void onUnload_( const CacheObject& cacheObject LB_UNUSED ) { }
+    virtual void _onUnload( const CacheObject& cacheObject LB_UNUSED ) { }
 
     /**
      * Notifies the CacheObserver on increase of reference count.
      * @param cacheObject The CacheObject that notifies.
      */
-    virtual void onReferenced_( const CacheObject& cacheObject LB_UNUSED ) { }
+    virtual void _onReferenced( const CacheObject& cacheObject LB_UNUSED ) { }
 
     /**
      * Notifies the CacheObserver on decrease of reference count.
      * @param cacheObject The CacheObject that notifies.
      */
-    virtual void onUnreferenced_( const CacheObject& cacheObject LB_UNUSED ) { }
+    virtual void _onUnreferenced( const CacheObject& cacheObject LB_UNUSED ) { }
 
     /**
      * Notifies the CacheObserver if object is in Cache
      * @param cacheObject The CacheObject that notifies.
      */
-    virtual void onCacheHit_( const CacheObject& cacheObject LB_UNUSED ) { }
+    virtual void _onCacheHit( const CacheObject& cacheObject LB_UNUSED ) { }
 
     /**
      * Notifies notify the CacheObserver if object is not in Cache
      * @param cacheObject The CacheObject that notifies.
      */
-    virtual void onCacheMiss_( const CacheObject& cacheObject LB_UNUSED ) { }
+    virtual void _onCacheMiss( const CacheObject& cacheObject LB_UNUSED ) { }
 
     virtual ~CacheObjectObserver() {}
 };

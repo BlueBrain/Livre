@@ -35,7 +35,6 @@ set(LIVRECORE_HEADERS
   dash/DashRenderNode.h
   dash/DashRenderStatus.h
   dash/DashTree.h
-  data/LODNodeTrait.h
   data/VolumeDataSource.h
   dashpipeline/DashConnection.h
   dashpipeline/DashProcessor.h
@@ -58,7 +57,6 @@ set(LIVRECORE_HEADERS
   render/RenderBrick.h
   render/Renderer.h
   render/TexturePool.h
-  render/TexturePoolFactory.h
   render/TextureState.h
   render/TransferFunction1D.h
   render/View.h
@@ -79,7 +77,6 @@ set(LIVRECORE_SOURCES
   dash/DashRenderStatus.cpp
   dash/DashTree.cpp
   data/LODNode.cpp
-  data/LODNodeTrait.cpp
   data/MemoryUnit.cpp
   data/NodeId.cpp
   data/VolumeDataSource.cpp
@@ -103,7 +100,6 @@ set(LIVRECORE_SOURCES
   render/RenderBrick.cpp
   render/Renderer.cpp
   render/TexturePool.cpp
-  render/TexturePoolFactory.cpp
   render/TextureState.cpp
   render/TransferFunction1D.cpp
   render/View.cpp

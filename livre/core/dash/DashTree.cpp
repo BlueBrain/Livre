@@ -50,7 +50,7 @@ public:
     ~DashTree( )
     {
         _localContext.commit();
-        BOOST_FOREACH( DashContextPtr ctx, dashContexts )
+        for( DashContextPtr ctx: dashContexts )
         {
             ctx->commit();
         }
@@ -102,8 +102,8 @@ public:
         dash::Context& prevCtx = dash::Context::getCurrent();
         _localContext.setCurrent();
 
-        ConstLODNodePtr lodNodePtr = _dataSource->getNode( nodeId );
-        if( !lodNodePtr )
+        const LODNode& lodNode = _dataSource->getNode( nodeId );
+        if( !lodNode.isValid( ))
         {
             prevCtx.setCurrent();
             return dash::NodePtr();
@@ -112,10 +112,10 @@ public:
         dash::NodePtr node = new dash::Node();
         DashRenderNode::initializeDashNode( node );
         DashRenderNode renderNode( node );
-        renderNode.setLODNode( *lodNodePtr );
+        renderNode.setLODNode( lodNode );
 
         _localContext.commit();
-        BOOST_FOREACH( DashContextPtr ctx, dashContexts )
+        for( DashContextPtr ctx: dashContexts )
         {
             _localContext.map( node, *ctx );
         }

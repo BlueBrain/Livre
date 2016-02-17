@@ -19,6 +19,7 @@
  */
 
 #include <livre/lib/cache/TextureDataObject.h>
+#include <livre/lib/cache/TextureDataCache.h>
 
 #include <livre/core/data/LODNode.h>
 #include <livre/core/data/MemoryUnit.h>
@@ -29,25 +30,176 @@
 
 namespace livre
 {
-TextureDataObject::TextureDataObject()
-    : CacheObject()
-    , LODNodeTrait()
-    , data_( new AllocMemoryUnit( ))
-    , dataSourcePtr_()
-    , gpuDataType_( 0 )
-{
-}
 
-TextureDataObject::TextureDataObject( VolumeDataSourcePtr dataSourcePtr,
-                                      ConstLODNodePtr lodNodePtr,
-                                      const uint32_t gpuDataType )
-    : CacheObject()
-    , LODNodeTrait( lodNodePtr )
-    , data_( new AllocMemoryUnit( ))
-    , dataSourcePtr_( dataSourcePtr )
-    , gpuDataType_( gpuDataType )
+struct TextureDataObject::Impl
 {
-    if( lodNodePtr_->getRefLevel() ==  0 )
+public:
+
+    Impl( TextureDataObject& dataObject,
+          TextureDataCache& dataCache )
+        : _data( new AllocMemoryUnit( ))
+        , _dataObject( dataObject )
+        , _dataCache( dataCache )
+        , _dataSource( dataCache.getDataSource( ))
+        , _gpuDataType( dataCache.getTextureType( ))
+    {}
+
+    bool isLoaded() const
+    {
+        return _data->getMemSize() > 0;
+    }
+
+    size_t getDataSize() const
+    {
+        const LODNode& lodNode =
+                _dataSource.getNode( NodeId( _dataObject.getId( )));
+
+        const Vector3ui& overlap =
+                    _dataSource.getVolumeInformation().overlap;
+        const size_t elemSize =
+                    _dataSource.getVolumeInformation().getBytesPerVoxel();
+        const uint32_t compCount =
+                    _dataSource.getVolumeInformation().compCount;
+        const Vector3ui blockSize =
+                    lodNode.getBlockSize() + overlap * 2;
+        return blockSize.product() * elemSize * compCount;
+    }
+
+    size_t getSize() const
+    {
+        return _data->getAllocSize();
+    }
+
+    const void* getDataPtr() const
+    {
+        return _data->getData< void >();
+    }
+
+    template< class DEST_TYPE >
+    bool readTextureData( const bool quantize )
+    {
+        const NodeId nodeId( _dataObject.getId( ));
+        ConstMemoryUnitPtr data = _dataSource.getData( nodeId );
+        if( !data )
+            return false;
+
+        const void* rawData = data->getData< void >();
+        if( quantize )
+        {
+            std::vector< DEST_TYPE > textureData;
+            convertData( rawData, textureData );
+            _data->allocAndSetData( textureData );
+        }
+        else
+            _data->allocAndSetData( rawData, getDataSize( ));
+
+        return true;
+    }
+
+    template< class SRC_TYPE, class DEST_TYPE >
+    void quantizeData( const SRC_TYPE* rawData,
+                       std::vector< DEST_TYPE >& formattedData ) const
+    {
+        const VolumeInformation& volumeInfo = _dataSource.getVolumeInformation();
+        const uint32_t compCount = volumeInfo.compCount;
+        const size_t dataSize = getDataSize();
+
+        const Vector3f min( std::numeric_limits< DEST_TYPE >::min( ));
+        const Vector3f max( std::numeric_limits< DEST_TYPE >::max( ));
+        if( std::is_signed< DEST_TYPE >::value )
+        {
+            signedQuantize( rawData, &formattedData[ 0 ], dataSize,
+                            compCount, min, max );
+        }
+        else
+        {
+            unsignedQuantize( rawData, &formattedData[ 0 ], dataSize,
+                              compCount, min, max );
+        }
+    }
+
+    template< class DEST_TYPE >
+    void convertData( const void* rawData,
+                      std::vector< DEST_TYPE >& formattedData ) const
+    {
+
+        const VolumeInformation& volumeInfo = _dataSource.getVolumeInformation();
+        const DataType dataType = volumeInfo.dataType;
+        const size_t dataSize = getDataSize();
+        formattedData.resize( dataSize );
+
+        switch( dataType )
+        {
+           case DT_UINT8:
+                quantizeData< uint8_t, DEST_TYPE >( static_cast< const uint8_t* >( rawData ),
+                                                    formattedData );
+                break;
+           case DT_UINT16:
+                quantizeData< uint16_t, DEST_TYPE >( static_cast< const uint16_t* >( rawData ),
+                                                     formattedData );
+                break;
+           case DT_UINT32:
+                quantizeData< uint32_t, DEST_TYPE >( static_cast< const uint32_t* >( rawData ),
+                                                     formattedData );
+                break;
+           case DT_INT8:
+                quantizeData< int8_t, DEST_TYPE >( static_cast< const int8_t* >( rawData ),
+                                                   formattedData );
+                break;
+           case DT_INT16:
+                quantizeData< int16_t, DEST_TYPE >( static_cast< const int16_t* >( rawData ),
+                                                    formattedData );
+                break;
+           case DT_INT32:
+                quantizeData< int32_t, DEST_TYPE >( static_cast< const int32_t* >( rawData ),
+                                                    formattedData );
+                break;
+           case DT_UNDEFINED:
+           case DT_FLOAT32:
+           case DT_FLOAT64:
+           {
+                LBTHROW( std::runtime_error( "Unimplemented data type." ));
+           }
+        }
+    }
+
+    bool load()
+    {
+        const DataType dataType = _dataSource.getVolumeInformation().dataType;
+        switch( _gpuDataType )
+        {
+            case GL_UNSIGNED_BYTE:
+                return readTextureData< uint8_t >( dataType != DT_UINT8 );
+            case GL_FLOAT:
+                return readTextureData< float >( dataType != DT_FLOAT32 );
+            case GL_UNSIGNED_SHORT:
+                return readTextureData< uint16_t >( dataType != DT_UINT16 );
+        }
+        return false;
+    }
+
+    void unload()
+    {
+        _data->release();
+
+        const NodeId nodeId( _dataObject.getId( ));
+           LBVERB << "Texture Data released: " << nodeId
+               << std::endl;
+    }
+
+    AllocMemoryUnitPtr _data;
+    TextureDataObject& _dataObject;
+    TextureDataCache& _dataCache;
+    VolumeDataSource& _dataSource;
+    uint32_t _gpuDataType;
+};
+
+TextureDataObject::TextureDataObject( const CacheId& cacheId,
+                                     TextureDataCache& dataCache )
+    : CacheObject( cacheId )
+    , _impl( new Impl( *this, dataCache ))
+{
+    if( NodeId( getId( )).getLevel() ==  0 )
         setUnloadable( false );
 }
 
@@ -55,187 +207,37 @@ TextureDataObject::~TextureDataObject()
 {
 }
 
-TextureDataObject* TextureDataObject::getEmptyPtr()
+bool TextureDataObject::_isLoaded( ) const
 {
-    static boost::shared_ptr< TextureDataObject > data( new TextureDataObject( ));
-    return data.get();
-}
-
-CacheId TextureDataObject::getCacheID() const
-{
-    return lodNodePtr_->getNodeId().getId();
-}
-
-bool TextureDataObject::operator==( const TextureDataObject& data ) const
-{
-    return lodNodePtr_ == data.lodNodePtr_;
-}
-
-bool TextureDataObject::isLoaded_( ) const
-{
-    return data_->getMemSize();
-}
-
-bool TextureDataObject::isValid_( ) const
-{
-    return lodNodePtr_->isValid();
-}
-
-size_t TextureDataObject::getDataSize_() const
-{
-    if( !isValid() )
+    if( !isValid( ))
         return 0;
 
-    const Vector3ui& overlap =
-                dataSourcePtr_->getVolumeInformation().overlap;
-    const size_t elemSize =
-                dataSourcePtr_->getVolumeInformation().getBytesPerVoxel();
-    const Vector3ui blockSize =
-                lodNodePtr_->getBlockSize() + overlap * 2;
-    return blockSize.product() * elemSize;
+    return _impl->isLoaded();
 }
 
-size_t TextureDataObject::getCacheSize() const
+size_t TextureDataObject::getSize() const
 {
-    if( !isValid() )
+    if( !isValid( ))
         return 0;
 
-    return data_->getAllocSize();
-}
-
-ConstVolumeDataSourcePtr TextureDataObject::getDataSource() const
-{
-    return dataSourcePtr_;
-}
-
-GLenum TextureDataObject::getGPUDataType() const
-{
-    return gpuDataType_;
+    return _impl->getSize();
 }
 
 const void* TextureDataObject::getDataPtr() const
 {
-    getUnconst_()->updateLastUsedWithCurrentTime_();
-    return data_->getData< void >();
+    _getMutable()->touch();
+    return _impl->getDataPtr();
 }
 
-template< class T >
-bool TextureDataObject::setTextureData_( const bool quantize )
+bool TextureDataObject::_load()
 {
-    getUnconst_()->updateLastUsedWithCurrentTime_();
-
-    ConstMemoryUnitPtr data = dataSourcePtr_->getData( *lodNodePtr_ );
-    if( !data )
-        return false;
-
-    const T* rawData = data->getData< T >();
-    if( quantize )
-    {
-        std::vector< T > textureData;
-        getQuantizedData_< T >( rawData, textureData );
-        data_->allocAndSetData( textureData );
-    }
-    else
-        data_->allocAndSetData( rawData, getRawDataSize_( ));
-    return true;
+    _getMutable()->touch();
+    return _impl->load();
 }
 
-template< class T >
-void TextureDataObject::getQuantizedData_( const T* rawData,
-                                         std::vector< T >& formattedData ) const
+void TextureDataObject::_unload()
 {
-    const VolumeInformation& volumeInfo = dataSourcePtr_->getVolumeInformation();
-    const uint32_t compCount = volumeInfo.compCount;
-    const DataType dataType = volumeInfo.dataType;
-    const size_t dataSize = getRawDataSize_();
-
-    formattedData.resize( dataSize );
-
-    switch( dataType )
-    {
-       case DT_UINT8:
-       {
-            const Vector3f min( std::numeric_limits< uint8_t >::min( ));
-            const Vector3f max( std::numeric_limits< uint8_t >::max( ));
-            unsignedQuantize( rawData, &formattedData[ 0 ], dataSize,
-                              compCount, min, max );
-            break;
-       }
-       case DT_UINT16:
-       {
-            const Vector3f min( std::numeric_limits< uint16_t >::min( ));
-            const Vector3f max( std::numeric_limits< uint16_t >::max( ));
-            unsignedQuantize( rawData, &formattedData[ 0 ], dataSize,
-                              compCount, min, max );
-            break;
-       }
-       case DT_UINT32:
-       {
-            const Vector3f min( std::numeric_limits< uint32_t >::min( ));
-            const Vector3f max( std::numeric_limits< uint32_t >::max( ));
-            unsignedQuantize( rawData, &formattedData[ 0 ], dataSize,
-                              compCount, min, max );
-            break;
-       }
-       case DT_INT8:
-       {
-            const Vector3f min( std::numeric_limits< int8_t >::min( ));
-            const Vector3f max( std::numeric_limits< int8_t >::max( ));
-            signedQuantize( rawData, &formattedData[ 0 ], dataSize,
-                            compCount, min, max );
-            break;
-       }
-       case DT_INT16:
-       {
-            const Vector3f min( std::numeric_limits< int16_t >::min( ));
-            const Vector3f max( std::numeric_limits< int16_t >::max( ));
-            signedQuantize( rawData, &formattedData[ 0 ], dataSize,
-                            compCount, min, max);
-            break;
-       }
-       case DT_INT32:
-       {
-            const Vector3f min( std::numeric_limits< int32_t >::min( ));
-            const Vector3f max( std::numeric_limits< int32_t >::max( ));
-            signedQuantize( rawData, &formattedData[ 0 ], dataSize,
-                            compCount, min, max );
-            break;
-       }
-       case DT_UNDEFINED:
-       case DT_FLOAT32:
-       case DT_FLOAT64:
-       {
-            LBTHROW( std::runtime_error( "Unimplemented data type." ));
-       }
-    }
-}
-
-size_t TextureDataObject::getRawDataSize_() const
-{
-    const VolumeInformation& volumeInfo = dataSourcePtr_->getVolumeInformation();
-    return getDataSize_() * volumeInfo.compCount * volumeInfo.getBytesPerVoxel();
-}
-
-bool TextureDataObject::load_( )
-{
-    const DataType dataType = dataSourcePtr_->getVolumeInformation().dataType;
-    switch( gpuDataType_ )
-    {
-        case GL_UNSIGNED_BYTE:
-            return setTextureData_< uint8_t >( dataType != DT_UINT8 );
-        case GL_FLOAT:
-            return setTextureData_< float >( dataType != DT_FLOAT32 );
-        case GL_UNSIGNED_SHORT:
-            return setTextureData_< uint16_t >( dataType != DT_UINT16 );
-    }
-    return false;
-}
-
-void TextureDataObject::unload_( )
-{
-    data_->release();
-    LBVERB << "Texture Data released: " << lodNodePtr_->getNodeId()
-           << std::endl;
+    return _impl->unload();
 }
 
 }

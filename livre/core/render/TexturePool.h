@@ -28,14 +28,24 @@ namespace livre
 {
 
 /**
- * The TexturePool class is responsible for allocating texture slots and copying textures into the texture slots.
- * The methods are not thread safe, the class should only be used by a single thread.
+ * The TexturePool class is responsible for allocating texture slots and copying
+ * textures into the texture slots. The methods are not thread safe.
  */
 class TexturePool
-{
-    friend class TexturePoolFactory;
-
+{   
 public:
+
+    /**
+     * Constructor.
+     * @param maxBlockSize is the maximum block size of a data souce
+     * @param internalFormat The OpenGL GPU internal format of the texture data
+     * @param format he OpenGL format of the texture data kept in memory
+     * @param gpuDataType The OpenGL format of the texture data kept in memory
+     */
+    LIVRECORE_API TexturePool( const Vector3ui& maxBlockSize,
+                               int internalFormat,
+                               uint32_t format,
+                               uint32_t gpuDataType );
 
     /**
      * @return The OpenGL GPU internal format of the texture data.
@@ -53,11 +63,6 @@ public:
     LIVRECORE_API uint32_t getFormat() const;
 
     /**
-     * @return The maximum texture block size in voxels.
-     */
-    LIVRECORE_API const Vector3i& getMaxBlockSize( ) const;
-
-   /**
      * Generates / uses a preallocated a 3D OpenGL texture based on OpenGL parameters.
      * @param textureState The destination state is filled with needed information.
      */
@@ -70,18 +75,13 @@ public:
     LIVRECORE_API void releaseTexture( TextureStatePtr textureState );
 
 private:
-    TexturePool( const Vector3i& maxBlockSize,
-                 const int internalFormat,
-                 const uint32_t format,
-                 const uint32_t gpuDataType );
 
-    std::vector< uint32_t > textureStack_;
+    UInt32Vector _textureStack;
 
-    const Vector3i maxBlockSize_;
-
-    const int32_t internalFormat_;
-    const uint32_t format_;
-    const uint32_t gpuDataType_;
+    const Vector3ui _maxBlockSize;
+    const int32_t _internalFormat;
+    const uint32_t _format;
+    const uint32_t _gpuDataType;
 };
 
 

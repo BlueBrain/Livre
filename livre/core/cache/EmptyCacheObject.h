@@ -43,22 +43,17 @@ public:
     }
 
     /**
-     * @return The invalid cache id.
-     */
-    virtual CacheId getCacheID() const { return INVALID_CACHE_ID; }
-
-    /**
      * @return The empty size.
      */
-    virtual size_t getCacheSize( ) const { return 0; }
+    virtual size_t getSize( ) const { return 0; }
 
 private:
 
     EmptyCacheObject( ) { }
-    virtual bool load_( ) { return false; }
-    virtual void unload_( ) { }
-    virtual bool isValid_( ) const { return false; }
-    virtual bool isLoaded_( ) const { return false; }
+    virtual bool _load( ) { return false; }
+    virtual void _unload( ) { }
+    virtual bool _isValid( ) const { return false; }
+    virtual bool _isLoaded( ) const { return false; }
 };
 
 }
