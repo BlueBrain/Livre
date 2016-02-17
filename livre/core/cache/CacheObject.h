@@ -140,7 +140,7 @@ protected:
     /**
      * @return The unconst object.
      */
-    CacheObject* _getUnconst() const { return const_cast< CacheObject * >( this ); }
+    CacheObject* _getMutable() const { return const_cast< CacheObject* >( this ); }
 
     /**
      * @param observer is added to list of observers.
@@ -157,11 +157,11 @@ private:
     LIVRECORE_API void _increaseReference();
     LIVRECORE_API void _decreaseReference();
 
-    friend void intrusive_ptr_add_ref( CacheObject *object ) { object->_increaseReference(); }
-    friend void intrusive_ptr_release( CacheObject *object ) { object->_decreaseReference(); }
+    friend void intrusive_ptr_add_ref( CacheObject* object ) { object->_increaseReference(); }
+    friend void intrusive_ptr_release( CacheObject* object ) { object->_decreaseReference(); }
 
-    friend void intrusive_ptr_add_ref( const CacheObject *object ) { object->_getUnconst()->_increaseReference(); }
-    friend void intrusive_ptr_release( const CacheObject *object ) { object->_getUnconst()->_decreaseReference(); }
+    friend void intrusive_ptr_add_ref( const CacheObject* object ) { object->_getMutable()->_increaseReference(); }
+    friend void intrusive_ptr_release( const CacheObject* object ) { object->_getMutable()->_decreaseReference(); }
 
     struct Status;
     mutable boost::shared_ptr< Status > _status;

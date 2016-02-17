@@ -225,13 +225,13 @@ size_t TextureDataObject::getSize() const
 
 const void* TextureDataObject::getDataPtr() const
 {
-    _getUnconst()->touch();
+    _getMutable()->touch();
     return _impl->getDataPtr();
 }
 
 bool TextureDataObject::_load()
 {
-    _getUnconst()->touch();
+    _getMutable()->touch();
     return _impl->load();
 }
 
