@@ -40,6 +40,9 @@ public:
     /** @return A pointer to the data or 0 if no data is loaded. */
     const void* getDataPtr() const;
 
+    /** @copydoc livre::CacheObject::getSize */
+    size_t getSize() const final;
+
 private:
     friend class TextureDataCache;
 
@@ -49,7 +52,6 @@ private:
     bool _load() final;
     void _unload() final;
     bool _isLoaded() const final;
-    size_t getSize() const final;
 
     struct Impl;
     std::unique_ptr<Impl> _impl;
