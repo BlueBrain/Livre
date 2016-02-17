@@ -97,7 +97,7 @@ void Renderer::_onFrameRender( const GLWidget& glWidget,
                                const View& view,
                                const RenderBricks &bricks )
 {
-    BOOST_FOREACH( const RenderBrickPtr& brick, bricks )
+    for( const RenderBrickPtr& brick: bricks )
         _renderBrick( glWidget, view, *brick );
 }
 

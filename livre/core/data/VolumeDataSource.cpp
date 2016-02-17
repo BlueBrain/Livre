@@ -83,7 +83,7 @@ void VolumeDataSource::loadPlugins()
 
 void VolumeDataSource::unloadPlugins()
 {
-    BOOST_FOREACH( lunchbox::DSO* plugin, _plugins )
+    for( lunchbox::DSO* plugin: _plugins )
         detail::VolumeDataSource::PluginFactory::getInstance().unload( plugin );
 }
 

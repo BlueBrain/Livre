@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE( testRemote )
         std::cout << std::endl
                   << "Volume size, setup (ms), MB/s (first brick),  MB/s (other bricks)"
                   << std::endl;
-        BOOST_FOREACH( const std::string& string, result )
+        for( const std::string& string: result )
             std::cout << string << std::endl;
     }
     catch( const std::runtime_error& e )

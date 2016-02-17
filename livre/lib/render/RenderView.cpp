@@ -50,14 +50,14 @@ struct RenderView::Impl
 
     void freeTextures( const FrameInfo& frameInfo )
     {
-        BOOST_FOREACH( const ConstCacheObjectPtr& cacheObject,
+        for( const ConstCacheObjectPtr& cacheObject:
                        frameInfo.renderNodes )
         {
             const NodeId nodeId(cacheObject->getId( ));
             freeTexture( nodeId );
         }
 
-        BOOST_FOREACH( const NodeId& nodeId, frameInfo.allNodes )
+        for( const NodeId& nodeId: frameInfo.allNodes )
             freeTexture( nodeId );
     }
 

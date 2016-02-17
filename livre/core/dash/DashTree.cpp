@@ -50,7 +50,7 @@ public:
     ~DashTree( )
     {
         _localContext.commit();
-        BOOST_FOREACH( DashContextPtr ctx, dashContexts )
+        for( DashContextPtr ctx: dashContexts )
         {
             ctx->commit();
         }
@@ -115,7 +115,7 @@ public:
         renderNode.setLODNode( lodNode );
 
         _localContext.commit();
-        BOOST_FOREACH( DashContextPtr ctx, dashContexts )
+        for( DashContextPtr ctx: dashContexts )
         {
             _localContext.map( node, *ctx );
         }
