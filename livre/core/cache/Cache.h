@@ -48,17 +48,17 @@ public:
     };
 
     /**
-     * @param cacheObjectID The object cache id to be queried.
+     * @param cacheId The object cache id to be queried.
      * @return The cache object from cache, if object is not in the list it is created with given cache id.
      */
-    LIVRECORE_API CacheObjectPtr get( const CacheId& cacheObjectID );
+    LIVRECORE_API CacheObjectPtr get( const CacheId& cacheId );
 
     /**
-     * @param cacheObjectID The object cache id to be queried.
+     * @param cacheId The object cache id to be queried.
      * @return The cache object from cache, if object is not in the list an empty cache
      * object is returned.
      */
-    LIVRECORE_API CacheObjectPtr get( const CacheId& cacheObjectID ) const;
+    LIVRECORE_API CacheObjectPtr get( const CacheId& cacheId ) const;
 
     /**
      * Applies a policy to the cache.
@@ -88,22 +88,22 @@ protected:
     LIVRECORE_API virtual ~Cache( );
 
     /**
-     * @param cacheObjectID The object cache id to be queried.
+     * @param cacheId The object cache id to be queried.
      * @return The cache object from cache, if object is not in the list it is created.
      */
     LIVRECORE_API CacheObjectPtr _get( const CacheId& cacheId );
 
     /**
-     * @param cacheObjectID The object cache id to be queried.
+     * @param cacheId The object cache id to be queried.
      * @return The cache object from cache, if object is not in the list an invalid cache object is returned.
      */
     LIVRECORE_API CacheObjectPtr _get( const CacheId& cacheId ) const;
 
     /**
-     * @param cacheID The derived class allocates an \see CacheObject with the given ID
+     * @param cacheId The derived class allocates an \see CacheObject with the given ID
      * @return The allocated object.
      */
-    virtual CacheObject* _generate( const CacheId& cacheID ) = 0;
+    virtual CacheObject* _generate( const CacheId& cacheId ) = 0;
 
     /**
      * @return Enforce unloading all objects. This function is convinient when

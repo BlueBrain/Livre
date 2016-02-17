@@ -28,18 +28,19 @@ namespace livre
 {
 
 /**
- * TextureCache class handles the \see TextureObject memory management. \see TextureObject holds the information
- * for OpenGL reference and amount of data on the GPU.
+ * TextureCache class handles the \see TextureObject memory management. \see TextureObject holds
+ * the information for OpenGL reference and amount of data on the GPU.
  */
 class TextureCache : public LRUCache
 {
 public:
 
     /**
-     * @param maxMemBytes Maximum texture memory
+     * @param dataCache Data cache.
+     * @param maxMemBytes Maximum texture memory.
      * @param internalTextureFormat Internal texture format of OpenGL, it defines the memory usage.
      */
-    LIVRE_API TextureCache( TextureDataCache& textureDataCache,
+    LIVRE_API TextureCache( TextureDataCache& dataCache,
                             size_t maxMemBytes,
                             int internalTextureFormat );
 

@@ -131,8 +131,7 @@ private:
             return;
 
         MemoryUnitPtr data = dataSource->getData( request.second.getNodeId( ));
-        _publisher.publish( zeq::serializeDataSampleData( request.first + 1
-                                                          , data ));
+        _publisher.publish( zeq::serializeDataSampleData( request.first + 1, data ));
         std::cout << '.' << std::flush;
     }
 };

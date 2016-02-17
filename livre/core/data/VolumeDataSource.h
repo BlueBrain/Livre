@@ -65,12 +65,12 @@ public:
 
     /**
      * Read the data for a given node.
-     * @param node NodeId to be read.
+     * @param nodeId NodeId to be read.
      * @return The memory block containing the data for the node.
      */
     LIVRECORE_API MemoryUnitPtr getData( const NodeId& nodeId );
 
-    /** @copydoc getData( const NodeId& node ) */
+    /** @copydoc getData( const NodeId& nodeId ) */
     LIVRECORE_API ConstMemoryUnitPtr getData( const NodeId& nodeId ) const;
 
     /**

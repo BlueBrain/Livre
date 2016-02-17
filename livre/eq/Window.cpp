@@ -195,8 +195,9 @@ public:
         Config* config = static_cast< Config* >( _window->getConfig( ));
         Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
 
+        const uint32_t maxGPUMem = pipe->getFrameData()->getVRParameters().getMaxGPUCacheMemoryMB();
         _textureCache.reset( new TextureCache( node->getTextureDataCache( ),
-                                               pipe->getFrameData()->getVRParameters( ).getMaxGPUCacheMemoryMB() * LB_1MB,
+                                               maxGPUMem * LB_1MB,
                                                GL_LUMINANCE8 ));
 
         _textureUploader.reset(

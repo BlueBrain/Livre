@@ -38,13 +38,13 @@ class TextureDataCache : public LRUCache
 public:
     /**
      * @param maxMemBytes Maximum data memory
-     * @param volumeDataSource The source where the volume data should
+     * @param dataSource The source where the volume data should
      * be loaded from
-     * @param type The type of the data for the GPU.
+     * @param textureType The type of the data for the GPU.
      */
     LIVRE_API TextureDataCache( size_t maxMemBytes,
                                 VolumeDataSource& dataSource,
-                                uint32_t textureType  );
+                                uint32_t textureType );
 
     ~TextureDataCache();
 

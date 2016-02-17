@@ -35,8 +35,8 @@ struct LastUsedOrderOperator
 
 LRUCachePolicy::LRUCachePolicy( size_t maxMemBytes,
                                 float cleanUpRatio /* = 1.0f */ )
-    : _maxMemBytes( maxMemBytes ),
-      _cleanUpRatio( cleanUpRatio )
+    : _maxMemBytes( maxMemBytes )
+    , _cleanUpRatio( cleanUpRatio )
 {}
 
 bool LRUCachePolicy::willPolicyBeActivated( const Cache& cache ) const

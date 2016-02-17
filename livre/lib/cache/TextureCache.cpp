@@ -59,6 +59,11 @@ struct TextureCache::Impl
                                              dataCache.getTextureType( )));
     }
 
+    CacheObject* generate( const CacheId& cacheId, TextureCache& cache )
+    {
+        return new TextureObject( cacheId, cache );
+    }
+
     TextureDataCache& _dataCache;
     std::unique_ptr< TexturePool > _texturePool;
 };
@@ -72,9 +77,9 @@ TextureCache::TextureCache( TextureDataCache& dataCache,
     _statistics->setName( "Texture cache GPU");
 }
 
-CacheObject* TextureCache::_generate( const CacheId& cacheId  )
+CacheObject* TextureCache::_generate( const CacheId& cacheId )
 {
-    return new TextureObject( cacheId, *this );
+    return _impl->generate( cacheId, *this );
 }
 
 TextureCache::~TextureCache()

@@ -45,8 +45,6 @@ struct TextureObject::Impl
           TextureCache& textureCache )
        : _textureObject( textureObject )
        , _textureCache( textureCache )
-       , _dataObject( boost::static_pointer_cast< TextureDataObject >(
-                           textureCache.getDataCache( ).get( textureObject.getId( ))))
        , _textureState( new TextureState( ))
        , _dataSource( textureCache.getDataCache( ).getDataSource( ))
        , _texturePool( textureCache.getTexturePool( ))
@@ -60,6 +58,9 @@ struct TextureObject::Impl
 
     bool load()
     {
+        _dataObject = boost::static_pointer_cast< TextureDataObject >(
+                    _textureCache.getDataCache().get( _textureObject.getId( )));
+
         if( !_dataObject->isLoaded( ))
             return false;
 
@@ -67,6 +68,7 @@ struct TextureObject::Impl
         _texturePool.generateTexture( _textureState );
         LBASSERT( _textureState->textureId );
         loadTextureToGPU( );
+        _dataObject.reset();
         return true;
     }
 

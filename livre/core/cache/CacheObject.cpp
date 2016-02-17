@@ -30,13 +30,13 @@ namespace livre
 
 struct CacheObject::Status : public CacheObjectListener
 {
-    Status( const CacheId& cacheId_ ) :
-        nRef( 0 ),
-        lastUsedTime( 0.0 ),
-        loadTime( 0.0 ),
-        unloadable( true ),
-        cacheId( cacheId_ )
-    { }
+    Status( const CacheId& cacheId_ )
+        : nRef( 0 )
+        , lastUsedTime( 0.0 )
+        , loadTime( 0.0 )
+        , unloadable( true )
+        , cacheId( cacheId_ )
+    {}
 
     uint32_t nRef;
     double lastUsedTime;

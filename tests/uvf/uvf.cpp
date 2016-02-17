@@ -42,25 +42,18 @@ lunchbox::PluginRegisterer< livre::UVFDataSource > registerer;
 BOOST_AUTO_TEST_CASE( UVFDataSource )
 {
     std::cout << "uvf://" UVF_DATA_FILE << std::endl;
-
     const lunchbox::URI uri( "uvf://" UVF_DATA_FILE );
     livre::VolumeDataSource source( uri );
     const livre::VolumeInformation& info = source.getVolumeInformation();
 
-     // 32 << depth = 512 - shortest dimension of the volume.
     BOOST_CHECK( info.rootNode.getDepth() == 2 );
-
-    // Component count per voxel, intensity only 1 channels.
     BOOST_CHECK( info.compCount == 1 );
+    BOOST_CHECK( info.dataType == livre::DT_UINT8 );
+    BOOST_CHECK( info.voxels == livre::Vector3ui( VOXEL_SIZE_X,
+                                                  VOXEL_SIZE_Y,
+                                                  VOXEL_SIZE_Z ));
 
-    // 32 << depth = 512 - shortest dimension of the volume.
-   BOOST_CHECK( info.dataType == livre::DT_UINT8 );
-
-   BOOST_CHECK( info.voxels == livre::Vector3ui( VOXEL_SIZE_X,
-                                                 VOXEL_SIZE_Y,
-                                                 VOXEL_SIZE_Z ));
-
-   BOOST_CHECK( info.overlap == livre::Vector3ui( OVERLAP_SIZE ));
+    BOOST_CHECK( info.overlap == livre::Vector3ui( OVERLAP_SIZE ));
 
     const uint32_t level = 0;
     const livre::Vector3f position( 0, 0, 0 );

@@ -38,7 +38,7 @@ LODNode VolumeDataSourcePlugin::getNode( const NodeId& nodeId ) const
 
     WriteLock writeLock( _mutex );
     it = _lodNodeMap.find( nodeId );
-    if( it == _lodNodeMap.end( ) )
+    if( it == _lodNodeMap.end( ))
     {
         LODNode node;
         internalNodeToLODNode( nodeId, node );

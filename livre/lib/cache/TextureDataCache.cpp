@@ -33,17 +33,16 @@ namespace livre
 struct TextureDataCache::Impl
 {
 public:
-    /**
-     * @param maxMemBytes Maximum data memory
-     * @param volumeDataSource The source where the volume data should
-     * be loaded from
-     * @param type The type of the data for the GPU.
-     */
     Impl( VolumeDataSource& dataSource,
           const uint32_t textureType  )
         : _dataSource( dataSource )
         , _textureType( textureType )
     {}
+
+    CacheObject* generate( const CacheId& cacheId, TextureDataCache& cache )
+    {
+        return new TextureDataObject( cacheId, cache );
+    }
 
     VolumeDataSource& _dataSource;
     const uint32_t _textureType;
@@ -60,7 +59,7 @@ TextureDataCache::TextureDataCache( const size_t maxMemBytes,
 
 CacheObject* TextureDataCache::_generate( const CacheId& cacheId )
 {
-    return new TextureDataObject( cacheId, *this );
+    return _impl->generate( cacheId, *this );
 }
 
 TextureDataCache::~TextureDataCache()

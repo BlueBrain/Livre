@@ -120,6 +120,7 @@ public:
         ::memcpy( _rawData.getData(), sourceData, size * sizeof( T ) );
     }
 
+    /** "void" specialization of allocAndSetData function */
     void allocAndSetData( const void* sourceData, const size_t size )
     {
         allocAndSetData( static_cast< const uint8_t* >( sourceData ),

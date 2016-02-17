@@ -28,23 +28,24 @@ namespace livre
 {
 
 /**
- * The TexturePool class is responsible for allocating texture slots and copying textures into the texture slots.
- * The methods are not thread safe, the class should only be used by a single thread.
+ * The TexturePool class is responsible for allocating texture slots and copying
+ * textures into the texture slots. The methods are not thread safe.
  */
 class TexturePool
 {   
 public:
 
     /**
+     * Constructor.
      * @param maxBlockSize is the maximum block size of a data souce
      * @param internalFormat The OpenGL GPU internal format of the texture data
      * @param format he OpenGL format of the texture data kept in memory
      * @param gpuDataType The OpenGL format of the texture data kept in memory
      */
     LIVRECORE_API TexturePool( const Vector3ui& maxBlockSize,
-                               const int internalFormat,
-                               const uint32_t format,
-                               const uint32_t gpuDataType );
+                               int internalFormat,
+                               uint32_t format,
+                               uint32_t gpuDataType );
 
     /**
      * @return The OpenGL GPU internal format of the texture data.
@@ -75,8 +76,7 @@ public:
 
 private:
 
-
-    std::vector< uint32_t > _textureStack;
+    UInt32Vector _textureStack;
 
     const Vector3ui _maxBlockSize;
     const int32_t _internalFormat;

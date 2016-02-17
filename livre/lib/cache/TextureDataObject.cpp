@@ -37,7 +37,7 @@ public:
 
     Impl( TextureDataObject& dataObject,
           TextureDataCache& dataCache )
-        : _data( new AllocMemoryUnit())
+        : _data( new AllocMemoryUnit( ))
         , _dataObject( dataObject )
         , _dataCache( dataCache )
         , _dataSource( dataCache.getDataSource( ))
@@ -92,6 +92,7 @@ public:
         }
         else
             _data->allocAndSetData( rawData, getDataSize( ));
+
         return true;
     }
 
@@ -194,7 +195,7 @@ public:
 };
 
 TextureDataObject::TextureDataObject( const CacheId& cacheId,
-                                     TextureDataCache& dataCache  )
+                                     TextureDataCache& dataCache )
     : CacheObject( cacheId )
     , _impl( new Impl( *this, dataCache ))
 {

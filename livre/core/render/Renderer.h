@@ -39,11 +39,11 @@ public:
      * Renders the list of render bricks for a given frustum.
      * @param glWidget Widget to render to.
      * @param view The viewing information on the widget.
-     * @param brickList The list of render bricks.
+     * @param bricks The list of render bricks.
      */
     LIVRECORE_API void render( const GLWidget& glWidget,
                                const View& view,
-                               const RenderBricks& brickList );
+                               const RenderBricks& bricks );
 
     /**
      * @return The OpenGL GPU internal format of the texture data.
@@ -66,7 +66,7 @@ protected:
      * @param bricks The list of bricks to be ordered.
      * @param frustum The frustum to order the bricks for.
      */
-    LIVRECORE_API virtual void order_( RenderBricks& bricks, const Frustum& frustum ) const;
+    LIVRECORE_API virtual void _order( RenderBricks& bricks, const Frustum& frustum ) const;
 
     /**
      * Is called on start of each rendering.
@@ -114,9 +114,9 @@ protected:
      * @param gpuDataType The OpenGL data type.
      * @param internalFormat The OpenGL internal format.
      */
-    LIVRECORE_API Renderer( const uint32_t nComponents,
-                            const uint32_t gpuDataType,
-                            const int32_t internalFormat );
+    LIVRECORE_API Renderer( uint32_t nComponents,
+                            uint32_t gpuDataType,
+                            int32_t internalFormat );
 
     LIVRECORE_API virtual ~Renderer();
 

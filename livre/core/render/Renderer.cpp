@@ -50,8 +50,8 @@ struct DistanceOperator
 Renderer::Renderer( const uint32_t nComponents,
                     const GLenum gpuDataType,
                     const GLint internalFormat )
-    : _gpuDataType( gpuDataType ),
-      _internalFormat( internalFormat )
+    : _gpuDataType( gpuDataType )
+    , _internalFormat( internalFormat )
 {
 
     switch( nComponents )
@@ -86,7 +86,7 @@ GLenum Renderer::getFormat() const
     return _format;
 }
 
-void Renderer::order_( RenderBricks &bricks, const Frustum &frustum ) const
+void Renderer::_order( RenderBricks &bricks, const Frustum &frustum ) const
 {
     DistanceOperator distanceOp( frustum );
     std::sort( bricks.begin(), bricks.end(), distanceOp );
@@ -95,7 +95,7 @@ void Renderer::order_( RenderBricks &bricks, const Frustum &frustum ) const
 
 void Renderer::_onFrameRender( const GLWidget& glWidget,
                                const View& view,
-                               const RenderBricks &bricks )
+                               const RenderBricks& bricks )
 {
     for( const RenderBrickPtr& brick: bricks )
         _renderBrick( glWidget, view, *brick );
@@ -103,10 +103,10 @@ void Renderer::_onFrameRender( const GLWidget& glWidget,
 
 void Renderer::render( const GLWidget& glWidget,
                        const View& view,
-                       const RenderBricks& brickList )
+                       const RenderBricks& bricks_ )
 {
-    RenderBricks bricks = brickList;
-    order_( bricks, view.getFrustum( ));
+    RenderBricks bricks = bricks_;
+    _order( bricks, view.getFrustum( ));
     _onFrameStart( glWidget, view, bricks );
     _onFrameRender( glWidget, view, bricks );
     _onFrameEnd( glWidget, view, bricks );
