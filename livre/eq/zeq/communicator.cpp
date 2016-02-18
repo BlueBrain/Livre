@@ -1,4 +1,6 @@
-/* Copyright (c) 2006-2015, Daniel.Nachbaur@epfl.ch
+
+/* Copyright (c) 2015-2016, Daniel.Nachbaur@epfl.ch
+ *                          Stefan.Eilemann@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -76,7 +78,7 @@ public:
         if( !_publisher )
             return;
 
-        const auto& cameraSettings = _config.getFrameData().getCameraSettings();
+        const auto& cameraSettings = _getFrameData().getCameraSettings();
         const Matrix4f& modelView = cameraSettings.getModelViewMatrix();
         const FloatVector matrix( modelView.begin(), modelView.end( ));
         _publisher->publish( ::zeq::hbp::serializeCamera( matrix ));
@@ -95,7 +97,7 @@ public:
         if( !_publisher )
             return;
 
-        const auto& renderSettings = _config.getFrameData().getRenderSettings();
+        const auto& renderSettings = _getFrameData().getRenderSettings();
         const auto& lut = renderSettings.getTransferFunction().getData();
         _publisher->publish( ::zeq::hbp::serializeLookupTable1D( lut ) );
     }
@@ -105,7 +107,7 @@ public:
         if( !_publisher )
             return;
 
-        const auto& frameSettings = _config.getFrameData().getFrameSettings();
+        const auto& frameSettings = _getFrameData().getFrameSettings();
         const auto& params = _config.getApplicationParameters();
 
         const ::zeq::Event& frame = ::zeq::hbp::serializeFrame(
@@ -119,7 +121,7 @@ public:
 
     void publishVolumeRendererParameters()
     {
-         _publisher->publish( _config.getFrameData().getVRParameters( ));
+         _publisher->publish( _getFrameData().getVRParameters( ));
     }
 
     void publishVocabulary()
@@ -194,7 +196,7 @@ public:
         const auto& matrix = ::zeq::hbp::deserializeCamera( event );
         Matrix4f modelViewMatrix;
         modelViewMatrix.set( matrix.begin(), matrix.end(), false );
-        auto& cameraSettings = _config.getFrameData().getCameraSettings();
+        auto& cameraSettings = _getFrameData().getCameraSettings();
         cameraSettings.setModelViewMatrix( modelViewMatrix );
     }
 
@@ -207,7 +209,7 @@ public:
 
         const auto& modelViewMatrix =
                 _config.convertFromHBPCamera( modelViewMatrixMicron );
-        auto& cameraSettings = _config.getFrameData().getCameraSettings();
+        auto& cameraSettings = _getFrameData().getCameraSettings();
         cameraSettings.setModelViewMatrix( modelViewMatrix );
     }
 
@@ -215,7 +217,7 @@ public:
     {
         const TransferFunction1D transferFunction(
             ::zeq::hbp::deserializeLookupTable1D( event ));
-        auto& renderSettings = _config.getFrameData().getRenderSettings();
+        auto& renderSettings = _getRenderSettings();
         renderSettings.setTransferFunction( transferFunction );
     }
 
@@ -226,7 +228,7 @@ public:
         if( _config.getDataFrameCount() == 0 )
             return;
 
-        auto& frameSettings = _config.getFrameData().getFrameSettings();
+        auto& frameSettings = _getFrameData().getFrameSettings();
         auto& params = _config.getApplicationParameters();
 
         if( frame.current == frameSettings.getFrameNumber() &&
@@ -244,7 +246,7 @@ public:
 
     void requestImageJPEG()
     {
-        _config.getFrameData().getFrameSettings().setGrabFrame( true );
+        _getFrameData().getFrameSettings().setGrabFrame( true );
     }
 
     void requestExit()
@@ -278,8 +280,9 @@ private:
             std::bind( &Impl::requestImageJPEG, this );
         _requests[::zeq::vocabulary::EVENT_EXIT] =
             std::bind( &Impl::requestExit, this );
-        _requests[ VolumeRendererParameters::TYPE_IDENTIFIER() ] = [&]
-            { _publisher->publish( _config.getFrameData().getVRParameters( )); };
+        const auto& renderParams = _getFrameData().getVRParameters();
+        _requests[ renderParams.getTypeIdentifier( )] = [&]
+            { _publisher->publish( _getFrameData().getVRParameters( )); };
     }
 
     void _setupRESTBridge( const int argc LB_UNUSED, char** argv LB_UNUSED )
@@ -324,8 +327,15 @@ private:
         subscriber->registerHandler( ::zeq::vocabulary::EVENT_REQUEST,
                                      std::bind( &Impl::onRequest,
                                                 this, std::placeholders::_1 ));
-        subscriber->subscribe( _config.getFrameData().getVRParameters( ));
+        subscriber->subscribe( _getFrameData().getVRParameters( ));
     }
+
+    FrameData& _getFrameData() { return _config.getFrameData(); }
+    const FrameData& _getFrameData() const { return _config.getFrameData(); }
+    RenderSettings& _getRenderSettings()
+        { return _getFrameData().getRenderSettings(); }
+    const RenderSettings& _getRenderSettings() const
+        { return _getFrameData().getRenderSettings(); }
 
     typedef std::shared_ptr< ::zeq::Subscriber > SubscriberPtr;
     typedef std::shared_ptr< ::zeq::Publisher > PublisherPtr;

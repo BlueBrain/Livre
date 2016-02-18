@@ -513,7 +513,7 @@ public:
             eq::FrameDataPtr data = _frame.getFrameData();
             _frame.clear( );
             _frame.setOffset( eq::Vector2i( 0, 0 ));
-            data->setRange( _drawRange );
+            data->getContext().range = _drawRange;
             data->setPixelViewport( coveredPVP );
             dbFrames.push_back( &_frame );
         }
@@ -528,18 +528,13 @@ public:
             {
                 _frame.readback( _channel->getObjectManager(),
                                  _channel->getDrawableConfig(),
-                                 _channel->getRegions( ));
+                                 _channel->getRegions(),
+                                 _channel->getContext( ));
                 clearViewport( coveredPVP );
                 // offset for assembly
                 _frame.setOffset( eq::Vector2i( coveredPVP.x, coveredPVP.y ));
             }
         }
-
-        LBINFO << "Frame order: ";
-        for( const eq::Frame* frame : dbFrames )
-            LBINFO << frame->getName() <<  " "
-                   << frame->getFrameData()->getRange() << " : ";
-        LBINFO << std::endl;
 
         try // blend DB frames in computed order
         {
@@ -552,13 +547,16 @@ public:
 
         // Update draw range
         for( size_t i = 0; i < dbFrames.size(); ++i )
-            _drawRange.merge( dbFrames[i]->getRange( ));
+            _drawRange.merge( dbFrames[i]->getFrameData()->getContext().range );
     }
 
     bool useDBSelfAssemble() const { return _drawRange != eq::Range::ALL; }
 
     static bool cmpRangesInc(const eq::Frame* a, const eq::Frame* b )
-        { return a->getRange().start > b->getRange().start; }
+    {
+        return a->getFrameData()->getContext().range.start >
+               b->getFrameData()->getContext().range.start;
+    }
 
     void prepareFramesAndSetPvp( const eq::Frames& frames,
                                  eq::Frames& dbFrames,
@@ -572,7 +570,7 @@ public:
                 frame->waitReady( );
             }
 
-            const eq::Range& range = frame->getRange();
+            const eq::Range& range = frame->getFrameData()->getContext().range;
             if( range == eq::Range::ALL ) // 2D frame, assemble directly
             {
                 eq::Compositor::assembleFrame( frame, _channel );
@@ -609,7 +607,8 @@ public:
         // of projection to the middle of slices' boundaries
         for( const eq::Frame* frame : frames )
         {
-            const double px = -1.0 + frame->getRange().end*2.0;
+            const double px = -1.0 +
+                            frame->getFrameData()->getContext().range.end * 2.0;
             const Vector4f pS = modelView * Vector4f( 0.0f, 0.0f, px, 1.0f );
             Vector3f pSsub( pS[ 0 ], pS[ 1 ], pS[ 2 ] );
             pSsub.normalize();

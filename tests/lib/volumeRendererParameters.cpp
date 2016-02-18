@@ -21,7 +21,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include <livre/lib/configuration/VolumeRendererParameters.h>
-#include <zerobuf/Generic.h>
 
 BOOST_AUTO_TEST_CASE(defaultValues)
 {
@@ -42,21 +41,6 @@ BOOST_AUTO_TEST_CASE(defaultValues)
     BOOST_CHECK_EQUAL( params.getMaxGPUCacheMemoryMB(), 3072u );
     BOOST_CHECK_EQUAL( params.getMaxCPUCacheMemoryMB(), 8192u );
 #endif
-}
-
-BOOST_AUTO_TEST_CASE(genericParams)
-{
-    livre::VolumeRendererParameters params;
-    params.setMinLOD( 2 );
-    const zerobuf::Data& zerobuf = params.toBinary();
-    BOOST_CHECK( zerobuf.size > 0 );
-    BOOST_CHECK_EQUAL( params.getZerobufNumDynamics(), 0 );
-
-    ::zerobuf::Generic generic( params.getSchemas( ));
-    BOOST_CHECK_EQUAL( generic.getTypeIdentifier(),
-                       params.getTypeIdentifier( ));
-    generic.fromBinary( zerobuf );
-    BOOST_CHECK( generic == params );
 }
 
 BOOST_AUTO_TEST_CASE(copy)
