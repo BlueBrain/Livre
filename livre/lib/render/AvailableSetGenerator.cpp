@@ -38,7 +38,7 @@ namespace livre
 
 struct AvailableSetGenerator::Impl
 {
-    Impl( DashTreePtr dashTree, const TextureCache& textureCache )
+    Impl( DashTree& dashTree, const TextureCache& textureCache )
         : _dashTree( dashTree )
         , _textureCache( textureCache )
     {}
@@ -115,12 +115,12 @@ struct AvailableSetGenerator::Impl
         }
     }
 
-    DashTreePtr _dashTree;
+    DashTree& _dashTree;
     const TextureCache& _textureCache;
 };
 
 
-AvailableSetGenerator::AvailableSetGenerator( DashTreePtr tree,
+AvailableSetGenerator::AvailableSetGenerator( DashTree& tree,
                                               const TextureCache& textureCache )
     : _impl( new AvailableSetGenerator::Impl( tree, textureCache ))
 {

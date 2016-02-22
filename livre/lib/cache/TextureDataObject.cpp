@@ -211,7 +211,7 @@ bool TextureDataObject::_isLoaded( ) const
     return _impl->isLoaded();
 }
 
-size_t TextureDataObject::getSize() const
+size_t TextureDataObject::_getSize() const
 {
     if( !isValid( ))
         return 0;

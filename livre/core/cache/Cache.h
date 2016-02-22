@@ -46,7 +46,7 @@ public:
      * @return The cache object from cache, if object is not in the list an empty cache
      * object is returned.
      */
-    LIVRECORE_API CacheObjectPtr get( const CacheId& cacheId ) const;
+    LIVRECORE_API ConstCacheObjectPtr get( const CacheId& cacheId ) const;
 
     /**
      * Loads the object to cache. If object is not in the cache it is created.
@@ -57,15 +57,15 @@ public:
     LIVRECORE_API CacheObjectPtr load( const CacheId& cacheId );
 
     /**
-     * Unloads the object from the memory, if there are not any references.
+     * Unloads the object from the memory, if there are not any references. The
+     * objects are removed from cache
      * @param cacheId The object cache id to be unloaded.
-     * @return false if object is not unloaded, cacheId is invalid or
-     * cache object is busy.
+     * @return false if object is not unloaded or cacheId is invalid
      */
-    LIVRECORE_API bool unload( const CacheId& cacheId ) const;
+    LIVRECORE_API bool unload( const CacheId& cacheId );
 
     /**
-     * @return The number of cache objects managed ( not the number of loaded objects ).
+     * @return The number of cache objects managed.
      */
     LIVRECORE_API size_t getCount() const;
 

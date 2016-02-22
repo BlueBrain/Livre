@@ -53,8 +53,6 @@ typedef boost::shared_ptr< const TextureObject > ConstTextureObjectPtr;
 typedef boost::shared_ptr< TextureDataObject > TextureDataObjectPtr;
 typedef boost::shared_ptr< TextureObject > TextureObjectPtr;
 
-typedef boost::scoped_ptr< TextureDataCache > TextureDataCachePtr;
-
 /** Map definitions */
 typedef boost::unordered_map< uint32_t, DataUploadProcessorPtr > DataUploadProcessorPtrMap;
 

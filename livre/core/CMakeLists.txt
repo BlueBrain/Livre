@@ -25,7 +25,6 @@ set(LIVRECORE_HEADERS
   cache/Cache.h
   cache/CacheObject.h
   cache/CacheStatistics.h
-  cache/EmptyCacheObject.h
   configuration/Configuration.h
   configuration/Parameters.h
   dash/DashContextTrait.h

@@ -70,20 +70,20 @@ BOOST_AUTO_TEST_CASE( testDataCache )
     const size_t maxMemory = 2048;
     const uint32_t destGPUDataType = 5121; // GL_UNSIGNED_BYTE;
     livre::TextureDataCache dataCache( maxMemory, source, destGPUDataType );
-    livre::CacheObjectPtr data = dataCache.get( firstChildNodeId.getId( ));
-    BOOST_CHECK( dataCache.getCount() == 1 );
-    BOOST_CHECK( !data->isLoaded( ));
-    BOOST_CHECK( data->getId() == firstChildNodeId.getId( ));
-    data = dataCache.load( firstChildNodeId.getId( ));
+    livre::ConstCacheObjectPtr constData = dataCache.get( firstChildNodeId.getId( ));
+    BOOST_CHECK( dataCache.getCount() == 0 );
+    BOOST_CHECK( !constData );
+
+    livre::CacheObjectPtr data = dataCache.load( firstChildNodeId.getId( ));
     BOOST_CHECK( data->isLoaded( ));
 
-    data = dataCache.get( livre::INVALID_CACHE_ID );
+    constData = dataCache.get( livre::INVALID_CACHE_ID );
     BOOST_CHECK( dataCache.getCount() == 1 );
-    BOOST_CHECK( data.get() == 0 );
+    BOOST_CHECK( constData.get() == 0 );
 
     // get() on cache returns already loaded data
-    data = dataCache.get( firstChildNodeId.getId( ));
-    BOOST_CHECK( data->isLoaded( ));
+    constData = dataCache.get( firstChildNodeId.getId( ));
+    BOOST_CHECK( constData->isLoaded( ));
     BOOST_CHECK( dataCache.getCount() == 1 );
 
     livre::TextureDataObjectPtr dataObject =

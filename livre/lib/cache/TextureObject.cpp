@@ -46,7 +46,7 @@ struct TextureObject::Impl
        : _textureObject( textureObject )
        , _textureCache( textureCache )
        , _textureState( new TextureState( ))
-       , _dataSource( textureCache.getDataCache( ).getDataSource( ))
+       , _dataSource( textureCache.getDataCache().getDataSource( ))
        , _texturePool( textureCache.getTexturePool( ))
        , _textureType( textureCache.getDataCache( ).getTextureType( ))
     {}
@@ -58,7 +58,7 @@ struct TextureObject::Impl
 
     bool load()
     {
-        _dataObject = boost::static_pointer_cast< TextureDataObject >(
+        _dataObject = boost::static_pointer_cast< const TextureDataObject >(
                     _textureCache.getDataCache().get( _textureObject.getId( )));
 
         if( !_dataObject->isLoaded( ))
@@ -167,7 +167,7 @@ struct TextureObject::Impl
 
     TextureObject& _textureObject;
     TextureCache& _textureCache;
-    TextureDataObjectPtr _dataObject;
+    ConstTextureDataObjectPtr _dataObject;
     TextureStatePtr _textureState;
     VolumeDataSource& _dataSource;
     TexturePool& _texturePool;
@@ -211,7 +211,7 @@ void TextureObject::_unload()
     _impl->unload();
 }
 
-size_t TextureObject::getSize() const
+size_t TextureObject::_getSize() const
 {
     if( !isValid() )
         return 0;

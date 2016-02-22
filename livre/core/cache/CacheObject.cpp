@@ -28,11 +28,9 @@ namespace livre
 struct CacheObject::Status
 {
     Status( const CacheId& cacheId_ )
-        : nRef( 0 )
-        , cacheId( cacheId_ )
+        : cacheId( cacheId_ )
     {}
 
-    uint32_t nRef;
     CacheId cacheId;
     ReadWriteMutex mutex;
 };
@@ -42,27 +40,18 @@ CacheObject::CacheObject( const CacheId& cacheId )
 {
 }
 
-void CacheObject::_increaseRef()
-{
-    WriteLock lock( _status->mutex );
-    _status->nRef++;
-}
-
-void CacheObject::_decreaseRef()
-{
-    WriteLock lock( _status->mutex );
-    _status->nRef--;
-}
-
 bool CacheObject::isLoaded() const
 {
     ReadLock lock( _status->mutex );
-    const bool ret = _isValid( ) && _isLoaded( );
-    return ret;
+    return _isValid() && _isLoaded();
 }
+
+CacheObject::~CacheObject()
+{}
 
 bool CacheObject::isValid() const
 {
+    ReadLock lock( _status->mutex );
     return _isValid();
 }
 
@@ -71,33 +60,32 @@ CacheId CacheObject::getId() const
     return _status->cacheId;
 }
 
-bool CacheObject::_cacheLoad()
+size_t CacheObject::getSize() const
+{
+    ReadLock lock( _status->mutex );
+    return _getSize();
+}
+
+bool CacheObject::_notifyLoad()
 {
     WriteLock lock( _status->mutex );
-    return _load( );
+    return _load();
 }
 
-bool CacheObject::_cacheUnload()
+void CacheObject::_notifyUnload()
 {
-    WriteLock lock( _status->mutex, boost::try_to_lock );
-    if( !lock.owns_lock() )
-        return false;
-
-    if( _status->nRef > 0 )
-        return false;
-
-    _unload( );
-    return true;
-}
-
-uint32_t CacheObject::getRefCount( ) const
-{
-    return _status->nRef;
+    WriteLock lock( _status->mutex );
+    _unload();
 }
 
 bool CacheObject::_isValid() const
 {
     return _status->cacheId != INVALID_CACHE_ID;
+}
+
+size_t CacheObject::_getSize() const
+{
+    return 0;
 }
 
 bool CacheObject::operator==( const CacheObject& cacheObject ) const

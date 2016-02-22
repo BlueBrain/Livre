@@ -43,14 +43,10 @@
 
 namespace livre
 {
-
-namespace detail
-{
-
-class Node
+struct Node::Impl
 {
 public:
-    explicit Node( livre::Node* node )
+    explicit Impl( livre::Node* node )
        : _node( node )
        , _config( static_cast< livre::Config* >( node->getConfig( )))
     {}
@@ -116,22 +112,19 @@ public:
 
     livre::Node* const _node;
     livre::Config* const _config;
-    TextureDataCachePtr _textureDataCache;
     VolumeDataSourcePtr _dataSource;
-    DashTreePtr _dashTree;
+    std::unique_ptr< TextureDataCache > _textureDataCache;
+    std::unique_ptr< livre::DashTree > _dashTree;
 };
-
-}
 
 Node::Node( eq::Config* parent )
     : eq::Node( parent )
-    , _impl( new detail::Node( this ))
+    , _impl( new Impl( this ))
 {
 }
 
 Node::~Node()
 {
-    delete _impl;
 }
 
 bool Node::configInit( const eq::uint128_t& initId )
@@ -144,8 +137,8 @@ bool Node::configInit( const eq::uint128_t& initId )
         return false;
 
     livre::Client* client = static_cast<livre::Client*>( getClient( ).get());
-    client->setIdleFunction( std::bind( &detail::Node::updateAndSendFrameRange,
-                                        _impl));
+    client->setIdleFunction( std::bind( &Impl::updateAndSendFrameRange,
+                                        _impl.get()));
 
     if( !isApplicationNode( ))
     {
@@ -172,14 +165,14 @@ TextureDataCache& Node::getTextureDataCache()
     return *_impl->_textureDataCache;
 }
 
-DashTreePtr Node::getDashTree()
+DashTree& Node::getDashTree()
 {
-    return _impl->_dashTree;
+    return *_impl->_dashTree;
 }
 
-ConstDashTreePtr Node::getDashTree() const
+const DashTree& Node::getDashTree() const
 {
-    return _impl->_dashTree;
+    return *_impl->_dashTree;
 }
 
 void Node::frameStart( const eq::uint128_t &frameId,

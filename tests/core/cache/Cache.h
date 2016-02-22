@@ -22,7 +22,7 @@
 
 #include "ValidCacheObject.h"
 
-#include <livre/core/cache//Cache.h>
+#include <livre/core/cache/Cache.h>
 
 namespace test
 {

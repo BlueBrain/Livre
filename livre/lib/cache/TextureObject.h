@@ -57,7 +57,7 @@ private:
     bool _load( ) final;
     void _unload( ) final;
     bool _isLoaded( ) const final;
-    size_t getSize() const final;
+    size_t _getSize() const final;
 
     struct Impl;
     std::unique_ptr<Impl> _impl;

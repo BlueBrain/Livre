@@ -37,7 +37,7 @@ public:
      * @param tree The initialized dash tree with the volume.
      * @param texture cache
      */
-    LIVRE_API AvailableSetGenerator( DashTreePtr tree,
+    LIVRE_API AvailableSetGenerator( DashTree& tree,
                                      const TextureCache& textureCache );
 
     LIVRE_API ~AvailableSetGenerator();

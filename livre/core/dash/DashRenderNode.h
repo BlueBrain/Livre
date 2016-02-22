@@ -28,7 +28,6 @@
 #include <livre/core/visitor/VisitState.h>
 #include <livre/core/data/LODNode.h>
 #include <livre/core/render/Frustum.h>
-#include <livre/core/cache/EmptyCacheObject.h>
 
 namespace livre
 {
@@ -56,13 +55,13 @@ public:
 
     /**
      * @return \see TextureDataObject, if not initialized in the tree, the returned object
-     * is \see EmptyCacheObject.
+     * is empty.
      */
     LIVRECORE_API ConstCacheObjectPtr getTextureDataObject() const;
 
     /**
      * @return \see TextureObject, if not initialized in the tree, the returned object is
-     * \see EmptyCacheObject.
+     * empty.
      */
     LIVRECORE_API ConstCacheObjectPtr getTextureObject() const;
 

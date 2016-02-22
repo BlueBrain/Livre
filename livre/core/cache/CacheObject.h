@@ -37,7 +37,7 @@ namespace livre
 class CacheObject
 {
 public:
-    LIVRECORE_API virtual ~CacheObject() { }
+    LIVRECORE_API virtual ~CacheObject();
 
     /**
      * @return True if the object is valid.
@@ -47,21 +47,17 @@ public:
     /**
      * @return The unique cache id.
      */
-    CacheId getId() const;
+    LIVRECORE_API CacheId getId() const;
 
-    /**
-     * @return The memory size of the object in bytes.
-     */
-    virtual size_t getSize() const = 0;
     /**
      * @return The object is loaded in cache. The function is thread safe.
      */
     LIVRECORE_API bool isLoaded() const;
 
     /**
-     * @return The number of references to CacheObject.
+     * @return The memory size of the object in bytes.
      */
-    LIVRECORE_API uint32_t getRefCount() const;
+    LIVRECORE_API size_t getSize() const;
 
     /**
      * @return On default returns true if cache ids are same
@@ -97,19 +93,18 @@ protected:
      */
     virtual bool _isLoaded() const = 0;
 
-    /** Increase ref count */
-    void _increaseRef();
-
-    /** Decrease ref count */
-    void _decreaseRef();
+    /**
+     * @return The memory size of the object in bytes.
+     */
+    virtual size_t _getSize() const;
 
 private:
 
     /** Used by cache to load the data */
-    bool _cacheLoad();
+    bool _notifyLoad();
 
     /** Used by cache to unload the data */
-    bool _cacheUnload();
+    void _notifyUnload();
 
     struct Status;
     mutable boost::shared_ptr< Status > _status;

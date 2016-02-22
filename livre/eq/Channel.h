@@ -23,15 +23,12 @@
 #define _Channel_h_
 
 #include <livre/eq/api.h>
+#include <livre/core/types.h>
+
 #include <eq/channel.h>
 
 namespace livre
 {
-
-namespace detail
-{
-class Channel;
-}
 
 /** A view in OpenGL. */
 class Channel : public eq::Channel
@@ -39,6 +36,8 @@ class Channel : public eq::Channel
 public:
     LIVREEQ_API Channel( eq::Window* parent );
     LIVREEQ_API ~Channel();
+
+    struct Impl;
 
 private:
     bool configInit( const eq::uint128_t& initId ) final;
@@ -53,7 +52,7 @@ private:
     void frameReadback( const eq::uint128_t&, const eq::Frames& ) final;
     std::string getDumpImageFileName() const final;
 
-    detail::Channel* _impl;
+    std::unique_ptr< Impl >  _impl;
 };
 
 }

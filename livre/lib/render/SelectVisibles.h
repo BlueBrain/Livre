@@ -31,7 +31,7 @@ namespace livre
 class SelectVisibles : public livre::RenderNodeVisitor
 {
 public:
-    SelectVisibles( DashTreePtr dashTree, const Frustum& frustum,
+    SelectVisibles( DashTree& dashTree, const Frustum& frustum,
                     const uint32_t windowHeight, const float screenSpaceError,
                     const float worldSpacePerVoxel, const uint32_t volumeDepth,
                     const uint32_t minLOD, const uint32_t maxLOD,

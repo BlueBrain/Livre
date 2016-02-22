@@ -28,7 +28,6 @@
 #include <livre/core/data/VolumeInformation.h>
 #include <livre/core/mathTypes.h>
 
-
 namespace
 {
 const uint32_t BLOCK_SIZE = 32;

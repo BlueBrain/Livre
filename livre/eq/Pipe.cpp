@@ -27,13 +27,10 @@
 namespace livre
 {
 
-namespace detail
-{
-
-class Pipe
+struct Pipe::Impl
 {
 public:
-    explicit Pipe( livre::Pipe* pipe )
+    explicit Impl( livre::Pipe* pipe )
         : _pipe( pipe )
         , _frameDataPtr( new FrameData( ))
     {}
@@ -73,17 +70,14 @@ public:
     FrameDataPtr _frameDataPtr;
 };
 
-}
-
 Pipe::Pipe( eq::Node* parent )
     : eq::Pipe( parent )
-    , _impl( new detail::Pipe( this ))
+    , _impl( new Impl( this ))
 {
 }
 
 Pipe::~Pipe( )
 {
-    delete _impl;
 }
 
 void Pipe::frameStart( const eq::uint128_t& frameId, const uint32_t frameNumber )

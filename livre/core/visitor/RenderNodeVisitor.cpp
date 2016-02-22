@@ -30,22 +30,22 @@ namespace detail
 class RenderNodeVisitor
 {
 public:
-    explicit RenderNodeVisitor( DashTreePtr dashTree )
+    explicit RenderNodeVisitor( livre::DashTree& dashTree )
         : _dashTree( dashTree )
     {}
 
     dash::NodePtr getDashNode( const NodeId& nodeId )
     {
-        return _dashTree->getDashNode( nodeId );
+        return _dashTree.getDashNode( nodeId );
     }
 
-    DashTreePtr getDashTree() { return _dashTree; }
-    DashTreePtr _dashTree;
+    livre::DashTree& getDashTree() { return _dashTree; }
+    livre::DashTree& _dashTree;
 };
 
 }
 
-RenderNodeVisitor::RenderNodeVisitor( DashTreePtr dashTree )
+RenderNodeVisitor::RenderNodeVisitor( DashTree& dashTree )
     : _impl( new detail::RenderNodeVisitor( dashTree ))
 {
 
@@ -56,7 +56,7 @@ RenderNodeVisitor::~RenderNodeVisitor()
     delete _impl;
 }
 
-DashTreePtr RenderNodeVisitor::getDashTree()
+DashTree& RenderNodeVisitor::getDashTree()
 {
     return _impl->getDashTree();
 }

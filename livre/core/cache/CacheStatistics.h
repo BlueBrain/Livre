@@ -70,11 +70,11 @@ private:
     CacheStatistics( const std::string& statisticsName,
                      const size_t queueSize );
 
-    void _loaded( const CacheObject& cacheObject );
-    void _unloaded( const CacheObject& cacheObject );
+    void _notifyLoaded( const CacheObject& cacheObject );
+    void _notifyUnloaded( const CacheObject& cacheObject );
 
-    void _miss() { ++_cacheMiss; }
-    void _hit() { ++_cacheHit; }
+    void _notifyMiss() { ++_cacheMiss; }
+    void _notifyHit() { ++_cacheHit; }
 
     std::string _name;
     size_t _usedMemBytes;

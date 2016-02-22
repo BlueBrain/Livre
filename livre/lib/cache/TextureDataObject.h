@@ -41,7 +41,7 @@ public:
     const void* getDataPtr() const;
 
     /** @copydoc livre::CacheObject::getSize */
-    size_t getSize() const final;
+    size_t _getSize() const final;
 
 private:
     friend class TextureDataCache;

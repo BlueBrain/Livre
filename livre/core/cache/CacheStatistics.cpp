@@ -89,7 +89,7 @@ CacheStatistics::CacheStatistics( const std::string& statisticsName,
 {
 }
 
-void CacheStatistics::_loaded( const CacheObject& cacheObject )
+void CacheStatistics::_notifyLoaded( const CacheObject& cacheObject )
 {
    ++_objCount;
    _usedMemBytes += cacheObject.getSize();
@@ -106,7 +106,7 @@ void CacheStatistics::_loaded( const CacheObject& cacheObject )
                                              cacheObject.getSize( ))));
 }
 
-void CacheStatistics::_unloaded( const CacheObject& cacheObject )
+void CacheStatistics::_notifyUnloaded( const CacheObject& cacheObject )
 {
     --_objCount;
     _usedMemBytes -= cacheObject.getSize();

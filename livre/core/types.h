@@ -123,8 +123,6 @@ typedef boost::shared_ptr< TextureState > TextureStatePtr;
 typedef boost::shared_ptr< const TextureState > ConstTextureStatePtr;
 typedef boost::shared_ptr< VolumeDataSource > VolumeDataSourcePtr;
 typedef boost::shared_ptr< const VolumeDataSource > ConstVolumeDataSourcePtr;
-typedef boost::shared_ptr< DashTree > DashTreePtr;
-typedef boost::shared_ptr< const DashTree > ConstDashTreePtr;
 typedef boost::shared_ptr< EventHandler > EventHandlerPtr;
 typedef boost::shared_ptr< EventHandlerFactory > EventHandlerFactoryPtr;
 typedef boost::shared_ptr< EventMapper > EventMapperPtr;
@@ -187,7 +185,7 @@ typedef std::vector< RenderBrickPtr > RenderBricks;
  * Map definitions
  */
 typedef boost::unordered_map< NodeId, dash::NodePtr > NodeIDDashNodePtrMap;
-typedef boost::unordered_map< CacheId, CacheObject* > CacheMap;
+typedef boost::unordered_map< CacheId, CacheObjectPtr > CacheMap;
 typedef boost::unordered_map< CacheId, ConstCacheObjectPtr > ConstCacheMap;
 typedef boost::unordered_map< uint32_t, bool > BoolMap;
 typedef boost::unordered_map< uint32_t, EventHandlerPtr > EventHandlerPtrMap;

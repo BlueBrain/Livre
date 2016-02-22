@@ -39,7 +39,7 @@ public:
         , _isLoaded_( false )
     { }
 
-    size_t getSize( ) const final { return CACHE_SIZE; }
+    size_t _getSize( ) const final { return CACHE_SIZE; }
 
 private:
 

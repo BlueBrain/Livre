@@ -36,15 +36,12 @@ BOOST_AUTO_TEST_CASE( testCache )
     livre::CacheObjectPtr validCacheObject( new test::ValidCacheObject( 0 ) );
     BOOST_CHECK( validCacheObject->getId() == 0 );
 
-    livre::CacheObjectPtr cacheObject = cache.get( 1 );
+    livre::ConstCacheObjectPtr constCacheObject = cache.get( 1 );
 
     size_t cacheSize = 0;
-    BOOST_CHECK( cacheObject );
-    BOOST_CHECK( cache.getCount() == 1 );
-    BOOST_CHECK( boost::static_pointer_cast< test::ValidCacheObject >( cacheObject )->getId() == 1 );
-    BOOST_CHECK( cacheObject->getRefCount() == 1 );
+    BOOST_CHECK( !constCacheObject );
 
-    cacheObject = cache.load( 1 );
+    livre::CacheObjectPtr cacheObject = cache.load( 1 );
     cacheSize = cacheSize + cacheObject->getSize();
     BOOST_CHECK( cache.getStatistics().getUsedMemory() == cacheSize );
 
@@ -52,7 +49,7 @@ BOOST_AUTO_TEST_CASE( testCache )
     BOOST_CHECK( cacheObject );
     BOOST_CHECK( cache.getCount() == 2 );
     BOOST_CHECK( boost::static_pointer_cast< test::ValidCacheObject >( cacheObject )->getId() == 2 );
-    BOOST_CHECK( cacheObject->getRefCount() == 1 );
+    BOOST_CHECK( cacheObject.use_count() == 2 );
     cacheSize = cacheSize + cacheObject->getSize();
     BOOST_CHECK( cache.getStatistics().getUsedMemory() == cacheSize );
 
@@ -60,15 +57,16 @@ BOOST_AUTO_TEST_CASE( testCache )
     BOOST_CHECK( cacheObject );
     BOOST_CHECK( cache.getCount() == 2 );
     BOOST_CHECK( boost::static_pointer_cast< test::ValidCacheObject >( cacheObject )->getId() == 1 );
-    BOOST_CHECK( cacheObject->getRefCount() == 1 );
+    BOOST_CHECK( cacheObject.use_count() == 2 );
     BOOST_CHECK( cache.getStatistics().getUsedMemory() == cacheSize );
+    cacheObject.reset();
 
     livre::CacheObjectPtr cacheObjectTriggerClean = cache.load( 3 );
     BOOST_CHECK( cacheObjectTriggerClean );
 
-    BOOST_CHECK( cache.getCount() == 3 );
+    BOOST_CHECK( cache.getCount() == 2 );
     BOOST_CHECK( boost::static_pointer_cast< test::ValidCacheObject >( cacheObjectTriggerClean )->getId() == 3 );
-    BOOST_CHECK( cacheObjectTriggerClean->getRefCount() == 1 );
+    BOOST_CHECK( cacheObjectTriggerClean.use_count() == 2 );
     BOOST_CHECK( cache.getStatistics().getUsedMemory() == cacheSize );
 }
 

@@ -53,13 +53,13 @@ class EqTextureUploadProcessor : public TextureUploadProcessor
 {
 public:
     EqTextureUploadProcessor( Config& config,
-                              DashTreePtr dashTree,
+                              DashTree& dashTree,
                               GLContextPtr shareContext,
                               GLContextPtr context,
-                              TextureCache& textureCache,
+                              TextureDataCache& dataCache,
                               const VolumeRendererParameters& parameters )
         : TextureUploadProcessor( dashTree, shareContext,
-                                  context, textureCache, parameters )
+                                  context, dataCache, parameters )
         , _config( config )
     {}
 
@@ -76,7 +76,7 @@ private:
     Config& _config;
 };
 
-class Window::Impl
+struct Window::Impl
 {
 public:
     explicit Impl( Window* window )
@@ -113,14 +113,14 @@ public:
         // be set correctly.
         _dashProcessor->getDashContext()->setCurrent();
         livre::Node* node = static_cast< livre::Node* >( _window->getNode( ));
-        node->getDashTree()->getRenderStatus().setThreadOp( TO_EXIT );
+        node->getDashTree().getRenderStatus().setThreadOp( TO_EXIT );
     }
 
     void frameStart()
     {
         _dashProcessor->getDashContext()->setCurrent();
         livre::Node* node = static_cast< livre::Node* >( _window->getNode( ));
-        DashRenderStatus& renderStatus = node->getDashTree()->getRenderStatus();
+        DashRenderStatus& renderStatus = node->getDashTree().getRenderStatus();
 
         const Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
         const uint32_t frame =
@@ -183,8 +183,8 @@ public:
 
         // First one in group: setup
         Node* node = static_cast< Node* >( _window->getNode( ));
-        DashTreePtr dashTree = node->getDashTree();
-        _dashProcessor->setDashContext( dashTree->createContext( ));
+        DashTree& dashTree = node->getDashTree();
+        _dashProcessor->setDashContext( dashTree.createContext( ));
 
         GLContextPtr dataUploadContext( new EqContext( _window ));
         _dataUploader.reset( new DataUploadProcessor( dashTree, _windowContext,
@@ -195,15 +195,10 @@ public:
         Config* config = static_cast< Config* >( _window->getConfig( ));
         Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
 
-        const uint32_t maxGPUMem = pipe->getFrameData()->getVRParameters().getMaxGPUCacheMemoryMB();
-        _textureCache.reset( new TextureCache( node->getTextureDataCache( ),
-                                               maxGPUMem * LB_1MB,
-                                               GL_LUMINANCE8 ));
-
         _textureUploader.reset(
             new EqTextureUploadProcessor( *config, dashTree, _windowContext,
                                           textureUploadContext,
-                                          *_textureCache,
+                                          node->getTextureDataCache(),
                                           pipe->getFrameData()->getVRParameters( )));
     }
 
@@ -236,7 +231,6 @@ public:
     DataUploadProcessorPtr _dataUploader;
     DashProcessorPtr _dashProcessor;
     GLContextPtr _windowContext;
-    TextureCachePtr _textureCache;
 };
 
 Window::Window( eq::Pipe *parent )

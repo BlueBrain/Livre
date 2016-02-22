@@ -44,11 +44,13 @@ public:
      * @param context the context used by this processor.
      * @param vrParameters the volume rendering parameters.
      */
-    LIVRE_API TextureUploadProcessor( DashTreePtr dashTree,
+    LIVRE_API TextureUploadProcessor( DashTree& dashTree,
                                       GLContextPtr shareContext,
                                       GLContextPtr context,
-                                      TextureCache& textureCache,
+                                      TextureDataCache& dataCache,
                                       const VolumeRendererParameters& vrParameters );
+
+    LIVRE_API ~TextureUploadProcessor();
 
     /** @return the texture cache */
     LIVRE_API const TextureCache& getTextureCache() const;
@@ -64,14 +66,14 @@ private:
     void _loadData();
     void _checkThreadOperation( );
 
-    DashTreePtr _dashTree;
+    DashTree& _dashTree;
     GLContextPtr _shareContext;
 
     uint64_t _currentFrameID;
     ThreadOperation _threadOp;
     CacheIdSet _protectUnloading;
     const VolumeRendererParameters& _vrParameters;
-    TextureCache& _textureCache;
+    TextureCache _textureCache;
     bool _allDataLoaded;
     bool _needRedraw;
 };

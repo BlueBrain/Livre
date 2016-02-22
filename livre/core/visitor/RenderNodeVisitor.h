@@ -38,7 +38,7 @@ class RenderNodeVisitor;
 class RenderNodeVisitor : public NodeVisitor
 {
 public:
-    LIVRECORE_API RenderNodeVisitor( DashTreePtr dashTree );
+    LIVRECORE_API RenderNodeVisitor( DashTree& dashTree );
     LIVRECORE_API ~RenderNodeVisitor();
 
     /**
@@ -50,7 +50,7 @@ public:
     /**
      * @return Returns the dash tree
      */
-    LIVRECORE_API DashTreePtr getDashTree();
+    LIVRECORE_API DashTree& getDashTree();
 
 private:
     LIVRECORE_API void visit( const NodeId& nodeId, VisitState& state ) final;
