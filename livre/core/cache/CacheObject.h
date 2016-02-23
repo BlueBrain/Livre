@@ -68,7 +68,7 @@ protected:
 
     friend class Cache;
 
-    LIVRECORE_API CacheObject( const CacheId& cacheId = INVALID_CACHE_ID );
+    LIVRECORE_API explicit CacheObject( const CacheId& cacheId = INVALID_CACHE_ID );
 
     /**
      * Implemented by the derived class, for loading data to memory. Thread safety is satisfied for

@@ -38,7 +38,7 @@ public:
     /**
      * @param maxMemBytes maximum memory.
      */
-    LIVRECORE_API Cache( size_t maxMemBytes );
+    LIVRECORE_API explicit Cache( size_t maxMemBytes );
     LIVRECORE_API virtual ~Cache();
 
     /**
