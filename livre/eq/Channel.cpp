@@ -445,7 +445,7 @@ public:
         ConstVolumeDataSourcePtr dataSource = static_cast< livre::Node* >(
             _channel->getNode( ))->getDashTree()->getDataSource();
         const VolumeInformation& info = dataSource->getVolumeInformation();
-        Vector3f voxelSize = info.boundingBox.getDimension() / info.voxels;
+        Vector3f voxelSize = info.boundingBox.getSize() / info.voxels;
         std::string unit = "m";
         if( voxelSize.x() < 0.000001f )
         {

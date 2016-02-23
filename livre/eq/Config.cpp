@@ -71,7 +71,7 @@ public:
                                                        eyePos );
 
         const Vector3f& circuitCenter = volumeBBox.getCenter();
-        const Vector3f& circuitSize = volumeBBox.getDimension();
+        const Vector3f& circuitSize = volumeBBox.getSize();
         const float isotropicScale = circuitSize.find_max();
 
         eyePos = ( eyePos * isotropicScale ) + circuitCenter;
@@ -84,7 +84,7 @@ public:
     Matrix4f convertFromHBPCamera( const Matrix4f& modelViewMatrix ) const
     {
         const Vector3f circuitCenter = volumeBBox.getCenter();
-        const Vector3f circuitSize = volumeBBox.getDimension();
+        const Vector3f circuitSize = volumeBBox.getSize();
         const float isotropicScale = circuitSize.find_max();
 
         Matrix3f rotation;

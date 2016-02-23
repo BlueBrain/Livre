@@ -64,8 +64,8 @@ BOOST_AUTO_TEST_CASE( UVFDataSource )
 
     const livre::LODNode& lodNode = source.getNode( firstChildNodeId );
     BOOST_CHECK( lodNode.isValid( ));
-    BOOST_CHECK( lodNode.getVoxelBox().getDimension() =
-                 livre::Vector3ui( BLOCK_SIZE ));
+    BOOST_CHECK_EQUAL( lodNode.getVoxelBox().getSize(),
+                       livre::Vector3ui( BLOCK_SIZE ));
 
     const livre::Vector3ui& blockSize = lodNode.getBlockSize() +
                                        livre::Vector3ui( info.overlap ) * 2;
