@@ -343,8 +343,7 @@ public:
                 _channel->getConfig()->sendEvent( REDRAW );
         }
 
-        const AvailableSetGenerator generateSet( node->getDashTree(),
-                                                 window->getTextureCache( ));
+        const AvailableSetGenerator generateSet( window->getTextureCache( ));
 
         for( const auto& visible : visibles )
             _frameInfo.allNodes.push_back(visible.getLODNode().getNodeId());
