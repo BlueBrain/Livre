@@ -253,7 +253,7 @@ struct RayCastRenderer::Impl
         glUniform3fv( tParamNameGL, 1, texState->textureCoordsMax.array );
 
         const Vector3f& voxSize =
-                rb.getTextureState( )->textureSize / lodNode.getWorldBox( ).getDimension( );
+            rb.getTextureState()->textureSize / lodNode.getWorldBox().getSize();
         tParamNameGL = glGetUniformLocation( program, "voxelSpacePerWorldSpace" );
         glUniform3fv( tParamNameGL, 1, voxSize.array );
 

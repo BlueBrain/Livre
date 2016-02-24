@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -95,7 +95,7 @@ struct TextureObject::Impl
         const LODNode& lodNode =
                 _dataSource.getNode( NodeId( _textureObject.getId( )));
 
-        const Vector3f& size = lodNode.getVoxelBox().getDimension();
+        const Vector3f& size = lodNode.getVoxelBox().getSize();
         const Vector3f& maxSize = _dataSource.getVolumeInformation().maximumBlockSize;
         const Vector3f& overlapf = overlap / maxSize;
         _textureState->textureCoordsMax = size / maxSize;

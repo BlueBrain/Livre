@@ -270,7 +270,7 @@ public:
         }
         else
         {
-            const Vector3ui dimensions = node.getVoxelBox().getDimension()
+            const Vector3ui dimensions = node.getVoxelBox().getSize()
                                         + _volumeInfo.overlap * 2;
             const uint32_t uncompressedSize = dimensions.product()
                                               * _volumeInfo.compCount

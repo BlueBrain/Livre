@@ -57,7 +57,7 @@ void _testDataSource( const std::string& uriStr )
 
     const livre::LODNode& lodNode = source.getNode( firstChildNodeId );
     BOOST_CHECK( lodNode.isValid( ));
-    BOOST_CHECK( lodNode.getVoxelBox().getDimension() =
+    BOOST_CHECK( lodNode.getVoxelBox().getSize() =
                  livre::Vector3ui( BLOCK_SIZE ));
 
     const livre::Vector3ui blockSize = lodNode.getBlockSize() +
