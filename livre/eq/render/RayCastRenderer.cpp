@@ -214,7 +214,7 @@ struct RayCastRenderer::Impl
         glUniform1i( tParamNameGL, _nSamplesPerPixel );
 
         tParamNameGL = glGetUniformLocation( program, "nearPlaneDist" );
-        glUniform1f( tParamNameGL, frustum.near_plane( ));
+        glUniform1f( tParamNameGL, frustum.nearPlane( ));
 
         // Disable shader
         glUseProgram( 0 );

@@ -60,13 +60,9 @@ using vmml::Vector3f; //!< A three-component float vector.
 using vmml::Vector3d; //!< A three-component double vector.
 using vmml::Vector4d; //!< A four-component double vector.
 using vmml::Vector4f; //!< A four-component float vector.
+using vmml::Frustumf; //!< Float frustum.
+using vmml::FrustumCullerf; //!< Float frustum culler.
 typedef Vector4f Plane;
-
-/**
- * Frustum definitions
- */
-typedef vmml::frustum< float > Frustumf; //!< Float frustum.
-typedef vmml::frustum_culler< float > FrustumCullerf; //!< Float frustum culler.
 
 /**
  * Quaternion definitions

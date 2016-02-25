@@ -49,7 +49,7 @@ uint32_t ScreenSpaceLODEvaluator::getLODForPoint( const Frustum& frustum,
 
     const float distance = std::abs( frustum.getNearPlane().distance( worldCoord ));
 
-    const float n = frustum.near_plane();
+    const float n = frustum.nearPlane();
     const float voxelPerPixelInDistance = voxelPerPixel * distance / n;
 
     const uint32_t minLOD = std::min( _minLOD, volumeDepth );

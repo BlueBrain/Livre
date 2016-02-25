@@ -122,10 +122,9 @@ RemoteInformation deserializeDataSourceData( const ::zeq::Event& event )
     vi.maxPos = _deserializeVector3< float >( data->maxPos( ));
     vi.voxels = _deserializeVector3< unsigned >( data->voxels( ));
     vi.worldSize = _deserializeVector3< float >( data->worldSize( ));
-    vi.boundingBox.getMin() = _deserializeVector3< float >(
-                                     data->boundingBoxMin( ));
-    vi.boundingBox.getMax() = _deserializeVector3< float >(
-                                     data->boundingBoxMax( ));
+    vi.boundingBox =
+        Boxf( _deserializeVector3< float >( data->boundingBoxMin()),
+              _deserializeVector3< float >( data->boundingBoxMax( )));
     vi.worldSpacePerVoxel = data->worldSpacePerVoxel();
 
     const Vector3ui& blockSize = vi.maximumBlockSize - vi.overlap * 2;

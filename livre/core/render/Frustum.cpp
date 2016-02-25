@@ -33,13 +33,7 @@ const Plane& Frustum::getNearPlane() const
 
 bool Frustum::boxInFrustum( const Boxf &worldBox ) const
 {
-    const Vector3f& min = worldBox.getMin();
-    const Vector3f& max = worldBox.getMax();
-    const Vector2f x( min[0], max[0] );
-    const Vector2f y( min[1], max[1] );
-    const Vector2f z( min[2], max[2] );
-
-    const vmml::Visibility vis = _culler.test_aabb( x, y, z );
+    const vmml::Visibility vis = _culler.test( worldBox );
     return vis != vmml::VISIBILITY_NONE;
 }
 
@@ -88,7 +82,7 @@ void Frustum::setup( const Matrix4f& modelViewMatrix,
     projectionMatrix_ = projectionMatrix;
     projectionMatrix_.inverse( invProjectionMatrix_ );
 
-    _culler.setup( mvp );
+    _culler = FrustumCullerf( mvp );
     computeLimitsFromProjectionMatrix_();
 
     modelViewMatrix_.inverse( invModelViewMatrix_ );
@@ -97,13 +91,7 @@ void Frustum::setup( const Matrix4f& modelViewMatrix,
 
 void Frustum::computeLimitsFromProjectionMatrix_()
 {
-    const float n = projectionMatrix_[2][3]/(projectionMatrix_[2][2] - 1.0);
-    const float f = projectionMatrix_[2][3]/(projectionMatrix_[2][2] + 1.0);
-    const float b = n * ( projectionMatrix_[1][2] - 1.0 ) / projectionMatrix_[1][1];
-    const float t = n * ( projectionMatrix_[1][2] + 1.0 ) / projectionMatrix_[1][1];
-    const float l = n * ( projectionMatrix_[0][2] - 1.0 ) / projectionMatrix_[0][0];
-    const float r = n * ( projectionMatrix_[0][2] + 1.0 ) / projectionMatrix_[0][0];
-    set( l, r ,b, t, n, f);
+    *static_cast< Frustumf* >( this ) = Frustumf( projectionMatrix_ );
 }
 
 }
