@@ -22,11 +22,8 @@
 #include <livre/core/cache/CacheObject.h>
 #include <livre/core/cache/CacheStatistics.h>
 
-#define CACHE_LOG_SIZE 1000000
-
 namespace livre
 {
-
 
 struct LRUCachePolicy
 {
@@ -84,10 +81,12 @@ struct LRUCachePolicy
 
 struct Cache::Impl
 {
-    Impl( Cache& cache, const size_t maxMemBytes )
+    Impl( Cache& cache,
+          const std::string& name,
+          const size_t maxMemBytes )
         : _policy( maxMemBytes )
         , _cache( cache )
-        , _statistics( "Statistics", CACHE_LOG_SIZE )
+        , _statistics( name )
     {}
 
     ~Impl()
@@ -113,15 +112,15 @@ struct Cache::Impl
         CacheObjectPtr obj = getFromMap( cacheId );
         if( obj->isLoaded( ))
         {
-            _statistics._notifyHit();
+            _statistics.notifyHit();
             _policy.insert( cacheId );
             return obj;
         }
 
         if( obj->_notifyLoad( ))
         {
-            _statistics._notifyMiss();
-            _statistics._notifyLoaded( *obj );
+            _statistics.notifyMiss();
+            _statistics.notifyLoaded( *obj );
             _policy.insert( cacheId );
             applyPolicy();
             return obj;
@@ -141,7 +140,7 @@ struct Cache::Impl
             return false;
 
         obj->_notifyUnload();
-        _statistics._notifyUnloaded( *obj );
+        _statistics.notifyUnloaded( *obj );
         _policy.remove( cacheId );
         _cacheMap.erase( cacheId );
         return true;
@@ -205,8 +204,9 @@ struct Cache::Impl
     mutable ReadWriteMutex _mutex;
 };
 
-Cache::Cache( const size_t maxMemBytes )
-    : _impl( new Cache::Impl( *this, maxMemBytes ))
+Cache::Cache( const std::string& name,
+              const size_t maxMemBytes )
+    : _impl( new Cache::Impl( *this, name, maxMemBytes ))
 {
 }
 
@@ -232,7 +232,7 @@ bool Cache::unload( const CacheId& cacheId )
 ConstCacheObjectPtr Cache::get( const CacheId& cacheId ) const
 {
     if( cacheId == INVALID_CACHE_ID )
-        return CacheObjectPtr();
+        return ConstCacheObjectPtr();
 
     return _impl->get( cacheId );
 }
@@ -245,11 +245,6 @@ void Cache::_unloadAll()
 size_t Cache::getCount() const
 {
     return _impl->getCount();
-}
-
-CacheStatistics& Cache::_getStatistics()
-{
-    return _impl->_statistics;
 }
 
 const CacheStatistics& Cache::getStatistics() const

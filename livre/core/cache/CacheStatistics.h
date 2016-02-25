@@ -25,6 +25,8 @@
 #include <livre/core/types.h>
 #include <lunchbox/mtQueue.h>
 
+#define CACHE_LOG_SIZE 1000000
+
 namespace livre
 {
 /**
@@ -33,25 +35,48 @@ namespace livre
 class CacheStatistics
 {
 public:
+
+    /**
+     * Constructor
+     * @param name of the cache statistics
+     * @param queueSize the queue size of the load/unload information to keep
+     */
+    LIVRECORE_API CacheStatistics( const std::string& name,
+                                   const size_t queueSize = CACHE_LOG_SIZE );
+
+    LIVRECORE_API ~CacheStatistics();
+
     /**
      * @return Number of objects in the corresponding \see Cache.
      */
-    size_t getBlockCount() const { return _objCount; }
+    LIVRECORE_API size_t getBlockCount() const { return _objCount; }
 
     /**
      * @return Used memory in bytes used by the \see Cache.
      */
-    size_t getUsedMemory() const { return _usedMemBytes; }
+    LIVRECORE_API size_t getUsedMemory() const { return _usedMemBytes; }
 
     /**
-     * @param statisticsName The name of the statistics.
+     * Notifies the statistics for cache misses
      */
-    void setName( const std::string& statisticsName )
-        { _name = statisticsName; }
+    void notifyMiss() { ++_cacheMiss; }
 
-    /** @param Maximum memory in bytes used by the associated cache. */
-    void setMaximumMemory( const size_t maxMemBytes )
-        { _maxMemBytes = maxMemBytes; }
+    /**
+     * Notifies the statistics for cache hits
+     */
+    void notifyHit() { ++_cacheHit; }
+
+    /**
+     * Notifies statistics when an object is loaded.
+     * @param cacheObject is the cache object.
+     */
+    LIVRECORE_API void notifyLoaded( const CacheObject& cacheObject );
+
+    /**
+     * Notifies statistics when an object is unloaded.
+     * @param cacheObject is the cache object.
+     */
+    LIVRECORE_API void notifyUnloaded( const CacheObject& cacheObject );
 
     /**
      * @param stream Output stream.
@@ -59,22 +84,9 @@ public:
      * @return The output stream.
      */
     LIVRECORE_API friend std::ostream& operator<<( std::ostream& stream,
-                                     const CacheStatistics& cacheStatistics );
-
-    ~CacheStatistics();
+                                     const CacheStatistics& statistics );
 
 private:
-
-    friend class Cache;
-
-    CacheStatistics( const std::string& statisticsName,
-                     const size_t queueSize );
-
-    void _notifyLoaded( const CacheObject& cacheObject );
-    void _notifyUnloaded( const CacheObject& cacheObject );
-
-    void _notifyMiss() { ++_cacheMiss; }
-    void _notifyHit() { ++_cacheHit; }
 
     std::string _name;
     size_t _usedMemBytes;

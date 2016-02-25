@@ -36,9 +36,11 @@ class Cache
 public:
 
     /**
+     * @param name is the name of the cache.
      * @param maxMemBytes maximum memory.
      */
-    LIVRECORE_API explicit Cache( size_t maxMemBytes );
+    LIVRECORE_API explicit Cache( const std::string& name,
+                                  size_t maxMemBytes );
     LIVRECORE_API virtual ~Cache();
 
     /**
@@ -75,11 +77,6 @@ public:
     LIVRECORE_API const CacheStatistics& getStatistics() const;
 
 protected:
-
-    /**
-     * @return Statistics.
-     */
-    LIVRECORE_API CacheStatistics& _getStatistics();
 
     /**
      * @param cacheId The derived class allocates an \see CacheObject with the given ID

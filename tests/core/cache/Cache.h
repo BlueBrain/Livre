@@ -31,7 +31,7 @@ class Cache : public livre::Cache
 {
 public:
     Cache( size_t maxMemBytes )
-        : livre::Cache( maxMemBytes ) {}
+        : livre::Cache( "Test Cache" ,maxMemBytes ) {}
 
 private:
     livre::CacheObject* _generate( const livre::CacheId& cacheId )

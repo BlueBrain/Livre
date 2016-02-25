@@ -52,11 +52,9 @@ public:
 TextureDataCache::TextureDataCache( const size_t maxMemBytes,
                                     VolumeDataSource& dataSource,
                                     const uint32_t textureType )
-    : Cache( maxMemBytes )
+    : Cache( "Data cache CPU", maxMemBytes )
     , _impl( new Impl( dataSource, textureType ))
-{
-    _getStatistics().setName( "Data cache CPU");
-}
+{}
 
 CacheObject* TextureDataCache::_generate( const CacheId& cacheId )
 {

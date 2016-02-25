@@ -77,9 +77,9 @@ struct CacheStatistics::LoadInfo
     double loadTime;
 };
 
-CacheStatistics::CacheStatistics( const std::string& statisticsName,
-                                  const size_t queueSize )
-    : _name( statisticsName )
+CacheStatistics::CacheStatistics( const std::string& name,
+                                  const size_t queueSize /* = CACHE_LOG_SIZE */ )
+    : _name( name )
     , _usedMemBytes( 0 )
     , _maxMemBytes( 0 )
     , _objCount( 0 )
@@ -89,7 +89,7 @@ CacheStatistics::CacheStatistics( const std::string& statisticsName,
 {
 }
 
-void CacheStatistics::_notifyLoaded( const CacheObject& cacheObject )
+void CacheStatistics::notifyLoaded( const CacheObject& cacheObject )
 {
    ++_objCount;
    _usedMemBytes += cacheObject.getSize();
@@ -106,7 +106,7 @@ void CacheStatistics::_notifyLoaded( const CacheObject& cacheObject )
                                              cacheObject.getSize( ))));
 }
 
-void CacheStatistics::_notifyUnloaded( const CacheObject& cacheObject )
+void CacheStatistics::notifyUnloaded( const CacheObject& cacheObject )
 {
     --_objCount;
     _usedMemBytes -= cacheObject.getSize();
@@ -121,22 +121,22 @@ void CacheStatistics::_notifyUnloaded( const CacheObject& cacheObject )
 }
 
 std::ostream& operator<<( std::ostream& stream,
-                          const CacheStatistics& cacheStatistics )
+                          const CacheStatistics& statistics )
 {
     const int hits = int(
-        100.f * float( cacheStatistics._cacheHit ) /
-        float( cacheStatistics._cacheHit + cacheStatistics._cacheMiss ));
-    stream << cacheStatistics._name << std::endl;
+        100.f * float( statistics._cacheHit ) /
+        float( statistics._cacheHit + statistics._cacheMiss ));
+    stream << statistics._name << std::endl;
     stream << "  Used Memory: "
-           << (cacheStatistics._usedMemBytes + LB_1MB - 1) / LB_1MB << "/"
-           << (cacheStatistics._maxMemBytes + LB_1MB - 1) / LB_1MB << "MB"
+           << (statistics._usedMemBytes + LB_1MB - 1) / LB_1MB << "/"
+           << (statistics._maxMemBytes + LB_1MB - 1) / LB_1MB << "MB"
            << std::endl;
     stream << "  Block Count: "
-           << cacheStatistics._objCount << std::endl;
+           << statistics._objCount << std::endl;
     stream << "  Cache hits: "
-           << cacheStatistics._cacheHit << " (" << hits << "%)" << std::endl;
+           << statistics._cacheHit << " (" << hits << "%)" << std::endl;
     stream << "  Cache misses: "
-           << cacheStatistics._cacheMiss << std::endl;
+           << statistics._cacheMiss << std::endl;
 
     return stream;
 }

@@ -72,11 +72,9 @@ struct TextureCache::Impl
 TextureCache::TextureCache( TextureDataCache& dataCache,
                             const size_t maxMemBytes,
                             const GLint internalTextureFormat )
-    : Cache( maxMemBytes )
+    : Cache( "Texture cache GPU", maxMemBytes )
     , _impl( new Impl( dataCache, internalTextureFormat ))
-{
-    _getStatistics().setName( "Texture cache GPU");
-}
+{}
 
 CacheObject* TextureCache::_generate( const CacheId& cacheId )
 {
