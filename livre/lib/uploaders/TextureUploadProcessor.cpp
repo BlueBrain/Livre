@@ -18,7 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/lib/cache/LRUCachePolicy.h>
 #include <livre/lib/cache/TextureCache.h>
 #include <livre/lib/cache/TextureDataObject.h>
 #include <livre/lib/cache/TextureObject.h>
@@ -51,7 +50,7 @@ __itt_string_handle* ittTextureLoadTask = __itt_string_handle_create("Texture lo
 class TextureLoaderVisitor : public RenderNodeVisitor
 {
 public:
-    TextureLoaderVisitor( DashTreePtr dashTree,
+    TextureLoaderVisitor( DashTree& dashTree,
                           TextureCache& textureCache,
                           ProcessorInputPtr processorInput,
                           ProcessorOutputPtr processorOutput,
@@ -85,7 +84,7 @@ private:
 class CollectVisiblesVisitor : public RenderNodeVisitor
 {
 public:
-    CollectVisiblesVisitor( DashTreePtr dashTree )
+    CollectVisiblesVisitor( DashTree& dashTree )
      : RenderNodeVisitor( dashTree ) {}
 
     void visit( DashRenderNode& renderNode, VisitState& state ) final
@@ -95,10 +94,10 @@ public:
     }
 };
 
-TextureUploadProcessor::TextureUploadProcessor( DashTreePtr dashTree,
+TextureUploadProcessor::TextureUploadProcessor( DashTree& dashTree,
                                                 GLContextPtr shareContext,
                                                 GLContextPtr context,
-                                                TextureCache& textureCache,
+                                                TextureDataCache& dataCache,
                                                 const VolumeRendererParameters& vrParameters )
     : GLContextTrait( context )
     , _dashTree( dashTree )
@@ -106,11 +105,17 @@ TextureUploadProcessor::TextureUploadProcessor( DashTreePtr dashTree,
     , _currentFrameID( 0 )
     , _threadOp( TO_NONE )
     , _vrParameters( vrParameters )
-    , _textureCache( textureCache )
+    , _textureCache( dataCache,
+                     _vrParameters.getMaxGPUCacheMemoryMB() * LB_1MB,
+                     GL_LUMINANCE8 )
     , _allDataLoaded( false )
     , _needRedraw( false )
 {
-    setDashContext( dashTree->createContext());
+    setDashContext( dashTree.createContext());
+}
+
+TextureUploadProcessor::~TextureUploadProcessor()
+{
 }
 
 const TextureCache& TextureUploadProcessor::getTextureCache() const
@@ -143,7 +148,7 @@ void TextureUploadProcessor::_loadData()
     loadVisitor.setSynchronous( _vrParameters.getSynchronousMode( ));
 
     DFSTraversal traverser;
-    const RootNode& rootNode = _dashTree->getDataSource()->getVolumeInformation().rootNode;
+    const RootNode& rootNode = _dashTree.getDataSource()->getVolumeInformation().rootNode;
     traverser.traverse( rootNode, loadVisitor, _currentFrameID );
 
     if(  _vrParameters.getSynchronousMode( ))
@@ -165,14 +170,14 @@ void TextureUploadProcessor::runLoop_()
     __itt_task_begin ( ittTextureLoadDomain, __itt_null, __itt_null, ittTextureComputationTask );
 #endif //_ITT_DEBUG_
 
-    const DashRenderStatus& renderStatus = _dashTree->getRenderStatus();
+    const DashRenderStatus& renderStatus = _dashTree.getRenderStatus();
     if( renderStatus.getFrameID() != _currentFrameID )
     {
         _protectUnloading.clear();
         CollectVisiblesVisitor collectVisibles( _dashTree );
         DFSTraversal traverser;
         const RootNode& rootNode =
-                _dashTree->getDataSource()->getVolumeInformation().rootNode;
+                _dashTree.getDataSource()->getVolumeInformation().rootNode;
         traverser.traverse( rootNode, collectVisibles, renderStatus.getFrameID( ));
         _currentFrameID = renderStatus.getFrameID();
     }
@@ -186,7 +191,7 @@ void TextureUploadProcessor::runLoop_()
 
 void TextureUploadProcessor::_checkThreadOperation()
 {
-    DashRenderStatus& renderStatus = _dashTree->getRenderStatus();
+    DashRenderStatus& renderStatus = _dashTree.getRenderStatus();
     ThreadOperation op = renderStatus.getThreadOp();
     if( op != _threadOp )
     {
@@ -217,11 +222,11 @@ void TextureLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state 
     state.setVisitChild( false );
 
     const ConstCacheObjectPtr texPtr = renderNode.getTextureObject();
-    if( texPtr->isLoaded( ))
+    if( texPtr && texPtr->isLoaded( ))
         return;
 
-    CacheObjectPtr texture = _cache.get( lodNode.getNodeId().getId( ));
-    if( texture->isLoaded() )
+    ConstCacheObjectPtr texture = _cache.get( lodNode.getNodeId().getId( ));
+    if( texture && texture->isLoaded() )
     {
         renderNode.setTextureObject( texture );
         _output->commit( CONNECTION_ID );
@@ -230,14 +235,13 @@ void TextureLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state 
     else
     {
         const ConstCacheObjectPtr textureData = renderNode.getTextureDataObject();
-        if( textureData->isLoaded( ))
+        if( textureData && textureData->isLoaded( ))
         {
 #ifdef _ITT_DEBUG_
             __itt_task_begin ( ittTextureLoadDomain, __itt_null, __itt_null,
                                ittTextureLoadTask );
 #endif //_ITT_DEBUG_
-            CacheObjectPtr lodTexture = _cache.get( lodNode.getNodeId().getId( ));
-            lodTexture->load();
+            CacheObjectPtr lodTexture = _cache.load( lodNode.getNodeId().getId( ));
 
 #ifdef _ITT_DEBUG_
             __itt_task_end( ittTextureLoadDomain );

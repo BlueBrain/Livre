@@ -20,133 +20,236 @@
 #include <livre/core/defines.h>
 #include <livre/core/cache/Cache.h>
 #include <livre/core/cache/CacheObject.h>
-#include <livre/core/cache/CachePolicy.h>
 #include <livre/core/cache/CacheStatistics.h>
-
-#define CACHE_LOG_SIZE 1000000
 
 namespace livre
 {
 
-CacheObjectPtr Cache::get( const CacheId& cacheId )
+struct LRUCachePolicy
 {
-    return _get( cacheId );
-}
 
-CacheObjectPtr Cache::get( const CacheId& cacheId ) const
-{
-    return _get( cacheId );
-}
+    typedef std::deque< CacheId > LRUQueue;
 
-Cache::ApplyResult Cache::applyPolicy( CachePolicy& cachePolicy ) const
-{
-    ReadLock readLock( _mutex, boost::try_to_lock );
-    if( !readLock.owns_lock() )
-        return AR_CACHEBUSY;
+    LRUCachePolicy( const size_t maxMemBytes,
+                    const float cleanupRatio = 1.0f )
+        : _maxMemBytes( maxMemBytes )
+        , _cleanUpRatio( cleanupRatio )
+    {}
 
-    if( _cacheMap.empty() || !cachePolicy.willPolicyBeActivated( *this ) )
-        return AR_NOTACTIVATED;
-
-    std::vector< CacheObject* > cacheObjects;
-    cacheObjects.reserve( _cacheMap.size() );
-
-    for( CacheMap::const_iterator it = _cacheMap.begin(); it != _cacheMap.end(); ++it )
+    bool isFull( const Cache& cache ) const
     {
-        const CacheObjectPtr& object = it->second;
-        if( object && object->isValid() && object->_isLoaded() )
-            cacheObjects.push_back( object.get( ));
+        const size_t usedMemBytes = cache.getStatistics().getUsedMemory();
+        return usedMemBytes >= _maxMemBytes;
     }
 
-    if( cacheObjects.empty( ))
-        return AR_EMPTY;
+    bool hasSpace( const Cache& cache ) const
+    {
+        const size_t usedMemBytes = cache.getStatistics().getUsedMemory();
+        return usedMemBytes < ( 1.0f - _cleanUpRatio ) * _maxMemBytes;
+    }
 
-    std::vector< CacheObject * > modifiedList;
-    cachePolicy._apply( *this, cacheObjects, modifiedList );
+    void insert( const CacheId& cacheId )
+    {
+        remove( cacheId );
+        _lruQueue.push_back( cacheId );
+    }
 
-    _unload( cachePolicy, modifiedList );
-    return AR_ACTIVATED;
-}
+    void remove( const CacheId& cacheId )
+    {
+        typename LRUQueue::iterator it = _lruQueue.begin();
+        while( it != _lruQueue.end( ))
+        {
+            if( *it == cacheId )
+                _lruQueue.erase( it );
+            else
+                ++it;
+        }
+    }
 
-Cache::Cache()
-    : _statistics( new CacheStatistics( "Statistics", CACHE_LOG_SIZE ) )
+    CacheIds getObjects() const
+    {
+        CacheIds ids;
+        ids.reserve( _lruQueue.size( ));
+        ids.insert( ids.begin(), _lruQueue.begin(), _lruQueue.end());
+        return ids;
+    }
+
+    const size_t _maxMemBytes;
+    const float _cleanUpRatio;
+    LRUQueue _lruQueue;
+};
+
+struct Cache::Impl
+{
+    Impl( Cache& cache,
+          const std::string& name,
+          const size_t maxMemBytes )
+        : _policy( maxMemBytes )
+        , _cache( cache )
+        , _statistics( name )
+    {}
+
+    ~Impl()
+    {}
+
+    void applyPolicy()
+    {
+        if( _cacheMap.empty() || !_policy.isFull( _cache ))
+            return;
+
+        // Objects are returned in delete order
+        for( const CacheId& cacheId: _policy.getObjects( ))
+        {
+            unloadFromCache( cacheId );
+            if( _policy.hasSpace( _cache ))
+                return;
+        }
+    }
+
+    CacheObjectPtr load( const CacheId& cacheId )
+    {
+        WriteLock writeLock( _mutex );
+        CacheObjectPtr obj = getFromMap( cacheId );
+        if( obj->isLoaded( ))
+        {
+            _statistics.notifyHit();
+            _policy.insert( cacheId );
+            return obj;
+        }
+
+        if( obj->_notifyLoad( ))
+        {
+            _statistics.notifyMiss();
+            _statistics.notifyLoaded( *obj );
+            _policy.insert( cacheId );
+            applyPolicy();
+            return obj;
+        }
+
+        return CacheObjectPtr();
+    }
+
+    bool unloadFromCache( const CacheId& cacheId )
+    {
+        CacheMap::iterator it = _cacheMap.find( cacheId );
+        if( it == _cacheMap.end( ))
+            return false;
+
+        CacheObjectPtr& obj = it->second;
+        if( obj.use_count() > 1 )
+            return false;
+
+        obj->_notifyUnload();
+        _statistics.notifyUnloaded( *obj );
+        _policy.remove( cacheId );
+        _cacheMap.erase( cacheId );
+        return true;
+    }
+
+    CacheObjectPtr getFromMap( const CacheId& cacheId )
+    {
+        CacheMap::iterator it = _cacheMap.find( cacheId );
+        if( it == _cacheMap.end( ))
+        {
+            CacheObjectPtr cacheObject( _cache._generate( cacheId ));
+            _cacheMap[ cacheId ] = cacheObject;
+        }
+
+        return _cacheMap[ cacheId ];
+    }
+
+    CacheObjectPtr getFromMap( const CacheId& cacheId ) const
+    {
+        CacheMap::const_iterator it = _cacheMap.find( cacheId );
+        if( it == _cacheMap.end( ))
+            return CacheObjectPtr();
+
+        return it->second;
+    }
+
+    bool unload( const CacheId& cacheId )
+    {
+        WriteLock lock( _mutex );
+        return unloadFromCache( cacheId );
+    }
+
+    ConstCacheObjectPtr get( const CacheId& cacheId ) const
+    {
+        ReadLock lock( _mutex );
+        return getFromMap( cacheId );
+    }
+
+    void unloadAll()
+    {
+        WriteLock lock( _mutex );
+        CacheIds ids;
+        ids.reserve( _cacheMap.size( ));
+        for( CacheMap::iterator it = _cacheMap.begin(); it != _cacheMap.end(); ++it )
+            ids.push_back( it->first );
+
+        for( const CacheId& cacheId: ids )
+            unloadFromCache( cacheId );
+    }
+
+    size_t getCount() const
+    {
+        ReadLock lock( _mutex );
+        return _cacheMap.size();
+    }
+
+    mutable LRUCachePolicy _policy;
+    Cache& _cache;
+    mutable CacheStatistics _statistics;
+    CacheMap _cacheMap;
+    mutable ReadWriteMutex _mutex;
+};
+
+Cache::Cache( const std::string& name,
+              const size_t maxMemBytes )
+    : _impl( new Cache::Impl( *this, name, maxMemBytes ))
 {
 }
 
 Cache::~Cache()
-{
-    for( CacheMap::iterator it = _cacheMap.begin(); it != _cacheMap.end(); ++it )
-    {
-        CacheObjectPtr& cacheObject = it->second;
-        cacheObject->_unregisterObserver( this );
-        cacheObject->_unregisterObserver( _statistics.get( ));
-    }
-}
+{}
 
-CacheObjectPtr Cache::_get( const CacheId& cacheId )
+CacheObjectPtr Cache::load( const CacheId& cacheId )
 {
     if( cacheId == INVALID_CACHE_ID )
         return CacheObjectPtr();
 
-    WriteLock writeLock( _mutex );
-    CacheMap::iterator it = _cacheMap.find( cacheId );
-    if( it == _cacheMap.end() )
-    {
-        CacheObjectPtr cacheObject( _generate( cacheId ));
-        cacheObject->_registerObserver( this );
-        cacheObject->_registerObserver( _statistics.get() );
-        _cacheMap[ cacheId ] = cacheObject;
-    }
-
-    LBASSERT( _cacheMap[ cacheId ]->_status );
-
-    return _cacheMap[ cacheId ];
+    return _impl->load( cacheId );
 }
 
-CacheObjectPtr Cache::_get( const CacheId& cacheId ) const
+bool Cache::unload( const CacheId& cacheId )
 {
-    ReadLock readLock( _mutex );
-    CacheMap::const_iterator it = _cacheMap.find( cacheId );
+    if( cacheId == INVALID_CACHE_ID )
+        return false;
 
-    if( it == _cacheMap.end() )
-        return CacheObjectPtr();
+    return _impl->unload( cacheId );
+}
 
-    LBASSERT( it->second->_status );
+ConstCacheObjectPtr Cache::get( const CacheId& cacheId ) const
+{
+    if( cacheId == INVALID_CACHE_ID )
+        return ConstCacheObjectPtr();
 
-    return it->second;
+    return _impl->get( cacheId );
 }
 
 void Cache::_unloadAll()
 {
-    for( CacheMap::iterator it = _cacheMap.begin(); it != _cacheMap.end(); ++it )
-        it->second->_unload();
-}
-
-void Cache::_unload( CachePolicy& cachePolicy,
-                     const std::vector< CacheObject* >& cacheObjects ) const
-{
-    for( std::vector< CacheObject *>::const_iterator it = cacheObjects.begin();
-         it != cacheObjects.end(); ++it )
-    {
-        ( *it )->unload();
-        if( cachePolicy.isPolicySatisfied( *this ))
-            return;
-    }
+    _impl->unloadAll();
 }
 
 size_t Cache::getCount() const
 {
-    ReadLock readLock( _mutex );
-    return _cacheMap.size();
-}
-
-CacheStatistics& Cache::getStatistics()
-{
-    return *_statistics;
+    return _impl->getCount();
 }
 
 const CacheStatistics& Cache::getStatistics() const
 {
-    return *_statistics;
+    return _impl->_statistics;
 }
 
 }

@@ -28,8 +28,6 @@
 #include <livre/eq/types.h>
 #include <livre/core/types.h>
 
-#include <memory>
-
 namespace livre
 {
 
@@ -56,8 +54,6 @@ public:
     const TextureCache& getTextureCache() const;
 
 private:
-    class Impl;
-    std::unique_ptr< Impl > _impl;
 
     bool configInit( const eq::uint128_t& initId ) final;
     bool configExit() final;
@@ -65,6 +61,9 @@ private:
     bool configExitGL() final;
     void frameStart( const eq::uint128_t& frameID,
                      const uint32_t frameNumber ) final;
+
+    struct Impl;
+    std::unique_ptr< Impl > _impl;
 };
 
 }

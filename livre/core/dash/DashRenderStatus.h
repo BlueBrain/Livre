@@ -28,7 +28,6 @@
 #include <livre/core/visitor/VisitState.h>
 #include <livre/core/data/LODNode.h>
 #include <livre/core/render/Frustum.h>
-#include <livre/core/cache/EmptyCacheObject.h>
 
 namespace livre
 {

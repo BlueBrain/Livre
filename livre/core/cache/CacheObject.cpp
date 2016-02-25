@@ -21,27 +21,16 @@
 #include <lunchbox/scopedMutex.h>
 
 #include <livre/core/cache/CacheObject.h>
-#include <livre/core/cache/CacheObjectListener.h>
-#include <livre/core/cache/CacheObjectObserver.h>
-#include <livre/core/cache/CacheStatistics.h>
 
 namespace livre
 {
 
-struct CacheObject::Status : public CacheObjectListener
+struct CacheObject::Status
 {
     Status( const CacheId& cacheId_ )
-        : nRef( 0 )
-        , lastUsedTime( 0.0 )
-        , loadTime( 0.0 )
-        , unloadable( true )
-        , cacheId( cacheId_ )
+        : cacheId( cacheId_ )
     {}
 
-    uint32_t nRef;
-    double lastUsedTime;
-    double loadTime;
-    bool unloadable;
     CacheId cacheId;
     ReadWriteMutex mutex;
 };
@@ -51,59 +40,19 @@ CacheObject::CacheObject( const CacheId& cacheId )
 {
 }
 
-void CacheObject::_increaseReference( )
-{
-    WriteLock lock( _status->mutex );
-    _status->nRef++;
-
-    for( CacheObjectObserverSet::iterator it = _status->getObservers().begin();
-         it != _status->getObservers().end();
-         ++it )
-    {
-        (*it)->_onReferenced( *this );
-    }
-}
-
-void CacheObject::_decreaseReference( )
-{
-    WriteLock lock( _status->mutex );
-    _status->nRef--;
-
-    if( _status->nRef == 0 && _isValid() )
-    {
-        for( CacheObjectObserverSet::iterator it = _status->getObservers().begin();
-             it != _status->getObservers().end();
-             ++it )
-        {
-            (*it)->_onUnload( *this );
-        }
-        _unload();
-    }
-
-    for( CacheObjectObserverSet::iterator it = _status->getObservers().begin();
-         it != _status->getObservers().end();
-         ++it )
-    {
-        (*it)->_onUnreferenced( *this );
-    }
-}
-
 bool CacheObject::isLoaded() const
 {
     ReadLock lock( _status->mutex );
-    const bool ret = _isValid( ) && _isLoaded( );
-    for( CacheObjectObserverSet::const_iterator it = _status->getObservers().begin();
-         it != _status->getObservers().end();
-         ++it )
-    {
-        ret ? (*it)->_onCacheHit( *this ) : (*it)->_onCacheMiss( *this );
-    }
-    return ret;
+    return _isValid() && _isLoaded();
 }
+
+CacheObject::~CacheObject()
+{}
 
 bool CacheObject::isValid() const
 {
-    return ( _status ? _isValid() : false );
+    ReadLock lock( _status->mutex );
+    return _isValid();
 }
 
 CacheId CacheObject::getId() const
@@ -111,84 +60,22 @@ CacheId CacheObject::getId() const
     return _status->cacheId;
 }
 
-void CacheObject::load()
+size_t CacheObject::getSize() const
+{
+    ReadLock lock( _status->mutex );
+    return _getSize();
+}
+
+bool CacheObject::_notifyLoad()
 {
     WriteLock lock( _status->mutex );
-    if( _isLoaded( ) )
-        return;
-
-    const float start = ThreadClock::getClock().getTimef( );
-    if( !_load( ))
-        return;
-
-    _status->loadTime = ThreadClock::getClock().getTimef() - start;
-
-    for( CacheObjectObserverSet::iterator it = _status->getObservers().begin();
-         it != _status->getObservers().end();
-         ++it )
-    {
-        (*it)->_onLoaded( *this );
-    }
+    return _load();
 }
 
-void CacheObject::unload( )
+void CacheObject::_notifyUnload()
 {
-    WriteLock lock( _status->mutex, boost::try_to_lock );
-    if( !lock.owns_lock() )
-        return;
-
-    if( !isUnloadable() )
-        return;
-
-    if( !_isLoaded( ) || _status->nRef > 1 )
-    {
-        return;
-    }
-
-    for( CacheObjectObserverSet::iterator it = _status->getObservers().begin();
-         it != _status->getObservers().end();
-         ++it )
-    {
-        (*it)->_onUnload( *this );
-    }
-
-    _unload( );
-    _status->lastUsedTime = 0;
-}
-
-double CacheObject::getLastUsed() const
-{
-    return _status->lastUsedTime;
-}
-
-double CacheObject::getLoadTime() const
-{
-    return _status->loadTime;
-}
-
-bool CacheObject::isUnloadable() const
-{
-    return _status->unloadable;
-}
-
-void CacheObject::setUnloadable( bool unloadable )
-{
-    _status->unloadable = unloadable;
-}
-
-uint32_t CacheObject::getRefCount( ) const
-{
-    return _status->nRef;
-}
-
-void CacheObject::_registerObserver( CacheObjectObserver* observer )
-{
-    _status->registerObserver( observer );
-}
-
-void CacheObject::_unregisterObserver( CacheObjectObserver* observer )
-{
-    _status->unregisterObserver( observer );
+    WriteLock lock( _status->mutex );
+    _unload();
 }
 
 bool CacheObject::_isValid() const
@@ -196,14 +83,14 @@ bool CacheObject::_isValid() const
     return _status->cacheId != INVALID_CACHE_ID;
 }
 
+size_t CacheObject::_getSize() const
+{
+    return 0;
+}
+
 bool CacheObject::operator==( const CacheObject& cacheObject ) const
 {
     return _status->cacheId == cacheObject.getId();
-}
-
-void CacheObject::touch()
-{
-     _status->lastUsedTime = ThreadClock::getClock().getTimef();
 }
 
 }

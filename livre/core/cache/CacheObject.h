@@ -37,7 +37,7 @@ namespace livre
 class CacheObject
 {
 public:
-    LIVRECORE_API virtual ~CacheObject() { }
+    LIVRECORE_API virtual ~CacheObject();
 
     /**
      * @return True if the object is valid.
@@ -47,39 +47,7 @@ public:
     /**
      * @return The unique cache id.
      */
-    CacheId getId() const;
-
-    /**
-     * Loads the object to cache ( if the reference count is more than 1, it is not unloaded ).
-     * Function is thread safe for loading.
-     */
-    LIVRECORE_API void load();
-
-    /**
-     * Unloads the object from the memory, if there are not any references. Function is threadsafe
-     * for unloading.
-     */
-    LIVRECORE_API void unload();
-
-    /**
-     * @return The memory size of the object in bytes.
-     */
-    virtual size_t getSize() const = 0;
-
-    /**
-     * @return The last time object is used.
-     */
-    LIVRECORE_API double getLastUsed() const;
-
-    /**
-     * @return The last time object is loaded.
-     */
-    LIVRECORE_API double getLoadTime() const;
-
-    /**
-     * @return The object is unloadable, where \see Cache cannot unload it.
-     */
-    LIVRECORE_API bool isUnloadable() const;
+    LIVRECORE_API CacheId getId() const;
 
     /**
      * @return The object is loaded in cache. The function is thread safe.
@@ -87,20 +55,9 @@ public:
     LIVRECORE_API bool isLoaded() const;
 
     /**
-     * setUnloadable Sets the objects unloadablity.
-     * @param unloadable If true, object can not be unloaded.
+     * @return The memory size of the object in bytes.
      */
-    LIVRECORE_API void setUnloadable( bool unloadable );
-
-    /**
-     * @return The number of references to CacheObject.
-     */
-    LIVRECORE_API uint32_t getRefCount() const;
-
-    /**
-     * Updates the last used time with current time.
-     */
-    LIVRECORE_API void touch();
+    LIVRECORE_API size_t getSize() const;
 
     /**
      * @return On default returns true if cache ids are same
@@ -110,9 +67,8 @@ public:
 protected:
 
     friend class Cache;
-    friend class CacheStatistics;
 
-    LIVRECORE_API CacheObject( const CacheId& cacheId = INVALID_CACHE_ID );
+    LIVRECORE_API explicit CacheObject( const CacheId& cacheId = INVALID_CACHE_ID );
 
     /**
      * Implemented by the derived class, for loading data to memory. Thread safety is satisfied for
@@ -138,35 +94,20 @@ protected:
     virtual bool _isLoaded() const = 0;
 
     /**
-     * @return The unconst object.
+     * @return The memory size of the object in bytes.
      */
-    CacheObject* _getMutable() const { return const_cast< CacheObject* >( this ); }
-
-    /**
-     * @param observer is added to list of observers.
-     */
-    void _registerObserver( CacheObjectObserver* observer );
-
-    /**
-     * @param observer is removed from list of observer
-     */
-    void _unregisterObserver( CacheObjectObserver* observer );
+    virtual size_t _getSize() const;
 
 private:
 
-    LIVRECORE_API void _increaseReference();
-    LIVRECORE_API void _decreaseReference();
+    /** Used by cache to load the data */
+    bool _notifyLoad();
 
-    friend void intrusive_ptr_add_ref( CacheObject* object ) { object->_increaseReference(); }
-    friend void intrusive_ptr_release( CacheObject* object ) { object->_decreaseReference(); }
-
-    friend void intrusive_ptr_add_ref( const CacheObject* object ) { object->_getMutable()->_increaseReference(); }
-    friend void intrusive_ptr_release( const CacheObject* object ) { object->_getMutable()->_decreaseReference(); }
+    /** Used by cache to unload the data */
+    void _notifyUnload();
 
     struct Status;
     mutable boost::shared_ptr< Status > _status;
-
-    LB_TS_VAR( thread_ );
 };
 
 }

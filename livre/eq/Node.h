@@ -29,12 +29,6 @@
 
 namespace livre
 {
-
-namespace detail
-{
-class Node;
-}
-
 /**
  * The Node class is a standard EQ abstraction for a process. It manages the data loaders
  * and keeps the data cache.
@@ -56,12 +50,12 @@ public:
     /**
      * @return The dash tree.
      */
-    DashTreePtr getDashTree();
+    DashTree& getDashTree();
 
     /**
      * @return The dash tree.
      */
-    ConstDashTreePtr getDashTree() const;
+    const DashTree& getDashTree() const;
 
 private:
     bool configInit( const eq::uint128_t& initId ) final;
@@ -69,7 +63,8 @@ private:
                       const uint32_t frameNumber ) final;
     bool configExit() final;
 
-    detail::Node* _impl;
+    struct Impl;
+    std::unique_ptr< Impl >  _impl;
 };
 
 }

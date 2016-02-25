@@ -18,19 +18,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define BOOST_TEST_MODULE DataCache
-#include <boost/test/unit_test.hpp>
+#include <livre/lib/cache/TextureDataCache.h>
+#include <livre/lib/cache/TextureDataObject.h>
 
+#include <livre/core/cache/CacheStatistics.h>
 #include <livre/core/data/VolumeDataSource.h>
-
 #include <livre/core/data/NodeId.h>
 #include <livre/core/data/LODNode.h>
 #include <livre/core/data/MemoryUnit.h>
 #include <livre/core/data/VolumeInformation.h>
 #include <livre/core/mathTypes.h>
 
-#include <livre/lib/cache/TextureDataCache.h>
-#include <livre/lib/cache/TextureDataObject.h>
+#define BOOST_TEST_MODULE DataCache
+#include <boost/test/unit_test.hpp>
+
 
 const uint32_t BLOCK_SIZE = 32;
 const uint32_t VOXEL_SIZE_X = 1024;
@@ -69,20 +70,20 @@ BOOST_AUTO_TEST_CASE( testDataCache )
     const size_t maxMemory = 2048;
     const uint32_t destGPUDataType = 5121; // GL_UNSIGNED_BYTE;
     livre::TextureDataCache dataCache( maxMemory, source, destGPUDataType );
-    livre::CacheObjectPtr data = dataCache.get( firstChildNodeId.getId( ));
-    BOOST_CHECK( dataCache.getCount() == 1 );
-    BOOST_CHECK( !data->isLoaded( ));
-    BOOST_CHECK( data->getId() == firstChildNodeId.getId( ));
-    data->load();
+    livre::ConstCacheObjectPtr constData = dataCache.get( firstChildNodeId.getId( ));
+    BOOST_CHECK( dataCache.getCount() == 0 );
+    BOOST_CHECK( !constData );
+
+    livre::CacheObjectPtr data = dataCache.load( firstChildNodeId.getId( ));
     BOOST_CHECK( data->isLoaded( ));
 
-    data = dataCache.get( livre::INVALID_CACHE_ID );
+    constData = dataCache.get( livre::INVALID_CACHE_ID );
     BOOST_CHECK( dataCache.getCount() == 1 );
-    BOOST_CHECK( data.get() == 0 );
+    BOOST_CHECK( constData.get() == 0 );
 
     // get() on cache returns already loaded data
-    data = dataCache.get( firstChildNodeId.getId( ));
-    BOOST_CHECK( data->isLoaded( ));
+    constData = dataCache.get( firstChildNodeId.getId( ));
+    BOOST_CHECK( constData->isLoaded( ));
     BOOST_CHECK( dataCache.getCount() == 1 );
 
     livre::TextureDataObjectPtr dataObject =

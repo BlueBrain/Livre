@@ -24,6 +24,7 @@
 #include <livre/core/data/LODNode.h>
 #include <livre/core/data/VolumeDataSource.h>
 #include <livre/core/render/Renderer.h>
+#include <livre/core/cache/CacheStatistics.h>
 
 #include <eq/gl.h>
 
@@ -51,11 +52,9 @@ public:
 TextureDataCache::TextureDataCache( const size_t maxMemBytes,
                                     VolumeDataSource& dataSource,
                                     const uint32_t textureType )
-    : LRUCache( maxMemBytes )
+    : Cache( "Data cache CPU", maxMemBytes )
     , _impl( new Impl( dataSource, textureType ))
-{
-    _statistics->setName( "Data cache CPU");
-}
+{}
 
 CacheObject* TextureDataCache::_generate( const CacheId& cacheId )
 {

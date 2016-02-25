@@ -49,7 +49,7 @@ public:
      * @param context the context used by this processor.
      * @param textureDataCache Texture data cache holds the data in the CPU memory.
      */
-    LIVRE_API DataUploadProcessor( DashTreePtr dashTree,
+    LIVRE_API DataUploadProcessor( DashTree& dashTree,
                                    GLContextPtr shareContext,
                                    GLContextPtr context,
                                    TextureDataCache& textureDataCache );
@@ -59,7 +59,7 @@ private:
     void runLoop_( ) final;
     void _loadData();
 
-    DashTreePtr _dashTree;
+    DashTree& _dashTree;
     GLContextPtr _shareContext;
     TextureDataCache& _textureDataCache;
     uint64_t _currentFrameID;

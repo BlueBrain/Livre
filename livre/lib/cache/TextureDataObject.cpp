@@ -198,14 +198,10 @@ TextureDataObject::TextureDataObject( const CacheId& cacheId,
                                      TextureDataCache& dataCache )
     : CacheObject( cacheId )
     , _impl( new Impl( *this, dataCache ))
-{
-    if( NodeId( getId( )).getLevel() ==  0 )
-        setUnloadable( false );
-}
+{}
 
 TextureDataObject::~TextureDataObject()
-{
-}
+{}
 
 bool TextureDataObject::_isLoaded( ) const
 {
@@ -215,7 +211,7 @@ bool TextureDataObject::_isLoaded( ) const
     return _impl->isLoaded();
 }
 
-size_t TextureDataObject::getSize() const
+size_t TextureDataObject::_getSize() const
 {
     if( !isValid( ))
         return 0;
@@ -225,13 +221,11 @@ size_t TextureDataObject::getSize() const
 
 const void* TextureDataObject::getDataPtr() const
 {
-    _getMutable()->touch();
     return _impl->getDataPtr();
 }
 
 bool TextureDataObject::_load()
 {
-    _getMutable()->touch();
     return _impl->load();
 }
 

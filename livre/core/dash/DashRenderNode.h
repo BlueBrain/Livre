@@ -28,7 +28,6 @@
 #include <livre/core/visitor/VisitState.h>
 #include <livre/core/data/LODNode.h>
 #include <livre/core/render/Frustum.h>
-#include <livre/core/cache/EmptyCacheObject.h>
 
 namespace livre
 {
@@ -47,22 +46,22 @@ public:
     /**
      * @return The dash node.
      */
-    LIVRECORE_API dash::NodePtr getDashNode( ) const { return _dashNode; }
+    LIVRECORE_API dash::NodePtr getDashNode() const { return _dashNode; }
 
     /**
      * @return The LODNode.
      */
-    LIVRECORE_API const LODNode& getLODNode( ) const;
+    LIVRECORE_API const LODNode& getLODNode() const;
 
     /**
      * @return \see TextureDataObject, if not initialized in the tree, the returned object
-     * is \see EmptyCacheObject.
+     * is empty.
      */
     LIVRECORE_API ConstCacheObjectPtr getTextureDataObject() const;
 
     /**
      * @return \see TextureObject, if not initialized in the tree, the returned object is
-     * \see EmptyCacheObject.
+     * empty.
      */
     LIVRECORE_API ConstCacheObjectPtr getTextureObject() const;
 

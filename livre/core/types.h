@@ -28,7 +28,6 @@
 #include <dash/types.h>
 
 #include <boost/foreach.hpp>
-#include <boost/intrusive_ptr.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -53,8 +52,6 @@ namespace livre
 class AllocMemoryUnit;
 class Cache;
 class CacheObject;
-class CacheObjectObserver;
-class CachePolicy;
 class CacheStatistics;
 class Configuration;
 class DashConnection;
@@ -126,16 +123,14 @@ typedef boost::shared_ptr< TextureState > TextureStatePtr;
 typedef boost::shared_ptr< const TextureState > ConstTextureStatePtr;
 typedef boost::shared_ptr< VolumeDataSource > VolumeDataSourcePtr;
 typedef boost::shared_ptr< const VolumeDataSource > ConstVolumeDataSourcePtr;
-typedef boost::shared_ptr< DashTree > DashTreePtr;
-typedef boost::shared_ptr< const DashTree > ConstDashTreePtr;
 typedef boost::shared_ptr< EventHandler > EventHandlerPtr;
 typedef boost::shared_ptr< EventHandlerFactory > EventHandlerFactoryPtr;
 typedef boost::shared_ptr< EventMapper > EventMapperPtr;
 typedef boost::shared_ptr< MemoryUnit > MemoryUnitPtr;
 typedef boost::shared_ptr< const MemoryUnit > ConstMemoryUnitPtr;
 
-typedef boost::intrusive_ptr< CacheObject > CacheObjectPtr;
-typedef boost::intrusive_ptr< const CacheObject > ConstCacheObjectPtr;
+typedef boost::shared_ptr< CacheObject > CacheObjectPtr;
+typedef boost::shared_ptr< const CacheObject > ConstCacheObjectPtr;
 
 /**
  * Helper classes for shared_ptr objects
@@ -177,6 +172,7 @@ typedef std::vector< int64_t > Int64Vector;
 typedef std::vector< uint64_t > UInt64Vector;
 
 typedef std::vector< NodeId > NodeIds;
+typedef std::vector< CacheId > CacheIds;
 
 /**
  * Vector definitions for complex types
@@ -200,7 +196,6 @@ typedef boost::unordered_map< uint32_t, DashConnectionPtr > DashConnectionPtrMap
  */
 typedef std::set< CacheId > CacheIdSet;
 typedef std::set< NodeId > NodeIdSet;
-typedef std::set< CacheObjectObserver *> CacheObjectObserverSet;
 
 /**
  * Locking object definitions

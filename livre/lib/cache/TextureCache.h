@@ -22,7 +22,8 @@
 
 #include <livre/lib/api.h>
 #include <livre/lib/types.h>
-#include <livre/lib/cache/LRUCache.h>
+
+#include <livre/core/cache/Cache.h>
 
 namespace livre
 {
@@ -31,7 +32,7 @@ namespace livre
  * TextureCache class handles the \see TextureObject memory management. \see TextureObject holds
  * the information for OpenGL reference and amount of data on the GPU.
  */
-class TextureCache : public LRUCache
+class TextureCache : public Cache
 {
 public:
 

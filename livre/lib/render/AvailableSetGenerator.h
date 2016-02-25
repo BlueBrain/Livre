@@ -34,12 +34,9 @@ class AvailableSetGenerator
 {
 public:
     /**
-     * @param tree The initialized dash tree with the volume.
-     * @param texture cache
+     * @param textureCache is the cache for textures.
      */
-    LIVRE_API AvailableSetGenerator( DashTreePtr tree,
-                                     const TextureCache& textureCache );
-
+    LIVRE_API explicit AvailableSetGenerator( const TextureCache& textureCache );
     LIVRE_API ~AvailableSetGenerator();
 
     /**

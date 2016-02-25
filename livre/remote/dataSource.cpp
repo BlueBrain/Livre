@@ -31,8 +31,10 @@
 #include <zeq/subscriber.h>
 #include <zeq/connection/service.h>
 
-#include <boost/bind.hpp>
 #include <lunchbox/pluginRegisterer.h>
+#include <lunchbox/clock.h>
+
+#include <boost/bind.hpp>
 
 namespace livre
 {

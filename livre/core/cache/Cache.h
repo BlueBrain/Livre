@@ -23,59 +23,53 @@
 #include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <livre/core/lunchboxTypes.h>
-#include <livre/core/cache/CacheObjectObserver.h>
 
 namespace livre
 {
 
 /**
- * The Cache class manages the \see CacheObject s according to applied policies, methods
+ * The Cache class manages the \see CacheObject s according to LRU Policy, methods
  * are thread safe inserting/querying nodes.
  */
-class Cache : public CacheObjectObserver
+class Cache
 {
 public:
 
     /**
-     * The ApplyResult enum is the result of cache policy application on cache.
+     * @param name is the name of the cache.
+     * @param maxMemBytes maximum memory.
      */
-    enum ApplyResult
-    {
-        AR_NOTACTIVATED, //!< The cache policy is not activated.
-        AR_ACTIVATED, //!< The cache policy successfully run on cache.
-        AR_CACHEBUSY, //!< Cache is being modified.
-        AR_EMPTY //!< There is no cache object to unload.
-    };
-
-    /**
-     * @param cacheId The object cache id to be queried.
-     * @return The cache object from cache, if object is not in the list it is created with given cache id.
-     */
-    LIVRECORE_API CacheObjectPtr get( const CacheId& cacheId );
+    LIVRECORE_API explicit Cache( const std::string& name,
+                                  size_t maxMemBytes );
+    LIVRECORE_API virtual ~Cache();
 
     /**
      * @param cacheId The object cache id to be queried.
      * @return The cache object from cache, if object is not in the list an empty cache
      * object is returned.
      */
-    LIVRECORE_API CacheObjectPtr get( const CacheId& cacheId ) const;
+    LIVRECORE_API ConstCacheObjectPtr get( const CacheId& cacheId ) const;
 
     /**
-     * Applies a policy to the cache.
-     * @param cachePolicy The policy to be applied to cache.
-     * @return The state for the cache policy application.
+     * Loads the object to cache. If object is not in the cache it is created.
+     * @param cacheId The object cache id to be loaded.
+     * @return the loaded or previously loaded cache object. Return empty pointer
+     * if cache id is invalid
      */
-    LIVRECORE_API ApplyResult applyPolicy( CachePolicy& cachePolicy ) const;
+    LIVRECORE_API CacheObjectPtr load( const CacheId& cacheId );
 
     /**
-     * @return The number of cache objects managed ( not the number of loaded objects ).
+     * Unloads the object from the memory, if there are not any references. The
+     * objects are removed from cache
+     * @param cacheId The object cache id to be unloaded.
+     * @return false if object is not unloaded or cacheId is invalid
+     */
+    LIVRECORE_API bool unload( const CacheId& cacheId );
+
+    /**
+     * @return The number of cache objects managed.
      */
     LIVRECORE_API size_t getCount() const;
-
-    /**
-     * @return Statistics.
-     */
-    LIVRECORE_API CacheStatistics& getStatistics();
 
     /**
      * @return Statistics.
@@ -83,21 +77,6 @@ public:
     LIVRECORE_API const CacheStatistics& getStatistics() const;
 
 protected:
-    LIVRECORE_API Cache();
-
-    LIVRECORE_API virtual ~Cache( );
-
-    /**
-     * @param cacheId The object cache id to be queried.
-     * @return The cache object from cache, if object is not in the list it is created.
-     */
-    LIVRECORE_API CacheObjectPtr _get( const CacheId& cacheId );
-
-    /**
-     * @param cacheId The object cache id to be queried.
-     * @return The cache object from cache, if object is not in the list an invalid cache object is returned.
-     */
-    LIVRECORE_API CacheObjectPtr _get( const CacheId& cacheId ) const;
 
     /**
      * @param cacheId The derived class allocates an \see CacheObject with the given ID
@@ -112,15 +91,10 @@ protected:
      */
     LIVRECORE_API void _unloadAll();
 
-    CacheStatisticsPtr _statistics;  //!< The statistics object ptr.
-
 private:
 
-    void _unload( CachePolicy& cachePolicy,
-                  const std::vector< CacheObject* >& cacheObjects ) const;
-
-    CacheMap _cacheMap;
-    mutable ReadWriteMutex _mutex;
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 
 }

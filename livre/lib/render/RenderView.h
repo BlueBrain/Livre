@@ -37,7 +37,7 @@ namespace livre
 class RenderView : public View
 {
 public:
-    LIVRE_API RenderView( ConstDashTreePtr dashTree );
+    LIVRE_API RenderView( const DashTree& dashTree );
     LIVRE_API ~RenderView();
 
 private:

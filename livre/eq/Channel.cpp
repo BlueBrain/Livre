@@ -38,12 +38,14 @@
 #include <livre/lib/cache/TextureCache.h>
 #include <livre/lib/cache/TextureDataCache.h>
 #include <livre/lib/cache/TextureObject.h>
+
 #include <livre/lib/render/AvailableSetGenerator.h>
 #include <livre/lib/render/RenderView.h>
 #include <livre/lib/render/ScreenSpaceLODEvaluator.h>
 #include <livre/lib/render/SelectVisibles.h>
 #include <livre/lib/visitor/DFSTraversal.h>
 
+#include <livre/core/cache/CacheStatistics.h>
 #include <livre/core/dash/DashRenderStatus.h>
 #include <livre/core/dash/DashTree.h>
 #include <livre/core/dashpipeline/DashProcessorInput.h>
@@ -60,9 +62,6 @@
 namespace livre
 {
 
-namespace detail
-{
-
 /**
  * The EqRenderView class implements livre \see RenderView for internal use of \see eq::Channel.
  */
@@ -70,11 +69,11 @@ class EqRenderView : public RenderView
 {
 public:
 
-    EqRenderView( Channel* channel, ConstDashTreePtr dashTree );
+    EqRenderView( Channel::Impl *channel, const DashTree& dashTree );
     const Frustum& getFrustum() const final;
 
 private:
-    Channel* const _channel;
+    Channel::Impl* const _channel;
 };
 
 typedef boost::shared_ptr< EqRenderView > EqRenderViewPtr;
@@ -83,7 +82,7 @@ typedef boost::shared_ptr< EqRenderView > EqRenderViewPtr;
 class EqGLWidget : public GLWidget
 {
 public:
-    explicit EqGLWidget( livre::Channel* channel )
+    explicit EqGLWidget( Channel* channel )
         : _channel( channel )
     {}
 
@@ -114,17 +113,17 @@ public:
         return _channel->getPixelViewport().h;
     }
 
-    livre::Channel* _channel;
+    Channel* _channel;
 };
 
 
 const float nearPlane = 0.1f;
 const float farPlane = 15.0f;
 
-class Channel
+struct Channel::Impl
 {
 public:
-    explicit Channel( livre::Channel* channel )
+    explicit Impl( Channel* channel )
           : _channel( channel )
           , _glWidgetPtr( new EqGLWidget( channel ))
           , _frameInfo( _frustum, INVALID_FRAME )
@@ -157,9 +156,9 @@ public:
         const livre::Node* node =
                 static_cast< livre::Node* >( _channel->getNode( ));
 
-        ConstDashTreePtr dashTree = node->getDashTree();
+        const livre::DashTree& dashTree = node->getDashTree();
 
-        ConstVolumeDataSourcePtr dataSource = dashTree->getDataSource();
+        ConstVolumeDataSourcePtr dataSource = dashTree.getDataSource();
 
         _renderViewPtr.reset( new EqRenderView( this, dashTree ));
 
@@ -211,7 +210,7 @@ public:
         renderBricks.reserve( renderNodes.size( ));
 
         livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
-        DashTreePtr dashTree = node->getDashTree();
+        livre::DashTree& dashTree = node->getDashTree();
 
         for( const ConstCacheObjectPtr& cacheObject: renderNodes )
         {
@@ -219,7 +218,7 @@ public:
                 boost::static_pointer_cast< const TextureObject >( cacheObject );
 
             const LODNode& lodNode =
-                    dashTree->getDataSource()->getNode( NodeId( cacheObject->getId( )));
+                    dashTree.getDataSource()->getNode( NodeId( cacheObject->getId( )));
 
             RenderBrickPtr renderBrick( new RenderBrick( lodNode,
                                                          texture->getTextureState( )));
@@ -239,9 +238,9 @@ public:
         const uint32_t maxLOD = vrParams.getMaxLOD();
         const float screenSpaceError = vrParams.getSSE();
 
-        DashTreePtr dashTree = node->getDashTree();
+        DashTree& dashTree = node->getDashTree();
 
-        const VolumeInformation& volInfo = dashTree->getDataSource()->getVolumeInformation();
+        const VolumeInformation& volInfo = dashTree.getDataSource()->getVolumeInformation();
 
         const float worldSpacePerVoxel = volInfo.worldSpacePerVoxel;
         const uint32_t volumeDepth = volInfo.rootNode.getDepth();
@@ -255,7 +254,7 @@ public:
 
         livre::DFSTraversal traverser;
         traverser.traverse( volInfo.rootNode, visitor,
-                            dashTree->getRenderStatus().getFrameID( ));
+                            dashTree.getRenderStatus().getFrameID( ));
         window->commit();
         return visitor.getVisibles();
     }
@@ -310,7 +309,7 @@ public:
     void frameDraw( const eq::uint128_t& )
     {
         livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
-        const DashRenderStatus& renderStatus = node->getDashTree()->getRenderStatus();
+        const DashRenderStatus& renderStatus = node->getDashTree().getRenderStatus();
         const uint32_t frame = renderStatus.getFrameID();
         if( frame >= INVALID_FRAME )
             return;
@@ -344,8 +343,7 @@ public:
                 _channel->getConfig()->sendEvent( REDRAW );
         }
 
-        const AvailableSetGenerator generateSet( node->getDashTree(),
-                                                 window->getTextureCache( ));
+        const AvailableSetGenerator generateSet( window->getTextureCache( ));
 
         for( const auto& visible : visibles )
             _frameInfo.allNodes.push_back(visible.getLODNode().getNodeId());
@@ -443,7 +441,7 @@ public:
         _drawText( os.str(), y );
 
         ConstVolumeDataSourcePtr dataSource = static_cast< livre::Node* >(
-            _channel->getNode( ))->getDashTree()->getDataSource();
+            _channel->getNode( ))->getDashTree().getDataSource();
         const VolumeInformation& info = dataSource->getVolumeInformation();
         Vector3f voxelSize = info.boundingBox.getSize() / info.voxels;
         std::string unit = "m";
@@ -486,7 +484,7 @@ public:
     void frameFinish()
     {
         livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
-        DashRenderStatus& renderStatus = node->getDashTree()->getRenderStatus();
+        DashRenderStatus& renderStatus = node->getDashTree().getRenderStatus();
         renderStatus.setFrustum( _frustum );
     }
 
@@ -652,8 +650,8 @@ public:
     FrameInfo _frameInfo;
 };
 
-EqRenderView::EqRenderView( Channel* channel,
-                            ConstDashTreePtr dashTree )
+EqRenderView::EqRenderView( Channel::Impl* channel,
+                            const DashTree& dashTree )
     : RenderView( dashTree )
     , _channel( channel )
 {}
@@ -663,17 +661,14 @@ const Frustum& EqRenderView::getFrustum() const
     return _channel->setupFrustum();
 }
 
-}
-
 Channel::Channel( eq::Window* parent )
         : eq::Channel( parent )
-        , _impl( new detail::Channel( this ))
+        , _impl( new Impl( this ))
 {
 }
 
 Channel::~Channel()
-{
-    delete _impl;
+{    
 }
 
 bool Channel::configInit( const eq::uint128_t& initId )
@@ -744,10 +739,10 @@ void Channel::frameReadback( const eq::uint128_t& frameId,
 std::string Channel::getDumpImageFileName() const
 {
     const livre::Node* node = static_cast< const livre::Node* >( getNode( ));
-    ConstDashTreePtr dashTree = node->getDashTree();
+    const DashTree& dashTree = node->getDashTree();
     std::stringstream filename;
     filename << std::setw( 5 ) << std::setfill('0')
-             << dashTree->getRenderStatus().getFrameID() << ".png";
+             << dashTree.getRenderStatus().getFrameID() << ".png";
     return filename.str();
 }
 

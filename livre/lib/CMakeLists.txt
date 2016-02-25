@@ -15,8 +15,6 @@ set(LIVRELIB_PUBLIC_HEADERS
   ${ZEROBUF_GENERATED_HEADERS}
   types.h
   animation/CameraPath.h
-  cache/LRUCache.h
-  cache/LRUCachePolicy.h
   cache/TextureCache.h
   cache/TextureDataCache.h
   cache/TextureObject.h
@@ -38,8 +36,6 @@ set(LIVRELIB_HEADERS
 set(LIVRELIB_SOURCES
   ${ZEROBUF_GENERATED_SOURCES}
   animation/CameraPath.cpp
-  cache/LRUCache.cpp
-  cache/LRUCachePolicy.cpp
   cache/TextureCache.cpp
   cache/TextureDataCache.cpp
   cache/TextureObject.cpp

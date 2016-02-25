@@ -94,12 +94,12 @@ void DashRenderNode::initializeDashNode( dash::NodePtr dashNode )
     dashNode->insert( node );
 
     dash::AttributePtr textureData = new dash::Attribute();
-    ConstCacheObjectPtr lodTextureData( EmptyCacheObject::getEmptyPtr() );
+    ConstCacheObjectPtr lodTextureData;
     *textureData = lodTextureData;
     dashNode->insert( textureData );
 
     dash::AttributePtr texture = new dash::Attribute();
-    ConstCacheObjectPtr lodTexture( EmptyCacheObject::getEmptyPtr() );
+    ConstCacheObjectPtr lodTexture;
     *texture = lodTexture;
     dashNode->insert( texture );
 

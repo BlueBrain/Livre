@@ -23,7 +23,8 @@
 
 #include <livre/lib/api.h>
 #include <livre/lib/types.h>
-#include <livre/lib/cache/LRUCache.h>
+
+#include <livre/core/cache/Cache.h>
 
 namespace livre
 {
@@ -33,7 +34,7 @@ namespace livre
  * uploading. Therefore it decreases the amount of processing while data is
  * dropped from GPU and re-uploaded to GPU.
  */
-class TextureDataCache : public LRUCache
+class TextureDataCache : public Cache
 {
 public:
     /**

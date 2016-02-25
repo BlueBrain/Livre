@@ -35,17 +35,17 @@ namespace livre
 
 struct RenderView::Impl
 {
-    explicit Impl( ConstDashTreePtr dashTree ) : _dashTree( dashTree ) {}
+    explicit Impl( const DashTree& dashTree ) : _dashTree( dashTree ) {}
 
     void freeTexture( const NodeId& nodeId )
     {
-        dash::NodePtr dashNode = _dashTree->getDashNode( nodeId );
+        dash::NodePtr dashNode = _dashTree.getDashNode( nodeId );
         if( !dashNode )
             return;
 
         DashRenderNode renderNode( dashNode );
         if( renderNode.getLODNode().getRefLevel() != 0 )
-            renderNode.setTextureObject( EmptyCacheObject::getEmptyPtr( ));
+            renderNode.setTextureObject( CacheObjectPtr( ));
     }
 
     void freeTextures( const FrameInfo& frameInfo )
@@ -61,11 +61,11 @@ struct RenderView::Impl
             freeTexture( nodeId );
     }
 
-    ConstDashTreePtr _dashTree;
+    const DashTree& _dashTree;
 
 };
 
-RenderView::RenderView( ConstDashTreePtr dashTree )
+RenderView::RenderView( const DashTree& dashTree )
     : _impl( new RenderView::Impl( dashTree ))
 {
 }

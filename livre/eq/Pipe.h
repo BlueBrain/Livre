@@ -14,12 +14,6 @@
 
 namespace livre
 {
-
-namespace detail
-{
-class Pipe;
-}
-
 /**
  * The Pipe class is a standard EQ abstraction for OpenGL contexts.
  */
@@ -44,7 +38,8 @@ private:
     bool configInit( const eq::uint128_t& initId ) final;
     bool configExit() final;
 
-    detail::Pipe* _impl;
+    struct Impl;
+    std::unique_ptr< Impl >  _impl;
 };
 
 }

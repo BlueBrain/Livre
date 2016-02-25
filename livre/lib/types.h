@@ -48,13 +48,10 @@ typedef boost::shared_ptr< TextureUploadProcessor > TextureUploadProcessorPtr;
 typedef boost::shared_ptr< const DataUploadProcessor > ConstDataUploadProcessorPtr;
 typedef boost::shared_ptr< const TextureUploadProcessor > ConstTextureUploadProcessorPtr;
 typedef boost::shared_ptr< const DashProcessor > ConstDashProcessorPtr;
-
-typedef boost::intrusive_ptr< const TextureDataObject > ConstTextureDataObjectPtr;
-typedef boost::intrusive_ptr< const TextureObject > ConstTextureObjectPtr;
-typedef boost::intrusive_ptr< TextureDataObject > TextureDataObjectPtr;
-typedef boost::intrusive_ptr< TextureObject > TextureObjectPtr;
-
-typedef boost::scoped_ptr< TextureDataCache > TextureDataCachePtr;
+typedef boost::shared_ptr< const TextureDataObject > ConstTextureDataObjectPtr;
+typedef boost::shared_ptr< const TextureObject > ConstTextureObjectPtr;
+typedef boost::shared_ptr< TextureDataObject > TextureDataObjectPtr;
+typedef boost::shared_ptr< TextureObject > TextureObjectPtr;
 
 /** Map definitions */
 typedef boost::unordered_map< uint32_t, DataUploadProcessorPtr > DataUploadProcessorPtrMap;

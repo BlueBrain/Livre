@@ -39,19 +39,7 @@ public:
         , _isLoaded_( false )
     { }
 
-    size_t getSize( ) const final { return CACHE_SIZE; }
-
-    /**
-     * @param observer is added to list of observers.
-     */
-    void registerObserver( livre::CacheObjectObserver* observer )
-        { _registerObserver( observer ); }
-
-    /**
-     * @param observer is removed from list of observer
-     */
-    void unregisterObserver( livre::CacheObjectObserver* observer )
-        { _unregisterObserver( observer ); }
+    size_t _getSize( ) const final { return CACHE_SIZE; }
 
 private:
 

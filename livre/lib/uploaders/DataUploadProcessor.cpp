@@ -33,7 +33,6 @@
 #include <livre/lib/cache/TextureDataObject.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/lib/visitor/CollectionTraversal.h>
-#include <livre/lib/cache/LRUCachePolicy.h>
 #include <livre/lib/visitor/CollectionTraversal.h>
 
 namespace livre
@@ -49,7 +48,7 @@ __itt_string_handle* ittDataLoadTask = __itt_string_handle_create("Data loading 
 class DataLoaderVisitor : public RenderNodeVisitor
 {
 public:
-    DataLoaderVisitor( DashTreePtr dashTree, TextureDataCache& textureDataCache,
+    DataLoaderVisitor( DashTree& dashTree, TextureDataCache& textureDataCache,
                        ProcessorInputPtr processorInput,
                        ProcessorOutputPtr processorOutput )
         : RenderNodeVisitor( dashTree ),
@@ -70,7 +69,7 @@ private:
 class DepthCollectorVisitor : public RenderNodeVisitor
 {
 public:
-    DepthCollectorVisitor( DashTreePtr dashTree,
+    DepthCollectorVisitor( DashTree& dashTree,
                            TextureDataCache& textureDataCache,
                            ProcessorOutputPtr processorOutput,
                            DashNodeVector& refLevelCollection )
@@ -90,7 +89,7 @@ private:
 class DepthSortedDataLoaderVisitor : public RenderNodeVisitor
 {
 public:
-    DepthSortedDataLoaderVisitor( DashTreePtr dashTree,
+    DepthSortedDataLoaderVisitor( DashTree& dashTree,
                                   TextureDataCache& textureDataCache,
                                   ProcessorInputPtr processorInput,
                                   ProcessorOutputPtr processorOutput )
@@ -131,7 +130,7 @@ struct DepthCompare
     const Frustum& frustum_;
 };
 
-DataUploadProcessor::DataUploadProcessor( DashTreePtr dashTree,
+DataUploadProcessor::DataUploadProcessor( DashTree& dashTree,
                                           GLContextPtr shareContext,
                                           GLContextPtr context,
                                           TextureDataCache& textureDataCache )
@@ -142,7 +141,7 @@ DataUploadProcessor::DataUploadProcessor( DashTreePtr dashTree,
     , _currentFrameID( 0 )
     , _threadOp( TO_NONE )
 {
-    setDashContext( dashTree->createContext() );
+    setDashContext( dashTree.createContext() );
 }
 
 bool DataUploadProcessor::initializeThreadRun_()
@@ -176,7 +175,7 @@ void DataUploadProcessor::runLoop_()
 
 void DataUploadProcessor::_loadData()
 {
-    const DashRenderStatus& renderStatus = _dashTree->getRenderStatus();
+    const DashRenderStatus& renderStatus = _dashTree.getRenderStatus();
 
     const Frustum& frustum = renderStatus.getFrustum();
     _currentFrameID = renderStatus.getFrameID();
@@ -187,7 +186,7 @@ void DataUploadProcessor::_loadData()
                                                  processorOutputPtr_,
                                                  dashNodeList );
 
-    const RootNode& rootNode = _dashTree->getDataSource()->getVolumeInformation().rootNode;
+    const RootNode& rootNode = _dashTree.getDataSource()->getVolumeInformation().rootNode;
 
     DFSTraversal traverser;
     traverser.traverse( rootNode, depthCollectorVisitor, _currentFrameID );
@@ -210,7 +209,7 @@ void DataUploadProcessor::_loadData()
 
 void DataUploadProcessor::_checkThreadOperation()
 {
-    DashRenderStatus& renderStatus = _dashTree->getRenderStatus();
+    DashRenderStatus& renderStatus = _dashTree.getRenderStatus();
     ThreadOperation op = renderStatus.getThreadOp();
     if( op != _threadOp )
     {
@@ -244,7 +243,7 @@ void DataLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state )
     state.setVisitChild( false );
 
     const ConstCacheObjectPtr texture = renderNode.getTextureObject();
-    if( texture->isLoaded( ))
+    if( texture && texture->isLoaded( ))
         return;
 
     const ConstCacheObjectPtr tData = _cache.get( node.getNodeId().getId( ));
@@ -255,8 +254,7 @@ void DataLoaderVisitor::visit( DashRenderNode& renderNode, VisitState& state )
     __itt_task_begin( ittDataLoadDomain, __itt_null, __itt_null,
                       ittDataLoadTask );
 #endif //_ITT_DEBUG_
-    CacheObjectPtr textureData = _cache.get( node.getNodeId().getId( ));
-    textureData->load( );
+    CacheObjectPtr textureData = _cache.load( node.getNodeId().getId( ));
     if( _clock.getTime64() > 1000 ) // commit once every second
     {
         _clock.reset();
@@ -286,16 +284,16 @@ void DepthCollectorVisitor::visit( DashRenderNode& renderNode, VisitState& state
     state.setVisitChild( false );
 
     const ConstCacheObjectPtr texture = renderNode.getTextureObject();
-    if( texture->isLoaded( ))
+    if( texture && texture->isLoaded( ))
         return;
 
     const ConstCacheObjectPtr tData = renderNode.getTextureDataObject();
-    if( tData->isLoaded( ))
+    if( tData && tData->isLoaded( ))
         return;
 
     // Triggers creation of the cache object.
     const ConstCacheObjectPtr textureData = _cache.get( lodNode.getNodeId().getId( ));
-    if( textureData->isLoaded() )
+    if( textureData && textureData->isLoaded( ))
     {
         renderNode.setTextureDataObject( textureData );
         _output->commit( CONNECTION_ID );
@@ -315,9 +313,7 @@ void DepthSortedDataLoaderVisitor::visit( DashRenderNode& renderNode,
                       ittDataLoadTask );
 #endif //_ITT_DEBUG_
 
-    CacheObjectPtr textureData = _cache.get( lodNode.getNodeId().getId( ));
-    textureData->load();
-
+    CacheObjectPtr textureData = _cache.load( lodNode.getNodeId().getId( ));
 #ifdef _ITT_DEBUG_
     __itt_task_end( ittDataLoadDomain );
 #endif //_ITT_DEBUG_
