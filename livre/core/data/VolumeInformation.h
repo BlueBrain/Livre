@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -23,13 +23,12 @@
 #include <livre/core/api.h>
 #include <livre/core/mathTypes.h>
 #include <livre/core/data/NodeId.h>
+#include <vmmlib/aabb.hpp> // memver
 
 namespace livre
 {
 
-/**
- * The DataType enum is used for defining the data type in volumetric data.
- */
+/** Voxel data type in a volume */
 enum DataType
 {
     DT_FLOAT32,

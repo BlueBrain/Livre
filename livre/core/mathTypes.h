@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                          Stefan.Eilemann@epfl.ch
  *
@@ -23,7 +23,8 @@
 #define _mathTypes_h_
 
 #include <livre/core/types.h>
-#include <vmmlib/vmmlib.h>
+#include <vmmlib/types.hpp>
+#include <vmmlib/vector.hpp> // inline constants
 
 namespace livre
 {
@@ -31,7 +32,7 @@ namespace livre
 /**
  * AABB definitions
  */
-typedef vmml::AABB< float > Boxf; //!< float AABB box.
+typedef vmml::AABBf Boxf; //!< float AABB box.
 typedef vmml::AABB< int32_t > Boxi; //!< integer AABB box.
 typedef vmml::AABB< uint32_t > Boxui; //!< integer AABB box.
 
@@ -51,9 +52,9 @@ using vmml::Vector2i; //!< A two-component integer vector.
 using vmml::Vector3i; //!< A three-component integer vector.
 using vmml::Vector4i; //!< A four-component integer vector.
 
-typedef vmml::vector< 2, uint32_t > Vector2ui; //!< A two-component integer vector.
-typedef vmml::vector< 3, uint32_t > Vector3ui; //!< A three-component integer vector.
-typedef vmml::vector< 4, uint32_t > Vector4ui; //!< A four-component integer vector.
+using vmml::Vector2ui; //!< A two-component integer vector.
+using vmml::Vector3ui; //!< A three-component integer vector.
+using vmml::Vector4ui; //!< A four-component integer vector.
 
 using vmml::Vector2f; //!< A two-component float vector.
 using vmml::Vector3f; //!< A three-component float vector.
@@ -67,18 +68,13 @@ typedef Vector4f Plane;
 /**
  * Quaternion definitions
  */
-typedef vmml::quaternion< float > Quaternionf; //!< Float quaternion.
+using vmml::Quaternionf; //!< Float quaternion.
 
 /**
  * Viewport definitions
  */
 typedef vmml::Vector4i PixelViewport;
 typedef vmml::Vector4f Viewport;
-
-/**
- * Other definitions
- */
-typedef std::pair< Vector3f, Vector3f > MaxMinPair;
 
 /**
   * Definitions
