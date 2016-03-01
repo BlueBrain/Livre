@@ -74,15 +74,15 @@ void RenderBrick::getScreenCoordinates( const Frustum& frustum,
     const Vector3f& minPos = _lodNode.getWorldBox().getMin();
     const Vector3f& maxPos = _lodNode.getWorldBox().getMax();
 
-    const double x[ 2 ] = { minPos[ 0 ], maxPos[ 0 ] };
-    const double y[ 2 ] = { minPos[ 1 ], maxPos[ 1 ] };
-    const double z[ 2 ] = { minPos[ 2 ], maxPos[ 2 ] };
+    const float x[ 2 ] = { minPos[ 0 ], maxPos[ 0 ] };
+    const float y[ 2 ] = { minPos[ 1 ], maxPos[ 1 ] };
+    const float z[ 2 ] = { minPos[ 2 ], maxPos[ 2 ] };
 
-    double xMax = -std::numeric_limits< double >::max();
-    double yMax = -std::numeric_limits< double >::max();
+    float xMax = -std::numeric_limits< float >::max();
+    float yMax = -std::numeric_limits< float >::max();
 
-    double xMin = -xMax;
-    double yMin = -yMax;
+    float xMin = -xMax;
+    float yMin = -yMax;
 
     for( int32_t i = 0; i < 2; ++i )
     {
@@ -91,11 +91,11 @@ void RenderBrick::getScreenCoordinates( const Frustum& frustum,
             for( int32_t k = 0; k < 2; ++k )
             {
                 // based on gluProject code from SGI implementation
-                const Matrix4d& mv = frustum.getModelViewMatrix();
-                const Matrix4d& proj = frustum.getProjectionMatrix();
+                const Matrix4f& mv = frustum.getModelViewMatrix();
+                const Matrix4f& proj = frustum.getProjectionMatrix();
 
-                Vector4d in( x[ i ], y[ j ], z[ k ], 1.0 );
-                Vector4d out = mv * in;
+                Vector4f in( x[ i ], y[ j ], z[ k ], 1.0 );
+                Vector4f out = mv * in;
                 in = proj * out;
 
                 if( in.w() == 0.0 )
@@ -103,7 +103,7 @@ void RenderBrick::getScreenCoordinates( const Frustum& frustum,
                 in.normalize();
 
                 /* The perspective correction is done in the constructor */
-                Vector3d in3( in );
+                Vector3f in3( in );
 
                 /* Map x, y and z to range 0-1 */
                 in3 = in3 * 0.5 + 0.5;
@@ -125,14 +125,14 @@ void RenderBrick::getScreenCoordinates( const Frustum& frustum,
         }
     }
 
-    xMin = maths::clamp( xMin + 0.5, (double)pvp[0],
-                                     (double)pvp[0] + (double)pvp[2] );
-    yMin = maths::clamp( yMin + 0.5, (double)pvp[1],
-                                     (double)pvp[1] + (double)pvp[3] );
-    xMax = maths::clamp( xMax + 0.5, (double)pvp[0],
-                                     (double)pvp[0] + (double)pvp[2] );
-    yMax = maths::clamp( yMax + 0.5, (double)pvp[1],
-                                     (double)pvp[1] + (double)pvp[3] );
+    xMin = maths::clamp( xMin + 0.5f, (float)pvp[0],
+                                      (float)pvp[0] + (float)pvp[2] );
+    yMin = maths::clamp( yMin + 0.5f, (float)pvp[1],
+                                      (float)pvp[1] + (float)pvp[3] );
+    xMax = maths::clamp( xMax + 0.5f, (float)pvp[0],
+                                      (float)pvp[0] + (float)pvp[2] );
+    yMax = maths::clamp( yMax + 0.5f, (float)pvp[1],
+                                      (float)pvp[1] + (float)pvp[3] );
 
     minScreenPos = Vector2i( xMin, yMin  );
     maxScreenPos = Vector2i( xMax, yMax  );

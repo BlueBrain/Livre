@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -18,10 +18,10 @@
  */
 
 #include <livre/core/maths/maths.h>
+#include <vmmlib/matrix.hpp>
 
 namespace livre
 {
-
 namespace maths
 {
 

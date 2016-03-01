@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -23,12 +23,14 @@
 #include <livre/core/api.h>
 #include <livre/core/data/NodeId.h>
 #include <livre/core/mathTypes.h>
+#include <vmmlib/aabb.hpp> // member
 
 namespace livre
 {
 
 /**
- * The LODNode class is to define spatial structure of a node in terms of world space, size and voxel dimensions.
+ * Defines the spatial structure of a node in terms of world space, size and
+ * voxel dimensions.
  */
 class LODNode
 {

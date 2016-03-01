@@ -20,10 +20,11 @@
 #ifndef _Frustum_h_
 #define _Frustum_h_
 
-
 #include <livre/core/api.h>
 #include <livre/core/mathTypes.h>
 #include <livre/core/types.h>
+#include <vmmlib/frustum.hpp> // base class
+#include <vmmlib/frustumCuller.hpp> // member
 
 namespace livre
 {

@@ -176,7 +176,7 @@ public:
     {
         const eq::Matrix4f& modelView = computeModelView();
         const eq::Frustumf& eqFrustum = _channel->getFrustum();
-        const eq::Matrix4f& projection = eqFrustum.compute_matrix();
+        const eq::Matrix4f& projection = eqFrustum.computePerspectiveMatrix();
 
         _frustum.setup( modelView, projection );
         return _frustum;
