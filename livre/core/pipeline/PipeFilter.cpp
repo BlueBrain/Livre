@@ -72,7 +72,7 @@ struct PipeFilter::Impl
         return _outputMap.count( portName ) > 0;
     }
 
-    void throwError( const std::string& portName ) const
+    void throwPortError( const std::string& portName ) const
     {
         LBTHROW( std::runtime_error( std::string( "There is no port with name: ")
                                                   + portName ));
@@ -84,48 +84,50 @@ struct PipeFilter::Impl
             _inputMap[ portInfo.name ] = new InputPort( portInfo );
 
         for( const PortInfo& portInfo: oPortInfos )
-            _outputMap[ portInfo.name ] = new OutputPort( portInfo );
+            _outputMap[ portInfo.name ] = new OutputPort( *this, portInfo );
 
         // Connect notification ports
          _inputMap[ _id.getString( )] =
                  new InputPort( makePortInfo< ConstPortDataPtr >( _id.getString( )));
          _outputMap[ _id.getString( )] =
-                 new OutputPort( makePortInfo< ConstPortDataPtr >( _id.getString( )));
+                 new OutputPort( *this, makePortInfo< ConstPortDataPtr >( _id.getString( )));
     }
 
     void execute()
     {
-        lunchbox::Strings& inputNames;
-        const ConstFutures& inputFutures = getInputFutures( inputNames );
-
         InputPorts ports;
         for( auto pair: _inputMap )
             ports.push_back( pair.second );
 
-        const InputPortFutures futures( ports );
+        const InFutures futures( ports );
         PortPromises promises( getOutputPromises( ));
         _filter->execute( futures, promises );
         promises.flush();
     }
 
-    Promises getInputPromises()
+    PromisePtr getInputPromise( const std::string& portName ) const
     {
-        Promises promises;
-        for( auto pair: _inputMap )
+        if( !hasInputPort( portName ))
+            throwPortError( portName );
+
+        if( _outputsToInputMap.count( portName ) > 0 )
+            return _outputsToInputMap[ portName ]->getPromise();
+
+        InputPortPtr& inputPort = _inputMap[ portName ];
+
+        if(  inputPort->getSize() != 0 || // If there is another connection
+            inputPort->getName() == _id.getString( )) // If this is an notification port
         {
-            InputPortPtr& inputPort = pair.second;
-            if( _outputsToInputMap.getCount( inputPort->getName( )) == 0 &&
-                inputPort->getSize() == 0 && inputPort->getName() != _id.getString( ))
-            {
-                OutputPortPtr outputPort( new OutputPort(
-                                              makePortInfo( inputPort->getName(),
-                                                            inputPort->getDataType( ))));
-                _outputsToInputMap[ inputPort->getName() ] = outputPort;
-                promises.push_back( outputPort->getPromise( ));
-            }
+            LBTHROW( std::runtime_error( "The port is already connected or this is a"
+                                         "notification port" ));
         }
 
-        return promises;
+        OutputPortPtr outputPort( new OutputPort( *this,
+                                      makePortInfo( inputPort->getName(),
+                                                    inputPort->getDataType( ))));
+        _outputsToInputMap[ inputPort->getName() ] = outputPort;
+
+        return outputPort->getPromise();
     }
 
     Promises getOutputPromises() const
@@ -138,7 +140,7 @@ struct PipeFilter::Impl
         return promises;
     }
 
-    ConstFutures getOutputFutures() const
+    Futures getOutFutures() const
     {
         for( const auto& pair: _outputPorts )
         {
@@ -148,14 +150,14 @@ struct PipeFilter::Impl
         return futures;
     }
 
-    ConstFutures getInputFutures( lunchbox::Strings& names ) const
+    Futures getInputFutures( lunchbox::Strings& names ) const
     {
-        ConstFutures futures;
+        Futures futures;
         for( const auto& pair: _inputPorts )
         {
-            ConstFutures inputFutures = port->getFutures();
+            Futures inputFutures = port->getFutures();
             futures.insert( futures.end(), inputFutures.begin(), inputFutures.end( ));
-            names.push_back( pair.second->getName( ))
+            names.push_back( pair.second->getName( ));
         }
         return futures;
     }
@@ -165,12 +167,18 @@ struct PipeFilter::Impl
                   const std::string& dstPortName )
     {
         if( !hasOutputPort( srcPortName ))
-            throwError( srcPortName );
+            throwPortError( srcPortName );
 
         if( !dst->_impl.hasInputPort( dstPortName ))
-            throwError( dstPortName );
+            throwPortError( dstPortName );
 
-        _outputMap[ srcPortName ]->connect( *dst->_impl->inputMap[ dstPortName ] )
+        // The value on the output port may already be set
+        if( !dst->_impl._outputsToInputMap.count( dstPortName ))
+            std::runtime_error( std::string( "The value on port:  ")
+                                + portName
+                                + "is already set" );
+
+        _outputMap[ srcPortName ]->connect( *dst->_impl->inputMap[ dstPortName ] );
     }
 
     void PipeFilter::connect( PipeFilterPtr dst )
@@ -225,20 +233,20 @@ const std::string& PipeFilter::getName() const
     return _impl->_name;
 }
 
-ConstFutures PipeFilter::getInputFutures() const
+Futures PipeFilter::getConnectedInFutures() const
 {
     lunchbox::Strings& names;
     return _impl->getInputFutures( names );
 }
 
-Promises PipeFilter::getPromises()
+PromisePtr PipeFilter::getPromise( const std::string& portName )
 {
-    return _impl->getInputPromises();
+    return _impl->getInputPromise( portName );
 }
 
-ConstFutures PipeFilter::getOutputFutures() const
+Futures PipeFilter::getOutFutures() const
 {
-    return _impl->getOutputFutures();
+    return _impl->getOutFutures();
 }
 
 void PipeFilter::connect( const std::string& srcPortName,

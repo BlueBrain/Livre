@@ -20,18 +20,18 @@
 #ifndef _Promise_h_
 #define _Promise_h_
 
+#include <livre/core/pipeline/Future.h>
 #include <livre/core/types.h>
-#include <livre/core/pipeline/PortData.h>
 
 namespace livre
 {
 
-class PortPromise
+class Promise
 {
 public:
 
-    PortPromise( const Connection& connection );
-    ~PortPromise();
+    Promise( const PipeFilter& pipeFilter, const AsyncData& data );
+    ~Promise();
 
     const std::string& getName() const;
 
@@ -43,7 +43,7 @@ public:
     /**
      * @return the future, that can be queried for data retrieval
      */
-    ConstFuturePtr getFuture() const;
+    Future getFuture() const;
 
 private:
 

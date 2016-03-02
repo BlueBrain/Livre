@@ -19,80 +19,17 @@
 
 #include <livre/core/pipeline/OutputPort.h>
 #include <livre/core/pipeline/PortInfo.h>
-
-#include <livre/core/pipeline/Future.h>
+#include <livre/core/pipeline/Promise.h>
 
 #include <boost/thread/future.hpp>
 
 namespace livre
 {
 
+
 typedef boost::shared_future< ConstPortDataPtr > ConstPortDataFuture;
 typedef boost::promise< ConstPortDataPtr > ConstPortDataPromise;
-
 typedef std::vector< ConstPortDataFuture > ConstPortDataFutures;
-typedef std::vector< ConstPortDataPromise > ConstPortDataPromises;
-
-struct OutputPort::Impl
-{
-    Impl( const PortInfo& portInfo )
-        : _info( portInfo )
-        , _data( portInfo.name )
-        , _portPromise( new PortPromise( _data ))
-    {}
-
-    ~Impl()
-    {
-       flush();
-    }
-
-    void flush()
-    {
-        _data.set( ConstPortDataPtr( ));
-    }
-
-    const std::string& getName() const
-    {
-        return _info.portName;
-    }
-
-    PortInfo _info;
-    AsyncData _data;
-    PromisePtr _portPromise;
-};
-
-OutputPort::OutputPort( const PortInfo& portInfo )
-    : _impl( new OutputPort::Impl( portInfo ))
-{}
-
-
-OutputPort::~OutputPort()
-{}
-
-const std::string& OutputPort::getName() const
-{
-    return _impl->getName();
-}
-
-const std::type_index& OutputPort::getDataType() const
-{
-    return _impl->_info.getDataType();
-}
-
-ConstFuturePtr OutputPort::getFuture() const
-{
-    return _impl->_portFuture;
-}
-
-PromisePtr OutputPort::getPromise() const
-{
-    return _impl->_portPromise;
-}
-
-void OutputPort::connect( InputPort& inputPort )
-{
-    _inputPort->connect( *this );
-}
 
 struct AsyncData::Impl
 {
@@ -134,14 +71,14 @@ struct AsyncData::Impl
         _future.wait();
     }
 
+    const PipeFilter& _pipeFilter;
     ConstPortDataPromise _promise;
     mutable ConstPortDataFuture _future;
     const std::string _name;
 };
 
 AsyncData::AsyncData( const std::string& name )
-    : AsyncData( name )
-    , _impl( new Impl( ))
+    :  _impl( new Impl( pipeFilter, name ))
 {}
 
 ConstPortDataPtr AsyncData::get() const
@@ -169,7 +106,69 @@ void AsyncData::wait() const
     _impl->wait();
 }
 
-bool waitForAny( const ConstFutures& futures )
+
+struct OutputPort::Impl
+{
+    Impl( const PipeFilter& pipeFilter, const PortInfo& portInfo )
+        : _info( portInfo )
+        , _data( portInfo.name )
+        , _portPromise( new Promise( pipeFilter, _data ))
+    {}
+
+    ~Impl()
+    {
+       flush();
+    }
+
+    void flush()
+    {
+        _data.set( ConstPortDataPtr( ));
+    }
+
+    const std::string& getName() const
+    {
+        return _info.portName;
+    }
+
+    PortInfo _info;
+    AsyncData _data;
+    PromisePtr _portPromise;
+};
+
+OutputPort::OutputPort( const PipeFilter& pipeFilter, const PortInfo& portInfo )
+    : _impl( new OutputPort::Impl( pipeFilter, portInfo ))
+{}
+
+
+OutputPort::~OutputPort()
+{}
+
+const std::string& OutputPort::getName() const
+{
+    return _impl->getName();
+}
+
+const std::type_index& OutputPort::getDataType() const
+{
+    return _impl->_info.getDataType();
+}
+
+ConstFuturePtr OutputPort::getFuture() const
+{
+    return _impl->_portFuture;
+}
+
+PromisePtr OutputPort::getPromise() const
+{
+    return _impl->_portPromise;
+}
+
+void OutputPort::connect( InputPort& inputPort )
+{
+    _inputPort->connect( *this );
+}
+
+bool waitForAny( const Futures& futures )
 {
     ConstPortDataFutures futures;
     for( const auto& future: futures )

@@ -22,7 +22,6 @@
 
 #include <livre/core/types.h>
 #include <livre/core/pipeline/Future.h>
-#include <livre/core/pipeline/Promise.h>
 
 namespace livre
 {
@@ -44,14 +43,14 @@ public:
      * @return the input futures which the executable provides to wait. The
      * names of the futures are unique.
      */
-    virtual ConstFutures getOutputFutures() const { return ConstFutures(); }
+    virtual Futures getOutFutures() const { return Futures(); }
 
     /**
      * @return the input futures which the executable is waiting to proceed.
      * The names of the futures not necessarily unique. The inputs accepts
      * multiple outputs with the same name.
      */
-    virtual ConstFutures getInputFutures() const { return ConstFutures(); }
+    virtual Futures getConnectedInFutures() const { return Futures(); }
 
 protected:
 

@@ -48,7 +48,7 @@ public:
      * threads.
      * @param executable is executed by thread pool.
      */
-    Future execute( ExecutablePtr executable );
+    void execute( ExecutablePtr executable );
 
     /**
      * @return the size of thread pool.

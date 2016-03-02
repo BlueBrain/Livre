@@ -23,7 +23,6 @@
 #include <livre/core/types.h>
 #include <livre/core/pipeline/PortData.h>
 #include <livre/core/pipeline/PortInfo.h>
-#include <livre/core/pipeline/OutputPort.h>
 
 namespace livre
 {
@@ -61,7 +60,7 @@ public:
     /**
      * @return Return all the input futures that port has.
      */
-    ConstFutures getFutures() const;
+    Futures getFutures() const;
 
     /**
      * Connects an output port to input port

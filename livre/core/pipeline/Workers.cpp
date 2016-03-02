@@ -99,15 +99,12 @@ Workers::Workers( size_t nThreads,
     : _impl( new Workers::Impl( *this,
                                 nThreads,
                                 glContext ))
-{
-}
+{}
 
 Workers::~Workers()
-{
-    
-}
+{}
 
-Future Workers::execute( ExecutablePtr executable )
+void Workers::execute( ExecutablePtr executable )
 {
     _impl->submitWork( executable );
 }

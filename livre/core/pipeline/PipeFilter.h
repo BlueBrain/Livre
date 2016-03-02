@@ -25,8 +25,6 @@
 #include <livre/core/pipeline/InputPort.h>
 #include <livre/core/pipeline/OutputPort.h>
 #include <livre/core/pipeline/Executable.h>
-#include <livre/core/pipeline/PipeFilterInput.h>
-#include <livre/core/pipeline/PipeFilterOutput.h.h>
 
 namespace livre
 {
@@ -82,7 +80,7 @@ public:
      * @param srcPortName is the source pipe filter.
      * @param dst is the destination pipe filter.
      * @param dstPortName connection port name.
-     * @throws std::exception if connection can not be established
+     * @throws std::runtime_error if connection can not be established
      */
     void connect( const std::string& srcPortName,
                   PipeFilterPtr dst,
@@ -93,25 +91,30 @@ public:
      * is complete.
      * @param dst is the destination pipe filter.
      * @return true if connection is successful.
-     * @throws std::exception if connection can not be established
+     * @throws std::runtime_error if connection can not be established or if the
+     * port already is set from outside.
      */
     void connect( PipeFilterPtr dst );
 
     /**
-     * @copydoc Executable::getOutputFutures()
+     * @copydoc Executable::getOutFutures()
      */
-    ConstFutures getOutputFutures() const final;
+    Futures getOutFutures() const final;
 
     /**
      * @copydoc Executable::getInputFutures()
      * @note PipeFilter guarantees that only connected input futures are returned.
      */
-    ConstFutures getInputFutures() const final;
+    Futures getConnectedInFutures() const final;
 
     /**
-     * @return return inputs for the pipe filter.
+     * @return return promise for the given input port. If there is no connection to the
+     * input port, a new promise is created for the port and no further connections are allowed,
+     * if there is a connection getting a promise is not allowed.
+     * @throws std::runtime_error if there is already a connection or if there is
+     * no inputport or it is a noification port.
      */
-    Promises getPromises();
+    PromisePtr getPromise( const std::string& portName );
 
     /**
      * @return the unique id of the filter.

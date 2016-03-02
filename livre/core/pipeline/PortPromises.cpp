@@ -35,7 +35,7 @@ struct PortPromises::Impl
             _promiseMap[ promise->getName( )] = promise;
     }
 
-    void throwError( const std::string& portName ) const
+    void throwPortError( const std::string& portName ) const
     {
         std::stringstream err;
         err << "Unknown port: " << portName << std::endl;
@@ -50,7 +50,7 @@ struct PortPromises::Impl
     void flush( const std::string& portName )
     {
         if( portName != ALL_PORTS && !hasPort( portName ))
-            throwError( portName );
+            throwPortError( portName );
 
         for( const NamePromisePair& namePromisePair: _promiseMap )
         {
@@ -63,7 +63,7 @@ struct PortPromises::Impl
     void set( const std::string& portName, ConstPortDataPtr data )
     {
         if( !hasPort( portName ))
-            throwError( portName );
+            throwPortError( portName );
 
         _promiseMap[ portName ]->set( data );
     }

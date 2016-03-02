@@ -37,7 +37,7 @@ public:
      * @return the type index
      */
     const std::type_index& getDataType() const
-        { return _typeIndex; }
+        { return _dataType; }
 
 protected:
 
@@ -46,12 +46,12 @@ protected:
      * @param typeIndex type index of the data of the
      * derived classes data type.
      */
-    PortType( const std::type_index& typeIndex )
-        : _typeIndex( typeIndex) {}
+    PortType( const std::type_index& dataType )
+        : _dataType( dataType) {}
     virtual ~PortData() {}
 
 private:
-    std::type_index _typeIndex;
+    std::type_index _dataType;
 };
 
 }

@@ -38,7 +38,7 @@ public:
      * set yet, so any get() call will block the retrieval
      * @param name of the connection
      */
-    AsyncData( const std::string& name );
+    AsyncData( const PipeFilter& pipeFilter, const std::string& name );
 
     /**
      * @return the name of the connection
@@ -73,7 +73,7 @@ private:
      * @note this function needs internal access to the futures ( which is not exposed in the API ).
      * @return true if any new futures are ready.
      */
-    friend bool waitForAny( const ConstFutures& futures );
+    friend bool waitForAny( const Futures& futures );
 
     struct Impl;
     std::unique_ptr<Impl> _impl;
@@ -84,7 +84,7 @@ class OutputPort
 
 public:
 
-    OutputPort( const PortInfo& portInfo );
+    OutputPort( const PipeFilter& pipeFilter, const PortInfo& portInfo );
     ~OutputPort();
 
     /**
@@ -114,7 +114,7 @@ private:
     std::unique_ptr<Impl> _impl;
 };
 
-bool waitForAny( const ConstFutures& futures );
+bool waitForAny( const Futures& futures );
 
 }
 

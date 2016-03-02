@@ -20,6 +20,7 @@
 #ifndef _Executor_h_
 #define _Executor_h_
 
+#include <livre/core/pipeline/Executable.h>
 #include <livre/core/types.h>
 
 namespace livre
@@ -41,34 +42,34 @@ public:
      * Executes the executable. Returns the futures that can be queried for data.
      * @param pipeline to be executed.
      */
-    PortFutures execute( ExecutablePtr executable )
+    Futures execute( ExecutablePtr executable )
     {
-        const ConstFutures& fs = _executable->getOutputFutures();
+        const Futures& fs = _executable->getOutFutures();
         _schedule( { executable } );
-        return PortFutures( fs );
+        return fs;
     }
 
     /**
      * Executes the executable. Returns the futures that can be queried for data.
      * @param pipeline to be executed.
      */
-    PortFutures execute( const Executables& executables )
+    Futures execute( const Executables& executables )
     {
-        ConstFutures futures;
+        Futures futures;
         for( const ExecutablePtr& executable: executables )
         {
-            const ConstFutures& fs = executable->getOutputFutures();
+            const Futures& fs = executable->getOutFutures();
             futures.insert( futures.back(), fs.begin(), fs.end( ));
         }
 
         _schedule( executables );
-        return PortFutures( futures );
+        return futures;
     }
 
 protected:
 
     /**
-     * Schedules the executables for execution
+     * Schedules the executables for execution.
      * @param executables are the executables to schedule.
      */
     virtual void _schedule( const Executables& executables ) = 0;

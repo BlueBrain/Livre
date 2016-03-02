@@ -33,7 +33,7 @@ struct FunctionFilter::Impl
         , _outputPorts( outputPorts )
     {}
 
-    void execute( const PortFutures& input, PortPromises& output ) const
+    void execute( const InFutures& input, PortPromises& output ) const
     {
         _filterFunc( filter );
     }
@@ -67,7 +67,7 @@ FunctionFilter::FunctionFilter( const FilterFunc& filterFunc,
 FunctionFilter::~FunctionFilter()
 {}
 
-void FunctionFilter::execute( const PortFutures& input, PortPromises& output ) const
+void FunctionFilter::execute( const InFutures& input, PortPromises& output ) const
 {
     _impl->execute( input, output );
 }

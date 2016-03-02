@@ -27,14 +27,15 @@ namespace livre
 {
 
 /**
- * SimpleExecutor class provides the simplest implementation
- * for the @see Executor class. The submitted pipelines are
- * pushed to the worker threads. The pipeline submission
- * is thread safe.
+ * SimpleExecutor class provides a very basic implementation
+ * for the @see Executor class. The submitted executables are
+ * pushed to the worker threads without any real scheduling.
+ * The pipeline submission is thread safe.
  *
  * The scheduler implemented in this class, just pushes the
  * executables without re-ordering. This may mean that if
- * all workers are blocked, the processing can suspend.
+ * all workers are blocked, the processing can suspend. This
+ * is a push based executor.
  *
  */
 class SimpleExecutor : public Executor

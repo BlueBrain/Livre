@@ -24,8 +24,10 @@ namespace livre
 
 struct Future::Impl
 {
-    Impl( const AsyncData& data )
-        : _data( data )
+    Impl( const PipeFilter& pipeFilter,
+          const AsyncData& data )
+        : _pipeFilter( pipeFilter )
+        , _data( data )
     {}
 
     const std::string& getName() const
@@ -43,11 +45,13 @@ struct Future::Impl
         return _data.get();
     }
 
+    const PipeFilter& _pipeFilter;
     const AsyncData& _data;
 };
 
-Future::Future( const AsyncData& data )
-    : _impl( new Future::Impl( data ))
+Future::Future( const PipeFilter& pipeFilter,
+                const AsyncData& data )
+    : _impl( new Future::Impl( pipeFilter, data ))
 {}
 
 Future::~Future()
@@ -66,6 +70,11 @@ const std::string& Future::getName() const
 bool Future::isReady() const
 {
     return _impl->isReady();
+}
+
+const PipeFilter& Future::getPipeFilter() const
+{
+    return _impl->_pipeFilter;
 }
 
 void Future::_set( const ConstPortDataPtr& data )

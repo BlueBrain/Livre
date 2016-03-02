@@ -23,8 +23,6 @@
 #include <livre/core/types.h>
 #include <livre/core/pipeline/PortData.h>
 #include <livre/core/pipeline/PortInfo.h>
-#include <livre/core/pipeline/PortFutures.h>
-#include <livre/core/pipeline/PortPromises.h>
 
 namespace livre
 {
@@ -55,7 +53,7 @@ public:
      * @param input The Future that can be read for input parameters
      * @param output The Promise that can be written to for output parameters
      */
-    virtual void execute( const InputPortFutures& input, PortPromises& output ) const = 0;
+    virtual void execute( const InFutures& input, PortPromises& output ) const = 0;
 
     /**
      * @param inputPorts information is filled by the Filter class.

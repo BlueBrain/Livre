@@ -25,30 +25,30 @@ namespace livre
 
 struct Promise::Impl
 {
-    Impl( const Connection& connection )
-        : _connection( connection )
+    Impl( const PipeFilter& pipeFilter, const AsyncData& data )
+        : _pipeFilter( pipeFilter )
+        , _data( data )
+        , _future( _pipeFilter, _data )
     {}
 
     const std::string& getName() const
     {
-        return _connection.getName();
+        return _data.getName();
     }
 
     void set( ConstPortDataPtr msg )
     {
-        _connection.set( msg );
+        _data.set( msg );
     }
 
-    ConstFuturePtr getFuture() const
-    {
-        return ConstFuturePtr( new Future( _connection ));
-    }
-
-    const Connection& _connection;
+    Future _future;
+    const PipeFilter& _pipeFilter;
+    const AsyncData& _data;
 };
 
-Promise::Promise( const Connection& connection )
-    : _impl( new Promise::Impl( connection ))
+Promise::Promise( const PipeFilter& pipeFilter,
+                  const AsyncData& data )
+    : _impl( new Promise::Impl( pipeFilter, data ))
 {}
 
 Promise::~Promise()
@@ -59,14 +59,14 @@ const std::string& Promise::getName() const
     return _impl->getName();
 }
 
-void PortPromise::set( ConstPortDataPtr msg )
+void Promise::set( ConstPortDataPtr msg )
 {
     _impl->getName( msg );
 }
 
-ConstFuturePtr PortPromise::getFuture() const
+Future Promise::getFuture() const
 {
-    return _impl->getFuture();
+    return _impl->_future;
 }
 
 }

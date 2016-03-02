@@ -22,26 +22,81 @@
 
 #include <livre/core/types.h>
 #include <livre/core/pipeline/InputPort.h>
-#include <livre/core/pipeline/PortData.h>
 
 namespace livre
 {
 
 /**
- * The PortFutures class is a wrapper class to access the group of future
+ * The Futures classes are a wrappers to access the group of future
  * and execute thread-safe operations on them. With a given portName (name)
  * many futures can be associated.
  */
-class PortFutures
+
+/**
+ * PortFutures for managing ports with unique names.
+ */
+class OutFutures
 {
 public:
+
+    /**
+     * @param futures the list of futures.
+     * @param portNames is the list of port names futures to be tagged with. If not given,
+     * future names are used for name-future association.
+     */
+    OutFutures( const Futures& futures );
+
+    /**
+     * @param futures the list of futures.
+     * @param portNames is the list of port names futures to be tagged with. If not given,
+     * future names are used for name-future association.
+     */
+    OutFutures( const Futures& futures );
+    ~OutFutures();
+
+    /**
+     * Gets the copy of value(s) with the given type T. If input
+     * is connected and values are not provided this function will
+     * block.
+     * @param portName is the port name assoicated with futures.
+     * @return the values port, value map.
+     * @throw std::runtime_error when the port data is not exact
+     * type T
+     */
+    template< class T >
+    const T& get( const std::string& portName ) const
+    {
+         return getFuture( portName ).get< T >();
+    }
+
+    /**
+     * Moves the value(s) with the given type T. If input
+     * is connected and values are not provided this function will
+     * block.
+     * @param portName is the port name assoicated with futures.
+     * @return the values vector.
+     * @throw std::runtime_error when the port data is not exact
+     * type T
+     */
+    template< class T >
+    const T&& move( const std::string& portName ) const
+    {
+        return getFuture( portName ).move< T >();
+    }
 
     /**
      * @param portName is the port name assoicated with futures. If port name
      * is ALL_PORTS, all futures are marked to return.
      * @return the futures associated with port name.
      */
-    ConstFutures getFutures( const std::string& portName = ALL_PORTS ) const;
+    Future getFuture( const std::string& portName ) const;
+
+    /**
+     * @param portName is the port name assoicated with futures. If port name
+     * is ALL_PORTS, all futures are marked to return.
+     * @return the futures associated with port name.
+     */
+    Futures getFutures() const;
 
     /**
      * Queries if port is ready
@@ -68,87 +123,16 @@ public:
      */
     void waitForAny( const std::string& portName ) const;
 
-protected:
-
-    PortFutures();
-
-    /**
-     * Adds a future
-     * @param future future to add
-     */
-    void _addFuture( const std::string& name, const ConstFuturePtr& future );
-
+private:
 
     struct Impl;
-    std::unique_ptr<Impl> _impl;
-};
-
-/**
- * PortFutures for managing ports with unique names.
- */
-class OutputPortFutures : public PortFutures
-{
-public:
-
-    /**
-     * @param futures the list of futures.
-     * @param portNames is the list of port names futures to be tagged with. If not given,
-     * future names are used for name-future association.
-     */
-    OutputPortFutures( const ConstFutures& futures );
-
-    /**
-     * @param futures the list of futures.
-     * @param portNames is the list of port names futures to be tagged with. If not given,
-     * future names are used for name-future association.
-     */
-    OutputPortFutures( const ConstFutures& futures );
-    ~OutputPortFutures();
-
-    /**
-     * Gets the copy of value(s) with the given type T. If input
-     * is connected and values are not provided this function will
-     * block.
-     * @param portName is the port name assoicated with futures.
-     * @return the values port, value map.
-     * @throw std::runtime_error when the port data is not exact
-     * type T
-     */
-    template< class T >
-    const T& get( const std::string& portName ) const
-    {
-        ResultMapT< T > results;
-        for( const auto& future: getFutures( portName ))
-            results.insert( std::make_pair( future->getName(), future->get< T >( )));
-
-        return results[ future->getName() ];
-    }
-
-    /**
-     * Moves the value(s) with the given type T. If input
-     * is connected and values are not provided this function will
-     * block.
-     * @param portName is the port name assoicated with futures.
-     * @return the values vector.
-     * @throw std::runtime_error when the port data is not exact
-     * type T
-     */
-    template< class T >
-    const T&& move( const std::string& portName ) const
-    {
-        ResultMapT< T > results;
-        for( const auto& future: getFutures( portName ))
-            results.insert( std::make_pair( future->getName(), future->move< T >( )));
-
-        return results[ future->getName() ];
-    }
-
+    std::unique_ptr<Impl> const _impl;
 };
 
 /**
  * PortFutures for managing ports with non unique named ports.
  */
-class InputPortFutures : public PortFutures
+class InFutures
 {
 public:
 
@@ -156,8 +140,8 @@ public:
      * @param inputPorts is the list of input ports
      * future names are used for name-future association.
      */
-    InputPortFutures( const InputPorts& inputPorts );
-    ~InputPortFutures();
+    InFutures( const InputPorts& inputPorts );
+    ~InFutures();
 
     /**
      * Gets the copy of value(s) with the given type T. If input
@@ -169,11 +153,11 @@ public:
      * type T
      */
     template< class T >
-    ResultMapT< T > get( const std::string& portName ) const
+    ResultsT< T > get( const std::string& portName ) const
     {
-        ResultMapT< T > results;
+        ResultsT< T > results;
         for( const auto& future: getFutures( portName ))
-            results.insert( std::make_pair( future->getName(), future->get< T >( )));
+            results.push_back( future->get< T >( ));
 
         return results;
     }
@@ -188,11 +172,11 @@ public:
      * type T
      */
     template< class T >
-    ResultMapT< T > move( const std::string& portName ) const
+    ResultsT< T > move( const std::string& portName ) const
     {
-        ResultMapT< T > results;
+        ResultsT< T > results;
         for( const auto& future: getFutures( portName ))
-            results.insert( std::make_pair( future->getName(), future->move< T >( )));
+            results.push_back( future->move< T >( ));
 
         return results;
     }
@@ -205,15 +189,15 @@ public:
      * type T
      */
     template< class T >
-    ResultMapT< T > getReady( const std::string& portName ) const
+    ResultsT< T > getReady( const std::string& portName ) const
     {
-        ResultMapT< T > results;
+        ResultsT< T > results;
         for( const auto& future: getFutures( portName ))
         {
             if( !future->isReady())
                 continue;
 
-            results.insert( std::make_pair( future->getName(), future->get< T >( )));
+            results.push_back( future->get< T >( ));
         }
         return results;
     }
@@ -226,18 +210,23 @@ public:
      * type T or there is no future assigned to given port name
      */
     template< class T >
-    ResultMapT< T > moveReady( const std::string& portName ) const
+    ResultsT< T > moveReady( const std::string& portName ) const
     {
-        ResultMapT< T > results;
+        ResultsT< T > results;
         for( const auto& future: getFutures( portName ))
         {
             if( !future->isReady())
                 continue;
 
-            results.insert( std::make_pair( future->getName(), future->move< T >( )));
+            results.push_back( future->move< T >( ));
         }
         return results;
     }
+
+private:
+
+    struct Impl;
+    std::unique_ptr<Impl> const _impl;
 };
 
 }

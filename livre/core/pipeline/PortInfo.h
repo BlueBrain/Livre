@@ -28,13 +28,13 @@ namespace livre
 {
 
 /**
- * Structure that holds the port information ( name, default value )
+ * PortInfo holds the port information ( name, data type )
  */
 struct PortInfo final : public PortType
 {
     PortInfo( const std::string& name_,
-              std::type_index& typeIndex )
-        : PortType( typeIndex )
+              std::type_index& dataType )
+        : PortType( dataType )
         , name( portName_ )
     {}
 
@@ -43,7 +43,7 @@ struct PortInfo final : public PortType
 
 /**
  * Helper function to create port info.
- * @param name is the port name
+ * @param name is the port name with a type
  */
 template< class T >
 PortInfo makePortInfo( const std::string& name )
@@ -52,13 +52,14 @@ PortInfo makePortInfo( const std::string& name )
 }
 
 /**
- * Helper function to create port info.
+ * Helper function to create port info with a known type.
  * @param name is the port name
+ * @param dataType data type for the port
  */
 PortInfo makePortInfo( const std::string& name,
-                       const std::type_index& typeIndex )
+                       const std::type_index& dataType )
 {
-    return PortInfo( name, typeIndex );
+    return PortInfo( name, dataType );
 }
 
 /**

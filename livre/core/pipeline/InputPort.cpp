@@ -19,16 +19,16 @@
 
 #include <livre/core/pipeline/InputPort.h>
 #include <livre/core/pipeline/OutputPort.h>
+#include <livre/core/pipeline/Promise.h>
+#include <livre/core/pipeline/Future.h>
 
 namespace livre
 {
 
 struct InputPort::Impl
 {
-    Impl( InputPort& inputPort,
-          const PortInfo& info )
-        : _inputPort( inputPort )
-        , _info( info )
+    Impl( const PortInfo& info )
+        : _info( info )
     {}
 
     ~Impl()
@@ -57,18 +57,18 @@ struct InputPort::Impl
         _futures.push_back( outputPort.getPromise()-getFuture( ));
     }
 
-    ConstFutures _futures;
+    Futures _futures;
     const PortInfo _info;
 };
 
 InputPort::InputPort( const PortInfo& portInfo )
-    : _impl( new InputPort::Impl(  portInfo ))
+    : _impl( new InputPort::Impl( portInfo ))
 {}
 
 InputPort::~InputPort()
 {}
 
-ConstFutures InputPort::getFutures() const
+Futures InputPort::getFutures() const
 {
     return _impl->getFutures();
 }

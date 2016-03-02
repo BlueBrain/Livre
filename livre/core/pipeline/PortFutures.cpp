@@ -26,9 +26,11 @@ namespace livre
 typedef std::multimap< std::string, ConstFuturePtr > NameFutureMap;
 typedef std::pair< std::string, ConstFuturePtr > NameFuturePair;
 
-struct PortFutures::Impl
+class FutureMap
 {
-    void throwError( const std::string& portName ) const
+public:
+
+    void throwPortError( const std::string& portName ) const
     {
         LBTHROW( std::runtime_error( std::string( "No futures assigned with the given port with name: ")
                                                   + portName ));
@@ -39,26 +41,25 @@ struct PortFutures::Impl
         return _futureMap.count( portName ) > 0;
     }
 
-    ConstFutures getFutures( const std::string& portName ) const
+    Futures getFutures( const std::string& portName ) const
     {
         if( portName == ALL_PORTS )
         {
-            ConstFutures futures;
+            Futures futures;
             futures.insert( futures.end(), _futureMap.begin(), _futureMap.end( ));
             return futures;
         }
 
         if( !hasPort( portName ))
-            throwError( portName );
+            throwPortError( portName );
 
-        ConstFutures futures;
+        Futures futures;
         NameFutureMap::const_iterator it = _futureMap.find( portName );
         futures.insert( futures.end(), it, _futureMap.end( ));
         return futures;
     }
 
-
-    bool areReady()
+    bool isReady() const
     {
         for( const auto& future: getFutures( portName ))
         {
@@ -68,7 +69,7 @@ struct PortFutures::Impl
         return true;
     }
 
-    void wait()
+    void wait( const std::string& portName ) const
     {
         for( const auto& future: getFutures( portName ))
             future->wait();
@@ -87,70 +88,95 @@ struct PortFutures::Impl
     NameFutureMap _futureMap;
 };
 
+struct OutFutures::Impl: public FutureMap
+{
+public:
+    Impl( const Futures& futures )
+    {
+        for( const auto& future: futures )
+        {
+            const std::string& name = future->getName();
+            if( hasPort( name ))
+                throwPortError( name );
+            addFuture( name, future );
+        }
+    }
+};
 
-PortFutures::PortFutures( const ConstFutures& futures,
-                          const lunchbox::Strings& portNames /* = lunchbox::Strings() */)
-    : _impl( new PortFutures::Impl( futures, portNames ))
+OutFutures::OutFutures( const Futures& futures )
+    : _impl( new OutFutures::Impl( futures ))
 {}
 
-PortFutures::~PortFutures()
-{}
-
-size_t PortFutures::getInputSize( const std::string& portName ) const
+Futures OutFutures::getFutures() const
 {
-    return _impl->getPortSize( portName );
+    return _impl->getFutures( ALL_PORTS );
 }
 
-ConstFutures PortFutures::getFutures( const std::string& portName ) const
+Future OutFutures::getFuture( const std::string& portName ) const
 {
-    return _impl->getFutures( portName );
+    return _impl->getFuture();
 }
 
-bool PortFutures::areReady( const std::string& portName ) const
+bool OutFutures::isReady( const std::string& portName ) const
 {
-    return _impl->areReady( portName );
+    return _impl->isReady( portName );
 }
 
-void PortFutures::wait( const std::string& portName ) const
+void OutFutures::wait( const std::string& portName ) const
 {
-    return _impl->wait( portName );
+    _impl->wait( portName );
 }
 
-void PortFutures::waitForAny( const std::string& portName ) const
+void OutFutures::waitForAny( const std::string& portName ) const
 {
     return _impl->waitForAny( portName );
 }
 
-PortFutures::PortFutures()
+OutFutures::~OutFutures()
 {}
 
-void PortFutures::_addFuture( const std::string& name, const ConstFuturePtr& future )
+struct InFutures::Impl: public FutureMap
 {
-    _impl->addFuture( name, future );
+public:
+    Impl( const InputPorts& inputPorts )
+    {
+        for( const InputPortPtr& inputPort: inputPorts )
+        {
+            const Futures& futures = inputPort->getFutures();
+            for( const auto& future: futures )
+                addFuture( inputPort->getName(), future );
+        }
+    }
+};
+
+InFutures::InFutures( const InputPorts& inputPorts )
+    : _impl( new InFutures::Impl( inputPorts ))
+{
 }
 
-OutputPortFutures::OutputPortFutures( const ConstFutures& futures )
+Futures InFutures::getFutures( const std::string& portName /* = ALL_PORTS */ ) const
 {
-    for( const auto& future: futures )
-        _addFuture( future->getName(), future );
-
+    return _impl->getFutures( portName );
 }
 
-OutputPortFutures::~OutputPortFutures()
+bool InFutures::isReady( const std::string& portName ) const
+{
+    return _impl->isReady( portName );
+}
+
+void InFutures::wait( const std::string& portName ) const
+{
+    _impl->wait( portName );
+}
+
+void InFutures::waitForAny( const std::string& portName ) const
+{
+    return _impl->waitForAny( portName );
+}
+
+InFutures::~InFutures()
 {}
 
-InputPortFutures::InputPortFutures( const InputPorts& inputPorts )
-{
-     for( const auto& inputPort: inputPorts )
-     {
-         const ConstFutures& futures = inputPort->getFutures();
-         for( const auto& future: futures )
-             _addFuture( future->getName(), future );
-     }
-}
-
-InputPortFutures::~InputPortFutures()
-{}
 
 
 }

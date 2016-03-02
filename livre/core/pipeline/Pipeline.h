@@ -52,10 +52,12 @@ public:
               bool wait = true );
 
     /**
-     * Adds a filter to be executed
+     * Creates and adds a pipefilter around a filter to be executed. The
+     * notification of completion of execution is connected to the pipeline
+     * if user wants to wait on execution of whole pipeline.
      * @param filter is added  to list of executables.
      * @param wait If true, on asynchronous execution, pipeline
-     * can wait on given filter.
+     * can wait on the added filter.
      * @return returns the generated pipe filter.
      */
     PipeFilterPtr add( const std::string& name,
@@ -63,12 +65,14 @@ public:
                        bool wait = true );
 
     /**
-     * Adds a filter function to be executed
+     * Adds a filter function to be executed. The
+     * notification of completion of execution is connected to the pipeline
+     * if user wants to wait on execution of whole pipeline.
      * @param filterFunc is the filter function object.
      * @param inputPorts are the input ports information.
      * @param outputPorts are the output ports information.
      * @param wait  If true, on asynchronous execution, pipeline
-     * can wait on given filter function.
+     * can wait on the added filter function.
      * @return returns the generated pipe filter.
      */
     PipeFilterPtr add( const std::string& name,
@@ -89,17 +93,17 @@ private:
      * Executes each executable element in the graph
      * synchronously.
      */
-    void _execute() final;
+    void execute() final;
 
     /**
      * @return Returns the writable future
      */
-    ConstFutures getInputFutures() const final;
+    Futures getConnectedInFutures() const final;
 
     /**
      * @return Returns the writable future
      */
-    ConstFutures getOutputFutures() const final;
+    Futures getOutFutures() const final;
 
     struct Impl;
     std::unique_ptr<Impl> _impl;

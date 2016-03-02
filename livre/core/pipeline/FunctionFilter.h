@@ -47,7 +47,7 @@ struct FunctionFilter final : public Filter
     /**
      * @copydoc Filter::execute( PipeFilter& filter )
      */
-    void execute( const PortFutures& input, PortPromises& output ) const final;
+    void execute( const InFutures& input, PortPromises& output ) const final;
 
     /**
      * @copydoc Filter::getInputPorts()

@@ -21,7 +21,6 @@
 #include <livre/core/pipeline/InputPort.h>
 #include <livre/core/pipeline/OutputPort.h>
 #include <livre/core/pipeline/PortFutures.h>
-#include <livre/core/pipeline/PipeFilterOutput.h.h>
 #include <livre/core/pipeline/Pipeline.h>
 #include <livre/core/pipeline/PipeFilter.h>
 #include <livre/core/pipeline/PortInfo.h>
@@ -34,6 +33,7 @@ struct Pipeline::Impl
 {
     typedef std::map< std::string, ConstPipelinePtr > PipelineMap;
     typedef std::map< std::string, ConstPipeFilterPtr > PipeFilterMap;
+    typedef std::map< std::string, ExecutablePtr > ExecutableMap;
 
     Impl( Pipeline& pipeline )
         : _pipeline( pipeline )
@@ -55,15 +55,16 @@ struct Pipeline::Impl
                        FilterPtr filter,
                        bool wait )
     {
-        if( _filters.count( name ) > 0 || _pipelines.count( name ))
+        if( _executableMap.count( name ) > 0 )
             LBTHROW( std::runtime_error( name + " already exists"));
 
         PipeFilterPtr pipefilter( new PipeFilter( name, filter ));
-        _filters[ name ] = pipefilter;
+        _executableMap[ name ] = pipefilter;
+
         if( wait )
         {
-            const PortFutures portFutures( pipefilter->getOutputFutures( ));
-            _waitFutures.push_back( portFutures.getFutures( pipefilter->getId().getString( )));
+            const OutFutures portFutures( pipefilter->getOutFutures( ));
+            _waitFutures.push_back( portFutures.getFuture( pipefilter->getId().getString( )));
         }
     }
 
@@ -74,11 +75,14 @@ struct Pipeline::Impl
         if( pipeline.get() == _pipeline )
             return;
 
-        _pipelines[ name ] = pipeline;
+        if( _executableMap.count( name ) > 0 )
+            LBTHROW( std::runtime_error( name + " already exists"));
+
+        _executableMap[ name ] = pipeline;
 
         if( wait )
         {
-            const ConstFutures& futures = pipeline->getOutputFutures();
+            const Futures& futures = pipeline->getOutFutures();
             _waitFutures.insert( _waitFutures.end(), futures.begin(), futures.end( ));
         }
     }
@@ -90,7 +94,7 @@ struct Pipeline::Impl
         while( !executables.empty())
         {
             ExecutablePtr executable = *it;
-            const PortFutures portFutures( executable->getInputFutures( ));
+            const FutureMap portFutures( executable->getConnectedInFutures( ));
             if( portFutures.isReady( ))
             {
                 executable->execute();
@@ -109,23 +113,19 @@ struct Pipeline::Impl
     Executables getExecutables() const
     {
         Executables executables;
-        executables.reserve( _filters.size() + _pipelines.size( ));
 
-        for( auto pair: _filters )
-            executables.push_back( pair.second );
-
-        for( auto pair: _pipelines )
+        for( auto pair: _executableMap )
             executables.push_back( pair.second );
 
         return executables;
     }
 
-    ConstFutures getInputFutures() const
+    Futures getConnectedInFutures() const
     {
-        return ConstFutures();
+        return Futures();
     }
 
-    ConstFutures getOutputFutures() const
+    Futures getOutFutures() const
     {
         return _waitFutures;
     }
@@ -134,9 +134,8 @@ struct Pipeline::Impl
     {}
 
     Pipeline& _pipeline;
-    PipeFilterMap _filters;
-    PipelineMap _pipelines;
-    ConstFutures _waitFutures;
+    ExecutableMap _executableMap;
+    Futures _waitFutures;
 };
 
 Pipeline::Pipeline()
@@ -184,14 +183,14 @@ void Pipeline::execute()
     return _impl->execute();
 }
 
-ConstFutures Pipeline::getInputFutures() const
+Futures Pipeline::getConnectedInFutures() const
 {
-    return _impl->getInputFutures();
+    return _impl->getConnectedInFutures();
 }
 
-ConstFutures Pipeline::getOutputFutures() const
+Futures Pipeline::getOutFutures() const
 {
-    return _impl->getOutputFutures();
+    return _impl->getOutFutures();
 }
 
 }

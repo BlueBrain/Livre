@@ -29,13 +29,9 @@ class Future
 {
 public:
 
-    Future( const AsyncData& data );
+    Future( const PipeFilter& pipeFilter,
+            const AsyncData& data );
     ~Future();
-
-    /**
-     * @return the async data implementation
-     */
-    const AsyncData& getAsyncData() const;
 
     /**
      * @return name of the future
@@ -92,15 +88,26 @@ public:
      */
     bool isReady() const;
 
+    /**
+     * @return the pipe filter that future belongs to. If executor supports pull mode,
+     * by getting futures, it will be possible to reach the source of the execution
+     */
+    const PipeFilter& getPipeFilter() const;
+
+    /**
+     * @return the async data implementation
+     */
+    const AsyncData& getAsyncData() const;
+
 private:
 
-    friend livre::waitForAny( const ConstFutures& future );
+    friend livre::waitForAny( const Futures& future );
 
     void _set( const ConstPortDataPtr& data );
     ConstPortDataPtr _get() const;
 
     struct Impl;
-    std::unique_ptr<Impl> _impl;
+    std::shared_ptr<Impl> _impl;
 };
 
 }
