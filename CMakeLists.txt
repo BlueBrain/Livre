@@ -41,7 +41,7 @@ if(APPLE) # WAR otherwise MacPorts X11 (/opt/local) is preferred
   include_directories(SYSTEM /opt/X11/include /usr/X11R6/include)
 endif()
 
-if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+if(APPLE OR CMAKE_SYSTEM_NAME MATCHES "Linux")
   git_subproject(Tuvok https://github.com/BlueBrain/Tuvok.git bbp)
 endif()
 
