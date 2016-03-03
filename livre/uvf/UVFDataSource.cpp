@@ -37,6 +37,7 @@
 #pragma GCC diagnostic pop
 
 #include <lunchbox/pluginRegisterer.h>
+#include <boost/algorithm/string/predicate.hpp>
 
 #define MAX_ACCEPTABLE_BLOCK_SIZE 512
 
@@ -407,7 +408,10 @@ UVFDataSource::~UVFDataSource()
 
 bool UVFDataSource::handles( const VolumeDataSourcePluginData& initData )
 {
-    return initData.getURI().getScheme() == "uvf";
+    const servus::URI& uri = initData.getURI();
+    return uri.getScheme() == "uvf" ||
+        ( uri.getScheme().empty() &&
+          boost::algorithm::ends_with( uri.getPath(), ".uvf" ));
 }
 
 MemoryUnitPtr UVFDataSource::getData( const LODNode& node )

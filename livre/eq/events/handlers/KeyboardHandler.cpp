@@ -67,11 +67,6 @@ bool KeyboardHandler::operator ()( EqEventInfo& eqEventInfo )
             frameSettings.toggleHelp();
             return true;
 
-        case 'r':
-        case 'R':
-            frameSettings.toggleRecording();
-            return true;
-
         case ' ':
             forceUpdate_ = true;
             config->resetCamera( );
