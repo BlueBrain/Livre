@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -18,6 +18,7 @@
  */
 
 #include <livre/core/pipeline/OutputPort.h>
+#include <livre/core/pipeline/InputPort.h>
 #include <livre/core/pipeline/PortInfo.h>
 #include <livre/core/pipeline/Promise.h>
 
@@ -26,62 +27,79 @@
 namespace livre
 {
 
-
 typedef boost::shared_future< ConstPortDataPtr > ConstPortDataFuture;
 typedef boost::promise< ConstPortDataPtr > ConstPortDataPromise;
 typedef std::vector< ConstPortDataFuture > ConstPortDataFutures;
 
+namespace
+{
+    /* Boost wait_for_any implementation uses the internal locks from the futures.
+       Therefore, the get/set/query operations on promises/futures causes deadlocks
+       when used with wait_for_any( futurelist ) if futurelist is including the
+       future to be queried. With below implementation no locking is needed between
+       future operations. A higher granularity can be added for checking whet */
+
+    ReadWriteMutex waitForAnyLock;
+}
+
 struct AsyncData::Impl
 {
-    Impl( const std::string name )
+    Impl( const std::string& name,
+          const std::type_index& dataType )
         : _future( _promise.get_future( ))
         , _name( name )
+        , _dataType( dataType )
     {}
 
     ~Impl()
     {
         if( !isReady())
-            _promise.set_value( result );
+            _promise.set_value( ConstPortDataPtr( ));
     }
 
-    ConstPortDataPtr get() const
+    const ConstPortDataPtr& get() const
     {
+        ReadLock lock( waitForAnyLock );
         return _future.get();
     }
 
     void set( const ConstPortDataPtr& data )
     {
-        if( result )
+        if( data )
         {
-            if( data->getDataType() != _info->getDataType( ))
+            if( data->getDataType() != _dataType )
                 LBTHROW( std::runtime_error( "Types does not match on set value"));
         }
 
-        if( !isReady())
-            _promise.set_value( result );
+        ReadLock lock( waitForAnyLock );
+        if( !_future.is_ready( ))
+            _promise.set_value( data );
     }
 
     bool isReady() const
     {
+        ReadLock lock( waitForAnyLock );
         return _future.is_ready();
     }
 
     void wait() const
     {
+        ReadLock lock( waitForAnyLock );
         _future.wait();
     }
 
-    const PipeFilter& _pipeFilter;
     ConstPortDataPromise _promise;
     mutable ConstPortDataFuture _future;
     const std::string _name;
+    const std::type_index _dataType;
 };
 
-AsyncData::AsyncData( const std::string& name )
-    :  _impl( new Impl( pipeFilter, name ))
+AsyncData::AsyncData( const std::string& name,
+                      const std::type_index& dataType )
+    :  _impl( new Impl( name, dataType ))
 {}
 
-ConstPortDataPtr AsyncData::get() const
+const ConstPortDataPtr& AsyncData::get() const
 {
     return _impl->get();
 }
@@ -111,7 +129,7 @@ struct OutputPort::Impl
 {
     Impl( const PipeFilter& pipeFilter, const PortInfo& portInfo )
         : _info( portInfo )
-        , _data( portInfo.name )
+        , _data( portInfo.name, portInfo.getDataType( ))
         , _portPromise( new Promise( pipeFilter, _data ))
     {}
 
@@ -127,10 +145,10 @@ struct OutputPort::Impl
 
     const std::string& getName() const
     {
-        return _info.portName;
+        return _info.name;
     }
 
-    PortInfo _info;
+    const PortInfo _info;
     AsyncData _data;
     PromisePtr _portPromise;
 };
@@ -153,11 +171,6 @@ const std::type_index& OutputPort::getDataType() const
     return _impl->_info.getDataType();
 }
 
-ConstFuturePtr OutputPort::getFuture() const
-{
-    return _impl->_portFuture;
-}
-
 PromisePtr OutputPort::getPromise() const
 {
     return _impl->_portPromise;
@@ -165,22 +178,24 @@ PromisePtr OutputPort::getPromise() const
 
 void OutputPort::connect( InputPort& inputPort )
 {
-    _inputPort->connect( *this );
+    inputPort.connect( *this );
 }
 
 bool waitForAny( const Futures& futures )
 {
-    ConstPortDataFutures futures;
-    for( const auto& future: futures )
-    {
-        if( !future->isReady())
-           futures.push_back( future->getAsyncData()._impl->_future );
-    }
-
     if( futures.empty( ))
         return false;
 
-    boost::wait_for_any( futures.begin(), futures.end( ));
+    ConstPortDataFutures boostFutures;
+    boostFutures.reserve( futures.size( ));
+    for( const auto& future: futures )
+        boostFutures.push_back( future.getAsyncData()._impl->_future );
+
+    WriteLock lock( waitForAnyLock, boost::try_to_lock );
+    if( !lock.owns_lock( ))
+        return true;
+
+    boost::wait_for_any( boostFutures.begin(), boostFutures.end( ));
     return true;
 }
 

@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -20,7 +20,7 @@
 
 #include <livre/core/pipeline/InputPort.h>
 #include <livre/core/pipeline/OutputPort.h>
-#include <livre/core/pipeline/PortFutures.h>
+#include <livre/core/pipeline/FutureMap.h>
 #include <livre/core/pipeline/Pipeline.h>
 #include <livre/core/pipeline/PipeFilter.h>
 #include <livre/core/pipeline/PortInfo.h>
@@ -52,7 +52,7 @@ struct Pipeline::Impl
     }
 
     PipeFilterPtr add( const std::string& name,
-                       FilterPtr filter,
+                       const FilterPtr& filter,
                        bool wait )
     {
         if( _executableMap.count( name ) > 0 )
@@ -63,16 +63,18 @@ struct Pipeline::Impl
 
         if( wait )
         {
-            const OutFutures portFutures( pipefilter->getOutFutures( ));
+            const OutFutureMap portFutures( pipefilter->getPostconditions( ));
             _waitFutures.push_back( portFutures.getFuture( pipefilter->getId().getString( )));
         }
+
+        return pipefilter;
     }
 
     void add( const std::string& name,
-              const ConstPipelinePtr& pipeline,
+              const PipelinePtr& pipeline,
               bool wait )
     {
-        if( pipeline.get() == _pipeline )
+        if( pipeline.get() == &_pipeline )
             return;
 
         if( _executableMap.count( name ) > 0 )
@@ -82,7 +84,7 @@ struct Pipeline::Impl
 
         if( wait )
         {
-            const Futures& futures = pipeline->getOutFutures();
+            const Futures& futures = pipeline->getPostconditions();
             _waitFutures.insert( _waitFutures.end(), futures.begin(), futures.end( ));
         }
     }
@@ -94,8 +96,8 @@ struct Pipeline::Impl
         while( !executables.empty())
         {
             ExecutablePtr executable = *it;
-            const FutureMap portFutures( executable->getConnectedInFutures( ));
-            if( portFutures.isReady( ))
+            const FutureMap futureMap( executable->getPreconditions( ));
+            if( futureMap.isReady( ))
             {
                 executable->execute();
                 executables.erase( it );
@@ -120,7 +122,7 @@ struct Pipeline::Impl
         return executables;
     }
 
-    Futures getConnectedInFutures() const
+    Futures getConnectedInFutureMap() const
     {
         return Futures();
     }
@@ -139,7 +141,7 @@ struct Pipeline::Impl
 };
 
 Pipeline::Pipeline()
-    : _impl( new Pipeline::Impl( this ))
+    : _impl( new Pipeline::Impl( *this ))
 {
 }
 
@@ -147,14 +149,14 @@ Pipeline::~Pipeline()
 {}
 
 void Pipeline::add( const std::string& name,
-                    PipelinePtr pipeline,
+                    const PipelinePtr& pipeline,
                     bool wait )
 {
-    return _impl->addPipeline( name, pipeline, wait );
+    return _impl->add( name, pipeline, wait );
 }
 
 PipeFilterPtr Pipeline::add( const std::string& name,
-                             FilterPtr filter,
+                             const FilterPtr& filter,
                              bool wait )
 {
     return _impl->add( name, filter, wait );
@@ -183,12 +185,12 @@ void Pipeline::execute()
     return _impl->execute();
 }
 
-Futures Pipeline::getConnectedInFutures() const
+Futures Pipeline::getPreconditions() const
 {
-    return _impl->getConnectedInFutures();
+    return _impl->getConnectedInFutureMap();
 }
 
-Futures Pipeline::getOutFutures() const
+Futures Pipeline::getPostconditions() const
 {
     return _impl->getOutFutures();
 }

@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -19,6 +19,8 @@
 
 #include <livre/core/pipeline/Future.h>
 
+#include <livre/core/pipeline/OutputPort.h>
+
 namespace livre
 {
 
@@ -35,14 +37,19 @@ struct Future::Impl
         return _data.getName();
     }
 
-    void set( const ConstPortDataPtr& data )
-    {
-        _data.set( data );
-    }
-
     ConstPortDataPtr get() const
     {
         return _data.get();
+    }
+
+    bool isReady() const
+    {
+        return _data.isReady();
+    }
+
+    void wait() const
+    {
+        return _data.wait();
     }
 
     const PipeFilter& _pipeFilter;
@@ -67,6 +74,11 @@ const std::string& Future::getName() const
     return _impl->getName();
 }
 
+void Future::wait() const
+{
+    return _impl->wait();
+}
+
 bool Future::isReady() const
 {
     return _impl->isReady();
@@ -75,11 +87,6 @@ bool Future::isReady() const
 const PipeFilter& Future::getPipeFilter() const
 {
     return _impl->_pipeFilter;
-}
-
-void Future::_set( const ConstPortDataPtr& data )
-{
-    _impl->set( data );
 }
 
 ConstPortDataPtr Future::_get() const

@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -20,12 +20,11 @@
 #ifndef _Executor_h_
 #define _Executor_h_
 
-#include <livre/core/pipeline/Executable.h>
 #include <livre/core/types.h>
+#include <livre/core/pipeline/Executable.h>
 
 namespace livre
 {
-
 
 /**
  * Executor class is the base class for implementing different scheduling
@@ -42,9 +41,9 @@ public:
      * Executes the executable. Returns the futures that can be queried for data.
      * @param pipeline to be executed.
      */
-    Futures execute( ExecutablePtr executable )
+    Futures execute( const ExecutablePtr& executable )
     {
-        const Futures& fs = _executable->getOutFutures();
+        const Futures& fs = executable->getPostconditions();
         _schedule( { executable } );
         return fs;
     }
@@ -58,8 +57,8 @@ public:
         Futures futures;
         for( const ExecutablePtr& executable: executables )
         {
-            const Futures& fs = executable->getOutFutures();
-            futures.insert( futures.back(), fs.begin(), fs.end( ));
+            const Futures& fs = executable->getPostconditions( );
+            futures.insert( futures.end(), fs.begin(), fs.end( ));
         }
 
         _schedule( executables );
@@ -78,6 +77,7 @@ protected:
      * Clears the executor
      */
     virtual void clear() {}
+
 };
 
 }

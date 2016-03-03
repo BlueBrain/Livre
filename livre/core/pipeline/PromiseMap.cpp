@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/core/pipeline/PortPromises.h>
+#include <livre/core/pipeline/PromiseMap.h>
 #include <livre/core/pipeline/PortData.h>
 #include <livre/core/pipeline/Promise.h>
 
@@ -27,11 +27,11 @@ namespace livre
 typedef std::pair< std::string, PromisePtr > NamePromisePair;
 typedef std::map< std::string, PromisePtr > NamePromiseMap;
 
-struct PortPromises::Impl
+struct PromiseMap::Impl
 {
     Impl( const Promises& promises )
     {
-        for( PromisePtr& promise: promises )
+        for( const PromisePtr& promise: promises )
             _promiseMap[ promise->getName( )] = promise;
     }
 
@@ -39,7 +39,7 @@ struct PortPromises::Impl
     {
         std::stringstream err;
         err << "Unknown port: " << portName << std::endl;
-        _promiseMap( std::runtime_error( err.str( )));
+        LBTHROW( std::runtime_error( err.str( )));
     }
 
     bool hasPort( const std::string& portName ) const
@@ -52,42 +52,40 @@ struct PortPromises::Impl
         if( portName != ALL_PORTS && !hasPort( portName ))
             throwPortError( portName );
 
-        for( const NamePromisePair& namePromisePair: _promiseMap )
+        for( const auto& pair: _promiseMap )
         {
-            PromisePtr& promise = namePromisePair.second;
+            const PromisePtr& promise = pair.second;
             if( portName == ALL_PORTS || promise->getName() == portName )
                 promise->flush();
         }
     }
 
-    void set( const std::string& portName, ConstPortDataPtr data )
+    PromisePtr getPromise( const std::string& portName )
     {
         if( !hasPort( portName ))
             throwPortError( portName );
 
-        _promiseMap[ portName ]->set( data );
+        return _promiseMap[ portName ];
     }
 
     NamePromiseMap _promiseMap;
 };
 
-PortPromises::PortPromises( const Promises& promises )
-    : _impl( new PortPromises::Impl( promises ))
+PromiseMap::PromiseMap( const Promises& promises )
+    : _impl( new PromiseMap::Impl( promises ))
 {}
 
-PortPromises::~PipeFilterOutput()
+PromiseMap::~PromiseMap()
 {}
 
-void PortPromises::flush( const std::string& portName /* = ALL_PORTS */ )
+void PromiseMap::flush( const std::string& portName /* = ALL_PORTS */ )
 {
     _impl->flush( portName );
 }
 
-void PortPromises::_set( const std::string& name,
-                         ConstPortDataPtr data )
+PromisePtr PromiseMap::getPromise( const std::string& portName )
 {
-    _impl->set( name, data );
+    return _impl->getPromise( portName );
 }
-
 
 }

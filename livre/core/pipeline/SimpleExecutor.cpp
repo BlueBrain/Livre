@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -22,21 +22,16 @@
 
 #include <livre/core/pipeline/Filter.h>
 #include <livre/core/pipeline/Workers.h>
-#include <livre/core/pipeline/Pipeline.h>
-#include <livre/core/pipeline/PipeFilter.h>
+#include <livre/core/pipeline/Executable.h>
+#include <livre/core/pipeline/FutureMap.h>
 
 #include <livre/core/data/NodeId.h>
 #include <livre/core/data/LODNode.h>
 #include <livre/core/render/GLContext.h>
 
 #include <lunchbox/mtQueue.h>
-#include <lunchbox/monitor.h>
-
-#define BOOST_THREAD_PROVIDES_FUTURE
-#define BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION
 
 #include <boost/thread.hpp>
-#include <boost/thread/future.hpp>
 
 namespace livre
 {
@@ -44,9 +39,9 @@ namespace livre
 struct SimpleExecutor::Impl
 {
 
-    Impl( WorkersPtr workers )
-        : _workThread( boost::thread( boost::bind( &Impl::execute, this )))
-        , _workers( workers )
+    Impl( const size_t threadCount )
+        : _workThread( boost::thread( boost::bind( &Impl::schedule, this )))
+        , _workers( threadCount )
     {}
 
     ~Impl()
@@ -61,11 +56,39 @@ struct SimpleExecutor::Impl
         while( true )
         {
             Executables executables = _mtWorkQueue.pop();
-            if( !executable.empty() )
+            if( executables.empty() )
                 break;
 
-            for( ExecutablePtr& executable: executables )
-                _workers->execute( executable );
+            Futures futures;
+
+            do
+            {
+                futures.clear();
+                for( const ExecutablePtr& executable: executables )
+                {
+                    const Futures& inputFutures = executable->getPreconditions();
+                    for( const Future& future: inputFutures )
+                    {
+                        if( !future.isReady( ))
+                            futures.push_back( future );
+                    }
+                }
+
+                Executables::iterator it = executables.begin();
+                while( it != executables.end( ))
+                {
+                    ExecutablePtr executable = *it;
+                    const FutureMap futureMap( executable->getPreconditions( ));
+                    if( futureMap.isReady( ))
+                    {
+                        _workers.execute( executable );
+                        it = executables.erase( it );
+                    }
+                    else
+                        ++it;
+                }
+
+            } while( FutureMap( futures ).waitForAny( ));
         }
     }
 
@@ -81,11 +104,11 @@ struct SimpleExecutor::Impl
 
     lunchbox::MTQueue< Executables > _mtWorkQueue;
     boost::thread _workThread;
-    WorkersPtr _workers;
+    Workers _workers;
 };
 
-SimpleExecutor::SimpleExecutor( WorkersPtr workers )
-    : _impl( new Impl( workers ))
+SimpleExecutor::SimpleExecutor( const size_t threadCount )
+    : _impl( new Impl( threadCount ))
 {
 }
 

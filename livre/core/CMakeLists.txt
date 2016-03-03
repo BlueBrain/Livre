@@ -55,7 +55,23 @@ set(LIVRECORE_HEADERS
   util/ThreadClock.h
   visitor/NodeVisitor.h
   visitor/RenderNodeVisitor.h
-  visitor/VisitState.h)
+  visitor/VisitState.h
+
+  pipeline/Executable.h
+  pipeline/Filter.h
+  pipeline/FunctionFilter.h
+  pipeline/Future.h
+  pipeline/FutureMap.h
+  pipeline/InputPort.h
+  pipeline/OutputPort.h
+  pipeline/PipeFilter.h
+  pipeline/Pipeline.h
+  pipeline/PortData.h
+  pipeline/PortType.h
+  pipeline/Promise.h
+  pipeline/PromiseMap.h
+  pipeline/SimpleExecutor.h
+  pipeline/Workers.h )
 
 set(LIVRECORE_SOURCES
   cache/Cache.cpp
@@ -93,7 +109,19 @@ set(LIVRECORE_SOURCES
   util/ThreadClock.cpp
   util/Utilities.cpp
   visitor/RenderNodeVisitor.cpp
-  visitor/VisitState.cpp)
+  visitor/VisitState.cpp
+
+  pipeline/FunctionFilter.cpp
+  pipeline/Future.cpp
+  pipeline/FutureMap.cpp
+  pipeline/InputPort.cpp
+  pipeline/OutputPort.cpp
+  pipeline/PipeFilter.cpp
+  pipeline/Pipeline.cpp
+  pipeline/Promise.cpp
+  pipeline/PromiseMap.cpp
+  pipeline/SimpleExecutor.cpp
+  pipeline/Workers.cpp )
 
 set(LIVRECORE_LINK_LIBRARIES
   PUBLIC ${Boost_LIBRARIES} dash Collage Lexis Lunchbox vmmlib

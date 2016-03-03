@@ -48,6 +48,11 @@ public:
     virtual GLContextPtr clone() const = 0;
 
     /**
+     * @return a similar context.
+     */
+    virtual GLContextPtr createContext() const = 0;
+
+    /**
      * Makes the context current.
      */
     virtual void makeCurrent();

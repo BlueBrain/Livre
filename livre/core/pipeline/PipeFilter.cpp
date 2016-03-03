@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -20,8 +20,8 @@
 
 #include <livre/core/pipeline/InputPort.h>
 #include <livre/core/pipeline/OutputPort.h>
-#include <livre/core/pipeline/PortPromises.h>
-#include <livre/core/pipeline/PortFutures.h>
+#include <livre/core/pipeline/PromiseMap.h>
+#include <livre/core/pipeline/FutureMap.h>
 #include <livre/core/pipeline/PipeFilter.h>
 #include <livre/core/pipeline/PortData.h>
 #include <livre/core/pipeline/PortInfo.h>
@@ -34,6 +34,9 @@ namespace livre
 
 struct PipeFilter::Impl
 {
+    typedef std::map< std::string, OutputPortPtr > OutputPortMap;
+    typedef std::map< std::string, InputPortPtr > InputPortMap;
+
     Impl( PipeFilter& pipeFilter,
           const std::string& name,
           FilterPtr filter )
@@ -81,16 +84,17 @@ struct PipeFilter::Impl
     void addPorts( const PortInfos& iPortInfos, const PortInfos& oPortInfos )
     {
         for( const PortInfo& portInfo: iPortInfos )
-            _inputMap[ portInfo.name ] = new InputPort( portInfo );
+            _inputMap[ portInfo.name ] = InputPortPtr( new InputPort( portInfo ));
 
         for( const PortInfo& portInfo: oPortInfos )
-            _outputMap[ portInfo.name ] = new OutputPort( *this, portInfo );
+            _outputMap[ portInfo.name ] = OutputPortPtr( new OutputPort( _pipeFilter, portInfo ));
 
         // Connect notification ports
          _inputMap[ _id.getString( )] =
-                 new InputPort( makePortInfo< ConstPortDataPtr >( _id.getString( )));
+                 InputPortPtr( new InputPort( makePortInfo< ConstPortDataPtr >( _id.getString( ))));
          _outputMap[ _id.getString( )] =
-                 new OutputPort( *this, makePortInfo< ConstPortDataPtr >( _id.getString( )));
+                 OutputPortPtr( new OutputPort( _pipeFilter,
+                                                makePortInfo< ConstPortDataPtr >( _id.getString( ))));
     }
 
     void execute()
@@ -99,19 +103,28 @@ struct PipeFilter::Impl
         for( auto pair: _inputMap )
             ports.push_back( pair.second );
 
-        const InFutures futures( ports );
-        PortPromises promises( getOutputPromises( ));
-        _filter->execute( futures, promises );
-        promises.flush();
+        const InFutureMap futures( ports );
+        PromiseMap promises( getOutputPromises( ));
+
+        try
+        {
+            _filter->execute( futures, promises );
+            promises.flush();
+        }
+        catch( const std::runtime_error& err )
+        {
+            promises.flush();
+            throw err;
+        }
     }
 
-    PromisePtr getInputPromise( const std::string& portName ) const
+    PromisePtr getInputPromise( const std::string& portName )
     {
         if( !hasInputPort( portName ))
             throwPortError( portName );
 
-        if( _outputsToInputMap.count( portName ) > 0 )
-            return _outputsToInputMap[ portName ]->getPromise();
+        if( _readyPortsMap.count( portName ) > 0 )
+            return _readyPortsMap[ portName ]->getPromise();
 
         InputPortPtr& inputPort = _inputMap[ portName ];
 
@@ -122,10 +135,11 @@ struct PipeFilter::Impl
                                          "notification port" ));
         }
 
-        OutputPortPtr outputPort( new OutputPort( *this,
+        OutputPortPtr outputPort( new OutputPort( _pipeFilter,
                                       makePortInfo( inputPort->getName(),
                                                     inputPort->getDataType( ))));
-        _outputsToInputMap[ inputPort->getName() ] = outputPort;
+        _readyPortsMap[ inputPort->getName() ] = outputPort;
+        inputPort->connect( *outputPort );
 
         return outputPort->getPromise();
     }
@@ -133,31 +147,32 @@ struct PipeFilter::Impl
     Promises getOutputPromises() const
     {
         Promises promises;
-        promises.reserve( _outputPorts.size( ));
+        promises.reserve( _outputMap.size( ));
         for( const auto& pair: _outputMap )
             promises.push_back( pair.second->getPromise( ));
 
         return promises;
     }
 
-    Futures getOutFutures() const
+    Futures getPostconditions() const
     {
-        for( const auto& pair: _outputPorts )
+        Futures futures;
+        futures.reserve(_outputMap.size( ));
+        for( const auto& pair: _outputMap )
         {
-            ConstFuturePtr outputFuture = pair.second->getPromise()->getFuture();
+            const Future& outputFuture = pair.second->getPromise()->getFuture();
             futures.push_back( outputFuture );
         }
         return futures;
     }
 
-    Futures getInputFutures( lunchbox::Strings& names ) const
+    Futures getPreconditions() const
     {
         Futures futures;
-        for( const auto& pair: _inputPorts )
+        for( const auto& pair: _inputMap )
         {
-            Futures inputFutures = port->getFutures();
+            const Futures& inputFutures = pair.second->getFutures();
             futures.insert( futures.end(), inputFutures.begin(), inputFutures.end( ));
-            names.push_back( pair.second->getName( ));
         }
         return futures;
     }
@@ -169,19 +184,19 @@ struct PipeFilter::Impl
         if( !hasOutputPort( srcPortName ))
             throwPortError( srcPortName );
 
-        if( !dst->_impl.hasInputPort( dstPortName ))
+        if( !dst->_impl->hasInputPort( dstPortName ))
             throwPortError( dstPortName );
 
         // The value on the output port may already be set
-        if( !dst->_impl._outputsToInputMap.count( dstPortName ))
+        if( !dst->_impl->_readyPortsMap.count( dstPortName ))
             std::runtime_error( std::string( "The value on port:  ")
-                                + portName
+                                + dstPortName
                                 + "is already set" );
 
-        _outputMap[ srcPortName ]->connect( *dst->_impl->inputMap[ dstPortName ] );
+        _outputMap[ srcPortName ]->connect( *dst->_impl->_inputMap[ dstPortName ] );
     }
 
-    void PipeFilter::connect( PipeFilterPtr dst )
+    void connect( PipeFilterPtr dst )
     {
         OutputPortPtr outputPort = _outputMap[ _id.getString() ];
         InputPortPtr inputPort = dst->_impl->_inputMap[ dst->_impl->_id.getString() ];
@@ -194,13 +209,12 @@ struct PipeFilter::Impl
     FilterPtr _filter;
     InputPortMap _inputMap;
     OutputPortMap _outputMap;
-    OutputPortMap _outputsToInputMap;
+    OutputPortMap _readyPortsMap;
 };
 
 PipeFilter::PipeFilter( const std::string& name,
                         FilterPtr filter )
     : _impl( new PipeFilter::Impl( *this, name, filter ))
-    , Executable( _impl->_promise )
 {}
 
 PipeFilter::PipeFilter( const std::string& name,
@@ -212,7 +226,6 @@ PipeFilter::PipeFilter( const std::string& name,
                                    func,
                                    inputPorts,
                                    outputPorts ))
-    , Executable( _filterOutput.getPorts( ))
 {}
 
 PipeFilter::~PipeFilter()
@@ -233,27 +246,27 @@ const std::string& PipeFilter::getName() const
     return _impl->_name;
 }
 
-Futures PipeFilter::getConnectedInFutures() const
+Futures PipeFilter::getPreconditions() const
 {
-    lunchbox::Strings& names;
-    return _impl->getInputFutures( names );
+    return _impl->getPreconditions();
 }
+
+Futures PipeFilter::getPostconditions() const
+{
+    return _impl->getPostconditions();
+}
+
 
 PromisePtr PipeFilter::getPromise( const std::string& portName )
 {
     return _impl->getInputPromise( portName );
 }
 
-Futures PipeFilter::getOutFutures() const
-{
-    return _impl->getOutFutures();
-}
-
 void PipeFilter::connect( const std::string& srcPortName,
                           PipeFilterPtr dst,
-                          const std::string& dst )
+                          const std::string& dstPortName )
 {
-     _impl->connect( srcPortName, dst, dst );
+     _impl->connect( srcPortName, dst, dstPortName );
 }
 
 void PipeFilter::connect( PipeFilterPtr dst )

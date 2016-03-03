@@ -42,7 +42,12 @@ public:
     ~EqContext();
 
     /**
-     * @copydoc GLContext::share
+     * @return a similar context
+     */
+    GLContextPtr createContext() const final;
+
+    /**
+     * Makes the context, current.
      */
     void share( const GLContext& src ) final;
 

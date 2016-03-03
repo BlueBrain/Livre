@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -20,6 +20,7 @@
 #ifndef _Future_h_
 #define _Future_h_
 
+#include <livre/core/pipeline/PortData.h>
 #include <livre/core/types.h>
 
 namespace livre
@@ -101,9 +102,8 @@ public:
 
 private:
 
-    friend livre::waitForAny( const Futures& future );
+    friend bool livre::waitForAny( const Futures& future );
 
-    void _set( const ConstPortDataPtr& data );
     ConstPortDataPtr _get() const;
 
     struct Impl;

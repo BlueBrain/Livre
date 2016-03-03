@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -36,7 +36,7 @@ struct InputPort::Impl
 
     const std::string& getName() const
     {
-        return _info.portName;
+        return _info.name;
     }
 
     size_t getSize() const
@@ -51,10 +51,10 @@ struct InputPort::Impl
 
     void connect( const OutputPort& outputPort )
     {
-        if( getDataType() != outputPort->getDataType( ))
-            LB_THROW( std::exception( "Data types does not match between ports"));
+        if( getDataType() != outputPort.getDataType( ))
+            LBTHROW( std::runtime_error( "Data types does not match between ports"));
 
-        _futures.push_back( outputPort.getPromise()-getFuture( ));
+        _futures.push_back( outputPort.getPromise()->getFuture( ));
     }
 
     Futures _futures;
@@ -68,9 +68,9 @@ InputPort::InputPort( const PortInfo& portInfo )
 InputPort::~InputPort()
 {}
 
-Futures InputPort::getFutures() const
+const Futures& InputPort::getFutures() const
 {
-    return _impl->getFutures();
+    return _impl->_futures;
 }
 
 void InputPort::connect( const OutputPort& outputPort )

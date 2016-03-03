@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -19,13 +19,14 @@
 
 #include <livre/core/pipeline/Promise.h>
 #include <livre/core/pipeline/Future.h>
+#include <livre/core/pipeline/OutputPort.h>
 
 namespace livre
 {
 
 struct Promise::Impl
 {
-    Impl( const PipeFilter& pipeFilter, const AsyncData& data )
+    Impl( const PipeFilter& pipeFilter, AsyncData& data )
         : _pipeFilter( pipeFilter )
         , _data( data )
         , _future( _pipeFilter, _data )
@@ -36,18 +37,23 @@ struct Promise::Impl
         return _data.getName();
     }
 
-    void set( ConstPortDataPtr msg )
+    void set( const ConstPortDataPtr& data )
     {
-        _data.set( msg );
+        _data.set( data );
     }
 
-    Future _future;
+    void flush()
+    {
+        _data.set( ConstPortDataPtr( ));
+    }
+
     const PipeFilter& _pipeFilter;
-    const AsyncData& _data;
+    AsyncData& _data;
+    const Future _future;
 };
 
 Promise::Promise( const PipeFilter& pipeFilter,
-                  const AsyncData& data )
+                  AsyncData& data )
     : _impl( new Promise::Impl( pipeFilter, data ))
 {}
 
@@ -59,14 +65,19 @@ const std::string& Promise::getName() const
     return _impl->getName();
 }
 
-void Promise::set( ConstPortDataPtr msg )
+void Promise::flush()
 {
-    _impl->getName( msg );
+    _impl->flush();
 }
 
-Future Promise::getFuture() const
+const Future& Promise::getFuture() const
 {
     return _impl->_future;
+}
+
+void Promise::_set( const ConstPortDataPtr& data )
+{
+    _impl->set( data );
 }
 
 }

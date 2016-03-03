@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -37,8 +37,10 @@ public:
      * When connection is instantiated the data is not
      * set yet, so any get() call will block the retrieval
      * @param name of the connection
+     * @param dataType type of the data
      */
-    AsyncData( const PipeFilter& pipeFilter, const std::string& name );
+    AsyncData( const std::string& name,
+               const std::type_index& dataType );
 
     /**
      * @return the name of the connection
@@ -48,12 +50,12 @@ public:
     /**
      * @param data sets the data
      */
-    void set( ConstPortDataPtr data );
+    void set( const ConstPortDataPtr& data );
 
     /**
      * @return the data. If data is not set it will block.
      */
-    ConstPortDataPtr get() const;
+    const ConstPortDataPtr& get() const;
 
     /**
      * @return true if data is set.
@@ -71,9 +73,12 @@ private:
      * Waits for any future to be ready.
      * @param futures queried to be ready.
      * @note this function needs internal access to the futures ( which is not exposed in the API ).
-     * @return true if any new futures are ready.
+     * @return true if any new futures are ready or futures included are not busy.
      */
     friend bool waitForAny( const Futures& futures );
+
+    AsyncData( const AsyncData& ) = delete;
+    AsyncData& operator=( const AsyncData& ) = delete;
 
     struct Impl;
     std::unique_ptr<Impl> _impl;

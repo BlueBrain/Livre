@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -34,8 +34,8 @@ namespace livre
 class PortData : public PortType
 {
 protected:
-    PortData( const std::type_index& typeIndex )
-        : PortType( typeIndex) {}
+    explicit PortData( const std::type_index& dataType )
+        : PortType( dataType) {}
     virtual ~PortData() {}
 };
 
@@ -57,6 +57,9 @@ struct PortDataT final : public PortData
 
     ~PortDataT() {}
     const T data;
+
+    PortDataT( const PortDataT< T >& ) = delete;
+    PortDataT< T >& operator=( const PortDataT< T >& ) = delete;
 };
 
 template <class T>
@@ -65,17 +68,11 @@ using PortDataTPtr = boost::shared_ptr< PortDataT< T >>;
 template <class T>
 using ConstPortDataTPtr = boost::shared_ptr< PortDataT< T >>;
 
-template <class T>
-using PortDataTPtrs = std::vector< PortDataTPtr< T >>;
-
-template <class T>
-using ConstPortDataTPtrs = std::vector< ConstPortDataTPtr< T >>;
-
 /**
  * Constructs a PortDataTPtr object from type T
  */
 template< class T >
-PortDataTPtr< T > makePortDataPtr( const T& data )
+inline PortDataTPtr< T > makePortDataPtr( const T& data )
 {
     return boost::make_shared< PortDataT< T >>( data );
 }
@@ -85,7 +82,7 @@ PortDataTPtr< T > makePortDataPtr( const T& data )
  * Moves the to the port data.
  */
 template< class T >
-PortDataTPtr< T > makePortDataPtr( const T&& data )
+inline PortDataTPtr< T > makePortDataPtr( const T&& data )
 {
     return boost::make_shared< PortDataT< T >>( data );
 }

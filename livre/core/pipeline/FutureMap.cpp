@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -17,16 +17,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/core/pipeline/PortFutures.h>
-#include <livre/core/pipeline/Future.h>
+#include <livre/core/pipeline/FutureMap.h>
+#include <livre/core/pipeline/InputPort.h>
+#include <livre/core/pipeline/OutputPort.h>
 
 namespace livre
 {
 
-typedef std::multimap< std::string, ConstFuturePtr > NameFutureMap;
-typedef std::pair< std::string, ConstFuturePtr > NameFuturePair;
+typedef std::multimap< std::string, Future > NameFutureMap;
+typedef std::pair< std::string, Future > NameFuturePair;
 
-class FutureMap
+struct FutureMapImpl
 {
 public:
 
@@ -46,7 +47,9 @@ public:
         if( portName == ALL_PORTS )
         {
             Futures futures;
-            futures.insert( futures.end(), _futureMap.begin(), _futureMap.end( ));
+            futures.reserve( _futureMap.size( ));
+            for( const auto& pair: _futureMap )
+                futures.push_back( pair.second );
             return futures;
         }
 
@@ -55,15 +58,21 @@ public:
 
         Futures futures;
         NameFutureMap::const_iterator it = _futureMap.find( portName );
-        futures.insert( futures.end(), it, _futureMap.end( ));
+
+        while( it != _futureMap.end( ))
+        {
+            futures.push_back( it->second );
+            ++it;
+        }
+
         return futures;
     }
 
-    bool isReady() const
+    bool isReady( const std::string& portName ) const
     {
         for( const auto& future: getFutures( portName ))
         {
-            if( !future->isReady())
+            if( !future.isReady())
                 return false;
         }
         return true;
@@ -72,30 +81,70 @@ public:
     void wait( const std::string& portName ) const
     {
         for( const auto& future: getFutures( portName ))
-            future->wait();
+            future.wait();
     }
 
-    void waitForAny( const std::string& portName ) const
+    bool waitForAny( const std::string& portName ) const
     {
         return livre::waitForAny( getFutures( portName ));
     }
 
-    void addFuture( const std::string& name, const ConstFuturePtr& future )
+    void addFuture( const std::string& name, const Future& future )
     {
-        _futureMap[ name ] = future;
+        _futureMap.insert( std::make_pair( name, future ));
     }
 
     NameFutureMap _futureMap;
 };
 
-struct OutFutures::Impl: public FutureMap
+struct FutureMap::Impl: public FutureMapImpl
 {
 public:
     Impl( const Futures& futures )
     {
         for( const auto& future: futures )
         {
-            const std::string& name = future->getName();
+            const std::string& name = future.getName();
+            addFuture( name, future );
+        }
+    }
+};
+
+FutureMap::FutureMap( const Futures& futures )
+    : _impl( new FutureMap::Impl( futures ))
+{}
+
+Futures FutureMap::getFutures() const
+{
+    return _impl->getFutures( ALL_PORTS );
+}
+
+bool FutureMap::isReady() const
+{
+    return _impl->isReady( ALL_PORTS );
+}
+
+void FutureMap::wait() const
+{
+    _impl->wait( ALL_PORTS );
+}
+
+bool FutureMap::waitForAny() const
+{
+    return _impl->waitForAny( ALL_PORTS );
+}
+
+FutureMap::~FutureMap()
+{}
+
+struct OutFutureMap::Impl: public FutureMapImpl
+{
+public:
+    Impl( const Futures& futures )
+    {
+        for( const auto& future: futures )
+        {
+            const std::string& name = future.getName();
             if( hasPort( name ))
                 throwPortError( name );
             addFuture( name, future );
@@ -103,39 +152,39 @@ public:
     }
 };
 
-OutFutures::OutFutures( const Futures& futures )
-    : _impl( new OutFutures::Impl( futures ))
+OutFutureMap::OutFutureMap( const Futures& futures )
+    : _impl( new OutFutureMap::Impl( futures ))
 {}
 
-Futures OutFutures::getFutures() const
+Futures OutFutureMap::getFutures() const
 {
     return _impl->getFutures( ALL_PORTS );
 }
 
-Future OutFutures::getFuture( const std::string& portName ) const
+Future OutFutureMap::getFuture( const std::string& portName ) const
 {
-    return _impl->getFuture();
+    return _impl->getFutures( portName )[ 0 ];
 }
 
-bool OutFutures::isReady( const std::string& portName ) const
+bool OutFutureMap::isReady( const std::string& portName ) const
 {
     return _impl->isReady( portName );
 }
 
-void OutFutures::wait( const std::string& portName ) const
+void OutFutureMap::wait( const std::string& portName ) const
 {
     _impl->wait( portName );
 }
 
-void OutFutures::waitForAny( const std::string& portName ) const
+bool OutFutureMap::waitForAny() const
 {
-    return _impl->waitForAny( portName );
+    return _impl->waitForAny( ALL_PORTS );
 }
 
-OutFutures::~OutFutures()
+OutFutureMap::~OutFutureMap()
 {}
 
-struct InFutures::Impl: public FutureMap
+struct InFutureMap::Impl: public FutureMapImpl
 {
 public:
     Impl( const InputPorts& inputPorts )
@@ -149,32 +198,32 @@ public:
     }
 };
 
-InFutures::InFutures( const InputPorts& inputPorts )
-    : _impl( new InFutures::Impl( inputPorts ))
+InFutureMap::InFutureMap( const InputPorts& inputPorts )
+    : _impl( new InFutureMap::Impl( inputPorts ))
 {
 }
 
-Futures InFutures::getFutures( const std::string& portName /* = ALL_PORTS */ ) const
+Futures InFutureMap::getFutures( const std::string& portName ) const
 {
     return _impl->getFutures( portName );
 }
 
-bool InFutures::isReady( const std::string& portName ) const
+bool InFutureMap::isReady( const std::string& portName ) const
 {
     return _impl->isReady( portName );
 }
 
-void InFutures::wait( const std::string& portName ) const
+void InFutureMap::wait( const std::string& portName ) const
 {
     _impl->wait( portName );
 }
 
-void InFutures::waitForAny( const std::string& portName ) const
+bool InFutureMap::waitForAny( const std::string& portName ) const
 {
     return _impl->waitForAny( portName );
 }
 
-InFutures::~InFutures()
+InFutureMap::~InFutureMap()
 {}
 
 

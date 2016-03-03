@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -46,12 +46,11 @@ protected:
      * @param typeIndex type index of the data of the
      * derived classes data type.
      */
-    PortType( const std::type_index& dataType )
+    explicit PortType( const std::type_index& dataType )
         : _dataType( dataType) {}
-    virtual ~PortData() {}
 
 private:
-    std::type_index _dataType;
+    const std::type_index _dataType;
 };
 
 }

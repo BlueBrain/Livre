@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -27,34 +27,36 @@ namespace livre
 {
 
 /**
- * The Executable class is the base class for objects that can be executed by workers.
+ * The Executable class is the base class for objects that can be executed by workers. It
+ * provides extra pre/post conditions as futures to retrieve the current situation.
+ *
+ * According to given futures executors can decide on scheduling algorithms. Also the
+ * input and are output futures can be queried for the results. @see PipeFilter and
+ * @see Pipeline classes are based on this class.
  */
 class Executable
 {
 public:
 
     Executable() {}
+    virtual ~Executable() {}
+
     /**
      * Executes the executable
      */
     virtual void execute() = 0;
 
     /**
-     * @return the input futures which the executable provides to wait. The
-     * names of the futures are unique.
+     * @return the output futures for querying the outputs of the executable.
      */
-    virtual Futures getOutFutures() const { return Futures(); }
+    virtual Futures getPostconditions() const { return Futures(); }
 
     /**
-     * @return the input futures which the executable is waiting to proceed.
-     * The names of the futures not necessarily unique. The inputs accepts
-     * multiple outputs with the same name.
+     * @return the input futures which the executable can be queried for the state or
+     * data retrieval.
      */
-    virtual Futures getConnectedInFutures() const { return Futures(); }
+    virtual Futures getPreconditions() const { return Futures(); }
 
-protected:
-
-    virtual ~Executable() {}
 };
 
 }

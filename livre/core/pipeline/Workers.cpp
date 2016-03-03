@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -19,7 +19,7 @@
 
 #include <livre/core/pipeline/Workers.h>
 #include <livre/core/pipeline/Filter.h>
-#include <livre/core/pipeline/PortFutures.h>
+#include <livre/core/pipeline/FutureMap.h>
 #include <livre/core/pipeline/PipeFilter.h>
 #include <livre/core/render/GLContext.h>
 

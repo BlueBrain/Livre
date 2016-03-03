@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -21,14 +21,13 @@
 #define _Filter_h_
 
 #include <livre/core/types.h>
-#include <livre/core/pipeline/PortData.h>
 #include <livre/core/pipeline/PortInfo.h>
 
 namespace livre
 {
 
 /**
- * Filters are similar to functions. Their inputs and
+ * Filters are similar to functions (immutable). Their inputs and
  * outputs are provided through ports. These ports provide
  * thread safe information retrieval, setting and querying.
  *
@@ -37,9 +36,7 @@ namespace livre
  * have their unique names and these names are used to query,
  * retrieve and set data.
  *
- * Execution part of filters can be thought as functions and
- * port definitions can be thought as inputs and outputs to
- * those functions. PipeFilters build the connection and execution
+ * PipeFilters class build the connection and execution
  * functionality around filter instances.
  */
 
@@ -53,7 +50,7 @@ public:
      * @param input The Future that can be read for input parameters
      * @param output The Promise that can be written to for output parameters
      */
-    virtual void execute( const InFutures& input, PortPromises& output ) const = 0;
+    virtual void execute( const InFutureMap& input, PromiseMap& output ) const = 0;
 
     /**
      * @param inputPorts information is filled by the Filter class.

@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -30,22 +30,48 @@ class Promise
 {
 public:
 
-    Promise( const PipeFilter& pipeFilter, const AsyncData& data );
+    Promise( const PipeFilter& pipeFilter, AsyncData& data );
     ~Promise();
 
     const std::string& getName() const;
 
     /**
-     * @return sets the promise with data
+     * Sets the port with the value.
+     * @param value to be set
+     * @throw std::runtime_error when the port data is not exact
+     * type T or there is no such port name.
      */
-    void set( ConstPortDataPtr msg );
+    template< class T >
+    void set( const T& value )
+    {
+       _set( makePortDataPtr( value ));
+    }
+
+    /**
+     * Sets the port with the value.
+     * @param value to be set
+     * @throw std::runtime_error when the port data is not exact
+     * type T or there is no such port name.
+     */
+    template< class T >
+    void set( const T&& value )
+    {
+        _set( makePortDataPtr( value ));
+    }
+
+    /**
+     * Sets the promise with empty data if it is not set already
+     */
+    void flush();
 
     /**
      * @return the future, that can be queried for data retrieval
      */
-    Future getFuture() const;
+    const Future& getFuture() const;
 
 private:
+
+    void _set( const ConstPortDataPtr& data );
 
     struct Impl;
     std::unique_ptr<Impl> _impl;

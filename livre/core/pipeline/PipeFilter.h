@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -21,9 +21,6 @@
 #define _PipeFilter_h_
 
 #include <livre/core/types.h>
-#include <livre/core/pipeline/Filter.h>
-#include <livre/core/pipeline/InputPort.h>
-#include <livre/core/pipeline/OutputPort.h>
 #include <livre/core/pipeline/Executable.h>
 
 namespace livre
@@ -99,13 +96,13 @@ public:
     /**
      * @copydoc Executable::getOutFutures()
      */
-    Futures getOutFutures() const final;
+    Futures getPostconditions() const final;
 
     /**
      * @copydoc Executable::getInputFutures()
      * @note PipeFilter guarantees that only connected input futures are returned.
      */
-    Futures getConnectedInFutures() const final;
+    Futures getPreconditions() const final;
 
     /**
      * @return return promise for the given input port. If there is no connection to the

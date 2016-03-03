@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -48,7 +48,7 @@ public:
      * can wait on given pipeline.
      */
     void add( const std::string& name,
-              PipelinePtr pipeline,
+              const PipelinePtr& pipeline,
               bool wait = true );
 
     /**
@@ -61,7 +61,7 @@ public:
      * @return returns the generated pipe filter.
      */
     PipeFilterPtr add( const std::string& name,
-                       FilterPtr filter,
+                       const FilterPtr& filter,
                        bool wait = true );
 
     /**
@@ -87,23 +87,23 @@ public:
      */
     Executables getExecutables() const;
 
-private:
-
     /**
      * Executes each executable element in the graph
      * synchronously.
      */
     void execute() final;
 
-    /**
-     * @return Returns the writable future
-     */
-    Futures getConnectedInFutures() const final;
+private:
 
     /**
      * @return Returns the writable future
      */
-    Futures getOutFutures() const final;
+    Futures getPreconditions() const final;
+
+    /**
+     * @return Returns the writable future
+     */
+    Futures getPostconditions() const final;
 
     struct Impl;
     std::unique_ptr<Impl> _impl;

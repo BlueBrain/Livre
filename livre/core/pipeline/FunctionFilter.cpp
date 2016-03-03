@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -33,9 +33,9 @@ struct FunctionFilter::Impl
         , _outputPorts( outputPorts )
     {}
 
-    void execute( const InFutures& input, PortPromises& output ) const
+    void execute( const InFutureMap& input, PromiseMap& output ) const
     {
-        _filterFunc( filter );
+        _filterFunc( input, output );
     }
 
     PortInfos getInputPorts() const
@@ -43,7 +43,7 @@ struct FunctionFilter::Impl
         return _inputPorts;
     }
 
-    PortInfos getInputPorts() const
+    PortInfos getOutputPorts() const
     {
         return _outputPorts;
     }
@@ -67,19 +67,19 @@ FunctionFilter::FunctionFilter( const FilterFunc& filterFunc,
 FunctionFilter::~FunctionFilter()
 {}
 
-void FunctionFilter::execute( const InFutures& input, PortPromises& output ) const
+void FunctionFilter::execute( const InFutureMap& input, PromiseMap& output ) const
 {
     _impl->execute( input, output );
 }
 
 PortInfos FunctionFilter::getInputPorts() const
 {
-    _impl->getInputPorts();
+    return _impl->getInputPorts();
 }
 
-PortInfos FunctionFilter::getOutputPorts( ) const
+PortInfos FunctionFilter::getOutputPorts() const
 {
-    _impl->getOutputPorts();
+    return _impl->getOutputPorts();
 }
 
 }

@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -39,7 +39,7 @@ public:
      * InputPort constructor based on port information
      * @param portInfo is the port information
      */
-    InputPort( const PortInfo& portInfo );
+    explicit InputPort( const PortInfo& portInfo );
     ~InputPort();
 
     /**
@@ -60,7 +60,7 @@ public:
     /**
      * @return Return all the input futures that port has.
      */
-    Futures getFutures() const;
+    const Futures& getFutures() const;
 
     /**
      * Connects an output port to input port

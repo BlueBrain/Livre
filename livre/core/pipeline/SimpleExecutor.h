@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -34,19 +34,20 @@ namespace livre
  *
  * The scheduler implemented in this class, just pushes the
  * executables without re-ordering. This may mean that if
- * all workers are blocked, the processing can suspend. This
- * is a push based executor.
+ * all workers are blocked, the processing can suspend.
  *
+ * SimpleExecutor executes executables in a push based flow.
  */
+
 class SimpleExecutor : public Executor
 {
 public:
 
     /**
-     * @param workers are thread pools that executes individual
+     * @param threadCount number of workers are thread pools that executes individual
      * executables ( PipeFilter, Pipeline )
      */
-    explicit SimpleExecutor( WorkersPtr workers );
+    explicit SimpleExecutor( size_t threadCount );
     virtual ~SimpleExecutor();
 
     /**
@@ -60,7 +61,6 @@ private:
      * @copydoc Executor::_schedule
      */
     void _schedule( const Executables& executables ) final;
-
 
     struct Impl;
     std::unique_ptr<Impl> _impl;

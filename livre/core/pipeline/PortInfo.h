@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -20,9 +20,9 @@
 #ifndef _PortInfo_h_
 #define _PortInfo_h_
 
-#include <livre/core/types.h>
+#include <livre/core/pipeline/PortType.h>
 
-#include "PortType.h"
+#include <livre/core/types.h>
 
 namespace livre
 {
@@ -33,9 +33,9 @@ namespace livre
 struct PortInfo final : public PortType
 {
     PortInfo( const std::string& name_,
-              std::type_index& dataType )
+              const std::type_index& dataType )
         : PortType( dataType )
-        , name( portName_ )
+        , name( name_ )
     {}
 
     const std::string name;
@@ -46,7 +46,7 @@ struct PortInfo final : public PortType
  * @param name is the port name with a type
  */
 template< class T >
-PortInfo makePortInfo( const std::string& name )
+inline PortInfo makePortInfo( const std::string& name )
 {
     return PortInfo( name, std::type_index( typeid( T )));
 }
@@ -56,7 +56,7 @@ PortInfo makePortInfo( const std::string& name )
  * @param name is the port name
  * @param dataType data type for the port
  */
-PortInfo makePortInfo( const std::string& name,
+inline PortInfo makePortInfo( const std::string& name,
                        const std::type_index& dataType )
 {
     return PortInfo( name, dataType );
@@ -68,7 +68,7 @@ PortInfo makePortInfo( const std::string& name,
  * @param portName is the port name
  */
 template< class T >
-void addPortInfo( PortInfos& portInfos,
+inline void addPortInfo( PortInfos& portInfos,
                   const std::string& portname )
 {
     portInfos.push_back( makePortInfo< T >( portname ));

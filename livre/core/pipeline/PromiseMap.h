@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -17,11 +17,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _PortPromises_h_
-#define _PortPromises_h_
+#ifndef _PromiseMap_h_
+#define _PromiseMap_h_
 
 #include <livre/core/types.h>
-#include <livre/core/pipeline/Filter.h>
+#include <livre/core/pipeline/Promise.h>
 
 namespace livre
 {
@@ -36,48 +36,55 @@ namespace livre
  *
  * It also provides thread safe functions to query the state of the port.
  */
-class PortPromises
+class PromiseMap
 {
 
 public:
 
-    PortPromises( const Promises& promises );
-    ~PortPromises();
+    explicit PromiseMap( const Promises& promises );
+    ~PromiseMap();
+
+    /**
+     * @param portName is the port name.
+     * @return the promise related to the port name.
+     */
+    PromisePtr getPromise( const std::string& portName );
 
     /**
      * Sets the port with the value.
+     * @param portName is the port name.
      * @param value to be set
      * @throw std::runtime_error when the port data is not exact
-     * type T
+     * type T or there is no such port name.
      */
     template< class T >
     void set( const std::string& portName, const T& value )
     {
-       _set( portName, makePortDataPtr( value ));
+        getPromise( portName )->set( value );
     }
 
     /**
      * Sets the port with the value.
+     * @param portName is the port name.
      * @param value to be set
      * @throw std::runtime_error when the port data is not exact
-     * type T
+     * type T or there is no such port name.
      */
     template< class T >
     void set( const std::string& portName, const T&& value )
     {
-        _set( portName, makePortDataPtr( value ));
+        getPromise( portName )->set( value );
     }
 
     /**
-     * Writes empty values to promises
+     * Writes empty values to promises which are not set already.
      * @param portName is the port name. If ALL_PORTS is given,
      * all promises will be flushed
+     * @throw std::runtime_error there is no such port name.
      */
     void flush( const std::string& portName = ALL_PORTS );
 
 private:
-
-    void _set( const std::string& portName, ConstPortDataPtr data );
 
     struct Impl;
     std::unique_ptr<Impl> _impl;
@@ -85,4 +92,4 @@ private:
 
 }
 
-#endif // _PortPromises_h_
+#endif // _PromiseMap_h_
