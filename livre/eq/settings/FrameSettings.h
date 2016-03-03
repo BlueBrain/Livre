@@ -33,7 +33,7 @@ namespace livre
 {
 
 /**
- * The FrameSettings class enables/disables help, statistics, recording. Changes view and also toogles the
+ * The FrameSettings class enables/disables help, statistics. Changes view and also toogles the
  * screen shot.
  */
 class FrameSettings : public co::Serializable
@@ -54,11 +54,6 @@ public:
      * Toggles the help.
      */
     void toggleHelp();
-
-    /**
-     * Toggles the recording.
-     */
-    void toggleRecording();
 
     /**
      * Toggles the statictics.
@@ -93,11 +88,6 @@ public:
     bool getShowHelp() const;
 
     /**
-     * @return Returns true if recording is set.
-     */
-    bool getRecording() const;
-
-    /**
      * @return Returns true if statistics is set.
      */
     bool getStatistics() const;
@@ -126,7 +116,6 @@ private:
     eq::uint128_t currentViewId_;
     uint32_t frameNumber_;
     uint32_t screenShot_;
-    bool recording_;
     bool statistics_;
     bool help_;
     bool grabFrame_;

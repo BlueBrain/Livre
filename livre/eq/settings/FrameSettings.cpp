@@ -37,7 +37,6 @@ void FrameSettings::reset()
     currentViewId_ = lunchbox::uint128_t( 0 );
     frameNumber_ = INVALID_FRAME;
     screenShot_ = 0;
-    recording_ = false;
     statistics_ = false;
     help_ = false;
     grabFrame_= false;
@@ -47,15 +46,15 @@ void FrameSettings::reset()
 void FrameSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
 {
     co::Serializable::serialize( os, dirtyBits );
-    os << currentViewId_ << frameNumber_ << screenShot_
-       << recording_ << statistics_ << help_ << grabFrame_;
+    os << currentViewId_ << frameNumber_ << screenShot_ << statistics_ << help_
+       << grabFrame_;
 }
 
 void FrameSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits )
 {
     co::Serializable::deserialize( is, dirtyBits );
-    is >> currentViewId_ >> frameNumber_ >> screenShot_
-       >> recording_ >> statistics_ >> help_ >> grabFrame_;
+    is >> currentViewId_ >> frameNumber_ >> screenShot_ >> statistics_ >> help_
+       >> grabFrame_;
 }
 
 void FrameSettings::setFrameNumber( uint32_t frame )
@@ -70,12 +69,6 @@ void FrameSettings::setFrameNumber( uint32_t frame )
 void FrameSettings::makeScreenshot()
 {
     screenShot_++;
-    setDirty( DIRTY_ALL );
-}
-
-void FrameSettings::toggleRecording()
-{
-    recording_ = !recording_;
     setDirty( DIRTY_ALL );
 }
 
@@ -94,11 +87,6 @@ void FrameSettings::toggleHelp()
 bool FrameSettings::getShowHelp() const
 {
     return help_;
-}
-
-bool FrameSettings::getRecording() const
-{
-    return recording_;
 }
 
 bool FrameSettings::getStatistics() const
