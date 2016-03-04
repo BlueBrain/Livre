@@ -50,7 +50,7 @@
 #include <livre/core/dash/DashTree.h>
 #include <livre/core/dashpipeline/DashProcessorInput.h>
 #include <livre/core/dashpipeline/DashProcessorOutput.h>
-#include <livre/core/data/VolumeDataSource.h>
+#include <livre/core/data/DataSource.h>
 #include <livre/core/render/FrameInfo.h>
 #include <livre/core/render/Frustum.h>
 #include <livre/core/render/GLWidget.h>
@@ -158,7 +158,7 @@ public:
 
         const livre::DashTree& dashTree = node->getDashTree();
 
-        ConstVolumeDataSourcePtr dataSource = dashTree.getDataSource();
+        ConstDataSourcePtr dataSource = dashTree.getDataSource();
 
         _renderViewPtr.reset( new EqRenderView( this, dashTree ));
 
@@ -440,7 +440,7 @@ public:
         os << window->getTextureCache().getStatistics();
         _drawText( os.str(), y );
 
-        ConstVolumeDataSourcePtr dataSource = static_cast< livre::Node* >(
+        ConstDataSourcePtr dataSource = static_cast< livre::Node* >(
             _channel->getNode( ))->getDashTree().getDataSource();
         const VolumeInformation& info = dataSource->getVolumeInformation();
         Vector3f voxelSize = info.boundingBox.getSize() / info.voxels;

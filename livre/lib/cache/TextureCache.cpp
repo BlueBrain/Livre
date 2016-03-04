@@ -23,7 +23,7 @@
 #include <livre/lib/cache/TextureObject.h>
 
 #include <livre/core/data/LODNode.h>
-#include <livre/core/data/VolumeDataSource.h>
+#include <livre/core/data/DataSource.h>
 #include <livre/core/render/Renderer.h>
 #include <livre/core/cache/CacheStatistics.h>
 
@@ -37,7 +37,7 @@ struct TextureCache::Impl
           const int internalTextureFormat )
         : _dataCache( dataCache )
     {
-        const VolumeDataSource& dataSource = _dataCache.getDataSource();
+        const DataSource& dataSource = _dataCache.getDataSource();
         const VolumeInformation& info = dataSource.getVolumeInformation();
 
         uint32_t format;

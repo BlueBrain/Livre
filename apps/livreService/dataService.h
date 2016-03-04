@@ -21,7 +21,7 @@
 #define LIVRE_DATASERVICE_H
 
 #include <livre/core/data/LODNode.h>
-#include <livre/core/data/VolumeDataSource.h>
+#include <livre/core/data/DataSource.h>
 #include <livre/lib/zeq/events.h>
 #include <zeq/zeq.h>
 #include <lunchbox/stdExt.h>
@@ -61,14 +61,14 @@ public:
         _setup();
     }
 
-    ~DataService() { VolumeDataSource::unloadPlugins(); }
+    ~DataService() { DataSource::unloadPlugins(); }
 
     bool isRunning() const { return _running; }
     void processOne() { _subscriber.receive(); }
 
 private:
     typedef stde::hash_map< ::zeq::uint128_t,
-                            VolumeDataSourcePtr > DataSourceMap;
+                            DataSourcePtr > DataSourceMap;
     ::zeq::Publisher _publisher;
     ::zeq::Subscriber _subscriber;
     ::zeq::connection::Broker _broker;
@@ -77,7 +77,7 @@ private:
 
     void _setup()
     {
-        VolumeDataSource::loadPlugins();
+        DataSource::loadPlugins();
 
         if( !_subscriber.registerHandler( zeq::EVENT_DATASOURCE,
                     boost::bind( &livre::DataService::_newClient, this, _1 )) ||
@@ -100,10 +100,10 @@ private:
         const ::zeq::uint128_t& dataEvent = lunchbox::make_uint128(
             std::string( "livre::zeq::" ) + uriStr );
 
-        VolumeDataSourcePtr dataSource = _dataSources[ dataEvent ];
+        DataSourcePtr dataSource = _dataSources[ dataEvent ];
         if( !dataSource )
         {
-            dataSource.reset( new VolumeDataSource( uri ));
+            dataSource.reset( new DataSource( uri ));
             if( !dataSource )
             {
                 LBWARN << "Data source " << uriStr << " initialization failed"
@@ -126,7 +126,7 @@ private:
     void _newSample( const ::zeq::Event& event )
     {
         const zeq::LODNodeSample& request = zeq::deserializeDataSample( event );
-        VolumeDataSourcePtr dataSource = _dataSources[ request.first ];
+        DataSourcePtr dataSource = _dataSources[ request.first ];
         if( !dataSource )
             return;
 

@@ -22,7 +22,7 @@
 #include <livre/lib/cache/TextureDataObject.h>
 
 #include <livre/core/data/LODNode.h>
-#include <livre/core/data/VolumeDataSource.h>
+#include <livre/core/data/DataSource.h>
 #include <livre/core/render/Renderer.h>
 #include <livre/core/cache/CacheStatistics.h>
 
@@ -34,7 +34,7 @@ namespace livre
 struct TextureDataCache::Impl
 {
 public:
-    Impl( VolumeDataSource& dataSource,
+    Impl( DataSource& dataSource,
           const uint32_t textureType  )
         : _dataSource( dataSource )
         , _textureType( textureType )
@@ -45,12 +45,12 @@ public:
         return new TextureDataObject( cacheId, cache );
     }
 
-    VolumeDataSource& _dataSource;
+    DataSource& _dataSource;
     const uint32_t _textureType;
 };
 
 TextureDataCache::TextureDataCache( const size_t maxMemBytes,
-                                    VolumeDataSource& dataSource,
+                                    DataSource& dataSource,
                                     const uint32_t textureType )
     : Cache( "Data cache CPU", maxMemBytes )
     , _impl( new Impl( dataSource, textureType ))
@@ -66,12 +66,12 @@ TextureDataCache::~TextureDataCache()
     _unloadAll();
 }
 
-VolumeDataSource& TextureDataCache::getDataSource()
+DataSource& TextureDataCache::getDataSource()
 {
     return _impl->_dataSource;
 }
 
-const VolumeDataSource& TextureDataCache::getDataSource() const
+const DataSource& TextureDataCache::getDataSource() const
 {
     return _impl->_dataSource;
 }

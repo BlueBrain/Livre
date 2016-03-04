@@ -18,8 +18,8 @@
  */
 
 
-#ifndef _VolumeDataSourcePlugin_h_
-#define _VolumeDataSourcePlugin_h_
+#ifndef _DataSourcePlugin_h_
+#define _DataSourcePlugin_h_
 
 #include <livre/core/api.h>
 #include <livre/core/data/NodeId.h>
@@ -30,10 +30,10 @@
 namespace livre
 {
 
-class VolumeDataSourcePluginData
+class DataSourcePluginData
 {
 public:
-    explicit VolumeDataSourcePluginData( const lunchbox::URI& uri,
+    explicit DataSourcePluginData( const lunchbox::URI& uri,
                                          const AccessMode accessMode = MODE_READ )
         : _uri( uri ),
           _accessMode( accessMode )
@@ -53,19 +53,19 @@ private:
  *
  * Implementations are responsible for filling the VolumeInformation.
  */
-class VolumeDataSourcePlugin : public boost::noncopyable
+class DataSourcePlugin : public boost::noncopyable
 {
 public:
 
-    LIVRECORE_API VolumeDataSourcePlugin();
+    LIVRECORE_API DataSourcePlugin();
 
     /** Needed by the PluginRegisterer. */
-    typedef VolumeDataSourcePlugin PluginT;
+    typedef DataSourcePlugin PluginT;
 
     /** Needed by the PluginRegisterer. */
-    typedef VolumeDataSourcePluginData InitDataT;
+    typedef DataSourcePluginData InitDataT;
 
-    virtual ~VolumeDataSourcePlugin() {}
+    virtual ~DataSourcePlugin() {}
 
     /**
      * @return The volume information.
@@ -126,7 +126,7 @@ LIVRECORE_API bool fillRegularVolumeInfo( VolumeInformation& info );
 namespace boost
 {
 template<> inline
-std::string lexical_cast( const livre::VolumeDataSourcePluginData& data )
+std::string lexical_cast( const livre::DataSourcePluginData& data )
 {
     return lexical_cast< std::string >( data.getURI( ));
 }
@@ -135,8 +135,8 @@ std::string lexical_cast( const livre::VolumeDataSourcePluginData& data )
 // http://stackoverflow.com/questions/1566963/singleton-in-a-dll
 #ifdef _MSC_VER
    template class LIVRECORE_API
-   lunchbox::PluginFactory< livre::VolumeDataSourcePlugin,
-                            livre::VolumeDataSourcePluginData >;
+   lunchbox::PluginFactory< livre::DataSourcePlugin,
+                            livre::DataSourcePluginData >;
 #endif
 
-#endif // _VolumeDataSourcePlugin_h_
+#endif // _DataSourcePlugin_h_

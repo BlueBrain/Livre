@@ -21,7 +21,7 @@
 #define BOOST_TEST_MODULE DataSource
 #include <boost/test/unit_test.hpp>
 
-#include <livre/core/data/VolumeDataSource.h>
+#include <livre/core/data/DataSource.h>
 #include <livre/core/data/NodeId.h>
 #include <livre/core/data/LODNode.h>
 #include <livre/core/data/MemoryUnit.h>
@@ -38,7 +38,7 @@ const uint32_t VOXEL_SIZE_Z = 512;
 void _testDataSource( const std::string& uriStr )
 {
     const lunchbox::URI uri( uriStr );
-    livre::VolumeDataSource source( uri );
+    livre::DataSource source( uri );
     const livre::VolumeInformation& info = source.getVolumeInformation();
 
      // 32 << depth = 512 - shortest dimension of the volume.

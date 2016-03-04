@@ -30,13 +30,13 @@
 #include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/options_description.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+
 #include <boost/thread/locks.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/unordered_map.hpp>
-#include <boost/weak_ptr.hpp>
 
 #include <stdint.h>
 #include <set>
@@ -45,11 +45,14 @@
 #include <deque>
 #include <algorithm>
 #include <utility>
+#include <typeindex>
+#include <memory>
 
 namespace livre
 {
 
 class AllocMemoryUnit;
+class AsyncData;
 class Cache;
 class CacheObject;
 class CacheStatistics;
@@ -66,27 +69,47 @@ class EventHandler;
 class EventHandlerFactory;
 class EventInfo;
 class EventMapper;
+class Executor;
+class Executable;
+class Filter;
+class Future;
+class PromiseMap;
+class PortData;
+class Promise;
 class Frustum;
 class GLContext;
 class GLSLShaders;
 class GLWidget;
+class InFutureMap;
+class InputPort;
 class LODNode;
 class LODEvaluator;
 class MemoryUnit;
 class NodeId;
+class OutputPort;
+class OutFutures;
 class Parameter;
+class Pipeline;
+class PipeFilter;
+class PortData;
+class PortInfo;
 class Processor;
 class ProcessorInput;
 class ProcessorOutput;
+class Promise;
 class RenderBrick;
 class Renderer;
 class RootNode;
 class TexturePool;
 class View;
 class VisitState;
-class VolumeDataSource;
-class VolumeDataSourcePlugin;
-class VolumeDataSourcePluginData;
+class DataSource;
+class DataSourcePlugin;
+class DataSourcePluginData;
+class WorkInput;
+class Workers;
+class WorkQueue;
+
 struct FrameInfo;
 struct TextureState;
 struct VolumeInformation;
@@ -101,8 +124,6 @@ typedef std::array< float, 2 > Range;
 /**
  * SmartPtr definitions
  */
-typedef std::unique_ptr< GLSLShaders > GLSLShadersPtr;
-typedef std::unique_ptr< CacheStatistics > CacheStatisticsPtr;
 
 typedef boost::shared_ptr< AllocMemoryUnit > AllocMemoryUnitPtr;
 typedef boost::shared_ptr< RenderBrick > RenderBrickPtr;
@@ -112,25 +133,53 @@ typedef boost::shared_ptr< DashProcessor > DashProcessorPtr;
 typedef boost::shared_ptr< ProcessorInput > ProcessorInputPtr;
 typedef boost::shared_ptr< ProcessorOutput > ProcessorOutputPtr;
 typedef boost::shared_ptr< Renderer > RendererPtr;
-typedef boost::shared_ptr< const View > ConstViewPtr;
 typedef boost::shared_ptr< View > ViewPtr;
 typedef boost::shared_ptr< GLContext > GLContextPtr;
 typedef boost::shared_ptr< const GLContext > ConstGLContextPtr;
 typedef boost::shared_ptr< GLWidget > GLWidgetPtr;
-typedef boost::shared_ptr< VolumeInformation > VolumeInformationPtr;
-typedef boost::shared_ptr< const VolumeInformation > ConstVolumeInformationPtr;
 typedef boost::shared_ptr< TextureState > TextureStatePtr;
 typedef boost::shared_ptr< const TextureState > ConstTextureStatePtr;
-typedef boost::shared_ptr< VolumeDataSource > VolumeDataSourcePtr;
-typedef boost::shared_ptr< const VolumeDataSource > ConstVolumeDataSourcePtr;
+typedef boost::shared_ptr< DataSource > DataSourcePtr;
+typedef boost::shared_ptr< const DataSource > ConstDataSourcePtr;
 typedef boost::shared_ptr< EventHandler > EventHandlerPtr;
 typedef boost::shared_ptr< EventHandlerFactory > EventHandlerFactoryPtr;
-typedef boost::shared_ptr< EventMapper > EventMapperPtr;
 typedef boost::shared_ptr< MemoryUnit > MemoryUnitPtr;
 typedef boost::shared_ptr< const MemoryUnit > ConstMemoryUnitPtr;
-
+typedef boost::shared_ptr< PortData > PortDataPtr;
+typedef boost::shared_ptr< Filter > FilterPtr;
+typedef boost::shared_ptr< const Filter > ConstFilterPtr;
+typedef boost::shared_ptr< PortData > PortDataPtr;
+typedef boost::shared_ptr< const PortData > ConstPortDataPtr;
+typedef boost::shared_ptr< Pipeline > PipelinePtr;
+typedef boost::shared_ptr< const Pipeline > ConstPipelinePtr;
+typedef boost::shared_ptr< PipeFilter > PipeFilterPtr;
+typedef boost::shared_ptr< const PipeFilter > ConstPipeFilterPtr;
+typedef boost::shared_ptr< Workers > WorkersPtr;
+typedef boost::shared_ptr< Executor > ExecutorPtr;
+typedef boost::shared_ptr< InputPort > InputPortPtr;
+typedef boost::shared_ptr< OutputPort > OutputPortPtr;
+typedef boost::shared_ptr< const InputPort > ConstInputPortPtr;
+typedef boost::shared_ptr< const OutputPort > ConstOutputPortPtr;
+typedef boost::shared_ptr< LODEvaluator > LODEvaluatorPtr;
+typedef boost::shared_ptr< const LODEvaluator > ConstLODEvaluatorPtr;
+typedef boost::shared_ptr< Cache > CachePtr;
+typedef boost::shared_ptr< const Cache > ConstCachePtr;
+typedef boost::shared_ptr< Executable > ExecutablePtr;
+typedef boost::shared_ptr< const Executable > ConstExecutablePtr;
 typedef boost::shared_ptr< CacheObject > CacheObjectPtr;
 typedef boost::shared_ptr< const CacheObject > ConstCacheObjectPtr;
+typedef boost::shared_ptr< Future > FuturePtr;
+typedef boost::shared_ptr< const Future > ConstFuturePtr;
+typedef boost::shared_ptr< Promise > PromisePtr;
+typedef boost::shared_ptr< const Promise > ConstPromisePtr;
+typedef boost::shared_ptr< CacheObject > CacheObjectPtr;
+typedef boost::shared_ptr< const CacheObject > ConstCacheObjectPtr;
+typedef boost::shared_ptr< GLSLShaders > GLSLShadersPtr;
+
+/**
+  * Pair definitions
+  */
+typedef std::pair< std::string, std::type_index > NameTypePair;
 
 /**
  * Helper classes for shared_ptr objects
@@ -180,6 +229,24 @@ typedef std::vector< CacheId > CacheIds;
 typedef std::vector< CacheObjectPtr > CacheObjects;
 typedef std::vector< ConstCacheObjectPtr > ConstCacheObjects;
 typedef std::vector< RenderBrickPtr > RenderBricks;
+typedef std::vector< FilterPtr > Filters;
+typedef std::vector< ConstFilterPtr > ConstFilters;
+typedef std::vector< ConstPortDataPtr > ConstPortDataPtrs;
+typedef std::vector< WorkInput > WorkInputs;
+typedef std::vector< PipeFilterPtr > PipeFilters;
+typedef std::vector< OutputPortPtr > OutputPorts;
+typedef std::vector< InputPortPtr > InputPorts;
+typedef std::vector< ConstOutputPortPtr > ConstOutputPorts;
+typedef std::vector< ConstInputPortPtr > ConstInputPorts;
+typedef std::vector< NameTypePair > NameTypePairs;
+typedef std::vector< PortInfo > PortInfos;
+typedef std::vector< PromisePtr > Promises;
+
+typedef std::list< Future > Futures;
+typedef std::list< ExecutablePtr > Executables;
+
+template <class T>
+using ResultsT = std::vector< T >;
 
 /**
  * Map definitions
@@ -235,7 +302,14 @@ typedef boost::program_options::variables_map ProgramOptionsMap;
 typedef boost::program_options::options_description ProgramOptionsDescription;
 typedef std::map< std::string,
                   ProgramOptionsDescription > ProgramOptionsDescriptionMap;
+
+// functions
+
+typedef boost::function< void( const InFutureMap&, PromiseMap& )> FilterFunc;
+
 static const std::string HIDDEN_PROGRAMDESCRIPTION_STR("_HIDDEN_");
+static const std::string ALL_PORTS = "";
+static const std::string NO_PREFIX = "";
 }
 
 #endif // _coreTypes_h_

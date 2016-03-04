@@ -36,7 +36,7 @@
 #include <livre/core/dash/DashRenderStatus.h>
 #include <livre/core/dash/DashTree.h>
 #include <livre/core/dashpipeline/DashProcessorOutput.h>
-#include <livre/core/data/VolumeDataSource.h>
+#include <livre/core/data/DataSource.h>
 
 #include <eq/eq.h>
 #include <eq/gl.h>
@@ -72,7 +72,7 @@ public:
                     _config->getFrameData().getVolumeSettings();
             const lunchbox::URI& uri = lunchbox::URI( volumeSettings.getURI( ));
             dash::Context::getMain(); // Create the main context
-            _dataSource.reset( new livre::VolumeDataSource( uri ));
+            _dataSource.reset( new livre::DataSource( uri ));
             _dashTree.reset( new livre::DashTree( _dataSource ));
         }
         catch( const std::runtime_error& err )
@@ -112,7 +112,7 @@ public:
 
     livre::Node* const _node;
     livre::Config* const _config;
-    VolumeDataSourcePtr _dataSource;
+    DataSourcePtr _dataSource;
     std::unique_ptr< TextureDataCache > _textureDataCache;
     std::unique_ptr< livre::DashTree > _dashTree;
 };

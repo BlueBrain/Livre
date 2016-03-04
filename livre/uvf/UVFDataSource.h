@@ -21,7 +21,7 @@
 #define _UVFDataSource_h_
 
 #include <livre/uvf/tuvokTypes.h>
-#include <livre/core/data/VolumeDataSourcePlugin.h>
+#include <livre/core/data/DataSourcePlugin.h>
 
 namespace livre
 {
@@ -32,13 +32,13 @@ namespace detail
 }
 
 /** Reads Tuvok Volumes and generates hierarchies. */
-class UVFDataSource : public VolumeDataSourcePlugin
+class UVFDataSource : public DataSourcePlugin
 {
 public:
-    UVFDataSource( const VolumeDataSourcePluginData& initData );
+    UVFDataSource( const DataSourcePluginData& initData );
     virtual ~UVFDataSource();
 
-    static bool handles( const VolumeDataSourcePluginData& initData );
+    static bool handles( const DataSourcePluginData& initData );
 
 private:
 

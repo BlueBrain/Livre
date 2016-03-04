@@ -56,7 +56,7 @@ class UVFDataSource
 {
 public:
     UVFDataSource( VolumeInformation& volumeInfo,
-                   const VolumeDataSourcePluginData& initData )
+                   const DataSourcePluginData& initData )
         : _uvfTOCBlock( 0 ),
           _volumeInfo( volumeInfo )
     {
@@ -395,7 +395,7 @@ public:
 
 }
 
-UVFDataSource::UVFDataSource( const VolumeDataSourcePluginData& initData )
+UVFDataSource::UVFDataSource( const DataSourcePluginData& initData )
     : _impl( new detail::UVFDataSource( _volumeInfo, initData ))
 {
 }
@@ -405,7 +405,7 @@ UVFDataSource::~UVFDataSource()
     delete _impl;
 }
 
-bool UVFDataSource::handles( const VolumeDataSourcePluginData& initData )
+bool UVFDataSource::handles( const DataSourcePluginData& initData )
 {
     const servus::URI& uri = initData.getURI();
     return uri.getScheme() == "uvf" ||

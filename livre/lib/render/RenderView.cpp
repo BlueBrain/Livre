@@ -23,7 +23,7 @@
 
 #include <livre/core/dash/DashRenderNode.h>
 #include <livre/core/dash/DashTree.h>
-#include <livre/core/data/VolumeDataSource.h>
+#include <livre/core/data/DataSource.h>
 #include <livre/core/data/VolumeInformation.h>
 #include <livre/core/maths/maths.h>
 #include <livre/core/render/FrameInfo.h>

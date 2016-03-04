@@ -17,16 +17,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/core/data/VolumeDataSourcePlugin.h>
+#include <livre/core/data/DataSourcePlugin.h>
 #include <livre/core/data/LODNode.h>
 
 namespace livre
 {
 
-VolumeDataSourcePlugin::VolumeDataSourcePlugin()
+DataSourcePlugin::DataSourcePlugin()
 {}
 
-LODNode VolumeDataSourcePlugin::getNode( const NodeId& nodeId ) const
+LODNode DataSourcePlugin::getNode( const NodeId& nodeId ) const
 {
     NodeIDLODNodeMap::iterator it;
     {
@@ -47,12 +47,12 @@ LODNode VolumeDataSourcePlugin::getNode( const NodeId& nodeId ) const
     return _lodNodeMap[ nodeId ];
 }
 
-const VolumeInformation& VolumeDataSourcePlugin::getVolumeInformation() const
+const VolumeInformation& DataSourcePlugin::getVolumeInformation() const
 {
     return _volumeInfo;
 }
 
-LODNode VolumeDataSourcePlugin::internalNodeToLODNode( const NodeId& internalNode ) const
+LODNode DataSourcePlugin::internalNodeToLODNode( const NodeId& internalNode ) const
 {
     const uint32_t refLevel = internalNode.getLevel();
     const Vector3ui& bricksInRefLevel = _volumeInfo.rootNode.getBlockSize( refLevel );

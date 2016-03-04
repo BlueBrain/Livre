@@ -26,7 +26,7 @@
 #include <livre/lib/visitor/DFSTraversal.h>
 
 #include <livre/core/visitor/RenderNodeVisitor.h>
-#include <livre/core/data/VolumeDataSource.h>
+#include <livre/core/data/DataSource.h>
 #include <livre/core/dash/DashRenderNode.h>
 #include <livre/core/dash/DashTree.h>
 #include <livre/core/render/GLContext.h>

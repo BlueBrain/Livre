@@ -39,13 +39,13 @@ namespace detail
 class DashTree : public boost::noncopyable
 {
 public:
-    LIVRECORE_API DashTree( ConstVolumeDataSourcePtr dataSource );
+    LIVRECORE_API DashTree( ConstDataSourcePtr dataSource );
     LIVRECORE_API ~DashTree();
 
     /**
      * @return Returns the data source
      */
-    LIVRECORE_API ConstVolumeDataSourcePtr getDataSource( ) const;
+    LIVRECORE_API ConstDataSourcePtr getDataSource( ) const;
 
     /**
      * Creates a new context, registers it and maps its data to already registered contexts.

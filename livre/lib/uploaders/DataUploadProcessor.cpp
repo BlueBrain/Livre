@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/core/data/VolumeDataSource.h>
+#include <livre/core/data/DataSource.h>
 #include <livre/core/data/LODNode.h>
 #include <livre/core/dash/DashRenderNode.h>
 #include <livre/core/dash/DashTree.h>
@@ -149,7 +149,7 @@ bool DataUploadProcessor::initializeThreadRun_()
     setName( "DataUp" );
     LBASSERT( getGLContext( ));
     _shareContext->shareContext( getGLContext( ));
-    VolumeDataSource& dataSource = _textureDataCache.getDataSource();
+    DataSource& dataSource = _textureDataCache.getDataSource();
     dataSource.initializeGL();
     return DashProcessor::initializeThreadRun_();
 }

@@ -23,7 +23,7 @@
 #include <livre/core/dash/DashRenderNode.h>
 #include <livre/core/dash/DashRenderStatus.h>
 
-#include <livre/core/data/VolumeDataSource.h>
+#include <livre/core/data/DataSource.h>
 #include <livre/core/data/NodeId.h>
 
 namespace livre
@@ -35,7 +35,7 @@ namespace detail
 class DashTree : public boost::noncopyable
 {
 public:
-    explicit DashTree( ConstVolumeDataSourcePtr dataSource )
+    explicit DashTree( ConstDataSourcePtr dataSource )
         : _dataSource( dataSource ),
           _localContext( dash::Context::getMain( ))
     {
@@ -124,7 +124,7 @@ public:
         return node;
     }
 
-    ConstVolumeDataSourcePtr _dataSource;
+    ConstDataSourcePtr _dataSource;
     NodeIDDashNodePtrMap _dashNodeMap;
     DashRenderStatus* _renderStatus;
     mutable ReadWriteMutex _mutex;
@@ -134,11 +134,11 @@ public:
 
 }
 
-DashTree::DashTree( ConstVolumeDataSourcePtr datasSource )
+DashTree::DashTree( ConstDataSourcePtr datasSource )
     : _impl( new detail::DashTree( datasSource ))
 {}
 
-ConstVolumeDataSourcePtr DashTree::getDataSource() const
+ConstDataSourcePtr DashTree::getDataSource() const
 {
     return _impl->_dataSource;
 }

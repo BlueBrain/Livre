@@ -23,8 +23,8 @@
 #include <livre/lib/cache/TextureObject.h>
 
 #include <livre/core/data/LODNode.h>
-#include <livre/core/data/VolumeDataSource.h>
-#include <livre/core/data/VolumeDataSource.h>
+#include <livre/core/data/DataSource.h>
+#include <livre/core/data/DataSource.h>
 #include <livre/core/render/GLContext.h>
 #include <livre/core/render/Renderer.h>
 #include <livre/core/render/TexturePool.h>
@@ -169,7 +169,7 @@ struct TextureObject::Impl
     TextureCache& _textureCache;
     ConstTextureDataObjectPtr _dataObject;
     TextureStatePtr _textureState;
-    VolumeDataSource& _dataSource;
+    DataSource& _dataSource;
     TexturePool& _texturePool;
     uint32_t _textureType;
 };

@@ -47,7 +47,7 @@ namespace detail
 static const uint32_t timeout = 60000; /*ms*/
 namespace
 {
-lunchbox::URI _getSinkURI( const VolumeDataSourcePluginData& initData )
+lunchbox::URI _getSinkURI( const DataSourcePluginData& initData )
 {
     const lunchbox::URI& initURI = initData.getURI();
     lunchbox::URI::ConstKVIter i = initURI.findQuery( "bind" );
@@ -56,7 +56,7 @@ lunchbox::URI _getSinkURI( const VolumeDataSourcePluginData& initData )
     return lunchbox::URI( "livresink://" + i->second );
 }
 
-lunchbox::URI _getSourceURI( const VolumeDataSourcePluginData& initData )
+lunchbox::URI _getSourceURI( const DataSourcePluginData& initData )
 {
     if( initData.getURI().getHost().empty( ))
         return lunchbox::URI( "livresource://" );
@@ -70,7 +70,7 @@ lunchbox::URI _getSourceURI( const VolumeDataSourcePluginData& initData )
 class DataSource
 {
 public:
-    DataSource( const VolumeDataSourcePluginData& initData,
+    DataSource( const DataSourcePluginData& initData,
                 VolumeInformation& info )
         : _publisher( _getSinkURI( initData ))
         , _subscriber( _getSourceURI( initData ))
@@ -170,7 +170,7 @@ DataSource::DataSource()
 {}
 
 //TODO: generalize URI and rm this ctor once plugins are used
-DataSource::DataSource( const VolumeDataSourcePluginData& initData )
+DataSource::DataSource( const DataSourcePluginData& initData )
     : _impl( new detail::DataSource( initData, _volumeInfo ) )
 {
     if(!fillRegularVolumeInfo( _volumeInfo  ))
@@ -187,7 +187,7 @@ MemoryUnitPtr DataSource::getData( const LODNode& node )
     return _impl->sample( node );
 }
 
-bool DataSource::handles( const VolumeDataSourcePluginData& initData )
+bool DataSource::handles( const DataSourcePluginData& initData )
 {
     const std::string remote = "remote";
     const std::string& scheme = initData.getURI().getScheme();

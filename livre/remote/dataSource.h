@@ -21,7 +21,7 @@
 #define LIVRE_REMOTE_DATASOURCE_H
 
 #include <livre/core/mathTypes.h>
-#include <livre/core/data/VolumeDataSourcePlugin.h>
+#include <livre/core/data/DataSourcePlugin.h>
 
 namespace livre
 {
@@ -40,16 +40,16 @@ namespace detail{ class DataSource; }
  * key-value pair in the URI query part to bind the local publisher to a fixed
  * address instead of INADDR_ANY.
  */
-class DataSource : public VolumeDataSourcePlugin
+class DataSource : public DataSourcePlugin
 {
 public:
     DataSource();
-    explicit DataSource( const VolumeDataSourcePluginData& initData );
+    explicit DataSource( const DataSourcePluginData& initData );
     virtual ~DataSource();
 
     MemoryUnitPtr getData( const LODNode& node ) final;
 
-    static bool handles( const VolumeDataSourcePluginData& initData );
+    static bool handles( const DataSourcePluginData& initData );
 
 private:
     detail::DataSource* _impl;
