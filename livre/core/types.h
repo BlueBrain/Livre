@@ -27,7 +27,6 @@
 
 #include <dash/types.h>
 
-#include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/options_description.hpp>
 
@@ -42,7 +41,6 @@
 #include <deque>
 #include <algorithm>
 #include <utility>
-#include <typeindex>
 #include <memory>
 #include <unordered_map>
 #include <list>
@@ -51,7 +49,6 @@ namespace livre
 {
 
 class AllocMemoryUnit;
-class AsyncData;
 class Cache;
 class CacheObject;
 class CacheStatistics;
@@ -63,39 +60,22 @@ class DashProcessorOutput;
 class DashRenderNode;
 class DashRenderStatus;
 class DashTree;
-class DataSourceFactory;
 class EventHandler;
 class EventHandlerFactory;
 class EventInfo;
 class EventMapper;
-class Executor;
-class Executable;
-class Filter;
-class Future;
-class PromiseMap;
-class PortData;
-class Promise;
 class Frustum;
 class GLContext;
 class GLSLShaders;
 class GLWidget;
-class InFutureMap;
-class InputPort;
 class LODNode;
 class LODEvaluator;
 class MemoryUnit;
 class NodeId;
-class OutputPort;
-class OutFutures;
 class Parameter;
-class Pipeline;
-class PipeFilter;
-class PortData;
-class PortInfo;
 class Processor;
 class ProcessorInput;
 class ProcessorOutput;
-class Promise;
 class RenderBrick;
 class Renderer;
 class RootNode;
@@ -105,9 +85,6 @@ class VisitState;
 class DataSource;
 class DataSourcePlugin;
 class DataSourcePluginData;
-class WorkInput;
-class Workers;
-class WorkQueue;
 
 struct FrameInfo;
 struct TextureState;
@@ -144,40 +121,10 @@ typedef std::shared_ptr< EventHandler > EventHandlerPtr;
 typedef std::shared_ptr< EventHandlerFactory > EventHandlerFactoryPtr;
 typedef std::shared_ptr< MemoryUnit > MemoryUnitPtr;
 typedef std::shared_ptr< const MemoryUnit > ConstMemoryUnitPtr;
-typedef std::shared_ptr< PortData > PortDataPtr;
-typedef std::shared_ptr< Filter > FilterPtr;
-typedef std::shared_ptr< const Filter > ConstFilterPtr;
-typedef std::shared_ptr< PortData > PortDataPtr;
-typedef std::shared_ptr< const PortData > ConstPortDataPtr;
-typedef std::shared_ptr< Pipeline > PipelinePtr;
-typedef std::shared_ptr< const Pipeline > ConstPipelinePtr;
-typedef std::shared_ptr< PipeFilter > PipeFilterPtr;
-typedef std::shared_ptr< const PipeFilter > ConstPipeFilterPtr;
-typedef std::shared_ptr< Workers > WorkersPtr;
-typedef std::shared_ptr< Executor > ExecutorPtr;
-typedef std::shared_ptr< InputPort > InputPortPtr;
-typedef std::shared_ptr< OutputPort > OutputPortPtr;
-typedef std::shared_ptr< const InputPort > ConstInputPortPtr;
-typedef std::shared_ptr< const OutputPort > ConstOutputPortPtr;
-typedef std::shared_ptr< LODEvaluator > LODEvaluatorPtr;
-typedef std::shared_ptr< const LODEvaluator > ConstLODEvaluatorPtr;
-typedef std::shared_ptr< Cache > CachePtr;
-typedef std::shared_ptr< const Cache > ConstCachePtr;
-typedef std::shared_ptr< Executable > ExecutablePtr;
-typedef std::shared_ptr< const Executable > ConstExecutablePtr;
 typedef std::shared_ptr< CacheObject > CacheObjectPtr;
 typedef std::shared_ptr< const CacheObject > ConstCacheObjectPtr;
-typedef std::shared_ptr< Future > FuturePtr;
-typedef std::shared_ptr< const Future > ConstFuturePtr;
-typedef std::shared_ptr< Promise > PromisePtr;
-typedef std::shared_ptr< const Promise > ConstPromisePtr;
 typedef std::shared_ptr< CacheObject > CacheObjectPtr;
 typedef std::shared_ptr< const CacheObject > ConstCacheObjectPtr;
-
-/**
-  * Pair definitions
-  */
-typedef std::pair< std::string, std::type_index > NameTypePair;
 
 /**
  * Helper classes for shared_ptr objects
@@ -227,24 +174,6 @@ typedef std::vector< CacheId > CacheIds;
 typedef std::vector< CacheObjectPtr > CacheObjects;
 typedef std::vector< ConstCacheObjectPtr > ConstCacheObjects;
 typedef std::vector< RenderBrickPtr > RenderBricks;
-typedef std::vector< FilterPtr > Filters;
-typedef std::vector< ConstFilterPtr > ConstFilters;
-typedef std::vector< ConstPortDataPtr > ConstPortDataPtrs;
-typedef std::vector< WorkInput > WorkInputs;
-typedef std::vector< PipeFilterPtr > PipeFilters;
-typedef std::vector< OutputPortPtr > OutputPorts;
-typedef std::vector< InputPortPtr > InputPorts;
-typedef std::vector< ConstOutputPortPtr > ConstOutputPorts;
-typedef std::vector< ConstInputPortPtr > ConstInputPorts;
-typedef std::vector< NameTypePair > NameTypePairs;
-typedef std::vector< PortInfo > PortInfos;
-typedef std::vector< PromisePtr > Promises;
-
-typedef std::list< Future > Futures;
-typedef std::list< ExecutablePtr > Executables;
-
-template <class T>
-using ResultsT = std::vector< T >;
 
 /**
  * Map definitions
@@ -300,13 +229,10 @@ typedef boost::program_options::options_description ProgramOptionsDescription;
 typedef std::map< std::string,
                   ProgramOptionsDescription > ProgramOptionsDescriptionMap;
 
-// functions
-
-typedef boost::function< void( const InFutureMap&, PromiseMap& )> FilterFunc;
-
+// Const definitions
 static const std::string HIDDEN_PROGRAMDESCRIPTION_STR("_HIDDEN_");
-static const std::string ALL_PORTS = "";
 static const std::string NO_PREFIX = "";
+
 }
 
 #endif // _coreTypes_h_
