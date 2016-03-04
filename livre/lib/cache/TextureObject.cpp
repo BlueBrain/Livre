@@ -58,7 +58,7 @@ struct TextureObject::Impl
 
     bool load()
     {
-        _dataObject = boost::static_pointer_cast< const TextureDataObject >(
+        _dataObject = std::static_pointer_cast< const TextureDataObject >(
                     _textureCache.getDataCache().get( _textureObject.getId( )));
 
         if( !_dataObject->isLoaded( ))

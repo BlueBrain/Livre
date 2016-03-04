@@ -23,7 +23,6 @@
 #include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <livre/core/lunchboxTypes.h>
-#include <boost/enable_shared_from_this.hpp>
 
 namespace livre
 {
@@ -31,7 +30,7 @@ namespace livre
 /**
  * The GLContext class is the warpper for different kinds of OpenGL contexts
  */
-class GLContext : public boost::enable_shared_from_this< GLContext >
+class GLContext : public std::enable_shared_from_this< GLContext >
 {
 public:
     LIVRECORE_API GLContext();

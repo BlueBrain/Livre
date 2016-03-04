@@ -30,7 +30,6 @@
 #include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/options_description.hpp>
-#include <boost/make_shared.hpp>
 
 #include <boost/thread/locks.hpp>
 #include <boost/thread/mutex.hpp>
@@ -124,55 +123,55 @@ typedef std::array< float, 2 > Range;
  * SmartPtr definitions
  */
 
-typedef boost::shared_ptr< AllocMemoryUnit > AllocMemoryUnitPtr;
-typedef boost::shared_ptr< RenderBrick > RenderBrickPtr;
-typedef boost::shared_ptr< DashConnection > DashConnectionPtr;
-typedef boost::shared_ptr< Processor > ProcessorPtr;
-typedef boost::shared_ptr< DashProcessor > DashProcessorPtr;
-typedef boost::shared_ptr< ProcessorInput > ProcessorInputPtr;
-typedef boost::shared_ptr< ProcessorOutput > ProcessorOutputPtr;
-typedef boost::shared_ptr< Renderer > RendererPtr;
-typedef boost::shared_ptr< View > ViewPtr;
-typedef boost::shared_ptr< GLContext > GLContextPtr;
-typedef boost::shared_ptr< const GLContext > ConstGLContextPtr;
-typedef boost::shared_ptr< GLWidget > GLWidgetPtr;
-typedef boost::shared_ptr< TextureState > TextureStatePtr;
-typedef boost::shared_ptr< const TextureState > ConstTextureStatePtr;
-typedef boost::shared_ptr< DataSource > DataSourcePtr;
-typedef boost::shared_ptr< const DataSource > ConstDataSourcePtr;
-typedef boost::shared_ptr< EventHandler > EventHandlerPtr;
-typedef boost::shared_ptr< EventHandlerFactory > EventHandlerFactoryPtr;
-typedef boost::shared_ptr< MemoryUnit > MemoryUnitPtr;
-typedef boost::shared_ptr< const MemoryUnit > ConstMemoryUnitPtr;
-typedef boost::shared_ptr< PortData > PortDataPtr;
-typedef boost::shared_ptr< Filter > FilterPtr;
-typedef boost::shared_ptr< const Filter > ConstFilterPtr;
-typedef boost::shared_ptr< PortData > PortDataPtr;
-typedef boost::shared_ptr< const PortData > ConstPortDataPtr;
-typedef boost::shared_ptr< Pipeline > PipelinePtr;
-typedef boost::shared_ptr< const Pipeline > ConstPipelinePtr;
-typedef boost::shared_ptr< PipeFilter > PipeFilterPtr;
-typedef boost::shared_ptr< const PipeFilter > ConstPipeFilterPtr;
-typedef boost::shared_ptr< Workers > WorkersPtr;
-typedef boost::shared_ptr< Executor > ExecutorPtr;
-typedef boost::shared_ptr< InputPort > InputPortPtr;
-typedef boost::shared_ptr< OutputPort > OutputPortPtr;
-typedef boost::shared_ptr< const InputPort > ConstInputPortPtr;
-typedef boost::shared_ptr< const OutputPort > ConstOutputPortPtr;
-typedef boost::shared_ptr< LODEvaluator > LODEvaluatorPtr;
-typedef boost::shared_ptr< const LODEvaluator > ConstLODEvaluatorPtr;
-typedef boost::shared_ptr< Cache > CachePtr;
-typedef boost::shared_ptr< const Cache > ConstCachePtr;
-typedef boost::shared_ptr< Executable > ExecutablePtr;
-typedef boost::shared_ptr< const Executable > ConstExecutablePtr;
-typedef boost::shared_ptr< CacheObject > CacheObjectPtr;
-typedef boost::shared_ptr< const CacheObject > ConstCacheObjectPtr;
-typedef boost::shared_ptr< Future > FuturePtr;
-typedef boost::shared_ptr< const Future > ConstFuturePtr;
-typedef boost::shared_ptr< Promise > PromisePtr;
-typedef boost::shared_ptr< const Promise > ConstPromisePtr;
-typedef boost::shared_ptr< CacheObject > CacheObjectPtr;
-typedef boost::shared_ptr< const CacheObject > ConstCacheObjectPtr;
+typedef std::shared_ptr< AllocMemoryUnit > AllocMemoryUnitPtr;
+typedef std::shared_ptr< RenderBrick > RenderBrickPtr;
+typedef std::shared_ptr< DashConnection > DashConnectionPtr;
+typedef std::shared_ptr< Processor > ProcessorPtr;
+typedef std::shared_ptr< DashProcessor > DashProcessorPtr;
+typedef std::shared_ptr< ProcessorInput > ProcessorInputPtr;
+typedef std::shared_ptr< ProcessorOutput > ProcessorOutputPtr;
+typedef std::shared_ptr< Renderer > RendererPtr;
+typedef std::shared_ptr< View > ViewPtr;
+typedef std::shared_ptr< GLContext > GLContextPtr;
+typedef std::shared_ptr< const GLContext > ConstGLContextPtr;
+typedef std::shared_ptr< GLWidget > GLWidgetPtr;
+typedef std::shared_ptr< TextureState > TextureStatePtr;
+typedef std::shared_ptr< const TextureState > ConstTextureStatePtr;
+typedef std::shared_ptr< DataSource > DataSourcePtr;
+typedef std::shared_ptr< const DataSource > ConstDataSourcePtr;
+typedef std::shared_ptr< EventHandler > EventHandlerPtr;
+typedef std::shared_ptr< EventHandlerFactory > EventHandlerFactoryPtr;
+typedef std::shared_ptr< MemoryUnit > MemoryUnitPtr;
+typedef std::shared_ptr< const MemoryUnit > ConstMemoryUnitPtr;
+typedef std::shared_ptr< PortData > PortDataPtr;
+typedef std::shared_ptr< Filter > FilterPtr;
+typedef std::shared_ptr< const Filter > ConstFilterPtr;
+typedef std::shared_ptr< PortData > PortDataPtr;
+typedef std::shared_ptr< const PortData > ConstPortDataPtr;
+typedef std::shared_ptr< Pipeline > PipelinePtr;
+typedef std::shared_ptr< const Pipeline > ConstPipelinePtr;
+typedef std::shared_ptr< PipeFilter > PipeFilterPtr;
+typedef std::shared_ptr< const PipeFilter > ConstPipeFilterPtr;
+typedef std::shared_ptr< Workers > WorkersPtr;
+typedef std::shared_ptr< Executor > ExecutorPtr;
+typedef std::shared_ptr< InputPort > InputPortPtr;
+typedef std::shared_ptr< OutputPort > OutputPortPtr;
+typedef std::shared_ptr< const InputPort > ConstInputPortPtr;
+typedef std::shared_ptr< const OutputPort > ConstOutputPortPtr;
+typedef std::shared_ptr< LODEvaluator > LODEvaluatorPtr;
+typedef std::shared_ptr< const LODEvaluator > ConstLODEvaluatorPtr;
+typedef std::shared_ptr< Cache > CachePtr;
+typedef std::shared_ptr< const Cache > ConstCachePtr;
+typedef std::shared_ptr< Executable > ExecutablePtr;
+typedef std::shared_ptr< const Executable > ConstExecutablePtr;
+typedef std::shared_ptr< CacheObject > CacheObjectPtr;
+typedef std::shared_ptr< const CacheObject > ConstCacheObjectPtr;
+typedef std::shared_ptr< Future > FuturePtr;
+typedef std::shared_ptr< const Future > ConstFuturePtr;
+typedef std::shared_ptr< Promise > PromisePtr;
+typedef std::shared_ptr< const Promise > ConstPromisePtr;
+typedef std::shared_ptr< CacheObject > CacheObjectPtr;
+typedef std::shared_ptr< const CacheObject > ConstCacheObjectPtr;
 
 /**
   * Pair definitions

@@ -76,7 +76,7 @@ private:
     Channel::Impl* const _channel;
 };
 
-typedef boost::shared_ptr< EqRenderView > EqRenderViewPtr;
+typedef std::shared_ptr< EqRenderView > EqRenderViewPtr;
 
 /** Implements livre \GLWidget for internal use of eq::Channel. */
 class EqGLWidget : public GLWidget
@@ -215,7 +215,7 @@ public:
         for( const ConstCacheObjectPtr& cacheObject: renderNodes )
         {
             const ConstTextureObjectPtr texture =
-                boost::static_pointer_cast< const TextureObject >( cacheObject );
+                std::static_pointer_cast< const TextureObject >( cacheObject );
 
             const LODNode& lodNode =
                     dashTree.getDataSource()->getNode( NodeId( cacheObject->getId( )));
@@ -350,9 +350,9 @@ public:
         generateSet.generateRenderingSet( _frameInfo );
 
         EqRenderViewPtr renderViewPtr =
-                boost::static_pointer_cast< EqRenderView >( _renderViewPtr );
+                std::static_pointer_cast< EqRenderView >( _renderViewPtr );
         RayCastRendererPtr renderer =
-                boost::static_pointer_cast< RayCastRenderer >(
+                std::static_pointer_cast< RayCastRenderer >(
                     renderViewPtr->getRenderer( ));
 
         renderer->update( *pipe->getFrameData( ));

@@ -176,12 +176,12 @@ protected:
     /**
      * Receiver end of connection.
      */
-    boost::shared_ptr< Receiver< T > > receiver_;
+    std::shared_ptr< Receiver< T > > receiver_;
 
     /**
      * Sender end of connection.
      */
-    boost::shared_ptr< Sender< T > > sender_;
+    std::shared_ptr< Sender< T > > sender_;
 };
 
 }

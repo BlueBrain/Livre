@@ -21,7 +21,7 @@
 #define _dashTypes_h_
 
 #include <set>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <dash/node.h>
 #include <dash/context.h>
@@ -31,7 +31,7 @@ namespace livre
 /**
  * SmartPtr definitions
  */
-typedef boost::shared_ptr< dash::Context > DashContextPtr;
+typedef std::shared_ptr< dash::Context > DashContextPtr;
 
 /**
  * Vector definitions for complex types

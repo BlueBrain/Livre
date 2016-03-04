@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE( testDataCache )
     BOOST_CHECK( dataCache.getCount() == 1 );
 
     livre::TextureDataObjectPtr dataObject =
-            boost::dynamic_pointer_cast< livre::TextureDataObject >( data );
+            std::dynamic_pointer_cast< livre::TextureDataObject >( data );
 
     BOOST_CHECK( dataObject );
     BOOST_CHECK( dataObject->getSize() == allocSize );
