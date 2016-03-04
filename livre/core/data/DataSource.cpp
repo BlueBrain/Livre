@@ -63,7 +63,7 @@ public:
         return plugin->getData( node );
     }
 
-    boost::scoped_ptr< DataSourcePlugin > plugin;
+    std::unique_ptr< DataSourcePlugin > plugin;
 };
 
 }

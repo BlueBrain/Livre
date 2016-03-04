@@ -31,7 +31,6 @@
 #include <boost/program_options.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <boost/make_shared.hpp>
-#include <boost/scoped_ptr.hpp>
 
 #include <boost/thread/locks.hpp>
 #include <boost/thread/mutex.hpp>
