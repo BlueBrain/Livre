@@ -24,7 +24,6 @@
 #include <livre/core/types.h>
 #include <lunchbox/buffer.h> // member
 #include <lunchbox/thread.h> // LB_TS_VAR
-#include <boost/noncopyable.hpp>
 
 namespace livre
 {
@@ -150,6 +149,10 @@ public:
     LIVRECORE_API size_t getAllocSize() const final;
 
 private:
+
+    AllocMemoryUnit( const AllocMemoryUnit& ) = delete;
+    AllocMemoryUnit& operator=( const AllocMemoryUnit& ) = delete;
+
     const uint8_t* getData_() const final;
     uint8_t* getData_() final;
 

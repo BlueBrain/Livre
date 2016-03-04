@@ -54,7 +54,7 @@ private:
  *
  * Implementations are responsible for filling the VolumeInformation.
  */
-class DataSourcePlugin : public boost::noncopyable
+class DataSourcePlugin
 {
 public:
 
@@ -105,6 +105,9 @@ public:
     LODNode getNode( const NodeId& nodeId ) const;
 
 protected:
+
+    DataSourcePlugin( const DataSourcePlugin& ) = delete;
+    DataSourcePlugin& operator=( const DataSourcePlugin& ) = delete;
 
     typedef std::unordered_map< Identifier, LODNode > IdLODNodeMap;
 
