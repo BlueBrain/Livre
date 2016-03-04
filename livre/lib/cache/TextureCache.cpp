@@ -38,7 +38,7 @@ struct TextureCache::Impl
         : _dataCache( dataCache )
     {
         const DataSource& dataSource = _dataCache.getDataSource();
-        const VolumeInformation& info = dataSource.getVolumeInformation();
+        const VolumeInformation& info = dataSource.getVolumeInfo();
 
         uint32_t format;
         switch( info.compCount )

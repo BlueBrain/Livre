@@ -167,7 +167,7 @@ public:
                                   nSamplesPerPixel,
                                   GL_UNSIGNED_BYTE,
                                   GL_LUMINANCE8,
-                                  dataSource->getVolumeInformation( )));
+                                  dataSource->getVolumeInfo( )));
 
         _renderViewPtr->setRenderer( renderer );
     }
@@ -240,7 +240,7 @@ public:
 
         DashTree& dashTree = node->getDashTree();
 
-        const VolumeInformation& volInfo = dashTree.getDataSource()->getVolumeInformation();
+        const VolumeInformation& volInfo = dashTree.getDataSource()->getVolumeInfo();
 
         const float worldSpacePerVoxel = volInfo.worldSpacePerVoxel;
         const uint32_t volumeDepth = volInfo.rootNode.getDepth();
@@ -442,7 +442,7 @@ public:
 
         ConstDataSourcePtr dataSource = static_cast< livre::Node* >(
             _channel->getNode( ))->getDashTree().getDataSource();
-        const VolumeInformation& info = dataSource->getVolumeInformation();
+        const VolumeInformation& info = dataSource->getVolumeInfo();
         Vector3f voxelSize = info.boundingBox.getSize() / info.voxels;
         std::string unit = "m";
         if( voxelSize.x() < 0.000001f )

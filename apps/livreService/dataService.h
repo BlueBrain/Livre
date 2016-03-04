@@ -117,7 +117,7 @@ private:
                                                        this, _1 )));
         }
 
-        const VolumeInformation& info=dataSource->getVolumeInformation();
+        const VolumeInformation& info=dataSource->getVolumeInfo();
         _publisher.publish( zeq::serializeDataSourceData(
                                 std::make_pair( dataEvent, info )));
         LBINFO << "Serving " << uri << std::endl;

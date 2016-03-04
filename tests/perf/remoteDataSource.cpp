@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE( testRemote )
             const float setup = clock.getTimef();
 
             const livre::VolumeInformation& info =
-                dataSource.getVolumeInformation();
+                dataSource.getVolumeInfo();
             const vmml::Vector3ui block( i );
             livre::Boxf worldBox( vmml::Vector3i( 0.f ) ,
                                   vmml::Vector3i( 1.f ));

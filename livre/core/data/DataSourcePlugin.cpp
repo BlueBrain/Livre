@@ -47,7 +47,7 @@ LODNode DataSourcePlugin::getNode( const NodeId& nodeId ) const
     return _lodNodeMap[ nodeId ];
 }
 
-const VolumeInformation& DataSourcePlugin::getVolumeInformation() const
+const VolumeInformation& DataSourcePlugin::getVolumeInfo() const
 {
     return _volumeInfo;
 }

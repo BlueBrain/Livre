@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE( testDataCache )
 
     const lunchbox::URI uri( volumeName.str( ));
     livre::DataSource source( uri );
-    const livre::VolumeInformation& info = source.getVolumeInformation();
+    const livre::VolumeInformation& info = source.getVolumeInfo();
 
     const uint32_t level = 0;
     const livre::Vector3f position( 0, 0, 0);

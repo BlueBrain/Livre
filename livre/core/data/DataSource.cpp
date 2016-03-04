@@ -97,9 +97,9 @@ void DataSource::update()
     _impl->plugin->update();
 }
 
-const VolumeInformation& DataSource::getVolumeInformation() const
+const VolumeInformation& DataSource::getVolumeInfo() const
 {
-    return _impl->plugin->getVolumeInformation();
+    return _impl->plugin->getVolumeInfo();
 }
 
 bool DataSource::initializeGL()

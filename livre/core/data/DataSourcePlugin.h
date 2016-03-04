@@ -70,7 +70,7 @@ public:
     /**
      * @return The volume information.
      */
-    const VolumeInformation& getVolumeInformation() const;
+    const VolumeInformation& getVolumeInfo() const;
 
     /**
      * Initializes the GL specific functions.

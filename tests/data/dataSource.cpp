@@ -39,7 +39,7 @@ void _testDataSource( const std::string& uriStr )
 {
     const lunchbox::URI uri( uriStr );
     livre::DataSource source( uri );
-    const livre::VolumeInformation& info = source.getVolumeInformation();
+    const livre::VolumeInformation& info = source.getVolumeInfo();
 
      // 32 << depth = 512 - shortest dimension of the volume.
     BOOST_CHECK( info.rootNode.getDepth() == 5 );

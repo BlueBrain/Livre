@@ -58,7 +58,7 @@ public:
     /**
      * @return The volume information.
      */
-    LIVRECORE_API const VolumeInformation& getVolumeInformation() const;
+    LIVRECORE_API const VolumeInformation& getVolumeInfo() const;
 
     /** Initializes the GL specific functions. */
     LIVRECORE_API bool initializeGL();

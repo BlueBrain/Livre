@@ -55,11 +55,11 @@ public:
                 _dataSource.getNode( NodeId( _dataObject.getId( )));
 
         const Vector3ui& overlap =
-                    _dataSource.getVolumeInformation().overlap;
+                    _dataSource.getVolumeInfo().overlap;
         const size_t elemSize =
-                    _dataSource.getVolumeInformation().getBytesPerVoxel();
+                    _dataSource.getVolumeInfo().getBytesPerVoxel();
         const uint32_t compCount =
-                    _dataSource.getVolumeInformation().compCount;
+                    _dataSource.getVolumeInfo().compCount;
         const Vector3ui blockSize =
                     lodNode.getBlockSize() + overlap * 2;
         return blockSize.product() * elemSize * compCount;
@@ -100,7 +100,7 @@ public:
     void quantizeData( const SRC_TYPE* rawData,
                        std::vector< DEST_TYPE >& formattedData ) const
     {
-        const VolumeInformation& volumeInfo = _dataSource.getVolumeInformation();
+        const VolumeInformation& volumeInfo = _dataSource.getVolumeInfo();
         const uint32_t compCount = volumeInfo.compCount;
         const size_t dataSize = getDataSize();
 
@@ -123,7 +123,7 @@ public:
                       std::vector< DEST_TYPE >& formattedData ) const
     {
 
-        const VolumeInformation& volumeInfo = _dataSource.getVolumeInformation();
+        const VolumeInformation& volumeInfo = _dataSource.getVolumeInfo();
         const DataType dataType = volumeInfo.dataType;
         const size_t dataSize = getDataSize();
         formattedData.resize( dataSize );
@@ -165,7 +165,7 @@ public:
 
     bool load()
     {
-        const DataType dataType = _dataSource.getVolumeInformation().dataType;
+        const DataType dataType = _dataSource.getVolumeInfo().dataType;
         switch( _gpuDataType )
         {
             case GL_UNSIGNED_BYTE:

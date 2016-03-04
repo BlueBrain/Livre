@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE( UVFDataSource )
     std::cout << "uvf://" UVF_DATA_FILE << std::endl;
     const lunchbox::URI uri( "uvf://" UVF_DATA_FILE );
     livre::DataSource source( uri );
-    const livre::VolumeInformation& info = source.getVolumeInformation();
+    const livre::VolumeInformation& info = source.getVolumeInfo();
 
     BOOST_CHECK( info.rootNode.getDepth() == 2 );
     BOOST_CHECK( info.compCount == 1 );

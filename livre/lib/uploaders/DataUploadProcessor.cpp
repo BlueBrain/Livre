@@ -186,7 +186,7 @@ void DataUploadProcessor::_loadData()
                                                  processorOutputPtr_,
                                                  dashNodeList );
 
-    const RootNode& rootNode = _dashTree.getDataSource()->getVolumeInformation().rootNode;
+    const RootNode& rootNode = _dashTree.getDataSource()->getVolumeInfo().rootNode;
 
     DFSTraversal traverser;
     traverser.traverse( rootNode, depthCollectorVisitor, _currentFrameID );

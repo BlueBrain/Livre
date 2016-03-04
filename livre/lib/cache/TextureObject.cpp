@@ -90,13 +90,13 @@ struct TextureObject::Impl
     void initialize( )
     {
         // TODO: The internal format size should be calculated correctly
-        const Vector3f& overlap = _dataSource.getVolumeInformation().overlap;
+        const Vector3f& overlap = _dataSource.getVolumeInfo().overlap;
 
         const LODNode& lodNode =
                 _dataSource.getNode( NodeId( _textureObject.getId( )));
 
         const Vector3f& size = lodNode.getVoxelBox().getSize();
-        const Vector3f& maxSize = _dataSource.getVolumeInformation().maximumBlockSize;
+        const Vector3f& maxSize = _dataSource.getVolumeInfo().maximumBlockSize;
         const Vector3f& overlapf = overlap / maxSize;
         _textureState->textureCoordsMax = size / maxSize;
         _textureState->textureCoordsMin = overlapf;
@@ -127,7 +127,7 @@ struct TextureObject::Impl
         }
 
         const Vector3ui& textureSize =
-                _dataSource.getVolumeInformation().maximumBlockSize;
+                _dataSource.getVolumeInfo().maximumBlockSize;
         return textureSize.product() * elementSize;
     }
 
@@ -141,7 +141,7 @@ struct TextureObject::Impl
                   << lodNode.getRelativePosition() << " to "
                   << _textureState->textureId << std::endl;
     #endif
-        const Vector3ui& overlap = _dataSource.getVolumeInformation().overlap;
+        const Vector3ui& overlap = _dataSource.getVolumeInfo().overlap;
 
         const Vector3ui& voxSizeVec =
                 lodNode.getBlockSize() + overlap * 2;
