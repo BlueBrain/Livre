@@ -57,6 +57,20 @@ struct InputPort::Impl
         _futures.push_back( outputPort.getPromise()->getFuture( ));
     }
 
+    void disconnect( const OutputPort& outputPort )
+    {
+        Futures::iterator it = _futures.begin();
+        while( it != _futures.end())
+        {
+            if( *it == outputPort.getPromise()->getFuture( ))
+            {
+                _futures.erase( it );
+                return;
+            }
+            ++it;
+        }
+    }
+
     Futures _futures;
     const PortInfo _info;
 };
@@ -76,6 +90,11 @@ const Futures& InputPort::getFutures() const
 void InputPort::connect( const OutputPort& outputPort )
 {
     _impl->connect( outputPort );
+}
+
+void InputPort::disconnect( const OutputPort& outputPort )
+{
+    _impl->disconnect( outputPort );
 }
 
 const std::string& InputPort::getName() const

@@ -118,6 +118,11 @@ public:
      */
     const servus::uint128_t& getId() const;
 
+    /**
+     * Resets the filter. At this point pipe filter execution should be complete.
+     */
+    void reset();
+
 private:
 
     friend class Pipeline;

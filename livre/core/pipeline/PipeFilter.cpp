@@ -157,7 +157,6 @@ struct PipeFilter::Impl
     Futures getPostconditions() const
     {
         Futures futures;
-        futures.reserve(_outputMap.size( ));
         for( const auto& pair: _outputMap )
         {
             const Future& outputFuture = pair.second->getPromise()->getFuture();
@@ -203,6 +202,16 @@ struct PipeFilter::Impl
         inputPort->connect( *outputPort );
     }
 
+    void reset()
+    {
+        for( auto& pair: _readyPortsMap )
+            _inputMap[ pair.first ]->disconnect( *pair.second );
+
+        _readyPortsMap.clear();
+        for( const auto& pair: _outputMap )
+            pair.second->reset();
+    }
+
     PipeFilter& _pipeFilter;
     const std::string _name;
     const servus::uint128_t _id;
@@ -239,6 +248,11 @@ void PipeFilter::execute()
 const servus::uint128_t& PipeFilter::getId() const
 {
     return _impl->_id;
+}
+
+void PipeFilter::reset()
+{
+    _impl->reset();
 }
 
 const std::string& PipeFilter::getName() const

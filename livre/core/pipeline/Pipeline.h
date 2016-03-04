@@ -93,6 +93,11 @@ public:
      */
     void execute() final;
 
+    /**
+     * Resets the pipeline. At this point pipeline execution should be complete.
+     */
+    void reset() final;
+
 private:
 
     /**

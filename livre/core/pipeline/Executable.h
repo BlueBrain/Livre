@@ -57,6 +57,11 @@ public:
      */
     virtual Futures getPreconditions() const { return Futures(); }
 
+    /**
+     * Resets the executable
+     */
+    virtual void reset() {}
+
 };
 
 }

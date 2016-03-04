@@ -37,7 +37,10 @@ namespace
        Therefore, the get/set/query operations on promises/futures causes deadlocks
        when used with wait_for_any( futurelist ) if futurelist is including the
        future to be queried. With below implementation no locking is needed between
-       future operations. A higher granularity can be added for checking whet */
+       future operations. A higher granularity can be added for checking whether
+       the list includes the future or not, but simply exiting the wait_for_any
+       operation when lock is owned is simpler.
+     */
 
     ReadWriteMutex waitForAnyLock;
 }
@@ -88,6 +91,13 @@ struct AsyncData::Impl
         _future.wait();
     }
 
+    void reset()
+    {
+        ConstPortDataPromise newPromise;
+        _promise.swap( newPromise );
+        _future = _promise.get_future();
+    }
+
     ConstPortDataPromise _promise;
     mutable ConstPortDataFuture _future;
     const std::string _name;
@@ -124,6 +134,10 @@ void AsyncData::wait() const
     _impl->wait();
 }
 
+void AsyncData::reset()
+{
+    _impl->reset();
+}
 
 struct OutputPort::Impl
 {
@@ -146,6 +160,11 @@ struct OutputPort::Impl
     const std::string& getName() const
     {
         return _info.name;
+    }
+
+    void reset()
+    {
+        _data.reset();
     }
 
     const PortInfo _info;
@@ -179,6 +198,11 @@ PromisePtr OutputPort::getPromise() const
 void OutputPort::connect( InputPort& inputPort )
 {
     inputPort.connect( *this );
+}
+
+void OutputPort::reset()
+{
+    _impl->reset();
 }
 
 bool waitForAny( const Futures& futures )

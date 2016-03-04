@@ -132,6 +132,12 @@ struct Pipeline::Impl
         return _waitFutures;
     }
 
+    void reset()
+    {
+        for( auto pair: _executableMap )
+            pair.second->reset();
+    }
+
     ~Impl()
     {}
 
@@ -183,6 +189,11 @@ Executables Pipeline::getExecutables() const
 void Pipeline::execute()
 {
     return _impl->execute();
+}
+
+void Pipeline::reset()
+{
+    _impl->reset();
 }
 
 Futures Pipeline::getPreconditions() const

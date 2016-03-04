@@ -67,6 +67,11 @@ public:
      */
     void wait() const;
 
+    /**
+     * Resets the promise/future
+     */
+    void reset();
+
 private:
 
     /**
@@ -112,6 +117,11 @@ public:
      * @param inputPort input port
      */
     void connect( InputPort& inputPort );
+
+    /**
+     * Resets the promise/future
+     */
+    void reset();
 
 private:
 

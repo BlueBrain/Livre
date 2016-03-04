@@ -100,6 +100,12 @@ public:
      */
     const AsyncData& getAsyncData() const;
 
+    /**
+     * @param future is the future to be checked with
+     * @return true if both futures are same
+     */
+    bool operator==( const Future& future ) const { return _impl == future._impl; }
+
 private:
 
     friend bool livre::waitForAny( const Futures& future );

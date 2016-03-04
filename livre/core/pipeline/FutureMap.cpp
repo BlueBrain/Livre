@@ -47,7 +47,6 @@ public:
         if( portName == ALL_PORTS )
         {
             Futures futures;
-            futures.reserve( _futureMap.size( ));
             for( const auto& pair: _futureMap )
                 futures.push_back( pair.second );
             return futures;
@@ -163,7 +162,7 @@ Futures OutFutureMap::getFutures() const
 
 Future OutFutureMap::getFuture( const std::string& portName ) const
 {
-    return _impl->getFutures( portName )[ 0 ];
+    return _impl->getFutures( portName ).front();
 }
 
 bool OutFutureMap::isReady( const std::string& portName ) const

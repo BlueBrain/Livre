@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -198,13 +198,14 @@ BOOST_AUTO_TEST_CASE( testConnection )
     BOOST_CHECK_EQUAL( outputData.thanksForAllTheFish, 222 );
 }
 
-livre::PipelinePtr createPipeline( livre::PipeFilterPtr& pipeOutput,
+livre::PipelinePtr createPipeline( livre::PipeFilterPtr& pipeInput,
+                                   livre::PipeFilterPtr& pipeOutput,
                                    uint32_t inputValue,
                                    size_t nConvertFilter = 1 )
 {
     livre::FilterPtr filter( new TestFilter( ));
     livre::PipelinePtr pipeline( new livre::Pipeline( ));
-    livre::PipeFilterPtr pipeInput = pipeline->add( "Producer", filter );
+    pipeInput = pipeline->add( "Producer", filter );
     pipeOutput = pipeline->add( "Consumer", filter );
 
     livre::FilterPtr convertFilter( new ConvertFilter( ));
@@ -229,9 +230,15 @@ livre::ExecutorPtr createExecutor(const size_t nbOfWorkerThreads )
 
 BOOST_AUTO_TEST_CASE( testSynchronousPipeline )
 {
-    livre::PipeFilterPtr pipeOutput;
     const uint32_t inputValue = 90;
-    livre::PipelinePtr pipeline = createPipeline( pipeOutput, inputValue );
+    livre::PipeFilterPtr pipeInput;
+    livre::PipeFilterPtr pipeOutput;
+
+    livre::PipelinePtr pipeline = createPipeline( pipeInput,
+                                                  pipeOutput,
+                                                  inputValue,
+                                                  1 );
+
     pipeline->execute();
 
     const livre::OutFutureMap portFutures( pipeOutput->getPostconditions( ));
@@ -241,9 +248,15 @@ BOOST_AUTO_TEST_CASE( testSynchronousPipeline )
 
 BOOST_AUTO_TEST_CASE( testWaitPipeline )
 {
-    livre::PipeFilterPtr pipeOutput;
     const uint32_t inputValue = 90;
-    livre::PipelinePtr pipeline = createPipeline( pipeOutput, inputValue );
+    livre::PipeFilterPtr pipeInput;
+    livre::PipeFilterPtr pipeOutput;
+
+    livre::PipelinePtr pipeline = createPipeline( pipeInput,
+                                                  pipeOutput,
+                                                  inputValue,
+                                                  1 );
+
     livre::ExecutorPtr executor = createExecutor( 2 );
 
     const livre::FutureMap pipelineFutures( executor->execute( pipeline->getExecutables( )));
@@ -256,9 +269,15 @@ BOOST_AUTO_TEST_CASE( testWaitPipeline )
 
 BOOST_AUTO_TEST_CASE( testAsynchronousPipeline )
 {
-    livre::PipeFilterPtr pipeOutput;
     const uint32_t inputValue = 90;
-    livre::PipelinePtr pipeline = createPipeline( pipeOutput, inputValue );
+    livre::PipeFilterPtr pipeInput;
+    livre::PipeFilterPtr pipeOutput;
+
+    livre::PipelinePtr pipeline = createPipeline( pipeInput,
+                                                  pipeOutput,
+                                                  inputValue,
+                                                  1 );
+
     livre::ExecutorPtr executor = createExecutor( 2 );
 
     executor->execute( pipeline->getExecutables( ));
@@ -274,11 +293,14 @@ BOOST_AUTO_TEST_CASE( testOneToManyManyToOnePipeline )
     {
         const size_t convertFilterCount = 10;
         const uint32_t inputValue = 90;
+        livre::PipeFilterPtr pipeInput;
         livre::PipeFilterPtr pipeOutput;
 
-        livre::PipelinePtr pipeline = createPipeline( pipeOutput,
+        livre::PipelinePtr pipeline = createPipeline( pipeInput,
+                                                      pipeOutput,
                                                       inputValue,
                                                       convertFilterCount );
+
         livre::ExecutorPtr executor = createExecutor( 1 );
         executor->execute( pipeline->getExecutables( ));
 
@@ -291,17 +313,31 @@ BOOST_AUTO_TEST_CASE( testOneToManyManyToOnePipeline )
     {
         const size_t convertFilterCount = 10;
         const uint32_t inputValue = 90;
+        livre::PipeFilterPtr pipeInput;
         livre::PipeFilterPtr pipeOutput;
 
-        livre::PipelinePtr pipeline = createPipeline( pipeOutput,
+        livre::PipelinePtr pipeline = createPipeline( pipeInput,
+                                                      pipeOutput,
                                                       inputValue,
                                                       convertFilterCount );
         livre::ExecutorPtr executor = createExecutor( 8 );
-        executor->execute( pipeline->getExecutables( ));
+        const livre::Futures& futures = executor->execute( pipeline->getExecutables( ));
 
-        const livre::OutFutureMap portFutures( pipeOutput->getPostconditions( ));
-        const OutputData& outputData = portFutures.get< OutputData >( "TestOutputData" );
-        BOOST_CHECK_EQUAL( outputData.thanksForAllTheFish, 1761 );
+        const livre::OutFutureMap portFutures1( pipeOutput->getPostconditions( ));
+        const OutputData& outputData1 = portFutures1.get< OutputData >( "TestOutputData" );
+        BOOST_CHECK_EQUAL( outputData1.thanksForAllTheFish, 1761 );
+
+        // Reset the pipeline but wait pipeline execution before
+        const livre::FutureMap futureMap( futures );
+        futureMap.wait();
+
+        pipeline->reset();
+        executor->execute( pipeline->getExecutables( ));
+        pipeInput->getPromise( "TestInputData" )->set( InputData( inputValue ));
+
+        const livre::OutFutureMap portFutures2( pipeOutput->getPostconditions( ));
+        const OutputData& outputData2 = portFutures2.get< OutputData >( "TestOutputData" );
+        BOOST_CHECK_EQUAL( outputData2.thanksForAllTheFish, 1761 );
     }
 
 

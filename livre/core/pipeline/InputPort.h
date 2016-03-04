@@ -68,6 +68,12 @@ public:
      */
     void connect( const OutputPort& inputPort );
 
+    /**
+     * Disconnects an output port from input port
+     * @param inputPort input port
+     */
+    void disconnect( const OutputPort& inputPort );
+
 private:
 
     struct Impl;
