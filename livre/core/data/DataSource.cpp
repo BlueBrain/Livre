@@ -27,22 +27,21 @@
 
 namespace livre
 {
+
 namespace
 {
     lunchbox::DSOs _plugins;
 }
-namespace detail
-{
 
-class DataSource
+struct DataSource::Impl
 {
 public:
     typedef lunchbox::PluginFactory< DataSourcePlugin,
                                      DataSourcePluginData >
                 PluginFactory;
 
-    DataSource( const lunchbox::URI& uri,
-                      const AccessMode accessMode )
+    Impl( const lunchbox::URI& uri,
+          const AccessMode accessMode )
         : plugin( PluginFactory::getInstance().create(
                       DataSourcePluginData( uri, accessMode )))
     {}
@@ -65,25 +64,23 @@ public:
     std::unique_ptr< DataSourcePlugin > plugin;
 };
 
-}
-
 DataSource::DataSource( const lunchbox::URI& uri,
                         const AccessMode accessMode )
-    : _impl( new detail::DataSource( uri, accessMode ) )
+    : _impl( new Impl( uri, accessMode ) )
 {
 }
 
 void DataSource::loadPlugins()
 {
     unloadPlugins();
-    _plugins = detail::DataSource::PluginFactory::getInstance().load(
+    _plugins = DataSource::Impl::PluginFactory::getInstance().load(
         LIVRECORE_VERSION_ABI, lunchbox::getLibraryPaths(), "Livre.*Source" );
 }
 
 void DataSource::unloadPlugins()
 {
     for( lunchbox::DSO* plugin: _plugins )
-        detail::DataSource::PluginFactory::getInstance().unload( plugin );
+        DataSource::Impl::PluginFactory::getInstance().unload( plugin );
 }
 
 LODNode DataSource::getNode( const NodeId& nodeId ) const

@@ -26,11 +26,6 @@
 namespace livre
 {
 
-namespace detail
-{
-    class UVFDataSource;
-}
-
 /** Reads Tuvok Volumes and generates hierarchies. */
 class UVFDataSource : public DataSourcePlugin
 {
@@ -45,7 +40,8 @@ private:
     MemoryUnitPtr getData( const LODNode& node ) final;
     LODNode internalNodeToLODNode( const NodeId& internalNode ) const final;
 
-    detail::UVFDataSource* _impl;
+    struct Impl;
+    std::unique_ptr< Impl > _impl;
 };
 
 }

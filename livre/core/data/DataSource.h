@@ -32,12 +32,7 @@
 namespace livre
 {
 
-namespace detail
-{
-    class DataSource;
-}
-
-class DataSource : boost::noncopyable
+class DataSource
 {
 public:
     /**
@@ -84,7 +79,9 @@ public:
     LIVRECORE_API void update();
 
 private:
-    detail::DataSource* _impl;
+
+    struct Impl;
+    std::unique_ptr< Impl > _impl;
 };
 
 }

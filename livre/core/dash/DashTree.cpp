@@ -29,15 +29,12 @@
 namespace livre
 {
 
-namespace detail
-{
-
 typedef std::unordered_map< Identifier, dash::NodePtr > IdDashNodeMap;
 
-class DashTree : public boost::noncopyable
+struct DashTree::Impl
 {
 public:
-    explicit DashTree( ConstDataSourcePtr dataSource )
+    explicit Impl( ConstDataSourcePtr dataSource )
         : _dataSource( dataSource ),
           _localContext( dash::Context::getMain( ))
     {
@@ -49,7 +46,7 @@ public:
         prevCtx.setCurrent();
     }
 
-    ~DashTree( )
+    ~Impl()
     {
         _localContext.commit();
         for( DashContextPtr ctx: dashContexts )
@@ -135,10 +132,8 @@ public:
     std::vector< DashContextPtr > dashContexts;
 };
 
-}
-
 DashTree::DashTree( ConstDataSourcePtr datasSource )
-    : _impl( new detail::DashTree( datasSource ))
+    : _impl( new Impl( datasSource ))
 {}
 
 ConstDataSourcePtr DashTree::getDataSource() const
@@ -147,9 +142,7 @@ ConstDataSourcePtr DashTree::getDataSource() const
 }
 
 DashTree::~DashTree()
-{
-    delete _impl;
-}
+{}
 
 DashContextPtr DashTree::createContext()
 {

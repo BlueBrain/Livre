@@ -124,9 +124,7 @@ AvailableSetGenerator::AvailableSetGenerator( const TextureCache& textureCache )
 }
 
 AvailableSetGenerator::~AvailableSetGenerator()
-{
-    delete _impl;
-}
+{}
 
 void AvailableSetGenerator::generateRenderingSet( FrameInfo& frameInfo ) const
 {

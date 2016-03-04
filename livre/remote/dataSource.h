@@ -27,7 +27,6 @@ namespace livre
 {
 namespace remote
 {
-namespace detail{ class DataSource; }
 
 /**
  * Proxy for a remote ZeroEQ-based data source service
@@ -48,11 +47,12 @@ public:
     virtual ~DataSource();
 
     MemoryUnitPtr getData( const LODNode& node ) final;
-
     static bool handles( const DataSourcePluginData& initData );
 
 private:
-    detail::DataSource* _impl;
+
+    struct Impl;
+    std::unique_ptr< Impl > _impl;
 };
 
 }

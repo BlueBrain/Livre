@@ -29,12 +29,6 @@
 namespace livre
 {
 
-namespace detail
-{
-    class DFSTraversal;
-}
-
-
 /** Depth First Search ( DFS ) traverser for a dash node tree. */
 class DFSTraversal
 {
@@ -64,7 +58,9 @@ public:
                              uint32_t frame );
 
 private:
-    detail::DFSTraversal* _impl;
+
+    struct Impl;
+    std::unique_ptr< Impl > _impl;
 };
 
 }

@@ -49,14 +49,11 @@ namespace
    lunchbox::PluginRegisterer< UVFDataSource > registerer;
 }
 
-namespace detail
-{
-
-class UVFDataSource
+struct UVFDataSource::Impl
 {
 public:
-    UVFDataSource( VolumeInformation& volumeInfo,
-                   const DataSourcePluginData& initData )
+    Impl( VolumeInformation& volumeInfo,
+          const DataSourcePluginData& initData )
         : _uvfTOCBlock( 0 ),
           _volumeInfo( volumeInfo )
     {
@@ -147,7 +144,7 @@ public:
 
     }
 
-    ~UVFDataSource()
+    ~Impl()
     {
         if( _tuvokLargeMMapFilePtr )
             _tuvokLargeMMapFilePtr->close();
@@ -393,17 +390,13 @@ public:
     VolumeInformation& _volumeInfo;
 };
 
-}
-
 UVFDataSource::UVFDataSource( const DataSourcePluginData& initData )
-    : _impl( new detail::UVFDataSource( _volumeInfo, initData ))
+    : _impl( new Impl( _volumeInfo, initData ))
 {
 }
 
 UVFDataSource::~UVFDataSource()
-{
-    delete _impl;
-}
+{}
 
 bool UVFDataSource::handles( const DataSourcePluginData& initData )
 {

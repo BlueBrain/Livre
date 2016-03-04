@@ -71,9 +71,7 @@ RenderView::RenderView( const DashTree& dashTree )
 }
 
 RenderView::~RenderView()
-{
-    delete _impl;
-}
+{}
 
 void RenderView::_onPostRender( const GLWidget&,
                                 const FrameInfo& frameInfo )
