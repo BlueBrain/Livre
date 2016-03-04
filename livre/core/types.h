@@ -174,7 +174,6 @@ typedef boost::shared_ptr< Promise > PromisePtr;
 typedef boost::shared_ptr< const Promise > ConstPromisePtr;
 typedef boost::shared_ptr< CacheObject > CacheObjectPtr;
 typedef boost::shared_ptr< const CacheObject > ConstCacheObjectPtr;
-typedef boost::shared_ptr< GLSLShaders > GLSLShadersPtr;
 
 /**
   * Pair definitions
