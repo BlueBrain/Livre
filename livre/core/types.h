@@ -34,7 +34,6 @@
 #include <boost/thread/locks.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/shared_mutex.hpp>
-#include <boost/unordered_map.hpp>
 
 #include <stdint.h>
 #include <set>
@@ -45,6 +44,8 @@
 #include <utility>
 #include <typeindex>
 #include <memory>
+#include <unordered_map>
+#include <list>
 
 namespace livre
 {
@@ -248,12 +249,11 @@ using ResultsT = std::vector< T >;
 /**
  * Map definitions
  */
-typedef boost::unordered_map< NodeId, dash::NodePtr > NodeIDDashNodePtrMap;
-typedef boost::unordered_map< CacheId, CacheObjectPtr > CacheMap;
-typedef boost::unordered_map< CacheId, ConstCacheObjectPtr > ConstCacheMap;
-typedef boost::unordered_map< uint32_t, bool > BoolMap;
-typedef boost::unordered_map< uint32_t, EventHandlerPtr > EventHandlerPtrMap;
-typedef boost::unordered_map< uint32_t, DashConnectionPtr > DashConnectionPtrMap;
+typedef std::unordered_map< CacheId, CacheObjectPtr > CacheMap;
+typedef std::unordered_map< CacheId, ConstCacheObjectPtr > ConstCacheMap;
+typedef std::unordered_map< uint32_t, bool > BoolMap;
+typedef std::unordered_map< uint32_t, EventHandlerPtr > EventHandlerPtrMap;
+typedef std::unordered_map< uint32_t, DashConnectionPtr > DashConnectionPtrMap;
 
 /**
  * Set definitions

@@ -23,6 +23,7 @@
 
 #include <livre/core/api.h>
 #include <livre/core/data/NodeId.h>
+#include <livre/core/data/LODNode.h>
 #include <livre/core/data/VolumeInformation.h>
 
 #include <lunchbox/plugin.h>
@@ -105,9 +106,9 @@ public:
 
 protected:
 
-    typedef boost::unordered_map< NodeId, LODNode > NodeIDLODNodeMap;
+    typedef std::unordered_map< Identifier, LODNode > IdLODNodeMap;
 
-    mutable NodeIDLODNodeMap _lodNodeMap;
+    mutable IdLODNodeMap _lodNodeMap;
     VolumeInformation _volumeInfo;
     mutable ReadWriteMutex _mutex;
 

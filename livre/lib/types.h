@@ -54,7 +54,7 @@ typedef std::shared_ptr< TextureDataObject > TextureDataObjectPtr;
 typedef std::shared_ptr< TextureObject > TextureObjectPtr;
 
 /** Map definitions */
-typedef boost::unordered_map< uint32_t, DataUploadProcessorPtr > DataUploadProcessorPtrMap;
+typedef std::hash_map< uint32_t, DataUploadProcessorPtr > DataUploadProcessorPtrMap;
 
 static const uint32_t CONNECTION_ID( 0u );
 

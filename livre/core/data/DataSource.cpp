@@ -21,7 +21,6 @@
 #include <livre/core/defines.h>
 #include <livre/core/data/DataSource.h>
 #include <livre/core/data/DataSourcePlugin.h>
-#include <livre/core/data/LODNode.h>
 #include <livre/core/version.h>
 
 #include <lunchbox/pluginFactory.h>
@@ -69,7 +68,7 @@ public:
 }
 
 DataSource::DataSource( const lunchbox::URI& uri,
-                                    const AccessMode accessMode )
+                        const AccessMode accessMode )
     : _impl( new detail::DataSource( uri, accessMode ) )
 {
 }

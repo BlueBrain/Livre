@@ -18,7 +18,6 @@
  */
 
 #include <livre/core/data/DataSourcePlugin.h>
-#include <livre/core/data/LODNode.h>
 
 namespace livre
 {
@@ -28,23 +27,23 @@ DataSourcePlugin::DataSourcePlugin()
 
 LODNode DataSourcePlugin::getNode( const NodeId& nodeId ) const
 {
-    NodeIDLODNodeMap::iterator it;
+    IdLODNodeMap::iterator it;
     {
         ReadLock lock( _mutex );
-        it = _lodNodeMap.find( nodeId );
+        it = _lodNodeMap.find( nodeId.getId( ));
         if( it != _lodNodeMap.end( ))
             return it->second;
     }
 
     WriteLock writeLock( _mutex );
-    it = _lodNodeMap.find( nodeId );
+    it = _lodNodeMap.find( nodeId.getId( ));
     if( it == _lodNodeMap.end( ))
     {
         const LODNode& node = internalNodeToLODNode( nodeId );
-        _lodNodeMap[ nodeId ] = node;
+        _lodNodeMap[ nodeId.getId() ] = node;
     }
 
-    return _lodNodeMap[ nodeId ];
+    return _lodNodeMap[ nodeId.getId() ];
 }
 
 const VolumeInformation& DataSourcePlugin::getVolumeInfo() const

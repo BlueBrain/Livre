@@ -27,6 +27,7 @@
 #include <livre/core/defines.h>
 #include <livre/core/data/MemoryUnit.h>
 #include <livre/core/data/VolumeInformation.h>
+#include <livre/core/data/LODNode.h>
 
 namespace livre
 {
@@ -45,7 +46,7 @@ public:
      * @param accessMode The access mode.
      */
     LIVRECORE_API DataSource( const lunchbox::URI& uri,
-                                    const AccessMode accessMode = MODE_READ );
+                              const AccessMode accessMode = MODE_READ );
 
     LIVRECORE_API ~DataSource();
 

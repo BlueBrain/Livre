@@ -32,6 +32,8 @@ namespace livre
 namespace detail
 {
 
+typedef std::unordered_map< Identifier, dash::NodePtr > IdDashNodeMap;
+
 class DashTree : public boost::noncopyable
 {
 public:
@@ -79,23 +81,24 @@ public:
     dash::NodePtr getDashNode( const NodeId& nodeId) const
     {
         ReadLock readLock( _mutex );
-        NodeIDDashNodePtrMap::const_iterator it = _dashNodeMap.find( nodeId );
+        IdDashNodeMap::const_iterator it = _dashNodeMap.find( nodeId.getId( ));
         return it == _dashNodeMap.end() ? dash::NodePtr() : it->second;
     }
 
     dash::NodePtr getDashNode( const NodeId& nodeId )
     {
-        // "Double-Checked Locking" idiom is used below.
         LBASSERT( &_localContext != &dash::Context::getCurrent() );
-        ReadLock readLock( _mutex );
-        NodeIDDashNodePtrMap::const_iterator it = _dashNodeMap.find( nodeId );
-        if( it != _dashNodeMap.end( ) && it->second )
-            return it->second;
+        IdDashNodeMap::const_iterator it = _dashNodeMap.find( nodeId.getId( ));
 
-        readLock.unlock();
+        // "Double-Checked Locking" idiom is used below.
+        {
+            ReadLock readLock( _mutex );
+            if( it != _dashNodeMap.end( ) && it->second )
+                return it->second;
+        }
 
         WriteLock writeLock( _mutex );
-        it = _dashNodeMap.find( nodeId );
+        it = _dashNodeMap.find( nodeId.getId( ));
         if( it != _dashNodeMap.end( ))
             return it->second;
 
@@ -120,12 +123,12 @@ public:
             _localContext.map( node, *ctx );
         }
         prevCtx.setCurrent();
-        _dashNodeMap[ nodeId ] = node;
+        _dashNodeMap[ nodeId.getId() ] = node;
         return node;
     }
 
     ConstDataSourcePtr _dataSource;
-    NodeIDDashNodePtrMap _dashNodeMap;
+    IdDashNodeMap _dashNodeMap;
     DashRenderStatus* _renderStatus;
     mutable ReadWriteMutex _mutex;
     dash::Context& _localContext;
