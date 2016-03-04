@@ -301,8 +301,7 @@ public:
         return memUnitPtr;
     }
 
-    void internalNodeToLODNode( const NodeId& internalNode,
-                                LODNode& lodNode ) const
+    LODNode internalNodeToLODNode( const NodeId& internalNode ) const
     {
         const uint32_t frame = internalNode.getFrame();
         const uint32_t lod = treeLevelToTuvokLevel( internalNode.getLevel() );
@@ -316,7 +315,7 @@ public:
         {
             // UVF format is not a perfect octree but its octree structure is a
             // subset of perfect octree
-            return;
+            return LODNode();
         }
 
         const Vector3ui bricksInLod( tuvokBricksInLod.x,
@@ -359,7 +358,7 @@ public:
                                    brickInfo.n_voxels[ 1 ] - 2 * overlap[ 1 ],
                                    brickInfo.n_voxels[ 2 ] - 2 * overlap[ 2 ]);
 
-        lodNode = LODNode( internalNode, blockSize, worldBox );
+        return LODNode( internalNode, blockSize, worldBox );
     }
 
     uint32_t getBrickIndex( const uint32_t x,
@@ -419,10 +418,9 @@ MemoryUnitPtr UVFDataSource::getData( const LODNode& node )
     return _impl->getData( node );
 }
 
-void UVFDataSource::internalNodeToLODNode(
-    const NodeId& internalNode, LODNode& lodNode ) const
+LODNode UVFDataSource::internalNodeToLODNode( const NodeId& internalNode ) const
 {
-    return _impl->internalNodeToLODNode( internalNode, lodNode );
+    return _impl->internalNodeToLODNode( internalNode );
 }
 
 }

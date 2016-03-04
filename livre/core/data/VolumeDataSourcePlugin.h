@@ -86,11 +86,10 @@ public:
 
     /**
      * Converts internal node to lod node.
-     * @param internalNode Internal node.
-     * @param lodNode Destination lod node.
+     * @param nodeId Internal node.
+     * @returns lodNode for the node id ( world space definition, voxel size etc )
      */
-    LIVRECORE_API virtual void internalNodeToLODNode( const NodeId& internalNode,
-                                                      LODNode& lodNode ) const;
+    LIVRECORE_API virtual LODNode internalNodeToLODNode( const NodeId& nodeId ) const;
 
     /**
      * Updates the data source. For example, data sources may update their

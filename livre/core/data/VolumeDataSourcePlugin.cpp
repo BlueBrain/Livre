@@ -40,8 +40,7 @@ LODNode VolumeDataSourcePlugin::getNode( const NodeId& nodeId ) const
     it = _lodNodeMap.find( nodeId );
     if( it == _lodNodeMap.end( ))
     {
-        LODNode node;
-        internalNodeToLODNode( nodeId, node );
+        const LODNode& node = internalNodeToLODNode( nodeId );
         _lodNodeMap[ nodeId ] = node;
     }
 
@@ -53,8 +52,7 @@ const VolumeInformation& VolumeDataSourcePlugin::getVolumeInformation() const
     return _volumeInfo;
 }
 
-void VolumeDataSourcePlugin::internalNodeToLODNode(
-    const NodeId& internalNode, LODNode& lodNode ) const
+LODNode VolumeDataSourcePlugin::internalNodeToLODNode( const NodeId& internalNode ) const
 {
     const uint32_t refLevel = internalNode.getLevel();
     const Vector3ui& bricksInRefLevel = _volumeInfo.rootNode.getBlockSize( refLevel );
@@ -76,10 +74,10 @@ void VolumeDataSourcePlugin::internalNodeToLODNode(
            << " lBoxCoordMax " << boxCoordMax << std::endl
            << " volume world size " << _volumeInfo.worldSize << std::endl
            << std::endl;
-    lodNode = LODNode( internalNode,
-                       _volumeInfo.maximumBlockSize - _volumeInfo.overlap * 2,
-                       Boxf( boxCoordMin - _volumeInfo.worldSize * 0.5f,
-                             boxCoordMax - _volumeInfo.worldSize * 0.5f ));
+    return LODNode( internalNode,
+                    _volumeInfo.maximumBlockSize - _volumeInfo.overlap * 2,
+                    Boxf( boxCoordMin - _volumeInfo.worldSize * 0.5f,
+                          boxCoordMax - _volumeInfo.worldSize * 0.5f ));
 }
 
 bool fillRegularVolumeInfo( VolumeInformation& info )
