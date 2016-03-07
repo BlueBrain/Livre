@@ -58,9 +58,9 @@ public:
      * shared_ptr is returned.
      */
     template< class T >
-    boost::shared_ptr< T > getProcessorInput_( )
+    std::shared_ptr< T > getProcessorInput_( )
     {
-        return boost::dynamic_pointer_cast< T >( processorInputPtr_ );
+        return std::dynamic_pointer_cast< T >( processorInputPtr_ );
     }
     /**
      * @return The \see ProcessorOutput object that is responsible for sending data to the outgoing
@@ -77,9 +77,9 @@ public:
      * shared_ptr is returned.
      */
     template< class T >
-    boost::shared_ptr< T > getProcessorOutput_( )
+    std::shared_ptr< T > getProcessorOutput_( )
     {
-        return boost::dynamic_pointer_cast< T >( processorOutputPtr_ );
+        return std::dynamic_pointer_cast< T >( processorOutputPtr_ );
     }
 
 protected:

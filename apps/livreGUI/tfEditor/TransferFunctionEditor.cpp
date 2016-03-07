@@ -44,7 +44,7 @@ TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
     , _blueWidget( new ColorMapWidget( ColorMapWidget::BLUE_SHADE, this ))
     , _alphaWidget( new ColorMapWidget( ColorMapWidget::ARGB_SHADE, this ))
 {
-    qRegisterMetaType< UInt8Vector >("UInt8Vector");
+    qRegisterMetaType< UInt8s >("UInt8s");
 
     _ui->setupUi( this );
 
@@ -181,10 +181,10 @@ void TransferFunctionEditor::_publishTransferFunction()
     if( ! _tfReceived )
         return;
 
-    const UInt8Vector& redCurve =  _redWidget->getCurve();
-    const UInt8Vector& greenCurve =  _greenWidget->getCurve();
-    const UInt8Vector& blueCurve =  _blueWidget->getCurve();
-    const UInt8Vector& alphaCurve =  _alphaWidget->getCurve();
+    const UInt8s& redCurve =  _redWidget->getCurve();
+    const UInt8s& greenCurve =  _greenWidget->getCurve();
+    const UInt8s& blueCurve =  _blueWidget->getCurve();
+    const UInt8s& alphaCurve =  _alphaWidget->getCurve();
 
     if( redCurve.empty() || greenCurve.empty() || blueCurve.empty() ||
         alphaCurve.empty( ))
@@ -192,7 +192,7 @@ void TransferFunctionEditor::_publishTransferFunction()
         return;
     }
 
-    UInt8Vector transferFunction;
+    UInt8s transferFunction;
     transferFunction.reserve( redCurve.size() * 4u );
     for( uint32_t i = 0; i < redCurve.size(); ++i )
     {
@@ -343,7 +343,7 @@ QPolygonF _convertPoints( const QPolygon& points, const int width, const int hei
 }
 }
 
-void TransferFunctionEditor::_onTransferFunctionChanged( UInt8Vector tf )
+void TransferFunctionEditor::_onTransferFunctionChanged( UInt8s tf )
 {
     QGradientStops stops;
     QPolygon redPoints, bluePoints, greenPoints, alphaPoints;

@@ -26,7 +26,7 @@
 #include <livre/lib/visitor/DFSTraversal.h>
 
 #include <livre/core/visitor/RenderNodeVisitor.h>
-#include <livre/core/data/VolumeDataSource.h>
+#include <livre/core/data/DataSource.h>
 #include <livre/core/dash/DashRenderNode.h>
 #include <livre/core/dash/DashTree.h>
 #include <livre/core/render/GLContext.h>
@@ -148,7 +148,7 @@ void TextureUploadProcessor::_loadData()
     loadVisitor.setSynchronous( _vrParameters.getSynchronousMode( ));
 
     DFSTraversal traverser;
-    const RootNode& rootNode = _dashTree.getDataSource()->getVolumeInformation().rootNode;
+    const RootNode& rootNode = _dashTree.getDataSource()->getVolumeInfo().rootNode;
     traverser.traverse( rootNode, loadVisitor, _currentFrameID );
 
     if(  _vrParameters.getSynchronousMode( ))
@@ -177,7 +177,7 @@ void TextureUploadProcessor::runLoop_()
         CollectVisiblesVisitor collectVisibles( _dashTree );
         DFSTraversal traverser;
         const RootNode& rootNode =
-                _dashTree.getDataSource()->getVolumeInformation().rootNode;
+                _dashTree.getDataSource()->getVolumeInfo().rootNode;
         traverser.traverse( rootNode, collectVisibles, renderStatus.getFrameID( ));
         _currentFrameID = renderStatus.getFrameID();
     }

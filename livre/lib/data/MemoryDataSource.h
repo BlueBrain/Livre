@@ -20,7 +20,7 @@
 #ifndef _MemoryDataSource_h_
 #define _MemoryDataSource_h_
 
-#include <livre/core/data/VolumeDataSourcePlugin.h>
+#include <livre/core/data/DataSourcePlugin.h>
 
 #include <livre/lib/types.h>
 
@@ -39,11 +39,11 @@ namespace livre
  * The rest of the parameters are total number of voxels in X,Y,Z and
  * the block size.
  */
-class MemoryDataSource : public VolumeDataSourcePlugin
+class MemoryDataSource : public DataSourcePlugin
 {
 public:
 
-    MemoryDataSource( const VolumeDataSourcePluginData& initData );
+    MemoryDataSource( const DataSourcePluginData& initData );
     virtual ~MemoryDataSource();
 
     /**
@@ -53,7 +53,7 @@ public:
      */
     MemoryUnitPtr getData( const LODNode& node ) final;
 
-    static bool handles( const VolumeDataSourcePluginData& initData );
+    static bool handles( const DataSourcePluginData& initData );
 
     float _sparsity;
 };

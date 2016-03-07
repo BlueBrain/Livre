@@ -45,7 +45,7 @@ private:
                                   const FrameInfo& frameInfo ) final;
 
     struct Impl;
-    Impl* _impl;
+    std::unique_ptr< Impl > _impl;
 };
 
 }

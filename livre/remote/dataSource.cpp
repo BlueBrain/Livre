@@ -42,12 +42,10 @@ namespace remote
 {
 using boost::lexical_cast;
 
-namespace detail
-{
 static const uint32_t timeout = 60000; /*ms*/
 namespace
 {
-lunchbox::URI _getSinkURI( const VolumeDataSourcePluginData& initData )
+lunchbox::URI _getSinkURI( const DataSourcePluginData& initData )
 {
     const lunchbox::URI& initURI = initData.getURI();
     lunchbox::URI::ConstKVIter i = initURI.findQuery( "bind" );
@@ -56,7 +54,7 @@ lunchbox::URI _getSinkURI( const VolumeDataSourcePluginData& initData )
     return lunchbox::URI( "livresink://" + i->second );
 }
 
-lunchbox::URI _getSourceURI( const VolumeDataSourcePluginData& initData )
+lunchbox::URI _getSourceURI( const DataSourcePluginData& initData )
 {
     if( initData.getURI().getHost().empty( ))
         return lunchbox::URI( "livresource://" );
@@ -67,11 +65,11 @@ lunchbox::URI _getSourceURI( const VolumeDataSourcePluginData& initData )
 }
 }
 
-class DataSource
+class DataSource::Impl
 {
 public:
-    DataSource( const VolumeDataSourcePluginData& initData,
-                VolumeInformation& info )
+    Impl( const DataSourcePluginData& initData,
+          VolumeInformation& info )
         : _publisher( _getSinkURI( initData ))
         , _subscriber( _getSourceURI( initData ))
     {
@@ -83,7 +81,7 @@ public:
         uri.setScheme( uri.getScheme().substr( ::strlen( "remote" )));
 
         if( !_subscriber.registerHandler( livre::zeq::EVENT_DATASOURCE_DATA,
-                       boost::bind( &livre::remote::detail::DataSource::_onInfo,
+                       boost::bind( &livre::remote::DataSource::Impl::_onInfo,
                                     this, _1, boost::ref( info ))))
         {
             LBTHROW( std::runtime_error( "Cannot register subscriber") );
@@ -118,7 +116,7 @@ public:
         AllocMemoryUnit* memory = 0;
 
         LBCHECK( _subscriber.registerHandler( _event + 1,
-                       boost::bind( &livre::remote::detail::DataSource::_onData,
+                       boost::bind( &livre::remote::DataSource::Impl::_onData,
                                     this, _1, boost::ref( memory ))));
         LBCHECK( _publisher.publish( zeq::serializeDataSample( _event, node )));
 
@@ -158,7 +156,6 @@ private:
         ptr = memory;
     }
 };
-}
 
 namespace
 {
@@ -166,28 +163,26 @@ namespace
 }
 
 DataSource::DataSource()
-     : _impl( 0 )
+     : _impl( nullptr )
 {}
 
 //TODO: generalize URI and rm this ctor once plugins are used
-DataSource::DataSource( const VolumeDataSourcePluginData& initData )
-    : _impl( new detail::DataSource( initData, _volumeInfo ) )
+DataSource::DataSource( const DataSourcePluginData& initData )
+    : _impl( new Impl( initData, _volumeInfo ) )
 {
     if(!fillRegularVolumeInfo( _volumeInfo  ))
         LBTHROW( std::runtime_error( "Cannot setup the regular tree" ));
 }
 
 DataSource::~DataSource()
-{
-    delete _impl;
-}
+{}
 
 MemoryUnitPtr DataSource::getData( const LODNode& node )
 {
     return _impl->sample( node );
 }
 
-bool DataSource::handles( const VolumeDataSourcePluginData& initData )
+bool DataSource::handles( const DataSourcePluginData& initData )
 {
     const std::string remote = "remote";
     const std::string& scheme = initData.getURI().getScheme();

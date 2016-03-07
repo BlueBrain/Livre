@@ -21,8 +21,7 @@
 #define _lunchboxTypes_h_
 
 #include <vector>
-
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <lunchbox/thread.h>
 #include <lunchbox/mtQueue.h>
@@ -34,7 +33,7 @@ namespace livre
 /**
  * Smart ptr definitions
  */
-typedef boost::shared_ptr< lunchbox::Thread > ThreadPtr;
+typedef std::shared_ptr< lunchbox::Thread > ThreadPtr;
 
 }
 #endif // _lunchboxTypes_h_

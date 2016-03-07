@@ -66,7 +66,7 @@ private:
     bool applyAllTimed_( const uint32_t inputConnection, const uint32_t timeMs  );
     bool applyAll_( const uint32_t inputConnection );
 
-    DashConnectionPtrMap connectionMap_;
+    DashConnectionMap connectionMap_;
     lunchbox::Lock connectionMapModificationLock_;
 };
 

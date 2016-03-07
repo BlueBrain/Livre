@@ -27,16 +27,12 @@
 
 #include <dash/types.h>
 
-#include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/options_description.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+
 #include <boost/thread/locks.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/shared_mutex.hpp>
-#include <boost/unordered_map.hpp>
-#include <boost/weak_ptr.hpp>
 
 #include <stdint.h>
 #include <set>
@@ -45,6 +41,9 @@
 #include <deque>
 #include <algorithm>
 #include <utility>
+#include <memory>
+#include <unordered_map>
+#include <list>
 
 namespace livre
 {
@@ -61,7 +60,6 @@ class DashProcessorOutput;
 class DashRenderNode;
 class DashRenderStatus;
 class DashTree;
-class DataSourceFactory;
 class EventHandler;
 class EventHandlerFactory;
 class EventInfo;
@@ -84,9 +82,10 @@ class RootNode;
 class TexturePool;
 class View;
 class VisitState;
-class VolumeDataSource;
-class VolumeDataSourcePlugin;
-class VolumeDataSourcePluginData;
+class DataSource;
+class DataSourcePlugin;
+class DataSourcePluginData;
+
 struct FrameInfo;
 struct TextureState;
 struct VolumeInformation;
@@ -101,36 +100,31 @@ typedef std::array< float, 2 > Range;
 /**
  * SmartPtr definitions
  */
-typedef std::unique_ptr< GLSLShaders > GLSLShadersPtr;
-typedef std::unique_ptr< CacheStatistics > CacheStatisticsPtr;
 
-typedef boost::shared_ptr< AllocMemoryUnit > AllocMemoryUnitPtr;
-typedef boost::shared_ptr< RenderBrick > RenderBrickPtr;
-typedef boost::shared_ptr< DashConnection > DashConnectionPtr;
-typedef boost::shared_ptr< Processor > ProcessorPtr;
-typedef boost::shared_ptr< DashProcessor > DashProcessorPtr;
-typedef boost::shared_ptr< ProcessorInput > ProcessorInputPtr;
-typedef boost::shared_ptr< ProcessorOutput > ProcessorOutputPtr;
-typedef boost::shared_ptr< Renderer > RendererPtr;
-typedef boost::shared_ptr< const View > ConstViewPtr;
-typedef boost::shared_ptr< View > ViewPtr;
-typedef boost::shared_ptr< GLContext > GLContextPtr;
-typedef boost::shared_ptr< const GLContext > ConstGLContextPtr;
-typedef boost::shared_ptr< GLWidget > GLWidgetPtr;
-typedef boost::shared_ptr< VolumeInformation > VolumeInformationPtr;
-typedef boost::shared_ptr< const VolumeInformation > ConstVolumeInformationPtr;
-typedef boost::shared_ptr< TextureState > TextureStatePtr;
-typedef boost::shared_ptr< const TextureState > ConstTextureStatePtr;
-typedef boost::shared_ptr< VolumeDataSource > VolumeDataSourcePtr;
-typedef boost::shared_ptr< const VolumeDataSource > ConstVolumeDataSourcePtr;
-typedef boost::shared_ptr< EventHandler > EventHandlerPtr;
-typedef boost::shared_ptr< EventHandlerFactory > EventHandlerFactoryPtr;
-typedef boost::shared_ptr< EventMapper > EventMapperPtr;
-typedef boost::shared_ptr< MemoryUnit > MemoryUnitPtr;
-typedef boost::shared_ptr< const MemoryUnit > ConstMemoryUnitPtr;
-
-typedef boost::shared_ptr< CacheObject > CacheObjectPtr;
-typedef boost::shared_ptr< const CacheObject > ConstCacheObjectPtr;
+typedef std::shared_ptr< AllocMemoryUnit > AllocMemoryUnitPtr;
+typedef std::shared_ptr< RenderBrick > RenderBrickPtr;
+typedef std::shared_ptr< DashConnection > DashConnectionPtr;
+typedef std::shared_ptr< Processor > ProcessorPtr;
+typedef std::shared_ptr< DashProcessor > DashProcessorPtr;
+typedef std::shared_ptr< ProcessorInput > ProcessorInputPtr;
+typedef std::shared_ptr< ProcessorOutput > ProcessorOutputPtr;
+typedef std::shared_ptr< Renderer > RendererPtr;
+typedef std::shared_ptr< View > ViewPtr;
+typedef std::shared_ptr< GLContext > GLContextPtr;
+typedef std::shared_ptr< const GLContext > ConstGLContextPtr;
+typedef std::shared_ptr< GLWidget > GLWidgetPtr;
+typedef std::shared_ptr< TextureState > TextureStatePtr;
+typedef std::shared_ptr< const TextureState > ConstTextureStatePtr;
+typedef std::shared_ptr< DataSource > DataSourcePtr;
+typedef std::shared_ptr< const DataSource > ConstDataSourcePtr;
+typedef std::shared_ptr< EventHandler > EventHandlerPtr;
+typedef std::shared_ptr< EventHandlerFactory > EventHandlerFactoryPtr;
+typedef std::shared_ptr< MemoryUnit > MemoryUnitPtr;
+typedef std::shared_ptr< const MemoryUnit > ConstMemoryUnitPtr;
+typedef std::shared_ptr< CacheObject > CacheObjectPtr;
+typedef std::shared_ptr< const CacheObject > ConstCacheObjectPtr;
+typedef std::shared_ptr< CacheObject > CacheObjectPtr;
+typedef std::shared_ptr< const CacheObject > ConstCacheObjectPtr;
 
 /**
  * Helper classes for shared_ptr objects
@@ -156,20 +150,20 @@ struct DontDeleteObject
 /**
  * Vector definitions basic types
  */
-typedef std::vector< float > FloatVector;
-typedef std::vector< double > DoubleVector;
+typedef std::vector< float > Floats;
+typedef std::vector< double > Doubles;
 
-typedef std::vector< int8_t > Int8Vector;
-typedef std::vector< uint8_t > UInt8Vector;
+typedef std::vector< int8_t > Int8s;
+typedef std::vector< uint8_t > UInt8s;
 
-typedef std::vector< int16_t > Int16Vector;
-typedef std::vector< uint16_t > UInt16Vector;
+typedef std::vector< int16_t > Int16s;
+typedef std::vector< uint16_t > UInt16s;
 
-typedef std::vector< int32_t > Int32Vector;
-typedef std::vector< uint32_t > UInt32Vector;
+typedef std::vector< int32_t > Int32s;
+typedef std::vector< uint32_t > UInt32s;
 
-typedef std::vector< int64_t > Int64Vector;
-typedef std::vector< uint64_t > UInt64Vector;
+typedef std::vector< int64_t > Int64s;
+typedef std::vector< uint64_t > UInt64s;
 
 typedef std::vector< NodeId > NodeIds;
 typedef std::vector< CacheId > CacheIds;
@@ -184,12 +178,11 @@ typedef std::vector< RenderBrickPtr > RenderBricks;
 /**
  * Map definitions
  */
-typedef boost::unordered_map< NodeId, dash::NodePtr > NodeIDDashNodePtrMap;
-typedef boost::unordered_map< CacheId, CacheObjectPtr > CacheMap;
-typedef boost::unordered_map< CacheId, ConstCacheObjectPtr > ConstCacheMap;
-typedef boost::unordered_map< uint32_t, bool > BoolMap;
-typedef boost::unordered_map< uint32_t, EventHandlerPtr > EventHandlerPtrMap;
-typedef boost::unordered_map< uint32_t, DashConnectionPtr > DashConnectionPtrMap;
+typedef std::unordered_map< CacheId, CacheObjectPtr > CacheMap;
+typedef std::unordered_map< CacheId, ConstCacheObjectPtr > ConstCacheMap;
+typedef std::unordered_map< uint32_t, bool > BoolMap;
+typedef std::unordered_map< uint32_t, EventHandlerPtr > EventHandlerMap;
+typedef std::unordered_map< uint32_t, DashConnectionPtr > DashConnectionMap;
 
 /**
  * Set definitions
@@ -235,7 +228,11 @@ typedef boost::program_options::variables_map ProgramOptionsMap;
 typedef boost::program_options::options_description ProgramOptionsDescription;
 typedef std::map< std::string,
                   ProgramOptionsDescription > ProgramOptionsDescriptionMap;
+
+// Const definitions
 static const std::string HIDDEN_PROGRAMDESCRIPTION_STR("_HIDDEN_");
+static const std::string NO_PREFIX = "";
+
 }
 
 #endif // _coreTypes_h_

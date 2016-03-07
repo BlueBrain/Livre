@@ -25,6 +25,8 @@
 #include <livre/core/types.h>
 #include <livre/core/mathTypes.h>
 
+#include <functional>
+
 namespace livre
 {
 
@@ -173,12 +175,6 @@ inline std::ostream& operator<<( std::ostream& os, const NodeId& nodeId )
     return os << "Level: " << nodeId.getLevel()
               << " Position: " << nodeId.getPosition()
               << " Frame: " << nodeId.getFrame();
-}
-
-inline std::size_t hash_value( const NodeId& nodeId )
-{
-   boost::hash<Identifier> hasher;
-   return hasher( nodeId.getId( ));
 }
 
 }

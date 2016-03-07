@@ -27,18 +27,13 @@
 namespace livre
 {
 
-namespace detail
-{
-class RenderNodeVisitor;
-}
-
 /**
  * The RenderNodeVisitor class is base class for invoking traversing events on DashRenderNodes.
 */
 class RenderNodeVisitor : public NodeVisitor
 {
 public:
-    LIVRECORE_API RenderNodeVisitor( DashTree& dashTree );
+    LIVRECORE_API explicit RenderNodeVisitor( DashTree& dashTree );
     LIVRECORE_API ~RenderNodeVisitor();
 
     /**
@@ -55,7 +50,8 @@ public:
 private:
     LIVRECORE_API void visit( const NodeId& nodeId, VisitState& state ) final;
 
-    detail::RenderNodeVisitor* _impl;
+    struct Impl;
+    std::unique_ptr< Impl > _impl;
 };
 
 }

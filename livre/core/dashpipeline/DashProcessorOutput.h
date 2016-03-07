@@ -64,7 +64,7 @@ public:
 private:
     virtual CommitState commit_( const uint32_t outputConnection );
 
-    DashConnectionPtrMap connectionMap_;
+    DashConnectionMap connectionMap_;
     lunchbox::Lock connectionMapModificationLock_;
 
 };

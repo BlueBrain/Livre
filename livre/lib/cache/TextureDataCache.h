@@ -44,16 +44,16 @@ public:
      * @param textureType The type of the data for the GPU.
      */
     LIVRE_API TextureDataCache( size_t maxMemBytes,
-                                VolumeDataSource& dataSource,
+                                DataSource& dataSource,
                                 uint32_t textureType );
 
     ~TextureDataCache();
 
     /** @return the data source. */
-    LIVRE_API VolumeDataSource& getDataSource();
+    LIVRE_API DataSource& getDataSource();
 
     /** @return the data source. */
-    LIVRE_API const VolumeDataSource& getDataSource() const;
+    LIVRE_API const DataSource& getDataSource() const;
 
     /**
      * @return The GPU data type.

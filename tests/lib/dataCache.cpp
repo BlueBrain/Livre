@@ -22,7 +22,7 @@
 #include <livre/lib/cache/TextureDataObject.h>
 
 #include <livre/core/cache/CacheStatistics.h>
-#include <livre/core/data/VolumeDataSource.h>
+#include <livre/core/data/DataSource.h>
 #include <livre/core/data/NodeId.h>
 #include <livre/core/data/LODNode.h>
 #include <livre/core/data/MemoryUnit.h>
@@ -45,8 +45,8 @@ BOOST_AUTO_TEST_CASE( testDataCache )
                << VOXEL_SIZE_Z << "," << BLOCK_SIZE;
 
     const lunchbox::URI uri( volumeName.str( ));
-    livre::VolumeDataSource source( uri );
-    const livre::VolumeInformation& info = source.getVolumeInformation();
+    livre::DataSource source( uri );
+    const livre::VolumeInformation& info = source.getVolumeInfo();
 
     const uint32_t level = 0;
     const livre::Vector3f position( 0, 0, 0);
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE( testDataCache )
     BOOST_CHECK( dataCache.getCount() == 1 );
 
     livre::TextureDataObjectPtr dataObject =
-            boost::dynamic_pointer_cast< livre::TextureDataObject >( data );
+            std::dynamic_pointer_cast< livre::TextureDataObject >( data );
 
     BOOST_CHECK( dataObject );
     BOOST_CHECK( dataObject->getSize() == allocSize );

@@ -22,7 +22,7 @@
 #include <eq/eq.h>
 
 #include <livre/core/version.h>
-#include <livre/core/data/VolumeDataSource.h>
+#include <livre/core/data/DataSource.h>
 
 #include <livre/lib/configuration/ApplicationParameters.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
@@ -47,7 +47,7 @@ struct Client::Impl
 
     ~Impl()
     {
-        VolumeDataSource::unloadPlugins();
+        DataSource::unloadPlugins();
     }
 
     bool parseArguments( const int32_t argc, const char** argv )
@@ -94,7 +94,7 @@ struct Client::Impl
         if( !parseArguments( argc, const_cast< const char** >( argv )))
             return false;
 
-        VolumeDataSource::loadPlugins(); //initLocal on render clients never returns
+        DataSource::loadPlugins(); //initLocal on render clients never returns
         return true;
     }
 

@@ -227,8 +227,13 @@ public:
     }
 
     Window* const _window;
+
+    typedef std::shared_ptr< TextureUploadProcessor > TextureUploadProcessorPtr;
     TextureUploadProcessorPtr _textureUploader;
+
+    typedef std::shared_ptr< DataUploadProcessor > DataUploadProcessorPtr;
     DataUploadProcessorPtr _dataUploader;
+
     DashProcessorPtr _dashProcessor;
     GLContextPtr _windowContext;
 };

@@ -9,7 +9,7 @@ set(LIVRECORE_PUBLIC_HEADERS
   data/LODNode.h
   data/NodeId.h
   data/MemoryUnit.h
-  data/VolumeDataSourcePlugin.h
+  data/DataSourcePlugin.h
   data/VolumeInformation.h
   render/GLContext.h
   render/GLSLShaders.h
@@ -31,7 +31,7 @@ set(LIVRECORE_HEADERS
   dash/DashRenderNode.h
   dash/DashRenderStatus.h
   dash/DashTree.h
-  data/VolumeDataSource.h
+  data/DataSource.h
   dashpipeline/DashConnection.h
   dashpipeline/DashProcessor.h
   dashpipeline/DashProcessorInput.h
@@ -75,8 +75,8 @@ set(LIVRECORE_SOURCES
   data/LODNode.cpp
   data/MemoryUnit.cpp
   data/NodeId.cpp
-  data/VolumeDataSource.cpp
-  data/VolumeDataSourcePlugin.cpp
+  data/DataSource.cpp
+  data/DataSourcePlugin.cpp
   data/VolumeInformation.cpp
   dashpipeline/DashConnection.cpp
   dashpipeline/DashProcessor.cpp

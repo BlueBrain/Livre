@@ -25,7 +25,6 @@
 #include <eq/types.h>
 
 #include <lunchbox/refPtr.h>
-#include <boost/shared_ptr.hpp>
 
 namespace livre
 {
@@ -59,22 +58,22 @@ struct EqEventInfo;
 typedef lunchbox::RefPtr< CommandNode > CommandNodePtr;
 typedef lunchbox::RefPtr< Client > ClientPtr;
 
-typedef boost::shared_ptr< Config > ConfigPtr;
-typedef boost::shared_ptr< const Config > ConstConfigPtr;
-typedef boost::shared_ptr< SerializableMap > SerializableMapPtr;
-typedef boost::shared_ptr< const SerializableMap > ConstSerializableMapPtr;
-typedef boost::shared_ptr< FrameData > FrameDataPtr;
-typedef boost::shared_ptr< LocalInitData > LocalInitDataPtr;
-typedef boost::shared_ptr< const FrameData > ConstFrameDataPtr;
-typedef boost::shared_ptr< const LocalInitData > ConstLocalInitDataPtr;
-typedef boost::shared_ptr< VolumeSettings > VolumeSettingsPtr;
-typedef boost::shared_ptr< FrameSettings > FrameSettingsPtr;
-typedef boost::shared_ptr< const FrameSettings > ConstFrameSettingsPtr;
-typedef boost::shared_ptr< CameraSettings > CameraSettingsPtr;
-typedef boost::shared_ptr< const CameraSettings > ConstCameraSettingsPtr;
-typedef boost::shared_ptr< RenderSettings > RenderSettingsPtr;
-typedef boost::shared_ptr< const RenderSettings > ConstRenderSettingsPtr;
-typedef boost::shared_ptr< RayCastRenderer > RayCastRendererPtr;
+typedef std::shared_ptr< Config > ConfigPtr;
+typedef std::shared_ptr< const Config > ConstConfigPtr;
+typedef std::shared_ptr< SerializableMap > SerializableMapPtr;
+typedef std::shared_ptr< const SerializableMap > ConstSerializableMapPtr;
+typedef std::shared_ptr< FrameData > FrameDataPtr;
+typedef std::shared_ptr< LocalInitData > LocalInitDataPtr;
+typedef std::shared_ptr< const FrameData > ConstFrameDataPtr;
+typedef std::shared_ptr< const LocalInitData > ConstLocalInitDataPtr;
+typedef std::shared_ptr< VolumeSettings > VolumeSettingsPtr;
+typedef std::shared_ptr< FrameSettings > FrameSettingsPtr;
+typedef std::shared_ptr< const FrameSettings > ConstFrameSettingsPtr;
+typedef std::shared_ptr< CameraSettings > CameraSettingsPtr;
+typedef std::shared_ptr< const CameraSettings > ConstCameraSettingsPtr;
+typedef std::shared_ptr< RenderSettings > RenderSettingsPtr;
+typedef std::shared_ptr< const RenderSettings > ConstRenderSettingsPtr;
+typedef std::shared_ptr< RayCastRenderer > RayCastRendererPtr;
 
 }
 

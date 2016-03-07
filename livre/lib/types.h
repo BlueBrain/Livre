@@ -35,26 +35,11 @@ class TextureDataObject;
 class TextureObject;
 class TextureUploadProcessor;
 struct ApplicationParameters;
-struct EFPrefetchAlgorithmParameters;
-struct RESTParameters;
 
-/** SmartPtr definitions */
-typedef boost::shared_ptr< RESTParameters > RESTParametersPtr;
-typedef boost::shared_ptr< const RESTParameters > ConstRESTParametersPtr;
-
-typedef boost::shared_ptr< TextureCache > TextureCachePtr;
-typedef boost::shared_ptr< DataUploadProcessor > DataUploadProcessorPtr;
-typedef boost::shared_ptr< TextureUploadProcessor > TextureUploadProcessorPtr;
-typedef boost::shared_ptr< const DataUploadProcessor > ConstDataUploadProcessorPtr;
-typedef boost::shared_ptr< const TextureUploadProcessor > ConstTextureUploadProcessorPtr;
-typedef boost::shared_ptr< const DashProcessor > ConstDashProcessorPtr;
-typedef boost::shared_ptr< const TextureDataObject > ConstTextureDataObjectPtr;
-typedef boost::shared_ptr< const TextureObject > ConstTextureObjectPtr;
-typedef boost::shared_ptr< TextureDataObject > TextureDataObjectPtr;
-typedef boost::shared_ptr< TextureObject > TextureObjectPtr;
-
-/** Map definitions */
-typedef boost::unordered_map< uint32_t, DataUploadProcessorPtr > DataUploadProcessorPtrMap;
+typedef std::shared_ptr< const TextureDataObject > ConstTextureDataObjectPtr;
+typedef std::shared_ptr< const TextureObject > ConstTextureObjectPtr;
+typedef std::shared_ptr< TextureDataObject > TextureDataObjectPtr;
+typedef std::shared_ptr< TextureObject > TextureObjectPtr;
 
 static const uint32_t CONNECTION_ID( 0u );
 

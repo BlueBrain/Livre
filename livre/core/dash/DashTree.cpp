@@ -23,19 +23,18 @@
 #include <livre/core/dash/DashRenderNode.h>
 #include <livre/core/dash/DashRenderStatus.h>
 
-#include <livre/core/data/VolumeDataSource.h>
+#include <livre/core/data/DataSource.h>
 #include <livre/core/data/NodeId.h>
 
 namespace livre
 {
 
-namespace detail
-{
+typedef std::unordered_map< Identifier, dash::NodePtr > IdDashNodeMap;
 
-class DashTree : public boost::noncopyable
+struct DashTree::Impl
 {
 public:
-    explicit DashTree( ConstVolumeDataSourcePtr dataSource )
+    explicit Impl( ConstDataSourcePtr dataSource )
         : _dataSource( dataSource ),
           _localContext( dash::Context::getMain( ))
     {
@@ -47,7 +46,7 @@ public:
         prevCtx.setCurrent();
     }
 
-    ~DashTree( )
+    ~Impl()
     {
         _localContext.commit();
         for( DashContextPtr ctx: dashContexts )
@@ -79,23 +78,24 @@ public:
     dash::NodePtr getDashNode( const NodeId& nodeId) const
     {
         ReadLock readLock( _mutex );
-        NodeIDDashNodePtrMap::const_iterator it = _dashNodeMap.find( nodeId );
+        IdDashNodeMap::const_iterator it = _dashNodeMap.find( nodeId.getId( ));
         return it == _dashNodeMap.end() ? dash::NodePtr() : it->second;
     }
 
     dash::NodePtr getDashNode( const NodeId& nodeId )
     {
-        // "Double-Checked Locking" idiom is used below.
         LBASSERT( &_localContext != &dash::Context::getCurrent() );
-        ReadLock readLock( _mutex );
-        NodeIDDashNodePtrMap::const_iterator it = _dashNodeMap.find( nodeId );
-        if( it != _dashNodeMap.end( ) && it->second )
-            return it->second;
+        IdDashNodeMap::const_iterator it = _dashNodeMap.find( nodeId.getId( ));
 
-        readLock.unlock();
+        // "Double-Checked Locking" idiom is used below.
+        {
+            ReadLock readLock( _mutex );
+            if( it != _dashNodeMap.end( ) && it->second )
+                return it->second;
+        }
 
         WriteLock writeLock( _mutex );
-        it = _dashNodeMap.find( nodeId );
+        it = _dashNodeMap.find( nodeId.getId( ));
         if( it != _dashNodeMap.end( ))
             return it->second;
 
@@ -120,33 +120,29 @@ public:
             _localContext.map( node, *ctx );
         }
         prevCtx.setCurrent();
-        _dashNodeMap[ nodeId ] = node;
+        _dashNodeMap[ nodeId.getId() ] = node;
         return node;
     }
 
-    ConstVolumeDataSourcePtr _dataSource;
-    NodeIDDashNodePtrMap _dashNodeMap;
+    ConstDataSourcePtr _dataSource;
+    IdDashNodeMap _dashNodeMap;
     DashRenderStatus* _renderStatus;
     mutable ReadWriteMutex _mutex;
     dash::Context& _localContext;
     std::vector< DashContextPtr > dashContexts;
 };
 
-}
-
-DashTree::DashTree( ConstVolumeDataSourcePtr datasSource )
-    : _impl( new detail::DashTree( datasSource ))
+DashTree::DashTree( ConstDataSourcePtr datasSource )
+    : _impl( new Impl( datasSource ))
 {}
 
-ConstVolumeDataSourcePtr DashTree::getDataSource() const
+ConstDataSourcePtr DashTree::getDataSource() const
 {
     return _impl->_dataSource;
 }
 
 DashTree::~DashTree()
-{
-    delete _impl;
-}
+{}
 
 DashContextPtr DashTree::createContext()
 {

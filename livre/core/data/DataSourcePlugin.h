@@ -18,11 +18,12 @@
  */
 
 
-#ifndef _VolumeDataSourcePlugin_h_
-#define _VolumeDataSourcePlugin_h_
+#ifndef _DataSourcePlugin_h_
+#define _DataSourcePlugin_h_
 
 #include <livre/core/api.h>
 #include <livre/core/data/NodeId.h>
+#include <livre/core/data/LODNode.h>
 #include <livre/core/data/VolumeInformation.h>
 
 #include <lunchbox/plugin.h>
@@ -30,10 +31,10 @@
 namespace livre
 {
 
-class VolumeDataSourcePluginData
+class DataSourcePluginData
 {
 public:
-    explicit VolumeDataSourcePluginData( const lunchbox::URI& uri,
+    explicit DataSourcePluginData( const lunchbox::URI& uri,
                                          const AccessMode accessMode = MODE_READ )
         : _uri( uri ),
           _accessMode( accessMode )
@@ -53,24 +54,24 @@ private:
  *
  * Implementations are responsible for filling the VolumeInformation.
  */
-class VolumeDataSourcePlugin : public boost::noncopyable
+class DataSourcePlugin
 {
 public:
 
-    LIVRECORE_API VolumeDataSourcePlugin();
+    LIVRECORE_API DataSourcePlugin();
 
     /** Needed by the PluginRegisterer. */
-    typedef VolumeDataSourcePlugin PluginT;
+    typedef DataSourcePlugin PluginT;
 
     /** Needed by the PluginRegisterer. */
-    typedef VolumeDataSourcePluginData InitDataT;
+    typedef DataSourcePluginData InitDataT;
 
-    virtual ~VolumeDataSourcePlugin() {}
+    virtual ~DataSourcePlugin() {}
 
     /**
      * @return The volume information.
      */
-    const VolumeInformation& getVolumeInformation() const;
+    const VolumeInformation& getVolumeInfo() const;
 
     /**
      * Initializes the GL specific functions.
@@ -86,11 +87,10 @@ public:
 
     /**
      * Converts internal node to lod node.
-     * @param internalNode Internal node.
-     * @param lodNode Destination lod node.
+     * @param nodeId Internal node.
+     * @returns lodNode for the node id ( world space definition, voxel size etc )
      */
-    LIVRECORE_API virtual void internalNodeToLODNode( const NodeId& internalNode,
-                                                      LODNode& lodNode ) const;
+    LIVRECORE_API virtual LODNode internalNodeToLODNode( const NodeId& nodeId ) const;
 
     /**
      * Updates the data source. For example, data sources may update their
@@ -106,9 +106,12 @@ public:
 
 protected:
 
-    typedef boost::unordered_map< NodeId, LODNode > NodeIDLODNodeMap;
+    DataSourcePlugin( const DataSourcePlugin& ) = delete;
+    DataSourcePlugin& operator=( const DataSourcePlugin& ) = delete;
 
-    mutable NodeIDLODNodeMap _lodNodeMap;
+    typedef std::unordered_map< Identifier, LODNode > IdLODNodeMap;
+
+    mutable IdLODNodeMap _lodNodeMap;
     VolumeInformation _volumeInfo;
     mutable ReadWriteMutex _mutex;
 
@@ -127,7 +130,7 @@ LIVRECORE_API bool fillRegularVolumeInfo( VolumeInformation& info );
 namespace boost
 {
 template<> inline
-std::string lexical_cast( const livre::VolumeDataSourcePluginData& data )
+std::string lexical_cast( const livre::DataSourcePluginData& data )
 {
     return lexical_cast< std::string >( data.getURI( ));
 }
@@ -136,8 +139,8 @@ std::string lexical_cast( const livre::VolumeDataSourcePluginData& data )
 // http://stackoverflow.com/questions/1566963/singleton-in-a-dll
 #ifdef _MSC_VER
    template class LIVRECORE_API
-   lunchbox::PluginFactory< livre::VolumeDataSourcePlugin,
-                            livre::VolumeDataSourcePluginData >;
+   lunchbox::PluginFactory< livre::DataSourcePlugin,
+                            livre::DataSourcePluginData >;
 #endif
 
-#endif // _VolumeDataSourcePlugin_h_
+#endif // _DataSourcePlugin_h_

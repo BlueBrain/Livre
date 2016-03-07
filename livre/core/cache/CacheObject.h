@@ -107,7 +107,7 @@ private:
     void _notifyUnload();
 
     struct Status;
-    mutable boost::shared_ptr< Status > _status;
+    mutable std::shared_ptr< Status > _status;
 };
 
 }

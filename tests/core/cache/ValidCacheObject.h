@@ -62,8 +62,8 @@ private:
     bool _isLoaded_;
 };
 
-typedef boost::shared_ptr< ValidCacheObject > ValidCacheObjectPtr;
-typedef boost::shared_ptr< const ValidCacheObject > ConstValidCacheObjectPtr;
+typedef std::shared_ptr< ValidCacheObject > ValidCacheObjectPtr;
+typedef std::shared_ptr< const ValidCacheObject > ConstValidCacheObjectPtr;
 
 }
 

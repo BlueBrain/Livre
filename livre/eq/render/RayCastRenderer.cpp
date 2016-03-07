@@ -62,9 +62,7 @@ struct RayCastRenderer::Impl
     Impl( const uint32_t samplesPerRay,
           const uint32_t samplesPerPixel,
           const VolumeInformation& volInfo )
-        :  _framebufferTexture(
-            new eq::util::Texture( GL_TEXTURE_RECTANGLE_ARB, glewGetContext( )))
-        , _shaders( new GLSLShaders )
+        : _framebufferTexture( GL_TEXTURE_RECTANGLE_ARB, glewGetContext( ))
         , _nSamplesPerRay( samplesPerRay )
         , _nSamplesPerPixel( samplesPerPixel )
         , _computedSamplesPerRay( samplesPerRay )
@@ -75,7 +73,7 @@ struct RayCastRenderer::Impl
         initTransferFunction( transferFunction );
 
         // TODO: Add the shaders from resource directory
-        const int error = _shaders->loadShaders( ShaderData( vertRayCast_glsl,
+        const int error = _shaders.loadShaders( ShaderData( vertRayCast_glsl,
                                                              fragRayCast_glsl ));
         if( error != GL_NO_ERROR )
             LBTHROW( std::runtime_error( "Can't load glsl shaders: " +
@@ -85,7 +83,7 @@ struct RayCastRenderer::Impl
 
     ~Impl()
     {
-        _framebufferTexture->flush();
+        _framebufferTexture.flush();
     }
 
     void update( const FrameData& frameData )
@@ -113,7 +111,7 @@ struct RayCastRenderer::Impl
         }
         glBindTexture( GL_TEXTURE_1D, _transferFunctionTexture );
 
-        const UInt8Vector& transferFunctionData = transferFunction.getData();
+        const UInt8s& transferFunctionData = transferFunction.getData();
         glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA, GLsizei(transferFunctionData.size()/4u), 0,
                        GL_RGBA, GL_UNSIGNED_BYTE, &transferFunctionData[ 0 ] );
     }
@@ -123,7 +121,7 @@ struct RayCastRenderer::Impl
     {
         const Viewport& viewport = glWidget.getViewport( view );
         const eq::PixelViewport pvp( 0, 0, viewport[2], viewport[3] );
-        _framebufferTexture->copyFromFrameBuffer( GL_RGBA, pvp );
+        _framebufferTexture.copyFromFrameBuffer( GL_RGBA, pvp );
     }
 
     void onFrameStart( const GLWidget& glWidget LB_UNUSED,
@@ -165,7 +163,7 @@ struct RayCastRenderer::Impl
         glDisable( GL_DEPTH_TEST );
         glDisable( GL_BLEND );
 
-        GLSLShaders::Handle program = _shaders->getProgram( );
+        GLSLShaders::Handle program = _shaders.getProgram( );
         LBASSERT( program );
 
         // Enable shaders
@@ -225,7 +223,7 @@ struct RayCastRenderer::Impl
                       const View& view,
                       const RenderBrick& rb )
     {
-        GLSLShaders::Handle program = _shaders->getProgram( );
+        GLSLShaders::Handle program = _shaders.getProgram( );
         LBASSERT( program );
 
         // Enable shaders
@@ -260,9 +258,9 @@ struct RayCastRenderer::Impl
         readFromFrameBuffer( glWidget, view );
 
         glActiveTexture( GL_TEXTURE2 );
-        _framebufferTexture->bind( );
-        _framebufferTexture->applyZoomFilter( eq::FILTER_LINEAR );
-        _framebufferTexture->applyWrap( );
+        _framebufferTexture.bind( );
+        _framebufferTexture.applyZoomFilter( eq::FILTER_LINEAR );
+        _framebufferTexture.applyWrap( );
 
         tParamNameGL = glGetUniformLocation( program, "frameBufferTex" );
         glUniform1i( tParamNameGL, 2 );
@@ -290,8 +288,8 @@ struct RayCastRenderer::Impl
         glUseProgram( 0 );
     }
 
-    std::unique_ptr< eq::util::Texture > _framebufferTexture;
-    GLSLShadersPtr _shaders;
+    eq::util::Texture _framebufferTexture;
+    GLSLShaders _shaders;
     uint32_t _nSamplesPerRay;
     uint32_t _nSamplesPerPixel;
     uint32_t _computedSamplesPerRay;

@@ -103,7 +103,7 @@ public:
      * Return curve's values.
      * @return A vector of 8-bits uints with the curve values.
      */
-    UInt8Vector getCurve() const;
+    UInt8s getCurve() const;
 
 signals:
 

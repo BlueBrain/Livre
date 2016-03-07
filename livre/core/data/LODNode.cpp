@@ -18,7 +18,7 @@
  */
 
 #include <livre/core/data/LODNode.h>
-#include <livre/core/data/VolumeDataSource.h>
+#include <livre/core/data/DataSource.h>
 
 namespace livre
 {

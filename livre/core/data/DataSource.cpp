@@ -19,33 +19,31 @@
  */
 
 #include <livre/core/defines.h>
-#include <livre/core/data/VolumeDataSource.h>
-#include <livre/core/data/VolumeDataSourcePlugin.h>
-#include <livre/core/data/LODNode.h>
+#include <livre/core/data/DataSource.h>
+#include <livre/core/data/DataSourcePlugin.h>
 #include <livre/core/version.h>
 
 #include <lunchbox/pluginFactory.h>
 
 namespace livre
 {
+
 namespace
 {
     lunchbox::DSOs _plugins;
 }
-namespace detail
-{
 
-class VolumeDataSource
+struct DataSource::Impl
 {
 public:
-    typedef lunchbox::PluginFactory< VolumeDataSourcePlugin,
-                                     VolumeDataSourcePluginData >
+    typedef lunchbox::PluginFactory< DataSourcePlugin,
+                                     DataSourcePluginData >
                 PluginFactory;
 
-    VolumeDataSource( const lunchbox::URI& uri,
-                      const AccessMode accessMode )
+    Impl( const lunchbox::URI& uri,
+          const AccessMode accessMode )
         : plugin( PluginFactory::getInstance().create(
-                      VolumeDataSourcePluginData( uri, accessMode )))
+                      DataSourcePluginData( uri, accessMode )))
     {}
 
     LODNode getNode( const NodeId& nodeId ) const
@@ -63,51 +61,49 @@ public:
         return plugin->getData( node );
     }
 
-    boost::scoped_ptr< VolumeDataSourcePlugin > plugin;
+    std::unique_ptr< DataSourcePlugin > plugin;
 };
 
-}
-
-VolumeDataSource::VolumeDataSource( const lunchbox::URI& uri,
-                                    const AccessMode accessMode )
-    : _impl( new detail::VolumeDataSource( uri, accessMode ) )
+DataSource::DataSource( const lunchbox::URI& uri,
+                        const AccessMode accessMode )
+    : _impl( new Impl( uri, accessMode ) )
 {
 }
 
-void VolumeDataSource::loadPlugins()
+void DataSource::loadPlugins()
 {
     unloadPlugins();
-    _plugins = detail::VolumeDataSource::PluginFactory::getInstance().load(
+    _plugins = DataSource::Impl::PluginFactory::getInstance().load(
         LIVRECORE_VERSION_ABI, lunchbox::getLibraryPaths(), "Livre.*Source" );
 }
 
-void VolumeDataSource::unloadPlugins()
+void DataSource::unloadPlugins()
 {
     for( lunchbox::DSO* plugin: _plugins )
-        detail::VolumeDataSource::PluginFactory::getInstance().unload( plugin );
+        DataSource::Impl::PluginFactory::getInstance().unload( plugin );
 }
 
-LODNode VolumeDataSource::getNode( const NodeId& nodeId ) const
+LODNode DataSource::getNode( const NodeId& nodeId ) const
 {
     return _impl->getNode( nodeId );
 }
 
-void VolumeDataSource::update()
+void DataSource::update()
 {
     _impl->plugin->update();
 }
 
-const VolumeInformation& VolumeDataSource::getVolumeInformation() const
+const VolumeInformation& DataSource::getVolumeInfo() const
 {
-    return _impl->plugin->getVolumeInformation();
+    return _impl->plugin->getVolumeInfo();
 }
 
-bool VolumeDataSource::initializeGL()
+bool DataSource::initializeGL()
 {
     return _impl->plugin->initializeGL();
 }
 
-MemoryUnitPtr VolumeDataSource::getData( const NodeId& nodeId )
+MemoryUnitPtr DataSource::getData( const NodeId& nodeId )
 {
     if( !nodeId.isValid( ))
         return MemoryUnitPtr();
@@ -116,7 +112,7 @@ MemoryUnitPtr VolumeDataSource::getData( const NodeId& nodeId )
     return _impl->plugin->getData( lodNode );
 }
 
-ConstMemoryUnitPtr VolumeDataSource::getData( const NodeId& nodeId ) const
+ConstMemoryUnitPtr DataSource::getData( const NodeId& nodeId ) const
 {
     if( !nodeId.isValid( ))
         return ConstMemoryUnitPtr();
@@ -125,7 +121,7 @@ ConstMemoryUnitPtr VolumeDataSource::getData( const NodeId& nodeId ) const
     return _impl->plugin->getData( lodNode );
 }
 
-VolumeDataSource::~VolumeDataSource()
+DataSource::~DataSource()
 {}
 
 }

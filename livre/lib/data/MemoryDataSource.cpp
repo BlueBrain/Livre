@@ -37,7 +37,7 @@ namespace
    lunchbox::PluginRegisterer< MemoryDataSource > registerer;
 }
 
-MemoryDataSource::MemoryDataSource( const VolumeDataSourcePluginData& initData )
+MemoryDataSource::MemoryDataSource( const DataSourcePluginData& initData )
 {
     _volumeInfo.overlap = Vector3ui( 4 );
 
@@ -115,7 +115,7 @@ MemoryUnitPtr MemoryDataSource::getData( const LODNode& node )
     return memoryUnit;
 }
 
-bool MemoryDataSource::handles( const VolumeDataSourcePluginData& initData )
+bool MemoryDataSource::handles( const DataSourcePluginData& initData )
 {
     return initData.getURI().getScheme() == "mem";
 }

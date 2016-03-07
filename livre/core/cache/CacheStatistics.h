@@ -96,7 +96,7 @@ private:
     size_t _cacheMiss;
 
     struct LoadInfo;
-    typedef boost::shared_ptr< LoadInfo > LoadInfoPtr;
+    typedef std::shared_ptr< LoadInfo > LoadInfoPtr;
     typedef lunchbox::MTQueue< LoadInfoPtr > LoadInfoPtrQueue;
 
     LoadInfoPtrQueue _ioQueue;

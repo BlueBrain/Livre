@@ -17,8 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _VolumeDataSource_h_
-#define _VolumeDataSource_h_
+#ifndef _DataSource_h_
+#define _DataSource_h_
 
 #include <lunchbox/clock.h>
 
@@ -27,27 +27,23 @@
 #include <livre/core/defines.h>
 #include <livre/core/data/MemoryUnit.h>
 #include <livre/core/data/VolumeInformation.h>
+#include <livre/core/data/LODNode.h>
 
 namespace livre
 {
 
-namespace detail
-{
-    class VolumeDataSource;
-}
-
-class VolumeDataSource : boost::noncopyable
+class DataSource
 {
 public:
     /**
-     * VolumeDataSource constructor.
+     * DataSource constructor.
      * @param uri Initialization URI. The volume data source is generated accordingly
      * @param accessMode The access mode.
      */
-    LIVRECORE_API VolumeDataSource( const lunchbox::URI& uri,
-                                    const AccessMode accessMode = MODE_READ );
+    LIVRECORE_API DataSource( const lunchbox::URI& uri,
+                              const AccessMode accessMode = MODE_READ );
 
-    LIVRECORE_API ~VolumeDataSource();
+    LIVRECORE_API ~DataSource();
 
     /** Load all plugin DSOs. */
     LIVRECORE_API static void loadPlugins();
@@ -58,7 +54,7 @@ public:
     /**
      * @return The volume information.
      */
-    LIVRECORE_API const VolumeInformation& getVolumeInformation() const;
+    LIVRECORE_API const VolumeInformation& getVolumeInfo() const;
 
     /** Initializes the GL specific functions. */
     LIVRECORE_API bool initializeGL();
@@ -79,13 +75,15 @@ public:
      */
     LIVRECORE_API LODNode getNode( const NodeId& nodeId ) const;
 
-    /** @copydoc VolumeDataSourcePlugin::update() */
+    /** @copydoc DataSourcePlugin::update() */
     LIVRECORE_API void update();
 
 private:
-    detail::VolumeDataSource* _impl;
+
+    struct Impl;
+    std::unique_ptr< Impl > _impl;
 };
 
 }
 
-#endif // _VolumeDataSource_h_
+#endif // _DataSource_h_

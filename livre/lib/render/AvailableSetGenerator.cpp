@@ -26,7 +26,7 @@
 #include <livre/core/dash/DashRenderNode.h>
 #include <livre/core/dash/DashRenderStatus.h>
 #include <livre/core/dash/DashTree.h>
-#include <livre/core/data/VolumeDataSource.h>
+#include <livre/core/data/DataSource.h>
 #include <livre/core/data/VolumeInformation.h>
 #include <livre/core/render/FrameInfo.h>
 #include <livre/core/render/RenderBrick.h>
@@ -62,7 +62,7 @@ struct AvailableSetGenerator::Impl
         {
             const NodeId& currentNodeId = current;
             const ConstTextureObjectPtr texture =
-                boost::static_pointer_cast< const TextureObject >(
+                std::static_pointer_cast< const TextureObject >(
                      _textureCache.get( currentNodeId.getId( )));
 
             if( texture && texture->isLoaded( ))
@@ -124,9 +124,7 @@ AvailableSetGenerator::AvailableSetGenerator( const TextureCache& textureCache )
 }
 
 AvailableSetGenerator::~AvailableSetGenerator()
-{
-    delete _impl;
-}
+{}
 
 void AvailableSetGenerator::generateRenderingSet( FrameInfo& frameInfo ) const
 {

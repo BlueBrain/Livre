@@ -50,7 +50,7 @@
 #include <livre/core/dash/DashTree.h>
 #include <livre/core/dashpipeline/DashProcessorInput.h>
 #include <livre/core/dashpipeline/DashProcessorOutput.h>
-#include <livre/core/data/VolumeDataSource.h>
+#include <livre/core/data/DataSource.h>
 #include <livre/core/render/FrameInfo.h>
 #include <livre/core/render/Frustum.h>
 #include <livre/core/render/GLWidget.h>
@@ -76,7 +76,7 @@ private:
     Channel::Impl* const _channel;
 };
 
-typedef boost::shared_ptr< EqRenderView > EqRenderViewPtr;
+typedef std::shared_ptr< EqRenderView > EqRenderViewPtr;
 
 /** Implements livre \GLWidget for internal use of eq::Channel. */
 class EqGLWidget : public GLWidget
@@ -158,7 +158,7 @@ public:
 
         const livre::DashTree& dashTree = node->getDashTree();
 
-        ConstVolumeDataSourcePtr dataSource = dashTree.getDataSource();
+        ConstDataSourcePtr dataSource = dashTree.getDataSource();
 
         _renderViewPtr.reset( new EqRenderView( this, dashTree ));
 
@@ -167,7 +167,7 @@ public:
                                   nSamplesPerPixel,
                                   GL_UNSIGNED_BYTE,
                                   GL_LUMINANCE8,
-                                  dataSource->getVolumeInformation( )));
+                                  dataSource->getVolumeInfo( )));
 
         _renderViewPtr->setRenderer( renderer );
     }
@@ -215,7 +215,7 @@ public:
         for( const ConstCacheObjectPtr& cacheObject: renderNodes )
         {
             const ConstTextureObjectPtr texture =
-                boost::static_pointer_cast< const TextureObject >( cacheObject );
+                std::static_pointer_cast< const TextureObject >( cacheObject );
 
             const LODNode& lodNode =
                     dashTree.getDataSource()->getNode( NodeId( cacheObject->getId( )));
@@ -240,7 +240,7 @@ public:
 
         DashTree& dashTree = node->getDashTree();
 
-        const VolumeInformation& volInfo = dashTree.getDataSource()->getVolumeInformation();
+        const VolumeInformation& volInfo = dashTree.getDataSource()->getVolumeInfo();
 
         const float worldSpacePerVoxel = volInfo.worldSpacePerVoxel;
         const uint32_t volumeDepth = volInfo.rootNode.getDepth();
@@ -350,9 +350,9 @@ public:
         generateSet.generateRenderingSet( _frameInfo );
 
         EqRenderViewPtr renderViewPtr =
-                boost::static_pointer_cast< EqRenderView >( _renderViewPtr );
+                std::static_pointer_cast< EqRenderView >( _renderViewPtr );
         RayCastRendererPtr renderer =
-                boost::static_pointer_cast< RayCastRenderer >(
+                std::static_pointer_cast< RayCastRenderer >(
                     renderViewPtr->getRenderer( ));
 
         renderer->update( *pipe->getFrameData( ));
@@ -440,9 +440,9 @@ public:
         os << window->getTextureCache().getStatistics();
         _drawText( os.str(), y );
 
-        ConstVolumeDataSourcePtr dataSource = static_cast< livre::Node* >(
+        ConstDataSourcePtr dataSource = static_cast< livre::Node* >(
             _channel->getNode( ))->getDashTree().getDataSource();
-        const VolumeInformation& info = dataSource->getVolumeInformation();
+        const VolumeInformation& info = dataSource->getVolumeInfo();
         Vector3f voxelSize = info.boundingBox.getSize() / info.voxels;
         std::string unit = "m";
         if( voxelSize.x() < 0.000001f )

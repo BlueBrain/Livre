@@ -78,13 +78,13 @@ BOOST_AUTO_TEST_CASE( testRemote )
         for( uint32_t i = 32; i < 1024; i = i << 1 )
         {
             lunchbox::Clock clock;
-            livre::VolumeDataSource dataSource(
+            livre::DataSource dataSource(
                 lunchbox::URI( uriBase + "#1024,1024,1024," +
                                lexical_cast< std::string >( i )));
             const float setup = clock.getTimef();
 
             const livre::VolumeInformation& info =
-                dataSource.getVolumeInformation();
+                dataSource.getVolumeInfo();
             const vmml::Vector3ui block( i );
             livre::Boxf worldBox( vmml::Vector3i( 0.f ) ,
                                   vmml::Vector3i( 1.f ));

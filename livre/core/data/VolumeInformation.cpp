@@ -18,7 +18,7 @@
  */
 
 #include <livre/core/data/VolumeInformation.h>
-#include <livre/core/data/VolumeDataSourcePlugin.h>
+#include <livre/core/data/DataSourcePlugin.h>
 #include <livre/core/data/LODNode.h>
 
 namespace livre

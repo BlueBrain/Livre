@@ -23,7 +23,7 @@
 
 #ifdef LIVRE_USE_TUVOK
 
-#include <livre/core/data/VolumeDataSource.h>
+#include <livre/core/data/DataSource.h>
 #include <livre/core/data/LODNode.h>
 
 const uint32_t BLOCK_SIZE = 28;
@@ -43,8 +43,8 @@ BOOST_AUTO_TEST_CASE( UVFDataSource )
 {
     std::cout << "uvf://" UVF_DATA_FILE << std::endl;
     const lunchbox::URI uri( "uvf://" UVF_DATA_FILE );
-    livre::VolumeDataSource source( uri );
-    const livre::VolumeInformation& info = source.getVolumeInformation();
+    livre::DataSource source( uri );
+    const livre::VolumeInformation& info = source.getVolumeInfo();
 
     BOOST_CHECK( info.rootNode.getDepth() == 2 );
     BOOST_CHECK( info.compCount == 1 );

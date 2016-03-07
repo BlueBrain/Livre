@@ -20,7 +20,6 @@
 #ifndef _DashTree_h_
 #define _DashTree_h_
 
-#include <boost/noncopyable.hpp>
 #include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <livre/core/dashTypes.h>
@@ -28,24 +27,19 @@
 namespace livre
 {
 
-namespace detail
-{
-    class DashTree;
-}
-
 /**
  * The DashTree class keeps the hierarcy of the dash nodes representing the LOD nodes.
  */
-class DashTree : public boost::noncopyable
+class DashTree
 {
 public:
-    LIVRECORE_API DashTree( ConstVolumeDataSourcePtr dataSource );
+    LIVRECORE_API DashTree( ConstDataSourcePtr dataSource );
     LIVRECORE_API ~DashTree();
 
     /**
      * @return Returns the data source
      */
-    LIVRECORE_API ConstVolumeDataSourcePtr getDataSource( ) const;
+    LIVRECORE_API ConstDataSourcePtr getDataSource( ) const;
 
     /**
      * Creates a new context, registers it and maps its data to already registered contexts.
@@ -79,7 +73,9 @@ public:
     LIVRECORE_API dash::NodePtr getDashNode( const NodeId& nodeId ) const;
 
 private:
-    detail::DashTree* _impl;
+
+    struct Impl;
+    std::unique_ptr< Impl > _impl;
 };
 
 }

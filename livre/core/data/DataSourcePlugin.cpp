@@ -17,44 +17,41 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/core/data/VolumeDataSourcePlugin.h>
-#include <livre/core/data/LODNode.h>
+#include <livre/core/data/DataSourcePlugin.h>
 
 namespace livre
 {
 
-VolumeDataSourcePlugin::VolumeDataSourcePlugin()
+DataSourcePlugin::DataSourcePlugin()
 {}
 
-LODNode VolumeDataSourcePlugin::getNode( const NodeId& nodeId ) const
+LODNode DataSourcePlugin::getNode( const NodeId& nodeId ) const
 {
-    NodeIDLODNodeMap::iterator it;
+    IdLODNodeMap::iterator it;
     {
         ReadLock lock( _mutex );
-        it = _lodNodeMap.find( nodeId );
+        it = _lodNodeMap.find( nodeId.getId( ));
         if( it != _lodNodeMap.end( ))
             return it->second;
     }
 
     WriteLock writeLock( _mutex );
-    it = _lodNodeMap.find( nodeId );
+    it = _lodNodeMap.find( nodeId.getId( ));
     if( it == _lodNodeMap.end( ))
     {
-        LODNode node;
-        internalNodeToLODNode( nodeId, node );
-        _lodNodeMap[ nodeId ] = node;
+        const LODNode& node = internalNodeToLODNode( nodeId );
+        _lodNodeMap[ nodeId.getId() ] = node;
     }
 
-    return _lodNodeMap[ nodeId ];
+    return _lodNodeMap[ nodeId.getId() ];
 }
 
-const VolumeInformation& VolumeDataSourcePlugin::getVolumeInformation() const
+const VolumeInformation& DataSourcePlugin::getVolumeInfo() const
 {
     return _volumeInfo;
 }
 
-void VolumeDataSourcePlugin::internalNodeToLODNode(
-    const NodeId& internalNode, LODNode& lodNode ) const
+LODNode DataSourcePlugin::internalNodeToLODNode( const NodeId& internalNode ) const
 {
     const uint32_t refLevel = internalNode.getLevel();
     const Vector3ui& bricksInRefLevel = _volumeInfo.rootNode.getBlockSize( refLevel );
@@ -76,10 +73,10 @@ void VolumeDataSourcePlugin::internalNodeToLODNode(
            << " lBoxCoordMax " << boxCoordMax << std::endl
            << " volume world size " << _volumeInfo.worldSize << std::endl
            << std::endl;
-    lodNode = LODNode( internalNode,
-                       _volumeInfo.maximumBlockSize - _volumeInfo.overlap * 2,
-                       Boxf( boxCoordMin - _volumeInfo.worldSize * 0.5f,
-                             boxCoordMax - _volumeInfo.worldSize * 0.5f ));
+    return LODNode( internalNode,
+                    _volumeInfo.maximumBlockSize - _volumeInfo.overlap * 2,
+                    Boxf( boxCoordMin - _volumeInfo.worldSize * 0.5f,
+                          boxCoordMax - _volumeInfo.worldSize * 0.5f ));
 }
 
 bool fillRegularVolumeInfo( VolumeInformation& info )

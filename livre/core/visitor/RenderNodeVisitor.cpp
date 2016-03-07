@@ -24,13 +24,10 @@
 namespace livre
 {
 
-namespace detail
-{
-
-class RenderNodeVisitor
+struct RenderNodeVisitor::Impl
 {
 public:
-    explicit RenderNodeVisitor( livre::DashTree& dashTree )
+    explicit Impl( livre::DashTree& dashTree )
         : _dashTree( dashTree )
     {}
 
@@ -43,18 +40,14 @@ public:
     livre::DashTree& _dashTree;
 };
 
-}
-
 RenderNodeVisitor::RenderNodeVisitor( DashTree& dashTree )
-    : _impl( new detail::RenderNodeVisitor( dashTree ))
+    : _impl( new Impl( dashTree ))
 {
 
 }
 
 RenderNodeVisitor::~RenderNodeVisitor()
-{
-    delete _impl;
-}
+{}
 
 DashTree& RenderNodeVisitor::getDashTree()
 {
