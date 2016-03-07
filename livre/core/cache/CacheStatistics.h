@@ -39,9 +39,11 @@ public:
     /**
      * Constructor
      * @param name of the cache statistics
+     * @param maxMemBytes maximum memory.
      * @param queueSize the queue size of the load/unload information to keep
      */
     LIVRECORE_API CacheStatistics( const std::string& name,
+                                   size_t maxMemBytes,
                                    const size_t queueSize = CACHE_LOG_SIZE );
 
     LIVRECORE_API ~CacheStatistics();
@@ -55,6 +57,11 @@ public:
      * @return Used memory in bytes used by the \see Cache.
      */
     LIVRECORE_API size_t getUsedMemory() const { return _usedMemBytes; }
+
+    /**
+     * @return Max memory in bytes used by the \see Cache.
+     */
+    LIVRECORE_API size_t getMaximumMemory() const { return _maxMemBytes; }
 
     /**
      * Notifies the statistics for cache misses
@@ -90,7 +97,7 @@ private:
 
     std::string _name;
     size_t _usedMemBytes;
-    size_t _maxMemBytes;
+    const size_t _maxMemBytes;
     size_t _objCount;
     size_t _cacheHit;
     size_t _cacheMiss;

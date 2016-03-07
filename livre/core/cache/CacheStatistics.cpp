@@ -78,10 +78,11 @@ struct CacheStatistics::LoadInfo
 };
 
 CacheStatistics::CacheStatistics( const std::string& name,
+                                  const size_t maxMemBytes,
                                   const size_t queueSize /* = CACHE_LOG_SIZE */ )
     : _name( name )
     , _usedMemBytes( 0 )
-    , _maxMemBytes( 0 )
+    , _maxMemBytes( maxMemBytes )
     , _objCount( 0 )
     , _cacheHit( 0 )
     , _cacheMiss( 0 )
