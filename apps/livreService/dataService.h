@@ -24,7 +24,6 @@
 #include <livre/core/data/DataSource.h>
 #include <livre/lib/zeq/events.h>
 #include <zeq/zeq.h>
-#include <lunchbox/stdExt.h>
 
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
@@ -67,8 +66,8 @@ public:
     void processOne() { _subscriber.receive(); }
 
 private:
-    typedef stde::hash_map< ::zeq::uint128_t,
-                            DataSourcePtr > DataSourceMap;
+    typedef std::unordered_map< ::zeq::uint128_t,
+                                 DataSourcePtr > DataSourceMap;
     ::zeq::Publisher _publisher;
     ::zeq::Subscriber _subscriber;
     ::zeq::connection::Broker _broker;

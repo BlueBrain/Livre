@@ -35,12 +35,6 @@ class TextureDataObject;
 class TextureObject;
 class TextureUploadProcessor;
 struct ApplicationParameters;
-struct EFPrefetchAlgorithmParameters;
-struct RESTParameters;
-
-/** SmartPtr definitions */
-typedef std::shared_ptr< RESTParameters > RESTParametersPtr;
-typedef std::shared_ptr< const RESTParameters > ConstRESTParametersPtr;
 
 typedef std::shared_ptr< TextureCache > TextureCachePtr;
 typedef std::shared_ptr< DataUploadProcessor > DataUploadProcessorPtr;
@@ -52,9 +46,6 @@ typedef std::shared_ptr< const TextureDataObject > ConstTextureDataObjectPtr;
 typedef std::shared_ptr< const TextureObject > ConstTextureObjectPtr;
 typedef std::shared_ptr< TextureDataObject > TextureDataObjectPtr;
 typedef std::shared_ptr< TextureObject > TextureObjectPtr;
-
-/** Map definitions */
-typedef std::hash_map< uint32_t, DataUploadProcessorPtr > DataUploadProcessorPtrMap;
 
 static const uint32_t CONNECTION_ID( 0u );
 
