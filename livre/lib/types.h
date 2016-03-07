@@ -36,12 +36,6 @@ class TextureObject;
 class TextureUploadProcessor;
 struct ApplicationParameters;
 
-typedef std::shared_ptr< TextureCache > TextureCachePtr;
-typedef std::shared_ptr< DataUploadProcessor > DataUploadProcessorPtr;
-typedef std::shared_ptr< TextureUploadProcessor > TextureUploadProcessorPtr;
-typedef std::shared_ptr< const DataUploadProcessor > ConstDataUploadProcessorPtr;
-typedef std::shared_ptr< const TextureUploadProcessor > ConstTextureUploadProcessorPtr;
-typedef std::shared_ptr< const DashProcessor > ConstDashProcessorPtr;
 typedef std::shared_ptr< const TextureDataObject > ConstTextureDataObjectPtr;
 typedef std::shared_ptr< const TextureObject > ConstTextureObjectPtr;
 typedef std::shared_ptr< TextureDataObject > TextureDataObjectPtr;

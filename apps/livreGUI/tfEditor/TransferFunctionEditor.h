@@ -54,7 +54,7 @@ public:
 
 signals:
     void gradientStopsChanged( const QGradientStops& stops );
-    void transferFunctionChanged( UInt8Vector tf );
+    void transferFunctionChanged( UInt8s tf );
 
 private Q_SLOTS:
 
@@ -63,7 +63,7 @@ private Q_SLOTS:
     void _save();
     void _setDefault();
     void _pointsUpdated();
-    void _onTransferFunctionChanged( UInt8Vector tf );
+    void _onTransferFunctionChanged( UInt8s tf );
 
 private:
 

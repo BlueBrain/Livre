@@ -25,15 +25,15 @@ namespace livre
 {
 
 EventMapper::EventMapper( EventHandlerFactoryPtr eventHandlerFactoryPtr )
-    : eventHandlerFactoryPtr_( eventHandlerFactoryPtr )
+    : _eventHandlerFactory( eventHandlerFactoryPtr )
 {
 
 }
 
 bool EventMapper::registerEvent( const uint32_t eventId, EventHandlerPtr eventHandler )
 {
-    EventHandlerPtrMap::iterator it = eventHandlerPtrMap_.find( eventId );
-    if( it != eventHandlerPtrMap_.end() )
+    EventHandlerMap::iterator it = _eventHandlerMap.find( eventId );
+    if( it != _eventHandlerMap.end() )
     {
         return false;
     }
@@ -41,29 +41,29 @@ bool EventMapper::registerEvent( const uint32_t eventId, EventHandlerPtr eventHa
     EventHandlerPtr handler = eventHandler;
     if( !handler )
     {
-        handler = eventHandlerFactoryPtr_->create( eventId );
+        handler = _eventHandlerFactory->create( eventId );
     }
 
-    eventHandlerPtrMap_[ eventId ] = handler;
+    _eventHandlerMap[ eventId ] = handler;
     return true;
 }
 
 bool EventMapper::unregisterEvent(const uint32_t eventId)
 {
-    EventHandlerPtrMap::iterator it = eventHandlerPtrMap_.find( eventId );
-    if( it == eventHandlerPtrMap_.end() )
+    EventHandlerMap::iterator it = _eventHandlerMap.find( eventId );
+    if( it == _eventHandlerMap.end() )
     {
         return false;
     }
 
-    eventHandlerPtrMap_.erase( eventId );
+    _eventHandlerMap.erase( eventId );
     return true;
 }
 
 bool EventMapper::handleEvent( const uint32_t eventId, EventInfo& eventInfo ) const
 {
-    EventHandlerPtrMap::const_iterator it = eventHandlerPtrMap_.find( eventId );
-    if( it == eventHandlerPtrMap_.end() )
+    EventHandlerMap::const_iterator it = _eventHandlerMap.find( eventId );
+    if( it == _eventHandlerMap.end() )
     {
         return false;
     }
@@ -73,8 +73,8 @@ bool EventMapper::handleEvent( const uint32_t eventId, EventInfo& eventInfo ) co
 
 EventHandlerPtr EventMapper::getEventHandler(const uint32_t eventId) const
 {
-    EventHandlerPtrMap::const_iterator it = eventHandlerPtrMap_.find( eventId );
-    if( it == eventHandlerPtrMap_.end() )
+    EventHandlerMap::const_iterator it = _eventHandlerMap.find( eventId );
+    if( it == _eventHandlerMap.end() )
     {
         return EventHandlerPtr();
     }

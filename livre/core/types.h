@@ -150,20 +150,20 @@ struct DontDeleteObject
 /**
  * Vector definitions basic types
  */
-typedef std::vector< float > FloatVector;
-typedef std::vector< double > DoubleVector;
+typedef std::vector< float > Floats;
+typedef std::vector< double > Doubles;
 
-typedef std::vector< int8_t > Int8Vector;
-typedef std::vector< uint8_t > UInt8Vector;
+typedef std::vector< int8_t > Int8s;
+typedef std::vector< uint8_t > UInt8s;
 
-typedef std::vector< int16_t > Int16Vector;
-typedef std::vector< uint16_t > UInt16Vector;
+typedef std::vector< int16_t > Int16s;
+typedef std::vector< uint16_t > UInt16s;
 
-typedef std::vector< int32_t > Int32Vector;
-typedef std::vector< uint32_t > UInt32Vector;
+typedef std::vector< int32_t > Int32s;
+typedef std::vector< uint32_t > UInt32s;
 
-typedef std::vector< int64_t > Int64Vector;
-typedef std::vector< uint64_t > UInt64Vector;
+typedef std::vector< int64_t > Int64s;
+typedef std::vector< uint64_t > UInt64s;
 
 typedef std::vector< NodeId > NodeIds;
 typedef std::vector< CacheId > CacheIds;
@@ -181,8 +181,8 @@ typedef std::vector< RenderBrickPtr > RenderBricks;
 typedef std::unordered_map< CacheId, CacheObjectPtr > CacheMap;
 typedef std::unordered_map< CacheId, ConstCacheObjectPtr > ConstCacheMap;
 typedef std::unordered_map< uint32_t, bool > BoolMap;
-typedef std::unordered_map< uint32_t, EventHandlerPtr > EventHandlerPtrMap;
-typedef std::unordered_map< uint32_t, DashConnectionPtr > DashConnectionPtrMap;
+typedef std::unordered_map< uint32_t, EventHandlerPtr > EventHandlerMap;
+typedef std::unordered_map< uint32_t, DashConnectionPtr > DashConnectionMap;
 
 /**
  * Set definitions

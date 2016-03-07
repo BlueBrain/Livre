@@ -74,7 +74,7 @@ DashConnectionPtr DashProcessorInput::getConnection( const uint32_t connectionId
 
 bool DashProcessorInput::dataWaitingOnInput_( const uint32_t inputConnection ) const
 {
-    DashConnectionPtrMap::const_iterator it = connectionMap_.find( inputConnection );
+    DashConnectionMap::const_iterator it = connectionMap_.find( inputConnection );
     return it->second->hasData( );
 }
 

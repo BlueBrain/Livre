@@ -86,9 +86,9 @@ uint32_t ColorMapWidget::getColorAtPoint( const int32_t xPosition )
     return 0u;
 }
 
-UInt8Vector ColorMapWidget::getCurve() const
+UInt8s ColorMapWidget::getCurve() const
 {
-    UInt8Vector curve;
+    UInt8s curve;
 
     int32_t currentHPointIndex = 0;
     const size_t tfSize = 256u;

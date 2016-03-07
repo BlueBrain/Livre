@@ -44,7 +44,7 @@ enum SamplePointsType
     DEFAULT = FLOAT
 };
 
-FloatVector create2ColorTF( const uint32_t surfaceColorPos,
+Floats create2ColorTF( const uint32_t surfaceColorPos,
                             const float surfaceColorAlpha,
                             const float solidColorAlpha, const size_t size,
                             const Vector3f& surfaceColorRGB,
@@ -52,7 +52,7 @@ FloatVector create2ColorTF( const uint32_t surfaceColorPos,
 {
     Vector3f finalColorRGB;
     float alpha;
-    FloatVector transferFunction;
+    Floats transferFunction;
 
     const Vector3f colorDiff = solidColorRGB - surfaceColorRGB;
     const float alphaDiff = solidColorAlpha - surfaceColorAlpha;
@@ -88,7 +88,7 @@ FloatVector create2ColorTF( const uint32_t surfaceColorPos,
     return transferFunction;
 }
 
-FloatVector createDefault2ColorTF()
+Floats createDefault2ColorTF()
 {
     return create2ColorTF( DEFAULT_COLOR1_DENSITY, DEFAULT_COLOR1_ALPHA,
                            DEFAULT_COLOR2_ALPHA,
@@ -97,7 +97,7 @@ FloatVector createDefault2ColorTF()
 }
 
 SamplePointsType readTransferFunction( const std::string& file,
-                                       FloatVector& transferFunction )
+                                       Floats& transferFunction )
 {
     transferFunction = createDefault2ColorTF();
     if( file.empty( ))
@@ -146,7 +146,7 @@ SamplePointsType readTransferFunction( const std::string& file,
 
 void TransferFunction1D::reset()
 {
-    const FloatVector defaultTF = createDefault2ColorTF();
+    const Floats defaultTF = createDefault2ColorTF();
     const float maxVal = std::numeric_limits< uint8_t >::max();
     const size_t size = defaultTF.size();
 
@@ -174,7 +174,7 @@ void TransferFunction1D::createCustomTF_( const uint32_t size )
 
 void TransferFunction1D::createTfFromFile_( const std::string& file )
 {
-    FloatVector transferFunction;
+    Floats transferFunction;
     const SamplePointsType& format = readTransferFunction( file, transferFunction );
     const size_t size = transferFunction.size();
     rgba_.resize( size );

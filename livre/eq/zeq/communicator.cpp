@@ -69,7 +69,7 @@ public:
         if( !_publisher )
             return;
 
-        const FloatVector matrix( modelView.begin(), modelView.end( ));
+        const Floats matrix( modelView.begin(), modelView.end( ));
         _publisher->publish( ::zeq::hbp::serializeCamera( matrix ));
     }
 
@@ -80,7 +80,7 @@ public:
 
         const auto& cameraSettings = _getFrameData().getCameraSettings();
         const Matrix4f& modelView = cameraSettings.getModelViewMatrix();
-        const FloatVector matrix( modelView.begin(), modelView.end( ));
+        const Floats matrix( modelView.begin(), modelView.end( ));
         _publisher->publish( ::zeq::hbp::serializeCamera( matrix ));
     }
 

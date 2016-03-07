@@ -42,14 +42,15 @@ public:
      * @param eventHandler The event handler to register if another event handler then the factory one is being used.
      * @return True if same event is not registered twice.
      */
-    LIVRECORE_API bool registerEvent( const uint32_t eventId, EventHandlerPtr eventHandler = EventHandlerPtr() );
+    LIVRECORE_API bool registerEvent( uint32_t eventId,
+                                      EventHandlerPtr eventHandler = EventHandlerPtr() );
 
     /**
      * Unregisters event.
      * @param eventId Event id.
      * @return True if event can be unregistered.
      */
-    LIVRECORE_API bool unregisterEvent( const uint32_t eventId );
+    LIVRECORE_API bool unregisterEvent( uint32_t eventId );
 
     /**
      * Handles the event with the given id.
@@ -57,18 +58,18 @@ public:
      * @param eventInfo The event information. \see livre::EventInfo
      * @return True when event is handled.
      */
-    LIVRECORE_API bool handleEvent( const uint32_t eventId, EventInfo& eventInfo ) const;
+    LIVRECORE_API bool handleEvent( uint32_t eventId, EventInfo& eventInfo ) const;
 
     /**
      * Gets the event from the mapper.
      * @param eventId Event id.
      * @return The event, if it finds the event, otherwise empty.
      */
-    LIVRECORE_API EventHandlerPtr getEventHandler( const uint32_t eventId ) const;
+    LIVRECORE_API EventHandlerPtr getEventHandler( uint32_t eventId ) const;
 
 private:
-    EventHandlerFactoryPtr eventHandlerFactoryPtr_;
-    EventHandlerPtrMap eventHandlerPtrMap_;
+    EventHandlerFactoryPtr _eventHandlerFactory;
+    EventHandlerMap _eventHandlerMap;
 };
 
 }

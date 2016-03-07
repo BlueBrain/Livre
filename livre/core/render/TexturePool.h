@@ -76,7 +76,7 @@ public:
 
 private:
 
-    UInt32Vector _textureStack;
+    UInt32s _textureStack;
 
     const Vector3ui _maxBlockSize;
     const int32_t _internalFormat;
