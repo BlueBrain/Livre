@@ -30,8 +30,12 @@ namespace ut = boost::unit_test;
 
 BOOST_AUTO_TEST_CASE( testCache )
 {
-    test::Cache cache( 2048 );
+    const size_t maxMemBytes = 2048u;
+
+    test::Cache cache( maxMemBytes );
     BOOST_CHECK( cache.getCount() == 0 );
+
+    BOOST_CHECK( cache.getStatistics().getMaximumMemory() == maxMemBytes );
 
     livre::CacheObjectPtr validCacheObject( new test::ValidCacheObject( 0 ) );
     BOOST_CHECK( validCacheObject->getId() == 0 );

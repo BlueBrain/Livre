@@ -86,7 +86,7 @@ struct Cache::Impl
           const size_t maxMemBytes )
         : _policy( maxMemBytes )
         , _cache( cache )
-        , _statistics( name )
+        , _statistics( name, maxMemBytes )
     {}
 
     ~Impl()
