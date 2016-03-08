@@ -1,4 +1,5 @@
 # -*- mode: cmake -*-
+git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git 18fa447)
 git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git 4a571bd)
 git_subproject(zeq https://github.com/HBPVis/zeq.git 881b091)
 git_subproject(Lunchbox https://github.com/Eyescale/Lunchbox.git d26906e)
