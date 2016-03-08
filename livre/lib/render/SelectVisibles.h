@@ -66,7 +66,23 @@ protected:
         }
 
         Vector3f vmin, vmax;
-        worldBox.computeNearFar( _frustum.getNearPlane(), vmin, vmax );
+        const Plane& nearPlane = _frustum.getNearPlane();
+
+        worldBox.computeNearFar( nearPlane, vmin, vmax );
+
+        Vector4f hVmin = vmin;
+        hVmin[ 3 ] = 1.0f;
+
+        Vector4f hVmax = vmax;
+        hVmax[ 3 ] = 1.0f;
+
+        // The bounding box intersects the plane
+        if( _frustum.getNearPlane().dot( hVmin ) < 0 ||
+            _frustum.getNearPlane().dot( hVmax ) < 0 )
+        {
+            // Where eye direction intersects with near plane
+            vmin = _frustum.getEyePos() - _frustum.getViewDir() * _frustum.nearPlane();
+        }
 
         const uint32_t lod =
             _lodEvaluator.getLODForPoint( _frustum, _volumeDepth, vmin );
