@@ -125,6 +125,7 @@ struct Channel::Impl
 public:
     explicit Impl( Channel* channel )
           : _channel( channel )
+          , _frustum( Matrix4f(), Matrix4f( ))
           , _glWidgetPtr( new EqGLWidget( channel ))
           , _frameInfo( _frustum, INVALID_FRAME )
     {}

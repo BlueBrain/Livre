@@ -41,7 +41,7 @@ DashRenderStatus::DashRenderStatus()
     _dashNode->insert( threadOp );
 
     dash::AttributePtr frustum = new dash::Attribute();
-    *frustum = Frustum();
+    *frustum = Frustum( Matrix4f(), Matrix4f( ));
     _dashNode->insert( frustum );
 }
 

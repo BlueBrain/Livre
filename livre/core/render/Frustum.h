@@ -42,8 +42,8 @@ public:
      * @param modelViewMatrix 4x4 modelview matrix.
      * @param projectionMatrix 4x4 projection matrix,
      */
-    LIVRECORE_API Frustum( const Matrix4f& modelViewMatrix = Matrix4f::IDENTITY,
-                           const Matrix4f& projectionMatrix = Matrix4f::IDENTITY );
+    LIVRECORE_API Frustum( const Matrix4f& modelViewMatrix,
+                           const Matrix4f& projectionMatrix );
     LIVRECORE_API ~Frustum();
 
     /** @return The frustum plane information in world coordinates. */
