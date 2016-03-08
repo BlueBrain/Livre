@@ -91,8 +91,8 @@ void RenderBrick::getScreenCoordinates( const Frustum& frustum,
             for( int32_t k = 0; k < 2; ++k )
             {
                 // based on gluProject code from SGI implementation
-                const Matrix4f& mv = frustum.getModelViewMatrix();
-                const Matrix4f& proj = frustum.getProjectionMatrix();
+                const Matrix4f& mv = frustum.getMVMatrix();
+                const Matrix4f& proj = frustum.getProjMatrix();
 
                 Vector4f in( x[ i ], y[ j ], z[ k ], 1.0 );
                 Vector4f out = mv * in;

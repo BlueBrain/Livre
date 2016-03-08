@@ -36,7 +36,15 @@ namespace livre
 class Frustum : public Frustumf
 {
 public:
-    LIVRECORE_API Frustum();
+
+    /**
+     * Initializes the Frustum parameters from the modelview and projection matrices.
+     * @param modelViewMatrix 4x4 modelview matrix.
+     * @param projectionMatrix 4x4 projection matrix,
+     */
+    LIVRECORE_API Frustum( const Matrix4f& modelViewMatrix,
+                           const Matrix4f& projectionMatrix );
+    LIVRECORE_API ~Frustum();
 
     /** @return The frustum plane information in world coordinates. */
     LIVRECORE_API const Plane& getNearPlane() const;
@@ -48,42 +56,39 @@ public:
     LIVRECORE_API bool boxInFrustum( const Boxf &worldBox ) const;
 
     /**
-     * Initializes the Frustum parameters from the modelview and projection matrices.
-     * @param modelViewMatrix 4x4 modelview matrix.
-     * @param projectionMatrix 4x4 projection matrix,
-     */
-    LIVRECORE_API void setup( const Matrix4f& modelViewMatrix,
-                              const Matrix4f& projectionMatrix );
-
-    /**
      * @return The modelview matrix.
      */
-    LIVRECORE_API const Matrix4f& getModelViewMatrix() const;
+    LIVRECORE_API const Matrix4f& getMVMatrix() const;
 
     /**
      * @return The projection matrix.
      */
-    LIVRECORE_API const Matrix4f& getProjectionMatrix() const;
+    LIVRECORE_API const Matrix4f& getProjMatrix() const;
 
     /**
      * @return The inverse modelview matrix.
      */
-    LIVRECORE_API const Matrix4f& getInvModelViewMatrix() const;
+    LIVRECORE_API const Matrix4f& getInvMVMatrix() const;
 
     /**
      * @return The inverse projection matrix.
      */
-    LIVRECORE_API const Matrix4f& getInvProjectionMatrix() const;
+    LIVRECORE_API const Matrix4f& getInvProjMatrix() const;
 
     /**
      * @return The modelview projection matrix.
      */
-    LIVRECORE_API Matrix4f getModelViewProjectionMatrix() const;
+    LIVRECORE_API Matrix4f getMVPMatrix() const;
 
     /**
      * @return The eye coordinates in world space.
      */
-    LIVRECORE_API const Vector3f& getEyeCoords() const;
+    LIVRECORE_API const Vector3f& getEyePos() const;
+
+    /**
+     * @return The eye direction in world space.
+     */
+    LIVRECORE_API const Vector3f& getViewDir() const;
 
     /** @return True if the two frustums are the same. */
     LIVRECORE_API bool operator == ( const Frustum& rhs ) const;
@@ -93,14 +98,9 @@ public:
         { return !(*this == rhs); }
 
 private:
-    Matrix4f modelViewMatrix_;
-    Matrix4f invModelViewMatrix_;
-    Matrix4f projectionMatrix_;
-    Matrix4f invProjectionMatrix_;
-    Vector3f eye_;
-    FrustumCullerf _culler;
 
-    void computeLimitsFromProjectionMatrix_();
+    struct Impl;
+    std::shared_ptr<Impl> _impl;
 };
 
 }

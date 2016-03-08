@@ -121,9 +121,9 @@ struct DepthCompare
         const LODNode& lodNode1 = renderNode1.getLODNode();
         const LODNode& lodNode2 = renderNode2.getLODNode();
 
-        const float depth1 = ( frustum_.getEyeCoords() -
+        const float depth1 = ( frustum_.getEyePos() -
                                lodNode1.getWorldBox().getCenter( )).length();
-        const float depth2 = ( frustum_.getEyeCoords() -
+        const float depth2 = ( frustum_.getEyePos() -
                                lodNode2.getWorldBox().getCenter( )).length();
         return  depth1 < depth2;
     }

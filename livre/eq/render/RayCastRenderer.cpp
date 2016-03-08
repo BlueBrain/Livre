@@ -173,10 +173,10 @@ struct RayCastRenderer::Impl
         const Frustum& frustum = view.getFrustum();
 
         tParamNameGL = glGetUniformLocation( program, "invProjectionMatrix" );
-        glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getInvProjectionMatrix( ).array );
+        glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getInvProjMatrix( ).array );
 
         tParamNameGL = glGetUniformLocation( program, "invModelViewMatrix" );
-        glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getInvModelViewMatrix( ).array );
+        glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getInvMVMatrix( ).array );
 
         // Because the volume is centered to the origin we can compute the volume AABB by using
         // the volume total size.
@@ -200,7 +200,7 @@ struct RayCastRenderer::Impl
         glUniform2fv( tParamNameGL, 1, depthRange.array );
 
         tParamNameGL = glGetUniformLocation( program, "worldEyePosition" );
-        glUniform3fv( tParamNameGL, 1, frustum.getEyeCoords( ).array );
+        glUniform3fv( tParamNameGL, 1, frustum.getEyePos( ).array );
 
         tParamNameGL = glGetUniformLocation( program, "nSamplesPerRay" );
         glUniform1i( tParamNameGL, _computedSamplesPerRay );

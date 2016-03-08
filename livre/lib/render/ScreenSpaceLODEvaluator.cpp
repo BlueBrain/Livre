@@ -47,7 +47,9 @@ uint32_t ScreenSpaceLODEvaluator::getLODForPoint( const Frustum& frustum,
     const float worldSpacePerPixel = ( t - b ) / _windowHeight;
     const float voxelPerPixel = worldSpacePerPixel  / _worldSpacePerVoxel * _screenSpaceError;
 
-    const float distance = std::abs( frustum.getNearPlane().distance( worldCoord ));
+    Vector4f hWorldCoord = worldCoord;
+    hWorldCoord[ 3 ] = 1.0f;
+    const float distance = std::abs( frustum.getNearPlane().dot( hWorldCoord ));
 
     const float n = frustum.nearPlane();
     const float voxelPerPixelInDistance = voxelPerPixel * distance / n;
