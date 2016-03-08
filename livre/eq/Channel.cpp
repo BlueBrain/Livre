@@ -178,7 +178,7 @@ public:
         const eq::Frustumf& eqFrustum = _channel->getFrustum();
         const eq::Matrix4f& projection = eqFrustum.computePerspectiveMatrix();
 
-        _frustum.setup( modelView, projection );
+        _frustum = Frustum( modelView, projection );
         return _frustum;
     }
 
@@ -261,7 +261,7 @@ public:
 
     void updateRegions( const RenderBricks& bricks )
     {
-        const Matrix4f& mvpMatrix = _frustum.getModelViewProjectionMatrix();
+        const Matrix4f& mvpMatrix = _frustum.getMVPMatrix();
         for( const RenderBrickPtr& brick : bricks )
         {
             const Boxf& worldBox = brick->getLODNode().getWorldBox();

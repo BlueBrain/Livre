@@ -22,76 +22,126 @@
 namespace livre
 {
 
-Frustum::Frustum()
-    : modelViewMatrix_( Matrix4f::IDENTITY )
+struct Frustum::Impl
+{
+    Impl( Frustum& frustum,
+          const Matrix4f& modelViewMatrix,
+          const Matrix4f& projectionMatrix )
+        : _frustum( frustum )
+        , _mvMatrix( modelViewMatrix )
+        , _projMatrix( projectionMatrix )
+        , _culler( projectionMatrix * modelViewMatrix )
+    {
+        _projMatrix.inverse( _invProjMatrix );
+        computeLimitsFromProjectionMatrix();
+
+        _mvMatrix.inverse( _invMVMatrix );
+        _invMVMatrix.get_translation( _eye );
+
+        Vector4f eyeDir;
+        _invMVMatrix.get_column( 2, eyeDir );
+        _dir[ 0 ] = eyeDir[ 0 ];
+        _dir[ 1 ] = eyeDir[ 1 ];
+        _dir[ 2 ] = eyeDir[ 2 ];
+    }
+
+    const Plane& getNearPlane() const
+    {
+        return _culler.getNearPlane();
+    }
+
+    bool boxInFrustum( const Boxf &worldBox ) const
+    {
+        const vmml::Visibility vis = _culler.test( worldBox );
+        return vis != vmml::VISIBILITY_NONE;
+    }
+
+    Matrix4f getMVPMatrix() const
+    {
+        return _projMatrix * _mvMatrix;
+    }
+
+    bool operator==( const Frustum::Impl& rhs ) const
+    {
+        return _mvMatrix.equals( rhs._mvMatrix, std::numeric_limits< float >::epsilon( ));
+    }
+
+    void computeLimitsFromProjectionMatrix()
+    {
+        *static_cast< Frustumf* >( &_frustum ) = Frustumf( _projMatrix );
+    }
+
+    Frustum& _frustum;
+    const Matrix4f _mvMatrix;
+    Matrix4f _invMVMatrix;
+    const Matrix4f _projMatrix;
+    Matrix4f _invProjMatrix;
+    Vector3f _eye;
+    Vector3f _dir;
+    FrustumCullerf _culler;
+};
+
+Frustum::Frustum( const Matrix4f& modelViewMatrix,
+                  const Matrix4f& projectionMatrix )
+    : _impl( new Frustum::Impl( *this,
+                                modelViewMatrix,
+                                projectionMatrix ))
+{}
+
+Frustum::~Frustum()
 {}
 
 const Plane& Frustum::getNearPlane() const
 {
-    return _culler.getNearPlane();
+    return _impl->getNearPlane();
 }
 
-bool Frustum::boxInFrustum( const Boxf &worldBox ) const
+bool Frustum::boxInFrustum( const Boxf& worldBox ) const
 {
-    const vmml::Visibility vis = _culler.test( worldBox );
-    return vis != vmml::VISIBILITY_NONE;
+    return _impl->boxInFrustum( worldBox );
 }
 
-const Matrix4f& Frustum::getModelViewMatrix() const
+const Matrix4f& Frustum::getMVMatrix() const
 {
-    return modelViewMatrix_;
+    return _impl->_mvMatrix;
 }
 
-const Matrix4f& Frustum::getProjectionMatrix() const
+const Matrix4f& Frustum::getProjMatrix() const
 {
-    return projectionMatrix_;
+    return _impl->_projMatrix;
 }
 
-const Matrix4f& Frustum::getInvModelViewMatrix() const
+const Matrix4f& Frustum::getInvMVMatrix() const
 {
-    return invModelViewMatrix_;
+    return _impl->_invMVMatrix;
 }
 
-const Matrix4f& Frustum::getInvProjectionMatrix() const
+const Matrix4f& Frustum::getInvProjMatrix() const
 {
-    return invProjectionMatrix_;
+    return _impl->_invProjMatrix;
 }
 
-Matrix4f Frustum::getModelViewProjectionMatrix() const
+Matrix4f Frustum::getMVPMatrix() const
 {
-    return projectionMatrix_ * modelViewMatrix_;
+    return _impl->getMVPMatrix();
 }
 
-const Vector3f& Frustum::getEyeCoords() const
+const Vector3f& Frustum::getEyePos() const
 {
-    return eye_;
+    return _impl->_eye;
+}
+
+const Vector3f& Frustum::getViewDir() const
+{
+    return _impl->_dir;
 }
 
 bool Frustum::operator==( const Frustum& rhs ) const
 {
-    return modelViewMatrix_.equals( rhs.getModelViewMatrix(),
-                                    std::numeric_limits< float >::epsilon( ));
+    return *_impl == *rhs._impl;
 }
 
 
-void Frustum::setup( const Matrix4f& modelViewMatrix,
-                     const Matrix4f& projectionMatrix )
-{
-    const Matrix4f& mvp = projectionMatrix * modelViewMatrix;
-    modelViewMatrix_ = modelViewMatrix;
-    projectionMatrix_ = projectionMatrix;
-    projectionMatrix_.inverse( invProjectionMatrix_ );
 
-    _culler = FrustumCullerf( mvp );
-    computeLimitsFromProjectionMatrix_();
-
-    modelViewMatrix_.inverse( invModelViewMatrix_ );
-    invModelViewMatrix_.get_translation( eye_ );
-}
-
-void Frustum::computeLimitsFromProjectionMatrix_()
-{
-    *static_cast< Frustumf* >( this ) = Frustumf( projectionMatrix_ );
-}
 
 }

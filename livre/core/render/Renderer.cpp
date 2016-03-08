@@ -38,9 +38,9 @@ struct DistanceOperator
     bool operator()( const RenderBrickPtr& rb1,
                      const RenderBrickPtr& rb2 )
     {
-        const float distance1 = ( _frustum.getModelViewMatrix() *
+        const float distance1 = ( _frustum.getMVMatrix() *
                                   rb1->getLODNode().getWorldBox().getCenter() ).length();
-        const float distance2 = ( _frustum.getModelViewMatrix() *
+        const float distance2 = ( _frustum.getMVMatrix() *
                                   rb2->getLODNode().getWorldBox().getCenter() ).length();
         return  distance1 < distance2;
     }
