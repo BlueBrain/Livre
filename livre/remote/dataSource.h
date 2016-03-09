@@ -50,7 +50,6 @@ public:
     static bool handles( const DataSourcePluginData& initData );
 
 private:
-
     class Impl;
     std::unique_ptr< Impl > _impl;
 };

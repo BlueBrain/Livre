@@ -79,8 +79,7 @@ void CameraSettings::setModelViewMatrix( const Matrix4f& modelViewMatrix )
     maths::getRotationAndEyePositionFromModelView( modelViewMatrix,
                                                    rotationMatrix,
                                                    cameraPosition_ );
-    Matrix3f inverseRotation = Matrix4f::IDENTITY;
-    rotationMatrix.transpose_to( inverseRotation );
+    const Matrix3f& inverseRotation = vmml::transpose( rotationMatrix );
     modelRotation_ = inverseRotation;
     modelRotation_( 3, 3 ) = 1;
     cameraPosition_ = inverseRotation * -cameraPosition_;
@@ -92,7 +91,7 @@ Matrix4f CameraSettings::getModelViewMatrix() const
 {
     Matrix4f modelView;
     modelView = modelRotation_;
-    modelView.set_translation( cameraPosition_ );
+    modelView.setTranslation( cameraPosition_ );
     return modelView;
 }
 

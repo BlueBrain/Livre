@@ -533,10 +533,9 @@ public:
         LBASSERT( !_channel->useOrtho( ));
 
         // calculate modelview inversed+transposed matrix
-        Matrix3f modelviewITM;
         Matrix4f modelviewIM;
         modelView.inverse( modelviewIM );
-        Matrix3f( modelviewIM ).transpose_to( modelviewITM );
+        const Matrix3f modelviewITM = vmml::transpose( Matrix3f( modelviewIM ));
 
         Vector3f norm = modelviewITM * Vector3f( 0.0f, 0.0f, 1.0f );
         norm.normalize();

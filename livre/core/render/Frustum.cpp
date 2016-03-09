@@ -24,8 +24,7 @@ namespace livre
 
 struct Frustum::Impl
 {
-    Impl( Frustum& frustum,
-          const Matrix4f& modelViewMatrix,
+    Impl( Frustum& frustum, const Matrix4f& modelViewMatrix,
           const Matrix4f& projectionMatrix )
         : _frustum( frustum )
         , _mvMatrix( modelViewMatrix )
@@ -36,10 +35,9 @@ struct Frustum::Impl
         computeLimitsFromProjectionMatrix();
 
         _mvMatrix.inverse( _invMVMatrix );
-        _invMVMatrix.get_translation( _eye );
+        _eye = _invMVMatrix.getTranslation();
 
-        Vector4f eyeDir;
-        _invMVMatrix.get_column( 2, eyeDir );
+        const Vector4f eyeDir = _invMVMatrix.getColumn( 2 );
         _dir[ 0 ] = eyeDir[ 0 ];
         _dir[ 1 ] = eyeDir[ 1 ];
         _dir[ 2 ] = eyeDir[ 2 ];
@@ -63,7 +61,8 @@ struct Frustum::Impl
 
     bool operator==( const Frustum::Impl& rhs ) const
     {
-        return _mvMatrix.equals( rhs._mvMatrix, std::numeric_limits< float >::epsilon( ));
+        return _mvMatrix.equals( rhs._mvMatrix,
+                                 std::numeric_limits< float >::epsilon( ));
     }
 
     void computeLimitsFromProjectionMatrix()
@@ -83,9 +82,7 @@ struct Frustum::Impl
 
 Frustum::Frustum( const Matrix4f& modelViewMatrix,
                   const Matrix4f& projectionMatrix )
-    : _impl( new Frustum::Impl( *this,
-                                modelViewMatrix,
-                                projectionMatrix ))
+    : _impl( new Frustum::Impl( *this, modelViewMatrix, projectionMatrix ))
 {}
 
 Frustum::~Frustum()
@@ -140,8 +137,5 @@ bool Frustum::operator==( const Frustum& rhs ) const
 {
     return *_impl == *rhs._impl;
 }
-
-
-
 
 }
