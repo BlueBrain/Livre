@@ -21,7 +21,7 @@
 #define _Pipeline_h_
 
 #include <livre/core/types.h>
-#include <livre/core/pipeline/Filter.h>
+#include <livre/core/pipeline/PipeFilter.h>
 #include <livre/core/pipeline/Executable.h>
 
 namespace livre
@@ -31,9 +31,9 @@ namespace livre
  * Pipeline represents a filter graph. On asynchronous
  * execution through the Executor, the status of the
  * execution can be queried whether the execution is
- * complete or not.
+ * complete or not through the post conditions.
  */
-class Pipeline : public Executable
+class Pipeline : public Executable::ExecutableImpl
 {
 
 public:
@@ -48,38 +48,35 @@ public:
      * can wait on given pipeline.
      */
     void add( const std::string& name,
-              const PipelinePtr& pipeline,
-              bool wait = true );
+              const Pipeline& pipeline,
+              bool wait = true )
+    {
+        _add( name,
+              Executable( pipeline ),
+              wait );
+    }
 
     /**
-     * Creates and adds a pipefilter around a filter to be executed. The
-     * notification of completion of execution is connected to the pipeline
-     * if user wants to wait on execution of whole pipeline.
-     * @param filter is added  to list of executables.
+     * Creates and adds a pipefilter ( given the FilterT type of filter )
+     * @param FilterT is the type of filter to be added to list of executables.
+     * @name name the name of the filter instance.
+     * @param args for the FilterT construction
      * @param wait If true, on asynchronous execution, pipeline
      * can wait on the added filter.
      * @return returns the generated pipe filter.
+     * @throws std::runtime_error if an executable with same name is present
      */
-    PipeFilterPtr add( const std::string& name,
-                       const FilterPtr& filter,
-                       bool wait = true );
 
-    /**
-     * Adds a filter function to be executed. The
-     * notification of completion of execution is connected to the pipeline
-     * if user wants to wait on execution of whole pipeline.
-     * @param filterFunc is the filter function object.
-     * @param inputPorts are the input ports information.
-     * @param outputPorts are the output ports information.
-     * @param wait  If true, on asynchronous execution, pipeline
-     * can wait on the added filter function.
-     * @return returns the generated pipe filter.
-     */
-    PipeFilterPtr add( const std::string& name,
-                       const FilterFunc& filterFunc,
-                       const PortInfos& inputPorts,
-                       const PortInfos& outputPorts,
-                       bool wait = true );
+    template< class FilterT, class... Args, bool wait = true >
+    PipeFilter add( const std::string& name,
+                    Args&&... args )
+    {
+        PipeFilterT< FilterT > pipeFilter( name, args... );
+        _add( name,
+              Executable( pipeFilter ),
+              wait );
+        return pipeFilter;
+    }
 
     /**
      * @return the list of all executables ( pipe filters and
@@ -88,30 +85,42 @@ public:
     Executables getExecutables() const;
 
     /**
-     * Executes each executable element in the graph
-     * synchronously.
+     * @param name of the executable
+     * @return the executable
+     * @throws std::runtime_error if a pipe filter or pipeline does not exist
+     */
+    const Executable& getExecutable( const std::string& name ) const;
+
+    /**
+     * @copydoc Executable::execute
      */
     void execute() final;
 
     /**
-     * Resets the pipeline. At this point pipeline execution should be complete.
+     * @copydoc Executable::getPostconditions
+     */
+    Futures getPostconditions() const final;
+
+    /**
+     * @copydoc Executable::getPreconditions
+     */
+    Futures getPreconditions() const final;
+
+    /**
+     * @copydoc Executable::reset
      */
     void reset() final;
 
 private:
 
-    /**
-     * @return Returns the writable future
-     */
-    Futures getPreconditions() const final;
-
-    /**
-     * @return Returns the writable future
-     */
-    Futures getPostconditions() const final;
+    void _add( const std::string& name,
+               const Executable& filter,
+               bool wait );
+private:
 
     struct Impl;
-    std::unique_ptr<Impl> _impl;
+    std::shared_ptr< Impl > _impl;
+
 };
 
 }

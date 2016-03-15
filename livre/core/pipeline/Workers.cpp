@@ -18,9 +18,6 @@
  */
 
 #include <livre/core/pipeline/Workers.h>
-#include <livre/core/pipeline/Filter.h>
-#include <livre/core/pipeline/FutureMap.h>
-#include <livre/core/pipeline/PipeFilter.h>
 #include <livre/core/render/GLContext.h>
 
 #include <lunchbox/mtQueue.h>
@@ -35,8 +32,8 @@ struct Workers::Impl
 
 
     Impl( Workers& workers,
-          size_t nThreads,
-          GLContextPtr glContext )
+          const size_t nThreads,
+          const GLContextPtr& glContext )
         : _workers( workers )
         , _glContext( glContext )
     {
@@ -45,6 +42,16 @@ struct Workers::Impl
                                                      this ));
 
     }
+
+    struct Work
+    {
+        Work( const Executable& executable_ )
+            : executable( executable_ )
+        {}
+        Executable executable;
+    };
+
+    typedef std::shared_ptr< Work > WorkPtr;
 
     void execute()
     {
@@ -57,24 +64,25 @@ struct Workers::Impl
 
         while( true )
         {
-            ExecutablePtr executable = _workQueue.pop();
-            if( !executable )
+            WorkPtr work = _workQueue.pop();
+            if( !work )
                 break;
 
-            executable->execute();
+            work->executable.execute();
         }
     }
 
     ~Impl()
     {
         for( size_t i = 0; i < getSize(); ++i )
-            _workQueue.push( ExecutablePtr());
+            _workQueue.push( WorkPtr());
         _threadGroup.join_all();
     }
 
-    void submitWork( ExecutablePtr executable )
+
+    void submitWork( const Executable& executable )
     {
-        _workQueue.push( executable );
+        _workQueue.push( WorkPtr( new Work( executable )));
     }
 
     size_t getSize() const
@@ -82,19 +90,13 @@ struct Workers::Impl
         return _threadGroup.size();
     }
 
-    struct Work
-    {
-
-
-    };
-
     Workers& _workers;
-    lunchbox::MTQueue< ExecutablePtr > _workQueue;
+    lunchbox::MTQueue< WorkPtr > _workQueue;
     boost::thread_group _threadGroup;
-    GLContextPtr _glContext;
+    const GLContextPtr _glContext;
 };
 
-Workers::Workers( size_t nThreads,
+Workers::Workers( const size_t nThreads,
                   GLContextPtr glContext )
     : _impl( new Workers::Impl( *this,
                                 nThreads,
@@ -104,7 +106,7 @@ Workers::Workers( size_t nThreads,
 Workers::~Workers()
 {}
 
-void Workers::execute( ExecutablePtr executable )
+void Workers::execute( const Executable& executable )
 {
     _impl->submitWork( executable );
 }

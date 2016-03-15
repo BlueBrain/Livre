@@ -25,78 +25,21 @@
 namespace livre
 {
 
-/**
- * The AsyncData class provides thread safe operations on data setting/retrieval/querying
- * based on boost::shared_future ( boost::wait_for_any is not supported by std yet ).
- */
-class AsyncData
-{
-public:
-
-    /**
-     * When connection is instantiated the data is not
-     * set yet, so any get() call will block the retrieval
-     * @param name of the connection
-     * @param dataType type of the data
-     */
-    AsyncData( const std::string& name,
-               const std::type_index& dataType );
-
-    /**
-     * @return the name of the connection
-     */
-    const std::string& getName() const;
-
-    /**
-     * @param data sets the data
-     */
-    void set( const ConstPortDataPtr& data );
-
-    /**
-     * @return the data. If data is not set it will block.
-     */
-    const ConstPortDataPtr& get() const;
-
-    /**
-     * @return true if data is set.
-     */
-    bool isReady() const;
-
-    /**
-     * Waits until data is set
-     */
-    void wait() const;
-
-    /**
-     * Resets the promise/future
-     */
-    void reset();
-
-private:
-
-    /**
-     * Waits for any future to be ready.
-     * @param futures queried to be ready.
-     * @note this function needs internal access to the futures ( which is not exposed in the API ).
-     * @return true if any new futures are ready or futures included are not busy.
-     */
-    friend bool waitForAny( const Futures& futures );
-
-    AsyncData( const AsyncData& ) = delete;
-    AsyncData& operator=( const AsyncData& ) = delete;
-
-    struct Impl;
-    std::unique_ptr<Impl> _impl;
-};
-
 class OutputPort
 {
 
 public:
 
-    OutputPort( const PipeFilter& pipeFilter, const PortInfo& portInfo );
+    /**
+     * @param dataInfo is the name and type information for the data.
+     * @param pipeFilter is the reference to the pipefilter class which instantiates the
+     * Promise.
+     */
+    OutputPort( const PipeFilter& pipeFilter,
+                const DataInfo& dataInfo );
     ~OutputPort();
 
+    OutputPort( OutputPort&& port );
     /**
      * @return name of the port
      */
@@ -110,13 +53,13 @@ public:
     /**
      * @return the promise, that data can be written to
      */
-    PromisePtr getPromise() const;
+    Promise getPromise() const;
 
     /**
      * Connects an output port to input port
-     * @param inputPort input port
+     * @param port input port
      */
-    void connect( InputPort& inputPort );
+    void connect( InputPort& port );
 
     /**
      * Resets the promise/future

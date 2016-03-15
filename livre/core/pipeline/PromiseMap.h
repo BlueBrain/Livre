@@ -20,8 +20,8 @@
 #ifndef _PromiseMap_h_
 #define _PromiseMap_h_
 
-#include <livre/core/types.h>
 #include <livre/core/pipeline/Promise.h>
+#include <livre/core/types.h>
 
 namespace livre
 {
@@ -45,44 +45,44 @@ public:
     ~PromiseMap();
 
     /**
-     * @param portName is the port name.
+     * @param name of the promise
      * @return the promise related to the port name.
      */
-    PromisePtr getPromise( const std::string& portName );
+    Promise getPromise( const std::string& name ) const;
 
     /**
      * Sets the port with the value.
-     * @param portName is the port name.
+     * @param name of the promise
      * @param value to be set
      * @throw std::runtime_error when the port data is not exact
      * type T or there is no such port name.
      */
     template< class T >
-    void set( const std::string& portName, const T& value )
+    void set( const std::string& name, const T& value ) const
     {
-        getPromise( portName )->set( value );
+        getPromise( name ).set( value );
     }
 
     /**
      * Sets the port with the value.
-     * @param portName is the port name.
+     * @param name of the promise
      * @param value to be set
      * @throw std::runtime_error when the port data is not exact
      * type T or there is no such port name.
      */
     template< class T >
-    void set( const std::string& portName, const T&& value )
+    void set( const std::string& name, const T&& value ) const
     {
-        getPromise( portName )->set( value );
+        getPromise( name ).set( value );
     }
 
     /**
      * Writes empty values to promises which are not set already.
-     * @param portName is the port name. If ALL_PORTS is given,
+     * @param name of the promise. If ALL_PROMISES is given,
      * all promises will be flushed
      * @throw std::runtime_error there is no such port name.
      */
-    void flush( const std::string& portName = ALL_PORTS );
+    void flush( const std::string& name = ALL_PROMISES ) const;
 
 private:
 

@@ -64,9 +64,9 @@ struct SimpleExecutor::Impl
             do
             {
                 futures.clear();
-                for( const ExecutablePtr& executable: executables )
+                for( const Executable& executable: executables )
                 {
-                    const Futures& inputFutures = executable->getPreconditions();
+                    const Futures& inputFutures = executable.getPreconditions();
                     for( const Future& future: inputFutures )
                     {
                         if( !future.isReady( ))
@@ -77,8 +77,8 @@ struct SimpleExecutor::Impl
                 Executables::iterator it = executables.begin();
                 while( it != executables.end( ))
                 {
-                    ExecutablePtr executable = *it;
-                    const FutureMap futureMap( executable->getPreconditions( ));
+                    Executable& executable = *it;
+                    const FutureMap futureMap( executable.getPreconditions( ));
                     if( futureMap.isReady( ))
                     {
                         _workers.execute( executable );
@@ -113,9 +113,7 @@ SimpleExecutor::SimpleExecutor( const size_t threadCount )
 }
 
 SimpleExecutor::~SimpleExecutor( )
-{
-    
-}
+{}
 
 void SimpleExecutor::clear()
 {

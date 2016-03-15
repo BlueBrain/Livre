@@ -28,43 +28,13 @@ namespace livre
 
 /**
  * PipeFilter class instantiates the @Filter classes by constructing
- * the communication layer around the filter. While adding the ports,
- * it add its name as prefix to port name. i.e. if the name of the
- * pipefilter is "Rescale" and output port name for the filter is "Volume"
- * the port will be named as
+ * the communication layer around the filter.
  */
-class PipeFilter : public Executable
+class PipeFilter : public Executable::ExecutableImpl
 {
 public:
 
-    /**
-     * Constructs a PipeFilter with a given filter
-     * @param name of the pipefilter
-     * @param filter the filter object
-     */
-    PipeFilter( const std::string& name,
-                FilterPtr filter );
-
-    /**
-     * Constructs a PipeFilter with a given filter function
-     * @param name of the pipefilter
-     * @param func is the filter function object
-     * @param inputPorts input ports
-     * @param outputPorts output ports
-     */
-    PipeFilter( const std::string& name,
-                const FilterFunc& func,
-                const PortInfos& inputPorts,
-                const PortInfos& outputPorts );
-
     ~PipeFilter();
-
-    /**
-     * Executes the filter. If a filter input port is
-     * connected and no input is provided to the port
-     * the execution will block.
-     */
-    void execute() final;
 
     /**
      * @return the unique name of the filter.
@@ -80,29 +50,8 @@ public:
      * @throws std::runtime_error if connection can not be established
      */
     void connect( const std::string& srcPortName,
-                  PipeFilterPtr dst,
+                  PipeFilter& dst,
                   const std::string& dstPortName );
-
-    /**
-     * Connect to given pipe filter for notification when source filter execution
-     * is complete.
-     * @param dst is the destination pipe filter.
-     * @return true if connection is successful.
-     * @throws std::runtime_error if connection can not be established or if the
-     * port already is set from outside.
-     */
-    void connect( PipeFilterPtr dst );
-
-    /**
-     * @copydoc Executable::getOutFutures()
-     */
-    Futures getPostconditions() const final;
-
-    /**
-     * @copydoc Executable::getInputFutures()
-     * @note PipeFilter guarantees that only connected input futures are returned.
-     */
-    Futures getPreconditions() const final;
 
     /**
      * @return return promise for the given input port. If there is no connection to the
@@ -111,24 +60,62 @@ public:
      * @throws std::runtime_error if there is already a connection or if there is
      * no inputport or it is a noification port.
      */
-    PromisePtr getPromise( const std::string& portName );
+    Promise getPromise( const std::string& portName );
 
     /**
-     * @return the unique id of the filter.
+     * @copydoc Executable::execute
      */
-    const servus::uint128_t& getId() const;
+    void execute() final;
 
     /**
-     * Resets the filter. At this point pipe filter execution should be complete.
+     * @copydoc Executable::getPostconditions
      */
-    void reset();
+    Futures getPostconditions() const final;
+
+    /**
+     * @copydoc Executable::getPreconditions
+     */
+    Futures getPreconditions() const final;
+
+    /**
+     * @copydoc Executable::reset
+     */
+    void reset() final;
+
+protected:
+
+    /**
+     * Constructs a PipeFilter with a given filter
+     * @param name of the pipefilter
+     * @param filter the filter object.
+     */
+    PipeFilter( const std::string& name,
+                FilterPtr&& filter );
 
 private:
 
-    friend class Pipeline;
-
     struct Impl;
-    std::unique_ptr<Impl> _impl;
+    std::shared_ptr< Impl > _impl;
+};
+
+/**
+ * Creates a PipeFiter class instance with a given filter type
+ */
+template< class FilterT >
+class PipeFilterT : public PipeFilter
+{
+public:
+
+    /**
+     * Constructs a PipeFilter with a given filter type FilterT
+     * @param name of the pipefilter
+     * @param args are the arguments for construction of FilterT
+     */
+    template< class... Args >
+    PipeFilterT( const std::string& name,
+                 Args&&... args )
+        : PipeFilter( name, FilterPtr( new FilterT( args... )))
+    {}
 };
 
 }

@@ -18,74 +18,35 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/core/pipeline/InputPort.h>
-#include <livre/core/pipeline/OutputPort.h>
 #include <livre/core/pipeline/FutureMap.h>
 #include <livre/core/pipeline/Pipeline.h>
-#include <livre/core/pipeline/PipeFilter.h>
-#include <livre/core/pipeline/PortInfo.h>
-#include <livre/core/pipeline/FunctionFilter.h>
 
 namespace livre
 {
 
 struct Pipeline::Impl
 {
-    typedef std::map< std::string, ConstPipelinePtr > PipelineMap;
-    typedef std::map< std::string, ConstPipeFilterPtr > PipeFilterMap;
-    typedef std::map< std::string, ExecutablePtr > ExecutableMap;
+    typedef std::map< std::string, const Pipeline > PipelineMap;
+    typedef std::map< std::string, const PipeFilter > PipeFilterMap;
+    typedef std::map< std::string, Executable > ExecutableMap;
 
     Impl( Pipeline& pipeline )
         : _pipeline( pipeline )
     {}
 
-    PipeFilterPtr add( const std::string& name,
-                       const FilterFunc& filterFunc,
-                       const PortInfos& inputPorts,
-                       const PortInfos& outputPorts,
-                       bool wait )
-{
-        FilterPtr filter( new FunctionFilter( filterFunc,
-                                              inputPorts,
-                                              outputPorts ));
-        return add( name, filter, wait );
-    }
-
-    PipeFilterPtr add( const std::string& name,
-                       const FilterPtr& filter,
-                       bool wait )
-    {
-        if( _executableMap.count( name ) > 0 )
-            LBTHROW( std::runtime_error( name + " already exists"));
-
-        PipeFilterPtr pipefilter( new PipeFilter( name, filter ));
-        _executableMap[ name ] = pipefilter;
-
-        if( wait )
-        {
-            const OutFutureMap portFutures( pipefilter->getPostconditions( ));
-            _waitFutures.push_back( portFutures.getFuture( pipefilter->getId().getString( )));
-        }
-
-        return pipefilter;
-    }
-
     void add( const std::string& name,
-              const PipelinePtr& pipeline,
+              const Executable& executable,
               bool wait )
     {
-        if( pipeline.get() == &_pipeline )
-            return;
-
         if( _executableMap.count( name ) > 0 )
             LBTHROW( std::runtime_error( name + " already exists"));
 
-        _executableMap[ name ] = pipeline;
+        _executableMap.insert({ name, executable });
 
         if( wait )
         {
-            const Futures& futures = pipeline->getPostconditions();
-            _waitFutures.insert( _waitFutures.end(), futures.begin(), futures.end( ));
+            const Futures& futures = executable.getPostconditions();
+            _outFutures.insert( _outFutures.end(), futures.begin(), futures.end( ));
         }
     }
 
@@ -93,13 +54,13 @@ struct Pipeline::Impl
     {
         Executables executables = getExecutables();
         Executables::iterator it = executables.begin();
-        while( !executables.empty())
+        while( !executables.empty( ))
         {
-            ExecutablePtr executable = *it;
-            const FutureMap futureMap( executable->getPreconditions( ));
+            Executable& executable = *it;
+            const FutureMap futureMap( executable.getPreconditions( ));
             if( futureMap.isReady( ))
             {
-                executable->execute();
+                executable.execute();
                 executables.erase( it );
                 it = executables.begin();
             }
@@ -122,63 +83,54 @@ struct Pipeline::Impl
         return executables;
     }
 
-    Futures getConnectedInFutureMap() const
+    const Executable& getExecutable( const std::string& name ) const
     {
-        return Futures();
+        if( _executableMap.count( name ) == 0 )
+            LBTHROW( std::runtime_error( name + " executable does not exist"));
+
+        return _executableMap.find( name )->second;
     }
 
-    Futures getOutFutures() const
+    Futures getPreconditions() const
     {
-        return _waitFutures;
+        Futures inFutures;
+        for( auto pair: _executableMap )
+        {
+            const Futures& futures = pair.second.getPreconditions();
+            inFutures.insert( inFutures.end(), futures.begin(), futures.end( ));
+        }
+        return inFutures;
+    }
+
+    Futures getPostconditions() const
+    {
+        return _outFutures;
     }
 
     void reset()
     {
-        for( auto pair: _executableMap )
-            pair.second->reset();
+        for( auto& pair: _executableMap )
+            pair.second.reset();
     }
-
-    ~Impl()
-    {}
 
     Pipeline& _pipeline;
     ExecutableMap _executableMap;
-    Futures _waitFutures;
+    Futures _outFutures;
 };
 
 Pipeline::Pipeline()
-    : _impl( new Pipeline::Impl( *this ))
+    : _impl( new Impl( *this ))
 {
 }
 
 Pipeline::~Pipeline()
 {}
 
-void Pipeline::add( const std::string& name,
-                    const PipelinePtr& pipeline,
-                    bool wait )
+void Pipeline::_add( const std::string& name,
+                     const Executable& executable,
+                     bool wait )
 {
-    return _impl->add( name, pipeline, wait );
-}
-
-PipeFilterPtr Pipeline::add( const std::string& name,
-                             const FilterPtr& filter,
-                             bool wait )
-{
-    return _impl->add( name, filter, wait );
-}
-
-PipeFilterPtr Pipeline::add( const std::string& name,
-                             const FilterFunc& filterFunc,
-                             const PortInfos& inputPorts,
-                             const PortInfos& outputPorts,
-                             bool wait )
-{
-    return _impl->add( name,
-                       filterFunc,
-                       inputPorts,
-                       outputPorts,
-                       wait );
+    _impl->add( name, executable, wait );
 }
 
 Executables Pipeline::getExecutables() const
@@ -186,24 +138,30 @@ Executables Pipeline::getExecutables() const
     return _impl->getExecutables();
 }
 
+const Executable& Pipeline::getExecutable( const std::string& name ) const
+{
+    return _impl->getExecutable( name );
+}
+
+
 void Pipeline::execute()
 {
-    return _impl->execute();
+    _impl->execute();
+}
+
+Futures Pipeline::getPostconditions() const
+{
+    return _impl->getPostconditions();
+}
+
+Futures Pipeline::getPreconditions() const
+{
+    return _impl->getPreconditions();
 }
 
 void Pipeline::reset()
 {
     _impl->reset();
-}
-
-Futures Pipeline::getPreconditions() const
-{
-    return _impl->getConnectedInFutureMap();
-}
-
-Futures Pipeline::getPostconditions() const
-{
-    return _impl->getOutFutures();
 }
 
 }

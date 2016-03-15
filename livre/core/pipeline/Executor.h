@@ -21,7 +21,6 @@
 #define _Executor_h_
 
 #include <livre/core/types.h>
-#include <livre/core/pipeline/Executable.h>
 
 namespace livre
 {
@@ -35,46 +34,33 @@ class Executor
 {
 public:
 
-    virtual ~Executor() {}
+    virtual ~Executor();
 
     /**
      * Executes the executable. Returns the futures that can be queried for data.
      * @param pipeline to be executed.
      */
-    Futures execute( const ExecutablePtr& executable )
-    {
-        const Futures& fs = executable->getPostconditions();
-        _schedule( { executable } );
-        return fs;
-    }
+    Futures execute( const Executable& executable );
 
     /**
      * Executes the executable. Returns the futures that can be queried for data.
      * @param pipeline to be executed.
      */
-    Futures execute( const Executables& executables )
-    {
-        Futures futures;
-        for( const ExecutablePtr& executable: executables )
-        {
-            const Futures& fs = executable->getPostconditions( );
-            futures.insert( futures.end(), fs.begin(), fs.end( ));
-        }
-
-        _schedule( executables );
-        return futures;
-    }
+    Futures execute( const Executables& executables );
 
 protected:
 
     /**
-     * Schedules the executables for execution.
+     * Schedules the executables for execution. The deriving class should implement a
+     * scheduling algorithm for the execution. ( i.e. there may be a work queue and
+     * executables are selected from the work queue according to their pre-post
+     * conditions
      * @param executables are the executables to schedule.
      */
     virtual void _schedule( const Executables& executables ) = 0;
 
     /**
-     * Clears the executor
+     * Clears the executor ( i.e : Implementation can empty the work queue )
      */
     virtual void clear() {}
 

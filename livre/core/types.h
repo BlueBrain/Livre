@@ -45,6 +45,9 @@
 #include <unordered_map>
 #include <list>
 
+#include <functional>
+#include <typeindex>
+
 namespace livre
 {
 
@@ -82,6 +85,27 @@ class DataSource;
 class DataSourcePlugin;
 class DataSourcePluginData;
 
+/**
+ * Pipeline
+ */
+class AsyncData;
+class Executor;
+class Executable;
+class Filter;
+class Future;
+class FutureMap;
+class FutureMap;
+class InputPort;
+class PortData;
+class Promise;
+class PromiseMap;
+class OutputPort;
+class OutFutures;
+class UniqueFutureMap;
+class Pipeline;
+class PipeFilter;
+class Workers;
+
 struct FrameInfo;
 struct TextureState;
 struct VolumeInformation;
@@ -116,6 +140,9 @@ typedef std::shared_ptr< CacheObject > CacheObjectPtr;
 typedef std::shared_ptr< const CacheObject > ConstCacheObjectPtr;
 typedef std::shared_ptr< CacheObject > CacheObjectPtr;
 typedef std::shared_ptr< const CacheObject > ConstCacheObjectPtr;
+typedef std::shared_ptr< PortData > PortDataPtr;
+
+typedef std::unique_ptr< Filter > FilterPtr;
 
 /**
  * Helper classes for shared_ptr objects
@@ -160,10 +187,17 @@ typedef std::vector< NodeId > NodeIds;
 typedef std::vector< CacheId > CacheIds;
 
 /**
- * Vector definitions for complex types
+ * Vector/list definitions for complex types
  */
 typedef std::vector< CacheObjectPtr > CacheObjects;
 typedef std::vector< ConstCacheObjectPtr > ConstCacheObjects;
+
+typedef std::list< Executable > Executables;
+typedef std::list< Future > Futures;
+typedef std::list< Promise > Promises;
+
+template < class T >
+using ResultsT = std::vector< T >;
 
 /**
  * Map definitions
@@ -173,6 +207,16 @@ typedef std::unordered_map< CacheId, ConstCacheObjectPtr > ConstCacheMap;
 typedef std::unordered_map< uint32_t, bool > BoolMap;
 typedef std::unordered_map< uint32_t, EventHandlerPtr > EventHandlerMap;
 typedef std::unordered_map< uint32_t, DashConnectionPtr > DashConnectionMap;
+
+template < class T >
+inline std::type_index getType()
+{
+    typedef typename std::remove_const<T>::type UnconstT;
+    return std::type_index( typeid( UnconstT ));
+}
+
+typedef std::map< std::string, std::type_index > DataInfos;
+typedef DataInfos::value_type DataInfo;
 
 /**
  * Set definitions
@@ -222,6 +266,8 @@ typedef std::map< std::string,
 // Const definitions
 static const std::string HIDDEN_PROGRAMDESCRIPTION_STR("_HIDDEN_");
 static const std::string NO_PREFIX = "";
+static const std::string ALL_FUTURES = "";
+static const std::string ALL_PROMISES = "";
 
 }
 

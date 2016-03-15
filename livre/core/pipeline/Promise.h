@@ -21,18 +21,38 @@
 #define _Promise_h_
 
 #include <livre/core/pipeline/Future.h>
+#include <livre/core/pipeline/PortData.h>
 #include <livre/core/types.h>
 
 namespace livre
 {
 
+
+/**
+ * The Promise class is similar to the std::promise classes in functionality and it has additional
+ * information for the name and data type. It provides methods to set the data.
+ */
 class Promise
 {
 public:
 
-    Promise( const PipeFilter& pipeFilter, AsyncData& data );
+    /**
+     * @param pipeFilter is the reference to the pipefilter class which instantiates the
+     * Promise.
+     * @param dataInfo is the name and type information for the data.
+     */
+    Promise( const PipeFilter& pipeFilter,
+             const DataInfo& dataInfo );
     ~Promise();
 
+    /**
+     * @return the name of the connection
+     */
+    const std::type_index& getDataType() const;
+
+    /**
+     * @return the name of the connection
+     */
     const std::string& getName() const;
 
     /**
@@ -44,7 +64,7 @@ public:
     template< class T >
     void set( const T& value )
     {
-       _set( makePortDataPtr( value ));
+        _set( std::make_shared< PortDataT< T >>( value ));
     }
 
     /**
@@ -56,7 +76,7 @@ public:
     template< class T >
     void set( const T&& value )
     {
-        _set( makePortDataPtr( value ));
+        _set( std::make_shared< PortDataT< T >>( value ));
     }
 
     /**
@@ -69,12 +89,19 @@ public:
      */
     const Future& getFuture() const;
 
+    /**
+     * @resets the promise. ( Future is reset and value can be set again )
+     * The behavior of the function is undefined when multiple threads
+     * execute query/get from future.
+     */
+    void reset();
+
 private:
 
-    void _set( const ConstPortDataPtr& data );
+    void _set( const PortDataPtr& data );
 
     struct Impl;
-    std::unique_ptr<Impl> _impl;
+    std::shared_ptr<Impl> _impl;
 };
 
 }

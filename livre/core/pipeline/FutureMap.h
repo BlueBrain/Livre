@@ -27,45 +27,89 @@ namespace livre
 {
 
 /**
- * The Futures classes are a wrappers to access the group of future
- * and execute thread-safe operations on them. With a given portName (name)
- * many futures can be associated.
- */
-
-/**
- * FutureMap class provides basic functionality to query state of multiple futures.
+ * FutureMap is a wrapper class to query multiple futures with same names for data and data state.
  */
 class FutureMap
 {
 public:
 
     /**
-     * @param futures the list of futures.
+     * @param futures is the list of futures
+     * future names are used for name-future association.
      */
     explicit FutureMap( const Futures& futures );
     ~FutureMap();
 
     /**
-     * @return the futures associated with port name.
+     * Gets the copy of value(s) with the given type T. If input
+     * is connected and values are not provided this function will
+     * block.
+     * @param name of the future.
+     * @return the values of the futures.
+     * @throw std::runtime_error when the port data is not exact
+     * type T
      */
-    Futures getFutures() const;
+    template< class T >
+    ResultsT< T > get( const std::string& name ) const
+    {
+        ResultsT< T > results;
+        for( const auto& future: getFutures( name ))
+            results.push_back( future.get< T >( ));
+
+        return results;
+    }
 
     /**
-     * Queries if all ports are ready
+     * Gets the copy of ready value(s) with the given type T.
+     * @param name of the future.
+     * @return the values of the futures.
+     * @throw std::runtime_error when the port data is not exact
+     * type T
+     */
+    template< class T >
+    ResultsT< T > getReady( const std::string& name ) const
+    {
+        ResultsT< T > results;
+        for( const auto& future: getFutures( name ))
+        {
+            if( !future.isReady())
+                continue;
+
+            results.push_back( future.get< T >( ));
+        }
+        return results;
+    }
+
+    /**
+     * @param name of the future. If name is ALL_FUTURES, all futures are marked to return.
+     * @return the futures associated with the name.
+     */
+    Futures getFutures( const std::string& portName = ALL_FUTURES ) const;
+
+    /**
+     * Queries if port is ready
+     * @param name of the future. If name is ALL_FUTURES, all futures are queried
      * @return true if all port inputs are ready.
+     * @throw std::runtime_error when there is no future associated with the
+     * given name
      */
-    bool isReady() const;
+    bool isReady( const std::string& portName = ALL_FUTURES ) const;
 
     /**
-     * Waits all futures
+     * Waits all futures associated with port name
+     * @param name of the future. If name is ALL_FUTURES, all futures are waited.
+     * @throw std::runtime_error when there is no future associated with the
+     * given name
      */
-    void wait() const;
+    void wait( const std::string& portName = ALL_FUTURES ) const;
 
     /**
-     * Waits for any futures
-     * @return true if any future is waited.
+     * Waits all futures associated with port name.
+     * @param name of the future. If name is ALL_FUTURES, all futures are waited.
+     * @throw std::runtime_error when there is no future associated with the
+     * given name
      */
-    bool waitForAny() const;
+    bool waitForAny( const std::string& portName = ALL_FUTURES ) const;
 
 private:
 
@@ -74,9 +118,9 @@ private:
 };
 
 /**
- * PortFutures for managing ports with unique names.
+ * UniqueFutureMap is a wrapper class to query futures with unique names for data and data state.
  */
-class OutFutureMap
+class UniqueFutureMap
 {
 public:
 
@@ -84,207 +128,58 @@ public:
      * @param futures the list of futures.
      * @throws std::runtime_error when futures are not unique in names
      */
-    explicit OutFutureMap( const Futures& futures );
-    ~OutFutureMap();
+    explicit UniqueFutureMap( const Futures& futures );
+    ~UniqueFutureMap();
 
     /**
      * Gets the copy of value(s) with the given type T. If input
      * is connected and values are not provided this function will
      * block.
-     * @param portName is the port name assoicated with futures.
-     * @return the values port, value map.
+     * @param name of the future.
+     * @return the value for the future.
      * @throw std::runtime_error when the port data is not exact
      * type T
      */
     template< class T >
-    const T& get( const std::string& portName ) const
+    const T& get( const std::string& name ) const
     {
-         return getFuture( portName ).get< T >();
+         return getFuture( name ).get< T >();
     }
 
     /**
-     * Moves the value(s) with the given type T. If input
-     * is connected and values are not provided this function will
-     * block.
-     * @param portName is the port name assoicated with futures.
-     * @return the values vector.
-     * @throw std::runtime_error when the port data is not exact
-     * type T
+     * @param name of the future
+     * @return the future associated with the name.
+     * @throw std::runtime_error when the name is ALL_FUTURES
      */
-    template< class T >
-    const T&& move( const std::string& portName ) const
-    {
-        return getFuture( portName ).move< T >();
-    }
+    Future getFuture( const std::string& name ) const;
 
     /**
-     * @param portName is the port name assoicated with the future. If port name
-     * is ALL_PORTS, all futures are marked to return.
-     * @return the futures associated with port name.
-     */
-    Future getFuture( const std::string& portName ) const;
-
-    /**
-     * @param portName is the port name assoicated with futures. If port name
-     * is ALL_PORTS, all futures are marked to return.
-     * @return the future associated with port name.
+     * @return all the futures.
      */
     Futures getFutures() const;
 
     /**
      * Queries if port is ready
-     * @param portName is the port name assoicated with the future.
-     * @return true if all port inputs are ready.
-     * @throw std::runtime_error when there is no future associated with
-     * given port name
+     * @param name of the future
+     * @return true if all futures are ready.
+     * @throw std::runtime_error when there is no future associated with the
+     * given name
      */
-    bool isReady( const std::string& portName = ALL_PORTS ) const;
+    bool isReady( const std::string& name = ALL_FUTURES ) const;
 
     /**
      * Waits for the future associated with port name
-     * @param portName is the port name assoicated with futures.
-     * @throw std::runtime_error when there is no future associated with
-     * given port name
+     * @param name is the port name assoicated with futures.
+     * @throw std::runtime_error when there is no future associated with the
+     * given name
      */
-    void wait( const std::string& portName = ALL_PORTS ) const;
+    void wait( const std::string& name = ALL_FUTURES ) const;
 
     /**
-     * Waits for any futures.
-     * @return true if any future is waited.
+     * Waits for any future to be ready.
+     * @return true if there are still futures which are not ready.
      */
     bool waitForAny() const;
-
-private:
-
-    struct Impl;
-    std::shared_ptr<Impl> _impl;
-};
-
-/**
- * PortFutures for managing ports with non unique named ports.
- */
-class InFutureMap
-{
-public:
-
-    /**
-     * @param inputPorts is the list of input ports
-     * future names are used for name-future association.
-     */
-    explicit InFutureMap( const InputPorts& inputPorts );
-    ~InFutureMap();
-
-    /**
-     * Gets the copy of value(s) with the given type T. If input
-     * is connected and values are not provided this function will
-     * block.
-     * @param portName is the port name assoicated with futures.
-     * @return the values port, value map.
-     * @throw std::runtime_error when the port data is not exact
-     * type T
-     */
-    template< class T >
-    ResultsT< T > get( const std::string& portName ) const
-    {
-        ResultsT< T > results;
-        for( const auto& future: getFutures( portName ))
-            results.push_back( future.get< T >( ));
-
-        return results;
-    }
-
-    /**
-     * Moves the value(s) with the given type T. If input
-     * is connected and values are not provided this function will
-     * block.
-     * @param portName is the port name assoicated with futures.
-     * @return the values vector.
-     * @throw std::runtime_error when the port data is not exact
-     * type T
-     */
-    template< class T >
-    ResultsT< T > move( const std::string& portName ) const
-    {
-        ResultsT< T > results;
-        for( const auto& future: getFutures( portName ))
-            results.push_back( future.move< T >( ));
-
-        return results;
-    }
-
-    /**
-     * Gets the copy of ready value(s) with the given type T.
-     * @param portName is the port name assoicated with futures.
-     * @return the values vector.
-     * @throw std::runtime_error when the port data is not exact
-     * type T
-     */
-    template< class T >
-    ResultsT< T > getReady( const std::string& portName ) const
-    {
-        ResultsT< T > results;
-        for( const auto& future: getFutures( portName ))
-        {
-            if( !future.isReady())
-                continue;
-
-            results.push_back( future.get< T >( ));
-        }
-        return results;
-    }
-
-    /**
-     * Moves the ready value(s) with the given type T
-     * @param portName is the port name assoicated with futures.
-     * @return the values vector.
-     * @throw std::runtime_error when the port data is not exact
-     * type T or there is no future assigned to given port name
-     */
-    template< class T >
-    ResultsT< T > moveReady( const std::string& portName ) const
-    {
-        ResultsT< T > results;
-        for( const auto& future: getFutures( portName ))
-        {
-            if( !future.isReady())
-                continue;
-
-            results.push_back( future.move< T >( ));
-        }
-        return results;
-    }
-
-    /**
-     * @param portName is the port name assoicated with futures. If port name
-     * is ALL_PORTS, all futures are marked to return.
-     * @return the futures associated with port name.
-     */
-    Futures getFutures( const std::string& portName ) const;
-
-    /**
-     * Queries if port is ready
-     * @param portName is the port name assoicated with futures.
-     * @return true if all port inputs are ready.
-     * @throw std::runtime_error when there is no future associated with
-     * given port name
-     */
-    bool isReady( const std::string& portName ) const;
-
-    /**
-     * Waits all futures associated with port name
-     * @param portName is the port name assoicated with futures.
-     * @throw std::runtime_error when there is no future associated with
-     * given port name
-     */
-    void wait( const std::string& portName ) const;
-
-    /**
-     * Waits all futures associated with port name.
-     * @param portName is the port name assoicated with futures.
-     * @throw std::runtime_error when there is no future associated with
-     * given port name
-     */
-    bool waitForAny( const std::string& portName ) const;
 
 private:
 

@@ -21,8 +21,6 @@
 #define _InputPort_h_
 
 #include <livre/core/types.h>
-#include <livre/core/pipeline/PortData.h>
-#include <livre/core/pipeline/PortInfo.h>
 
 namespace livre
 {
@@ -37,9 +35,9 @@ public:
 
     /**
      * InputPort constructor based on port information
-     * @param portInfo is the port information
+     * @param dataInfo is the port information
      */
-    explicit InputPort( const PortInfo& portInfo );
+    explicit InputPort( const DataInfo& dataInfo );
     ~InputPort();
 
     /**
@@ -64,15 +62,17 @@ public:
 
     /**
      * Connects an output port to input port
-     * @param inputPort input port
+     * @param port is the connected output port.
      */
-    void connect( const OutputPort& inputPort );
+    void connect( const OutputPort& port );
 
     /**
      * Disconnects an output port from input port
-     * @param inputPort input port
+     * @param port is the disconnected output port.
+     * @return true if output port is found as a connection and removed
+     * for the connections
      */
-    void disconnect( const OutputPort& inputPort );
+    bool disconnect( const OutputPort& port );
 
 private:
 

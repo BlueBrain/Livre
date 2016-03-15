@@ -19,16 +19,17 @@
 
 #include <livre/core/pipeline/Promise.h>
 #include <livre/core/pipeline/Future.h>
-#include <livre/core/pipeline/OutputPort.h>
+#include <livre/core/pipeline/AsyncData.h>
 
 namespace livre
 {
 
 struct Promise::Impl
 {
-    Impl( const PipeFilter& pipeFilter, AsyncData& data )
+    Impl( const PipeFilter& pipeFilter,
+          const DataInfo& dataInfo )
         : _pipeFilter( pipeFilter )
-        , _data( data )
+        , _data( dataInfo )
         , _future( _pipeFilter, _data )
     {}
 
@@ -37,28 +38,43 @@ struct Promise::Impl
         return _data.getName();
     }
 
-    void set( const ConstPortDataPtr& data )
+    const std::type_index& getDataType() const
+    {
+        return _data.getDataType();
+    }
+
+    void set( const PortDataPtr& data )
     {
         _data.set( data );
     }
 
+    void reset()
+    {
+        _data.reset();
+    }
+
     void flush()
     {
-        _data.set( ConstPortDataPtr( ));
+        _data.set( PortDataPtr( ));
     }
 
     const PipeFilter& _pipeFilter;
-    AsyncData& _data;
+    AsyncData _data;
     const Future _future;
 };
 
 Promise::Promise( const PipeFilter& pipeFilter,
-                  AsyncData& data )
-    : _impl( new Promise::Impl( pipeFilter, data ))
+                  const DataInfo& dataInfo )
+    : _impl( new Promise::Impl( pipeFilter, dataInfo ))
 {}
 
 Promise::~Promise()
 {}
+
+const std::type_index& Promise::getDataType() const
+{
+    return _impl->getDataType();
+}
 
 const std::string& Promise::getName() const
 {
@@ -75,7 +91,12 @@ const Future& Promise::getFuture() const
     return _impl->_future;
 }
 
-void Promise::_set( const ConstPortDataPtr& data )
+void Promise::reset()
+{
+    _impl->reset();
+}
+
+void Promise::_set( const PortDataPtr& data )
 {
     _impl->set( data );
 }

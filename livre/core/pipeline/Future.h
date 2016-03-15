@@ -26,10 +26,20 @@
 namespace livre
 {
 
+/**
+ * The Future class is similar to the std::future classes in functionality and it has additional
+ * information for the name and data type. It provides thread safe methods to query and get the
+ * data. Futures are retrieved from the @see Promise class.
+ */
 class Future
 {
 public:
 
+    /**
+     * @param pipeFilter is the reference to @Pipefilter class which
+     * instantiates the @see Promise that Future belongs to.
+     * @param data holds the thread safe data (query/retrieve).
+     */
     Future( const PipeFilter& pipeFilter,
             const AsyncData& data );
     ~Future();
@@ -40,44 +50,19 @@ public:
     const std::string& getName() const;
 
     /**
+     * Gets a copy future with the given name
+     */
+    Future rename( const std::string& name ) const;
+
+    /**
      * Gets the value with the given type T. If output is not set
      * this function will block.
      * @return the value.
-     * @throw std::runtime_error when the port data is not exact
+     * @throw std::runtime_error when the data is not exact
      * type T
      */
     template< class T >
-    const T& get() const
-    {
-        typedef typename std::remove_const<T>::type UnconstT;
-        const auto& dataPtr =
-                boost::dynamic_pointer_cast< const PortDataT< UnconstT >>( _get( ));
-
-        if( !dataPtr )
-            LBTHROW( std::runtime_error( "Invalid data type" ));
-
-        return dataPtr->data;
-    }
-
-    /**
-     * Moves the value with the given type T. If output is not set
-     * this function will block.
-     * @return the value.
-     * @throw std::runtime_error when the port data is not exact
-     * type T
-     */
-    template< class T >
-    const T&& move() const
-    {
-        typedef typename std::remove_const<T>::type UnconstT;
-        const auto& dataPtr =
-                boost::dynamic_pointer_cast< const PortDataT< UnconstT >>( _get( ));
-
-        if( !dataPtr )
-            LBTHROW( std::runtime_error( "Invalid data type" ));
-
-        return std::move( dataPtr->data );
-    }
+    const T& get() const { return _get<T>(); }
 
     /**
      * Waits until the data is ready.
@@ -96,11 +81,6 @@ public:
     const PipeFilter& getPipeFilter() const;
 
     /**
-     * @return the async data implementation
-     */
-    const AsyncData& getAsyncData() const;
-
-    /**
      * @param future is the future to be checked with
      * @return true if both futures are same
      */
@@ -110,7 +90,18 @@ private:
 
     friend bool livre::waitForAny( const Futures& future );
 
-    ConstPortDataPtr _get() const;
+    const AsyncData& _getAsyncData() const;
+
+    template< class T >
+    const T& _get() const
+    {
+        const auto& dataPtr =
+                std::static_pointer_cast< const PortDataT< T >>( _getPtr( getType< T >( )));
+
+        return dataPtr->data;
+    }
+
+    PortDataPtr _getPtr( const std::type_index& dataType ) const;
 
     struct Impl;
     std::shared_ptr<Impl> _impl;

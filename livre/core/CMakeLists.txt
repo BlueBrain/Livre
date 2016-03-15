@@ -57,9 +57,9 @@ set(LIVRECORE_HEADERS
   visitor/RenderNodeVisitor.h
   visitor/VisitState.h
 
+  pipeline/AsyncData.h
   pipeline/Executable.h
   pipeline/Filter.h
-  pipeline/FunctionFilter.h
   pipeline/Future.h
   pipeline/FutureMap.h
   pipeline/InputPort.h
@@ -67,7 +67,6 @@ set(LIVRECORE_HEADERS
   pipeline/PipeFilter.h
   pipeline/Pipeline.h
   pipeline/PortData.h
-  pipeline/PortType.h
   pipeline/Promise.h
   pipeline/PromiseMap.h
   pipeline/SimpleExecutor.h
@@ -111,7 +110,8 @@ set(LIVRECORE_SOURCES
   visitor/RenderNodeVisitor.cpp
   visitor/VisitState.cpp
 
-  pipeline/FunctionFilter.cpp
+  pipeline/AsyncData.cpp
+  pipeline/Executor.cpp
   pipeline/Future.cpp
   pipeline/FutureMap.cpp
   pipeline/InputPort.cpp

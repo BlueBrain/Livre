@@ -18,54 +18,53 @@
  */
 
 #include <livre/core/pipeline/PromiseMap.h>
-#include <livre/core/pipeline/PortData.h>
 #include <livre/core/pipeline/Promise.h>
 
 namespace livre
 {
 
-typedef std::pair< std::string, PromisePtr > NamePromisePair;
-typedef std::map< std::string, PromisePtr > NamePromiseMap;
+typedef std::map< std::string, Promise > NamePromiseMap;
+typedef NamePromiseMap::value_type NamePromisePair;
 
 struct PromiseMap::Impl
 {
     Impl( const Promises& promises )
     {
-        for( const PromisePtr& promise: promises )
-            _promiseMap[ promise->getName( )] = promise;
+        for( const auto& promise: promises )
+            _promiseMap.insert({ promise.getName(), promise });
     }
 
-    void throwPortError( const std::string& portName ) const
+    void throwError( const std::string& name ) const
     {
         std::stringstream err;
-        err << "Unknown port: " << portName << std::endl;
+        err << "Unknown promise name: " << name << std::endl;
         LBTHROW( std::runtime_error( err.str( )));
     }
 
-    bool hasPort( const std::string& portName ) const
+    bool hasPromise( const std::string& name ) const
     {
-        return _promiseMap.count( portName ) > 0;
+        return _promiseMap.count( name ) > 0;
     }
 
-    void flush( const std::string& portName )
+    void flush( const std::string& name ) const
     {
-        if( portName != ALL_PORTS && !hasPort( portName ))
-            throwPortError( portName );
+        if( name != ALL_PROMISES && !hasPromise( name ))
+            throwError( name );
 
-        for( const auto& pair: _promiseMap )
+        for( const NamePromisePair& pair: _promiseMap )
         {
-            const PromisePtr& promise = pair.second;
-            if( portName == ALL_PORTS || promise->getName() == portName )
-                promise->flush();
+            Promise promise = pair.second;
+            if( name == ALL_PROMISES || promise.getName() == name )
+                promise.flush();
         }
     }
 
-    PromisePtr getPromise( const std::string& portName )
+    Promise getPromise( const std::string& name ) const
     {
-        if( !hasPort( portName ))
-            throwPortError( portName );
+        if( !hasPromise( name ))
+            throwError( name );
 
-        return _promiseMap[ portName ];
+        return _promiseMap.find( name )->second;
     }
 
     NamePromiseMap _promiseMap;
@@ -78,14 +77,14 @@ PromiseMap::PromiseMap( const Promises& promises )
 PromiseMap::~PromiseMap()
 {}
 
-void PromiseMap::flush( const std::string& portName /* = ALL_PORTS */ )
+void PromiseMap::flush( const std::string& name /* = ALL_PROMISES */ ) const
 {
-    _impl->flush( portName );
+    _impl->flush( name );
 }
 
-PromisePtr PromiseMap::getPromise( const std::string& portName )
+Promise PromiseMap::getPromise( const std::string& name ) const
 {
-    return _impl->getPromise( portName );
+    return _impl->getPromise( name );
 }
 
 }

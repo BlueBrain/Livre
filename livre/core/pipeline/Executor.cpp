@@ -17,43 +17,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _PortType_h_
-#define _PortType_h_
-
-#include <livre/core/types.h>
+#include <livre/core/pipeline/Executor.h>
+#include <livre/core/pipeline/Executable.h>
 
 namespace livre
 {
 
-/**
- * PortType class is base class for keeping the track for types
- * by using the std::type_index.
- */
-class PortType
+Futures Executor::execute( const Executable& executable )
 {
-public:
-
-    /**
-     * @return the type index
-     */
-    const std::type_index& getDataType() const
-        { return _dataType; }
-
-protected:
-
-    /**
-     * PortType constructor
-     * @param typeIndex type index of the data of the
-     * derived classes data type.
-     */
-    explicit PortType( const std::type_index& dataType )
-        : _dataType( dataType) {}
-
-private:
-    const std::type_index _dataType;
-};
-
+    const Futures& fs = executable.getPostconditions();
+    _schedule({ executable });
+    return fs;
 }
 
-#endif // _PortData_h_
+Futures Executor::execute( const Executables& executables )
+{
+    Futures futures;
+    for( const Executable& executable: executables )
+    {
+        const Futures& fs = executable.getPostconditions( );
+        futures.insert( futures.end(), fs.begin(), fs.end( ));
+    }
 
+    _schedule( executables );
+    return futures;
+}
+
+Executor::~Executor()
+{}
+
+}

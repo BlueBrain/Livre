@@ -20,21 +20,25 @@
 #ifndef _SimpleExecutor_h_
 #define _SimpleExecutor_h_
 
-#include <livre/core/types.h>
 #include <livre/core/pipeline/Executor.h>
+#include <livre/core/types.h>
 
 namespace livre
 {
 
 /**
  * SimpleExecutor class provides a very basic implementation
- * for the @see Executor class. The submitted executables are
- * pushed to the worker threads without any real scheduling.
- * The pipeline submission is thread safe.
+ * for the @see Executor class. It has a thread pool for
+ * executing multiple executables asynchronously.
  *
- * The scheduler implemented in this class, just pushes the
- * executables without re-ordering. This may mean that if
- * all workers are blocked, the processing can suspend.
+ * The submitted executables are queued for the worker threads.
+ * without any real scheduling.The pipeline submission is
+ * thread safe.
+ *
+ * The scheduler implemented in this class, pushes the
+ * executables without re-ordering. The executable whose
+ * preconditions are satisfied is marked for execution
+ * in the thread pool.
  *
  * SimpleExecutor executes executables in a push based flow.
  */

@@ -22,8 +22,6 @@
 
 #include <livre/core/types.h>
 
-#include "PortType.h"
-
 namespace livre
 {
 
@@ -31,11 +29,14 @@ namespace livre
  * PortData class is base class for keeping the track for types
  * by using the std::type_index.
  */
-class PortData : public PortType
+class PortData
 {
+public:
+    const std::type_index dataType;
+
 protected:
-    explicit PortData( const std::type_index& dataType )
-        : PortType( dataType) {}
+    explicit PortData( const std::type_index& dataType_ )
+        : dataType( dataType_ ) {}
     virtual ~PortData() {}
 };
 
@@ -46,12 +47,12 @@ template< class T>
 struct PortDataT final : public PortData
 {
     explicit PortDataT( const T& data_ )
-        : PortData( std::type_index( typeid( T )))
+        : PortData( getType< T >())
         , data( data_ )
     {}
 
     explicit PortDataT( const T&& data_ )
-        : PortData( std::type_index( typeid( T )))
+        : PortData( getType< T >( ))
         , data( std::move( data_ ))
     {}
 
@@ -61,31 +62,6 @@ struct PortDataT final : public PortData
     PortDataT( const PortDataT< T >& ) = delete;
     PortDataT< T >& operator=( const PortDataT< T >& ) = delete;
 };
-
-template <class T>
-using PortDataTPtr = boost::shared_ptr< PortDataT< T >>;
-
-template <class T>
-using ConstPortDataTPtr = boost::shared_ptr< PortDataT< T >>;
-
-/**
- * Constructs a PortDataTPtr object from type T
- */
-template< class T >
-inline PortDataTPtr< T > makePortDataPtr( const T& data )
-{
-    return boost::make_shared< PortDataT< T >>( data );
-}
-
-/**
- * Constructs a PortDataTPtr object from type T.
- * Moves the to the port data.
- */
-template< class T >
-inline PortDataTPtr< T > makePortDataPtr( const T&& data )
-{
-    return boost::make_shared< PortDataT< T >>( data );
-}
 
 }
 

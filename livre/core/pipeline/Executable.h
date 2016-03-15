@@ -27,41 +27,99 @@ namespace livre
 {
 
 /**
- * The Executable class is the base class for objects that can be executed by workers. It
- * provides extra pre/post conditions as futures to retrieve the current situation.
+ * The Executable class is constructed using ExecutableImpl
+ * classes. It wraps the methods for execution of ExecutableImpl.
+ * a ExecutableImpl. It provides extra pre/post
+ * conditions as futures to retrieve the current situation.
  *
- * According to given futures executors can decide on scheduling algorithms. Also the
- * input and are output futures can be queried for the results. @see PipeFilter and
- * @see Pipeline classes are based on this class.
+ * According to the preconditions or postconditions,
+ * executors can decide on scheduling algorithms.
  */
 class Executable
 {
 public:
 
-    Executable() {}
-    virtual ~Executable() {}
+    struct ExecutableImpl;
+
+    /**
+     * @param impl Executable implementation. T class must be
+     * derived from ExecutableImpl and must be copy constructible
+     */
+    template< class T >
+    Executable( const T& impl )
+        : _impl( ExecutableImplPtr( new T( impl )))
+    {}
+
+    /**
+     * @return the implementation
+     */
+    const ExecutableImpl& getImpl() const { return *_impl; }
 
     /**
      * Executes the executable
      */
-    virtual void execute() = 0;
+    void execute()
+    {
+        _impl->execute();
+    }
 
     /**
-     * @return the output futures for querying the outputs of the executable.
+     * @return the output futures for getting the outputs of the executable. The post
+     * conditions has to be fullfilled by the execute() implementation ( at the end of
+     * execution all futures should be ready )
      */
-    virtual Futures getPostconditions() const { return Futures(); }
+    Futures getPostconditions() const
+    {
+        return _impl->getPostconditions();
+    }
 
     /**
      * @return the input futures which the executable can be queried for the state or
      * data retrieval.
      */
-    virtual Futures getPreconditions() const { return Futures(); }
+    Futures getPreconditions() const
+    {
+        return _impl->getPreconditions();
+    }
 
     /**
-     * Resets the executable
+     * Resets the executable by setting all pre and post conditions to an clean state
+     * ( The futures are not ready )
      */
-    virtual void reset() {}
+    void reset() { _impl->reset(); }
 
+    /**
+     * Executable implementation
+     */
+    struct ExecutableImpl
+    {
+        /**
+         * @copydoc Executable::execute
+         */
+        virtual void execute() = 0;
+
+        /**
+         * @copydoc Executable::getPostconditions
+         */
+        virtual Futures getPostconditions() const = 0;
+
+        /**
+         * @copydoc Executable::getPreconditions
+         */
+        virtual Futures getPreconditions() const = 0;
+
+        /**
+         * @copydoc Executable::reset
+         */
+        virtual void reset() {}
+
+        virtual ~ExecutableImpl() {}
+    };
+
+private:
+
+    typedef std::shared_ptr< ExecutableImpl > ExecutableImplPtr;
+    ExecutableImplPtr _impl;
 };
 
 }

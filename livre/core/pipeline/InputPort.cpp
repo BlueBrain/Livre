@@ -27,7 +27,7 @@ namespace livre
 
 struct InputPort::Impl
 {
-    Impl( const PortInfo& info )
+    Impl( const DataInfo& info )
         : _info( info )
     {}
 
@@ -36,7 +36,7 @@ struct InputPort::Impl
 
     const std::string& getName() const
     {
-        return _info.name;
+        return _info.first;
     }
 
     size_t getSize() const
@@ -46,37 +46,38 @@ struct InputPort::Impl
 
     const std::type_index& getDataType() const
     {
-        return _info.getDataType();
+        return _info.second;
     }
 
-    void connect( const OutputPort& outputPort )
+    void connect( const OutputPort& port )
     {
-        if( getDataType() != outputPort.getDataType( ))
+        if( getDataType() != port.getDataType( ))
             LBTHROW( std::runtime_error( "Data types does not match between ports"));
 
-        _futures.push_back( outputPort.getPromise()->getFuture( ));
+        _futures.push_back( port.getPromise().getFuture( ));
     }
 
-    void disconnect( const OutputPort& outputPort )
+    bool disconnect( const OutputPort& port )
     {
         Futures::iterator it = _futures.begin();
         while( it != _futures.end())
         {
-            if( *it == outputPort.getPromise()->getFuture( ))
+            if( *it == port.getPromise().getFuture( ))
             {
                 _futures.erase( it );
-                return;
+                return true;
             }
             ++it;
         }
+        return false;
     }
 
     Futures _futures;
-    const PortInfo _info;
+    const DataInfo _info;
 };
 
-InputPort::InputPort( const PortInfo& portInfo )
-    : _impl( new InputPort::Impl( portInfo ))
+InputPort::InputPort( const DataInfo& dataInfo )
+    : _impl( new InputPort::Impl( dataInfo ))
 {}
 
 InputPort::~InputPort()
@@ -87,14 +88,14 @@ const Futures& InputPort::getFutures() const
     return _impl->_futures;
 }
 
-void InputPort::connect( const OutputPort& outputPort )
+void InputPort::connect( const OutputPort& port )
 {
-    _impl->connect( outputPort );
+    _impl->connect( port );
 }
 
-void InputPort::disconnect( const OutputPort& outputPort )
+bool InputPort::disconnect( const OutputPort& port )
 {
-    _impl->disconnect( outputPort );
+    return _impl->disconnect( port );
 }
 
 const std::string& InputPort::getName() const

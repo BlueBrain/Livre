@@ -18,8 +18,7 @@
  */
 
 #include <livre/core/pipeline/Future.h>
-
-#include <livre/core/pipeline/OutputPort.h>
+#include <livre/core/pipeline/AsyncData.h>
 
 namespace livre
 {
@@ -28,18 +27,26 @@ struct Future::Impl
 {
     Impl( const PipeFilter& pipeFilter,
           const AsyncData& data )
-        : _pipeFilter( pipeFilter )
+        : _name( data.getName( ))
+        , _pipeFilter( pipeFilter )
         , _data( data )
     {}
 
-    const std::string& getName() const
+    Future rename( const std::string& name ) const
     {
-        return _data.getName();
+        Future ret( _pipeFilter, _data );
+        ret._impl->_name = name;
+        return ret;
     }
 
-    ConstPortDataPtr get() const
+    const std::string& getName() const
     {
-        return _data.get();
+        return _name;
+    }
+
+    PortDataPtr get( const std::type_index& dataType ) const
+    {
+        return _data.get( dataType );
     }
 
     bool isReady() const
@@ -52,6 +59,7 @@ struct Future::Impl
         return _data.wait();
     }
 
+    std::string _name;
     const PipeFilter& _pipeFilter;
     const AsyncData& _data;
 };
@@ -64,14 +72,14 @@ Future::Future( const PipeFilter& pipeFilter,
 Future::~Future()
 {}
 
-const AsyncData& Future::getAsyncData() const
-{
-    return _impl->_data;
-}
-
 const std::string& Future::getName() const
 {
     return _impl->getName();
+}
+
+Future Future::rename( const std::string& name ) const
+{
+    return _impl->rename( name );
 }
 
 void Future::wait() const
@@ -89,9 +97,14 @@ const PipeFilter& Future::getPipeFilter() const
     return _impl->_pipeFilter;
 }
 
-ConstPortDataPtr Future::_get() const
+const AsyncData& Future::_getAsyncData() const
 {
-    return _impl->get();
+    return _impl->_data;
+}
+
+PortDataPtr Future::_getPtr( const std::type_index& dataType ) const
+{
+    return _impl->get( dataType );
 }
 
 }

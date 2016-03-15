@@ -21,25 +21,16 @@
 #define _Filter_h_
 
 #include <livre/core/types.h>
-#include <livre/core/pipeline/PortInfo.h>
 
 namespace livre
 {
 
 /**
- * Filters are similar to functions (immutable). Their inputs and
- * outputs are provided through ports. These ports provide
- * thread safe information retrieval, setting and querying.
- *
- * One input port may have many incoming connections and one output
- * port can be connected to many other input connections. The ports
- * have their unique names and these names are used to query,
- * retrieve and set data.
- *
- * PipeFilters class build the connection and execution
- * functionality around filter instances.
+ * Filters are similar to functions ( immutable ). Their inputs and
+ * outputs are provided with given name and data types. In execution time
+ * values can be queried from the map of futures ( name - future pairs )
+ * and can be set through the map of promises ( name - promise maps )
  */
-
 class Filter
 {
 public:
@@ -50,19 +41,21 @@ public:
      * @param input The Future that can be read for input parameters
      * @param output The Promise that can be written to for output parameters
      */
-    virtual void execute( const InFutureMap& input, PromiseMap& output ) const = 0;
+    virtual void execute( const FutureMap& input, PromiseMap& output ) const = 0;
 
     /**
-     * @param inputPorts information is filled by the Filter class.
-     * These ports are constructed by the @PipeFilter.
+     * @return information for the name and data types for the filter
+     * communication. In execution time using these names and types,
+     * data can be retrieved.
      */
-    virtual PortInfos getInputPorts() const  { return PortInfos(); }
+    virtual DataInfos getInputDataInfos() const  { return DataInfos(); }
 
     /**
-     * @param outputPorts information is filled by the Filter class.
-     * Afterwards, these ports are instantiated by the @PipeFilter.
+     * @return information for the name and data types for the filter
+     * communication. In execution time using these names and types,
+     * data can be set.
      */
-    virtual PortInfos getOutputPorts() const { return PortInfos(); }
+    virtual DataInfos getOutputDataInfos() const { return DataInfos(); }
 
     virtual ~Filter() {}
 };
