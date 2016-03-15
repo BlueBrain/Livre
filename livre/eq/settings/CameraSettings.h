@@ -25,14 +25,14 @@
 #include <livre/core/mathTypes.h>
 #include <eq/fabric/vmmlib.h>
 #include <co/distributable.h> // base class
-#include <zerobuf/render/camera.h> // base class
+#include <zerobuf/render/lookOut.h> // base class
 
 namespace livre
 {
 /**
  * The CameraSettings class is the information sent from app node to the clients for camera operations
  */
-class CameraSettings : public co::Distributable< ::zerobuf::render::Camera >
+class CameraSettings : public co::Distributable< ::zerobuf::render::LookOut >
 {
 public:
     /**

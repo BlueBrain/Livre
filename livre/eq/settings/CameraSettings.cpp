@@ -25,90 +25,99 @@
 #include <livre/core/maths/maths.h>
 #include <co/co.h>
 
+#include <algorithm>
+
 namespace livre
 {
 
 CameraSettings::CameraSettings()
-{}
+{
+    Matrix4f initial = Matrix4f::IDENTITY;
+    std::copy( &initial.array[0], &initial.array[0] + 16, getMatrix( ));
+}
 
 void CameraSettings::spinModel( const float x, const float y )
 {
     if( x == 0.f && y == 0.f )
         return;
 
-    ::zerobuf::render::Vector3f& pos = getOrigin();
-    ::zerobuf::render::Vector3f& lookat = getLookAt();
+    float matrixValues[16];
+    std::copy( getMatrix(), getMatrix() + 16, matrixValues );
 
-    Vector3f look( pos.getX() - lookat.getX(), pos.getY() - lookat.getY(),
-                   pos.getZ() - lookat.getZ( ));
-    const float length = look.length();
+    Matrix4f modelview( &matrixValues[0], &matrixValues[0] + 16 );
 
-    const Vector3f up( getUp().getX(),  getUp().getY(),  getUp().getZ( ));
-    const Vector3f left = vmml::cross( look, up );
-    std::cout << *this;
-    look.rotate( -x, up );
-    look.rotate( -y, left );
-    look *= length / look.length();
+    modelview[0][3] = 0.0f;
+    modelview[1][3] = 0.0f;
+    modelview[2][3] = 0.0f;
 
-    pos.setX( look.x() + lookat.getX( ));
-    pos.setY( look.y() + lookat.getY( ));
-    pos.setZ( look.z() + lookat.getZ( ));
-    std::cout << " -> " << *this << std::endl;
+    modelview.pre_rotate_x( x );
+    modelview.pre_rotate_y( y );
+
+    modelview[0][3] = matrixValues[12];
+    modelview[1][3] = matrixValues[13];
+    modelview[2][3] = matrixValues[14];
+
+    std::copy( &modelview.array[0], &modelview.array[0] + 16, getMatrix( ));
 }
 
 void CameraSettings::moveCamera( const float x, const float y, const float z )
 {
-    ::zerobuf::render::Vector3f& pos = getOrigin();
-    pos.setX( pos.getX() + x );
-    pos.setY( pos.getY() + y );
-    pos.setZ( pos.getZ() + z );
-
-    ::zerobuf::render::Vector3f& lookat = getLookAt();
-    lookat.setX( lookat.getX() + x );
-    lookat.setY( lookat.getY() + y );
-    lookat.setZ( lookat.getZ() + z );
-    std::cout << pos << std::endl;
+    getMatrix()[12] += x;
+    getMatrix()[13] += y;
+    getMatrix()[14] += z;
 }
 
 void CameraSettings::setCameraPosition( const Vector3f& pos )
 {
-    setOrigin( ::zerobuf::render::Vector3f( pos.x(), pos.y(), pos.z( )));
+    getMatrix()[12] = pos.x();
+    getMatrix()[13] = pos.y();
+    getMatrix()[14] = pos.z();
 }
 
 void CameraSettings::setCameraLookAt( const Vector3f& lookAt )
 {
-    setLookAt( ::zerobuf::render::Vector3f( lookAt.x(), lookAt.y(),
-                                            lookAt.z( )));
+    Vector3f eye( (float)getMatrix()[12],
+                  (float)getMatrix()[13],
+                  (float)getMatrix()[14]);
+    const Vector3f zAxis = vmml::normalize( eye - lookAt );
+
+    // Avoid Gimbal lock effect when looking upwards/downwards
+    Vector3f up( Vector3f::UP );
+    const float angle = zAxis.dot( up );
+    if( 1.f - std::abs( angle ) < 0.0001f )
+    {
+        Vector3f right( Vector3f::RIGHT );
+        if( angle > 0 ) // Looking downwards
+            right = Vector3f::LEFT;
+        up = up.rotate( 0.01f, right );
+        up.normalize();
+    }
+
+    const Vector3f xAxis = vmml::normalize( vmml::cross( up, zAxis ));
+    const Vector3f yAxis = vmml::cross( zAxis, xAxis );
+
+    Matrix3f rotationMatrix = Matrix4f::IDENTITY;
+    rotationMatrix.set_column( 0, xAxis );
+    rotationMatrix.set_column( 1, yAxis );
+    rotationMatrix.set_column( 2, zAxis );
+
+    Matrix4f rotationTranspose = Matrix4f::IDENTITY;
+    rotationTranspose.set_sub_matrix( rotationMatrix, 0, 0 );
+    rotationTranspose = transpose( rotationTranspose );
+
+    Matrix4f modelview = Matrix4f::IDENTITY;
+    modelview.set_translation( -eye );
+    modelview = rotationTranspose * modelview;
+
+    std::copy( &modelview.array[0], &modelview.array[0] + 16, getMatrix( ));
 }
 
 Matrix4f CameraSettings::computeMatrix() const
 {
-    // see 'man gluLookAt'
-    Vector3f f( getLookAt().getX() - getOrigin().getX(),
-                getLookAt().getY() - getOrigin().getY(),
-                getLookAt().getZ() - getOrigin().getZ( ));
-    f.normalize();
+    float matrixValues[16];
+    std::copy( getMatrix(), getMatrix() + 16, matrixValues );
 
-    Vector3f up( getUp().getX(), getUp().getY(), getUp().getZ( ));
-    up.normalize();
-
-    const Vector3f s = vmml::cross( f, up );
-    const Vector3f u = vmml::cross( s, f );
-    const float matrix[16] = { s.x(), u.x(), -f.x(), 0.f,
-                               s.y(), u.y(), -f.y(), 0.f,
-                               s.z(), u.z(), -f.z(), 0.f,
-                               0.f, 0.f, 0.f, 1.f };
-    const Matrix4f rotation( matrix, matrix + 16 );
-    Matrix4f translation;
-    translation.set_translation( Vector3f( -getOrigin().getX(),
-                                           -getOrigin().getY(),
-                                           -getOrigin().getZ( )));
-
-    const Matrix4f m = rotation * translation;
-    std::cout << *this << " = " << m << std::endl
-              << std::atan( m.at( 3, 2 ) / m.at( 3, 3 )) << std::endl
-              << -std::asin( m.at( 3, 1 )) << std::endl
-              << std::atan( m.at( 2, 1 ) / m.at( 1, 1 )) << std::endl;
-    return m;
+    Matrix4f modelview( &matrixValues[0], &matrixValues[0] + 16 );
+    return modelview;
 }
 }
