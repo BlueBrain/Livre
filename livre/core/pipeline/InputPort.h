@@ -26,16 +26,14 @@ namespace livre
 {
 
 /**
- * InputPort class implements the input port to a @PipeFilter. It
- * provides thread safe query and retrieval.
+ * Input connection for the @see PipeFilter.
  */
 class InputPort
 {
 public:
 
     /**
-     * InputPort constructor based on port information
-     * @param dataInfo is the port information
+     * @param dataInfo is the name and type information for the data.
      */
     explicit InputPort( const DataInfo& dataInfo );
     ~InputPort();
@@ -43,12 +41,12 @@ public:
     /**
      * @return name of the port
      */
-    const std::string& getName() const;
+    std::string getName() const;
 
     /**
      * @return data type of the port
      */
-    const std::type_index& getDataType() const;
+    std::type_index getDataType() const;
 
     /**
      * @return the number of the inputs to the port

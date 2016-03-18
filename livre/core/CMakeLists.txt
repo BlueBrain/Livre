@@ -111,7 +111,7 @@ set(LIVRECORE_SOURCES
   visitor/VisitState.cpp
 
   pipeline/AsyncData.cpp
-  pipeline/Executor.cpp
+  pipeline/Executable.cpp
   pipeline/Future.cpp
   pipeline/FutureMap.cpp
   pipeline/InputPort.cpp

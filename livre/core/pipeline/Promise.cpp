@@ -26,19 +26,17 @@ namespace livre
 
 struct Promise::Impl
 {
-    Impl( const PipeFilter& pipeFilter,
-          const DataInfo& dataInfo )
-        : _pipeFilter( pipeFilter )
-        , _data( dataInfo )
-        , _future( _pipeFilter, _data )
+    Impl( const DataInfo& dataInfo )
+        : _data( dataInfo )
+        , _future( _data )
     {}
 
-    const std::string& getName() const
+    std::string getName() const
     {
         return _data.getName();
     }
 
-    const std::type_index& getDataType() const
+    std::type_index getDataType() const
     {
         return _data.getDataType();
     }
@@ -58,25 +56,23 @@ struct Promise::Impl
         _data.set( PortDataPtr( ));
     }
 
-    const PipeFilter& _pipeFilter;
     AsyncData _data;
     const Future _future;
 };
 
-Promise::Promise( const PipeFilter& pipeFilter,
-                  const DataInfo& dataInfo )
-    : _impl( new Promise::Impl( pipeFilter, dataInfo ))
+Promise::Promise( const DataInfo& dataInfo )
+    : _impl( new Promise::Impl( dataInfo ))
 {}
 
 Promise::~Promise()
 {}
 
-const std::type_index& Promise::getDataType() const
+std::type_index Promise::getDataType() const
 {
     return _impl->getDataType();
 }
 
-const std::string& Promise::getName() const
+std::string Promise::getName() const
 {
     return _impl->getName();
 }
@@ -86,7 +82,7 @@ void Promise::flush()
     _impl->flush();
 }
 
-const Future& Promise::getFuture() const
+Future Promise::getFuture() const
 {
     return _impl->_future;
 }

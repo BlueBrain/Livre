@@ -26,7 +26,7 @@ namespace livre
 {
 
 /**
- * PortData class is base class for keeping the track for types
+ * Base class for keeping the track for types of data
  * by using the std::type_index.
  */
 class PortData
@@ -46,6 +46,10 @@ protected:
 template< class T>
 struct PortDataT final : public PortData
 {
+    /**
+     * Constructor
+     * @param data_ is copied
+     */
     explicit PortDataT( const T& data_ )
         : PortData( getType< T >())
         , data( data_ )

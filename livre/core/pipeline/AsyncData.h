@@ -26,7 +26,7 @@ namespace livre
 {
 
 /**
- * The AsyncData class provides thread safe operations for setting/retrieving/querying
+ * Provides thread safe operations for setting/retrieving/querying
  * the data. The internal data has a name and data type.
  */
 class AsyncData
@@ -36,28 +36,27 @@ public:
     /**
      * When connection is instantiated the data is not
      * set yet, so any get() call will block the retrieval
-     * @param name of the connection
-     * @param dataType type of the data
+     * @param dataInfo name, data type pair
      */
     explicit AsyncData( const DataInfo& dataInfo );
     ~AsyncData();
 
     /**
-     * @return the name of the connection
+     * @return the data type of the connection
      */
-    const std::type_index& getDataType() const;
+    std::type_index getDataType() const;
 
     /**
      * @return the name of the connection
      */
-    const std::string& getName() const;
+    std::string getName() const;
 
     /**
      * @param data sets the data
      * @throws std::runtime_error if data types does not match between data
      * and current async data
      */
-    void set( const PortDataPtr& data );
+    void set( PortDataPtr data );
 
     /**
      * @param dataType is the requested data type.
@@ -65,7 +64,7 @@ public:
      * @throws std::runtime_error if data types does not match between dataType
      * and current async data type
      */
-    const PortDataPtr& get( const std::type_index& dataType ) const;
+    PortDataPtr get( const std::type_index& dataType ) const;
 
     /**
      * @return true if data is set.
@@ -84,12 +83,6 @@ public:
 
 private:
 
-    /**
-     * Waits for any future to be ready.
-     * @param futures queried to be ready.
-     * @note this function needs internal access to the futures ( which is not exposed in the API ).
-     * @return true if any new futures are ready or futures included are not busy.
-     */
     friend bool waitForAny( const Futures& futures );
 
     AsyncData( const AsyncData& ) = delete;
@@ -100,10 +93,10 @@ private:
 };
 
 /**
- * Waits for any futures to be ready. If there are already ready futures the function returns
- * imeediately.
+ * Waits for any futures to be ready. If there are already ready futures, the function returns
+ * immediately.
  * @param futures that is waited to be ready
- * @return true if there are still not ready futures.
+ * @return true if there are still not ready futures, false if all futures are ready.
  */
 bool waitForAny( const Futures& futures );
 

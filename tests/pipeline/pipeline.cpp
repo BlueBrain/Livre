@@ -237,7 +237,7 @@ BOOST_AUTO_TEST_CASE( testWaitPipeline )
     livre::Pipeline pipeline = createPipeline( inputValue, 1 );
 
     livre::SimpleExecutor executor( 2 );
-    const livre::FutureMap pipelineFutures( executor.execute( pipeline.getExecutables( )));
+    const livre::FutureMap pipelineFutures( pipeline.schedule( executor ));
     pipelineFutures.wait();
 
     const livre::Executable& pipeOutput = pipeline.getExecutable( "Consumer" );
@@ -253,7 +253,7 @@ BOOST_AUTO_TEST_CASE( testAsynchronousPipeline )
     livre::Pipeline pipeline = createPipeline( inputValue, 1 );
     livre::SimpleExecutor executor( 2 );
 
-    const livre::FutureMap pipelineFutures( executor.execute( pipeline.getExecutables( )));
+    const livre::FutureMap pipelineFutures( pipeline.schedule( executor ));
     const livre::Executable& pipeOutput = pipeline.getExecutable( "Consumer" );
     const livre::UniqueFutureMap portFutures( pipeOutput.getPostconditions( ));
     const OutputData& outputData = portFutures.get< OutputData >( "TestOutputData" );
@@ -270,7 +270,7 @@ BOOST_AUTO_TEST_CASE( testOneToManyManyToOnePipeline )
         livre::Pipeline pipeline = createPipeline( inputValue, convertFilterCount );
 
         livre::SimpleExecutor executor( 2 );
-        const livre::FutureMap pipelineFutures( executor.execute( pipeline.getExecutables( )));
+        const livre::FutureMap pipelineFutures( pipeline.schedule( executor ));
         const livre::Executable& pipeOutput = pipeline.getExecutable( "Consumer" );
         const livre::UniqueFutureMap portFutures( pipeOutput.getPostconditions( ));
         const OutputData& outputData = portFutures.get< OutputData >( "TestOutputData" );
@@ -284,7 +284,7 @@ BOOST_AUTO_TEST_CASE( testOneToManyManyToOnePipeline )
         livre::Pipeline pipeline = createPipeline( inputValue, convertFilterCount );
 
         livre::SimpleExecutor executor( 8 );
-        const livre::Futures& futures = executor.execute( pipeline.getExecutables( ));
+        const livre::Futures& futures = pipeline.schedule( executor );
         const livre::Executable& pipeOutput = pipeline.getExecutable( "Consumer" );
 
         const livre::UniqueFutureMap portFutures1( pipeOutput.getPostconditions( ));
@@ -296,11 +296,11 @@ BOOST_AUTO_TEST_CASE( testOneToManyManyToOnePipeline )
         futureMap.wait();
 
         pipeline.reset();
-        executor.execute( pipeline.getExecutables( ));
+        pipeline.schedule( executor );
 
         livre::PipeFilter pipeInput =
                 static_cast< const livre::PipeFilter& >(
-                    pipeline.getExecutable( "Producer" ).getImpl( ));
+                    pipeline.getExecutable( "Producer" ));
         pipeInput.getPromise( "TestInputData" ).set( InputData( inputValue ));
 
         const livre::UniqueFutureMap portFutures2( pipeOutput.getPostconditions( ));

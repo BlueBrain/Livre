@@ -192,7 +192,7 @@ typedef std::vector< CacheId > CacheIds;
 typedef std::vector< CacheObjectPtr > CacheObjects;
 typedef std::vector< ConstCacheObjectPtr > ConstCacheObjects;
 
-typedef std::list< Executable > Executables;
+typedef std::list< Executable* > Executables;
 typedef std::list< Future > Futures;
 typedef std::list< Promise > Promises;
 

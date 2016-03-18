@@ -28,12 +28,9 @@ namespace livre
 {
 
 /**
- * Pipeline represents a filter graph. On asynchronous
- * execution through the Executor, the status of the
- * execution can be queried whether the execution is
- * complete or not through the post conditions.
+ * Implements the executable graph.
  */
-class Pipeline : public Executable::ExecutableImpl
+class Pipeline : public Executable
 {
 
 public:
@@ -43,16 +40,16 @@ public:
 
     /**
      * Adds a pipeline to be executed.
-     * @param pipeline is added to list of executables
-     * @param wait If true, on asynchronous execution, pipeline
-     * can wait on given pipeline.
+     * @param pipeline is added to list of executables ( shallow copied )
+     * @param wait If true, on scheduled execution, pipeline
+     * can wait on given pipeline post conditions.
      */
     void add( const std::string& name,
-              const Pipeline& pipeline,
+              Pipeline& pipeline,
               bool wait = true )
     {
         _add( name,
-              Executable( pipeline ),
+              new Pipeline( pipeline ),
               wait );
     }
 
@@ -61,28 +58,20 @@ public:
      * @param FilterT is the type of filter to be added to list of executables.
      * @name name the name of the filter instance.
      * @param args for the FilterT construction
-     * @param wait If true, on asynchronous execution, pipeline
-     * can wait on the added filter.
+     * @param wait If true, on scheduled execution, pipeline
+     * can wait on the post conditions of the pipefilter.
      * @return returns the generated pipe filter.
      * @throws std::runtime_error if an executable with same name is present
      */
 
-    template< class FilterT, class... Args, bool wait = true >
+    template< class FilterT, bool wait = true, class... Args >
     PipeFilter add( const std::string& name,
                     Args&&... args )
     {
-        PipeFilterT< FilterT > pipeFilter( name, args... );
-        _add( name,
-              Executable( pipeFilter ),
-              wait );
-        return pipeFilter;
+        PipeFilter* pipeFilter = new PipeFilterT< FilterT >( name, args... );
+        _add( name, pipeFilter, wait );
+        return *pipeFilter;
     }
-
-    /**
-     * @return the list of all executables ( pipe filters and
-     * pipelines )
-     */
-    Executables getExecutables() const;
 
     /**
      * @param name of the executable
@@ -114,9 +103,11 @@ public:
 private:
 
     void _add( const std::string& name,
-               const Executable& filter,
-               bool wait );
+               Executable* exec,
+               bool wait );   
 private:
+
+    void _schedule( Executor& executor ) final;
 
     struct Impl;
     std::shared_ptr< Impl > _impl;

@@ -26,8 +26,8 @@ namespace livre
 
 struct OutputPort::Impl
 {
-    Impl( const PipeFilter& pipeFilter, const DataInfo& dataInfo )
-        : _promise( pipeFilter, dataInfo )
+    Impl( const DataInfo& dataInfo )
+        : _promise( dataInfo )
     {}
 
     ~Impl()
@@ -40,12 +40,12 @@ struct OutputPort::Impl
         _promise.flush();
     }
 
-    const std::type_index& getDataType() const
+    std::type_index getDataType() const
     {
         return _promise.getDataType();
     }
 
-    const std::string& getName() const
+    std::string getName() const
     {
         return _promise.getName();
     }
@@ -58,8 +58,8 @@ struct OutputPort::Impl
     Promise _promise;
 };
 
-OutputPort::OutputPort( const PipeFilter& pipeFilter, const DataInfo& dataInfo )
-    : _impl( new OutputPort::Impl( pipeFilter, dataInfo ))
+OutputPort::OutputPort( const DataInfo& dataInfo )
+    : _impl( new OutputPort::Impl( dataInfo ))
 {}
 
 
@@ -70,12 +70,12 @@ OutputPort::OutputPort( OutputPort&& port )
     : _impl( std::move( port._impl ))
 {}
 
-const std::string& OutputPort::getName() const
+std::string OutputPort::getName() const
 {
     return _impl->getName();
 }
 
-const std::type_index& OutputPort::getDataType() const
+std::type_index OutputPort::getDataType() const
 {
     return _impl->getDataType();
 }

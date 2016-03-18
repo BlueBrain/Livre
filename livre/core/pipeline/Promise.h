@@ -29,7 +29,7 @@ namespace livre
 
 
 /**
- * The Promise class is similar to the std::promise classes in functionality and it has additional
+ * Is similar to the std::promise classes in functionality and it has additional
  * information for the name and data type. It provides methods to set the data.
  */
 class Promise
@@ -37,23 +37,20 @@ class Promise
 public:
 
     /**
-     * @param pipeFilter is the reference to the pipefilter class which instantiates the
-     * Promise.
      * @param dataInfo is the name and type information for the data.
      */
-    Promise( const PipeFilter& pipeFilter,
-             const DataInfo& dataInfo );
+    Promise( const DataInfo& dataInfo );
     ~Promise();
 
     /**
      * @return the name of the connection
      */
-    const std::type_index& getDataType() const;
+    std::type_index getDataType() const;
 
     /**
      * @return the name of the connection
      */
-    const std::string& getName() const;
+    std::string getName() const;
 
     /**
      * Sets the port with the value.
@@ -87,7 +84,7 @@ public:
     /**
      * @return the future, that can be queried for data retrieval
      */
-    const Future& getFuture() const;
+    Future getFuture() const;
 
     /**
      * @resets the promise. ( Future is reset and value can be set again )

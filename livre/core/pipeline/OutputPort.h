@@ -25,6 +25,9 @@
 namespace livre
 {
 
+/**
+ * Output connection for the @see PipeFilter.
+ */
 class OutputPort
 {
 
@@ -32,23 +35,20 @@ public:
 
     /**
      * @param dataInfo is the name and type information for the data.
-     * @param pipeFilter is the reference to the pipefilter class which instantiates the
-     * Promise.
      */
-    OutputPort( const PipeFilter& pipeFilter,
-                const DataInfo& dataInfo );
+    OutputPort( const DataInfo& dataInfo );
     ~OutputPort();
 
     OutputPort( OutputPort&& port );
     /**
      * @return name of the port
      */
-    const std::string& getName() const;
+    std::string getName() const;
 
     /**
      * @return data type of the port
      */
-    const std::type_index& getDataType() const;
+    std::type_index getDataType() const;
 
     /**
      * @return the promise, that data can be written to
@@ -71,8 +71,6 @@ private:
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };
-
-bool waitForAny( const Futures& futures );
 
 }
 

@@ -21,6 +21,8 @@
 #include <livre/core/pipeline/PortData.h>
 #include <livre/core/pipeline/Future.h>
 
+#include <lunchbox/log.h>
+
 #include <boost/thread/future.hpp>
 
 namespace livre
@@ -29,19 +31,6 @@ namespace livre
 typedef boost::shared_future< PortDataPtr > ConstPortDataFuture;
 typedef boost::promise< PortDataPtr > ConstPortDataPromise;
 typedef std::vector< ConstPortDataFuture > ConstPortDataFutures;
-
-namespace
-{
-    /* Boost wait_for_any implementation uses the internal locks from the futures.
-       Therefore, the get/set/query operations on promises/futures causes deadlocks
-       when used with wait_for_any( futurelist ) if futurelist is including the
-       future to be queried. With below implementation no locking is needed between
-       future operations. A higher granularity can be added for checking whether
-       the list includes the future or not, but simply exiting the wait_for_any
-       operation when lock is owned is simpler.
-     */
-    ReadWriteMutex waitForAnyLock;
-}
 
 struct AsyncData::Impl
 {
@@ -52,14 +41,11 @@ struct AsyncData::Impl
 
     ~Impl()
     {
-        if( !isReady())
-            _promise.set_value( PortDataPtr( ));
+        set( PortDataPtr( ));
     }
 
-    const PortDataPtr& get( const std::type_index& dataType ) const
+    PortDataPtr get( const std::type_index& dataType ) const
     {
-        ReadLock lock( waitForAnyLock );
-
         const PortDataPtr& data = _future.get();
 
         if( !data )
@@ -79,20 +65,21 @@ struct AsyncData::Impl
                 LBTHROW( std::runtime_error( "Types does not match on set value"));
         }
 
-        ReadLock lock( waitForAnyLock );
-        if( !_future.is_ready( ))
+        try
+        {
             _promise.set_value( data );
+        }
+        catch( const boost::promise_already_satisfied& )
+        {}
     }
 
     bool isReady() const
     {
-        ReadLock lock( waitForAnyLock );
         return _future.is_ready();
     }
 
     void wait() const
     {
-        ReadLock lock( waitForAnyLock );
         _future.wait();
     }
 
@@ -112,7 +99,7 @@ AsyncData::AsyncData( const DataInfo& dataInfo )
     :  _impl( new Impl( dataInfo ))
 {}
 
-const PortDataPtr& AsyncData::get( const std::type_index& dataType ) const
+PortDataPtr AsyncData::get( const std::type_index& dataType ) const
 {
     return _impl->get( dataType );
 }
@@ -120,17 +107,17 @@ const PortDataPtr& AsyncData::get( const std::type_index& dataType ) const
 AsyncData::~AsyncData()
 {}
 
-const std::type_index& AsyncData::getDataType() const
+std::type_index AsyncData::getDataType() const
 {
     return _impl->_dataInfo.second;
 }
 
-const std::string& AsyncData::getName() const
+std::string AsyncData::getName() const
 {
     return _impl->_dataInfo.first;
 }
 
-void AsyncData::set( const PortDataPtr& data )
+void AsyncData::set( PortDataPtr data )
 {
     _impl->set( data );
 }
@@ -159,10 +146,6 @@ bool waitForAny( const Futures& futures )
     boostFutures.reserve( futures.size( ));
     for( const auto& future: futures )
         boostFutures.push_back( future._getAsyncData()._impl->_future );
-
-    WriteLock lock( waitForAnyLock, boost::try_to_lock );
-    if( !lock.owns_lock( ))
-        return true;
 
     boost::wait_for_any( boostFutures.begin(), boostFutures.end( ));
     return true;

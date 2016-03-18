@@ -29,8 +29,6 @@ namespace livre
 
 struct Workers::Impl
 {
-
-
     Impl( Workers& workers,
           const size_t nThreads,
           const GLContextPtr& glContext )
@@ -43,16 +41,6 @@ struct Workers::Impl
 
     }
 
-    struct Work
-    {
-        Work( const Executable& executable_ )
-            : executable( executable_ )
-        {}
-        Executable executable;
-    };
-
-    typedef std::shared_ptr< Work > WorkPtr;
-
     void execute()
     {
         if( _glContext )
@@ -64,25 +52,25 @@ struct Workers::Impl
 
         while( true )
         {
-            WorkPtr work = _workQueue.pop();
-            if( !work )
+            Executable* exec = _workQueue.pop();
+            if( !exec )
                 break;
 
-            work->executable.execute();
+            exec->execute();
         }
     }
 
     ~Impl()
     {
         for( size_t i = 0; i < getSize(); ++i )
-            _workQueue.push( WorkPtr());
+            _workQueue.push( 0 );
         _threadGroup.join_all();
     }
 
 
-    void submitWork( const Executable& executable )
+    void submitWork( Executable& executable )
     {
-        _workQueue.push( WorkPtr( new Work( executable )));
+        _workQueue.push( &executable );
     }
 
     size_t getSize() const
@@ -91,7 +79,7 @@ struct Workers::Impl
     }
 
     Workers& _workers;
-    lunchbox::MTQueue< WorkPtr > _workQueue;
+    lunchbox::MTQueue< Executable* > _workQueue;
     boost::thread_group _threadGroup;
     const GLContextPtr _glContext;
 };
@@ -106,7 +94,7 @@ Workers::Workers( const size_t nThreads,
 Workers::~Workers()
 {}
 
-void Workers::execute( const Executable& executable )
+void Workers::execute( Executable& executable )
 {
     _impl->submitWork( executable );
 }

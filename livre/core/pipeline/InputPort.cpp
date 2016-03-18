@@ -34,7 +34,7 @@ struct InputPort::Impl
     ~Impl()
     {}
 
-    const std::string& getName() const
+    std::string getName() const
     {
         return _info.first;
     }
@@ -44,7 +44,7 @@ struct InputPort::Impl
         return _futures.size();
     }
 
-    const std::type_index& getDataType() const
+    std::type_index getDataType() const
     {
         return _info.second;
     }
@@ -98,12 +98,12 @@ bool InputPort::disconnect( const OutputPort& port )
     return _impl->disconnect( port );
 }
 
-const std::string& InputPort::getName() const
+std::string InputPort::getName() const
 {
     return _impl->getName();
 }
 
-const std::type_index& InputPort::getDataType() const
+std::type_index InputPort::getDataType() const
 {
     return _impl->getDataType();
 }

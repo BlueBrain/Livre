@@ -17,33 +17,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/core/pipeline/Executor.h>
 #include <livre/core/pipeline/Executable.h>
+#include <livre/core/pipeline/Executor.h>
 
 namespace livre
 {
 
-Futures Executor::execute( const Executable& executable )
+Futures Executable::schedule( Executor& executor )
 {
-    const Futures& fs = executable.getPostconditions();
-    _schedule({ executable });
-    return fs;
+    _schedule( executor );
+    return getPostconditions();
 }
 
-Futures Executor::execute( const Executables& executables )
-{
-    Futures futures;
-    for( const Executable& executable: executables )
-    {
-        const Futures& fs = executable.getPostconditions( );
-        futures.insert( futures.end(), fs.begin(), fs.end( ));
-    }
-
-    _schedule( executables );
-    return futures;
-}
-
-Executor::~Executor()
+Executable::~Executable()
 {}
+
+void Executable::_schedule( Executor& executor )
+{
+    executor.schedule( *this );
+}
 
 }

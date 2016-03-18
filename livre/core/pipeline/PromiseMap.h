@@ -27,14 +27,7 @@ namespace livre
 {
 
 /**
- * The PipeFilterOutput class is used by the @PipeFilter class to instantiate
- * the outgoing connections to a given filter using the connection info
- * provided by the filter.
- *
- * It provides functionality to wait on any or all the ports given by
- * name.
- *
- * It also provides thread safe functions to query the state of the port.
+ * Wrapper class for applying operations on the @Promise objects.
  */
 class PromiseMap
 {

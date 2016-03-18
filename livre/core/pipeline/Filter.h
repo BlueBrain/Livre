@@ -29,7 +29,7 @@ namespace livre
  * Filters are similar to functions ( immutable ). Their inputs and
  * outputs are provided with given name and data types. In execution time
  * values can be queried from the map of futures ( name - future pairs )
- * and can be set through the map of promises ( name - promise maps )
+ * and can be set through the map of promises ( name - promise pairs )
  */
 class Filter
 {
@@ -44,16 +44,16 @@ public:
     virtual void execute( const FutureMap& input, PromiseMap& output ) const = 0;
 
     /**
-     * @return information for the name and data types for the filter
+     * @return map for the name and data types for the filter
      * communication. In execution time using these names and types,
-     * data can be retrieved.
+     * data can be set.
      */
     virtual DataInfos getInputDataInfos() const  { return DataInfos(); }
 
     /**
-     * @return information for the name and data types for the filter
+     * @return map for the name and data types for the filter
      * communication. In execution time using these names and types,
-     * data can be set.
+     * data can be retrieved.
      */
     virtual DataInfos getOutputDataInfos() const { return DataInfos(); }
 

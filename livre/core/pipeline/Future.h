@@ -36,21 +36,18 @@ class Future
 public:
 
     /**
-     * @param pipeFilter is the reference to @Pipefilter class which
-     * instantiates the @see Promise that Future belongs to.
      * @param data holds the thread safe data (query/retrieve).
      */
-    Future( const PipeFilter& pipeFilter,
-            const AsyncData& data );
+    Future( const AsyncData& data );
     ~Future();
 
     /**
      * @return name of the future
      */
-    const std::string& getName() const;
+    std::string getName() const;
 
     /**
-     * Gets a copy future with the given name
+     * Gets a shallow copy of the future with the given name
      */
     Future rename( const std::string& name ) const;
 
@@ -75,16 +72,16 @@ public:
     bool isReady() const;
 
     /**
-     * @return the pipe filter that future belongs to. If executor supports pull mode,
-     * by getting futures, it will be possible to reach the source of the execution
-     */
-    const PipeFilter& getPipeFilter() const;
-
-    /**
      * @param future is the future to be checked with
      * @return true if both futures are same
      */
     bool operator==( const Future& future ) const { return _impl == future._impl; }
+
+    /**
+     * @param future is the future to be checked with
+     * @return true if implementation address is smaller than the other implementation address
+     */
+    bool operator<( const Future& future ) const { return _impl.get() < future._impl.get(); }
 
 private:
 

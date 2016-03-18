@@ -27,20 +27,12 @@ namespace livre
 {
 
 /**
- * SimpleExecutor class provides a very basic implementation
- * for the @see Executor class. It has a thread pool for
- * executing multiple executables asynchronously.
+ * Provides a very basic implementation for the @see Executor
+ * class. It has a thread pool for executing multiple executables
+ * asynchronously.
  *
- * The submitted executables are queued for the worker threads.
- * without any real scheduling.The pipeline submission is
- * thread safe.
- *
- * The scheduler implemented in this class, pushes the
- * executables without re-ordering. The executable whose
- * preconditions are satisfied is marked for execution
- * in the thread pool.
- *
- * SimpleExecutor executes executables in a push based flow.
+ * The submitted executables are queued for the worker threads,
+ * by looking at the preconditions if they are satisfied.
  */
 
 class SimpleExecutor : public Executor
@@ -55,16 +47,16 @@ public:
     virtual ~SimpleExecutor();
 
     /**
+     * @copydoc Executor::schedule
+     */
+    void schedule( Executable& executable ) final;
+
+    /**
      * @copydoc Executor::clear()
      */
     void clear() final;
 
 private:
-
-    /**
-     * @copydoc Executor::_schedule
-     */
-    void _schedule( const Executables& executables ) final;
 
     struct Impl;
     std::unique_ptr<Impl> _impl;

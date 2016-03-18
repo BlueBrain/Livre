@@ -27,10 +27,10 @@ namespace livre
 {
 
 /**
- * PipeFilter class instantiates the @Filter classes by constructing
- * the communication layer around the filter.
+ * Responsible for execution of the @see Filter objects by constructing
+ * the communication layer ( output ports, input ports ) around the filter.
  */
-class PipeFilter : public Executable::ExecutableImpl
+class PipeFilter : public Executable
 {
 public:
 
@@ -39,10 +39,10 @@ public:
     /**
      * @return the unique name of the filter.
      */
-    const std::string& getName() const;
+    std::string getName() const;
 
     /**
-     * Connect to given pipe filter with the given port names. Both filters
+     * Connects to given pipe filter with the given port names. Both filters
      * should have the same port data type.
      * @param srcPortName is the source pipe filter.
      * @param dst is the destination pipe filter.
@@ -54,7 +54,7 @@ public:
                   const std::string& dstPortName );
 
     /**
-     * @return return promise for the given input port. If there is no connection to the
+     * @return promise for the given input port. If there is no connection to the
      * input port, a new promise is created for the port and no further connections are allowed,
      * if there is a connection getting a promise is not allowed.
      * @throws std::runtime_error if there is already a connection or if there is

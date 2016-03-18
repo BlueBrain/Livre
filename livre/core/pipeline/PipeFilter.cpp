@@ -53,7 +53,7 @@ struct PipeFilter::Impl
         {
             _outputMap.emplace( std::piecewise_construct,
                                 std::forward_as_tuple( dataInfo.first ),
-                                std::forward_as_tuple( _pipeFilter, dataInfo ));
+                                std::forward_as_tuple( dataInfo ));
         }
     }
 
@@ -110,8 +110,7 @@ struct PipeFilter::Impl
 
         _manuallySetPortsMap.emplace( std::piecewise_construct,
                                       std::forward_as_tuple( inputPort.getName( )),
-                                      std::forward_as_tuple( _pipeFilter,
-                                                             DataInfo( inputPort.getName(),
+                                      std::forward_as_tuple( DataInfo( inputPort.getName(),
                                                                        inputPort.getDataType( ))));
         OutputPort& outputPort = _manuallySetPortsMap.find( inputPort.getName( ))->second;
 
@@ -196,7 +195,7 @@ PipeFilter::PipeFilter( const std::string& name,
 PipeFilter::~PipeFilter()
 {}
 
-const std::string& PipeFilter::getName() const
+std::string PipeFilter::getName() const
 {
     return _impl->_name;
 }
@@ -230,8 +229,7 @@ void PipeFilter::connect( const std::string& srcPortName,
                           PipeFilter& dst,
                           const std::string& dstPortName )
 {
-     _impl->connect( srcPortName, *dst._impl, dstPortName );
+    _impl->connect( srcPortName, *dst._impl, dstPortName );
 }
-
 
 }

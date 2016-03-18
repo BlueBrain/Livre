@@ -48,7 +48,7 @@ public:
      * threads.
      * @param executable is executed by thread pool.
      */
-    void execute( const Executable& executable );
+    void execute( Executable& executable );
 
     /**
      * @return the size of thread pool.

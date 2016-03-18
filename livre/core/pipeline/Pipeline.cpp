@@ -28,24 +28,26 @@ struct Pipeline::Impl
 {
     typedef std::map< std::string, const Pipeline > PipelineMap;
     typedef std::map< std::string, const PipeFilter > PipeFilterMap;
-    typedef std::map< std::string, Executable > ExecutableMap;
+    typedef std::map< std::string, std::unique_ptr< Executable >> ExecutableMap;
 
     Impl( Pipeline& pipeline )
         : _pipeline( pipeline )
     {}
 
     void add( const std::string& name,
-              const Executable& executable,
+              Executable* executable,
               bool wait )
     {
         if( _executableMap.count( name ) > 0 )
             LBTHROW( std::runtime_error( name + " already exists"));
 
-        _executableMap.insert({ name, executable });
+        _executableMap.emplace( std::piecewise_construct,
+                                std::forward_as_tuple( name ),
+                                std::forward_as_tuple( executable ));
 
         if( wait )
         {
-            const Futures& futures = executable.getPostconditions();
+            const Futures& futures = executable->getPostconditions();
             _outFutures.insert( _outFutures.end(), futures.begin(), futures.end( ));
         }
     }
@@ -56,11 +58,11 @@ struct Pipeline::Impl
         Executables::iterator it = executables.begin();
         while( !executables.empty( ))
         {
-            Executable& executable = *it;
-            const FutureMap futureMap( executable.getPreconditions( ));
+            Executable* executable = *it;
+            const FutureMap futureMap( executable->getPreconditions( ));
             if( futureMap.isReady( ))
             {
-                executable.execute();
+                executable->execute();
                 executables.erase( it );
                 it = executables.begin();
             }
@@ -77,8 +79,8 @@ struct Pipeline::Impl
     {
         Executables executables;
 
-        for( auto pair: _executableMap )
-            executables.push_back( pair.second );
+        for( auto& pair: _executableMap )
+            executables.push_back( pair.second.get( ));
 
         return executables;
     }
@@ -88,15 +90,15 @@ struct Pipeline::Impl
         if( _executableMap.count( name ) == 0 )
             LBTHROW( std::runtime_error( name + " executable does not exist"));
 
-        return _executableMap.find( name )->second;
+        return *_executableMap.find( name )->second;
     }
 
     Futures getPreconditions() const
     {
         Futures inFutures;
-        for( auto pair: _executableMap )
+        for( auto& pair: _executableMap )
         {
-            const Futures& futures = pair.second.getPreconditions();
+            const Futures& futures = pair.second->getPreconditions();
             inFutures.insert( inFutures.end(), futures.begin(), futures.end( ));
         }
         return inFutures;
@@ -107,10 +109,16 @@ struct Pipeline::Impl
         return _outFutures;
     }
 
+    void schedule( Executor& executor )
+    {
+        for( auto& pair: _executableMap )
+            executor.schedule( *pair.second );
+    }
+
     void reset()
     {
         for( auto& pair: _executableMap )
-            pair.second.reset();
+            pair.second->reset();
     }
 
     Pipeline& _pipeline;
@@ -127,22 +135,16 @@ Pipeline::~Pipeline()
 {}
 
 void Pipeline::_add( const std::string& name,
-                     const Executable& executable,
+                     Executable* exec,
                      bool wait )
 {
-    _impl->add( name, executable, wait );
-}
-
-Executables Pipeline::getExecutables() const
-{
-    return _impl->getExecutables();
+    _impl->add( name, exec, wait );
 }
 
 const Executable& Pipeline::getExecutable( const std::string& name ) const
 {
     return _impl->getExecutable( name );
 }
-
 
 void Pipeline::execute()
 {
@@ -162,6 +164,11 @@ Futures Pipeline::getPreconditions() const
 void Pipeline::reset()
 {
     _impl->reset();
+}
+
+void Pipeline::_schedule( Executor& executor )
+{
+    _impl->schedule( executor );
 }
 
 }

@@ -84,7 +84,7 @@ public:
      * @param name of the future. If name is ALL_FUTURES, all futures are marked to return.
      * @return the futures associated with the name.
      */
-    Futures getFutures( const std::string& portName = ALL_FUTURES ) const;
+    Futures getFutures( const std::string& name = ALL_FUTURES ) const;
 
     /**
      * Queries if port is ready
@@ -93,7 +93,7 @@ public:
      * @throw std::runtime_error when there is no future associated with the
      * given name
      */
-    bool isReady( const std::string& portName = ALL_FUTURES ) const;
+    bool isReady( const std::string& name = ALL_FUTURES ) const;
 
     /**
      * Waits all futures associated with port name
@@ -101,7 +101,7 @@ public:
      * @throw std::runtime_error when there is no future associated with the
      * given name
      */
-    void wait( const std::string& portName = ALL_FUTURES ) const;
+    void wait( const std::string& name = ALL_FUTURES ) const;
 
     /**
      * Waits all futures associated with port name.
@@ -109,7 +109,7 @@ public:
      * @throw std::runtime_error when there is no future associated with the
      * given name
      */
-    bool waitForAny( const std::string& portName = ALL_FUTURES ) const;
+    bool waitForAny( const std::string& name = ALL_FUTURES ) const;
 
 private:
 

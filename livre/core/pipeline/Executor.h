@@ -26,38 +26,27 @@ namespace livre
 {
 
 /**
- * Executor class is the base class for implementing different scheduling
- * algorithms for submited work. i.e. The IO or CPU intensive algorithms
- * can implement their own scheduling algorithms.
+ * Is the base class for implementing different scheduling
+ * algorithms for @see Executable objects. i.e. The IO or CPU intensive
+ * algorithms can implement their own scheduling algorithms. The
+ * push/pull scheduling algorithms can be implemented.
  */
 class Executor
 {
 public:
 
-    virtual ~Executor();
-
-    /**
-     * Executes the executable. Returns the futures that can be queried for data.
-     * @param pipeline to be executed.
-     */
-    Futures execute( const Executable& executable );
-
-    /**
-     * Executes the executable. Returns the futures that can be queried for data.
-     * @param pipeline to be executed.
-     */
-    Futures execute( const Executables& executables );
-
-protected:
+    virtual ~Executor() {}
 
     /**
      * Schedules the executables for execution. The deriving class should implement a
      * scheduling algorithm for the execution. ( i.e. there may be a work queue and
      * executables are selected from the work queue according to their pre-post
      * conditions
-     * @param executables are the executables to schedule.
+     * @param executable to schedule
      */
-    virtual void _schedule( const Executables& executables ) = 0;
+    virtual void schedule( Executable& executable ) = 0;
+
+protected:
 
     /**
      * Clears the executor ( i.e : Implementation can empty the work queue )
