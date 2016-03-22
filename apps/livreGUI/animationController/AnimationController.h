@@ -23,7 +23,6 @@
 #define _AnimationController_h_
 
 #include <livreGUI/types.h>
-#include <zeroeq/hbp/vocabulary.h>
 #include <QWidget>
 
 namespace livre
@@ -49,7 +48,7 @@ public:
 
 signals:
 
-    void newFrameReceived( ::zeroeq::hbp::data::Frame frame );
+    void newFrameReceived();
 
 private Q_SLOTS:
 
@@ -58,7 +57,7 @@ private Q_SLOTS:
     void _onFrameChanged();
     void _togglePlayPause();
     void _setFollow( int on );
-    void _onNewFrameReceived( ::zeroeq::hbp::data::Frame frame );
+    void _onNewFrameReceived();
 
 private:
 

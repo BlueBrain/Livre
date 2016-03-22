@@ -29,7 +29,7 @@
 const std::string& tfDir = lunchbox::getRootPath() +
                                "/share/Livre/examples/";
 
-BOOST_AUTO_TEST_CASE( TransferFunction )
+BOOST_AUTO_TEST_CASE( transferFunction )
 {
     const size_t nChannels = livre::TransferFunction1D::getNumChannels();
     const size_t defaultSize = nChannels * 256;
@@ -51,7 +51,7 @@ std::vector< uint8_t > readFile( const std::string& file )
     return values;
 }
 
-BOOST_AUTO_TEST_CASE( LoadTransferFunctionFile )
+BOOST_AUTO_TEST_CASE( loadTransferFunctionFile )
 {
     std::vector< uint8_t > values = readFile( tfDir + "tf_f.1dt" );
     livre::TransferFunction1D tfFile( tfDir + "tf_f.1dt" );
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE( serialization )
     BOOST_CHECK_EQUAL( tfFile, tfFileb );
 }
 
-BOOST_AUTO_TEST_CASE( LoadWrongTransferFunctionFile )
+BOOST_AUTO_TEST_CASE( loadWrongTransferFunctionFile )
 {
     livre::TransferFunction1D defaultTf;
     livre::TransferFunction1D tfFile( tfDir + "inexistent_file.1dt" );

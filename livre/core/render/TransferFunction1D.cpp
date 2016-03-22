@@ -1,6 +1,7 @@
 /* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                          Stefan.Eilemann@epfl.ch
+ *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -27,14 +28,6 @@
 
 namespace livre
 {
-namespace
-{
-enum SamplePointsType
-{
-    UINT8,
-    FLOAT
-};
-}
 
 TransferFunction1D::TransferFunction1D()
 {
@@ -52,7 +45,7 @@ TransferFunction1D::TransferFunction1D()
     for( uint32_t i = 0; i < getLutSize(); i += NCHANNELS )
     {
         Vector4f rgba;
-        if( 0 < i && i <= density1 )
+        if( i > 0 && i <= density1 )
         {
             rgba = color1;
             rgba[3] = alpha1 * ( float(i) / density1 );
@@ -64,12 +57,12 @@ TransferFunction1D::TransferFunction1D()
             rgba[3] = ( float( i ) - density1 + 1.f ) /
                       ( density2 - density1 + 1.f ) * alphaDiff + alpha1;
         }
-        // else i == 0 : rgba = 0;
 
-        data[ i + 0 ] = rgba[0] * std::numeric_limits< uint8_t >::max();
-        data[ i + 1 ] = rgba[1] * std::numeric_limits< uint8_t >::max();
-        data[ i + 2 ] = rgba[2] * std::numeric_limits< uint8_t >::max();
-        data[ i + 3 ] = rgba[3] * std::numeric_limits< uint8_t >::max();
+        float maxUint8 = std::numeric_limits< uint8_t >::max();
+        data[ i + 0 ] = rgba[0] * maxUint8;
+        data[ i + 1 ] = rgba[1] * maxUint8;
+        data[ i + 2 ] = rgba[2] * maxUint8;
+        data[ i + 3 ] = rgba[3] * maxUint8;
     }
 }
 
@@ -110,7 +103,9 @@ void TransferFunction1D::_createTfFromFile( const std::string& file )
     uint8_t* data = getLut();
     const bool hasBytes = (formatStr == "uint8");
     while( ifs >> val && i < numValues )
+    {
         data[i++] = hasBytes ? std::stoi( val ) :
                         std::stof( val ) * std::numeric_limits< uint8_t >::max();
+    }
 }
 }

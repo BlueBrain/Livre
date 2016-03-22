@@ -23,7 +23,7 @@
 #define _TransferFunctionEditor_h_
 
 #include <livreGUI/types.h>
-#include <zerobuf/render/lookupTable1D.h> // member
+#include <livre/core/render/TransferFunction1D.h>
 #include <lunchbox/monitor.h> // member
 #include <QWidget>
 
@@ -67,7 +67,7 @@ private:
     void _publishTransferFunction();
     void _onTransferFunction();
 
-    ::zerobuf::render::LookupTable1D _lut;
+    livre::TransferFunction1D _lut;
     livre::Controller& _controller;
     Ui::TransferFunctionEditor* _ui;
     ColorMapWidget* _redWidget;

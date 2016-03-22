@@ -33,7 +33,8 @@ namespace maths
  * @param upper Upper limit.
  * @return The clamped number.
  */
-template< class T > T clamp( const T number, const T lower, const T upper )
+template< class T >
+T clamp( const T number, const T lower, const T upper )
 {
     return number < lower ? lower : ( number > upper ? upper : number );
 }

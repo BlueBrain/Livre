@@ -26,7 +26,11 @@
 #include <livreGUI/ui_TransferFunctionEditor.h>
 #include <livreGUI/Controller.h>
 
+#include <lunchbox/file.h>
+
 #include <QMessageBox>
+
+#include <fstream>
 
 namespace livre
 {
@@ -72,8 +76,8 @@ TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
     QTimer::singleShot( 50, this, SLOT( _setDefault()));
 
     _controller.subscribe( _lut );
-    _lut.setUpdatedFunction(
-        std::bind( &TransferFunctionEditor::_onTransferFunction, this ));
+    _lut.setUpdatedFunction( [&]
+        { return _onTransferFunction(); });
 }
 
 TransferFunctionEditor::~TransferFunctionEditor()
@@ -218,67 +222,122 @@ void TransferFunctionEditor::_clear()
     _pointsUpdated();
 }
 
+namespace
+{
 const quint32 TF_FILE_HEADER = 0xdeadbeef;
 const quint32 TF_FILE_VERSION = 1;
-const QString TF_FILE_FILTER( "Transfer function files (*.tf)" );
-
+const QString TF_FILE_FILTER( "Transfer function's control points, *.tf" );
+const QString DT_FILE_FILTER( "ImageVis3d compatible ascii, *.1dt" );
+const QString LBA_FILE_FILTER( "Transfer function's values ascii, *.lba" );
+const QString LBB_FILE_FILTER( "Transfer function's values binary, *.lbb" );
+const QString TF_FILTERS( TF_FILE_FILTER + ";;" + DT_FILE_FILTER + ";;" +
+                          LBA_FILE_FILTER + ";;" + LBB_FILE_FILTER );
+}
 void TransferFunctionEditor::_load()
 {
+    QString selectedFilter;
     const QString filename = QFileDialog::getOpenFileName( this, "Load transfer function",
                                                            QString(),
-                                                           TF_FILE_FILTER );
+                                                           TF_FILTERS, &selectedFilter );
     if( filename.isEmpty( ))
         return;
 
-    QFile file( filename );
-    file.open( QIODevice::ReadOnly );
-    QDataStream in( &file );
+    if( selectedFilter == TF_FILE_FILTER )
+    {
 
-    quint32 header;
-    in >> header;
-    if( header != TF_FILE_HEADER )
+        QFile file( filename );
+        file.open( QIODevice::ReadOnly );
+        QDataStream in( &file );
+
+        quint32 header;
+        in >> header;
+        if( header != TF_FILE_HEADER )
+            return;
+
+        quint32 version;
+        in >> version;
+        if( version != TF_FILE_VERSION )
+            return;
+
+        QPolygonF redPoints, greenPoints, bluePoints, alphaPoints;
+        QGradientStops gradientStops;
+        in >> redPoints
+           >> greenPoints
+           >> bluePoints
+           >> alphaPoints;
+
+        _redWidget->setPoints( redPoints );
+        _greenWidget->setPoints( greenPoints );
+        _blueWidget->setPoints( bluePoints );
+        _alphaWidget->setPoints( alphaPoints );
+        _pointsUpdated();
         return;
-
-    quint32 version;
-    in >> version;
-    if( version != TF_FILE_VERSION )
+    }
+    else if(( selectedFilter == DT_FILE_FILTER ) ||
+            ( selectedFilter == LBA_FILE_FILTER ) ||
+            ( selectedFilter == LBB_FILE_FILTER ))
+    {
+        livre::TransferFunction1D lut( filename.toStdString( ));
+        _lut = lut;
+        _onTransferFunction();
         return;
-
-    QPolygonF redPoints, greenPoints, bluePoints, alphaPoints;
-    QGradientStops gradientStops;
-    in >> redPoints
-       >> greenPoints
-       >> bluePoints
-       >> alphaPoints;
-
-    _redWidget->setPoints( redPoints );
-    _greenWidget->setPoints( greenPoints );
-    _blueWidget->setPoints( bluePoints );
-    _alphaWidget->setPoints( alphaPoints );
-    _pointsUpdated();
+    }
 }
 
 void TransferFunctionEditor::_save()
 {
+    QString selectedFilter;
     QString filename = QFileDialog::getSaveFileName( this, "Save transfer function",
                                                            QString(),
-                                                           TF_FILE_FILTER );
-    if( filename.isEmpty( ))
-        return;
+                                                           TF_FILTERS, &selectedFilter );
+    if( selectedFilter == TF_FILE_FILTER )
+    {
+        if( !filename.endsWith( ".tf" ))
+            filename.append( ".tf" );
 
-    if( !filename.endsWith( ".tf" ))
-        filename.append( ".tf" );
+        QFile file( filename );
+        file.open( QIODevice::WriteOnly );
+        QDataStream out( &file );
+        out.setVersion( QDataStream::Qt_5_0 );
 
-    QFile file( filename );
-    file.open( QIODevice::WriteOnly );
-    QDataStream out( &file );
-    out.setVersion( QDataStream::Qt_5_0 );
+        out << TF_FILE_HEADER << TF_FILE_VERSION;
+        out << _redWidget->getPoints()
+            << _greenWidget->getPoints()
+            << _blueWidget->getPoints()
+            << _alphaWidget->getPoints();
+    }
+    else if( selectedFilter == DT_FILE_FILTER )
+    {
+        if( !filename.endsWith( ".1dt" ))
+            filename.append( ".1dt" );
 
-    out << TF_FILE_HEADER << TF_FILE_VERSION;
-    out << _redWidget->getPoints()
-        << _greenWidget->getPoints()
-        << _blueWidget->getPoints()
-        << _alphaWidget->getPoints();
+        std::ofstream file;
+        file.open( filename.toStdString( ));
+        size_t tfSize = _lut.getLutSize() / 4;
+        file << tfSize << " uint8" << std::endl;
+
+        for( size_t i = 0; i < tfSize; ++i )
+        {
+            file << (uint32_t)_redWidget->getCurve()[i] << " "
+                 << (uint32_t)_greenWidget->getCurve()[i] << " "
+                 << (uint32_t)_blueWidget->getCurve()[i] << " "
+                 << (uint32_t)_alphaWidget->getCurve()[i] << std::endl;
+        }
+    }
+    else if( selectedFilter == LBA_FILE_FILTER )
+    {
+        if( !filename.endsWith( ".lba" ))
+            filename.append( ".lba" );
+
+        lunchbox::saveAscii( _lut, filename.toStdString( ));
+    }
+    else if( selectedFilter == LBB_FILE_FILTER )
+    {
+        if( !filename.endsWith( ".lbb" ))
+            filename.append( ".lbb" );
+
+        lunchbox::saveBinary( _lut, filename.toStdString( ));
+    }
 }
 
 namespace
@@ -299,7 +358,7 @@ QPolygon _filterPoints( const QPolygon& points )
         {
             const QLine nextLine( currentPoint, points[i+1] );
             const float nextSlope = float(nextLine.dy()) / float(nextLine.dx());
-            if( std::abs(prevSlope - nextSlope) <= std::numeric_limits<float>::epsilon() )
+            if( std::abs(prevSlope - nextSlope) <= std::numeric_limits<float>::epsilon( ))
                 change = false;
         }
 
@@ -331,17 +390,14 @@ QPolygonF _convertPoints( const QPolygon& points, const int width, const int hei
 
 void TransferFunctionEditor::_onTransferFunctionChanged()
 {
-    QGradientStops stops;
     QPolygon redPoints, bluePoints, greenPoints, alphaPoints;
     const uint8_t* lut = _lut.getLut();
     for( size_t i = 0; i < _lut.getLutSize(); i += 4 )
     {
-        redPoints << QPoint(i, lut[i+0]);
-        greenPoints << QPoint(i, lut[i+1]);
-        bluePoints << QPoint(i, lut[i+2]);
-        alphaPoints << QPoint(i, lut[i+3]);
-        stops << QGradientStop( float(i/4) / 255.f,
-                                QColor( lut[i+0], lut[i+1], lut[i+2], lut[i+3]));
+        redPoints << QPoint( i / 4, lut[i+0] );
+        greenPoints << QPoint( i / 4, lut[i+1] );
+        bluePoints << QPoint( i / 4, lut[i+2] );
+        alphaPoints << QPoint( i / 4, lut[i+3] );
     }
 
     QPolygonF redPointsF = _convertPoints( _filterPoints( redPoints ),

@@ -23,7 +23,7 @@
 #include <livreGUI/ui_AnimationController.h>
 #include <livre/core/types.h>
 
-#include <zeroeq/event.h>
+#include <zerobuf/render/frame.h>
 
 namespace livre
 {
@@ -38,6 +38,8 @@ struct AnimationController::Impl
         , _onFirstFrame( true )
     {
         _ui.setupUi( _animationController );
+        _frame.setUpdatedFunction( [&]
+            { emit _animationController->newFrameReceived(); });
         connect();
     }
 
@@ -46,16 +48,9 @@ struct AnimationController::Impl
         disconnect();
     }
 
-    void onFrame( const ::zeroeq::Event& event_ )
-    {
-        emit _animationController->newFrameReceived( zeroeq::hbp::deserializeFrame( event_ ));
-    }
-
     void setSubscriber()
     {
-        _controller.registerHandler( ::zeroeq::hbp::EVENT_FRAME,
-                                     std::bind( &AnimationController::Impl::onFrame,
-                                                  this, std::placeholders::_1 ));
+        _controller.subscribe( _frame );
     }
 
     void connect()
@@ -75,7 +70,7 @@ struct AnimationController::Impl
 
     void disconnect()
     {
-        _controller.deregisterHandler( ::zeroeq::hbp::EVENT_FRAME );
+        _controller.unsubscribe( _frame );
         _connected = false;
         resetControls();
     }
@@ -99,13 +94,13 @@ struct AnimationController::Impl
         _ui.btnPlay->setText( enable ? "Pause" : "Play" );
     }
 
-    void onNewFrameReceived( zeroeq::hbp::data::Frame frame )
+    void onNewFrameReceived()
     {
         _connected = true;
 
         const int32_t int32Max = std::numeric_limits<int32_t>::max();
-        const int32_t startFrame = std::min( (int32_t)frame.start, int32Max );
-        const int32_t endFrame = std::min( (int32_t)frame.end, int32Max );
+        const int32_t startFrame = std::min( (int32_t)_frame.getStart(), int32Max );
+        const int32_t endFrame = std::min( (int32_t)_frame.getEnd(), int32Max );
 
         // Ignore events with invalid frame range, observed when a remote data
         // source is not yet connected
@@ -127,8 +122,8 @@ struct AnimationController::Impl
         _ui.sldFrame->setMaximum( endFrame - 1 );
         _ui.endFrameSpinBox->setValue( endFrame - 1 );
 
-        _ui.sldFrame->setValue( frame.current );
-        _ui.currentFrameSpinBox->setValue( frame.current );
+        _ui.sldFrame->setValue( _frame.getCurrent( ));
+        _ui.currentFrameSpinBox->setValue( _frame.getCurrent( ));
 
         _ui.sldFrame->blockSignals( false );
         _ui.startFrameSpinBox->blockSignals( false );
@@ -141,9 +136,9 @@ struct AnimationController::Impl
             resetControls();
         }
 
-        setPlaying( frame.delta != 0 );
-        _ui.chbxFollow->setChecked( frame.delta == LATEST_FRAME );
-        _ui.chbxReverse->setChecked( frame.delta < 0 );
+        setPlaying( _frame.getDelta() != 0 );
+        _ui.chbxFollow->setChecked( _frame.getDelta() == LATEST_FRAME );
+        _ui.chbxReverse->setChecked( _frame.getDelta() < 0 );
 
         if( endFrame - startFrame <= 1 )
             _animationController->setDisabled( true );
@@ -151,15 +146,15 @@ struct AnimationController::Impl
             _animationController->setEnabled( true );
     }
 
-    void publishFrame() const
+    void publishFrame()
     {
         if( _connected )
         {
-            const ::zeroeq::hbp::data::Frame frame( _ui.sldFrame->minimum(),
-                                                    _ui.sldFrame->value(),
-                                                    _ui.sldFrame->maximum() + 1,
-                                                    getFrameDelta( ));
-            _controller.publish( ::zeroeq::hbp::serializeFrame( frame ));
+            _frame.setStart( _ui.sldFrame->minimum( ));
+            _frame.setCurrent( _ui.sldFrame->value( ));
+            _frame.setEnd( _ui.sldFrame->maximum() + 1 );
+            _frame.setDelta( getFrameDelta( ));
+            _controller.publish( _frame );
         }
     }
 
@@ -183,6 +178,7 @@ public:
     Controller& _controller;
     bool _connected;
     bool _onFirstFrame;
+    zerobuf::render::Frame _frame;
 };
 
 AnimationController::AnimationController( Controller& controller,
@@ -190,8 +186,6 @@ AnimationController::AnimationController( Controller& controller,
     : QWidget( parentWgt )
     , _impl( new AnimationController::Impl( this, controller ))
 {
-    qRegisterMetaType< ::zeroeq::hbp::data::Frame >( "::zeroeq::hbp::data::Frame" );
-
     connect( _impl->_ui.sldFrame, &QSlider::valueChanged,
              this, &AnimationController::_onFrameChanged );
     connect( _impl->_ui.sldFrame, &QSlider::rangeChanged,
@@ -249,9 +243,9 @@ void AnimationController::_setFollow( int on )
     _impl->publishFrame();
 }
 
-void AnimationController::_onNewFrameReceived( zeroeq::hbp::data::Frame frame )
+void AnimationController::_onNewFrameReceived()
 {
-    _impl->onNewFrameReceived( frame );
+    _impl->onNewFrameReceived();
 }
 
 }

@@ -31,6 +31,9 @@
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 
 #include <zerobuf/render/lookupTable1D.h>
+#include <zerobuf/render/frame.h>
+#include <zerobuf/render/imageJPEG.h>
+#include <zerobuf/render/exit.h>
 #include <zeroeq/zeroeq.h>
 #include <zeroeq/hbp/hbp.h>
 #include <lunchbox/clock.h>
@@ -56,6 +59,14 @@ public:
             return;
 
         _setupRequests();
+        _config.getImageJPEG().setRequestedFunction( [&]
+            { return _config.renderJPEG(); });
+        _frame.setRequestedFunction( [&]
+            { return publishFrame(); });
+        _frame.setUpdatedFunction( [&]
+            { return updateFrame(); });
+        _exit.setRequestedFunction( [&]
+            { return requestExit(); });
         _setupSubscriber();
         _setupHTTPServer( argc, argv );
     }
@@ -70,13 +81,12 @@ public:
         const auto& frameSettings = _getFrameData().getFrameSettings();
         const auto& params = _config.getApplicationParameters();
 
-        const ::zeroeq::Event& frame = ::zeroeq::hbp::serializeFrame(
-                                        ::zeroeq::hbp::data::Frame(
-                                            params.frames[0],
-                                            frameSettings.getFrameNumber(),
-                                            params.frames[1],
-                                            params.animation ));
-        return _publisher.publish( frame );
+        _frame.setStart( params.frames[0] );
+        _frame.setCurrent( frameSettings.getFrameNumber( ));
+        _frame.setEnd( params.frames[1] );
+        _frame.setDelta( params.animation );
+
+        return _publisher.publish( _frame );
     }
 
     bool publishCamera()
@@ -94,13 +104,6 @@ public:
         }
     }
 
-    bool publishImageJPEG( const uint8_t* data, const uint64_t size )
-    {
-        const ::zeroeq::hbp::data::ImageJPEG image( size, data );
-        const auto& event = ::zeroeq::hbp::serializeImageJPEG( image );
-        return _publisher.publish( event );
-    }
-
     bool onRequest( const ::zeroeq::Event& event )
     {
         const auto& eventType = ::zeroeq::vocabulary::deserializeRequest( event );
@@ -110,33 +113,25 @@ public:
         return i->second();
     }
 
-    void onFrame( const ::zeroeq::Event& event )
+    void updateFrame()
     {
-        const auto& frame = ::zeroeq::hbp::deserializeFrame( event );
-
         if( _config.getDataFrameCount() == 0 )
             return;
 
         auto& frameSettings = _config.getFrameData().getFrameSettings();
         auto& params = _config.getApplicationParameters();
 
-        if( frame.current == frameSettings.getFrameNumber() &&
-            frame.delta == params.animation &&
-            frame.start == params.frames.x() &&
-            frame.end == params.frames.y( ))
+        if( _frame.getCurrent() == frameSettings.getFrameNumber() &&
+            _frame.getDelta() == params.animation &&
+            _frame.getStart() == params.frames.x() &&
+            _frame.getEnd() == params.frames.y( ))
         {
             return;
         }
 
-        frameSettings.setFrameNumber( frame.current );
-        params.animation = frame.delta;
-        params.frames = { frame.start, frame.end };
-    }
-
-    bool requestImageJPEG()
-    {
-        _config.getFrameData().getFrameSettings().setGrabFrame( true );
-        return true;
+        frameSettings.setFrameNumber( _frame.getCurrent() );
+        params.animation = _frame.getDelta();
+        params.frames = { _frame.getStart(), _frame.getEnd() };
     }
 
     bool requestExit()
@@ -158,22 +153,25 @@ private:
     typedef std::function< bool() > RequestFunc;
     typedef std::map< ::zeroeq::uint128_t, RequestFunc > RequestFuncs;
     RequestFuncs _requests;
-#ifdef ZEQ_USE_HTTPXX
+#ifdef ZEROEQ_USE_HTTPXX
     std::unique_ptr< ::zeroeq::http::Server > _httpServer;
 #endif
+    ::zerobuf::render::Frame _frame;
+    ::zerobuf::render::Exit _exit;
     Config& _config;
 
     void _setupRequests()
     {
-        _requests[::zeroeq::hbp::EVENT_FRAME] = [&]{ return publishFrame(); };
-        _requests[::zeroeq::hbp::EVENT_IMAGEJPEG] = [&]
-            { return requestImageJPEG(); };
-        _requests[::zeroeq::vocabulary::EVENT_EXIT] = [&]{ return requestExit(); };
-        _requests[ VolumeRendererParameters::TYPE_IDENTIFIER() ] = [&]
+        _requests[ _frame.getTypeIdentifier() ] = [&]
+            { return publishFrame(); };
+        _requests[ _config.getImageJPEG().getTypeIdentifier( )] = [&]
+            { return _config.renderJPEG(); };
+        _requests[ _exit.getTypeIdentifier() ] = [&]{ return requestExit(); };
+        _requests[ _getFrameData().getVRParameters().getTypeIdentifier( )] = [&]
             { return _publisher.publish( _getFrameData().getVRParameters( )); };
-        _requests[ ::zerobuf::render::Camera::TYPE_IDENTIFIER( )] = [&]
+        _requests[ _getFrameData().getCameraSettings().getTypeIdentifier( )] = [&]
             { return _publisher.publish( _getFrameData().getCameraSettings());};
-        _requests[ ::zerobuf::render::LookupTable1D::TYPE_IDENTIFIER( )] = [&]
+        _requests[ _getRenderSettings().getTransferFunction().getTypeIdentifier( )] = [&]
             {
                 return _publisher.publish(
                     _getRenderSettings().getTransferFunction( ));
@@ -182,14 +180,15 @@ private:
 
     void _setupHTTPServer( const int argc LB_UNUSED, char** argv LB_UNUSED )
     {
-#ifdef ZEQ_USE_HTTPXX
+#ifdef ZEROEQ_USE_HTTPXX
         _httpServer = ::zeroeq::http::Server::parse( argc, argv, _subscriber );
+
         if( !_httpServer )
             return;
 
-        // subscriber->registerHandler( ::zeroeq::hbp::EVENT_FRAME,
-        //                                 std::bind( &Impl::onFrame, this,
-        //                                            std::placeholders::_1 ));
+        _httpServer->add( _frame );
+        _httpServer->subscribe( _exit );
+        _httpServer->register_( _config.getImageJPEG( ));
         _httpServer->add( _getFrameData().getCameraSettings( ));
         _httpServer->add( _getRenderSettings().getTransferFunction( ));
 #endif
@@ -197,12 +196,10 @@ private:
 
     void _setupSubscriber()
     {
-        _subscriber.registerHandler( ::zeroeq::hbp::EVENT_FRAME,
-                                     [ this ]( const ::zeroeq::Event& event )
-                                         { onFrame( event ); } );
         _subscriber.registerHandler( ::zeroeq::vocabulary::EVENT_REQUEST,
                                      [ this ]( const ::zeroeq::Event& event )
                                          { onRequest( event ); } );
+        _subscriber.subscribe( _frame );
         _subscriber.subscribe( _getFrameData().getVRParameters( ));
         _subscriber.subscribe( _getFrameData().getCameraSettings( ));
         _subscriber.subscribe( _getRenderSettings().getTransferFunction( ));
@@ -223,11 +220,6 @@ Communicator::Communicator( Config& config, const int argc, char* argv[] )
 
 Communicator::~Communicator()
 {
-}
-
-void Communicator::publishImageJPEG( const uint8_t* data, const uint64_t size )
-{
-    _impl->publishImageJPEG( data, size );
 }
 
 void Communicator::publishHeartbeat()

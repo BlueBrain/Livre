@@ -118,8 +118,14 @@ public:
      */
     void switchLayout( const int32_t increment );
 
-    void handleEvents() final;
     bool handleEvent( eq::EventICommand command ) final;
+
+    void handleNetworkEvents();
+
+    /** @return The JPEG image. */
+    ::zerobuf::render::ImageJPEG& getImageJPEG() const;
+
+    bool renderJPEG();
 
 private:
     LIVREEQ_API virtual ~Config();
