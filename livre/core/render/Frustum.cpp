@@ -28,13 +28,12 @@ struct Frustum::Impl
           const Matrix4f& projectionMatrix )
         : _frustum( frustum )
         , _mvMatrix( modelViewMatrix )
+        , _invMVMatrix( _mvMatrix.inverse( ))
         , _projMatrix( projectionMatrix )
+        , _invProjMatrix( _projMatrix.inverse( ))
         , _culler( projectionMatrix * modelViewMatrix )
     {
-        _projMatrix.inverse( _invProjMatrix );
         computeLimitsFromProjectionMatrix();
-
-        _mvMatrix.inverse( _invMVMatrix );
         _eye = _invMVMatrix.getTranslation();
 
         const Vector4f eyeDir = _invMVMatrix.getColumn( 2 );

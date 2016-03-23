@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2006-2015, Stefan Eilemann <eile@equalizergraphics.com>
+/* Copyright (c) 2006-2016, Stefan Eilemann <eile@equalizergraphics.com>
  *                          Maxim Makhinya <maxmah@gmail.com>
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
@@ -533,9 +533,8 @@ public:
         LBASSERT( !_channel->useOrtho( ));
 
         // calculate modelview inversed+transposed matrix
-        Matrix4f modelviewIM;
-        modelView.inverse( modelviewIM );
-        const Matrix3f modelviewITM = vmml::transpose( Matrix3f( modelviewIM ));
+        const Matrix4f& modelviewIM = modelView.inverse();
+        const Matrix3f& modelviewITM = vmml::transpose( Matrix3f( modelviewIM ));
 
         Vector3f norm = modelviewITM * Vector3f( 0.0f, 0.0f, 1.0f );
         norm.normalize();

@@ -32,8 +32,7 @@ void getRotationAndEyePositionFromModelView( const Matrix4f& modelViewMatrix,
                                                    Matrix3f& rotationMatrix,
                                                    Vector3f& eye )
 {
-    Matrix4f iMv;
-    modelViewMatrix.inverse( iMv );
+    const Matrix4f& iMv = modelViewMatrix.inverse();
     rotationMatrix = iMv.getSubMatrix< 3, 3 >( 0, 0 );
     eye = iMv.getTranslation();
 }
