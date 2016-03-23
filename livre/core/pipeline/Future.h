@@ -29,16 +29,12 @@ namespace livre
 /**
  * The Future class is similar to the std::future classes in functionality and it has additional
  * information for the name and data type. It provides thread safe methods to query and get the
- * data. Futures are retrieved from the @see Promise class.
+ * data. Futures are retrieved from the  Promise class.
  */
 class Future
 {
 public:
 
-    /**
-     * @param data holds the thread safe data (query/retrieve).
-     */
-    Future( const AsyncData& data );
     ~Future();
 
     /**
@@ -47,13 +43,13 @@ public:
     std::string getName() const;
 
     /**
-     * Gets a shallow copy of the future with the given name
+     * Constructs a shallow copy of the future with the given name
      */
-    Future rename( const std::string& name ) const;
+    Future( const Future& future, const std::string& name );
 
     /**
-     * Gets the value with the given type T. If output is not set
-     * this function will block.
+     * Gets the value with the given type T. Blocks until data is
+     * available.
      * @return the value.
      * @throw std::runtime_error when the data is not exact
      * type T
@@ -73,26 +69,24 @@ public:
 
     /**
      * @param future is the future to be checked with
-     * @return true if both futures are same
+     * @return true if both futures are belonging to same promise
      */
-    bool operator==( const Future& future ) const { return _impl == future._impl; }
-
-    /**
-     * @param future is the future to be checked with
-     * @return true if implementation address is smaller than the other implementation address
-     */
-    bool operator<( const Future& future ) const { return _impl.get() < future._impl.get(); }
+    bool operator==( const Future& future ) const;
 
 private:
 
-    friend bool livre::waitForAny( const Futures& future );
+    friend class Promise;
+    Future( const AsyncData& data );
+
+    friend void waitForAny( const Futures& future );
+    friend bool operator<( const Future& future1, const Future& future2 );
 
     const AsyncData& _getAsyncData() const;
 
     template< class T >
     const T& _get() const
     {
-        const auto& dataPtr =
+        const auto dataPtr =
                 std::static_pointer_cast< const PortDataT< T >>( _getPtr( getType< T >( )));
 
         return dataPtr->data;
@@ -103,6 +97,13 @@ private:
     struct Impl;
     std::shared_ptr<Impl> _impl;
 };
+
+/**
+ * Waits for any futures to be ready. If there are already ready futures, the function returns
+ * immediately.
+ * @param futures that is waited to be ready
+ */
+void waitForAny( const Futures& futures );
 
 }
 

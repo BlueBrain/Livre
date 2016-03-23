@@ -27,7 +27,7 @@ namespace livre
 
 /**
  * Filters are similar to functions ( immutable ). Their inputs and
- * outputs are provided with given name and data types. In execution time
+ * outputs are provided with given name and data types. At execution time
  * values can be queried from the map of futures ( name - future pairs )
  * and can be set through the map of promises ( name - promise pairs )
  */

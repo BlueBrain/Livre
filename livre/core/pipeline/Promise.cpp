@@ -53,7 +53,12 @@ struct Promise::Impl
 
     void flush()
     {
-        _data.set( PortDataPtr( ));
+        try
+        {
+            _data.set( PortDataPtr( ));
+        }
+        catch( const std::runtime_error& )
+        {}
     }
 
     AsyncData _data;
@@ -92,7 +97,7 @@ void Promise::reset()
     _impl->reset();
 }
 
-void Promise::_set( const PortDataPtr& data )
+void Promise::_set( PortDataPtr data )
 {
     _impl->set( data );
 }

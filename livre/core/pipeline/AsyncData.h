@@ -34,8 +34,7 @@ class AsyncData
 public:
 
     /**
-     * When connection is instantiated the data is not
-     * set yet, so any get() call will block the retrieval
+     * Constructor
      * @param dataInfo name, data type pair
      */
     explicit AsyncData( const DataInfo& dataInfo );
@@ -52,17 +51,19 @@ public:
     std::string getName() const;
 
     /**
+     * Sets the data.
      * @param data sets the data
-     * @throws std::runtime_error if data types does not match between data
+     * @throw std::runtime_error if data types does not match between data
      * and current async data
+     * @throw std::runtime_error if data is set twice.
      */
     void set( PortDataPtr data );
 
     /**
+     * Gets the data. If data is not set it will block.
      * @param dataType is the requested data type.
-     * @return the data. If data is not set it will block.
-     * @throws std::runtime_error if data types does not match between dataType
-     * and current async data type
+     * @return the data.
+     * @throw std::runtime_error if getDataType() != dataType
      */
     PortDataPtr get( const std::type_index& dataType ) const;
 
@@ -77,13 +78,14 @@ public:
     void wait() const;
 
     /**
-     * Resets the promise/future
+     * Resets the promise/future. This function should not be called when
+     * threads are blocked on wait()
      */
     void reset();
 
 private:
 
-    friend bool waitForAny( const Futures& futures );
+    friend void waitForAny( const Futures& futures );
 
     AsyncData( const AsyncData& ) = delete;
     AsyncData& operator=( const AsyncData& ) = delete;
@@ -91,14 +93,6 @@ private:
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };
-
-/**
- * Waits for any futures to be ready. If there are already ready futures, the function returns
- * immediately.
- * @param futures that is waited to be ready
- * @return true if there are still not ready futures, false if all futures are ready.
- */
-bool waitForAny( const Futures& futures );
 
 }
 

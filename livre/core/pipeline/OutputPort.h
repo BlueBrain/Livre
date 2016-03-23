@@ -26,7 +26,7 @@ namespace livre
 {
 
 /**
- * Output connection for the @see PipeFilter.
+ * Output connection for the  PipeFilter.
  */
 class OutputPort
 {
@@ -39,7 +39,6 @@ public:
     OutputPort( const DataInfo& dataInfo );
     ~OutputPort();
 
-    OutputPort( OutputPort&& port );
     /**
      * @return name of the port
      */

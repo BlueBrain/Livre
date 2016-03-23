@@ -55,15 +55,11 @@ struct PortDataT final : public PortData
         , data( data_ )
     {}
 
-    explicit PortDataT( const T&& data_ )
-        : PortData( getType< T >( ))
-        , data( std::move( data_ ))
-    {}
-
     ~PortDataT() {}
     const T data;
 
     PortDataT( const PortDataT< T >& ) = delete;
+    PortDataT( PortDataT< T >&& ) = delete;
     PortDataT< T >& operator=( const PortDataT< T >& ) = delete;
 };
 

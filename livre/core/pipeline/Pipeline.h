@@ -28,7 +28,8 @@ namespace livre
 {
 
 /**
- * Implements the executable graph.
+ * Implements the executable graph. Accesing the copies of the object from
+ * other threads for non-const functions is not thread safe.
  */
 class Pipeline : public Executable
 {
@@ -61,7 +62,7 @@ public:
      * @param wait If true, on scheduled execution, pipeline
      * can wait on the post conditions of the pipefilter.
      * @return returns the generated pipe filter.
-     * @throws std::runtime_error if an executable with same name is present
+     * @throw std::runtime_error if an executable with same name is present
      */
 
     template< class FilterT, bool wait = true, class... Args >
@@ -76,7 +77,7 @@ public:
     /**
      * @param name of the executable
      * @return the executable
-     * @throws std::runtime_error if a pipe filter or pipeline does not exist
+     * @throw std::runtime_error if a pipe filter or pipeline does not exist
      */
     const Executable& getExecutable( const std::string& name ) const;
 

@@ -66,10 +66,6 @@ OutputPort::OutputPort( const DataInfo& dataInfo )
 OutputPort::~OutputPort()
 {}
 
-OutputPort::OutputPort( OutputPort&& port )
-    : _impl( std::move( port._impl ))
-{}
-
 std::string OutputPort::getName() const
 {
     return _impl->getName();

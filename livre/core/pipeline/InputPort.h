@@ -49,12 +49,12 @@ public:
     std::type_index getDataType() const;
 
     /**
-     * @return the number of the inputs to the port
+     * @return the number of the connected outputs to the port
      */
     size_t getSize() const;
 
     /**
-     * @return Return all the input futures that port has.
+     * @return Return all the futures this port has.
      */
     const Futures& getFutures() const;
 

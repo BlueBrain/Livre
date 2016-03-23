@@ -27,8 +27,10 @@ namespace livre
 {
 
 /**
- * Responsible for execution of the @see Filter objects by constructing
+ * Responsible for execution of the Filter objects by constructing
  * the communication layer ( output ports, input ports ) around the filter.
+ * Accesing the copies of the object from other threads for non-const functions
+ * is not thread safe.
  */
 class PipeFilter : public Executable
 {
@@ -47,7 +49,7 @@ public:
      * @param srcPortName is the source pipe filter.
      * @param dst is the destination pipe filter.
      * @param dstPortName connection port name.
-     * @throws std::runtime_error if connection can not be established
+     * @throw std::runtime_error if connection can not be established
      */
     void connect( const std::string& srcPortName,
                   PipeFilter& dst,
@@ -57,7 +59,7 @@ public:
      * @return promise for the given input port. If there is no connection to the
      * input port, a new promise is created for the port and no further connections are allowed,
      * if there is a connection getting a promise is not allowed.
-     * @throws std::runtime_error if there is already a connection or if there is
+     * @throw std::runtime_error if there is already a connection or if there is
      * no inputport or it is a noification port.
      */
     Promise getPromise( const std::string& portName );
@@ -90,7 +92,7 @@ protected:
      * @param filter the filter object.
      */
     PipeFilter( const std::string& name,
-                FilterPtr&& filter );
+                FilterPtr filter );
 
 private:
 

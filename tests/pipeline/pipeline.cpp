@@ -59,7 +59,7 @@ class TestFilter : public livre::Filter
 {
     void execute( const livre::FutureMap& input, livre::PromiseMap& output ) const final
     {
-        const livre::ResultsT< InputData >& results = input.get< InputData >( "TestInputData" );
+        const std::vector< InputData >& results = input.get< InputData >( "TestInputData" );
         OutputData outputData;
 
         for( const auto& data: results )
@@ -92,7 +92,7 @@ class ConvertFilter : public livre::Filter
 {
     void execute( const livre::FutureMap& input, livre::PromiseMap& output ) const final
     {
-        const livre::ResultsT< OutputData >& results = input.get< OutputData >( "ConvertInputData" );
+        const std::vector< OutputData >& results = input.get< OutputData >( "ConvertInputData" );
 
         InputData inputData;
         for( const auto& data: results )

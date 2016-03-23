@@ -18,7 +18,6 @@
  */
 
 #include <livre/core/pipeline/Executable.h>
-#include <livre/core/pipeline/Executor.h>
 
 namespace livre
 {

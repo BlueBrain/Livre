@@ -73,9 +73,10 @@ std::string Future::getName() const
     return _impl->getName();
 }
 
-Future Future::rename( const std::string& name ) const
+Future::Future( const Future& future, const std::string& name )
+    : _impl( future._impl )
 {
-    return _impl->rename( name );
+    _impl->_name = name;
 }
 
 void Future::wait() const
@@ -86,6 +87,11 @@ void Future::wait() const
 bool Future::isReady() const
 {
     return _impl->isReady();
+}
+
+bool Future::operator==( const Future& future ) const
+{
+    return &_impl->_data == &future._impl->_data;
 }
 
 const AsyncData& Future::_getAsyncData() const

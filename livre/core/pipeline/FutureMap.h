@@ -27,7 +27,17 @@ namespace livre
 {
 
 /**
- * FutureMap is a wrapper class to query multiple futures with same names for data and data state.
+ * FutureMap is a wrapper class to query the map of ( name, future )
+ * futures with for data and state. In the map there can be multiple futures
+ * with the same name. i.e. if there are multiple futures with the same name
+ * "x", the get() function will block until all the futures with name "x" are
+ * ready and get() will return a vector of results.
+ *
+ * Filters has named ports to communicate with other filters and those ports
+ * are communicated through promise/future couples. The futures are named
+ * with the port names and users can access those values using the port
+ * names in the futures. This class provides convenient functions for querying
+ * futures with port names.
  */
 class FutureMap
 {
@@ -41,18 +51,17 @@ public:
     ~FutureMap();
 
     /**
-     * Gets the copy of value(s) with the given type T. If input
-     * is connected and values are not provided this function will
-     * block.
+     * Gets a copy of value(s) with the given type T. Until all
+     * futures with a given name are ready, this function will block.
      * @param name of the future.
      * @return the values of the futures.
-     * @throw std::runtime_error when the port data is not exact
+     * @throw std::runtime_error when the data is not exact
      * type T
      */
     template< class T >
-    ResultsT< T > get( const std::string& name ) const
+    std::vector< T > get( const std::string& name ) const
     {
-        ResultsT< T > results;
+        std::vector< T > results;
         for( const auto& future: getFutures( name ))
             results.push_back( future.get< T >( ));
 
@@ -63,13 +72,13 @@ public:
      * Gets the copy of ready value(s) with the given type T.
      * @param name of the future.
      * @return the values of the futures.
-     * @throw std::runtime_error when the port data is not exact
+     * @throw std::runtime_error when the data is not exact
      * type T
      */
     template< class T >
-    ResultsT< T > getReady( const std::string& name ) const
+    std::vector< T > getReady( const std::string& name ) const
     {
-        ResultsT< T > results;
+        std::vector< T > results;
         for( const auto& future: getFutures( name ))
         {
             if( !future.isReady())
@@ -81,35 +90,62 @@ public:
     }
 
     /**
-     * @param name of the future. If name is ALL_FUTURES, all futures are marked to return.
-     * @return the futures associated with the name.
+     * @param name of the future.
+     * @return the futures with the given name
      */
-    Futures getFutures( const std::string& name = ALL_FUTURES ) const;
+    Futures getFutures( const std::string& name ) const;
 
     /**
-     * Queries if port is ready
-     * @param name of the future. If name is ALL_FUTURES, all futures are queried
-     * @return true if all port inputs are ready.
+     * @return the futures
+     */
+    Futures getFutures() const;
+
+    /**
+     * Queries if futures are ready with a given name
+     * @param name of the future.
+     * @return true if all futures with the given name are ready.
      * @throw std::runtime_error when there is no future associated with the
      * given name
      */
-    bool isReady( const std::string& name = ALL_FUTURES ) const;
+    bool isReady( const std::string& name ) const;
 
     /**
-     * Waits all futures associated with port name
-     * @param name of the future. If name is ALL_FUTURES, all futures are waited.
+     * Queries if all futures are ready
+     * @return true if all futures are ready.
      * @throw std::runtime_error when there is no future associated with the
      * given name
      */
-    void wait( const std::string& name = ALL_FUTURES ) const;
+    bool isReady() const;
 
     /**
-     * Waits all futures associated with port name.
-     * @param name of the future. If name is ALL_FUTURES, all futures are waited.
+     * Waits all futures associated with a given name
+     * @param name of the future.
      * @throw std::runtime_error when there is no future associated with the
      * given name
      */
-    bool waitForAny( const std::string& name = ALL_FUTURES ) const;
+    void wait( const std::string& name ) const;
+
+    /**
+     * Waits all futures
+     * @throw std::runtime_error when there is no future associated with the
+     * given name
+     */
+    void wait() const;
+
+    /**
+     * Waits all futures associated with a given name.
+     * @param name of the future.
+     * @throw std::runtime_error when there is no future associated with the
+     * given name
+     */
+    void waitForAny( const std::string& name ) const;
+
+    /**
+     * Waits all futures.
+     * @throw std::runtime_error when there is no future associated with the
+     * given name
+     */
+    void waitForAny() const;
 
 private:
 
@@ -118,7 +154,9 @@ private:
 };
 
 /**
- * UniqueFutureMap is a wrapper class to query futures with unique names for data and data state.
+ * UniqueFutureMap is similar to the  FutureMap but for each name there is
+ * a unique future. So that, the value can be retrieved directly for the given
+ * name.
  */
 class UniqueFutureMap
 {
@@ -126,7 +164,7 @@ public:
 
     /**
      * @param futures the list of futures.
-     * @throws std::runtime_error when futures are not unique in names
+     * @throw std::runtime_error when futures are not unique in names
      */
     explicit UniqueFutureMap( const Futures& futures );
     ~UniqueFutureMap();
@@ -137,7 +175,7 @@ public:
      * block.
      * @param name of the future.
      * @return the value for the future.
-     * @throw std::runtime_error when the port data is not exact
+     * @throw std::runtime_error when the data is not exact
      * type T
      */
     template< class T >
@@ -149,7 +187,6 @@ public:
     /**
      * @param name of the future
      * @return the future associated with the name.
-     * @throw std::runtime_error when the name is ALL_FUTURES
      */
     Future getFuture( const std::string& name ) const;
 
@@ -159,27 +196,41 @@ public:
     Futures getFutures() const;
 
     /**
-     * Queries if port is ready
+     * Queries if future is ready for a given name
      * @param name of the future
+     * @return true if all futures with the given name are ready.
+     * @throw std::runtime_error when there is no future associated with the
+     * given name
+     */
+    bool isReady( const std::string& name ) const;
+
+    /**
+     * Queries if future is ready for a given name
      * @return true if all futures are ready.
      * @throw std::runtime_error when there is no future associated with the
      * given name
      */
-    bool isReady( const std::string& name = ALL_FUTURES ) const;
+    bool isReady() const;
 
     /**
-     * Waits for the future associated with port name
-     * @param name is the port name assoicated with futures.
+     * Waits for the future associated with a given name
+     * @param name is the name assoicated with futures.
      * @throw std::runtime_error when there is no future associated with the
      * given name
      */
-    void wait( const std::string& name = ALL_FUTURES ) const;
+    void wait( const std::string& name ) const;
+
+    /**
+     * Waits for all the futures
+     * @throw std::runtime_error when there is no future associated with the
+     * given name
+     */
+    void wait() const;
 
     /**
      * Waits for any future to be ready.
-     * @return true if there are still futures which are not ready.
      */
-    bool waitForAny() const;
+    void waitForAny() const;
 
 private:
 

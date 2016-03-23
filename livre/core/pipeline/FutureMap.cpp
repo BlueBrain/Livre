@@ -24,8 +24,14 @@
 namespace livre
 {
 
+namespace
+{
+
+const std::string ALL_FUTURES = "ALL_FUTURES";
+
+}
+
 typedef std::multimap< std::string, Future > NameFutureMap;
-typedef std::pair< std::string, Future > NameFuturePair;
 
 struct FutureMapImpl
 {
@@ -56,13 +62,10 @@ public:
             throwError( name );
 
         Futures futures;
-        NameFutureMap::const_iterator it = _futureMap.find( name );
+        const auto& itPair = _futureMap.equal_range( name );
 
-        while( it != _futureMap.end( ))
-        {
+        for( auto it = itPair.first; it != itPair.second; ++it )
             futures.push_back( it->second );
-            ++it;
-        }
 
         return futures;
     }
@@ -83,9 +86,9 @@ public:
             future.wait();
     }
 
-    bool waitForAny( const std::string& name ) const
+    void waitForAny( const std::string& name ) const
     {
-        return livre::waitForAny( getFutures( name ));
+        livre::waitForAny( getFutures( name ));
     }
 
     void addFuture( const std::string& name, const Future& future )
@@ -122,9 +125,6 @@ Futures UniqueFutureMap::getFutures() const
 
 Future UniqueFutureMap::getFuture( const std::string& name ) const
 {
-    if( name == ALL_FUTURES )
-        LBTHROW( std::runtime_error( "All futures cannot be retrieved with this function"))
-
     return _impl->getFutures( name ).front();
 }
 
@@ -138,9 +138,9 @@ void UniqueFutureMap::wait( const std::string& name ) const
     _impl->wait( name );
 }
 
-bool UniqueFutureMap::waitForAny() const
+void UniqueFutureMap::waitForAny() const
 {
-    return _impl->waitForAny( ALL_FUTURES );
+    _impl->waitForAny( ALL_FUTURES );
 }
 
 UniqueFutureMap::~UniqueFutureMap()
@@ -167,9 +167,19 @@ Futures FutureMap::getFutures( const std::string& name ) const
     return _impl->getFutures( name );
 }
 
+Futures FutureMap::getFutures() const
+{
+    return _impl->getFutures( ALL_FUTURES );
+}
+
 bool FutureMap::isReady( const std::string& name ) const
 {
     return _impl->isReady( name );
+}
+
+bool FutureMap::isReady() const
+{
+    return _impl->isReady( ALL_FUTURES );
 }
 
 void FutureMap::wait( const std::string& name ) const
@@ -177,9 +187,19 @@ void FutureMap::wait( const std::string& name ) const
     _impl->wait( name );
 }
 
-bool FutureMap::waitForAny( const std::string& name ) const
+void FutureMap::wait() const
 {
-    return _impl->waitForAny( name );
+    _impl->wait( ALL_FUTURES );
+}
+
+void FutureMap::waitForAny( const std::string& name ) const
+{
+    _impl->waitForAny( name );
+}
+
+void FutureMap::waitForAny() const
+{
+    _impl->waitForAny( ALL_FUTURES );
 }
 
 FutureMap::~FutureMap()

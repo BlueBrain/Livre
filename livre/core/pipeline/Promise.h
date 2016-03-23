@@ -65,18 +65,6 @@ public:
     }
 
     /**
-     * Sets the port with the value.
-     * @param value to be set
-     * @throw std::runtime_error when the port data is not exact
-     * type T or there is no such port name.
-     */
-    template< class T >
-    void set( const T&& value )
-    {
-        _set( std::make_shared< PortDataT< T >>( value ));
-    }
-
-    /**
      * Sets the promise with empty data if it is not set already
      */
     void flush();
@@ -95,7 +83,7 @@ public:
 
 private:
 
-    void _set( const PortDataPtr& data );
+    void _set( PortDataPtr data );
 
     struct Impl;
     std::shared_ptr<Impl> _impl;

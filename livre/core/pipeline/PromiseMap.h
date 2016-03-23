@@ -27,7 +27,8 @@ namespace livre
 {
 
 /**
- * Wrapper class for applying operations on the @Promise objects.
+ * Wrapper class for applying operations on map of @Promise objects. i.e a promise with
+ * the name can be set.
  */
 class PromiseMap
 {
@@ -57,25 +58,17 @@ public:
     }
 
     /**
-     * Sets the port with the value.
-     * @param name of the promise
-     * @param value to be set
-     * @throw std::runtime_error when the port data is not exact
-     * type T or there is no such port name.
+     * Writes empty values to promises which are not set already.
+     * @param name of the promise.
+     * @throw std::runtime_error there is no such port name.
      */
-    template< class T >
-    void set( const std::string& name, const T&& value ) const
-    {
-        getPromise( name ).set( value );
-    }
+    void flush( const std::string& name ) const;
 
     /**
      * Writes empty values to promises which are not set already.
-     * @param name of the promise. If ALL_PROMISES is given,
-     * all promises will be flushed
      * @throw std::runtime_error there is no such port name.
      */
-    void flush( const std::string& name = ALL_PROMISES ) const;
+    void flush() const;
 
 private:
 

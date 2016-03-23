@@ -36,8 +36,8 @@ struct PipeFilter::Impl
     typedef std::map< std::string, InputPort > InputPortMap;
 
     Impl( PipeFilter& pipeFilter,
-                    const std::string& name,
-                    FilterPtr&& filter )
+          const std::string& name,
+          FilterPtr filter )
         : _pipeFilter( pipeFilter )
         , _name( name )
         , _filter( std::move( filter ))
@@ -80,7 +80,7 @@ struct PipeFilter::Impl
         {
             const Futures& futures = pair.second.getFutures();
             for( const auto& future: futures )
-                inputFutures.push_back( future.rename( pair.second.getName( )));
+                inputFutures.emplace_back( future, pair.second.getName( ));
         }
 
         const FutureMap futures( inputFutures );
@@ -188,7 +188,7 @@ struct PipeFilter::Impl
 };
 
 PipeFilter::PipeFilter( const std::string& name,
-                        FilterPtr&& filter )
+                        FilterPtr filter )
     : _impl( new Impl( *this, name, std::move( filter )))
 {}
 

@@ -41,7 +41,12 @@ struct AsyncData::Impl
 
     ~Impl()
     {
-        set( PortDataPtr( ));
+        try
+        {
+            set( PortDataPtr( ));
+        }
+        catch( const std::runtime_error& )
+        {}
     }
 
     PortDataPtr get( const std::type_index& dataType ) const
@@ -70,7 +75,9 @@ struct AsyncData::Impl
             _promise.set_value( data );
         }
         catch( const boost::promise_already_satisfied& )
-        {}
+        {
+            LBTHROW( std::runtime_error( "Data only can be set once"));
+        }
     }
 
     bool isReady() const
@@ -137,10 +144,10 @@ void AsyncData::reset()
     _impl->reset();
 }
 
-bool waitForAny( const Futures& futures )
+void waitForAny( const Futures& futures )
 {
     if( futures.empty( ))
-        return false;
+        return;
 
     ConstPortDataFutures boostFutures;
     boostFutures.reserve( futures.size( ));
@@ -148,7 +155,6 @@ bool waitForAny( const Futures& futures )
         boostFutures.push_back( future._getAsyncData()._impl->_future );
 
     boost::wait_for_any( boostFutures.begin(), boostFutures.end( ));
-    return true;
 }
 
 }

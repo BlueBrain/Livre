@@ -26,10 +26,11 @@ namespace livre
 {
 
 /**
- * Is the base class for implementing different scheduling
- * algorithms for @see Executable objects. i.e. The IO or CPU intensive
- * algorithms can implement their own scheduling algorithms. The
- * push/pull scheduling algorithms can be implemented.
+ * Is base class for implementing different scheduling
+ * algorithms for Executable objects. i.e. The IO or
+ * CPU intensive algorithms can implement their own scheduling
+ * algorithms. The push/pull scheduling algorithms can also
+ * be implemented.
  */
 class Executor
 {

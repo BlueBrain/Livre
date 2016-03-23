@@ -23,6 +23,13 @@
 namespace livre
 {
 
+namespace
+{
+
+const std::string ALL_PROMISES = "ALL_PROMISES";
+
+}
+
 typedef std::map< std::string, Promise > NamePromiseMap;
 typedef NamePromiseMap::value_type NamePromisePair;
 
@@ -80,6 +87,11 @@ PromiseMap::~PromiseMap()
 void PromiseMap::flush( const std::string& name /* = ALL_PROMISES */ ) const
 {
     _impl->flush( name );
+}
+
+void PromiseMap::flush() const
+{
+     _impl->flush( ALL_PROMISES );
 }
 
 Promise PromiseMap::getPromise( const std::string& name ) const

@@ -42,6 +42,11 @@
 namespace livre
 {
 
+bool operator<( const Future& future1, const Future& future2 )
+{
+    return future1._impl.get() < future2._impl.get();
+}
+
 struct SimpleExecutor::Impl
 {
 

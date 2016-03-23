@@ -59,16 +59,13 @@ struct InputPort::Impl
 
     bool disconnect( const OutputPort& port )
     {
-        Futures::iterator it = _futures.begin();
-        while( it != _futures.end())
-        {
-            if( *it == port.getPromise().getFuture( ))
-            {
-                _futures.erase( it );
-                return true;
-            }
-            ++it;
-        }
+        const auto& it = std::find( _futures.begin(),
+                                    _futures.end(),
+                                    port.getPromise().getFuture( ));
+
+        if( it != _futures.end( ))
+            _futures.erase( it );
+
         return false;
     }
 
