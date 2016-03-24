@@ -36,6 +36,8 @@ class Pipeline : public Executable
 
 public:
 
+    typedef std::unique_ptr< Executable > ExecutablePtr;
+
     Pipeline();
     ~Pipeline();
 
@@ -50,7 +52,7 @@ public:
               bool wait = true )
     {
         _add( name,
-              new Pipeline( pipeline ),
+              ExecutablePtr( new Pipeline( pipeline )),
               wait );
     }
 
@@ -69,9 +71,11 @@ public:
     PipeFilter add( const std::string& name,
                     Args&&... args )
     {
-        PipeFilter* pipeFilter = new PipeFilterT< FilterT >( name, args... );
-        _add( name, pipeFilter, wait );
-        return *pipeFilter;
+        PipeFilterT< FilterT > pipeFilter( name, args... );
+        _add( name,
+              ExecutablePtr( new PipeFilter( pipeFilter )),
+              wait );
+        return pipeFilter;
     }
 
     /**
@@ -104,8 +108,8 @@ public:
 private:
 
     void _add( const std::string& name,
-               Executable* exec,
-               bool wait );   
+               ExecutablePtr exec,
+               bool wait );
 private:
 
     void _schedule( Executor& executor ) final;

@@ -53,8 +53,8 @@ public:
         if( name == ALL_FUTURES )
         {
             Futures futures;
-            for( const auto& pair: _futureMap )
-                futures.push_back( pair.second );
+            for( const auto& nameFuture: _futureMap )
+                futures.push_back( nameFuture.second );
             return futures;
         }
 

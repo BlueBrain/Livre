@@ -58,9 +58,9 @@ struct PromiseMap::Impl
         if( name != ALL_PROMISES && !hasPromise( name ))
             throwError( name );
 
-        for( const NamePromisePair& pair: _promiseMap )
+        for( const NamePromisePair& namePromise: _promiseMap )
         {
-            Promise promise = pair.second;
+            Promise promise = namePromise.second;
             if( name == ALL_PROMISES || promise.getName() == name )
                 promise.flush();
         }
@@ -84,7 +84,7 @@ PromiseMap::PromiseMap( const Promises& promises )
 PromiseMap::~PromiseMap()
 {}
 
-void PromiseMap::flush( const std::string& name /* = ALL_PROMISES */ ) const
+void PromiseMap::flush( const std::string& name ) const
 {
     _impl->flush( name );
 }

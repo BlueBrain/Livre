@@ -18,6 +18,7 @@
  */
 
 #include <livre/core/pipeline/Workers.h>
+#include <livre/core/pipeline/Executable.h>
 #include <livre/core/render/GLContext.h>
 
 #include <lunchbox/mtQueue.h>

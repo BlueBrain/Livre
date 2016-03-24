@@ -21,7 +21,6 @@
 #define _Workers_h_
 
 #include <livre/core/types.h>
-#include <livre/core/pipeline/Pipeline.h>
 
 namespace livre
 {

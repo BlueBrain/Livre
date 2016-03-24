@@ -76,11 +76,11 @@ struct PipeFilter::Impl
     void execute()
     {
         Futures inputFutures;
-        for( const auto& pair: _inputMap )
+        for( const auto& namePort: _inputMap )
         {
-            const Futures& futures = pair.second.getFutures();
+            const Futures& futures = namePort.second.getFutures();
             for( const auto& future: futures )
-                inputFutures.emplace_back( future, pair.second.getName( ));
+                inputFutures.emplace_back( future, namePort.second.getName( ));
         }
 
         const FutureMap futures( inputFutures );
@@ -100,29 +100,28 @@ struct PipeFilter::Impl
 
     Promise getInputPromise( const std::string& portName )
     {
-      if( !hasInputPort( portName ))
+        if( !hasInputPort( portName ))
             throwPortError( portName );
 
-        if( _manuallySetPortsMap.count( portName ) > 0 )
-            return _manuallySetPortsMap.find( portName )->second.getPromise();
+        const auto& itPromise = _manuallySetPortsMap.find( portName );
+        if( itPromise != _manuallySetPortsMap.end( ))
+            return itPromise->second.getPromise();
 
         InputPort& inputPort = _inputMap.find( portName )->second;
-
-        _manuallySetPortsMap.emplace( std::piecewise_construct,
+        const auto& itPort =  _manuallySetPortsMap.emplace( std::piecewise_construct,
                                       std::forward_as_tuple( inputPort.getName( )),
                                       std::forward_as_tuple( DataInfo( inputPort.getName(),
                                                                        inputPort.getDataType( ))));
-        OutputPort& outputPort = _manuallySetPortsMap.find( inputPort.getName( ))->second;
-
+        OutputPort& outputPort = itPort.first->second;
         inputPort.connect( outputPort );
-        return _manuallySetPortsMap.find( portName )->second.getPromise();
+        return outputPort.getPromise();
     }
 
     Promises getOutputPromises() const
     {
         Promises promises;
-        for( const auto& pair: _outputMap )
-            promises.push_back( pair.second.getPromise( ));
+        for( const auto& namePort: _outputMap )
+            promises.push_back( namePort.second.getPromise( ));
 
         return promises;
     }
@@ -130,9 +129,9 @@ struct PipeFilter::Impl
     Futures getPostconditions() const
     {
         Futures futures;
-        for( const auto& pair: _outputMap )
+        for( const auto& namePort: _outputMap )
         {
-            const Future& outputFuture = pair.second.getPromise().getFuture();
+            const Future& outputFuture = namePort.second.getPromise().getFuture();
             futures.push_back( outputFuture );
         }
         return futures;
@@ -141,9 +140,9 @@ struct PipeFilter::Impl
     Futures getPreconditions() const
     {
         Futures futures;
-        for( const auto& pair: _inputMap )
+        for( const auto& namePort: _inputMap )
         {
-            const Futures& inputFutures = pair.second.getFutures();
+            const Futures& inputFutures = namePort.second.getFutures();
             futures.insert( futures.end(), inputFutures.begin(), inputFutures.end( ));
         }
         return futures;
@@ -171,12 +170,12 @@ struct PipeFilter::Impl
 
     void reset()
     {
-        for( auto& pair: _manuallySetPortsMap )
-            _inputMap.find( pair.first )->second.disconnect( pair.second );
+        for( auto& namePort: _manuallySetPortsMap )
+            _inputMap.find( namePort.first )->second.disconnect( namePort.second );
 
         _manuallySetPortsMap.clear();
-        for( auto& pair: _outputMap )
-            pair.second.reset();
+        for( auto& namePort: _outputMap )
+            namePort.second.reset();
     }
 
     PipeFilter& _pipeFilter;

@@ -35,21 +35,21 @@ struct Pipeline::Impl
     {}
 
     void add( const std::string& name,
-              Executable* executable,
+              Pipeline::ExecutablePtr executable,
               bool wait )
     {
         if( _executableMap.count( name ) > 0 )
             LBTHROW( std::runtime_error( name + " already exists"));
-
-        _executableMap.emplace( std::piecewise_construct,
-                                std::forward_as_tuple( name ),
-                                std::forward_as_tuple( executable ));
 
         if( wait )
         {
             const Futures& futures = executable->getPostconditions();
             _outFutures.insert( _outFutures.end(), futures.begin(), futures.end( ));
         }
+
+        _executableMap.emplace( std::piecewise_construct,
+                                std::forward_as_tuple( name ),
+                                std::forward_as_tuple( std::move( executable )));
     }
 
     void execute()
@@ -79,8 +79,8 @@ struct Pipeline::Impl
     {
         Executables executables;
 
-        for( auto& pair: _executableMap )
-            executables.push_back( pair.second.get( ));
+        for( auto& nameExec: _executableMap )
+            executables.push_back( nameExec.second.get( ));
 
         return executables;
     }
@@ -96,9 +96,9 @@ struct Pipeline::Impl
     Futures getPreconditions() const
     {
         Futures inFutures;
-        for( auto& pair: _executableMap )
+        for( auto& nameExec: _executableMap )
         {
-            const Futures& futures = pair.second->getPreconditions();
+            const Futures& futures = nameExec.second->getPreconditions();
             inFutures.insert( inFutures.end(), futures.begin(), futures.end( ));
         }
         return inFutures;
@@ -111,14 +111,14 @@ struct Pipeline::Impl
 
     void schedule( Executor& executor )
     {
-        for( auto& pair: _executableMap )
-            executor.schedule( *pair.second );
+        for( auto& nameExec: _executableMap )
+            executor.schedule( *nameExec.second );
     }
 
     void reset()
     {
-        for( auto& pair: _executableMap )
-            pair.second->reset();
+        for( auto& nameExec: _executableMap )
+            nameExec.second->reset();
     }
 
     Pipeline& _pipeline;
@@ -135,10 +135,10 @@ Pipeline::~Pipeline()
 {}
 
 void Pipeline::_add( const std::string& name,
-                     Executable* exec,
+                     ExecutablePtr exec,
                      bool wait )
 {
-    _impl->add( name, exec, wait );
+    _impl->add( name, std::move( exec ), wait );
 }
 
 const Executable& Pipeline::getExecutable( const std::string& name ) const
