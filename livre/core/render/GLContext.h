@@ -40,12 +40,17 @@ public:
      * Shares the current context with the given context.
      * @param dstContextPtr The destination context to share the context with
      */
-    LIVRECORE_API void shareContext( GLContextPtr dstContextPtr );
+    LIVRECORE_API void share( GLContextPtr dstContextPtr );
+
+    /**
+     * @return a similar context.
+     */
+    virtual GLContextPtr create() const = 0;
 
     /**
      * Makes the context current.
      */
-    virtual void makeCurrent() = 0;
+    virtual void makeCurrent();
 
     /**
      * Clears the current context.
@@ -75,7 +80,7 @@ protected:
      * Implements the sharing of the context from the srcSharedContext.
      * @param srcSharedContext The source context.
      */
-    virtual void shareContext_( GLContext* srcSharedContext ) = 0;
+    virtual void share_( GLContext* srcSharedContext ) = 0;
 
 private:
     GLContextPtr parent_;

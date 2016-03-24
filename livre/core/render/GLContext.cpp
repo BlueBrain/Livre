@@ -29,7 +29,7 @@ const GLEWContext* GLContext::_glewContext = 0;
 void dontCleanup( livre::GLContext* )
 {}
 
-boost::thread_specific_ptr< livre::GLContext >  perThreadContext_( dontCleanup );
+boost::thread_specific_ptr< livre::GLContext > perThreadContext_( dontCleanup );
 
 GLContext::GLContext()
 {
@@ -40,11 +40,15 @@ GLContext::~GLContext()
 {
 }
 
-void GLContext::shareContext( GLContextPtr destContextPtr )
+void GLContext::share( GLContextPtr destContextPtr )
 {
     destContextPtr->parent_ = shared_from_this();
-    destContextPtr->shareContext_( this );
-    perThreadContext_.reset( destContextPtr.get() );
+    destContextPtr->share_( this );
+}
+
+void GLContext::makeCurrent()
+{
+     perThreadContext_.reset( this );
 }
 
 const GLContext* GLContext::getCurrent()

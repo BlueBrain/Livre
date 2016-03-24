@@ -38,18 +38,24 @@ EqContext::~EqContext()
     delete systemWindow_;
 }
 
+GLContextPtr EqContext::create() const
+{
+    return GLContextPtr( new EqContext( window_ ));
+}
+
 void EqContext::makeCurrent()
 {
     if( systemWindow_ )
+    {
+        GLContext::makeCurrent();
         systemWindow_->makeCurrent();
+    }
 }
 
 void EqContext::doneCurrent()
-{
+{}
 
-}
-
-void EqContext::shareContext_( GLContext* srcSharedContext )
+void EqContext::share_( GLContext* srcSharedContext )
 {
     LBASSERT( window_ );
 

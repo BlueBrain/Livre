@@ -132,23 +132,20 @@ struct DepthCompare
 
 DataUploadProcessor::DataUploadProcessor( DashTree& dashTree,
                                           GLContextPtr shareContext,
-                                          GLContextPtr context,
                                           TextureDataCache& textureDataCache )
-    : GLContextTrait( context )
-    , _dashTree( dashTree )
-    , _shareContext( shareContext )
+    : _dashTree( dashTree )
+    , _glContext( shareContext->create( ))
+    , _sharedContext( shareContext )
     , _textureDataCache( textureDataCache )
     , _currentFrameID( 0 )
     , _threadOp( TO_NONE )
 {
-    setDashContext( dashTree.createContext() );
+    setDashContext( dashTree.createContext( ));
 }
 
 bool DataUploadProcessor::initializeThreadRun_()
 {
     setName( "DataUp" );
-    LBASSERT( getGLContext( ));
-    _shareContext->shareContext( getGLContext( ));
     DataSource& dataSource = _textureDataCache.getDataSource();
     dataSource.initializeGL();
     return DashProcessor::initializeThreadRun_();
@@ -156,7 +153,12 @@ bool DataUploadProcessor::initializeThreadRun_()
 
 void DataUploadProcessor::runLoop_()
 {
-    LBASSERT( getGLContext( ));
+    LBASSERT( _glContext );
+    if( GLContext::getCurrent() != _glContext.get( ))
+    {
+        _sharedContext->share( _glContext );
+        _glContext->makeCurrent();
+    }
 
     processorInputPtr_->applyAll( CONNECTION_ID );
 

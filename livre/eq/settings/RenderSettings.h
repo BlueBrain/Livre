@@ -23,7 +23,6 @@
 #define _RenderSettings_h_
 
 #include <livre/lib/types.h>
-#include <livre/lib/render/RendererType.h>
 
 #include <livre/core/render/TransferFunction1D.h>
 
@@ -38,8 +37,7 @@ class RenderSettings : public co::Serializable
     enum DirtyBits
     {
         DIRTY_TF = co::Serializable::DIRTY_CUSTOM << 0u,
-        DIRTY_RENDERER_TYPE = co::Serializable::DIRTY_CUSTOM << 1u,
-        DIRTY_DEPTH = co::Serializable::DIRTY_CUSTOM << 2u
+        DIRTY_DEPTH = co::Serializable::DIRTY_CUSTOM << 1u
     };
 
 public:
@@ -61,20 +59,9 @@ public:
     void resetTransferFunction( );
 
     /**
-     * @brief setRendererType Sets the renderer type.
-     * @param rendererType The renderer type.
-     */
-    void setRendererType( const RendererType rendererType );
-
-    /**
      * @return Returns the transfer function.
      */
     const TransferFunction1D& getTransferFunction( ) const;
-
-    /**
-     * @return Returns the renderer type.
-     */
-    RendererType getRendererType( ) const;
 
     /**
      * @param depth Sets the maximum rendering depth.
@@ -108,7 +95,6 @@ private:
     virtual void deserialize( co::DataIStream& is, const uint64_t dirtyBits );
 
     TransferFunction1D transferFunction_;
-    RendererType rendererType_;
     uint8_t depth_;
 };
 

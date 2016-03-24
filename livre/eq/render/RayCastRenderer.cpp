@@ -25,8 +25,6 @@
 #include <livre/core/data/LODNode.h>
 #include <livre/core/maths/maths.h>
 #include <livre/core/render/GLContext.h>
-#include <livre/core/render/GLWidget.h>
-#include <livre/core/render/View.h>
 
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 
@@ -116,16 +114,14 @@ struct RayCastRenderer::Impl
                        GL_RGBA, GL_UNSIGNED_BYTE, &transferFunctionData[ 0 ] );
     }
 
-    void readFromFrameBuffer( const GLWidget& glWidget,
-                              const View& view )
+    void readFromFrameBuffer( const PixelViewport& viewport )
     {
-        const Viewport& viewport = glWidget.getViewport( view );
         const eq::PixelViewport pvp( 0, 0, viewport[2], viewport[3] );
         _framebufferTexture.copyFromFrameBuffer( GL_RGBA, pvp );
     }
 
-    void onFrameStart( const GLWidget& glWidget LB_UNUSED,
-                       const View& view LB_UNUSED,
+    void onFrameStart( const Frustum& frustum LB_UNUSED,
+                       const PixelViewport& view LB_UNUSED,
                        const RenderBricks& renderBricks )
     {
     #ifdef LIVRE_DEBUG_RENDERING
@@ -144,9 +140,9 @@ struct RayCastRenderer::Impl
         if( _nSamplesPerRay == 0 ) // Find sampling rate
         {
             uint32_t maxLOD = 0;
-            for( const RenderBrickPtr& rb : renderBricks )
+            for( const RenderBrick& rb : renderBricks )
             {
-                const uint32_t level = rb->getLODNode().getRefLevel();
+                const uint32_t level = rb.getLODNode().getRefLevel();
                 if( level > maxLOD )
                     maxLOD = level;
             }
@@ -169,8 +165,6 @@ struct RayCastRenderer::Impl
         // Enable shaders
         glUseProgram( program );
         GLint tParamNameGL;
-
-        const Frustum& frustum = view.getFrustum();
 
         tParamNameGL = glGetUniformLocation( program, "invProjectionMatrix" );
         glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getInvProjMatrix( ).array );
@@ -219,8 +213,8 @@ struct RayCastRenderer::Impl
     }
 
 
-    void renderBrick( const GLWidget& glWidget,
-                      const View& view,
+    void renderBrick( const Frustum&,
+                      const PixelViewport& viewport,
                       const RenderBrick& rb )
     {
         GLSLShaders::Handle program = _shaders.getProgram( );
@@ -255,7 +249,7 @@ struct RayCastRenderer::Impl
         tParamNameGL = glGetUniformLocation( program, "voxelSpacePerWorldSpace" );
         glUniform3fv( tParamNameGL, 1, voxSize.array );
 
-        readFromFrameBuffer( glWidget, view );
+        readFromFrameBuffer( viewport );
 
         glActiveTexture( GL_TEXTURE2 );
         _framebufferTexture.bind( );
@@ -300,11 +294,8 @@ struct RayCastRenderer::Impl
 
 RayCastRenderer::RayCastRenderer( const uint32_t samplesPerRay,
                                   const uint32_t samplesPerPixel,
-                                  const uint32_t gpuDataType,
-                                  const int32_t internalFormat,
                                   const VolumeInformation& volInfo )
-    : Renderer( volInfo.compCount, gpuDataType, internalFormat ),
-      _impl( new RayCastRenderer::Impl( samplesPerRay,
+    : _impl( new RayCastRenderer::Impl( samplesPerRay,
                                         samplesPerPixel,
                                         volInfo ))
 {}
@@ -317,19 +308,19 @@ void RayCastRenderer::update( const FrameData& frameData )
     _impl->update( frameData );
 }
 
-void RayCastRenderer::_onFrameStart( const GLWidget& glWidget,
-                                     const View& view,
+void RayCastRenderer::_onFrameStart( const Frustum& frustum,
+                                     const PixelViewport& view,
                                      const RenderBricks& renderBricks )
 {
-    _impl->onFrameStart( glWidget, view, renderBricks );
+    _impl->onFrameStart( frustum, view, renderBricks );
 }
 
 
-void RayCastRenderer::_renderBrick( const GLWidget& glWidget,
-                                    const View& view,
+void RayCastRenderer::_renderBrick( const Frustum& frustum,
+                                    const PixelViewport& view,
                                     const RenderBrick& renderBrick )
 {
-    _impl->renderBrick( glWidget, view, renderBrick );
+    _impl->renderBrick( frustum, view, renderBrick );
 }
 
 }

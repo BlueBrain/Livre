@@ -36,14 +36,10 @@ public:
     /**
      * @param samplesPerRay Number of samples per ray.
      * @param samplesPerPixel Number of samples per pixel.
-     * @param gpuDataType Data type of the texture data source.
-     * @param internalFormat Internal format of the texture in GPU memory.
      * @param volInfo Volume information.
      */
     RayCastRenderer( uint32_t samplesPerRay,
                      uint32_t samplesPerPixel,
-                     uint32_t gpuDataType,
-                     int32_t internalFormat,
                      const VolumeInformation& volInfo );
     ~RayCastRenderer();
 
@@ -56,12 +52,12 @@ public:
 
 private:
 
-    void _onFrameStart( const GLWidget& glWidget,
-                        const View& view,
+    void _onFrameStart( const Frustum& frustum,
+                        const PixelViewport& view,
                         const RenderBricks& renderBricks ) final;
 
-    void _renderBrick( const GLWidget& glWidget,
-                       const View& view,
+    void _renderBrick( const Frustum& frustum,
+                       const PixelViewport& view,
                        const RenderBrick& renderBrick ) final;
 
     struct Impl;

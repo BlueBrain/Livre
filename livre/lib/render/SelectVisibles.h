@@ -17,11 +17,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef LIVRE_SELECTVISIBLES_H
-#define LIVRE_SELECTVISIBLES_H
+#ifndef _SelectVisibles_h_
+#define _SelectVisibles_h_
 
 #include <livre/lib/types.h>
 #include <livre/core/visitor/RenderNodeVisitor.h>
+#include <livre/core/dash/DashRenderNode.h>
+#include <livre/core/data/LODNode.h>
 
 //#define LIVRE_STATIC_DECOMPOSITION
 
@@ -130,3 +132,4 @@ private:
 };
 }
 #endif
+

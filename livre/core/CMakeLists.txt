@@ -48,14 +48,11 @@ set(LIVRECORE_HEADERS
   pipeline/ProcessorOutput.h
   render/FrameInfo.h
   render/Frustum.h
-  render/GLContextTrait.h
-  render/GLWidget.h
   render/RenderBrick.h
   render/Renderer.h
   render/TexturePool.h
   render/TextureState.h
   render/TransferFunction1D.h
-  render/View.h
   util/FrameUtils.h
   util/ThreadClock.h
   visitor/NodeVisitor.h
@@ -91,14 +88,11 @@ set(LIVRECORE_SOURCES
   render/Frustum.cpp
   render/GLContext.cpp
   render/GLSLShaders.cpp
-  render/GLContextTrait.cpp
-  render/GLWidget.cpp
   render/RenderBrick.cpp
   render/Renderer.cpp
   render/TexturePool.cpp
   render/TextureState.cpp
   render/TransferFunction1D.cpp
-  render/View.cpp
   util/FrameUtils.cpp
   util/ThreadClock.cpp
   util/Utilities.cpp

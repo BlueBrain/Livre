@@ -55,11 +55,10 @@ public:
     EqTextureUploadProcessor( Config& config,
                               DashTree& dashTree,
                               GLContextPtr shareContext,
-                              GLContextPtr context,
                               TextureDataCache& dataCache,
                               const VolumeRendererParameters& parameters )
         : TextureUploadProcessor( dashTree, shareContext,
-                                  context, dataCache, parameters )
+                                  dataCache, parameters )
         , _config( config )
     {}
 
@@ -185,19 +184,16 @@ public:
         Node* node = static_cast< Node* >( _window->getNode( ));
         DashTree& dashTree = node->getDashTree();
         _dashProcessor->setDashContext( dashTree.createContext( ));
+        _dataUploader.reset( new DataUploadProcessor( dashTree,
+                                                      _windowContext,
+                                                      node->getTextureDataCache( )));
 
-        GLContextPtr dataUploadContext( new EqContext( _window ));
-        _dataUploader.reset( new DataUploadProcessor( dashTree, _windowContext,
-                                                      dataUploadContext,
-                                                 node->getTextureDataCache( )));
-
-        GLContextPtr textureUploadContext( new EqContext( _window ));
         Config* config = static_cast< Config* >( _window->getConfig( ));
         Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
 
         _textureUploader.reset(
-            new EqTextureUploadProcessor( *config, dashTree, _windowContext,
-                                          textureUploadContext,
+            new EqTextureUploadProcessor( *config, dashTree,
+                                          _windowContext,
                                           node->getTextureDataCache(),
                                           pipe->getFrameData()->getVRParameters( )));
     }

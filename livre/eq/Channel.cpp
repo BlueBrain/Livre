@@ -40,7 +40,6 @@
 #include <livre/lib/cache/TextureObject.h>
 
 #include <livre/lib/render/AvailableSetGenerator.h>
-#include <livre/lib/render/RenderView.h>
 #include <livre/lib/render/ScreenSpaceLODEvaluator.h>
 #include <livre/lib/render/SelectVisibles.h>
 #include <livre/lib/visitor/DFSTraversal.h>
@@ -53,7 +52,6 @@
 #include <livre/core/data/DataSource.h>
 #include <livre/core/render/FrameInfo.h>
 #include <livre/core/render/Frustum.h>
-#include <livre/core/render/GLWidget.h>
 #include <livre/core/render/RenderBrick.h>
 
 #include <eq/eq.h>
@@ -61,62 +59,6 @@
 
 namespace livre
 {
-
-/**
- * The EqRenderView class implements livre \see RenderView for internal use of \see eq::Channel.
- */
-class EqRenderView : public RenderView
-{
-public:
-
-    EqRenderView( Channel::Impl *channel, const DashTree& dashTree );
-    const Frustum& getFrustum() const final;
-
-private:
-    Channel::Impl* const _channel;
-};
-
-typedef std::shared_ptr< EqRenderView > EqRenderViewPtr;
-
-/** Implements livre \GLWidget for internal use of eq::Channel. */
-class EqGLWidget : public GLWidget
-{
-public:
-    explicit EqGLWidget( Channel* channel )
-        : _channel( channel )
-    {}
-
-    Viewport getViewport( const View& ) const final
-    {
-        const eq::PixelViewport& channelPvp = _channel->getPixelViewport();
-        return Viewport( channelPvp.x, channelPvp.y,
-                         channelPvp.w, channelPvp.h );
-    }
-
-    uint32_t getX() const
-    {
-        return _channel->getPixelViewport().x;
-    }
-
-    uint32_t getY() const
-    {
-        return _channel->getPixelViewport().y;
-    }
-
-    uint32_t getWidth() const
-    {
-        return _channel->getPixelViewport().w;
-    }
-
-    uint32_t getHeight() const
-    {
-        return _channel->getPixelViewport().h;
-    }
-
-    Channel* _channel;
-};
-
-
 const float nearPlane = 0.1f;
 const float farPlane = 15.0f;
 
@@ -126,7 +68,6 @@ public:
     explicit Impl( Channel* channel )
           : _channel( channel )
           , _frustum( Matrix4f(), Matrix4f( ))
-          , _glWidgetPtr( new EqGLWidget( channel ))
           , _frameInfo( _frustum, INVALID_FRAME )
     {}
 
@@ -158,19 +99,11 @@ public:
                 static_cast< livre::Node* >( _channel->getNode( ));
 
         const livre::DashTree& dashTree = node->getDashTree();
-
         ConstDataSourcePtr dataSource = dashTree.getDataSource();
-
-        _renderViewPtr.reset( new EqRenderView( this, dashTree ));
-
-        RendererPtr renderer( new RayCastRenderer(
+        _renderer.reset( new RayCastRenderer(
                                   nSamplesPerRay,
                                   nSamplesPerPixel,
-                                  GL_UNSIGNED_BYTE,
-                                  GL_LUMINANCE8,
                                   dataSource->getVolumeInfo( )));
-
-        _renderViewPtr->setRenderer( renderer );
     }
 
     const Frustum& setupFrustum()
@@ -221,9 +154,7 @@ public:
             const LODNode& lodNode =
                     dashTree.getDataSource()->getNode( NodeId( cacheObject->getId( )));
 
-            RenderBrickPtr renderBrick( new RenderBrick( lodNode,
-                                                         texture->getTextureState( )));
-            renderBricks.push_back( renderBrick );
+            renderBricks.emplace_back( lodNode, texture->getTextureState( ));
         }
     }
 
@@ -263,9 +194,9 @@ public:
     void updateRegions( const RenderBricks& bricks )
     {
         const Matrix4f& mvpMatrix = _frustum.getMVPMatrix();
-        for( const RenderBrickPtr& brick : bricks )
+        for( const RenderBrick& brick : bricks )
         {
-            const Boxf& worldBox = brick->getLODNode().getWorldBox();
+            const Boxf& worldBox = brick.getLODNode().getWorldBox();
             const Vector3f& min = worldBox.getMin();
             const Vector3f& max = worldBox.getMax();
             const Vector3f corners[8] =
@@ -307,6 +238,33 @@ public:
 #endif
     }
 
+    void freeTexture( const NodeId& nodeId )
+    {
+        livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
+        DashTree& dashTree = node->getDashTree();
+
+        dash::NodePtr dashNode = dashTree.getDashNode( nodeId );
+        if( !dashNode )
+            return;
+
+        DashRenderNode renderNode( dashNode );
+        if( renderNode.getLODNode().getRefLevel() != 0 )
+            renderNode.setTextureObject( CacheObjectPtr( ));
+    }
+
+    void freeTextures()
+    {
+        for( const ConstCacheObjectPtr& cacheObject:
+                       _frameInfo.renderNodes )
+        {
+            const NodeId nodeId(cacheObject->getId( ));
+            freeTexture( nodeId );
+        }
+
+        for( const NodeId& nodeId: _frameInfo.allNodes )
+            freeTexture( nodeId );
+    }
+
     void frameDraw( const eq::uint128_t& )
     {
         livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
@@ -320,9 +278,6 @@ public:
         _frameInfo = FrameInfo( _frustum, frame );
 
         const DashRenderNodes& visibles = requestData();
-        const eq::fabric::Viewport& vp = _channel->getViewport( );
-        const Viewport viewport( vp.x, vp.y, vp.w, vp.h );
-        _renderViewPtr->setViewport( viewport );
 
         livre::Window* window = static_cast< livre::Window* >( _channel->getWindow( ));
         const livre::Pipe* pipe = static_cast< const livre::Pipe* >( _channel->getPipe( ));
@@ -350,18 +305,16 @@ public:
             _frameInfo.allNodes.push_back(visible.getLODNode().getNodeId());
         generateSet.generateRenderingSet( _frameInfo );
 
-        EqRenderViewPtr renderViewPtr =
-                std::static_pointer_cast< EqRenderView >( _renderViewPtr );
-        RayCastRendererPtr renderer =
-                std::static_pointer_cast< RayCastRenderer >(
-                    renderViewPtr->getRenderer( ));
-
-        renderer->update( *pipe->getFrameData( ));
-
+        _renderer->update( *pipe->getFrameData( ));
         RenderBricks renderBricks;
         generateRenderBricks( _frameInfo.renderNodes, renderBricks );
-        renderViewPtr->render( _frameInfo, renderBricks, *_glWidgetPtr );
+
+        const eq::PixelViewport& vp = _channel->getPixelViewport();
+        _renderer->render( _frustum,
+                           PixelViewport( vp.x, vp.y, vp.w, vp.h ),
+                           renderBricks );
         updateRegions( renderBricks );
+        freeTextures();
     }
 
     void applyCamera()
@@ -375,16 +328,12 @@ public:
     {
         initializeFrame();
         initializeRenderer();
-
-        Window* window = static_cast< Window* >( _channel->getWindow( ));
-        _glWidgetPtr->setGLContext( GLContextPtr( new EqContext( window )));
     }
 
     void configExit()
     {
         _frameInfo.renderNodes.clear();
         _frame.getFrameData()->flush();
-        _renderViewPtr.reset();
     }
 
     void addImageListener()
@@ -645,22 +594,10 @@ public:
     eq::Range _drawRange;
     eq::Frame _frame;
     Frustum _frustum;
-    ViewPtr _renderViewPtr;
-    GLWidgetPtr _glWidgetPtr;
     FrameGrabber _frameGrabber;
     FrameInfo _frameInfo;
+    std::unique_ptr< RayCastRenderer > _renderer;
 };
-
-EqRenderView::EqRenderView( Channel::Impl* channel,
-                            const DashTree& dashTree )
-    : RenderView( dashTree )
-    , _channel( channel )
-{}
-
-const Frustum& EqRenderView::getFrustum() const
-{
-    return _channel->setupFrustum();
-}
 
 Channel::Channel( eq::Window* parent )
         : eq::Channel( parent )

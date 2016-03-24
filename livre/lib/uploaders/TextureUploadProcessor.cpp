@@ -96,12 +96,11 @@ public:
 
 TextureUploadProcessor::TextureUploadProcessor( DashTree& dashTree,
                                                 GLContextPtr shareContext,
-                                                GLContextPtr context,
                                                 TextureDataCache& dataCache,
                                                 const VolumeRendererParameters& vrParameters )
-    : GLContextTrait( context )
-    , _dashTree( dashTree )
-    , _shareContext( shareContext )
+    : _dashTree( dashTree )
+    , _glContext( shareContext->create( ))
+    , _sharedContext( shareContext )
     , _currentFrameID( 0 )
     , _threadOp( TO_NONE )
     , _vrParameters( vrParameters )
@@ -126,8 +125,7 @@ const TextureCache& TextureUploadProcessor::getTextureCache() const
 bool TextureUploadProcessor::initializeThreadRun_()
 {
     setName( "TexUp" );
-    LBASSERT( getGLContext( ));
-    _shareContext->shareContext( getGLContext( ));
+    LBASSERT( _glContext );
     return DashProcessor::initializeThreadRun_();
 }
 
@@ -160,8 +158,11 @@ void TextureUploadProcessor::_loadData()
 void TextureUploadProcessor::runLoop_()
 {
     _needRedraw = false;
-    if( GLContext::getCurrent() != getGLContext().get( ))
-        getGLContext()->makeCurrent();
+    if( GLContext::getCurrent() != _glContext.get( ))
+    {
+        _sharedContext->share( _glContext );
+        _glContext->makeCurrent();
+    }
 
     processorInputPtr_->applyAll( CONNECTION_ID );
     _checkThreadOperation();

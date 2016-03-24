@@ -42,19 +42,24 @@ public:
     ~EqContext();
 
     /**
+     * @return a similar context
+     */
+    GLContextPtr create() const final;
+
+    /**
      * Makes the context, current.
      */
-    virtual void makeCurrent( );
+    virtual void makeCurrent() final;
 
     /**
      * Clears the current context.
      */
-    virtual void doneCurrent( );
+    virtual void doneCurrent() final;
 
 private:
 
     EqContext();
-    void shareContext_( GLContext* srcSharedContext );
+    void share_( GLContext* srcSharedContext ) final;
     Window* const window_;
     eq::SystemWindow *systemWindow_;
 };

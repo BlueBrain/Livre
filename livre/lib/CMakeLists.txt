@@ -24,7 +24,6 @@ set(LIVRELIB_PUBLIC_HEADERS
   configuration/VolumeRendererParameters.h
   render/AvailableSetGenerator.h
   render/ScreenSpaceLODEvaluator.h
-  render/RenderView.h
   uploaders/DataUploadProcessor.h
   uploaders/TextureUploadProcessor.h
   visitor/CollectionTraversal.h
@@ -45,7 +44,6 @@ set(LIVRELIB_SOURCES
   configuration/VolumeRendererParameters.cpp
   render/AvailableSetGenerator.cpp
   render/ScreenSpaceLODEvaluator.cpp
-  render/RenderView.cpp
   uploaders/DataUploadProcessor.cpp
   uploaders/TextureUploadProcessor.cpp
   visitor/CollectionTraversal.cpp
