@@ -37,7 +37,7 @@ public:
 
     /**
      * Renders the list of render bricks for a given frustum.
-     * @param frustum Viewfrustum
+     * @param frustum is used for rendering the bricks according to view point.
      * @param view The pixel area.
      * @param bricks The list of render bricks.
      */
@@ -46,51 +46,51 @@ public:
                                const RenderBricks& bricks );
 
 protected:
+
     /**
      * Orders the render bricks front to back ( default ).
      * @param bricksSrc The list of bricks to be ordered.
-     * @param bricksDst ordered bricks.
-     * @param frustum The frustum to order the bricks for.
+     * @param frustum is used to order the bricks according to view point.
+     * @return the list of ordered bricks.
      */
-    LIVRECORE_API virtual void _order( const RenderBricks& bricksSrc,
-                                       RenderBricks& bricksDst,
-                                       const Frustum& frustum ) const;
+    LIVRECORE_API virtual RenderBricks _order( const RenderBricks& bricks,
+                                               const Frustum& frustum ) const;
 
     /**
      * Is called on start of each rendering.
-     * @param frustum Viewfrustum
+     * @param frustum is used for rendering the bricks according to view point.
      * @param view The pixel area.
-     * @param brickList The list of oredered bricks.
+     * @param orderedBricks is the list of ordered bricks.
      */
     virtual void _onFrameStart( const Frustum& frustum LB_UNUSED,
                                 const PixelViewport& view LB_UNUSED,
-                                const RenderBricks& brickList LB_UNUSED ) { }
+                                const RenderBricks& orderedBricks LB_UNUSED ) { }
 
     /**
      * Is called on start of each render. Default is front to back rendering.
-     * @param frustum Viewfrustum
+     * @param frustum is used for rendering the bricks according to view point.
      * @param view The pixel area.
-     * @param brickList The list of ordered bricks.
+     * @param orderedBricks is the list of ordered bricks.
     */
     LIVRECORE_API virtual void _onFrameRender( const Frustum& frustum,
                                                const PixelViewport& view,
-                                               const RenderBricks& brickList );
+                                               const RenderBricks& orderedBricks );
 
     /**
      * Is called on end of each rendering.
-     * @param frustum Viewfrustum
+     * @param frustum is used for rendering the bricks according to view point.
      * @param view The pixel area.
-     * @param brickList The list of ordered bricks.
+     * @param orderedBricks is the list of ordered bricks.
      */
     virtual void _onFrameEnd( const Frustum& frustum LB_UNUSED,
                               const PixelViewport& view LB_UNUSED,
-                              const RenderBricks& brickList LB_UNUSED ) { }
+                              const RenderBricks& orderedBricks LB_UNUSED ) { }
 
     /**
      * Should be implemented by the derived renderer to render a render brick.
-     * @param frustum Viewfrustum
+     * @param frustum is used for rendering the bricks according to view point.
      * @param view The pixel area.
-     * @param renderBrick The list of ordered bricks.
+     * @param renderBrick is rendered brick
      */
     virtual void _renderBrick(  const Frustum& frustum,
                                 const PixelViewport& view,

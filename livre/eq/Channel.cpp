@@ -254,8 +254,7 @@ public:
 
     void freeTextures()
     {
-        for( const ConstCacheObjectPtr& cacheObject:
-                       _frameInfo.renderNodes )
+        for( const auto& cacheObject: _frameInfo.renderNodes )
         {
             const NodeId nodeId(cacheObject->getId( ));
             freeTexture( nodeId );

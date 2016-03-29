@@ -37,14 +37,7 @@ GLContext::GLContext()
 }
 
 GLContext::~GLContext()
-{
-}
-
-void GLContext::share( GLContextPtr destContextPtr )
-{
-    destContextPtr->parent_ = shared_from_this();
-    destContextPtr->share_( this );
-}
+{}
 
 void GLContext::makeCurrent()
 {

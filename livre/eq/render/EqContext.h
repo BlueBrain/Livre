@@ -29,39 +29,43 @@ namespace livre
 class Window;
 
 /**
- * The EqContext class for wrapping the GLContext for eq library.
+ * The EqContext class for wrapping the GLContext for equalizer library.
  */
 class EqContext : public GLContext
 {
 public:
     /**
-     * @param window Parent window that has the rendering context.
+     * @param window is the parent equalizer window that has the rendering context.
      */
     EqContext( Window* const window );
 
     ~EqContext();
 
     /**
-     * @return a similar context
+     * @copydoc GLContext::share
      */
-    GLContextPtr create() const final;
+    void share( const GLContext& src ) final;
 
     /**
-     * Makes the context, current.
+     * @copydoc GLContext::clone
+     */
+    GLContextPtr clone() const final;
+
+    /**
+     * @copydoc GLContext::makeCurrent
      */
     virtual void makeCurrent() final;
 
     /**
-     * Clears the current context.
+     * @copydoc GLContext::doneCurrent
      */
     virtual void doneCurrent() final;
 
 private:
 
     EqContext();
-    void share_( GLContext* srcSharedContext ) final;
-    Window* const window_;
-    eq::SystemWindow *systemWindow_;
+    Window* const _window;
+    eq::SystemWindow* _systemWindow;
 };
 
 }

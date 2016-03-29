@@ -34,13 +34,13 @@ struct DistanceOperator
         : _frustum( frustum )
     { }
 
-    bool operator()( const RenderBrick* rb1,
-                     const RenderBrick* rb2 )
+    bool operator()( const RenderBrick& rb1,
+                     const RenderBrick& rb2 )
     {
         const float distance1 = ( _frustum.getMVMatrix() *
-                                  rb1->getLODNode().getWorldBox().getCenter() ).length();
+                                  rb1.getLODNode().getWorldBox().getCenter() ).length();
         const float distance2 = ( _frustum.getMVMatrix() *
-                                  rb2->getLODNode().getWorldBox().getCenter() ).length();
+                                  rb2.getLODNode().getWorldBox().getCenter() ).length();
         return  distance1 < distance2;
     }
     const Frustum& _frustum;
@@ -50,20 +50,13 @@ Renderer::~Renderer()
 {
 }
 
-void Renderer::_order( const RenderBricks& bricksSrc,
-                       RenderBricks& bricksDst,
-                       const Frustum& frustum ) const
+RenderBricks Renderer::_order( const RenderBricks& bricks,
+                               const Frustum& frustum ) const
 {
-    std::vector< const RenderBrick* > rbs;
-    rbs.reserve( bricksSrc.size( ));
-    for( auto& rb: bricksSrc )
-        rbs.push_back( &rb );
-
+    RenderBricks rbs = bricks;
     DistanceOperator distanceOp( frustum );
     std::sort( rbs.begin(), rbs.end(), distanceOp );
-
-     for( auto& rb: rbs )
-        bricksDst.push_back( *rb );
+    return rbs;
 }
 
 void Renderer::_onFrameRender( const Frustum& frustum,
@@ -78,8 +71,7 @@ void Renderer::render( const Frustum& frustum,
                        const PixelViewport& view,
                        const RenderBricks& bricks )
 {
-    RenderBricks ordered;
-    _order( bricks, ordered, frustum );
+    const RenderBricks& ordered = _order( bricks, frustum );
     _onFrameStart( frustum, view, ordered );
     _onFrameRender( frustum, view, ordered );
     _onFrameEnd( frustum, view, ordered );

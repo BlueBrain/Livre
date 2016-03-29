@@ -99,7 +99,7 @@ TextureUploadProcessor::TextureUploadProcessor( DashTree& dashTree,
                                                 TextureDataCache& dataCache,
                                                 const VolumeRendererParameters& vrParameters )
     : _dashTree( dashTree )
-    , _glContext( shareContext->create( ))
+    , _glContext( shareContext->clone( ))
     , _sharedContext( shareContext )
     , _currentFrameID( 0 )
     , _threadOp( TO_NONE )
@@ -160,7 +160,7 @@ void TextureUploadProcessor::runLoop_()
     _needRedraw = false;
     if( GLContext::getCurrent() != _glContext.get( ))
     {
-        _sharedContext->share( _glContext );
+        _glContext->share( *_sharedContext );
         _glContext->makeCurrent();
     }
 

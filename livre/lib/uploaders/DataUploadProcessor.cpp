@@ -134,7 +134,7 @@ DataUploadProcessor::DataUploadProcessor( DashTree& dashTree,
                                           GLContextPtr shareContext,
                                           TextureDataCache& textureDataCache )
     : _dashTree( dashTree )
-    , _glContext( shareContext->create( ))
+    , _glContext( shareContext->clone( ))
     , _sharedContext( shareContext )
     , _textureDataCache( textureDataCache )
     , _currentFrameID( 0 )
@@ -156,7 +156,7 @@ void DataUploadProcessor::runLoop_()
     LBASSERT( _glContext );
     if( GLContext::getCurrent() != _glContext.get( ))
     {
-        _sharedContext->share( _glContext );
+        _glContext->share( *_sharedContext );
         _glContext->makeCurrent();
     }
 
