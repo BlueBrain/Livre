@@ -73,8 +73,8 @@ public:
 
 private:
 
-    const LODNode _lodNode;
-    const ConstTextureStatePtr _textureState;
+    LODNode _lodNode;
+    ConstTextureStatePtr _textureState;
 };
 
 }

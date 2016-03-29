@@ -20,7 +20,6 @@
 #include "Renderer.h"
 
 #include <livre/core/render/Frustum.h>
-#include <livre/core/render/View.h>
 #include <livre/core/render/RenderBrick.h>
 #include <livre/core/data/LODNode.h>
 #include <eq/gl.h>
@@ -35,81 +34,47 @@ struct DistanceOperator
         : _frustum( frustum )
     { }
 
-    bool operator()( const RenderBrickPtr& rb1,
-                     const RenderBrickPtr& rb2 )
+    bool operator()( const RenderBrick& rb1,
+                     const RenderBrick& rb2 )
     {
         const float distance1 = ( _frustum.getMVMatrix() *
-                                  rb1->getLODNode().getWorldBox().getCenter() ).length();
+                                  rb1.getLODNode().getWorldBox().getCenter() ).length();
         const float distance2 = ( _frustum.getMVMatrix() *
-                                  rb2->getLODNode().getWorldBox().getCenter() ).length();
+                                  rb2.getLODNode().getWorldBox().getCenter() ).length();
         return  distance1 < distance2;
     }
     const Frustum& _frustum;
 };
 
-Renderer::Renderer( const uint32_t nComponents,
-                    const GLenum gpuDataType,
-                    const GLint internalFormat )
-    : _gpuDataType( gpuDataType )
-    , _internalFormat( internalFormat )
-{
-
-    switch( nComponents )
-    {
-        case 1:
-            _format = GL_RED;
-            break;
-        case 3:
-            _format = GL_RGB;
-            break;
-        default:
-            LBTHROW( std::runtime_error( "Unsupported texture format" ));
-    }
-}
-
 Renderer::~Renderer()
 {
 }
 
-GLint Renderer::getInternalFormat() const
+RenderBricks Renderer::_order( const RenderBricks& bricks,
+                               const Frustum& frustum ) const
 {
-    return _internalFormat;
-}
-
-GLenum Renderer::getGPUDataType() const
-{
-    return _gpuDataType;
-}
-
-GLenum Renderer::getFormat() const
-{
-    return _format;
-}
-
-void Renderer::_order( RenderBricks &bricks, const Frustum &frustum ) const
-{
+    RenderBricks rbs = bricks;
     DistanceOperator distanceOp( frustum );
-    std::sort( bricks.begin(), bricks.end(), distanceOp );
+    std::sort( rbs.begin(), rbs.end(), distanceOp );
+    return rbs;
 }
 
-
-void Renderer::_onFrameRender( const GLWidget& glWidget,
-                               const View& view,
+void Renderer::_onFrameRender( const Frustum& frustum,
+                               const PixelViewport& view,
                                const RenderBricks& bricks )
 {
-    for( const RenderBrickPtr& brick: bricks )
-        _renderBrick( glWidget, view, *brick );
+    for( const RenderBrick& brick: bricks )
+        _renderBrick( frustum, view, brick );
 }
 
-void Renderer::render( const GLWidget& glWidget,
-                       const View& view,
-                       const RenderBricks& bricks_ )
+void Renderer::render( const Frustum& frustum,
+                       const PixelViewport& view,
+                       const RenderBricks& bricks )
 {
-    RenderBricks bricks = bricks_;
-    _order( bricks, view.getFrustum( ));
-    _onFrameStart( glWidget, view, bricks );
-    _onFrameRender( glWidget, view, bricks );
-    _onFrameEnd( glWidget, view, bricks );
+    const RenderBricks& ordered = _order( bricks, frustum );
+    _onFrameStart( frustum, view, ordered );
+    _onFrameRender( frustum, view, ordered );
+    _onFrameEnd( frustum, view, ordered );
 }
 
 }

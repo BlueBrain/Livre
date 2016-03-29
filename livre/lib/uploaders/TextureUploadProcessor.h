@@ -26,7 +26,6 @@
 
 #include <livre/core/dashpipeline/DashProcessor.h>
 #include <livre/core/dash/DashRenderStatus.h>
-#include <livre/core/render/GLContextTrait.h>
 #include <livre/lib/cache/TextureCache.h>
 
 namespace livre
@@ -35,7 +34,7 @@ namespace livre
 /**
  * The TextureLoadProcessor class is responsible for loading texture data to GPU.
  */
-class TextureUploadProcessor : public DashProcessor, private GLContextTrait
+class TextureUploadProcessor : public DashProcessor
 {
 public:
     /**
@@ -46,7 +45,6 @@ public:
      */
     LIVRE_API TextureUploadProcessor( DashTree& dashTree,
                                       GLContextPtr shareContext,
-                                      GLContextPtr context,
                                       TextureDataCache& dataCache,
                                       const VolumeRendererParameters& vrParameters );
 
@@ -67,7 +65,8 @@ private:
     void _checkThreadOperation( );
 
     DashTree& _dashTree;
-    GLContextPtr _shareContext;
+    GLContextPtr _glContext;
+    GLContextPtr _sharedContext;
 
     uint64_t _currentFrameID;
     ThreadOperation _threadOp;

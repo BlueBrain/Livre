@@ -30,7 +30,6 @@
 #include <livre/core/dashpipeline/DashProcessor.h>
 #include <livre/core/visitor/NodeVisitor.h>
 #include <livre/core/dash/DashRenderStatus.h>
-#include <livre/core/render/GLContextTrait.h>
 
 namespace livre
 {
@@ -40,7 +39,7 @@ namespace livre
  * It is derived from GLContextTrait class because some algorithms may need OpenGL
  * to generate the data.
  */
-class DataUploadProcessor : public DashProcessor, private GLContextTrait
+class DataUploadProcessor : public DashProcessor
 {
 public:
     /**
@@ -51,7 +50,6 @@ public:
      */
     LIVRE_API DataUploadProcessor( DashTree& dashTree,
                                    GLContextPtr shareContext,
-                                   GLContextPtr context,
                                    TextureDataCache& textureDataCache );
 
 private:
@@ -60,7 +58,8 @@ private:
     void _loadData();
 
     DashTree& _dashTree;
-    GLContextPtr _shareContext;
+    GLContextPtr _glContext;
+    GLContextPtr _sharedContext;
     TextureDataCache& _textureDataCache;
     uint64_t _currentFrameID;
     void _checkThreadOperation( );

@@ -37,94 +37,66 @@ public:
 
     /**
      * Renders the list of render bricks for a given frustum.
-     * @param glWidget Widget to render to.
-     * @param view The viewing information on the widget.
+     * @param frustum is used for rendering the bricks according to view point.
+     * @param view The pixel area.
      * @param bricks The list of render bricks.
      */
-    LIVRECORE_API void render( const GLWidget& glWidget,
-                               const View& view,
+    LIVRECORE_API void render( const Frustum& frustum,
+                               const PixelViewport& view,
                                const RenderBricks& bricks );
 
-    /**
-     * @return The OpenGL GPU internal format of the texture data.
-     */
-    LIVRECORE_API int32_t getInternalFormat() const;
-
-    /**
-     * @return The OpenGL format of the texture data kept in memory. Channel count etc.
-     */
-    LIVRECORE_API uint32_t getGPUDataType() const;
-
-    /**
-     * @return The OpenGL data type of the texture data.
-     */
-    LIVRECORE_API uint32_t getFormat() const;
-
 protected:
+
     /**
      * Orders the render bricks front to back ( default ).
-     * @param bricks The list of bricks to be ordered.
-     * @param frustum The frustum to order the bricks for.
+     * @param bricksSrc The list of bricks to be ordered.
+     * @param frustum is used to order the bricks according to view point.
+     * @return the list of ordered bricks.
      */
-    LIVRECORE_API virtual void _order( RenderBricks& bricks, const Frustum& frustum ) const;
+    LIVRECORE_API virtual RenderBricks _order( const RenderBricks& bricks,
+                                               const Frustum& frustum ) const;
 
     /**
      * Is called on start of each rendering.
-     * @param glWidget The widget that has the GL context.
-     * @param view The definition of view on context
-     * @param brickList The list of oredered bricks.
+     * @param frustum is used for rendering the bricks according to view point.
+     * @param view The pixel area.
+     * @param orderedBricks is the list of ordered bricks.
      */
-    virtual void _onFrameStart( const GLWidget& glWidget LB_UNUSED,
-                                const View& view LB_UNUSED,
-                                const RenderBricks& brickList LB_UNUSED ) { }
+    virtual void _onFrameStart( const Frustum& frustum LB_UNUSED,
+                                const PixelViewport& view LB_UNUSED,
+                                const RenderBricks& orderedBricks LB_UNUSED ) { }
 
     /**
      * Is called on start of each render. Default is front to back rendering.
-     * @param glWidget The widget that has the GL context.
-     * @param view The definition of view on context
-     * @param frustum The frustum to order the bricks for.
-     * @param brickList The list of ordered bricks.
+     * @param frustum is used for rendering the bricks according to view point.
+     * @param view The pixel area.
+     * @param orderedBricks is the list of ordered bricks.
     */
-    LIVRECORE_API virtual void _onFrameRender( const GLWidget& glWidget,
-                                               const View& view,
-                                               const RenderBricks& brickList );
+    LIVRECORE_API virtual void _onFrameRender( const Frustum& frustum,
+                                               const PixelViewport& view,
+                                               const RenderBricks& orderedBricks );
 
     /**
      * Is called on end of each rendering.
-     * @param glWidget The widget that has the GL context.
-     * @param view The definition of view on context
-     * @param brickList The list of ordered bricks.
+     * @param frustum is used for rendering the bricks according to view point.
+     * @param view The pixel area.
+     * @param orderedBricks is the list of ordered bricks.
      */
-    virtual void _onFrameEnd( const GLWidget& glWidget LB_UNUSED,
-                              const View& view LB_UNUSED,
-                              const RenderBricks& brickList LB_UNUSED ) { }
+    virtual void _onFrameEnd( const Frustum& frustum LB_UNUSED,
+                              const PixelViewport& view LB_UNUSED,
+                              const RenderBricks& orderedBricks LB_UNUSED ) { }
 
     /**
      * Should be implemented by the derived renderer to render a render brick.
-     * @param glWidget The widget that has the GL context.
-     * @param view The definition of view on context
-     * @param renderBrick The list of ordered bricks.
+     * @param frustum is used for rendering the bricks according to view point.
+     * @param view The pixel area.
+     * @param renderBrick is rendered brick
      */
-    virtual void _renderBrick(  const GLWidget& glWidget,
-                                const View& view,
+    virtual void _renderBrick(  const Frustum& frustum,
+                                const PixelViewport& view,
                                 const RenderBrick& renderBrick ) = 0;
 
-    /**
-     * @param nComponents The number of components in the rendering.
-     * @param gpuDataType The OpenGL data type.
-     * @param internalFormat The OpenGL internal format.
-     */
-    LIVRECORE_API Renderer( uint32_t nComponents,
-                            uint32_t gpuDataType,
-                            int32_t internalFormat );
-
     LIVRECORE_API virtual ~Renderer();
-
-private:
-    uint32_t _gpuDataType;
-    int32_t _internalFormat;
-    uint32_t _format;
-
 };
 
 }

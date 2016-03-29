@@ -30,22 +30,27 @@ namespace livre
 /**
  * The GLContext class is the warpper for different kinds of OpenGL contexts
  */
-class GLContext : public std::enable_shared_from_this< GLContext >
+class GLContext
 {
 public:
     LIVRECORE_API GLContext();
     LIVRECORE_API virtual ~GLContext();
 
     /**
-     * Shares the current context with the given context.
-     * @param dstContextPtr The destination context to share the context with
+     * Shares the context with the source context.
+     * @param src is the source context to share the context with
      */
-    LIVRECORE_API void shareContext( GLContextPtr dstContextPtr );
+    virtual void share( const GLContext& src ) = 0;
+
+    /**
+     * @return a clone of the context.
+     */
+    virtual GLContextPtr clone() const = 0;
 
     /**
      * Makes the context current.
      */
-    virtual void makeCurrent() = 0;
+    virtual void makeCurrent();
 
     /**
      * Clears the current context.
@@ -69,16 +74,8 @@ public:
     /** @return the global glew context, @see glewSetContext */
     LIVRECORE_API static const GLEWContext* glewGetContext();
 
-protected:
-
-   /**
-     * Implements the sharing of the context from the srcSharedContext.
-     * @param srcSharedContext The source context.
-     */
-    virtual void shareContext_( GLContext* srcSharedContext ) = 0;
-
 private:
-    GLContextPtr parent_;
+
     static const GLEWContext* _glewContext;
 };
 

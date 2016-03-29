@@ -67,7 +67,6 @@ class EventMapper;
 class Frustum;
 class GLContext;
 class GLSLShaders;
-class GLWidget;
 class LODNode;
 class LODEvaluator;
 class MemoryUnit;
@@ -80,7 +79,6 @@ class RenderBrick;
 class Renderer;
 class RootNode;
 class TexturePool;
-class View;
 class VisitState;
 class DataSource;
 class DataSourcePlugin;
@@ -102,17 +100,12 @@ typedef std::array< float, 2 > Range;
  */
 
 typedef std::shared_ptr< AllocMemoryUnit > AllocMemoryUnitPtr;
-typedef std::shared_ptr< RenderBrick > RenderBrickPtr;
 typedef std::shared_ptr< DashConnection > DashConnectionPtr;
 typedef std::shared_ptr< Processor > ProcessorPtr;
 typedef std::shared_ptr< DashProcessor > DashProcessorPtr;
 typedef std::shared_ptr< ProcessorInput > ProcessorInputPtr;
 typedef std::shared_ptr< ProcessorOutput > ProcessorOutputPtr;
-typedef std::shared_ptr< Renderer > RendererPtr;
-typedef std::shared_ptr< View > ViewPtr;
 typedef std::shared_ptr< GLContext > GLContextPtr;
-typedef std::shared_ptr< const GLContext > ConstGLContextPtr;
-typedef std::shared_ptr< GLWidget > GLWidgetPtr;
 typedef std::shared_ptr< TextureState > TextureStatePtr;
 typedef std::shared_ptr< const TextureState > ConstTextureStatePtr;
 typedef std::shared_ptr< DataSource > DataSourcePtr;
@@ -173,7 +166,7 @@ typedef std::vector< CacheId > CacheIds;
  */
 typedef std::vector< CacheObjectPtr > CacheObjects;
 typedef std::vector< ConstCacheObjectPtr > ConstCacheObjects;
-typedef std::vector< RenderBrickPtr > RenderBricks;
+typedef std::vector< RenderBrick > RenderBricks;
 
 /**
  * Map definitions

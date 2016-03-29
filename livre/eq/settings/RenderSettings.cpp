@@ -20,30 +20,17 @@
 
 #include <livre/eq/settings/RenderSettings.h>
 
-namespace lunchbox
-{
-template<> inline void byteswap( livre::RendererType& value )
-    { byteswap( reinterpret_cast< uint32_t& >( value )); }
-}
-
 namespace livre
 {
 
 RenderSettings::RenderSettings( )
-    : rendererType_( RT_RAYCAST ),
-      depth_( 0 )
+    :  depth_( 0 )
 {
-    setDirty( DIRTY_RENDERER_TYPE );
 }
 
 const TransferFunction1D& RenderSettings::getTransferFunction( ) const
 {
     return transferFunction_;
-}
-
-RendererType RenderSettings::getRendererType( ) const
-{
-    return rendererType_;
 }
 
 void RenderSettings::resetTransferFunction( )
@@ -58,19 +45,10 @@ void RenderSettings::setTransferFunction( const TransferFunction1D& tf )
     setDirty( DIRTY_TF );
 }
 
-void RenderSettings::setRendererType( const RendererType rendererType )
-{
-    rendererType_ = rendererType;
-    setDirty( DIRTY_RENDERER_TYPE );
-}
-
 void RenderSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
 {
     if( dirtyBits & DIRTY_TF )
         os << transferFunction_;
-
-    if( dirtyBits & DIRTY_RENDERER_TYPE )
-        os << rendererType_;
 
     if( dirtyBits & DIRTY_DEPTH )
         os << depth_;
@@ -82,9 +60,6 @@ void RenderSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits 
 {
     if( dirtyBits & DIRTY_TF )
         is >> transferFunction_;
-
-    if( dirtyBits & DIRTY_RENDERER_TYPE )
-        is >> rendererType_;
 
     if( dirtyBits & DIRTY_DEPTH )
         is >> depth_;
