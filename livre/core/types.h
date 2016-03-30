@@ -68,7 +68,6 @@ class Frustum;
 class GLContext;
 class GLSLShaders;
 class LODNode;
-class LODEvaluator;
 class MemoryUnit;
 class NodeId;
 class Parameter;

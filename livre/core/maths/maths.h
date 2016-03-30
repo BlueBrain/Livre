@@ -65,6 +65,27 @@ T clamp( const T number, const T lower, const T upper )
     return number < lower ? lower : ( number > upper ? upper : number );
 }
 
+
+/**
+ * Finds the level of detail for a given world position and screen space error
+ * @param frustum is the view frustum
+ * @param worldCoord is the world position
+ * @param worldSpacePerVoxel is world space per voxel
+ * @param volumeDepth is the depth of the volume
+ * @param windowHeight is height of the window in pixels
+ * @param screenSpaceError is the pixels per voxel
+ * @param minLOD lod is clamped to minLOD and maxLOD
+ * @param maxLOD lod is clamped to minLOD and maxLOD
+ */
+LIVRECORE_API uint32_t getLODForPoint( const Frustum& frustum,
+                                       const Vector3f& worldCoord,
+                                       float worldSpacePerVoxel,
+                                       uint32_t volumeDepth,
+                                       uint32_t windowHeight,
+                                       float screenSpaceError,
+                                       uint32_t minLOD,
+                                       uint32_t maxLOD );
+
 }
 
 }

@@ -24,6 +24,8 @@
 #include <livre/core/visitor/RenderNodeVisitor.h>
 #include <livre/core/dash/DashRenderNode.h>
 #include <livre/core/data/LODNode.h>
+#include <livre/core/maths/maths.h>
+#include <livre/core/data/VolumeInformation.h>
 
 //#define LIVRE_STATIC_DECOMPOSITION
 
@@ -33,16 +35,21 @@ namespace livre
 class SelectVisibles : public livre::RenderNodeVisitor
 {
 public:
-    SelectVisibles( DashTree& dashTree, const Frustum& frustum,
-                    const uint32_t windowHeight, const float screenSpaceError,
-                    const float worldSpacePerVoxel, const uint32_t volumeDepth,
-                    const uint32_t minLOD, const uint32_t maxLOD,
+    SelectVisibles( DashTree& dashTree,
+                    const VolumeInformation& volInfo,
+                    const Frustum& frustum,
+                    const uint32_t windowHeight,
+                    const float screenSpaceError,
+                    const uint32_t minLOD,
+                    const uint32_t maxLOD,
                     const Range& range )
     : RenderNodeVisitor( dashTree )
-    , _lodEvaluator( windowHeight, screenSpaceError, worldSpacePerVoxel,
-                     minLOD, maxLOD )
+    , _volInfo( volInfo )
     , _frustum( frustum )
-    , _volumeDepth( volumeDepth )
+    , _windowHeight( windowHeight )
+    , _screenSpaceError( screenSpaceError )
+    , _minLOD( minLOD )
+    , _maxLOD( maxLOD )
     , _range( range )
     {}
 
@@ -86,8 +93,14 @@ protected:
             vmin = _frustum.getEyePos() - _frustum.getViewDir() * _frustum.nearPlane();
         }
 
-        const uint32_t lod =
-            _lodEvaluator.getLODForPoint( _frustum, _volumeDepth, vmin );
+        const uint32_t lod = maths::getLODForPoint( _frustum,
+                                                    vmin,
+                                                    _volInfo.worldSpacePerVoxel,
+                                                    _volInfo.rootNode.getDepth(),
+                                                    _windowHeight,
+                                                    _screenSpaceError,
+                                                    _minLOD,
+                                                    _maxLOD );
 
         const bool isLODVisible = (lod <= lodNode.getNodeId().getLevel( ));
         if( isLODVisible )
@@ -123,11 +136,14 @@ protected:
     }
 
 private:
-    const ScreenSpaceLODEvaluator _lodEvaluator;
-    const Frustum& _frustum;
-    const uint32_t _volumeDepth;
-    const Range _range;
 
+    const VolumeInformation& _volInfo;
+    const Frustum& _frustum;
+    const uint32_t _windowHeight;
+    const float _screenSpaceError;
+    const uint32_t _minLOD;
+    const uint32_t _maxLOD;
+    const Range _range;
     DashRenderNodes _visibles;
 };
 }

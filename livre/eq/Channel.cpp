@@ -40,7 +40,6 @@
 #include <livre/lib/cache/TextureObject.h>
 
 #include <livre/lib/render/AvailableSetGenerator.h>
-#include <livre/lib/render/ScreenSpaceLODEvaluator.h>
 #include <livre/lib/render/SelectVisibles.h>
 #include <livre/lib/visitor/DFSTraversal.h>
 
@@ -174,14 +173,13 @@ public:
 
         const VolumeInformation& volInfo = dashTree.getDataSource()->getVolumeInfo();
 
-        const float worldSpacePerVoxel = volInfo.worldSpacePerVoxel;
-        const uint32_t volumeDepth = volInfo.rootNode.getDepth();
         _drawRange = _channel->getRange();
-
-        SelectVisibles visitor( dashTree, _frustum,
+        SelectVisibles visitor( dashTree,
+                                volInfo,
+                                _frustum,
                                 _channel->getPixelViewport().h,
-                                screenSpaceError, worldSpacePerVoxel,
-                                volumeDepth, minLOD, maxLOD,
+                                screenSpaceError,
+                                minLOD, maxLOD,
                                 Range{{ _drawRange.start, _drawRange.end }});
 
         livre::DFSTraversal traverser;
