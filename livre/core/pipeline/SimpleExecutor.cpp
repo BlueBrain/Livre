@@ -73,20 +73,22 @@ struct SimpleExecutor::Impl
         Executables executables;
         while( true )
         {
-            const Futures inputConds( inputConditions.begin(), inputConditions.end( ));
-            waitForAny( inputConds );
-
+            waitForAny( Futures( inputConditions.begin(), inputConditions.end( )));
             {
                 ScopedLock lock( _promiseReset );
-                if( _unlockPromise.getFuture( ).isReady( ))
+                if( _unlockPromise.getFuture().isReady( ))
                 {
                     while( !_mtWorkQueue.empty( ))
                     {
                         Executable* exec = _mtWorkQueue.pop();
+                        // In destruction tine "0" is pushed to the queue
+                        // and no further executable is scheduled
                         if( !exec )
                             return;
 
                         executables.push_back( exec );
+                        const Futures& preConds = exec->getPreconditions();
+                        inputConditions.insert( preConds.begin(), preConds.end( ));
                     }
 
                     inputConditions.erase( _unlockPromise.getFuture( ));
@@ -110,10 +112,7 @@ struct SimpleExecutor::Impl
                         inputConditions.erase( future );
                 }
                 else
-                {
                     ++it;
-                    inputConditions.insert( preConds.begin(), preConds.end( ));
-                }
             }
         }
     }
@@ -125,9 +124,9 @@ struct SimpleExecutor::Impl
 
     void schedule( Executable& exec )
     {
+        ScopedLock lock( _promiseReset );
         const bool wasEmpty = _mtWorkQueue.empty();
         _mtWorkQueue.push_back( &exec );
-        ScopedLock lock( _promiseReset );
         if( wasEmpty )
             _unlockPromise.set( true );
     }
