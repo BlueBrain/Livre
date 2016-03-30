@@ -26,7 +26,7 @@ namespace livre
 {
 
 /**
- * Input connection for the @see PipeFilter.
+ * Input connection for the PipeFilter.
  */
 class InputPort
 {

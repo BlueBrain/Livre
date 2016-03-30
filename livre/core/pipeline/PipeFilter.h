@@ -92,7 +92,7 @@ protected:
      * @param filter the filter object.
      */
     PipeFilter( const std::string& name,
-                FilterPtr filter );
+                FilterPtr&& filter );
 
 private:
 

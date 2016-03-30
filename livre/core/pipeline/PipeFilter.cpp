@@ -187,7 +187,7 @@ struct PipeFilter::Impl
 };
 
 PipeFilter::PipeFilter( const std::string& name,
-                        FilterPtr filter )
+                        FilterPtr&& filter )
     : _impl( new Impl( *this, name, std::move( filter )))
 {}
 

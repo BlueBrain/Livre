@@ -27,23 +27,25 @@ namespace livre
 {
 
 /**
- * Provides a very basic implementation for the @see Executor
+ * Provides a very basic implementation for the Executor
  * class. It has a thread pool for executing multiple executables
  * asynchronously.
  *
- * The submitted executables are queued for the worker threads,
+ * The submitted executables are scheduled to the worker threads,
  * by looking at the preconditions if they are satisfied.
  */
-
 class SimpleExecutor : public Executor
 {
 public:
 
     /**
-     * @param threadCount number of workers are thread pools that executes individual
-     * executables ( PipeFilter, Pipeline )
+     * @param threadCount is number of worker threads
+     * @param glContext if a gl context is provided, a new context will be created and
+     * the worker threads will share the context with the given context
      */
-    explicit SimpleExecutor( size_t threadCount );
+    SimpleExecutor( size_t threadCount,
+                 GLContextPtr glContext = GLContextPtr( ));
+
     virtual ~SimpleExecutor();
 
     /**
@@ -52,7 +54,7 @@ public:
     void schedule( Executable& executable ) final;
 
     /**
-     * @copydoc Executor::clear()
+     * @copydoc Executor::clear
      */
     void clear() final;
 

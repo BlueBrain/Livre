@@ -187,11 +187,14 @@ typedef std::vector< NodeId > NodeIds;
 typedef std::vector< CacheId > CacheIds;
 
 /**
- * Vector/list definitions for complex types
+ * Vector definitions for complex types
  */
 typedef std::vector< CacheObjectPtr > CacheObjects;
 typedef std::vector< ConstCacheObjectPtr > ConstCacheObjects;
 
+/**
+ * List definitions for complex types
+ */
 typedef std::list< Executable* > Executables;
 typedef std::list< Future > Futures;
 typedef std::list< Promise > Promises;
@@ -243,9 +246,9 @@ const Identifier INVALID_CACHE_ID = -1; //!< Invalid cache id.
 const Identifier INVALID_NODE_ID = -1; //!< Invalid node ID.
 
 const uint32_t MAX_CHILDREN_BITS = 4; //!< Maximum number of children is 16
-const uint32_t NODEID_LEVEL_BITS = 4; //>!  NodeId
-const uint32_t NODEID_BLOCK_BITS = 14; //>!  NodeId
-const uint32_t NODEID_FRAME_BITS = 18; //>!  NodeId
+const uint32_t NODEID_LEVEL_BITS = 4; //>! see NodeId
+const uint32_t NODEID_BLOCK_BITS = 14; //>! see NodeId
+const uint32_t NODEID_FRAME_BITS = 18; //>! see NodeId
 
 const uint32_t INVALID_POSITION = ( 1u << NODEID_BLOCK_BITS ) - 1; //!< Invalid node ID.
 const uint32_t INVALID_LEVEL = ( 1u << NODEID_LEVEL_BITS ) - 1; //!< Invalid tree level.4 bits is on

@@ -48,7 +48,9 @@ struct Promise::Impl
 
     void reset()
     {
-        _data.reset();
+       flush();
+        _data = AsyncData( DataInfo( _data.getName(), _data.getDataType( )));
+        _future = Future( _data );
     }
 
     void flush()
@@ -62,7 +64,7 @@ struct Promise::Impl
     }
 
     AsyncData _data;
-    const Future _future;
+    Future _future;
 };
 
 Promise::Promise( const DataInfo& dataInfo )

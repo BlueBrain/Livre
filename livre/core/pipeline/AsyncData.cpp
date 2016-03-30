@@ -90,13 +90,6 @@ struct AsyncData::Impl
         _future.wait();
     }
 
-    void reset()
-    {
-        ConstPortDataPromise newPromise;
-        _promise.swap( newPromise );
-        _future = _promise.get_future();
-    }
-
     ConstPortDataPromise _promise;
     mutable ConstPortDataFuture _future;
     const DataInfo _dataInfo;
@@ -139,9 +132,9 @@ void AsyncData::wait() const
     _impl->wait();
 }
 
-void AsyncData::reset()
+bool AsyncData::operator==( const AsyncData& asyncData )
 {
-    _impl->reset();
+    return &_impl->_promise == &asyncData._impl->_promise;
 }
 
 void waitForAny( const Futures& futures )

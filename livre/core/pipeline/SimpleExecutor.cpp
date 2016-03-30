@@ -50,85 +50,70 @@ bool operator<( const Future& future1, const Future& future2 )
 struct SimpleExecutor::Impl
 {
 
-    Impl( const size_t threadCount )
-        : _workThread( boost::thread( boost::bind( &Impl::schedule, this )))
-        , _workers( threadCount )
+    Impl( const size_t threadCount, GLContextPtr glContext )
+        : _workers( threadCount, glContext )
         , _unlockPromise( DataInfo( "LoopUnlock", getType< bool >( )))
+        , _workThread( boost::thread( boost::bind( &Impl::schedule, this )))
     {}
 
     ~Impl()
     {
         _mtWorkQueue.clear();
         _mtWorkQueue.push( 0 );
+        {
+            ScopedLock lock( _promiseReset );
+             _unlockPromise.set( true );
+        }
         _workThread.join();
     }
 
     void schedule()
     {
-        std::set< Future > inputConditions;
-        std::set< Future > outputConditions;
-
+        std::set< Future > inputConditions = { _unlockPromise.getFuture() };
+        Executables executables;
         while( true )
         {
-            Executables executables;
-            Executable* executable = _mtWorkQueue.pop();
-            if( !executable )
-                return;
+            const Futures inputConds( inputConditions.begin(), inputConditions.end( ));
+            waitForAny( inputConds );
 
-            executables.push_back( executable );
+            {
+                ScopedLock lock( _promiseReset );
+                if( _unlockPromise.getFuture( ).isReady( ))
+                {
+                    while( !_mtWorkQueue.empty( ))
+                    {
+                        Executable* exec = _mtWorkQueue.pop();
+                        if( !exec )
+                            return;
 
-            for( const Executable* exec: executables )
-                for( const Future& future: exec->getPreconditions( ))
-                    inputConditions.insert( future );
+                        executables.push_back( exec );
+                    }
+
+                    inputConditions.erase( _unlockPromise.getFuture( ));
+                    _unlockPromise.reset();
+                    inputConditions.insert( _unlockPromise.getFuture( ));
+
+                }
+            }
 
             Executables::iterator it = executables.begin();
             while( it != executables.end( ))
             {
-                Executable* exec = *it;
-                const FutureMap futureMap( exec->getPreconditions( ));
+                Executable* executable = *it;
+                const Futures& preConds = executable->getPreconditions();
+                const FutureMap futureMap( preConds );
                 if( futureMap.isReady( ))
                 {
-                    _workers.execute( *exec );
+                    _workers.schedule( *executable );
                     it = executables.erase( it );
-
-                    for( const Future& future: exec->getPostconditions( ))
-                        outputConditions.insert( future );
-
-                    for( const Future& future: exec->getPreconditions( ))
+                    for( const auto& future: futureMap.getFutures( ))
                         inputConditions.erase( future );
                 }
                 else
+                {
                     ++it;
-            }
-
-            Futures intersection;
-            std::set_intersection( outputConditions.begin(), outputConditions.end(),
-                                   inputConditions.begin(), inputConditions.end(),
-                                   std::back_inserter( intersection ));
-
-            // Wait only for the futures where executed output conditions
-            // executables intersects
-            if( !intersection.empty( ))
-            {
-                FutureMap futureMap( intersection );
-                futureMap.waitForAny();
-            }
-
-            // Add left over executables back to queue
-            for( Executable* exec: executables )
-                _mtWorkQueue.push( exec );
-
-            FutureMap futureMap( intersection );
-            futureMap.waitForAny();
-
-            std::set< Future >::iterator itFuture = outputConditions.begin();
-            while( itFuture != outputConditions.end( ))
-            {
-                const Future& future = *itFuture;
-                if( future.isReady( ))
-                    itFuture = outputConditions.erase( itFuture );
-                else
-                    ++itFuture;
+                    inputConditions.insert( preConds.begin(), preConds.end( ));
+                }
             }
         }
     }
@@ -140,18 +125,22 @@ struct SimpleExecutor::Impl
 
     void schedule( Executable& exec )
     {
-        _mtWorkQueue.push( &exec );
+        const bool wasEmpty = _mtWorkQueue.empty();
+        _mtWorkQueue.push_back( &exec );
+        ScopedLock lock( _promiseReset );
+        if( wasEmpty )
+            _unlockPromise.set( true );
     }
 
     lunchbox::MTQueue< Executable* > _mtWorkQueue;
-    boost::thread _workThread;
     Workers _workers;
     Promise _unlockPromise;
     boost::mutex _promiseReset;
+    boost::thread _workThread;
 };
 
-SimpleExecutor::SimpleExecutor( const size_t threadCount )
-    : _impl( new Impl( threadCount ))
+SimpleExecutor::SimpleExecutor( const size_t threadCount, GLContextPtr glContext )
+    : _impl( new Impl( threadCount, glContext ))
 {
 }
 

@@ -39,15 +39,14 @@ struct Workers::Impl
         for( size_t i = 0; i < nThreads; ++i )
             _threadGroup.create_thread( boost::bind( &Impl::execute,
                                                      this ));
-
     }
 
     void execute()
     {
         if( _glContext )
         {
-            GLContextPtr context = _glContext->createContext();
-            _glContext->shareContext( context );
+            GLContextPtr context = _glContext->clone();
+            context->share( *_glContext );
             context->makeCurrent();
         }
 
@@ -95,7 +94,7 @@ Workers::Workers( const size_t nThreads,
 Workers::~Workers()
 {}
 
-void Workers::execute( Executable& executable )
+void Workers::schedule( Executable& executable )
 {
     _impl->submitWork( executable );
 }

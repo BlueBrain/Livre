@@ -78,20 +78,17 @@ public:
     void wait() const;
 
     /**
-     * Resets the promise/future. This function should not be called when
-     * threads are blocked on wait()
+     * @param asyncData to be compared with
+     * @return true if both async data are same
      */
-    void reset();
+    bool operator==( const AsyncData& asyncData );
 
 private:
 
     friend void waitForAny( const Futures& futures );
 
-    AsyncData( const AsyncData& ) = delete;
-    AsyncData& operator=( const AsyncData& ) = delete;
-
     struct Impl;
-    std::unique_ptr<Impl> _impl;
+    std::shared_ptr<Impl> _impl;
 };
 
 }

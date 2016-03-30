@@ -30,13 +30,6 @@ struct Future::Impl
         , _data( data )
     {}
 
-    Future rename( const std::string& name ) const
-    {
-        Future ret( _data );
-        ret._impl->_name = name;
-        return ret;
-    }
-
     std::string getName() const
     {
         return _name;
@@ -58,7 +51,7 @@ struct Future::Impl
     }
 
     std::string _name;
-    const AsyncData& _data;
+    AsyncData _data;
 };
 
 Future::Future( const AsyncData& data )
@@ -91,7 +84,7 @@ bool Future::isReady() const
 
 bool Future::operator==( const Future& future ) const
 {
-    return &_impl->_data == &future._impl->_data;
+    return _impl->_data == future._impl->_data;
 }
 
 const AsyncData& Future::_getAsyncData() const

@@ -43,11 +43,11 @@ public:
     ~Workers();
 
     /**
-     * Submitted executable is executed by the available
-     * threads.
+     * Submitted executable is scheduled to the execution
+     * queue.
      * @param executable is executed by thread pool.
      */
-    void execute( Executable& executable );
+    void schedule( Executable& executable );
 
     /**
      * @return the size of thread pool.
