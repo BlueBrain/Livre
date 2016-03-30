@@ -73,6 +73,12 @@ public:
      */
     bool operator==( const Future& future ) const;
 
+    /**
+     * @param future is the future to be checked with
+     * @return true if both futures are belonging to different promise
+     */
+    bool operator!=( const Future& future ) const { return !(*this == future); }
+
 private:
 
     friend class Promise;

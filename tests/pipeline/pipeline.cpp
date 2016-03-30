@@ -309,6 +309,36 @@ BOOST_AUTO_TEST_CASE( testOneToManyManyToOnePipeline )
     }
 }
 
+BOOST_AUTO_TEST_CASE( testPromiseFuture )
+{
+    livre::Promise promise( livre::DataInfo( "Helloworld", livre::getType< uint32_t >( )));
+    livre::Future future1 = promise.getFuture();
+    livre::Future future2 = promise.getFuture();
+    BOOST_CHECK( future1 == future2 );
+
+    // Promise only be set with the right type
+    BOOST_CHECK_EXCEPTION( promise.set( 12.0f );,
+                           std::runtime_error, check_error );
+
+    promise.set( 42u );
+    BOOST_CHECK_EQUAL( future1.get< uint32_t >(), 42u );
+    BOOST_CHECK_EQUAL( future2.get< uint32_t >(), 42u );
+
+    // Promise only can be set once
+    BOOST_CHECK_EXCEPTION( promise.set( 42u );,
+                           std::runtime_error, check_error );
+
+    promise.reset();
+    livre::Future future3 = promise.getFuture();
+    BOOST_CHECK( future1 != future3 );
+    BOOST_CHECK_EQUAL( future1.get< uint32_t >(), 42u );
+
+    // Promise is set with explicit conversion
+    promise.set< uint32_t >( 43.0f );
+
+    BOOST_CHECK_EQUAL( future3.get< uint32_t >(), 43u );
+}
+
 BOOST_AUTO_TEST_CASE( testFutureMaps )
 {
     livre::PipeFilterT< TestFilter > pipeFilter( "Producer" );
