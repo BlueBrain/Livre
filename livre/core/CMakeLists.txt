@@ -13,7 +13,6 @@ set(LIVRECORE_PUBLIC_HEADERS
   data/VolumeInformation.h
   render/GLContext.h
   render/GLSLShaders.h
-  render/LODEvaluator.h
   util/Utilities.h
   lunchboxTypes.h
   mathTypes.h

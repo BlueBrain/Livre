@@ -20,6 +20,9 @@
 #include <livre/core/maths/maths.h>
 #include <vmmlib/matrix.hpp>
 
+#include <livre/core/data/VolumeInformation.h>
+#include <livre/core/render/Frustum.h>
+
 namespace livre
 {
 namespace maths
@@ -72,6 +75,39 @@ Matrix4f computeModelViewMatrix( const Vector3f& eye, const Vector3f& center )
 
     return computeModelViewMatrix( rotationMatrix, eye );
 }
+
+uint32_t getLODForPoint( const Frustum& frustum,
+                         const Vector3f& worldCoord,
+                         const float worldSpacePerVoxel,
+                         const uint32_t volumeDepth,
+                         const uint32_t windowHeight,
+                         const float screenSpaceError,
+                         const uint32_t minLOD,
+                         const uint32_t maxLOD )
+{
+    const float t = frustum.top();
+    const float b = frustum.bottom();
+
+    const float worldSpacePerPixel = ( t - b ) / windowHeight;
+    const float voxelPerPixel = worldSpacePerPixel  / worldSpacePerVoxel * screenSpaceError;
+
+    Vector4f hWorldCoord = worldCoord;
+    hWorldCoord[ 3 ] = 1.0f;
+    const float distance = std::abs( frustum.getNearPlane().dot( hWorldCoord ));
+
+    const float n = frustum.nearPlane();
+    const float voxelPerPixelInDistance = voxelPerPixel * distance / n;
+
+    const uint32_t minLOD_ = std::min( minLOD, volumeDepth );
+    const uint32_t maxLOD_ = std::min( maxLOD, volumeDepth );
+
+    const uint32_t lod = std::min( std::max( std::log2( voxelPerPixelInDistance ), 0.0f ),
+                                   (float)volumeDepth - 1 );
+
+    return livre::maths::clamp( volumeDepth - lod - 1, minLOD_, maxLOD_ );
+
+}
+
 
 }
 }

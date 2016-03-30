@@ -20,8 +20,8 @@
 #define BOOST_TEST_MODULE LodSelection
 #include <boost/test/unit_test.hpp>
 
-#include <livre/lib/render/ScreenSpaceLODEvaluator.h>
 #include <livre/core/render/Frustum.h>
+#include <livre/core/maths/maths.h>
 
 uint32_t getLOD( const uint32_t minLOD,
                  const uint32_t maxLOD,
@@ -49,12 +49,14 @@ uint32_t getLOD( const uint32_t minLOD,
 
     const livre::Frustum frustum( mvMat, projMat );
 
-    livre::ScreenSpaceLODEvaluator lodEvaluator( windowHeight,
-                                                 screenSpaceError,
-                                                 worldSpacePerVoxel,
-                                                 minLOD,
-                                                 maxLOD );
-    return lodEvaluator.getLODForPoint( frustum, volumeDepth, worldPos );
+    return livre::maths::getLODForPoint( frustum,
+                                         worldPos,
+                                         worldSpacePerVoxel,
+                                         volumeDepth,
+                                         windowHeight,
+                                         screenSpaceError,
+                                         minLOD,
+                                         maxLOD );
 }
 
 BOOST_AUTO_TEST_CASE( testLODSelection )
