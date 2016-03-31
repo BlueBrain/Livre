@@ -67,9 +67,9 @@ protected:
         const Boxf& worldBox = lodNode.getWorldBox();
         const bool isInFrustum = _frustum.boxInFrustum( worldBox );
         renderNode.setInFrustum( isInFrustum );
+        renderNode.setLODVisible( false );
         if( !isInFrustum )
         {
-            renderNode.setLODVisible( false );
             state.setVisitChild( false );
             return;
         }
