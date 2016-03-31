@@ -120,23 +120,9 @@ struct RayCastRenderer::Impl
         _framebufferTexture.copyFromFrameBuffer( GL_RGBA, pvp );
     }
 
-    void onFrameStart( const Frustum& frustum LB_UNUSED,
-                       const PixelViewport& view LB_UNUSED,
+    void onFrameStart( const Frustum& frustum,
                        const RenderBricks& renderBricks )
     {
-    #ifdef LIVRE_DEBUG_RENDERING
-        std::sort( _usedTextures[1].begin(), _usedTextures[1].end( ));
-        if( _usedTextures[0] != _usedTextures[1] )
-        {
-            std::cout << "Render ";
-            std::copy( _usedTextures[1].begin(), _usedTextures[1].end(),
-                       std::ostream_iterator< uint32_t >( std::cout, " " ));
-            std::cout << " in " << (void*)this << std::endl;
-        }
-        _usedTextures[0].swap( _usedTextures[1] );
-        _usedTextures[1].clear();
-    #endif
-
         if( _nSamplesPerRay == 0 ) // Find sampling rate
         {
             uint32_t maxLOD = 0;
@@ -212,10 +198,7 @@ struct RayCastRenderer::Impl
         glUseProgram( 0 );
     }
 
-
-    void renderBrick( const Frustum&,
-                      const PixelViewport& viewport,
-                      const RenderBrick& rb )
+    void renderBrick( const PixelViewport& viewport, const RenderBrick& rb )
     {
         GLSLShaders::Handle program = _shaders.getProgram( );
         LBASSERT( program );
@@ -274,12 +257,26 @@ struct RayCastRenderer::Impl
         tParamNameGL = glGetUniformLocation( program, "refLevel" );
         glUniform1i( tParamNameGL, refLevel );
 
-    #ifdef LIVRE_DEBUG_RENDERING
         _usedTextures[1].push_back( texState->textureId );
-    #endif
         rb.drawBrick( false /* draw front */, true /* cull back */ );
 
         glUseProgram( 0 );
+    }
+
+    void onFrameEnd()
+    {
+        std::sort( _usedTextures[1].begin(), _usedTextures[1].end( ));
+#ifdef LIVRE_DEBUG_RENDERING
+        if( _usedTextures[0] != _usedTextures[1] )
+        {
+            std::cout << "Rendered ";
+            std::copy( _usedTextures[1].begin(), _usedTextures[1].end(),
+                       std::ostream_iterator< uint32_t >( std::cout, " " ));
+            std::cout << " in " << (void*)this << std::endl;
+        }
+#endif
+        _usedTextures[0].swap( _usedTextures[1] );
+        _usedTextures[1].clear();
     }
 
     eq::util::Texture _framebufferTexture;
@@ -309,18 +306,28 @@ void RayCastRenderer::update( const FrameData& frameData )
 }
 
 void RayCastRenderer::_onFrameStart( const Frustum& frustum,
-                                     const PixelViewport& view,
+                                     const PixelViewport&,
                                      const RenderBricks& renderBricks )
 {
-    _impl->onFrameStart( frustum, view, renderBricks );
+    _impl->onFrameStart( frustum, renderBricks );
 }
 
 
-void RayCastRenderer::_renderBrick( const Frustum& frustum,
-                                    const PixelViewport& view,
+void RayCastRenderer::_renderBrick( const Frustum&, const PixelViewport& view,
                                     const RenderBrick& renderBrick )
 {
-    _impl->renderBrick( frustum, view, renderBrick );
+    _impl->renderBrick( view, renderBrick );
+}
+
+void RayCastRenderer::_onFrameEnd( const Frustum&, const PixelViewport&,
+                                   const RenderBricks& )
+{
+    _impl->onFrameEnd();
+}
+
+size_t RayCastRenderer::getNumBricksUsed() const
+{
+    return _impl->_usedTextures[0].size();
 }
 
 }
