@@ -86,7 +86,7 @@ public:
     /**
      * @return The tree level.
      */
-    LIVRECORE_API int32_t getRefLevel( ) const { return nodeId_.getLevel(); }
+    LIVRECORE_API uint32_t getRefLevel( ) const { return nodeId_.getLevel(); }
 
     /**
      * @return The unique node id.

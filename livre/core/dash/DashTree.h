@@ -33,13 +33,17 @@ namespace livre
 class DashTree
 {
 public:
-    LIVRECORE_API DashTree( ConstDataSourcePtr dataSource );
+
+    /**
+     * @param dataSource node hierarchy matches the dash tree node hierarchy
+     */
+    LIVRECORE_API DashTree( const DataSource& dataSource );
     LIVRECORE_API ~DashTree();
 
     /**
      * @return Returns the data source
      */
-    LIVRECORE_API ConstDataSourcePtr getDataSource( ) const;
+    LIVRECORE_API const DataSource& getDataSource() const;
 
     /**
      * Creates a new context, registers it and maps its data to already registered contexts.
