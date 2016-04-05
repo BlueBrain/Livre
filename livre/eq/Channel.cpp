@@ -98,7 +98,7 @@ public:
                 static_cast< livre::Node* >( _channel->getNode( ));
 
         const livre::DashTree& dashTree = node->getDashTree();
-        ConstDataSourcePtr dataSource = dashTree.getDataSource();
+        const DataSource& dataSource = dashTree.getDataSource();
         _renderer.reset( new RayCastRenderer( nSamplesPerRay,
                                               nSamplesPerPixel,
                                               dataSource.getVolumeInfo( )));
@@ -397,7 +397,11 @@ public:
             voxelSize *= 1000;
         }
 
-        os << _renderer->getNumBricksUsed() << " bricks rendered" << std::endl
+        const size_t nBricks = _renderer->getNumBricksUsed();
+        const float mbBricks =
+            float( dataSource.getVolumeInfo().maximumBlockSize.product( )) /
+            1024.f / 1024.f * float( nBricks );
+        os << nBricks << " bricks / " << mbBricks << " MB rendered" << std::endl
            << "Total resolution " << info.voxels << " depth "
            << info.rootNode.getDepth() << std::endl
            << "Block resolution " << info.maximumBlockSize << std::endl

@@ -66,7 +66,7 @@ Identifiers getVisibles( const livre::DataSource& dataSource,
                                           screenSpaceError,
                                           minLOD,
                                           maxLOD,
-                                          { 0.0f, 1.0f } );
+                                          {{ 0.0f, 1.0f }});
 
     livre::DFSTraversal traverser;
     traverser.traverse( dataSource.getVolumeInfo().rootNode,

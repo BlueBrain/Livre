@@ -54,13 +54,16 @@ public:
     size_t getNumBricksUsed() const;
 
 private:
-    void _onFrameStart( const Frustum& frustum, const PixelViewport& view,
+    void _onFrameStart( const Frustum& frustum,
+                        const PixelViewport& view,
                         const RenderBricks& renderBricks ) final;
 
-    void _renderBrick( const Frustum& frustum, const PixelViewport& view,
+    void _renderBrick( const Frustum& frustum,
+                       const PixelViewport& view,
                        const RenderBrick& renderBrick ) final;
 
-    void _onFrameEnd( const Frustum& frustum, const PixelViewport& view,
+    void _onFrameEnd( const Frustum& frustum,
+                      const PixelViewport& view,
                       const RenderBricks& renderBricks ) final;
 
     struct Impl;
