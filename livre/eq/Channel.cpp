@@ -98,11 +98,11 @@ public:
                 static_cast< livre::Node* >( _channel->getNode( ));
 
         const livre::DashTree& dashTree = node->getDashTree();
-        ConstDataSourcePtr dataSource = dashTree.getDataSource();
+        const DataSource& dataSource = dashTree.getDataSource();
         _renderer.reset( new RayCastRenderer(
                                   nSamplesPerRay,
                                   nSamplesPerPixel,
-                                  dataSource->getVolumeInfo( )));
+                                  dataSource.getVolumeInfo( )));
     }
 
     const Frustum& setupFrustum()
@@ -151,7 +151,7 @@ public:
                 std::static_pointer_cast< const TextureObject >( cacheObject );
 
             const LODNode& lodNode =
-                    dashTree.getDataSource()->getNode( NodeId( cacheObject->getId( )));
+                    dashTree.getDataSource().getNode( NodeId( cacheObject->getId( )));
 
             renderBricks.emplace_back( lodNode, texture->getTextureState( ));
         }
@@ -171,11 +171,10 @@ public:
 
         DashTree& dashTree = node->getDashTree();
 
-        const VolumeInformation& volInfo = dashTree.getDataSource()->getVolumeInfo();
+        const VolumeInformation& volInfo = dashTree.getDataSource().getVolumeInfo();
 
         _drawRange = _channel->getRange();
         SelectVisibles visitor( dashTree,
-                                volInfo,
                                 _frustum,
                                 _channel->getPixelViewport().h,
                                 screenSpaceError,
@@ -387,9 +386,9 @@ public:
         os << window->getTextureCache().getStatistics();
         _drawText( os.str(), y );
 
-        ConstDataSourcePtr dataSource = static_cast< livre::Node* >(
+        const DataSource& dataSource = static_cast< livre::Node* >(
             _channel->getNode( ))->getDashTree().getDataSource();
-        const VolumeInformation& info = dataSource->getVolumeInfo();
+        const VolumeInformation& info = dataSource.getVolumeInfo();
         Vector3f voxelSize = info.boundingBox.getSize() / info.voxels;
         std::string unit = "m";
         if( voxelSize.x() < 0.000001f )

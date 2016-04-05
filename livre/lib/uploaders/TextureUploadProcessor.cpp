@@ -146,7 +146,7 @@ void TextureUploadProcessor::_loadData()
     loadVisitor.setSynchronous( _vrParameters.getSynchronousMode( ));
 
     DFSTraversal traverser;
-    const RootNode& rootNode = _dashTree.getDataSource()->getVolumeInfo().rootNode;
+    const RootNode& rootNode = _dashTree.getDataSource().getVolumeInfo().rootNode;
     traverser.traverse( rootNode, loadVisitor, _currentFrameID );
 
     if(  _vrParameters.getSynchronousMode( ))
@@ -178,7 +178,7 @@ void TextureUploadProcessor::runLoop_()
         CollectVisiblesVisitor collectVisibles( _dashTree );
         DFSTraversal traverser;
         const RootNode& rootNode =
-                _dashTree.getDataSource()->getVolumeInfo().rootNode;
+                _dashTree.getDataSource().getVolumeInfo().rootNode;
         traverser.traverse( rootNode, collectVisibles, renderStatus.getFrameID( ));
         _currentFrameID = renderStatus.getFrameID();
     }

@@ -34,7 +34,7 @@ typedef std::unordered_map< Identifier, dash::NodePtr > IdDashNodeMap;
 struct DashTree::Impl
 {
 public:
-    explicit Impl( ConstDataSourcePtr dataSource )
+    explicit Impl( const DataSource& dataSource )
         : _dataSource( dataSource ),
           _localContext( dash::Context::getMain( ))
     {
@@ -102,7 +102,7 @@ public:
         dash::Context& prevCtx = dash::Context::getCurrent();
         _localContext.setCurrent();
 
-        const LODNode& lodNode = _dataSource->getNode( nodeId );
+        const LODNode& lodNode = _dataSource.getNode( nodeId );
         if( !lodNode.isValid( ))
         {
             prevCtx.setCurrent();
@@ -124,7 +124,7 @@ public:
         return node;
     }
 
-    ConstDataSourcePtr _dataSource;
+    const DataSource& _dataSource;
     IdDashNodeMap _dashNodeMap;
     DashRenderStatus* _renderStatus;
     mutable ReadWriteMutex _mutex;
@@ -132,11 +132,11 @@ public:
     std::vector< DashContextPtr > dashContexts;
 };
 
-DashTree::DashTree( ConstDataSourcePtr datasSource )
-    : _impl( new Impl( datasSource ))
+DashTree::DashTree( const DataSource& dataSource )
+    : _impl( new Impl( dataSource ))
 {}
 
-ConstDataSourcePtr DashTree::getDataSource() const
+const DataSource& DashTree::getDataSource() const
 {
     return _impl->_dataSource;
 }

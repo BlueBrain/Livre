@@ -73,7 +73,7 @@ public:
             const lunchbox::URI& uri = lunchbox::URI( volumeSettings.getURI( ));
             dash::Context::getMain(); // Create the main context
             _dataSource.reset( new livre::DataSource( uri ));
-            _dashTree.reset( new livre::DashTree( _dataSource ));
+            _dashTree.reset( new livre::DashTree( *_dataSource ));
         }
         catch( const std::runtime_error& err )
         {
@@ -112,7 +112,7 @@ public:
 
     livre::Node* const _node;
     livre::Config* const _config;
-    DataSourcePtr _dataSource;
+    std::unique_ptr< DataSource > _dataSource;
     std::unique_ptr< TextureDataCache > _textureDataCache;
     std::unique_ptr< livre::DashTree > _dashTree;
 };

@@ -36,7 +36,6 @@ class SelectVisibles : public livre::RenderNodeVisitor
 {
 public:
     SelectVisibles( DashTree& dashTree,
-                    const VolumeInformation& volInfo,
                     const Frustum& frustum,
                     const uint32_t windowHeight,
                     const float screenSpaceError,
@@ -44,7 +43,6 @@ public:
                     const uint32_t maxLOD,
                     const Range& range )
     : RenderNodeVisitor( dashTree )
-    , _volInfo( volInfo )
     , _frustum( frustum )
     , _windowHeight( windowHeight )
     , _screenSpaceError( screenSpaceError )
@@ -93,16 +91,17 @@ protected:
             vmin = _frustum.getEyePos() - _frustum.getViewDir() * _frustum.nearPlane();
         }
 
-        const uint32_t lod = maths::getLODForPoint( _frustum,
-                                                    vmin,
-                                                    _volInfo.worldSpacePerVoxel,
-                                                    _volInfo.rootNode.getDepth(),
-                                                    _windowHeight,
-                                                    _screenSpaceError,
-                                                    _minLOD,
-                                                    _maxLOD );
+        const Vector3f voxelBox = lodNode.getVoxelBox().getSize();
+        const Vector3f worldSpacePerVoxel = worldBox.getSize() / voxelBox;
 
-        const bool isLODVisible = (lod <= lodNode.getNodeId().getLevel( ));
+        bool isLODVisible = maths::isLODVisible( _frustum,
+                                                  vmin,
+                                                  worldSpacePerVoxel.find_min(),
+                                                  _windowHeight,
+                                                  _screenSpaceError );
+        isLODVisible = ( isLODVisible && lodNode.getRefLevel() >= _minLOD )
+                       ||( lodNode.getRefLevel() == _maxLOD );
+
         if( isLODVisible )
             _visibles.push_back( renderNode );
         state.setVisitChild( !isLODVisible );
@@ -137,7 +136,6 @@ protected:
 
 private:
 
-    const VolumeInformation& _volInfo;
     const Frustum& _frustum;
     const uint32_t _windowHeight;
     const float _screenSpaceError;
