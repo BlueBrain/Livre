@@ -16,39 +16,36 @@ if(NOT QT5WIDGETS_FOUND)
   return()
 endif()
 
-set(LIVREGUI_MOC_HEADERS
-  MainWindow.h
+set(LIVREGUI_HEADERS
   animationController/AnimationController.h
+  AppSettings.h
+  Controller.h
+  MainWindow.h
   renderParametersController/RenderParametersController.h
   tfEditor/ColorMapWidget.h
   tfEditor/HoverPoints.h
   tfEditor/TFWidget.h
-  tfEditor/TransferFunctionEditor.h)
-
-set(LIVREGUI_HEADERS
-  ${LIVREGUI_MOC_HEADERS}
+  tfEditor/TransferFunctionEditor.h
+  tfEditor/Utilities.h
   types.h
-  AppSettings.h
-  Controller.h
-  tfEditor/Utilities.h)
+)
 
 set(LIVREGUI_SOURCES
+  animationController/AnimationController.cpp
+  animationController/AnimationController.ui
   Controller.cpp
   livreGUI.cpp
   MainWindow.cpp
-  animationController/AnimationController.cpp
+  MainWindow.ui
+  renderParametersController/RenderParametersController.ui
   renderParametersController/RenderParametersController.cpp
+  resources/resources.qrc
   tfEditor/ColorMapWidget.cpp
+  tfEditor/TransferFunctionEditor.ui
   tfEditor/HoverPoints.cpp
   tfEditor/TFWidget.cpp
-  tfEditor/TransferFunctionEditor.cpp)
-
-set(LIVREGUI_RESOURCES resources/resources.qrc)
-set(LIVREGUI_UI_FORMS
-  MainWindow.ui
-  animationController/gui/AnimationController.ui
-  renderParametersController/gui/RenderParametersController.ui
-  tfEditor/gui/TransferFunctionEditor.ui)
+  tfEditor/TransferFunctionEditor.cpp
+)
 
 set(LIVREGUI_LINK_LIBRARIES LivreCore LivreLib Qt5::Widgets ZeroEQ ZeroEQHBP ZeroBuf)
 
