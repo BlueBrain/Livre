@@ -3,6 +3,14 @@ Changelog {#Changelog}
 
 # master {#master}
 
+# Release 0.5 (2016-04-06) {#Release050}
+
+* [#270](https://github.com/BlueBrain/Livre/pull/270):
+  Fix #113. SSE selection algorithm is simplified
+  Fix #255, #221 Regression on visible selection fixed
+  Default camera position is modified
+* [#257](https://github.com/BlueBrain/Livre/pull/257):
+  The schema is optional with uvf files
 * [#236](https://github.com/BlueBrain/Livre/pull/236):
   Fix #225. Adapted shader alpha correction to the minimum number of samples
 * [#238](https://github.com/BlueBrain/Livre/pull/238):
