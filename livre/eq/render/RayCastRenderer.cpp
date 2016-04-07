@@ -40,7 +40,7 @@
 namespace livre
 {
 
-#define glewGetContext() GLContext::glewGetContext()
+#define glewGetContext() GLContext::getCurrent()->glewGetContext()
 
 namespace
 {

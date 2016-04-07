@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -33,7 +33,7 @@ namespace livre
 class GLContext
 {
 public:
-    LIVRECORE_API GLContext();
+    LIVRECORE_API GLContext( const GLEWContext* glewContext );
     LIVRECORE_API virtual ~GLContext();
 
     /**
@@ -62,21 +62,11 @@ public:
      */
     LIVRECORE_API static const GLContext* getCurrent();
 
-    /**
-     * Set a global glew context to used it whenever OpenGL function pointers
-     * need to be resolved (Windows only).
-     *
-     * As there is only a single glew context managed by this class, this won't
-     * work in a multi GPU scenario where per GPU glew contexts are required.
-     */
-    LIVRECORE_API static void glewSetContext( const GLEWContext* );
-
     /** @return the global glew context, @see glewSetContext */
-    LIVRECORE_API static const GLEWContext* glewGetContext();
+    LIVRECORE_API const GLEWContext* glewGetContext() const;
 
 private:
-
-    static const GLEWContext* _glewContext;
+    const GLEWContext* _glewContext;
 };
 
 }
