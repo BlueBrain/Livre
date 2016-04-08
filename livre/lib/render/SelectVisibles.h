@@ -23,7 +23,9 @@
 #include <livre/lib/types.h>
 #include <livre/core/visitor/RenderNodeVisitor.h>
 #include <livre/core/dash/DashRenderNode.h>
+#include <livre/core/dash/DashTree.h>
 #include <livre/core/data/LODNode.h>
+#include <livre/core/data/DataSource.h>
 #include <livre/core/maths/maths.h>
 #include <livre/core/data/VolumeInformation.h>
 
@@ -99,8 +101,13 @@ protected:
                                                   worldSpacePerVoxel.find_min(),
                                                   _windowHeight,
                                                   _screenSpaceError );
+
+        const VolumeInformation& volInfo =
+                getDashTree().getDataSource().getVolumeInfo();
+        const uint32_t depth = volInfo.rootNode.getDepth();
         isLODVisible = ( isLODVisible && lodNode.getRefLevel() >= _minLOD )
-                       ||( lodNode.getRefLevel() == _maxLOD );
+                       || ( lodNode.getRefLevel() == _maxLOD )
+                       || ( lodNode.getRefLevel() == depth - 1 );
 
         if( isLODVisible )
             _visibles.push_back( renderNode );
