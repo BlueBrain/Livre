@@ -61,4 +61,4 @@ list(APPEND CPPCHECK_EXTRA_ARGS
 
 add_definitions(${QT_DEFINITIONS} "-DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED" )
 
-common_gui_application(livreGUI)
+common_application(livreGUI GUI)
