@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -23,15 +23,13 @@
 
 namespace livre
 {
-
-const GLEWContext* GLContext::_glewContext = 0;
-
 void dontCleanup( livre::GLContext* )
 {}
 
 boost::thread_specific_ptr< livre::GLContext > perThreadContext_( dontCleanup );
 
-GLContext::GLContext()
+GLContext::GLContext( const GLEWContext* glewContext )
+    : _glewContext( glewContext )
 {
     perThreadContext_.reset( this );
 }
@@ -41,7 +39,7 @@ GLContext::~GLContext()
 
 void GLContext::makeCurrent()
 {
-     perThreadContext_.reset( this );
+    perThreadContext_.reset( this );
 }
 
 const GLContext* GLContext::getCurrent()
@@ -49,12 +47,7 @@ const GLContext* GLContext::getCurrent()
     return perThreadContext_.get();
 }
 
-void GLContext::glewSetContext( const GLEWContext* context )
-{
-    _glewContext = context;
-}
-
-const GLEWContext* GLContext::glewGetContext()
+const GLEWContext* GLContext::glewGetContext() const
 {
     return _glewContext;
 }

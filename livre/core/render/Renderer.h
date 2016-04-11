@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                         Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -64,7 +64,7 @@ protected:
      */
     virtual void _onFrameStart( const Frustum& frustum LB_UNUSED,
                                 const PixelViewport& view LB_UNUSED,
-                                const RenderBricks& orderedBricks LB_UNUSED ) { }
+                                const RenderBricks& orderedBricks LB_UNUSED ) {}
 
     /**
      * Is called on start of each render. Default is front to back rendering.
@@ -84,7 +84,7 @@ protected:
      */
     virtual void _onFrameEnd( const Frustum& frustum LB_UNUSED,
                               const PixelViewport& view LB_UNUSED,
-                              const RenderBricks& orderedBricks LB_UNUSED ) { }
+                              const RenderBricks& orderedBricks LB_UNUSED ) {}
 
     /**
      * Should be implemented by the derived renderer to render a render brick.

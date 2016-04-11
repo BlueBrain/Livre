@@ -99,10 +99,9 @@ public:
 
         const livre::DashTree& dashTree = node->getDashTree();
         const DataSource& dataSource = dashTree.getDataSource();
-        _renderer.reset( new RayCastRenderer(
-                                  nSamplesPerRay,
-                                  nSamplesPerPixel,
-                                  dataSource.getVolumeInfo( )));
+        _renderer.reset( new RayCastRenderer( nSamplesPerRay,
+                                              nSamplesPerPixel,
+                                              dataSource.getVolumeInfo( )));
     }
 
     const Frustum& setupFrustum()
@@ -372,19 +371,15 @@ public:
         glMatrixMode( GL_MODELVIEW );
 
         livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
-        std::ostringstream os;
         const size_t all = _frameInfo.allNodes.size();
         const size_t missing = _frameInfo.notAvailableRenderNodes.size();
         const float done = all > 0 ? float( all - missing ) / float( all ) : 0;
-        os << node->getTextureDataCache().getStatistics() << "  "
-           << int( 100.f * done + .5f ) << "% loaded" << std::endl;
-        float y = 220;
-        _drawText( os.str(), y );
-
         Window* window = static_cast< Window* >( _channel->getWindow( ));
-        os.str("");
-        os << window->getTextureCache().getStatistics();
-        _drawText( os.str(), y );
+
+        std::ostringstream os;
+        os << node->getTextureDataCache().getStatistics() << "  "
+           << int( 100.f * done + .5f ) << "% loaded" << std::endl
+           << window->getTextureCache().getStatistics();
 
         const DataSource& dataSource = static_cast< livre::Node* >(
             _channel->getNode( ))->getDashTree().getDataSource();
@@ -402,16 +397,18 @@ public:
             voxelSize *= 1000;
         }
 
-        os.str("");
-        os << "Total resolution " << info.voxels << " depth "
+        const size_t nBricks = _renderer->getNumBricksUsed();
+        const float mbBricks =
+            float( dataSource.getVolumeInfo().maximumBlockSize.product( )) /
+            1024.f / 1024.f * float( nBricks );
+        os << nBricks << " bricks / " << mbBricks << " MB rendered" << std::endl
+           << "Total resolution " << info.voxels << " depth "
            << info.rootNode.getDepth() << std::endl
            << "Block resolution " << info.maximumBlockSize << std::endl
            << unit << "/voxel " << voxelSize;
-        _drawText( os.str( ), y );
-    }
 
-    void _drawText( std::string text, float& y )
-    {
+        float y = 240.f;
+        std::string text = os.str();
         const eq::util::BitmapFont* font =_channel->getWindow()->getSmallFont();
         for( size_t pos = text.find( '\n' ); pos != std::string::npos;
              pos = text.find( '\n' ))
@@ -422,7 +419,7 @@ public:
             text = text.substr( pos + 1 );
             y -= 16.f;
         }
-        // last line
+        // last line might not end with /n
         glRasterPos3f( 10.f, y, 0.99f );
         font->draw( text );
     }
@@ -602,7 +599,7 @@ Channel::Channel( eq::Window* parent )
 }
 
 Channel::~Channel()
-{    
+{
 }
 
 bool Channel::configInit( const eq::uint128_t& initId )

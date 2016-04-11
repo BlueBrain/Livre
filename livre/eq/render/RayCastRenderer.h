@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -50,8 +50,10 @@ public:
      */
     void update( const FrameData& frameData );
 
-private:
+    /** @internal @return number of bricks rendered in the last render() pass */
+    size_t getNumBricksUsed() const;
 
+private:
     void _onFrameStart( const Frustum& frustum,
                         const PixelViewport& view,
                         const RenderBricks& renderBricks ) final;
@@ -59,6 +61,10 @@ private:
     void _renderBrick( const Frustum& frustum,
                        const PixelViewport& view,
                        const RenderBrick& renderBrick ) final;
+
+    void _onFrameEnd( const Frustum& frustum,
+                      const PixelViewport& view,
+                      const RenderBricks& renderBricks ) final;
 
     struct Impl;
     std::unique_ptr< Impl > _impl;

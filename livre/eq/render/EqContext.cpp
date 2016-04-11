@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -27,11 +27,10 @@ namespace livre
 {
 
 EqContext::EqContext( Window* const window )
-    : GLContext()
+    : GLContext( window->glewGetContext( ))
     , _window( window )
     , _systemWindow( 0 )
-{
-}
+{}
 
 EqContext::~EqContext()
 {

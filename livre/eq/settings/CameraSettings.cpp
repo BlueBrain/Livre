@@ -29,8 +29,7 @@ namespace livre
 {
 
 CameraSettings::CameraSettings()
-    : modelRotation_( Matrix4f::IDENTITY )
-    , cameraPosition_( 0.f, 0.f, 1.f )
+    : cameraPosition_( 0.f, 0.f, 1.5f )
 {
 }
 

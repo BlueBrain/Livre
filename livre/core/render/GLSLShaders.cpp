@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                          Maxim Makhinya
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
@@ -28,7 +28,7 @@
 
 namespace livre
 {
-#define glewGetContext() GLContext::glewGetContext()
+#define glewGetContext() GLContext::getCurrent()->glewGetContext()
 
 GLSLShaders::GLSLShaders()
     : _program( 0 )
