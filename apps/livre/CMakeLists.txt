@@ -20,4 +20,4 @@ foreach(LIVRE_OPTIONAL_LIBRARY ${LIVRE_OPTIONAL_LIBRARIES})
   endif()
 endforeach()
 
-common_application(livre MACOSX_BUNDLE)
+common_application(livre GUI)

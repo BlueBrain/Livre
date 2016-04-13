@@ -69,7 +69,7 @@ public:
         if( !_publisher )
             return;
 
-        const Floats matrix( modelView.begin(), modelView.end( ));
+        const Floats matrix( modelView.data(), modelView.data() + 16 );
         _publisher->publish( ::zeq::hbp::serializeCamera( matrix ));
     }
 
@@ -80,7 +80,7 @@ public:
 
         const auto& cameraSettings = _getFrameData().getCameraSettings();
         const Matrix4f& modelView = cameraSettings.getModelViewMatrix();
-        const Floats matrix( modelView.begin(), modelView.end( ));
+        const Floats matrix( modelView.data(), modelView.data() + 16 );
         _publisher->publish( ::zeq::hbp::serializeCamera( matrix ));
     }
 
@@ -194,8 +194,7 @@ public:
     void onCamera( const ::zeq::Event& event )
     {
         const auto& matrix = ::zeq::hbp::deserializeCamera( event );
-        Matrix4f modelViewMatrix;
-        modelViewMatrix.set( matrix.begin(), matrix.end(), false );
+        const Matrix4f modelViewMatrix( matrix );
         auto& cameraSettings = _getFrameData().getCameraSettings();
         cameraSettings.setModelViewMatrix( modelViewMatrix );
     }
@@ -204,8 +203,7 @@ public:
     void onHBPCamera( const ::zeq::Event& event )
     {
         const auto& matrix = ::zeq::hbp::deserializeCamera( event );
-        Matrix4f modelViewMatrixMicron;
-        modelViewMatrixMicron.set( matrix.begin(), matrix.end(), false );
+        const Matrix4f modelViewMatrixMicron( matrix );
 
         const auto& modelViewMatrix =
                 _config.convertFromHBPCamera( modelViewMatrixMicron );
