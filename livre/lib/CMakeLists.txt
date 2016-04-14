@@ -50,17 +50,6 @@ set(LIVRELIB_SOURCES
 set(LIVRELIB_LINK_LIBRARIES PUBLIC LivreCore ZeroBuf
                             PRIVATE Equalizer ${VTUNE_LIBRARIES})
 
-if(LIVRE_USE_REMOTE_DATASOURCE)
-  flatbuffers_generate_c_headers(FBS
-    zeq/lodNode.fbs
-    zeq/memory.fbs
-    zeq/uri.fbs
-    zeq/volumeInformation.fbs)
-  list(APPEND LIVRELIB_HEADERS zeq/events.h)
-  list(APPEND LIVRELIB_SOURCES zeq/events.cpp ${FBS_OUTPUTS})
-  list(APPEND LIVRELIB_LINK_LIBRARIES PUBLIC zeq)
-endif()
-
 set(LIVRELIB_INCLUDE_NAME livre/lib)
 common_library(LivreLib)
 if(CMAKE_COMPILER_IS_GNUCXX_PURE)

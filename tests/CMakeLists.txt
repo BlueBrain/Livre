@@ -4,13 +4,9 @@
 
 include(InstallFiles)
 
-if(NOT LIVRE_USE_REMOTE_DATASOURCE)
-  list(APPEND EXCLUDE_FROM_TESTS lib/events.cpp)
-endif()
-
 # Libraries to link the tests executables with
 set(TEST_LIBRARIES LivreCore LivreLib LivreEq ${Boost_LIBRARIES})
-set(LIVRE_OPTIONAL_LIBRARIES LivreUVF LivreRemote)
+set(LIVRE_OPTIONAL_LIBRARIES LivreUVF)
 foreach(LIVRE_OPTIONAL_LIBRARY ${LIVRE_OPTIONAL_LIBRARIES})
   if(TARGET ${LIVRE_OPTIONAL_LIBRARY})
     list(APPEND TEST_LIBRARIES ${LIVRE_OPTIONAL_LIBRARY})
@@ -26,7 +22,6 @@ add_definitions(-DUVF_DATA_FILE=\"${UVF_DATA_FILE}\")
 # Create and install all the tests
 if(CMAKE_COMPILER_IS_GNUCXX_PURE)
   set(data-dataSource_LINK_LIBRARIES "-Wl,--no-as-needed")
-  set(perf-remoteDataSource_LINK_LIBRARIES "-Wl,--no-as-needed")
 endif()
 
 include(CommonCTest)

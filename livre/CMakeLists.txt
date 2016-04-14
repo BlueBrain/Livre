@@ -17,4 +17,4 @@ add_subdirectory(core)
 add_subdirectory(lib)
 add_subdirectory(eq)
 add_subdirectory(uvf)
-add_subdirectory(remote)
+

@@ -35,7 +35,7 @@ class DataSourcePluginData
 {
 public:
     explicit DataSourcePluginData( const lunchbox::URI& uri,
-                                         const AccessMode accessMode = MODE_READ )
+                                   const AccessMode accessMode = MODE_READ )
         : _uri( uri ),
           _accessMode( accessMode )
     {}
