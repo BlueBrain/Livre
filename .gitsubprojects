@@ -2,7 +2,7 @@
 git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git d0b86ed)
 git_subproject(Servus https://github.com/HBPVIS/Servus.git c81b017)
 git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git 58f1b4b)
-git_subproject(zeq https://github.com/HBPVis/zeq.git b5c27ca)
+git_subproject(ZeroEQ https://github.com/HBPVis/ZeroEQ.git 934f68e)
 git_subproject(Lunchbox https://github.com/Eyescale/Lunchbox.git 0652faa)
 git_subproject(dash https://github.com/BlueBrain/dash.git 2e64ecd)
 git_subproject(Collage https://github.com/Eyescale/Collage.git 191dc21)

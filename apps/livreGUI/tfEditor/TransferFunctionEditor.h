@@ -68,7 +68,7 @@ private Q_SLOTS:
 private:
 
     void _publishTransferFunction();
-    void _onTransferFunction( const zeq::Event& event );
+    void _onTransferFunction( const zeroeq::Event& event );
 
     livre::Controller& _controller;
     Ui::TransferFunctionEditor* _ui;

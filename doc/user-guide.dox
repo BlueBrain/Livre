@@ -97,7 +97,7 @@ Application Parameters
                                         Camera orientation
   --sync-camera                         Synchronize camera with other
                                         applications
-  --zeq-schema arg (=hbp://)            Zeq schema
+  --zeroeq-schema arg (=hbp://)         ZeroEQ schema
 
 Volume Renderer Parameters
   --gpu-cache-mem arg (=3072)  Maximum GPU cache memory (MB) - caches the
@@ -115,8 +115,8 @@ Volume Renderer Parameters
 
   --rest [host][:port]: Enable the REST bridge. Optional parameters
         configure the web server, running by default on :4020
-  --zeq-publisher: URI where the application publishes ZeroEQ events
-  --zeq-subscriber: URI to where the application subscribes to
+  --zeroeq-publisher: URI where the application publishes ZeroEQ events
+  --zeroeq-subscriber: URI to where the application subscribes to
 
 \endcode
 

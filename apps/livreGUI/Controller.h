@@ -23,7 +23,7 @@
 #ifndef _Controller_h_
 #define _Controller_h_
 
-#include <zeq/types.h>
+#include <zeroeq/types.h>
 #include <zerobuf/types.h>
 
 namespace livre
@@ -45,7 +45,7 @@ public:
      * @return true if the publication of the event was successful, false
      *         otherwise
      */
-    bool publish( const zeq::Event& event );
+    bool publish( const zeroeq::Event& event );
 
     /**
      * @param zerobuf the ZeroBuf object to publish
@@ -62,14 +62,14 @@ public:
      * @param func the callback function on receive of event
      * @return true if the function was successfully registered
      */
-    bool registerHandler( const zeq::uint128_t& event,
-                          const zeq::EventFunc& func );
+    bool registerHandler( const zeroeq::uint128_t& event,
+                          const zeroeq::EventFunc& func );
 
     /**
      * @param event the event type of interest
      * @return true if function was successfully deregistered
      */
-    bool deregisterHandler( const zeq::uint128_t& event );
+    bool deregisterHandler( const zeroeq::uint128_t& event );
 
     /**
      * Subscribe the given ZeroBuf object and publish a request for a first-time

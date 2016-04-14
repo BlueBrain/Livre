@@ -25,8 +25,8 @@
 #include <livreGUI/tfEditor/TransferFunctionEditor.h>
 #include <livreGUI/tfEditor/Utilities.h>
 
-#include <zeq/event.h>
-#include <zeq/hbp/vocabulary.h>
+#include <zeroeq/event.h>
+#include <zeroeq/hbp/vocabulary.h>
 
 #include <QMessageBox>
 
@@ -74,14 +74,14 @@ TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
 
     QTimer::singleShot( 50, this, SLOT( _setDefault()));
 
-    _controller.registerHandler( zeq::hbp::EVENT_LOOKUPTABLE1D,
+    _controller.registerHandler( zeroeq::hbp::EVENT_LOOKUPTABLE1D,
                                  std::bind( &TransferFunctionEditor::_onTransferFunction,
                                               this, std::placeholders::_1 ));
 }
 
 TransferFunctionEditor::~TransferFunctionEditor()
 {
-    _controller.deregisterHandler( zeq::hbp::EVENT_LOOKUPTABLE1D );
+    _controller.deregisterHandler( zeroeq::hbp::EVENT_LOOKUPTABLE1D );
 
     delete _ui;
 }
@@ -204,15 +204,15 @@ void TransferFunctionEditor::_publishTransferFunction()
 
     if( transferFunction.size() == 1024 )
     {
-        _controller.publish( zeq::hbp::serializeLookupTable1D( transferFunction ));
+        _controller.publish( zeroeq::hbp::serializeLookupTable1D( transferFunction ));
     }
 }
 
-void TransferFunctionEditor::_onTransferFunction( const zeq::Event& tfEvent )
+void TransferFunctionEditor::_onTransferFunction( const zeroeq::Event& tfEvent )
 {
     if( !_tfReceived )
     {
-        emit transferFunctionChanged( zeq::hbp::deserializeLookupTable1D( tfEvent ));
+        emit transferFunctionChanged( zeroeq::hbp::deserializeLookupTable1D( tfEvent ));
     }
     _tfReceived = true;
 }

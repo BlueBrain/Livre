@@ -6,7 +6,7 @@
 #
 # This file is part of Livre <https://github.com/BlueBrain/Livre>
 #
-if(NOT ZEQ_FOUND)
+if(NOT ZEROEQ_FOUND)
   message(STATUS "Not building GUI due to missing ZeroEQ dependency")
   return()
 endif()
@@ -50,7 +50,7 @@ set(LIVREGUI_UI_FORMS
   renderParametersController/gui/RenderParametersController.ui
   tfEditor/gui/TransferFunctionEditor.ui)
 
-set(LIVREGUI_LINK_LIBRARIES LivreCore LivreLib Qt5::Widgets zeq zeqHBP ZeroBuf)
+set(LIVREGUI_LINK_LIBRARIES LivreCore LivreLib Qt5::Widgets ZeroEQ ZeroEQHBP ZeroBuf)
 
 if(MONSTEER_FOUND)
   list(APPEND LIVREGUI_LINK_LIBRARIES MonsteerQt)

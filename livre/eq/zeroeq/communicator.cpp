@@ -32,8 +32,8 @@
 
 #include <lunchbox/clock.h>
 #include <servus/uri.h>
-#include <zeq/zeq.h>
-#include <zeq/hbp/hbp.h>
+#include <zeroeq/zeroeq.h>
+#include <zeroeq/hbp/hbp.h>
 
 #ifdef LIVRE_USE_RESTBRIDGE
 #  include <restbridge/RestBridge.h>
@@ -47,7 +47,7 @@
 
 namespace livre
 {
-namespace zeq
+namespace zeroeq
 {
 class Communicator::Impl
 {
@@ -70,7 +70,7 @@ public:
             return;
 
         const Floats matrix( modelView.data(), modelView.data() + 16 );
-        _publisher->publish( ::zeq::hbp::serializeCamera( matrix ));
+        _publisher->publish( ::zeroeq::hbp::serializeCamera( matrix ));
     }
 
     void publishCamera()
@@ -81,7 +81,7 @@ public:
         const auto& cameraSettings = _getFrameData().getCameraSettings();
         const Matrix4f& modelView = cameraSettings.getModelViewMatrix();
         const Floats matrix( modelView.data(), modelView.data() + 16 );
-        _publisher->publish( ::zeq::hbp::serializeCamera( matrix ));
+        _publisher->publish( ::zeroeq::hbp::serializeCamera( matrix ));
     }
 
     void publishExit()
@@ -89,7 +89,7 @@ public:
         if( !_publisher )
             return;
 
-        _publisher->publish( ::zeq::Event( ::zeq::vocabulary::EVENT_EXIT ));
+        _publisher->publish( ::zeroeq::Event( ::zeroeq::vocabulary::EVENT_EXIT ));
     }
 
     void publishLookupTable1D()
@@ -99,7 +99,7 @@ public:
 
         const auto& renderSettings = _getFrameData().getRenderSettings();
         const auto& lut = renderSettings.getTransferFunction().getData();
-        _publisher->publish( ::zeq::hbp::serializeLookupTable1D( lut ) );
+        _publisher->publish( ::zeroeq::hbp::serializeLookupTable1D( lut ) );
     }
 
     void publishFrame()
@@ -110,8 +110,8 @@ public:
         const auto& frameSettings = _getFrameData().getFrameSettings();
         const auto& params = _config.getApplicationParameters();
 
-        const ::zeq::Event& frame = ::zeq::hbp::serializeFrame(
-                                        ::zeq::hbp::data::Frame(
+        const ::zeroeq::Event& frame = ::zeroeq::hbp::serializeFrame(
+                                        ::zeroeq::hbp::data::Frame(
                                             params.frames[0],
                                             frameSettings.getFrameNumber(),
                                             params.frames[1],
@@ -129,33 +129,33 @@ public:
         if( !_publisher )
             return;
 
-        ::zeq::EventDescriptors vocabulary;
+        ::zeroeq::EventDescriptors vocabulary;
         vocabulary.push_back(
-                    ::zeq::EventDescriptor( ::zeq::hbp::IMAGEJPEG,
-                                            ::zeq::hbp::EVENT_IMAGEJPEG,
-                                            ::zeq::hbp::SCHEMA_IMAGEJPEG,
-                                            ::zeq::PUBLISHER ));
+                    ::zeroeq::EventDescriptor( ::zeroeq::hbp::IMAGEJPEG,
+                                               ::zeroeq::hbp::EVENT_IMAGEJPEG,
+                                               ::zeroeq::hbp::SCHEMA_IMAGEJPEG,
+                                               ::zeroeq::PUBLISHER ));
         vocabulary.push_back(
-                    ::zeq::EventDescriptor( ::zeq::hbp::CAMERA,
-                                            ::zeq::hbp::EVENT_CAMERA,
-                                            ::zeq::hbp::SCHEMA_CAMERA,
-                                            ::zeq::BIDIRECTIONAL ));
+                    ::zeroeq::EventDescriptor( ::zeroeq::hbp::CAMERA,
+                                               ::zeroeq::hbp::EVENT_CAMERA,
+                                               ::zeroeq::hbp::SCHEMA_CAMERA,
+                                               ::zeroeq::BIDIRECTIONAL ));
         vocabulary.push_back(
-                    ::zeq::EventDescriptor( ::zeq::vocabulary::EXIT,
-                                            ::zeq::vocabulary::EVENT_EXIT,
-                                            ::zeq::vocabulary::SCHEMA_EXIT,
-                                            ::zeq::PUBLISHER ));
+                    ::zeroeq::EventDescriptor( ::zeroeq::vocabulary::EXIT,
+                                               ::zeroeq::vocabulary::EVENT_EXIT,
+                                               ::zeroeq::vocabulary::SCHEMA_EXIT,
+                                               ::zeroeq::PUBLISHER ));
         vocabulary.push_back(
-                    ::zeq::EventDescriptor( ::zeq::hbp::LOOKUPTABLE1D,
-                                            ::zeq::hbp::EVENT_LOOKUPTABLE1D,
-                                            ::zeq::hbp::SCHEMA_LOOKUPTABLE1D,
-                                            ::zeq::BIDIRECTIONAL ));
+                    ::zeroeq::EventDescriptor( ::zeroeq::hbp::LOOKUPTABLE1D,
+                                               ::zeroeq::hbp::EVENT_LOOKUPTABLE1D,
+                                               ::zeroeq::hbp::SCHEMA_LOOKUPTABLE1D,
+                                               ::zeroeq::BIDIRECTIONAL ));
         vocabulary.push_back(
-                    ::zeq::EventDescriptor( ::zeq::hbp::FRAME,
-                                            ::zeq::hbp::EVENT_FRAME,
-                                            ::zeq::hbp::SCHEMA_FRAME,
-                                            ::zeq::BIDIRECTIONAL ));
-        const auto& event = ::zeq::vocabulary::serializeVocabulary( vocabulary);
+                    ::zeroeq::EventDescriptor( ::zeroeq::hbp::FRAME,
+                                               ::zeroeq::hbp::EVENT_FRAME,
+                                               ::zeroeq::hbp::SCHEMA_FRAME,
+                                               ::zeroeq::BIDIRECTIONAL ));
+        const auto& event = ::zeroeq::vocabulary::serializeVocabulary( vocabulary );
         _publisher->publish( event );
     }
 
@@ -168,7 +168,7 @@ public:
         {
             _heartbeatClock.reset();
             _publisher->publish(
-                ::zeq::Event( ::zeq::vocabulary::EVENT_HEARTBEAT ));
+                ::zeroeq::Event( ::zeroeq::vocabulary::EVENT_HEARTBEAT ));
         }
     }
 
@@ -177,32 +177,32 @@ public:
         if( !_publisher )
             return;
 
-        const ::zeq::hbp::data::ImageJPEG image( size, data );
-        const auto& event = ::zeq::hbp::serializeImageJPEG( image );
+        const ::zeroeq::hbp::data::ImageJPEG image( size, data );
+        const auto& event = ::zeroeq::hbp::serializeImageJPEG( image );
         _publisher->publish( event );
     }
 
-    void onRequest( const ::zeq::Event& event )
+    void onRequest( const ::zeroeq::Event& event )
     {
-        const auto& eventType = ::zeq::vocabulary::deserializeRequest( event );
+        const auto& eventType = ::zeroeq::vocabulary::deserializeRequest( event );
         const auto& i = _requests.find( eventType );
         if( i != _requests.end( ))
             i->second();
     }
 
     // Generic camera (from REST) in meters
-    void onCamera( const ::zeq::Event& event )
+    void onCamera( const ::zeroeq::Event& event )
     {
-        const auto& matrix = ::zeq::hbp::deserializeCamera( event );
+        const auto& matrix = ::zeroeq::hbp::deserializeCamera( event );
         const Matrix4f modelViewMatrix( matrix );
         auto& cameraSettings = _getFrameData().getCameraSettings();
         cameraSettings.setModelViewMatrix( modelViewMatrix );
     }
 
     // HBP 'micron' camera from other brain applications
-    void onHBPCamera( const ::zeq::Event& event )
+    void onHBPCamera( const ::zeroeq::Event& event )
     {
-        const auto& matrix = ::zeq::hbp::deserializeCamera( event );
+        const auto& matrix = ::zeroeq::hbp::deserializeCamera( event );
         const Matrix4f modelViewMatrixMicron( matrix );
 
         const auto& modelViewMatrix =
@@ -211,17 +211,17 @@ public:
         cameraSettings.setModelViewMatrix( modelViewMatrix );
     }
 
-    void onLookupTable1D( const ::zeq::Event& event )
+    void onLookupTable1D( const ::zeroeq::Event& event )
     {
         const TransferFunction1D transferFunction(
-            ::zeq::hbp::deserializeLookupTable1D( event ));
+            ::zeroeq::hbp::deserializeLookupTable1D( event ));
         auto& renderSettings = _getRenderSettings();
         renderSettings.setTransferFunction( transferFunction );
     }
 
-    void onFrame( const ::zeq::Event& event )
+    void onFrame( const ::zeroeq::Event& event )
     {
-        const auto& frame = ::zeq::hbp::deserializeFrame( event );
+        const auto& frame = ::zeroeq::hbp::deserializeFrame( event );
 
         if( _config.getDataFrameCount() == 0 )
             return;
@@ -263,20 +263,20 @@ public:
 private:
     void _setupPublisher()
     {
-        _publisher.reset( new ::zeq::Publisher );
+        _publisher.reset( new ::zeroeq::Publisher );
     }
 
     void _setupRequests()
     {
-        _requests[::zeq::hbp::EVENT_CAMERA] =
+        _requests[::zeroeq::hbp::EVENT_CAMERA] =
             std::bind( &Impl::publishCamera, this );
-        _requests[::zeq::hbp::EVENT_FRAME] =
+        _requests[::zeroeq::hbp::EVENT_FRAME] =
             std::bind( &Impl::publishFrame, this );
-        _requests[::zeq::hbp::EVENT_LOOKUPTABLE1D] =
+        _requests[::zeroeq::hbp::EVENT_LOOKUPTABLE1D] =
             std::bind( &Impl::publishLookupTable1D, this );
-        _requests[::zeq::hbp::EVENT_IMAGEJPEG] =
+        _requests[::zeroeq::hbp::EVENT_IMAGEJPEG] =
             std::bind( &Impl::requestImageJPEG, this );
-        _requests[::zeq::vocabulary::EVENT_EXIT] =
+        _requests[::zeroeq::vocabulary::EVENT_EXIT] =
             std::bind( &Impl::requestExit, this );
         const auto& renderParams = _getFrameData().getVRParameters();
         _requests[ renderParams.getTypeIdentifier( )] = [&]
@@ -291,18 +291,18 @@ private:
             return;
 
         SubscriberPtr subscriber(
-            new ::zeq::Subscriber( _restBridge->getSubscriberURI( )));
+            new ::zeroeq::Subscriber( _restBridge->getSubscriberURI( )));
         subscribers.push_back( subscriber );
-        subscriber->registerHandler( ::zeq::hbp::EVENT_CAMERA,
+        subscriber->registerHandler( ::zeroeq::hbp::EVENT_CAMERA,
                                         std::bind( &Impl::onCamera, this,
                                                    std::placeholders::_1 ));
-        subscriber->registerHandler( ::zeq::vocabulary::EVENT_REQUEST,
+        subscriber->registerHandler( ::zeroeq::vocabulary::EVENT_REQUEST,
                                         std::bind( &Impl::onRequest, this,
                                                    std::placeholders::_1 ));
-        subscriber->registerHandler( ::zeq::hbp::EVENT_FRAME,
+        subscriber->registerHandler( ::zeroeq::hbp::EVENT_FRAME,
                                         std::bind( &Impl::onFrame, this,
                                                    std::placeholders::_1 ));
-        subscriber->registerHandler( ::zeq::hbp::EVENT_LOOKUPTABLE1D,
+        subscriber->registerHandler( ::zeroeq::hbp::EVENT_LOOKUPTABLE1D,
                                         std::bind( &Impl::onLookupTable1D, this,
                                                    std::placeholders::_1 ));
 #endif
@@ -310,19 +310,19 @@ private:
 
     void _setupSubscribers()
     {
-        SubscriberPtr subscriber( new ::zeq::Subscriber );
+        SubscriberPtr subscriber( new ::zeroeq::Subscriber );
 
         subscribers.push_back( subscriber );
-        subscriber->registerHandler( ::zeq::hbp::EVENT_CAMERA,
+        subscriber->registerHandler( ::zeroeq::hbp::EVENT_CAMERA,
                                      std::bind( &Impl::onHBPCamera,
                                                 this, std::placeholders::_1 ));
-        subscriber->registerHandler( ::zeq::hbp::EVENT_LOOKUPTABLE1D,
+        subscriber->registerHandler( ::zeroeq::hbp::EVENT_LOOKUPTABLE1D,
                                      std::bind( &Impl::onLookupTable1D,
                                                 this, std::placeholders::_1 ));
-        subscriber->registerHandler( ::zeq::hbp::EVENT_FRAME,
+        subscriber->registerHandler( ::zeroeq::hbp::EVENT_FRAME,
                                      std::bind( &Impl::onFrame,
                                                  this, std::placeholders::_1 ));
-        subscriber->registerHandler( ::zeq::vocabulary::EVENT_REQUEST,
+        subscriber->registerHandler( ::zeroeq::vocabulary::EVENT_REQUEST,
                                      std::bind( &Impl::onRequest,
                                                 this, std::placeholders::_1 ));
         subscriber->subscribe( _getFrameData().getVRParameters( ));
@@ -335,15 +335,15 @@ private:
     const RenderSettings& _getRenderSettings() const
         { return _getFrameData().getRenderSettings(); }
 
-    typedef std::shared_ptr< ::zeq::Subscriber > SubscriberPtr;
-    typedef std::shared_ptr< ::zeq::Publisher > PublisherPtr;
+    typedef std::shared_ptr< ::zeroeq::Subscriber > SubscriberPtr;
+    typedef std::shared_ptr< ::zeroeq::Publisher > PublisherPtr;
     typedef std::vector< SubscriberPtr > Subscribers;
 
     Subscribers subscribers;
     PublisherPtr _publisher;
     lunchbox::Clock _heartbeatClock;
     typedef std::function< void() > RequestFunc;
-    typedef std::map< ::zeq::uint128_t, RequestFunc > RequestFuncs;
+    typedef std::map< ::zeroeq::uint128_t, RequestFunc > RequestFuncs;
     RequestFuncs _requests;
 #ifdef LIVRE_USE_RESTBRIDGE
     std::unique_ptr< restbridge::RestBridge > _restBridge;

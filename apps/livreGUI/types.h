@@ -23,7 +23,7 @@
 #include <QVariant>
 
 #include <livre/core/types.h>
-#include <zeq/types.h>
+#include <zeroeq/types.h>
 
 namespace livre
 {
