@@ -22,9 +22,38 @@
 
 #include <livreGUI/ui_Progress.h>
 #include <zerobuf/data/progress.h>
+#include <QLabel>
+#include <QProgressBar>
 
 namespace livre
 {
+namespace
+{
+class OperationUI
+{
+public:
+    OperationUI( QWidget* parent )
+        : layout( new QHBoxLayout )
+        , name( new QLabel( parent ))
+        , bar( new QProgressBar( parent ))
+    {
+        layout->addWidget( name );
+        layout->addWidget( bar );
+    }
+
+    ~OperationUI()
+    {
+        delete bar;
+        delete name;
+        delete layout;
+    }
+
+    QHBoxLayout* layout;
+    QLabel* name;
+    QProgressBar* bar;
+};
+}
+
 struct Progress::Impl
 {
     Impl( Progress* parent, Controller& controller )
@@ -33,7 +62,6 @@ struct Progress::Impl
         , _progress( 0 )
     {
         _ui.setupUi( parent );
-        _ui.bar->setMaximum( 1000 );
 
         _progress.setUpdatedFunction(
             [parent]() { emit parent->updated(); });
@@ -47,14 +75,30 @@ struct Progress::Impl
 
     void onUpdated()
     {
+        const std::string& name = _progress.getOperationString();
+        OperationUI* ui = _operations[ name ];
+
         if( _progress.getAmount() >= 1.f )
-            _parent->parentWidget()->setHidden( true );
+        {
+            _operations.erase( name );
+            delete ui;
+        }
         else
         {
-            _ui.operation->setText( _progress.getOperation().data( ));
-            _ui.bar->setValue( _progress.getAmount() * 1000 );
-            _parent->parentWidget()->setHidden( false );
+            if( !ui )
+            {
+                ui = new OperationUI( _parent );
+                _ui.verticalLayout->addLayout( ui->layout );
+
+                ui->bar->setMaximum( 1000 );
+                ui->name->setText( name.c_str( ));
+                _operations[ name ] = ui;
+            }
+
+            ui->bar->setValue( _progress.getAmount() * 1000 );
         }
+
+        _parent->parentWidget()->setHidden( _operations.empty( ));
     }
 
 private:
@@ -62,6 +106,8 @@ private:
     Ui::Progress _ui;
     Controller& _controller;
     ::zerobuf::data::Progress _progress;
+
+    std::map< std::string, OperationUI* > _operations;
 };
 
 Progress::Progress( Controller& controller, QWidget* parentWgt )
