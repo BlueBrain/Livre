@@ -62,6 +62,7 @@ struct Progress::Impl
         , _progress( 0 )
     {
         _ui.setupUi( parent );
+        _ui.verticalLayout->setAlignment( Qt::AlignTop );
 
         _progress.setUpdatedFunction(
             [parent]() { emit parent->updated(); });
