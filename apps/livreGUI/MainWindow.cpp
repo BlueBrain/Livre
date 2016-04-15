@@ -22,6 +22,7 @@
 #include <livreGUI/ui_MainWindow.h>
 
 #include "animationController/AnimationController.h"
+#include "progress/Progress.h"
 #include "renderParametersController/RenderParametersController.h"
 #include "tfEditor/TransferFunctionEditor.h"
 #include "Controller.h"
@@ -35,20 +36,22 @@ namespace livre
 struct MainWindow::Impl
 {
     Impl( MainWindow* parent, Controller& controller )
-        : _controller( controller )
     {
         _ui.setupUi( parent );
 
         parent->setCentralWidget( new TransferFunctionEditor( controller ));
 
 #ifdef LIVRE_USE_MONSTEER
-        _ui.simulationDockWidget->setWidget( new monsteer::qt::SteeringWidget( ));
+        _ui.simulationDockWidget->setWidget( new monsteer::qt::SteeringWidget );
 #else
         _ui.simulationDockWidget->setHidden( true );
 #endif
 
         _ui.animationDockWidget->setWidget(
-                    new AnimationController( controller ));
+            new AnimationController( controller ));
+
+        _ui.progressDockWidget->setWidget( new Progress( controller ));
+        _ui.progressDockWidget->setHidden( true );
 
         _ui.renderParametersDockWidget->setWidget( new RenderParametersController( controller ));
 
@@ -57,22 +60,18 @@ struct MainWindow::Impl
                                       _ui.renderParametersDockWidget);
     }
 
-    ~Impl()
-    {
-    }
+    ~Impl(){}
 
+private:
     Ui::MainWindow _ui;
-    Controller& _controller;
 };
 
 MainWindow::MainWindow( Controller& controller, QWidget* parent_ )
     : QMainWindow( parent_ )
     , _impl( new Impl( this, controller ))
-{
-}
+{}
 
 MainWindow::~MainWindow()
-{
-}
+{}
 
 }
