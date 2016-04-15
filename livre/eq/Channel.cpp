@@ -53,6 +53,8 @@
 #include <livre/core/render/Frustum.h>
 #include <livre/core/render/RenderBrick.h>
 
+#include <zeq/publisher.h>
+#include <zerobuf/data/progress.h>
 #include <eq/eq.h>
 #include <eq/gl.h>
 
@@ -68,6 +70,7 @@ public:
           : _channel( channel )
           , _frustum( Matrix4f(), Matrix4f( ))
           , _frameInfo( _frustum, INVALID_FRAME )
+          , _progress( "Loading bricks", 0 )
     {}
 
     void initializeFrame()
@@ -354,6 +357,16 @@ public:
             _channel->drawStatistics();
             drawCacheStatistics();
         }
+
+#ifdef LIVRE_USE_ZEQ
+        const size_t all = _frameInfo.allNodes.size();
+        if( all > 0 )
+        {
+            _progress.restart( all );
+            _progress += all - _frameInfo.notAvailableRenderNodes.size();
+            _publisher.publish( _progress );
+        }
+#endif
     }
 
     void drawCacheStatistics()
@@ -588,6 +601,10 @@ public:
     FrameGrabber _frameGrabber;
     FrameInfo _frameInfo;
     std::unique_ptr< RayCastRenderer > _renderer;
+    ::zerobuf::data::Progress _progress;
+#ifdef LIVRE_USE_ZEQ
+    zeq::Publisher _publisher;
+#endif
 };
 
 Channel::Channel( eq::Window* parent )
