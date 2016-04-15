@@ -12,6 +12,8 @@ Changelog {#Changelog}
 * [#257](https://github.com/BlueBrain/Livre/pull/257):
   The schema is optional with uvf files
 * [#236](https://github.com/BlueBrain/Livre/pull/236):
+  Save .1dt transfer function file
+* [#236](https://github.com/BlueBrain/Livre/pull/236):
   Fix #225. Adapted shader alpha correction to the minimum number of samples
 * [#238](https://github.com/BlueBrain/Livre/pull/238):
   Fix #230. The caches reporting different sizes

@@ -29,6 +29,7 @@
 #include <zeq/hbp/vocabulary.h>
 
 #include <QMessageBox>
+#include <fstream>
 
 namespace livre
 {
@@ -275,24 +276,42 @@ void TransferFunctionEditor::_load()
 void TransferFunctionEditor::_save()
 {
     QString filename = QFileDialog::getSaveFileName( this, "Save transfer function",
-                                                           QString(),
-                                                           TF_FILE_FILTER );
+                                                     QString(),
+                                                     TF_FILE_FILTER );
     if( filename.isEmpty( ))
         return;
 
     if( !filename.endsWith( ".tf" ))
         filename.append( ".tf" );
 
+    // save .tf transfer function file (loadable via GUI)
     QFile file( filename );
     file.open( QIODevice::WriteOnly );
-    QDataStream out( &file );
-    out.setVersion( QDataStream::Qt_5_0 );
+    QDataStream outTf( &file );
+    outTf.setVersion( QDataStream::Qt_5_0 );
 
-    out << TF_FILE_HEADER << TF_FILE_VERSION;
-    out << _redWidget->getPoints()
-        << _greenWidget->getPoints()
-        << _blueWidget->getPoints()
-        << _alphaWidget->getPoints();
+    outTf << TF_FILE_HEADER << TF_FILE_VERSION;
+    outTf << _redWidget->getPoints()
+          << _greenWidget->getPoints()
+          << _blueWidget->getPoints()
+          << _alphaWidget->getPoints();
+
+    // save .1dt transfer function file (loadable via command line)
+    filename.replace( ".tf", ".1dt" );
+    std::ofstream out1dt( filename.toStdString( ));
+
+    out1dt << "256" << std::endl;
+    const UInt8s& redCurve = _redWidget->getCurve();
+    const UInt8s& greenCurve = _greenWidget->getCurve();
+    const UInt8s& blueCurve = _blueWidget->getCurve();
+    const UInt8s& alphaCurve = _alphaWidget->getCurve();
+    for( size_t i = 0; i < 256; ++i )
+    {
+        out1dt << std::to_string( float( redCurve[i] ) / 255.f ) << " "
+               << std::to_string( float( greenCurve[i] ) / 255.f ) << " "
+               << std::to_string( float( blueCurve[i] ) / 255.f ) << " "
+               << std::to_string( float( alphaCurve[i] ) / 255.f ) << std::endl;
+    }
 }
 
 namespace
