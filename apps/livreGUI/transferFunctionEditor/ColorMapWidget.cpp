@@ -18,8 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livreGUI/tfEditor/ColorMapWidget.h>
-#include <livreGUI/tfEditor/HoverPoints.h>
+#include <livreGUI/transferFunctionEditor/ColorMapWidget.h>
+#include <livreGUI/transferFunctionEditor/HoverPoints.h>
 
 namespace livre
 {

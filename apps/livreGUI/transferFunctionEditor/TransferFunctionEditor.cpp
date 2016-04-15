@@ -18,12 +18,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livreGUI/Controller.h>
+#include <livreGUI/transferFunctionEditor/ColorMapWidget.h>
+#include <livreGUI/transferFunctionEditor/HoverPoints.h>
+#include <livreGUI/transferFunctionEditor/TransferFunctionEditor.h>
+#include <livreGUI/transferFunctionEditor/Utilities.h>
 #include <livreGUI/ui_TransferFunctionEditor.h>
-#include <livreGUI/tfEditor/ColorMapWidget.h>
-#include <livreGUI/tfEditor/HoverPoints.h>
-#include <livreGUI/tfEditor/TransferFunctionEditor.h>
-#include <livreGUI/tfEditor/Utilities.h>
+#include <livreGUI/Controller.h>
 
 #include <zeroeq/event.h>
 #include <zeroeq/hbp/vocabulary.h>

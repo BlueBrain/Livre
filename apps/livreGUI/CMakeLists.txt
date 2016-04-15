@@ -42,12 +42,11 @@ set(LIVREGUI_SOURCES
   renderParametersController/RenderParametersController.cpp
   renderParametersController/RenderParametersController.ui
   resources/resources.qrc
-  tfEditor/ColorMapWidget.cpp
-  tfEditor/HoverPoints.cpp
-  tfEditor/TFWidget.cpp
-  tfEditor/TransferFunctionEditor.cpp
-  tfEditor/TransferFunctionEditor.ui
-)
+  transferFunctionEditor/ColorMapWidget.cpp
+  transferFunctionEditor/HoverPoints.cpp
+  transferFunctionEditor/TFWidget.cpp
+  transferFunctionEditor/TransferFunctionEditor.cpp
+  transferFunctionEditor/TransferFunctionEditor.ui)
 
 set(LIVREGUI_LINK_LIBRARIES LivreCore LivreLib Qt5::Widgets ZeroEQ ZeroEQHBP
   ZeroBuf ZeroBufData)

@@ -24,7 +24,7 @@
 #include "animationController/AnimationController.h"
 #include "progress/Progress.h"
 #include "renderParametersController/RenderParametersController.h"
-#include "tfEditor/TransferFunctionEditor.h"
+#include "transferFunctionEditor/TransferFunctionEditor.h"
 #include "Controller.h"
 
 #ifdef LIVRE_USE_MONSTEER
