@@ -33,13 +33,6 @@ if(RESTBRIDGE_FOUND)
   list(APPEND LIVREEQ_LINK_LIBRARIES PRIVATE RESTBridge)
 endif()
 
-if(NOT MSVC)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-overloaded-virtual")
-endif()
-
 set(LIVREEQ_INCLUDE_NAME livre/eq)
 set(LIVREEQ_NAMESPACE livreeq)
 common_library(LivreEq)
-if(CMAKE_COMPILER_IS_GNUCXX_PURE)
-  set_target_properties(LivreEq PROPERTIES LINK_FLAGS "-Wl,--no-undefined")
-endif()

@@ -20,10 +20,6 @@ file(COPY "uvf/mouse_reduced.uvf" DESTINATION ${UVF_DATA_DIR})
 add_definitions(-DUVF_DATA_FILE=\"${UVF_DATA_FILE}\")
 
 # Create and install all the tests
-if(CMAKE_COMPILER_IS_GNUCXX_PURE)
-  set(data-dataSource_LINK_LIBRARIES "-Wl,--no-as-needed")
-endif()
-
 include(CommonCTest)
 
 add_subdirectory(core)

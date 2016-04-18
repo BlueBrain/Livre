@@ -9,7 +9,7 @@ list(APPEND CPPCHECK_EXTRA_ARGS
 
 include(zerobufGenerateCxx)
 zerobuf_generate_cxx(ZEROBUF_GENERATED
-  ${OUTPUT_INCLUDE_DIR}/livre/lib/zerobuf zeroeq/volumeRendererParameters.fbs)
+  ${PROJECT_BINARY_DIR}/include/livre/lib/zerobuf zeroeq/volumeRendererParameters.fbs)
 
 set(LIVRELIB_PUBLIC_HEADERS
   ${ZEROBUF_GENERATED_HEADERS}
@@ -52,6 +52,3 @@ set(LIVRELIB_LINK_LIBRARIES PUBLIC LivreCore ZeroBuf
 
 set(LIVRELIB_INCLUDE_NAME livre/lib)
 common_library(LivreLib)
-if(CMAKE_COMPILER_IS_GNUCXX_PURE)
-  set_target_properties(LivreLib PROPERTIES LINK_FLAGS "-Wl,--no-undefined")
-endif()
