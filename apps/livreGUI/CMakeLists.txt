@@ -1,4 +1,4 @@
-# Copyright (c) 2011-2015, EPFL/Blue Brain Project
+# Copyright (c) 2011-2016, EPFL/Blue Brain Project
 #                          David Steiner <steiner@ifi.uzh.ch>
 #                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
 #                          Marwan Abdellah <marwan.abdellah@epfl.ch>
@@ -17,37 +17,39 @@ if(NOT QT5WIDGETS_FOUND)
 endif()
 
 set(LIVREGUI_HEADERS
-  animationController/AnimationController.h
   AppSettings.h
   Controller.h
   MainWindow.h
+  animationController/AnimationController.h
+  progress/Progress.h
   renderParametersController/RenderParametersController.h
-  tfEditor/ColorMapWidget.h
-  tfEditor/HoverPoints.h
-  tfEditor/TFWidget.h
-  tfEditor/TransferFunctionEditor.h
-  tfEditor/Utilities.h
-  types.h
-)
+  transferFunctionEditor/ColorMapWidget.h
+  transferFunctionEditor/HoverPoints.h
+  transferFunctionEditor/TFWidget.h
+  transferFunctionEditor/TransferFunctionEditor.h
+  transferFunctionEditor/Utilities.h
+  types.h)
 
 set(LIVREGUI_SOURCES
-  animationController/AnimationController.cpp
-  animationController/AnimationController.ui
   Controller.cpp
-  livreGUI.cpp
   MainWindow.cpp
   MainWindow.ui
-  renderParametersController/RenderParametersController.ui
+  animationController/AnimationController.cpp
+  animationController/AnimationController.ui
+  livreGUI.cpp
+  progress/Progress.cpp
+  progress/Progress.ui
   renderParametersController/RenderParametersController.cpp
+  renderParametersController/RenderParametersController.ui
   resources/resources.qrc
-  tfEditor/ColorMapWidget.cpp
-  tfEditor/TransferFunctionEditor.ui
-  tfEditor/HoverPoints.cpp
-  tfEditor/TFWidget.cpp
-  tfEditor/TransferFunctionEditor.cpp
-)
+  transferFunctionEditor/ColorMapWidget.cpp
+  transferFunctionEditor/HoverPoints.cpp
+  transferFunctionEditor/TFWidget.cpp
+  transferFunctionEditor/TransferFunctionEditor.cpp
+  transferFunctionEditor/TransferFunctionEditor.ui)
 
-set(LIVREGUI_LINK_LIBRARIES LivreCore LivreLib Qt5::Widgets ZeroEQ ZeroEQHBP ZeroBuf)
+set(LIVREGUI_LINK_LIBRARIES LivreCore LivreLib Qt5::Widgets ZeroEQ ZeroEQHBP
+  ZeroBuf ZeroBufData)
 
 if(MONSTEER_FOUND)
   list(APPEND LIVREGUI_LINK_LIBRARIES MonsteerQt)

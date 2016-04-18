@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # master {#master}
 
+* [#281](https://github.com/BlueBrain/Livre/pull/281):
+  LivreGUI: Show progress bar for ongoing operations
 * [#279](https://github.com/BlueBrain/Livre/pull/279):
   Adapt to the renaming of zeq to ZeroEQ
 

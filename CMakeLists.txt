@@ -28,9 +28,6 @@ set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)
 
 include(Common)
 
-if(NOT MSVC) # cppnetlib does not build on Windows
-  git_subproject(RESTBridge https://github.com/BlueBrain/RESTBridge.git ee0dc21)
-endif()
 if(APPLE) # WAR otherwise MacPorts X11 (/opt/local) is preferred
   list(REMOVE_ITEM CMAKE_SYSTEM_LIBRARY_PATH /opt/local/lib /usr/local/lib)
   list(REMOVE_ITEM CMAKE_SYSTEM_PREFIX_PATH /opt/local /usr/local)
@@ -57,7 +54,6 @@ common_find_package(OpenMP)
 common_find_package(Qt5Core)
 common_find_package(Qt5OpenGL)
 common_find_package(Qt5Widgets)
-common_find_package(RESTBridge)
 common_find_package(Threads REQUIRED)
 common_find_package(Tuvok)
 common_find_package(VTune)

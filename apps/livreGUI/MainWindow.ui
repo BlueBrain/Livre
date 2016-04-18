@@ -44,6 +44,15 @@ background-color: darkGray; width: 1px; height: 1px;
    </attribute>
    <widget class="QWidget" name="animationDockWidgetPlaceholder"/>
   </widget>
+  <widget class="QDockWidget" name="progressDockWidget">
+   <property name="windowTitle">
+    <string>Progress</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="progressDockWidgetPlaceholder"/>
+  </widget>
   <widget class="QDockWidget" name="renderParametersDockWidget">
    <property name="sizePolicy">
     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
