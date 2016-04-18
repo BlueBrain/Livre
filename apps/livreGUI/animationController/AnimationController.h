@@ -23,7 +23,7 @@
 #define _AnimationController_h_
 
 #include <livreGUI/types.h>
-#include <zeq/hbp/vocabulary.h>
+#include <zeroeq/hbp/vocabulary.h>
 #include <QWidget>
 
 namespace livre
@@ -40,7 +40,7 @@ class AnimationController : public QWidget
 public:
 
     /**
-     * @param controller The GUI connection to zeq world.
+     * @param controller The GUI connection to ZeroEQ world.
      * @param parentWgt Parent widget.
      */
     AnimationController( Controller& controller,
@@ -49,7 +49,7 @@ public:
 
 signals:
 
-    void newFrameReceived( ::zeq::hbp::data::Frame frame );
+    void newFrameReceived( ::zeroeq::hbp::data::Frame frame );
 
 private Q_SLOTS:
 
@@ -58,7 +58,7 @@ private Q_SLOTS:
     void _onFrameChanged();
     void _togglePlayPause();
     void _setFollow( int on );
-    void _onNewFrameReceived( ::zeq::hbp::data::Frame frame );
+    void _onNewFrameReceived( ::zeroeq::hbp::data::Frame frame );
 
 private:
 

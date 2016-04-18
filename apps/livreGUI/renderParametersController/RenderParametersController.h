@@ -35,7 +35,7 @@ class RenderParametersController : public QWidget
 
 public:
     /**
-     * @param controller The GUI connection to zeq world.
+     * @param controller The GUI connection to ZeroEQ world.
      * @param parentWgt Parent widget.
      */
     RenderParametersController( Controller& controller,

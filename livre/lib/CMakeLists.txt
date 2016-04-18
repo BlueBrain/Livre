@@ -9,7 +9,7 @@ list(APPEND CPPCHECK_EXTRA_ARGS
 
 include(zerobufGenerateCxx)
 zerobuf_generate_cxx(ZEROBUF_GENERATED
-  ${OUTPUT_INCLUDE_DIR}/livre/lib/zerobuf zeq/volumeRendererParameters.fbs)
+  ${OUTPUT_INCLUDE_DIR}/livre/lib/zerobuf zeroeq/volumeRendererParameters.fbs)
 
 set(LIVRELIB_PUBLIC_HEADERS
   ${ZEROBUF_GENERATED_HEADERS}

@@ -4,7 +4,7 @@ if(WIN32)
 endif()
 set(LIVRE_PACKAGE_VERSION 0.2.0)
 set(LIVRE_REPO_URL https://github.com/BlueBrain/Livre)
-set(LIVRE_DEPENDS BBPTestData OpenMP Tuvok VTune GLEW_MX zeq FlatBuffers
+set(LIVRE_DEPENDS BBPTestData OpenMP Tuvok VTune GLEW_MX ZeroEQ FlatBuffers
   RESTBridge LibJpegTurbo
   REQUIRED Boost Collage dash Equalizer Lunchbox OpenGL PNG Qt5Core Qt5OpenGL
            Qt5Widgets Threads)

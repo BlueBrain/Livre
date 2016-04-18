@@ -23,7 +23,7 @@
 #include <livreGUI/ui_AnimationController.h>
 #include <livre/core/types.h>
 
-#include <zeq/event.h>
+#include <zeroeq/event.h>
 
 namespace livre
 {
@@ -46,14 +46,14 @@ struct AnimationController::Impl
         disconnect();
     }
 
-    void onFrame( const ::zeq::Event& event_ )
+    void onFrame( const ::zeroeq::Event& event_ )
     {
-        emit _animationController->newFrameReceived( zeq::hbp::deserializeFrame( event_ ));
+        emit _animationController->newFrameReceived( zeroeq::hbp::deserializeFrame( event_ ));
     }
 
     void setSubscriber()
     {
-        _controller.registerHandler( ::zeq::hbp::EVENT_FRAME,
+        _controller.registerHandler( ::zeroeq::hbp::EVENT_FRAME,
                                      std::bind( &AnimationController::Impl::onFrame,
                                                   this, std::placeholders::_1 ));
     }
@@ -75,7 +75,7 @@ struct AnimationController::Impl
 
     void disconnect()
     {
-        _controller.deregisterHandler( ::zeq::hbp::EVENT_FRAME );
+        _controller.deregisterHandler( ::zeroeq::hbp::EVENT_FRAME );
         _connected = false;
         resetControls();
     }
@@ -99,7 +99,7 @@ struct AnimationController::Impl
         _ui.btnPlay->setText( enable ? "Pause" : "Play" );
     }
 
-    void onNewFrameReceived( zeq::hbp::data::Frame frame )
+    void onNewFrameReceived( zeroeq::hbp::data::Frame frame )
     {
         _connected = true;
 
@@ -155,11 +155,11 @@ struct AnimationController::Impl
     {
         if( _connected )
         {
-            const ::zeq::hbp::data::Frame frame( _ui.sldFrame->minimum(),
-                                                 _ui.sldFrame->value(),
-                                                 _ui.sldFrame->maximum() + 1,
-                                                 getFrameDelta( ));
-            _controller.publish( ::zeq::hbp::serializeFrame( frame ));
+            const ::zeroeq::hbp::data::Frame frame( _ui.sldFrame->minimum(),
+                                                    _ui.sldFrame->value(),
+                                                    _ui.sldFrame->maximum() + 1,
+                                                    getFrameDelta( ));
+            _controller.publish( ::zeroeq::hbp::serializeFrame( frame ));
         }
     }
 
@@ -190,7 +190,7 @@ AnimationController::AnimationController( Controller& controller,
     : QWidget( parentWgt )
     , _impl( new AnimationController::Impl( this, controller ))
 {
-    qRegisterMetaType< ::zeq::hbp::data::Frame >( "::zeq::hbp::data::Frame" );
+    qRegisterMetaType< ::zeroeq::hbp::data::Frame >( "::zeroeq::hbp::data::Frame" );
 
     connect( _impl->_ui.sldFrame, &QSlider::valueChanged,
              this, &AnimationController::_onFrameChanged );
@@ -249,7 +249,7 @@ void AnimationController::_setFollow( int on )
     _impl->publishFrame();
 }
 
-void AnimationController::_onNewFrameReceived( zeq::hbp::data::Frame frame )
+void AnimationController::_onNewFrameReceived( zeroeq::hbp::data::Frame frame )
 {
     _impl->onNewFrameReceived( frame );
 }

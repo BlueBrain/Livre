@@ -3,6 +3,9 @@ Changelog {#Changelog}
 
 # master {#master}
 
+* [#279](https://github.com/BlueBrain/Livre/pull/279):
+  Adapt to the renaming of zeq to ZeroEQ
+
 # Release 0.5 (2016-04-06) {#Release050}
 
 * [#270](https://github.com/BlueBrain/Livre/pull/270):
@@ -20,7 +23,7 @@ Changelog {#Changelog}
 * [#220](https://github.com/BlueBrain/Livre/pull/220):
   LivreGUI: Add renderer parameters panel
 * [#219](https://github.com/BlueBrain/Livre/pull/219):
-  LivreGUI: Editable frame range in animation panel  
+  LivreGUI: Editable frame range in animation panel
 
 # Release 0.4 (2015-11-09) {#Release040}
 

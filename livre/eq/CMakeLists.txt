@@ -19,10 +19,10 @@ include_directories(${PROJECT_BINARY_DIR})
 
 set(LIVREEQ_LINK_LIBRARIES PUBLIC LivreLib Equalizer)
 
-if(ZEQ_FOUND)
-  list(APPEND LIVREEQ_HEADERS zeq/communicator.h)
-  list(APPEND LIVREEQ_SOURCES zeq/communicator.cpp)
-  list(APPEND LIVREEQ_LINK_LIBRARIES PRIVATE zeq zeqHBP)
+if(ZEROEQ_FOUND)
+  list(APPEND LIVREEQ_HEADERS zeroeq/communicator.h)
+  list(APPEND LIVREEQ_SOURCES zeroeq/communicator.cpp)
+  list(APPEND LIVREEQ_LINK_LIBRARIES PRIVATE ZeroEQ ZeroEQHBP)
 endif()
 
 if(LibJpegTurbo_FOUND)

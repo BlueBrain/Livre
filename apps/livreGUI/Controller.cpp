@@ -23,7 +23,7 @@
 
 #include "Controller.h"
 
-#include <zeq/zeq.h>
+#include <zeroeq/zeroeq.h>
 #include <zerobuf/Zerobuf.h>
 
 #include <algorithm>
@@ -38,17 +38,17 @@ class Controller::Impl
 public:
     Impl()
         : _subscriber()
-        , _replySubscriber( (::zeq::Receiver&)_subscriber )
+        , _replySubscriber( (::zeroeq::Receiver&)_subscriber )
         , _subscriberPoll( std::bind( &Impl::pollSubscriber, this ))
         , _continuePolling( true )
     {
-        _replySubscriber.registerHandler( ::zeq::vocabulary::EVENT_HEARTBEAT,
+        _replySubscriber.registerHandler( ::zeroeq::vocabulary::EVENT_HEARTBEAT,
                      std::bind( &Impl::onHeartBeatReceived, this ));
     }
 
     ~Impl()
     {
-        _replySubscriber.deregisterHandler( ::zeq::vocabulary::EVENT_HEARTBEAT );
+        _replySubscriber.deregisterHandler( ::zeroeq::vocabulary::EVENT_HEARTBEAT );
 
         _continuePolling = false;
         _subscriberPoll.join();
@@ -57,10 +57,10 @@ public:
     void onHeartBeatReceived()
     {
         for( const auto& request : _requests )
-            _publisher.publish( ::zeq::vocabulary::serializeRequest( request ));
+            _publisher.publish( ::zeroeq::vocabulary::serializeRequest( request ));
     }
 
-    void onReply( const ::zeq::Event& event )
+    void onReply( const ::zeroeq::Event& event )
     {
         const auto& i = std::find( _requests.begin(), _requests.end(),
                                    event.getType( ));
@@ -71,7 +71,7 @@ public:
         _replySubscriber.deregisterHandler( event.getType( ));
     }
 
-    bool publish( const zeq::Event& event )
+    bool publish( const zeroeq::Event& event )
     {
         return _publisher.publish( event );
     }
@@ -81,8 +81,8 @@ public:
         return _publisher.publish( zerobuf );
     }
 
-    bool registerHandler( const zeq::uint128_t& event,
-                          const zeq::EventFunc& func )
+    bool registerHandler( const zeroeq::uint128_t& event,
+                          const zeroeq::EventFunc& func )
     {
         if( !_subscriber.registerHandler( event, func ))
             return false;
@@ -93,7 +93,7 @@ public:
                                                        std::placeholders::_1 ));
     }
 
-    bool deregisterHandler( const zeq::uint128_t& event )
+    bool deregisterHandler( const zeroeq::uint128_t& event )
     {
         if( !_subscriber.deregisterHandler( event ))
             return false;
@@ -142,14 +142,14 @@ private:
             _subscriber.receive( 100 );
     }
 
-    zeq::Publisher _publisher;
-    zeq::Subscriber _subscriber;
-    zeq::Subscriber _replySubscriber;
+    zeroeq::Publisher _publisher;
+    zeroeq::Subscriber _subscriber;
+    zeroeq::Subscriber _replySubscriber;
 
     std::thread _subscriberPoll;
     bool _continuePolling;
 
-    std::vector< ::zeq::uint128_t > _requests;
+    std::vector< ::zeroeq::uint128_t > _requests;
 };
 
 
@@ -160,7 +160,7 @@ Controller::Controller()
 Controller::~Controller()
 {}
 
-bool Controller::publish( const zeq::Event& event )
+bool Controller::publish( const zeroeq::Event& event )
 {
     return _impl->publish( event );
 }
@@ -170,13 +170,13 @@ bool Controller::publish( const ::zerobuf::Zerobuf& zerobuf )
     return _impl->publish( zerobuf );
 }
 
-bool Controller::registerHandler( const zeq::uint128_t& event,
-                                  const zeq::EventFunc& func )
+bool Controller::registerHandler( const zeroeq::uint128_t& event,
+                                  const zeroeq::EventFunc& func )
 {
     return _impl->registerHandler( event, func );
 }
 
-bool Controller::deregisterHandler( const zeq::uint128_t& event )
+bool Controller::deregisterHandler( const zeroeq::uint128_t& event )
 {
     return _impl->deregisterHandler( event );
 }

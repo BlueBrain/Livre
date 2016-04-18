@@ -23,7 +23,7 @@
 
 namespace livre
 {
-namespace zeq
+namespace zeroeq
 {
 
 /**
