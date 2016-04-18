@@ -23,13 +23,12 @@ set(LIVREGUI_HEADERS
   animationController/AnimationController.h
   progress/Progress.h
   renderParametersController/RenderParametersController.h
-  tfEditor/ColorMapWidget.h
-  tfEditor/HoverPoints.h
-  tfEditor/TFWidget.h
-  tfEditor/TransferFunctionEditor.h
-  tfEditor/Utilities.h
-  types.h
-)
+  transferFunctionEditor/ColorMapWidget.h
+  transferFunctionEditor/HoverPoints.h
+  transferFunctionEditor/TFWidget.h
+  transferFunctionEditor/TransferFunctionEditor.h
+  transferFunctionEditor/Utilities.h
+  types.h)
 
 set(LIVREGUI_SOURCES
   Controller.cpp

@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                          Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
  *                          Raphael Dumusc <raphael.dumusc@epfl.ch>
  *

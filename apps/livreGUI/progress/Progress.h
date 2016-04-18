@@ -48,6 +48,7 @@ signals:
 
 private Q_SLOTS:
     void onUpdated();
+    void onExpired();
 
 private:
     struct Impl;
