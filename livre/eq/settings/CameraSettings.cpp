@@ -41,23 +41,26 @@ void CameraSettings::spinModel( const float x, const float y )
     if( x == 0.f && y == 0.f )
         return;
 
-    float matrixValues[16];
-    std::copy( getMatrix(), getMatrix() + 16, matrixValues );
+    float translation[3];
+    translation[0] = getMatrix()[12];
+    translation[1] = getMatrix()[13];
+    translation[2] = getMatrix()[14];
 
-    Matrix4f modelview( &matrixValues[0], &matrixValues[0] + 16 );
+    Matrix4d modelview( &getMatrix()[0], &getMatrix()[0] + 16 );
 
-    modelview(0,3) = 0.0f;
-    modelview(1,3) = 0.0f;
-    modelview(2,3) = 0.0f;
+    modelview(0,3) = 0.0;
+    modelview(1,3) = 0.0;
+    modelview(2,3) = 0.0;
 
     modelview.pre_rotate_x( x );
     modelview.pre_rotate_y( y );
 
-    modelview(0,3) = matrixValues[12];
-    modelview(1,3) = matrixValues[13];
-    modelview(2,3) = matrixValues[14];
+    modelview(0,3) = translation[0];
+    modelview(1,3) = translation[1];
+    modelview(2,3) = translation[2];
 
     std::copy( &modelview.array[0], &modelview.array[0] + 16, getMatrix( ));
+    notifyChanged();
 }
 
 void CameraSettings::moveCamera( const float x, const float y, const float z )
@@ -65,6 +68,7 @@ void CameraSettings::moveCamera( const float x, const float y, const float z )
     getMatrix()[12] += x;
     getMatrix()[13] += y;
     getMatrix()[14] += z;
+    notifyChanged();
 }
 
 void CameraSettings::setCameraPosition( const Vector3f& pos )
@@ -72,6 +76,7 @@ void CameraSettings::setCameraPosition( const Vector3f& pos )
     getMatrix()[12] = pos.x();
     getMatrix()[13] = pos.y();
     getMatrix()[14] = pos.z();
+    notifyChanged();
 }
 
 void CameraSettings::setCameraLookAt( const Vector3f& lookAt )

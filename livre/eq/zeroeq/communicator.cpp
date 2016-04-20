@@ -59,21 +59,18 @@ public:
             return;
 
         _setupRequests();
-        _config.getImageJPEG().setRequestedFunction( [&]
+        _config.getImageJPEG().registerSerializeCallback( [&]
             { return _config.renderJPEG(); });
-        _frame.setRequestedFunction( [&]
-            { return publishFrame(); });
-        _frame.setUpdatedFunction( [&]
-            { return updateFrame(); });
-        _exit.setRequestedFunction( [&]
-            { return requestExit(); });
+        _frame.registerDeserializedCallback( [&] { return updateFrame(); });
+        _exit.registerSerializeCallback( [&] { return requestExit(); });
         _setupSubscriber();
         _setupHTTPServer( argc, argv );
     }
 
     bool publishExit()
     {
-        return _publisher.publish( ::zeroeq::Event( ::zeroeq::vocabulary::EVENT_EXIT ));
+        return _publisher.publish(
+                    ::zeroeq::Event( ::zeroeq::vocabulary::EVENT_EXIT ));
     }
 
     bool publishFrame()
@@ -165,8 +162,9 @@ private:
         _requests[ _frame.getTypeIdentifier() ] = [&]
             { return publishFrame(); };
         _requests[ _config.getImageJPEG().getTypeIdentifier( )] = [&]
-            { return _config.renderJPEG(); };
-        _requests[ _exit.getTypeIdentifier() ] = [&]{ return requestExit(); };
+            { return _publisher.publish( _config.getImageJPEG( )); };
+        _requests[ _exit.getTypeIdentifier() ] = [&]
+            { return _publisher.publish( _exit ); };
         _requests[ _getFrameData().getVRParameters().getTypeIdentifier( )] = [&]
             { return _publisher.publish( _getFrameData().getVRParameters( )); };
         _requests[ _getFrameData().getCameraSettings().getTypeIdentifier( )] = [&]

@@ -26,7 +26,8 @@ namespace livre
 RenderSettings::RenderSettings( )
     :  depth_( 0 )
 {
-    transferFunction_.setUpdatedFunction( [this] { setDirty( DIRTY_TF ); });
+    transferFunction_.registerDeserializedCallback( [this]
+        { setDirty( DIRTY_TF ); });
 }
 
 void RenderSettings::resetTransferFunction( )

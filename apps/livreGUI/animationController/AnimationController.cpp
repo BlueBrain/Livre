@@ -38,7 +38,7 @@ struct AnimationController::Impl
         , _onFirstFrame( true )
     {
         _ui.setupUi( _animationController );
-        _frame.setUpdatedFunction( [&]
+        _frame.registerDeserializedCallback( [&]
             { emit _animationController->newFrameReceived(); });
         connect();
     }

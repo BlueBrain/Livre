@@ -37,9 +37,10 @@
 #include <livre/core/maths/maths.h>
 #include <livre/core/util/FrameUtils.h>
 
+#include <zerobuf/render/imageJPEG.h>
+
 #ifdef LIVRE_USE_ZEROEQ
 #  include <livre/eq/zeroeq/communicator.h>
-#  include <zerobuf/render/imageJPEG.h>
 #endif
 
 #include <eq/eq.h>
@@ -65,9 +66,9 @@ public:
     EventMapper eventMapper;
     FrameData framedata;
     Boxf volumeBBox;
+    ::zerobuf::render::ImageJPEG imageJPEG;
 #ifdef LIVRE_USE_ZEROEQ
     std::unique_ptr< zeroeq::Communicator > communicator;
-    ::zerobuf::render::ImageJPEG imageJPEG;
 #endif
     bool redraw;
     Vector2ui dataFrameRange;
@@ -96,16 +97,11 @@ const FrameData& Config::getFrameData() const
 
 ::zerobuf::render::ImageJPEG& Config::getImageJPEG() const
 {
-#ifdef LIVRE_USE_ZEROEQ
     return _impl->imageJPEG;
-#else
-    LBTHROW( std::runtime_error( "ZeroEq missing, impossible to send imageJPEG" ));
-#endif
 }
 
-bool Config::renderJPEG()
+void Config::renderJPEG()
 {
-#ifdef LIVRE_USE_ZEROEQ
     _impl->imageJPEG.setData( std::vector< uint8_t >( ));
     getFrameData().getFrameSettings().setGrabFrame( true );
     frame();
@@ -119,10 +115,6 @@ bool Config::renderJPEG()
 
         handleEvent( event );
     }
-    return true;
-#else
-    return false;
-#endif
 }
 
 const ApplicationParameters& Config::getApplicationParameters() const
