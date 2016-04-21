@@ -1,5 +1,7 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                          Stefan.Eilemann@epfl.ch
+ *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -19,170 +21,91 @@
 
 #include "TransferFunction1D.h"
 
-#include <co/dataIStream.h>
-#include <co/dataOStream.h>
+#include <lunchbox/file.h>
 
 #include <fstream>
 #include <iterator>
 
-#define DEFAULT_COLOR1_DENSITY 128u
-#define DEFAULT_COLOR2_DENSITY 255u
-#define DEFAULT_COLOR1_ALPHA 0.39f
-#define DEFAULT_COLOR2_ALPHA 0.03f
-#define DEFAULT_TF_SIZE 256u
-#define DEFAULT_COLOR1_RGB Vector3f( 0.0f, 1.0f, 1.0f )
-#define DEFAULT_COLOR2_RGB Vector3f( 1.0f, 0.0f, 1.0f )
-
 namespace livre
 {
-namespace
-{
-enum SamplePointsType
-{
-    UINT8,
-    FLOAT,
-    DEFAULT = FLOAT
-};
 
-Floats create2ColorTF( const uint32_t surfaceColorPos,
-                            const float surfaceColorAlpha,
-                            const float solidColorAlpha, const size_t size,
-                            const Vector3f& surfaceColorRGB,
-                            const Vector3f& solidColorRGB )
+TransferFunction1D::TransferFunction1D()
 {
-    Vector3f finalColorRGB;
-    float alpha;
-    Floats transferFunction;
+    const Vector3f color1( 0.0f, 1.0f, 1.0f );
+    const Vector3f color2( 1.0f, 0.0f, 1.0f );
+    const float alpha1 = 0.39f;
+    const float alpha2 = 0.03f;
+    const float density1 = 127.f;
+    const float density2 = 255.f;
+    const Vector3f colorDiff = color2 - color1;
+    const float alphaDiff = alpha2 - alpha1;
 
-    const Vector3f colorDiff = solidColorRGB - surfaceColorRGB;
-    const float alphaDiff = solidColorAlpha - surfaceColorAlpha;
+    uint8_t* data = getLut();
 
-    for( uint32_t i = 0; i < size; ++i )
+    for( uint32_t i = 0; i < getLutSize(); i += NCHANNELS )
     {
-        if( i == 0 )
+        Vector4f rgba;
+        if( i > 0 && i <= density1 )
         {
-            finalColorRGB = Vector3f(0.0f);
-            alpha = 0;
+            rgba = color1;
+            rgba[3] = alpha1 * ( float(i) / density1 );
         }
-        else if( ( 0 < i ) && ( i<= surfaceColorPos ) )
+        else if( i > 0 )
         {
-            finalColorRGB = surfaceColorRGB;
-            alpha = surfaceColorAlpha * ( float(i) / (float)surfaceColorPos );
-        }
-        else
-        {
-            finalColorRGB = ( (float)( i - surfaceColorPos + 1u ) /
-                              (float)( DEFAULT_COLOR2_DENSITY -
-                                       surfaceColorPos + 1u ) ) * colorDiff +
-                             surfaceColorRGB;
-            alpha = ( (float)( i - surfaceColorPos + 1u ) /
-                    (float)( DEFAULT_COLOR2_DENSITY - surfaceColorPos + 1u ) ) *
-                    alphaDiff + surfaceColorAlpha;
+            rgba = ( float( i ) - density1 + 1.f ) /
+                   ( density2 - density1 + 1.f ) * colorDiff + color1;
+            rgba[3] = ( float( i ) - density1 + 1.f ) /
+                      ( density2 - density1 + 1.f ) * alphaDiff + alpha1;
         }
 
-        transferFunction.push_back( finalColorRGB[0] );
-        transferFunction.push_back( finalColorRGB[1] );
-        transferFunction.push_back( finalColorRGB[2] );
-        transferFunction.push_back( alpha );
+        float maxUint8 = std::numeric_limits< uint8_t >::max();
+        data[ i + 0 ] = rgba[0] * maxUint8;
+        data[ i + 1 ] = rgba[1] * maxUint8;
+        data[ i + 2 ] = rgba[2] * maxUint8;
+        data[ i + 3 ] = rgba[3] * maxUint8;
     }
-    return transferFunction;
 }
 
-Floats createDefault2ColorTF()
+void TransferFunction1D::_createTfFromFile( const std::string& file )
 {
-    return create2ColorTF( DEFAULT_COLOR1_DENSITY, DEFAULT_COLOR1_ALPHA,
-                           DEFAULT_COLOR2_ALPHA,
-                           DEFAULT_TF_SIZE, DEFAULT_COLOR1_RGB,
-                           DEFAULT_COLOR2_RGB );
-}
-
-SamplePointsType readTransferFunction( const std::string& file,
-                                       Floats& transferFunction )
-{
-    transferFunction = createDefault2ColorTF();
-    if( file.empty( ))
+    if( file.substr( file.find_last_of(".") + 1 ) == "lbb" )
     {
-        LBWARN << "Using default transfer function" << std::endl;
-        return DEFAULT;
+        lunchbox::loadBinary( *this, file );
+        return;
     }
-    if( file.substr( file.find_last_of(".") + 1 ) != "1dt" )
+    if( file.substr( file.find_last_of(".") + 1 ) == "lba" )
     {
-        LBWARN << "Wrong transfer function file format: " << file
-               << ", it must be '.1dt'. Using default transfer function"
-               << std::endl;
-        return DEFAULT;
+        lunchbox::loadAscii( *this, file );
+        return;
     }
 
     std::ifstream ifs( file );
     if( !ifs.is_open( ))
     {
-        LBWARN << "The specified transfer function file: " << file
-               << ", could not be opened. Using default transfer function"
+        LBWARN << "Transfer function file " << file << " could not be opened."
                << std::endl;
-        return DEFAULT;
+        return;
     }
 
     std::string line, val;
     std::getline( ifs, line );
     const std::string& formatStr = line.substr( line.find(' ') + 1 );
-    const SamplePointsType format = formatStr == "uint8" ? UINT8 : DEFAULT;
-
-    const size_t numValues = atoi( line.c_str( )) * TF_NCHANNELS;
-    if( !numValues )
+    const size_t numValues = atoi( line.c_str( )) * NCHANNELS;
+    if( !numValues || numValues != getLutSize( ))
     {
         LBWARN << "Wrong format in transfer function file: " << file
-               << ", the number of values must be specified. "
-               << "Using default transfer function" << std::endl;
-        return DEFAULT;
+               << ", got " << numValues << " entries, expect " << getLutSize()
+               << std::endl;
+        return;
     }
-    transferFunction.resize( numValues );
+
     size_t i = 0;
+    uint8_t* data = getLut();
+    const bool hasBytes = (formatStr == "uint8");
     while( ifs >> val && i < numValues )
-        transferFunction[i++] = atof( val.c_str( ));
-
-    return format;
-}
-}
-
-void TransferFunction1D::reset()
-{
-    const Floats defaultTF = createDefault2ColorTF();
-    const float maxVal = std::numeric_limits< uint8_t >::max();
-    const size_t size = defaultTF.size();
-
-    rgba_.resize( size );
-    for( size_t i = 0; i < size; ++i )
-        rgba_[i] = maxVal * defaultTF[i];
-}
-
-void TransferFunction1D::createCustomTF_( const uint32_t size )
-{
-    rgba_.resize( size * TF_NCHANNELS );
-
-    rgba_[0] = 0u;
-    rgba_[1] = 0u;
-    rgba_[2] = 0u;
-    rgba_[3] = 0u;
-    for( size_t i = 1; i < size; ++i )
     {
-        rgba_[ i * TF_NCHANNELS ] = 0u;
-        rgba_[ i * TF_NCHANNELS + 1 ] = 0u;
-        rgba_[ i * TF_NCHANNELS + 2 ] = 255u;
-        rgba_[ i * TF_NCHANNELS + 3 ] = 2u;
+        data[i++] = hasBytes ? std::stoi( val ) :
+                        std::stof( val ) * std::numeric_limits< uint8_t >::max();
     }
-}
-
-void TransferFunction1D::createTfFromFile_( const std::string& file )
-{
-    Floats transferFunction;
-    const SamplePointsType& format = readTransferFunction( file, transferFunction );
-    const size_t size = transferFunction.size();
-    rgba_.resize( size );
-
-    const uint8_t maxVal = std::numeric_limits< uint8_t >::max();
-    const uint8_t conversionFactor = format == UINT8 ? 1u : maxVal;
-
-    for( size_t i = 0; i < size; ++i )
-        rgba_[i] = conversionFactor * transferFunction[i];
 }
 }

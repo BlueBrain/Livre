@@ -86,12 +86,9 @@ void FrameGrabber::notifyNewImage( eq::Channel& channel,
     const uint64_t size = image.getPixelDataSize( eq::Frame::BUFFER_COLOR );
     const uint8_t* data = image.getPixelPointer( eq::Frame::BUFFER_COLOR );
     const eq::PixelViewport& pvp = image.getPixelViewport();
-    const eq::Viewport& vp = channel.getViewport();
 
-    const uint32_t width = pvp.w / vp.w;
-    const uint32_t height = pvp.h / vp.h;
     unsigned long jpegSize = size;
-    uint8_t* jpegData = _encodeJpeg( width, height, data, jpegSize );
+    uint8_t* jpegData = _encodeJpeg( pvp.w, pvp.h, data, jpegSize );
 
     if( !jpegData )
     {

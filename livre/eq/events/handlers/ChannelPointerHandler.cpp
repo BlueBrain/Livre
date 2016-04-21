@@ -88,8 +88,7 @@ bool ChannelPointerHandler::operator ()( EqEventInfo& eqEventInfo )
 
                   cameraSettings.spinModel(
                       -ROTATE_AND_ZOOM_SPEED * event->data.pointerMotion.dy,
-                      -ROTATE_AND_ZOOM_SPEED * event->data.pointerMotion.dx,
-                      0.f );
+                      -ROTATE_AND_ZOOM_SPEED * event->data.pointerMotion.dx );
                   return true;
 
               case eq::PTR_BUTTON2:

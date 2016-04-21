@@ -109,9 +109,10 @@ struct RayCastRenderer::Impl
         }
         glBindTexture( GL_TEXTURE_1D, _transferFunctionTexture );
 
-        const UInt8s& transferFunctionData = transferFunction.getData();
-        glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA, GLsizei(transferFunctionData.size()/4u), 0,
-                       GL_RGBA, GL_UNSIGNED_BYTE, &transferFunctionData[ 0 ] );
+        const uint8_t* transferFunctionData = transferFunction.getLut();
+        glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA,
+                       GLsizei( transferFunction.getLutSize() / 4u ), 0,
+                       GL_RGBA, GL_UNSIGNED_BYTE, transferFunctionData );
     }
 
     void readFromFrameBuffer( const PixelViewport& viewport )

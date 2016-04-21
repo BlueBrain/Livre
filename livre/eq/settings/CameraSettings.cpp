@@ -25,74 +25,83 @@
 #include <livre/core/maths/maths.h>
 #include <co/co.h>
 
+#include <algorithm>
+
 namespace livre
 {
 
 CameraSettings::CameraSettings()
-    : cameraPosition_( 0.f, 0.f, 1.5f )
 {
+    Matrix4f initial;
+    std::copy( &initial.array[0], &initial.array[0] + 16, getMatrix( ));
 }
 
-void CameraSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
+void CameraSettings::spinModel( const float x, const float y )
 {
-    co::Serializable::serialize( os, dirtyBits );
-    os << modelRotation_ << cameraPosition_;
-}
-
-void CameraSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits )
-{
-    co::Serializable::deserialize( is, dirtyBits );
-    is >> modelRotation_ >> cameraPosition_;
-}
-
-void CameraSettings::spinModel( const float x, const float y, const float z )
-{
-    if( x == 0.f && y == 0.f && z == 0.f )
+    if( x == 0.f && y == 0.f )
         return;
 
-    modelRotation_.pre_rotate_x( x );
-    modelRotation_.pre_rotate_y( y );
-    modelRotation_.pre_rotate_z( z );
-    setDirty( DIRTY_ALL );
+    float matrixValues[16];
+    std::copy( getMatrix(), getMatrix() + 16, matrixValues );
+
+    Matrix4f modelview( &matrixValues[0], &matrixValues[0] + 16 );
+
+    modelview(0,3) = 0.0f;
+    modelview(1,3) = 0.0f;
+    modelview(2,3) = 0.0f;
+
+    modelview.pre_rotate_x( x );
+    modelview.pre_rotate_y( y );
+
+    modelview(0,3) = matrixValues[12];
+    modelview(1,3) = matrixValues[13];
+    modelview(2,3) = matrixValues[14];
+
+    std::copy( &modelview.array[0], &modelview.array[0] + 16, getMatrix( ));
 }
 
 void CameraSettings::moveCamera( const float x, const float y, const float z )
 {
-    cameraPosition_ += Vector3f( x, y, z );
-    setDirty( DIRTY_ALL );
+    getMatrix()[12] += x;
+    getMatrix()[13] += y;
+    getMatrix()[14] += z;
 }
 
-void CameraSettings::setCameraPosition( const Vector3f& position )
+void CameraSettings::setCameraPosition( const Vector3f& pos )
 {
-    cameraPosition_ = position;
-    setDirty( DIRTY_ALL );
+    getMatrix()[12] = pos.x();
+    getMatrix()[13] = pos.y();
+    getMatrix()[14] = pos.z();
 }
 
 void CameraSettings::setCameraLookAt( const Vector3f& lookAt )
 {
-    setModelViewMatrix( maths::computeModelViewMatrix( cameraPosition_, lookAt ));
-}
+    const Vector3f eye( (float)getMatrix()[12],
+                        (float)getMatrix()[13],
+                        (float)getMatrix()[14]);
+    const Vector3f zAxis = vmml::normalize( eye - lookAt );
 
-void CameraSettings::setModelViewMatrix( const Matrix4f& modelViewMatrix )
-{
-    Matrix3f rotationMatrix;
-    maths::getRotationAndEyePositionFromModelView( modelViewMatrix,
-                                                   rotationMatrix,
-                                                   cameraPosition_ );
-    const Matrix3f& inverseRotation = vmml::transpose( rotationMatrix );
-    modelRotation_ = inverseRotation;
-    modelRotation_( 3, 3 ) = 1;
-    cameraPosition_ = inverseRotation * -cameraPosition_;
+    // Avoid Gimbal lock effect when looking upwards/downwards
+    Vector3f up( Vector3f::UP );
+    const float angle = zAxis.dot( up );
+    if( 1.f - std::abs( angle ) < 0.0001f )
+    {
+        Vector3f right( Vector3f::RIGHT );
+        if( angle > 0 ) // Looking downwards
+            right = Vector3f::LEFT;
+        up = up.rotate( 0.01f, right );
+        up.normalize();
+    }
 
-    setDirty( DIRTY_ALL );
+    Matrix4f modelview( eye, lookAt, up );
+    std::copy( &modelview.array[0], &modelview.array[0] + 16, getMatrix( ));
 }
 
 Matrix4f CameraSettings::getModelViewMatrix() const
 {
-    Matrix4f modelView;
-    modelView = modelRotation_;
-    modelView.setTranslation( cameraPosition_ );
-    return modelView;
-}
+    float matrixValues[16];
+    std::copy( getMatrix(), getMatrix() + 16, matrixValues );
 
+    return Matrix4f( &matrixValues[0], &matrixValues[0] + 16 );
+}
 }

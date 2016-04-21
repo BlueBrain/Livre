@@ -123,9 +123,7 @@ public:
     {
         const CameraSettings& cameraSettings =
             getFrameData()->getCameraSettings();
-        Matrix4f modelView = cameraSettings.getModelViewMatrix();
-        modelView = _channel->getHeadTransform() * modelView;
-        return modelView;
+        return _channel->getHeadTransform() * cameraSettings.getModelViewMatrix();
     }
 
     void clearViewport( const eq::PixelViewport &pvp )

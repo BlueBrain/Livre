@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -23,37 +23,11 @@
 
 namespace livre
 {
-
 namespace maths
 {
 
 /**
- * Extracts rotation and eye position from model view matrix.
- * @param modelViewMatrix is the 4x4 modelview matrix.
- * @param rotationMatrix returns 3x3 rotation matrix.
- * @param eye returns 3 element eye vector in world space.
- */
-LIVRECORE_API void getRotationAndEyePositionFromModelView( const Matrix4f& modelViewMatrix,
-                                                           Matrix3f& rotationMatrix,
-                                                           Vector3f& eye );
-/**
- * Computes model view matrix from rotation matrix and eye vector in world space.
- * @param rotationMatrix 3x3 rotation matrix.
- * @param eye vector in world space.
- * @return return 4x4 model view matrix.
- */
-LIVRECORE_API Matrix4f computeModelViewMatrix( const Matrix3f& rotationMatrix, const Vector3f& eye );
-
-/**
- * Computes model view matrix from eye vector and lookAt position in world space.
- * @param eye vector in world space.
- * @param center orientation center as lookAt vector in world space.
- * @return return 4x4 model view matrix.
- */
-LIVRECORE_API Matrix4f computeModelViewMatrix( const Vector3f& eye, const Vector3f& center );
-
-/**
- * Clamps a number between limits.
+ * Clamp a number between limits.
  * @param number Number to clamp.
  * @param lower Lower limit.
  * @param upper Upper limit.
@@ -82,5 +56,4 @@ LIVRECORE_API bool isLODVisible( const Frustum& frustum,
                                  float screenSpaceError );
 
 }
-
 }

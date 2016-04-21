@@ -26,6 +26,14 @@
 
 #include <lunchbox/refPtr.h>
 
+namespace zerobuf
+{
+namespace render
+{
+class ImageJPEG;
+}
+}
+
 namespace livre
 {
 

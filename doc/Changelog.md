@@ -2,6 +2,10 @@ Changelog {#Changelog}
 =========
 
 # master {#master}
+* [#265](https://github.com/BlueBrain/Livre/pull/265):
+  Livre uses the following ZeroBuf events: LookOut, imageJPEG, Frame,
+  VolumeRendererParameters, LookupTable1D. LivreGUI can load and save
+  the transfer function in .tf .1dt .lbb .lba formats
 
 * [#281](https://github.com/BlueBrain/Livre/pull/281):
   LivreGUI: Show progress bar for ongoing operations

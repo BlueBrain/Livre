@@ -39,6 +39,7 @@
 
 #ifdef LIVRE_USE_ZEROEQ
 #  include <livre/eq/zeroeq/communicator.h>
+#  include <zerobuf/render/imageJPEG.h>
 #endif
 
 #include <eq/eq.h>
@@ -58,45 +59,6 @@ public:
         , dataFrameRange( INVALID_FRAME_RANGE )
     {}
 
-    void publishModelView()
-    {
-#ifdef LIVRE_USE_ZEROEQ
-        const CameraSettings& cameraSettings = framedata.getCameraSettings();
-        Matrix4f modelView = cameraSettings.getModelViewMatrix();
-
-        Matrix3f rotation;
-        Vector3f eyePos;
-        maths::getRotationAndEyePositionFromModelView( modelView,
-                                                       rotation,
-                                                       eyePos );
-
-        const Vector3f& circuitCenter = volumeBBox.getCenter();
-        const Vector3f& circuitSize = volumeBBox.getSize();
-        const float isotropicScale = circuitSize.find_max();
-
-        eyePos = ( eyePos * isotropicScale ) + circuitCenter;
-
-        modelView = maths::computeModelViewMatrix( rotation, eyePos );
-        communicator->publishModelView( modelView );
-#endif
-    }
-
-    Matrix4f convertFromHBPCamera( const Matrix4f& modelViewMatrix ) const
-    {
-        const Vector3f circuitCenter = volumeBBox.getCenter();
-        const Vector3f circuitSize = volumeBBox.getSize();
-        const float isotropicScale = circuitSize.find_max();
-
-        Matrix3f rotation;
-        Vector3f eyePos;
-        maths::getRotationAndEyePositionFromModelView( modelViewMatrix,
-                                                       rotation,
-                                                       eyePos );
-
-        eyePos = ( eyePos - circuitCenter ) / isotropicScale;
-        return maths::computeModelViewMatrix( rotation, eyePos );
-    }
-
     Config* config;
     uint32_t defaultLatency;
     eq::Canvas* currentCanvas;
@@ -105,6 +67,7 @@ public:
     Boxf volumeBBox;
 #ifdef LIVRE_USE_ZEROEQ
     std::unique_ptr< zeroeq::Communicator > communicator;
+    ::zerobuf::render::ImageJPEG imageJPEG;
 #endif
     bool redraw;
     Vector2ui dataFrameRange;
@@ -129,6 +92,37 @@ FrameData& Config::getFrameData()
 const FrameData& Config::getFrameData() const
 {
     return _impl->framedata;
+}
+
+::zerobuf::render::ImageJPEG& Config::getImageJPEG() const
+{
+#ifdef LIVRE_USE_ZEROEQ
+    return _impl->imageJPEG;
+#else
+    LBTHROW( std::runtime_error( "ZeroEq missing, impossible to send imageJPEG" ));
+#endif
+}
+
+bool Config::renderJPEG()
+{
+#ifdef LIVRE_USE_ZEROEQ
+    _impl->imageJPEG.setData( std::vector< uint8_t >( ));
+    getFrameData().getFrameSettings().setGrabFrame( true );
+    frame();
+
+    while( _impl->imageJPEG.getData().empty())
+    {
+        eq::EventICommand event = getNextEvent();
+
+        if( !event.isValid( ))
+            continue;
+
+        handleEvent( event );
+    }
+    return true;
+#else
+    return false;
+#endif
 }
 
 const ApplicationParameters& Config::getApplicationParameters() const
@@ -159,7 +153,9 @@ void Config::resetCamera()
         getApplicationParameters().cameraPosition );
     _impl->framedata.getCameraSettings().setCameraLookAt(
         getApplicationParameters().cameraLookAt );
-    _impl->publishModelView();
+#ifdef LIVRE_USE_ZEROEQ
+    _impl->communicator->publishCamera();
+#endif
 }
 
 bool Config::init( const int argc LB_UNUSED, char** argv LB_UNUSED )
@@ -363,25 +359,18 @@ bool Config::switchToViewCanvas( const eq::uint128_t& viewID )
     return true;
 }
 
-void Config::handleEvents()
+void Config::handleNetworkEvents()
 {
-    eq::Config::handleEvents();
 #ifdef LIVRE_USE_ZEROEQ
     _impl->communicator->handleEvents();
     _impl->communicator->publishHeartbeat();
 #endif
 }
 
-Matrix4f Config::convertFromHBPCamera( const Matrix4f& modelViewMatrix ) const
-{
-    return _impl->convertFromHBPCamera( modelViewMatrix );
-}
-
 bool Config::handleEvent( const eq::ConfigEvent* event )
 {
 #ifdef LIVRE_USE_ZEROEQ
-    const CameraSettings& cameraSettings = _impl->framedata.getCameraSettings();
-    const Matrix4f& oldModelViewMatrix = cameraSettings.getModelViewMatrix();
+    CameraSettings cameraSettings = _impl->framedata.getCameraSettings();
 #endif
 
     EqEventInfo eventInfo( this, event );
@@ -411,8 +400,8 @@ bool Config::handleEvent( const eq::ConfigEvent* event )
     if( hasEvent )
     {
 #ifdef LIVRE_USE_ZEROEQ
-        if( cameraSettings.getModelViewMatrix() != oldModelViewMatrix )
-            _impl->publishModelView();
+        if( _impl->framedata.getCameraSettings() != cameraSettings )
+            _impl->communicator->publishCamera();
 #endif
         _impl->redraw = true;
         return true;
@@ -437,7 +426,7 @@ bool Config::handleEvent( eq::EventICommand command )
         const uint8_t* dataPtr =
             reinterpret_cast< const uint8_t* >( command.getRemainingBuffer( dataSize ) );
 
-        _impl->communicator->publishImageJPEG( dataPtr, dataSize );
+        _impl->imageJPEG.setData( dataPtr, dataSize );
         return false;
     }
 #endif

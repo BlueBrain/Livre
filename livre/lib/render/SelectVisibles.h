@@ -96,22 +96,45 @@ protected:
         const Vector3f voxelBox = lodNode.getVoxelBox().getSize();
         const Vector3f worldSpacePerVoxel = worldBox.getSize() / voxelBox;
 
-        bool isLODVisible = maths::isLODVisible( _frustum,
-                                                  vmin,
-                                                  worldSpacePerVoxel.find_min(),
-                                                  _windowHeight,
-                                                  _screenSpaceError );
+        bool lodVisible = isLODVisible( _frustum,
+                                        vmin,
+                                        worldSpacePerVoxel.find_min(),
+                                        _windowHeight,
+                                        _screenSpaceError );
 
         const VolumeInformation& volInfo =
                 getDashTree().getDataSource().getVolumeInfo();
         const uint32_t depth = volInfo.rootNode.getDepth();
-        isLODVisible = ( isLODVisible && lodNode.getRefLevel() >= _minLOD )
-                       || ( lodNode.getRefLevel() == _maxLOD )
-                       || ( lodNode.getRefLevel() == depth - 1 );
+        lodVisible = ( lodVisible && lodNode.getRefLevel() >= _minLOD )
+                     || ( lodNode.getRefLevel() == _maxLOD )
+                     || ( lodNode.getRefLevel() == depth - 1 );
 
-        if( isLODVisible )
+        if( lodVisible )
             _visibles.push_back( renderNode );
-        state.setVisitChild( !isLODVisible );
+        state.setVisitChild( !lodVisible );
+    }
+
+
+    bool isLODVisible( const Frustum& frustum,
+                       const Vector3f& worldCoord,
+                       const float worldSpacePerVoxel,
+                       const uint32_t windowHeight,
+                       const float screenSpaceError )
+    {
+        const float t = frustum.top();
+        const float b = frustum.bottom();
+
+        const float worldSpacePerPixel = ( t - b ) / windowHeight;
+        const float pixelPerVoxel = worldSpacePerVoxel / worldSpacePerPixel;
+
+        Vector4f hWorldCoord = worldCoord;
+        hWorldCoord[ 3 ] = 1.0f;
+        const float distance = std::abs( frustum.getNearPlane().dot( hWorldCoord ));
+
+        const float n = frustum.nearPlane();
+        const float pixelPerVoxelInDistance = pixelPerVoxel * n /  ( n + distance );
+
+        return pixelPerVoxelInDistance <= screenSpaceError;
     }
 
     void visitPost() final

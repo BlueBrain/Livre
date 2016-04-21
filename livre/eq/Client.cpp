@@ -219,9 +219,11 @@ int Client::run( const int argc, char** argv )
                 if( event.isValid( ))
                     config->handleEvent( event );
                 config->handleEvents(); // non-blocking
+                config->handleNetworkEvents(); //blocking
             }
         }
         config->handleEvents(); // process all pending events
+        config->handleNetworkEvents(); //blocking
     }
 
     const uint32_t frame = config->finishAllFrames();
