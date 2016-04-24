@@ -53,18 +53,6 @@ public:
     ConstTextureStatePtr getTextureState() const { return _textureState; }
 
     /**
-     * Computes the screen coordinates of an LOD block.
-     * @param frustum The frustum information for model view, projection matrices.
-     * @param pvp The pixel viewport.
-     * @param minScreenPos Returns minimum screen pos of the LOD block.
-     * @param maxScreenPos Returns maximum screen pos of the LOD block.
-     */
-    LIVRECORE_API void getScreenCoordinates( const Frustum& frustum,
-                                             const PixelViewport& pvp,
-                                             Vector2i& minScreenPos,
-                                             Vector2i& maxScreenPos ) const;
-
-    /**
      * Renders the faces of a RenderBrick.
      * @param front Only draw front faces.
      * @param back Only draw back faces.
