@@ -16,7 +16,12 @@ if(NOT QT5WIDGETS_FOUND)
   return()
 endif()
 
+include(zerobufGenerateCxx)
+zerobuf_generate_qobject(ZEROBUF_GENERATED ${CMAKE_CURRENT_BINARY_DIR}
+  ${PROJECT_SOURCE_DIR}/livre/lib/zeroeq/volumeRendererParameters.fbs)
+
 set(LIVREGUI_HEADERS
+  ${ZEROBUF_GENERATED_HEADERS}
   AppSettings.h
   Controller.h
   MainWindow.h
@@ -31,6 +36,7 @@ set(LIVREGUI_HEADERS
   types.h)
 
 set(LIVREGUI_SOURCES
+  ${ZEROBUF_GENERATED_SOURCES}
   Controller.cpp
   MainWindow.cpp
   MainWindow.ui
@@ -54,9 +60,6 @@ set(LIVREGUI_LINK_LIBRARIES LivreCore LivreLib Qt5::Widgets ZeroEQ ZeroEQHBP
 if(MONSTEER_FOUND)
   list(APPEND LIVREGUI_LINK_LIBRARIES MonsteerQt)
 endif()
-
-list(APPEND CPPCHECK_EXTRA_ARGS
-  --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/moc_MainWindow.cxx)
 
 add_definitions(${QT_DEFINITIONS} "-DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED" )
 

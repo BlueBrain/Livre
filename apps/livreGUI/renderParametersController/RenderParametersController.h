@@ -22,17 +22,14 @@
 #define _RenderParametersController_h_
 
 #include <livreGUI/types.h>
-#include <livre/lib/zerobuf/volumeRendererParameters.h>
 #include <QWidget>
 
 namespace livre
 {
 
-/** A widget with shows the renderer parameters that can be changed in Livre. */
+/** A widget which shows and modifies the renderer parameters of Livre. */
 class RenderParametersController : public QWidget
 {
-    Q_OBJECT
-
 public:
     /**
      * @param controller The GUI connection to ZeroEQ world.
@@ -42,16 +39,9 @@ public:
                                 QWidget *parentWgt = nullptr );
     ~RenderParametersController( );
 
-signals:
-    void paramsUpdated();
-
-private Q_SLOTS:
-    void onParamsUpdated();
-
 private:
     struct Impl;
     std::unique_ptr< Impl > _impl;
-
 };
 
 }

@@ -18,9 +18,10 @@
  */
 
 #include "RenderParametersController.h"
-#include <livreGUI/ui_RenderParametersController.h>
-#include <livreGUI/Controller.h>
 
+#include <livreGUI/Controller.h>
+#include <livreGUI/ui_RenderParametersController.h>
+#include <livreGUI/volumeRendererParameters.h>
 
 namespace livre
 {
@@ -32,8 +33,37 @@ struct RenderParametersController::Impl
     {
         _ui.setupUi( parent );
 
-        _params.setUpdatedFunction(
-            [parent]() { emit parent->paramsUpdated(); } );
+        parent->connect( _ui.maxLODSpinBox,
+                 static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+                 [&]( int value ) { _params.setMaxLOD( value ); publish(); });
+        parent->connect( _ui.minLODSpinBox,
+                 static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+                 [&]( int value ) { _params.setMinLOD( value ); publish(); });
+        parent->connect( _ui.screenSpaceErrorDoubleSpinBox,
+                 static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+                 [&]( double value ) { _params.setSSE( value ); publish(); });
+        parent->connect( _ui.synchronousCheckBox, &QCheckBox::stateChanged,
+                 [&]( int value ) { _params.setSynchronousMode( value != 0 ); publish(); });
+        parent->connect( _ui.samplesPerPixelSpinBox,
+                 static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+                 [&]( int value ) { _params.setSamplesPerPixel( value ); publish(); });
+        parent->connect( _ui.samplesPerRaySpinBox,
+                 static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+                 [&]( int value ) { _params.setSamplesPerRay( value ); publish(); });
+
+        parent->connect( &_params, &zerobuf::VolumeRendererParameters::maxLODChanged,
+                 [&]( uint32_t value ) { _ui.maxLODSpinBox->setValue( value ); });
+        parent->connect( &_params, &zerobuf::VolumeRendererParameters::minLODChanged,
+                 [&]( uint32_t value ) { _ui.minLODSpinBox->setValue( value ); });
+        parent->connect( &_params, &zerobuf::VolumeRendererParameters::SSEChanged,
+                 [&]( float value ) { _ui.screenSpaceErrorDoubleSpinBox->setValue( value ); });
+        parent->connect( &_params, &zerobuf::VolumeRendererParameters::synchronousModeChanged,
+                 [&]( bool value ) { _ui.synchronousCheckBox->setChecked( value ); });
+        parent->connect( &_params, &zerobuf::VolumeRendererParameters::samplesPerPixelChanged,
+                 [&]( uint32_t value ) { _ui.samplesPerPixelSpinBox->setValue( value ); });
+        parent->connect( &_params, &zerobuf::VolumeRendererParameters::samplesPerRayChanged,
+                 [&]( uint32_t value ) { _ui.samplesPerRaySpinBox->setValue( value ); });
+
         _controller.subscribe( _params );
     }
 
@@ -42,41 +72,8 @@ struct RenderParametersController::Impl
         _controller.unsubscribe( _params );
     }
 
-    void onParamsUpdated()
-    {
-        _ui.maxLODSpinBox->blockSignals( true );
-        _ui.maxLODSpinBox->setValue( _params.getMaxLOD( ));
-        _ui.maxLODSpinBox->blockSignals( false );
-
-        _ui.minLODSpinBox->blockSignals( true );
-        _ui.minLODSpinBox->setValue( _params.getMinLOD( ));
-        _ui.minLODSpinBox->blockSignals( false );
-
-        _ui.screenSpaceErrorDoubleSpinBox->blockSignals( true );
-        _ui.screenSpaceErrorDoubleSpinBox->setValue( _params.getSSE( ));
-        _ui.screenSpaceErrorDoubleSpinBox->blockSignals( false );
-
-        _ui.synchronousCheckBox->blockSignals( true );
-        _ui.synchronousCheckBox->setChecked( _params.getSynchronousMode( ));
-        _ui.synchronousCheckBox->blockSignals( false );
-
-        _ui.samplesPerPixelSpinBox->blockSignals( true );
-        _ui.samplesPerPixelSpinBox->setValue( _params.getSamplesPerPixel( ));
-        _ui.samplesPerPixelSpinBox->blockSignals( false );
-
-        _ui.samplesPerRaySpinBox->blockSignals( true );
-        _ui.samplesPerRaySpinBox->setValue( _params.getSamplesPerRay( ));
-        _ui.samplesPerRaySpinBox->blockSignals( false );
-    }
-
     void publish()
     {
-        _params.setMaxLOD( _ui.maxLODSpinBox->value( ));
-        _params.setMinLOD( _ui.minLODSpinBox->value( ));
-        _params.setSSE( _ui.screenSpaceErrorDoubleSpinBox->value( ));
-        _params.setSynchronousMode( _ui.synchronousCheckBox->isChecked( ));
-        _params.setSamplesPerPixel( _ui.samplesPerPixelSpinBox->value( ));
-        _params.setSamplesPerRay( _ui.samplesPerRaySpinBox->value( ));
         _controller.publish( _params );
     }
 
@@ -91,35 +88,10 @@ RenderParametersController::RenderParametersController( Controller& controller,
     : QWidget( parentWgt )
     , _impl( new RenderParametersController::Impl( this, controller ))
 {
-    connect( this, &RenderParametersController::paramsUpdated,
-             this, &RenderParametersController::onParamsUpdated );
-
-    connect( _impl->_ui.maxLODSpinBox,
-             static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-             [this]( int ) { _impl->publish(); });
-    connect( _impl->_ui.minLODSpinBox,
-             static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-             [this]( int ) { _impl->publish(); });
-    connect( _impl->_ui.screenSpaceErrorDoubleSpinBox,
-             static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-             [this]( double ) { _impl->publish(); });
-    connect( _impl->_ui.synchronousCheckBox, &QCheckBox::stateChanged,
-             [this]( int ) { _impl->publish(); });
-    connect( _impl->_ui.samplesPerPixelSpinBox,
-             static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-             [this]( int ) { _impl->publish(); });
-    connect( _impl->_ui.samplesPerRaySpinBox,
-             static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-             [this]( int ) { _impl->publish(); });
 }
 
 RenderParametersController::~RenderParametersController( )
 {
-}
-
-void RenderParametersController::onParamsUpdated()
-{
-    _impl->onParamsUpdated();
 }
 
 }
