@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -45,13 +45,12 @@ public:
 private:
 
     /**
-     * Converts RGBA RAW image into JPeg
-     * @return A pointer to the buffer containing the JPeg image
+     * Converts RGBA RAW image into jpeg
+     * @return A pointer to the buffer containing the jpeg image
      */
     uint8_t* _encodeJpeg( const uint32_t width, const uint32_t height,
                           const uint8_t* rawData, unsigned long& jpSize );
-    tjhandle handleCompress_;
-
+    tjhandle _compressor;
 };
 
 }

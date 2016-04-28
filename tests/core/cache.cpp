@@ -68,10 +68,8 @@ BOOST_AUTO_TEST_CASE( testCache )
     livre::CacheObjectPtr cacheObjectTriggerClean = cache.load( 3 );
     BOOST_CHECK( cacheObjectTriggerClean );
 
-    BOOST_CHECK( cache.getCount() == 2 );
+    BOOST_CHECK_EQUAL( cache.getCount(), 2 );
     BOOST_CHECK( std::static_pointer_cast< test::ValidCacheObject >( cacheObjectTriggerClean )->getId() == 3 );
-    BOOST_CHECK( cacheObjectTriggerClean.use_count() == 2 );
-    BOOST_CHECK( cache.getStatistics().getUsedMemory() == cacheSize );
+    BOOST_CHECK_EQUAL( cacheObjectTriggerClean.use_count(), 2 );
+    BOOST_CHECK_EQUAL( cache.getStatistics().getUsedMemory(), cacheSize );
 }
-
-
