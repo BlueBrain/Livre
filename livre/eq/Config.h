@@ -125,7 +125,7 @@ public:
     /** @return The JPEG image. */
     ::zerobuf::render::ImageJPEG& getImageJPEG() const;
 
-    bool renderJPEG();
+    void renderJPEG();
 
 private:
     LIVREEQ_API virtual ~Config();

@@ -76,7 +76,7 @@ TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
     QTimer::singleShot( 50, this, SLOT( _setDefault()));
 
     _controller.subscribe( _lut );
-    _lut.setUpdatedFunction( [&]
+    _lut.registerDeserializedCallback( [&]
         { return _onTransferFunction(); });
 }
 
@@ -204,7 +204,7 @@ void TransferFunctionEditor::_publishTransferFunction()
 void TransferFunctionEditor::_onTransferFunction()
 {
     emit transferFunctionChanged();
-    _lut.setUpdatedFunction( servus::Serializable::ChangeFunc( ));
+    _lut.registerDeserializedCallback( nullptr );
 }
 
 void TransferFunctionEditor::_clear()
