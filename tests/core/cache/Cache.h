@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -31,14 +31,12 @@ class Cache : public livre::Cache
 {
 public:
     Cache( size_t maxMemBytes )
-        : livre::Cache( "Test Cache" ,maxMemBytes ) {}
+        : livre::Cache( "Test Cache", maxMemBytes ) {}
 
 private:
     livre::CacheObject* _generate( const livre::CacheId& cacheId )
     {
-        ValidCacheObject* cacheObject =
-                new test::ValidCacheObject( cacheId );
-        return cacheObject;
+        return new test::ValidCacheObject( cacheId );
     }
 };
 

@@ -27,13 +27,11 @@ namespace livre
 
 struct LRUCachePolicy
 {
-
     typedef std::deque< CacheId > LRUQueue;
 
-    LRUCachePolicy( const size_t maxMemBytes,
-                    const float cleanupRatio = 1.0f )
+    LRUCachePolicy( const size_t maxMemBytes )
         : _maxMemBytes( maxMemBytes )
-        , _cleanUpRatio( cleanupRatio )
+        , _cleanUpRatio( 1.0f )
     {}
 
     bool isFull( const Cache& cache ) const
@@ -45,7 +43,7 @@ struct LRUCachePolicy
     bool hasSpace( const Cache& cache ) const
     {
         const size_t usedMemBytes = cache.getStatistics().getUsedMemory();
-        return usedMemBytes < ( 1.0f - _cleanUpRatio ) * _maxMemBytes;
+        return usedMemBytes < _cleanUpRatio * _maxMemBytes;
     }
 
     void insert( const CacheId& cacheId )
@@ -204,11 +202,9 @@ struct Cache::Impl
     mutable ReadWriteMutex _mutex;
 };
 
-Cache::Cache( const std::string& name,
-              const size_t maxMemBytes )
+Cache::Cache( const std::string& name, const size_t maxMemBytes )
     : _impl( new Cache::Impl( *this, name, maxMemBytes ))
-{
-}
+{}
 
 Cache::~Cache()
 {}
