@@ -77,4 +77,6 @@ BOOST_AUTO_TEST_CASE( UVFDataSource )
 
     BOOST_CHECK_EQUAL( memUnit->getMemSize(), allocSize );
 }
+#else
+BOOST_AUTO_TEST_CASE( UVFDataSource ) {}
 #endif // LIVRE_USE_TUVOK

@@ -17,12 +17,12 @@ stringify_shaders(${LIVREEQ_SHADERS})
 list(APPEND LIVREEQ_SOURCES ${SHADER_SOURCES})
 include_directories(${PROJECT_BINARY_DIR})
 
-set(LIVREEQ_LINK_LIBRARIES PUBLIC LivreLib Equalizer)
+set(LIVREEQ_LINK_LIBRARIES PUBLIC LivreLib Equalizer ZeroBufData)
 
 if(TARGET ZeroEQ)
   list(APPEND LIVREEQ_HEADERS zeroeq/communicator.h)
   list(APPEND LIVREEQ_SOURCES zeroeq/communicator.cpp)
-  list(APPEND LIVREEQ_LINK_LIBRARIES PRIVATE ZeroEQ ZeroEQHBP ZeroBufData)
+  list(APPEND LIVREEQ_LINK_LIBRARIES PRIVATE ZeroEQ ZeroEQHBP)
 endif()
 
 if(LibJpegTurbo_FOUND)

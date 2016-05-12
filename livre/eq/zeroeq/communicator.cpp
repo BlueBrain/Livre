@@ -61,8 +61,8 @@ public:
         _setupRequests();
         _config.getImageJPEG().registerSerializeCallback( [&]
             { return _config.renderJPEG(); });
-        _frame.registerDeserializedCallback( [&] { return updateFrame(); });
-        _exit.registerSerializeCallback( [&] { return requestExit(); });
+        _frame.registerDeserializedCallback( [&] { updateFrame(); });
+        _exit.registerSerializeCallback( [&] { requestExit(); });
         _setupSubscriber();
         _setupHTTPServer( argc, argv );
     }

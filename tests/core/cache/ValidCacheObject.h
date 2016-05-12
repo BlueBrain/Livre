@@ -25,7 +25,7 @@
 namespace test
 {
 
-const size_t CACHE_SIZE = 1000;
+const size_t OBJECT_SIZE = 1000;
 
 class ValidCacheObject : public livre::CacheObject
 {
@@ -39,7 +39,7 @@ public:
         , _isLoaded_( false )
     { }
 
-    size_t _getSize( ) const final { return CACHE_SIZE; }
+    size_t _getSize( ) const final { return OBJECT_SIZE; }
 
 private:
 
