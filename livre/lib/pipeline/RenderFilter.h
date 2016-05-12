@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -17,32 +17,50 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _dashTypes_h_
-#define _dashTypes_h_
+#ifndef _RenderFilter_h_
+#define _RenderFilter_h_
 
-#include <set>
-#include <memory>
+#include <livre/lib/types.h>
 
-#include <dash/node.h>
-#include <dash/context.h>
+#include <livre/core/pipeline/Filter.h>
 
 namespace livre
 {
-/**
- * SmartPtr definitions
- */
-typedef std::shared_ptr< dash::Context > DashContextPtr;
 
 /**
- * Vector definitions for complex types
+ * RenderFilter implements the rendering of loaded textures given the renderer.
  */
-typedef std::vector< dash::NodePtr > DashNodeVector;
+class RenderFilter : public Filter
+{
 
-/**
- * Set definitions
- */
-typedef std::set< dash::NodePtr > DashNodeSet;
+public:
+
+    /**
+     * Constructor
+     * @param dataSource the data source
+     * @param renderer the renderer ( RayCaster, etc )
+     */
+    RenderFilter( const DataSource& dataSource,
+                  Renderer& renderer );
+    ~RenderFilter();
+
+    /**
+     * @copydoc Filter::execute
+     */
+    void execute( const FutureMap& input, PromiseMap& output ) const final;
+
+    /**
+     * @copydoc Filter::getInputDataInfos
+     */
+    DataInfos getInputDataInfos() const final;
+
+private:
+
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
+};
 
 }
 
-#endif // _dashTypes_h_
+#endif
+

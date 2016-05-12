@@ -59,8 +59,8 @@ public:
      * @return promise for the given input port. If there is no connection to the
      * input port, a new promise is created for the port and no further connections are allowed,
      * if there is a connection getting a promise is not allowed.
-     * @throw std::runtime_error if there is already a connection or if there is
-     * no inputport or it is a noification port.
+     * @throw std::logic_error if there is already a connection if there is
+     * no input port or it is a notification port.
      */
     Promise getPromise( const std::string& portName );
 
@@ -95,6 +95,8 @@ protected:
                 FilterPtr&& filter );
 
 private:
+
+    ExecutablePtr clone() const;
 
     struct Impl;
     std::shared_ptr< Impl > _impl;

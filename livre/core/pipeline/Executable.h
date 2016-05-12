@@ -21,7 +21,7 @@
 #define _Executable_h_
 
 #include <livre/core/types.h>
-#include <livre/core/pipeline/Future.h>
+#include <livre/core/pipeline/FuturePromise.h>
 #include <livre/core/pipeline/Executor.h>
 
 namespace livre
@@ -65,6 +65,11 @@ public:
      * ( The futures are not ready )
      */
     virtual void reset() {}
+
+    /**
+     * @return returns a copy
+     */
+    virtual ExecutablePtr clone() const = 0;
 
     virtual ~Executable();
 

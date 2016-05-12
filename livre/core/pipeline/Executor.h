@@ -45,7 +45,7 @@ public:
      * conditions
      * @param executable to schedule
      */
-    virtual void schedule( Executable& executable ) = 0;
+    virtual void schedule( ExecutablePtr executable ) = 0;
 
 protected:
 

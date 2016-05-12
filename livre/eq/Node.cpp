@@ -32,10 +32,6 @@
 #include <livre/eq/settings/VolumeSettings.h>
 #include <livre/lib/cache/TextureDataCache.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
-#include <livre/lib/uploaders/DataUploadProcessor.h>
-#include <livre/core/dash/DashRenderStatus.h>
-#include <livre/core/dash/DashTree.h>
-#include <livre/core/dashpipeline/DashProcessorOutput.h>
 #include <livre/core/data/DataSource.h>
 
 #include <eq/eq.h>
@@ -71,9 +67,7 @@ public:
             const VolumeSettings& volumeSettings =
                     _config->getFrameData().getVolumeSettings();
             const lunchbox::URI& uri = lunchbox::URI( volumeSettings.getURI( ));
-            dash::Context::getMain(); // Create the main context
             _dataSource.reset( new livre::DataSource( uri ));
-            _dashTree.reset( new livre::DashTree( *_dataSource ));
         }
         catch( const std::runtime_error& err )
         {
@@ -114,7 +108,6 @@ public:
     livre::Config* const _config;
     std::unique_ptr< DataSource > _dataSource;
     std::unique_ptr< TextureDataCache > _textureDataCache;
-    std::unique_ptr< livre::DashTree > _dashTree;
 };
 
 Node::Node( eq::Config* parent )
@@ -163,16 +156,6 @@ bool Node::configExit()
 TextureDataCache& Node::getTextureDataCache()
 {
     return *_impl->_textureDataCache;
-}
-
-DashTree& Node::getDashTree()
-{
-    return *_impl->_dashTree;
-}
-
-const DashTree& Node::getDashTree() const
-{
-    return *_impl->_dashTree;
 }
 
 void Node::frameStart( const eq::uint128_t &frameId,

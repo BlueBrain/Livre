@@ -23,13 +23,11 @@
 
 #include <livre/lib/api.h>
 #include <livre/core/types.h>
-#include <livre/core/dashTypes.h>
-#include <livre/core/visitor/NodeVisitor.h>
 
 namespace livre
 {
 
-/** Depth First Search ( DFS ) traverser for a dash node tree. */
+/** Depth First Search ( DFS ) traverser for a LOD node tree. */
 class DFSTraversal
 {
 public:
@@ -37,7 +35,7 @@ public:
     LIVRE_API ~DFSTraversal();
 
     /**
-     * Traverse the dash node tree starting from the given node.
+     * Traverse the node tree starting from the given node.
      * @param rootNode The tree root information.
      * @param node starting node to traverse.
      * @param visitor Visitor object.
@@ -48,19 +46,19 @@ public:
                              NodeVisitor& visitor );
 
     /**
-     * Traverse the dash node tree starting from the root.
+     * Traverse the node tree starting from the root.
      * @param rootNode  The tree root information.
      * @param visitor Visitor object.
      * @param frame The temporal position of the node tree.
      */
     LIVRE_API void traverse( const RootNode& rootNode,
                              NodeVisitor& visitor,
-                             uint32_t frame );
+                             const uint32_t frame );
 
 private:
 
     struct Impl;
-    std::unique_ptr< Impl > _impl;
+    std::unique_ptr<Impl> _impl;
 };
 
 }

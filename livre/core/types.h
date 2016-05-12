@@ -25,8 +25,6 @@
 #include <lunchbox/uri.h>
 #include <servus/uint128_t.h>
 
-#include <dash/types.h>
-
 #include <boost/program_options.hpp>
 #include <boost/program_options/options_description.hpp>
 
@@ -56,13 +54,6 @@ class Cache;
 class CacheObject;
 class CacheStatistics;
 class Configuration;
-class DashConnection;
-class DashProcessor;
-class DashProcessorInput;
-class DashProcessorOutput;
-class DashRenderNode;
-class DashRenderStatus;
-class DashTree;
 class EventHandler;
 class EventHandlerFactory;
 class EventInfo;
@@ -73,6 +64,7 @@ class GLSLShaders;
 class LODNode;
 class MemoryUnit;
 class NodeId;
+class NodeVisitor;
 class Parameter;
 class Processor;
 class ProcessorInput;
@@ -122,12 +114,8 @@ typedef std::array< float, 2 > Range;
  */
 
 typedef std::shared_ptr< AllocMemoryUnit > AllocMemoryUnitPtr;
-typedef std::shared_ptr< DashConnection > DashConnectionPtr;
-typedef std::shared_ptr< Processor > ProcessorPtr;
-typedef std::shared_ptr< DashProcessor > DashProcessorPtr;
-typedef std::shared_ptr< ProcessorInput > ProcessorInputPtr;
-typedef std::shared_ptr< ProcessorOutput > ProcessorOutputPtr;
 typedef std::shared_ptr< GLContext > GLContextPtr;
+typedef std::shared_ptr< const GLContext > ConstGLContextPtr;
 typedef std::shared_ptr< TextureState > TextureStatePtr;
 typedef std::shared_ptr< const TextureState > ConstTextureStatePtr;
 typedef std::shared_ptr< DataSource > DataSourcePtr;
@@ -141,6 +129,7 @@ typedef std::shared_ptr< const CacheObject > ConstCacheObjectPtr;
 typedef std::shared_ptr< CacheObject > CacheObjectPtr;
 typedef std::shared_ptr< const CacheObject > ConstCacheObjectPtr;
 typedef std::shared_ptr< PortData > PortDataPtr;
+typedef std::shared_ptr< Executable > ExecutablePtr;
 
 typedef std::unique_ptr< Filter > FilterPtr;
 
@@ -206,7 +195,6 @@ typedef std::unordered_map< CacheId, CacheObjectPtr > CacheMap;
 typedef std::unordered_map< CacheId, ConstCacheObjectPtr > ConstCacheMap;
 typedef std::unordered_map< uint32_t, bool > BoolMap;
 typedef std::unordered_map< uint32_t, EventHandlerPtr > EventHandlerMap;
-typedef std::unordered_map< uint32_t, DashConnectionPtr > DashConnectionMap;
 
 template < class T >
 inline std::type_index getType()

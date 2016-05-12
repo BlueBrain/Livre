@@ -17,43 +17,47 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _RenderNodeVisitor_h_
-#define _RenderNodeVisitor_h_
-
-#include <livre/core/api.h>
-#include <livre/core/types.h>
-#include <livre/core/visitor/NodeVisitor.h>
+#include <livre/core/visitor/DataSourceVisitor.h>
+#include <livre/core/data/LODNode.h>
+#include <livre/core/data/DataSource.h>
 
 namespace livre
 {
 
-/**
- * The RenderNodeVisitor class is base class for invoking traversing events on DashRenderNodes.
-*/
-class RenderNodeVisitor : public NodeVisitor
+class DataSourceVisitor::Impl
 {
 public:
-    LIVRECORE_API explicit RenderNodeVisitor( DashTree& dashTree );
-    LIVRECORE_API ~RenderNodeVisitor();
+    explicit Impl( const DataSource& dataSource )
+        : _dataSource( dataSource )
+    {}
 
-    /**
-     * @see NodeVisitor::visit
-     */
-    virtual void visit( DashRenderNode& node,
-                        VisitState& state ) = 0;
+    LODNode getNode( const NodeId& nodeId ) const
+    {
+        return _dataSource.getNode( nodeId );
+    }
 
-    /**
-     * @return Returns the dash tree
-     */
-    LIVRECORE_API DashTree& getDashTree();
-
-private:
-    LIVRECORE_API void visit( const NodeId& nodeId, VisitState& state ) final;
-
-    struct Impl;
-    std::unique_ptr< Impl > _impl;
+    const DataSource& _dataSource;
 };
+
+DataSourceVisitor::DataSourceVisitor( const DataSource& dataSource )
+    : _impl( new DataSourceVisitor::Impl( dataSource ))
+{}
+
+DataSourceVisitor::~DataSourceVisitor()
+{}
+
+const DataSource& DataSourceVisitor::getDataSource() const
+{
+    return _impl->_dataSource;
+}
+
+void DataSourceVisitor::visit( const NodeId& nodeId,
+                               VisitState& state )
+{
+    const LODNode& node = _impl->getNode( nodeId );
+    if( node.isValid( ))
+        visit( node, state );
+}
 
 }
 
-#endif // _RenderNodeVisitor_h_

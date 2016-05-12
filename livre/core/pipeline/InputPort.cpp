@@ -19,8 +19,7 @@
 
 #include <livre/core/pipeline/InputPort.h>
 #include <livre/core/pipeline/OutputPort.h>
-#include <livre/core/pipeline/Promise.h>
-#include <livre/core/pipeline/Future.h>
+#include <livre/core/pipeline/FuturePromise.h>
 
 namespace livre
 {
@@ -54,7 +53,7 @@ struct InputPort::Impl
         if( getDataType() != port.getDataType( ))
             LBTHROW( std::runtime_error( "Data types does not match between ports"));
 
-        _futures.push_back( port.getPromise().getFuture( ));
+        _futures.emplace_back( port.getPromise( ));
     }
 
     bool disconnect( const OutputPort& port )

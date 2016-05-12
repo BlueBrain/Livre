@@ -19,10 +19,8 @@
 
 #include <livre/core/visitor/VisitState.h>
 #include <livre/core/visitor/NodeVisitor.h>
-#include <livre/core/dash/DashTree.h>
-#include <livre/core/dash/DashRenderNode.h>
 #include <livre/core/data/DataSource.h>
-#include <livre/lib/visitor/DFSTraversal.h>
+#include <livre/core/visitor/DFSTraversal.h>
 #include <livre/core/visitor/VisitState.h>
 
 namespace livre
@@ -31,7 +29,9 @@ namespace livre
 struct DFSTraversal::Impl
 {
 public:
-    bool traverse( const NodeId& nodeId, const uint32_t depth,
+
+    bool traverse( const NodeId& nodeId,
+                   const uint32_t depth,
                    livre::NodeVisitor& visitor )
     {
         if( depth == 0 || _state.getBreakTraversal() )
@@ -70,11 +70,14 @@ public:
 };
 
 DFSTraversal::DFSTraversal( )
-    : _impl( new Impl( ))
-{}
+    : _impl( new DFSTraversal::Impl() )
+{
+}
 
 DFSTraversal::~DFSTraversal()
-{}
+{
+    
+}
 
 bool DFSTraversal::traverse( const RootNode& rootNode, const NodeId& node,
                              NodeVisitor& visitor )

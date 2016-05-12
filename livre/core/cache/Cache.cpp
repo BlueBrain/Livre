@@ -85,6 +85,7 @@ struct Cache::Impl
         : _policy( maxMemBytes )
         , _cache( cache )
         , _statistics( name, maxMemBytes )
+        , _cacheMap( 128 )
     {}
 
     ~Impl()

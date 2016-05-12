@@ -35,7 +35,7 @@ struct Pipeline::Impl
     {}
 
     void add( const std::string& name,
-              Pipeline::ExecutablePtr executable,
+              Pipeline::UniqueExecutablePtr executable,
               bool wait )
     {
         if( _executableMap.count( name ) > 0 )
@@ -112,7 +112,7 @@ struct Pipeline::Impl
     void schedule( Executor& executor )
     {
         for( auto& nameExec: _executableMap )
-            executor.schedule( *nameExec.second );
+            executor.schedule( nameExec.second->clone( ));
     }
 
     void reset()
@@ -135,7 +135,7 @@ Pipeline::~Pipeline()
 {}
 
 void Pipeline::_add( const std::string& name,
-                     ExecutablePtr exec,
+                     UniqueExecutablePtr exec,
                      bool wait )
 {
     _impl->add( name, std::move( exec ), wait );
@@ -169,6 +169,11 @@ void Pipeline::reset()
 void Pipeline::_schedule( Executor& executor )
 {
     _impl->schedule( executor );
+}
+
+ExecutablePtr Pipeline::clone() const
+{
+    return ExecutablePtr( new Pipeline( *this ));
 }
 
 }

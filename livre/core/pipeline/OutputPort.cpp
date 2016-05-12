@@ -19,7 +19,7 @@
 
 #include <livre/core/pipeline/OutputPort.h>
 #include <livre/core/pipeline/InputPort.h>
-#include <livre/core/pipeline/Promise.h>
+#include <livre/core/pipeline/FuturePromise.h>
 
 namespace livre
 {

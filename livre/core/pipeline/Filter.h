@@ -21,6 +21,9 @@
 #define _Filter_h_
 
 #include <livre/core/types.h>
+#include <livre/core/pipeline/FuturePromise.h>
+#include <livre/core/pipeline/FutureMap.h>
+#include <livre/core/pipeline/PromiseMap.h>
 
 namespace livre
 {

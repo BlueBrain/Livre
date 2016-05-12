@@ -26,8 +26,7 @@
 #include <livre/core/pipeline/Workers.h>
 #include <livre/core/pipeline/FutureMap.h>
 #include <livre/core/pipeline/PromiseMap.h>
-#include <livre/core/pipeline/Future.h>
-#include <livre/core/pipeline/Promise.h>
+#include <livre/core/pipeline/FuturePromise.h>
 
 #include <boost/test/unit_test.hpp>
 
@@ -73,18 +72,12 @@ class TestFilter : public livre::Filter
 
     livre::DataInfos getInputDataInfos() const final
     {
-        return
-        {
-            { "TestInputData", livre::getType< InputData >( )}
-        };
+        return {{ "TestInputData", livre::getType< InputData >( ) }};
     }
 
     livre::DataInfos getOutputDataInfos() const final
     {
-        return
-        {
-            { "TestOutputData", livre::getType< OutputData >( )}
-        };
+        return {{ "TestOutputData", livre::getType< OutputData >( ) }};
     }
 };
 
@@ -105,19 +98,13 @@ class ConvertFilter : public livre::Filter
 
     livre::DataInfos getInputDataInfos() const final
     {
-        return
-        {
-            { "ConvertInputData", livre::getType< OutputData >( )}
-        };
+        return {{ "ConvertInputData", livre::getType< OutputData >( ) }};
 
     }
 
     livre::DataInfos getOutputDataInfos() const final
     {
-        return
-        {
-            { "ConvertOutputData", livre::getType< InputData >( )}
-        };
+        return {{ "ConvertOutputData", livre::getType< InputData >( )}};
     }
 };
 
@@ -128,12 +115,11 @@ BOOST_AUTO_TEST_CASE( testFilterNoInput )
     livre::PipeFilterT< TestFilter > pipeFilter( "Producer" );
 
     // Execute will fail because there are no inputs where data is retrieved
-    BOOST_CHECK_EXCEPTION( pipeFilter.execute(), std::runtime_error, check_error );
+    BOOST_CHECK_THROW( pipeFilter.execute(), std::logic_error );
     const livre::UniqueFutureMap portFutures( pipeFilter.getPostconditions( ));
 
     // Results of the filter will be empty.
-    BOOST_CHECK_EXCEPTION( portFutures.get< OutputData >( "TestOutputData" ),
-                           std::runtime_error, check_error );
+    BOOST_CHECK_THROW( portFutures.get< OutputData >( "TestOutputData" ), std::runtime_error );
 }
 
 BOOST_AUTO_TEST_CASE( testFilterWithInput )
@@ -156,12 +142,11 @@ BOOST_AUTO_TEST_CASE( testSetAndGetWrongParameters )
     livre::PipeFilterT< TestFilter > pipeFilter( "Producer" );
     pipeFilter.getPromise( "TestInputData" ).set( InputData());
 
-    BOOST_CHECK_EXCEPTION( pipeFilter.getPromise( "InputData" ).set( OutputData( 0 )),
-                           std::runtime_error, check_error );
+    BOOST_CHECK_THROW( pipeFilter.getPromise( "InputData" ).set( OutputData( 0 )),
+                       std::runtime_error );
     pipeFilter.execute();
     const livre::UniqueFutureMap portFutures( pipeFilter.getPostconditions());
-    BOOST_CHECK_EXCEPTION( portFutures.get<InputData>( "TestOutputData" ),
-                           std::runtime_error, check_error );
+    BOOST_CHECK_THROW( portFutures.get<InputData>( "TestOutputData" ), std::runtime_error );
 }
 
 BOOST_AUTO_TEST_CASE( testInvalidConnection )
@@ -169,10 +154,8 @@ BOOST_AUTO_TEST_CASE( testInvalidConnection )
     livre::PipeFilterT< TestFilter > pipeFilter1( "Producer" );
     livre::PipeFilterT< TestFilter > pipeFilter2( "Consumer" );
 
-    BOOST_CHECK_EXCEPTION( pipeFilter1.connect( "TestOutputData",
-                                                 pipeFilter2,
-                                                 "Helloworld" ),
-                           std::runtime_error, check_error );
+    BOOST_CHECK_THROW( pipeFilter1.connect( "TestOutputData", pipeFilter2, "NotExistingConnection" ),
+                       std::runtime_error );
 }
 
 BOOST_AUTO_TEST_CASE( testConnection )
@@ -253,7 +236,7 @@ BOOST_AUTO_TEST_CASE( testAsynchronousPipeline )
     livre::Pipeline pipeline = createPipeline( inputValue, 1 );
     livre::SimpleExecutor executor( 2 );
 
-    const livre::FutureMap pipelineFutures( pipeline.schedule( executor ));
+    pipeline.schedule( executor );
     const livre::Executable& pipeOutput = pipeline.getExecutable( "Consumer" );
     const livre::UniqueFutureMap portFutures( pipeOutput.getPostconditions( ));
     const OutputData& outputData = portFutures.get< OutputData >( "TestOutputData" );
@@ -270,7 +253,7 @@ BOOST_AUTO_TEST_CASE( testOneToManyManyToOnePipeline )
         livre::Pipeline pipeline = createPipeline( inputValue, convertFilterCount );
 
         livre::SimpleExecutor executor( 2 );
-        const livre::FutureMap pipelineFutures( pipeline.schedule( executor ));
+        pipeline.schedule( executor );
         const livre::Executable& pipeOutput = pipeline.getExecutable( "Consumer" );
         const livre::UniqueFutureMap portFutures( pipeOutput.getPostconditions( ));
         const OutputData& outputData = portFutures.get< OutputData >( "TestOutputData" );
@@ -286,7 +269,6 @@ BOOST_AUTO_TEST_CASE( testOneToManyManyToOnePipeline )
         livre::SimpleExecutor executor( 8 );
         const livre::Futures& futures = pipeline.schedule( executor );
         const livre::Executable& pipeOutput = pipeline.getExecutable( "Consumer" );
-
         const livre::UniqueFutureMap portFutures1( pipeOutput.getPostconditions( ));
         const OutputData& outputData1 = portFutures1.get< OutputData >( "TestOutputData" );
         BOOST_CHECK_EQUAL( outputData1.thanksForAllTheFish, 1761 );
@@ -317,25 +299,22 @@ BOOST_AUTO_TEST_CASE( testPromiseFuture )
     BOOST_CHECK( future1 == future2 );
 
     // Promise only be set with the right type
-    BOOST_CHECK_EXCEPTION( promise.set( 12.0f );,
-                           std::runtime_error, check_error );
+    BOOST_CHECK_THROW( promise.set( 12.0f ), std::runtime_error );
 
     promise.set( 42u );
     BOOST_CHECK_EQUAL( future1.get< uint32_t >(), 42u );
     BOOST_CHECK_EQUAL( future2.get< uint32_t >(), 42u );
 
     // Promise only can be set once
-    BOOST_CHECK_EXCEPTION( promise.set( 42u );,
-                           std::runtime_error, check_error );
+    BOOST_CHECK_THROW( promise.set( 42u ), std::runtime_error );
 
     promise.reset();
     livre::Future future3 = promise.getFuture();
     BOOST_CHECK( future1 != future3 );
-    BOOST_CHECK_EQUAL( future1.get< uint32_t >(), 42u );
 
     // Promise is set with explicit conversion
     promise.set< uint32_t >( 43.0f );
-
+    BOOST_CHECK_EQUAL( future1.get< uint32_t >(), 42u );
     BOOST_CHECK_EQUAL( future3.get< uint32_t >(), 43u );
 }
 
@@ -350,7 +329,7 @@ BOOST_AUTO_TEST_CASE( testFutureMaps )
 
     livre::Futures nonUniqueFutures = { uniqueFutures.front(), uniqueFutures.front() };
 
-    BOOST_CHECK_EXCEPTION( const livre::UniqueFutureMap portFuturesNonUnique( nonUniqueFutures ),
-                           std::runtime_error, check_error );
+    BOOST_CHECK_THROW( const livre::UniqueFutureMap portFuturesNonUnique( nonUniqueFutures ),
+                       std::logic_error );
     const livre::FutureMap portFutures2( nonUniqueFutures );
 }

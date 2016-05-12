@@ -42,6 +42,11 @@ void GLContext::makeCurrent()
     perThreadContext_.reset( this );
 }
 
+void GLContext::doneCurrent()
+{
+     perThreadContext_.reset( 0 );
+}
+
 const GLContext* GLContext::getCurrent()
 {
     return perThreadContext_.get();

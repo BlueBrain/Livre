@@ -26,6 +26,8 @@ FrameInfo::FrameInfo( const Frustum& frustum_,
                       const uint32_t frameId_ )
     : frustum( frustum_ )
     , frameId( frameId_ )
+    , nAvailable( 0 )
+    , nNotAvailable( 0 )
 {
 }
 

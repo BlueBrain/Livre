@@ -21,7 +21,7 @@
 #define _FutureMap_h_
 
 #include <livre/core/types.h>
-#include <livre/core/pipeline/Future.h>
+#include <livre/core/pipeline/FuturePromise.h>
 
 namespace livre
 {
@@ -55,6 +55,8 @@ public:
      * futures with a given name are ready, this function will block.
      * @param name of the future.
      * @return the values of the futures.
+     * @throw std::logic_error when there is no future associated with the
+     * given name
      * @throw std::runtime_error when the data is not exact
      * type T
      */
@@ -72,6 +74,8 @@ public:
      * Gets the copy of ready value(s) with the given type T.
      * @param name of the future.
      * @return the values of the futures.
+     * @throw std::logic_error when there is no future associated with the
+     * given name
      * @throw std::runtime_error when the data is not exact
      * type T
      */
@@ -104,7 +108,7 @@ public:
      * Queries if futures are ready with a given name
      * @param name of the future.
      * @return true if all futures with the given name are ready.
-     * @throw std::runtime_error when there is no future associated with the
+     * @throw std::logic_error when there is no future associated with the
      * given name
      */
     bool isReady( const std::string& name ) const;
@@ -120,7 +124,7 @@ public:
     /**
      * Waits all futures associated with a given name
      * @param name of the future.
-     * @throw std::runtime_error when there is no future associated with the
+     * @throw std::logic_error when there is no future associated with the
      * given name
      */
     void wait( const std::string& name ) const;
@@ -135,14 +139,14 @@ public:
     /**
      * Waits all futures associated with a given name.
      * @param name of the future.
-     * @throw std::runtime_error when there is no future associated with the
+     * @throw std::logic_error when there is no future associated with the
      * given name
      */
     void waitForAny( const std::string& name ) const;
 
     /**
      * Waits all futures.
-     * @throw std::runtime_error when there is no future associated with the
+     * @throw std::logic_error when there is no future associated with the
      * given name
      */
     void waitForAny() const;
@@ -164,7 +168,7 @@ public:
 
     /**
      * @param futures the list of futures.
-     * @throw std::runtime_error when futures are not unique in names
+     * @throw std::logic_error when futures are not unique in names
      */
     explicit UniqueFutureMap( const Futures& futures );
     ~UniqueFutureMap();
@@ -175,6 +179,8 @@ public:
      * block.
      * @param name of the future.
      * @return the value for the future.
+     * @throw std::logic_error when there is no future associated with the
+     * given name
      * @throw std::runtime_error when the data is not exact
      * type T
      */
@@ -187,6 +193,8 @@ public:
     /**
      * @param name of the future
      * @return the future associated with the name.
+     * @throw std::logic_error when there is no future associated with the
+     * given name
      */
     Future getFuture( const std::string& name ) const;
 
@@ -199,7 +207,7 @@ public:
      * Queries if future is ready for a given name
      * @param name of the future
      * @return true if all futures with the given name are ready.
-     * @throw std::runtime_error when there is no future associated with the
+     * @throw std::logic_error when there is no future associated with the
      * given name
      */
     bool isReady( const std::string& name ) const;
@@ -207,7 +215,7 @@ public:
     /**
      * Queries if future is ready for a given name
      * @return true if all futures are ready.
-     * @throw std::runtime_error when there is no future associated with the
+     * @throw std::logic_error when there is no future associated with the
      * given name
      */
     bool isReady() const;
@@ -215,14 +223,14 @@ public:
     /**
      * Waits for the future associated with a given name
      * @param name is the name assoicated with futures.
-     * @throw std::runtime_error when there is no future associated with the
+     * @throw std::logic_error when there is no future associated with the
      * given name
      */
     void wait( const std::string& name ) const;
 
     /**
      * Waits for all the futures
-     * @throw std::runtime_error when there is no future associated with the
+     * @throw std::logic_error when there is no future associated with the
      * given name
      */
     void wait() const;

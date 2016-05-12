@@ -67,7 +67,7 @@ public:
 
     size_t getSize() const
     {
-        return _data->getAllocSize();
+        return getDataSize();
     }
 
     const void* getDataPtr() const

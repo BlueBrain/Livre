@@ -55,7 +55,7 @@ public:
     /**
      * Clears the current context.
      */
-    virtual void doneCurrent() = 0;
+    virtual void doneCurrent();
 
     /**
      * Gets the current context

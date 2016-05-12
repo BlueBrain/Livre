@@ -33,7 +33,7 @@ Executable::~Executable()
 
 void Executable::_schedule( Executor& executor )
 {
-    executor.schedule( *this );
+    executor.schedule( clone( ));
 }
 
 }

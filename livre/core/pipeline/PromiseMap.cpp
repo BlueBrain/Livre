@@ -18,7 +18,6 @@
  */
 
 #include <livre/core/pipeline/PromiseMap.h>
-#include <livre/core/pipeline/Promise.h>
 
 namespace livre
 {
@@ -43,9 +42,7 @@ struct PromiseMap::Impl
 
     void throwError( const std::string& name ) const
     {
-        std::stringstream err;
-        err << "Unknown promise name: " << name << std::endl;
-        LBTHROW( std::runtime_error( err.str( )));
+        LBTHROW( std::logic_error( std::string( "Unknown promise name: ") + name ));
     }
 
     bool hasPromise( const std::string& name ) const
@@ -64,6 +61,20 @@ struct PromiseMap::Impl
         {
             Promise promise = namePromise.second;
             promise.flush();
+        }
+    }
+
+    void reset( const std::string& name ) const
+    {
+        getPromise( name ).reset();
+    }
+
+    void reset() const
+    {
+        for( auto& namePromise: _promiseMap )
+        {
+            Promise promise = namePromise.second;
+            promise.reset();
         }
     }
 
@@ -92,7 +103,17 @@ void PromiseMap::flush( const std::string& name ) const
 
 void PromiseMap::flush() const
 {
-     _impl->flush();
+    _impl->flush();
+}
+
+void PromiseMap::reset( const std::string& name) const
+{
+    _impl->reset( name );
+}
+
+void PromiseMap::reset() const
+{
+    _impl->flush();
 }
 
 Promise PromiseMap::getPromise( const std::string& name ) const

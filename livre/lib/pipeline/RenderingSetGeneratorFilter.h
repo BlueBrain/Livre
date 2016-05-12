@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -17,51 +17,53 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _Workers_h_
-#define _Workers_h_
+#ifndef _RenderingSetGeneratorFilter_h_
+#define _RenderingSetGeneratorFilter_h_
 
-#include <livre/core/types.h>
+#include <livre/lib/types.h>
+
+#include <livre/core/pipeline/Filter.h>
+#include <livre/core/render/FrameInfo.h>
 
 namespace livre
 {
 
 /**
- * A simple thread pool
+ * RenderingSetGeneratorFilter class generates the rendering set given the visibles.
  */
-class Workers
+class RenderingSetGeneratorFilter : public Filter
 {
+
 public:
 
     /**
-     * Constructs a thread pool given the number of threads.
-     * @param nThreads is the number of threads.
-     * @param glContext if given, the threads can share this
-     * context.
+     * Constructor
+     * @param textureCache the texture cache
      */
-    Workers( size_t nThreads = 4,
-             ConstGLContextPtr glContext = ConstGLContextPtr( ));
-    ~Workers();
+    RenderingSetGeneratorFilter( const TextureCache& textureCache );
+    ~RenderingSetGeneratorFilter();
 
     /**
-     * Submitted executable is scheduled to the execution
-     * queue.
-     * @param executable is executed by thread pool.
+     * @copydoc Filter::execute
      */
-    void schedule( ExecutablePtr executable );
+    void execute( const FutureMap& input, PromiseMap& output ) const final;
 
     /**
-     * @return the size of thread pool.
+     * @copydoc Filter::getInputDataInfos
      */
-    size_t getSize() const;
+    DataInfos getInputDataInfos() const final;
+
+    /**
+     * @copydoc Filter::getOutputDataInfos
+     */
+    DataInfos getOutputDataInfos() const final;
 
 private:
 
     struct Impl;
     std::unique_ptr<Impl> _impl;
-
 };
 
 }
 
-#endif // _Workers_h_
-
+#endif

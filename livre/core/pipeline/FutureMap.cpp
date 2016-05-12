@@ -18,8 +18,6 @@
  */
 
 #include <livre/core/pipeline/FutureMap.h>
-#include <livre/core/pipeline/Future.h>
-#include <livre/core/pipeline/AsyncData.h>
 
 namespace livre
 {
@@ -39,8 +37,7 @@ public:
 
     void throwError( const std::string& name ) const
     {
-        LBTHROW( std::runtime_error( std::string( "Unknown future name: ")
-                                                  + name ));
+        LBTHROW( std::logic_error( std::string( "Unknown future name: ") + name ));
     }
 
     bool hasFuture( const std::string& name ) const

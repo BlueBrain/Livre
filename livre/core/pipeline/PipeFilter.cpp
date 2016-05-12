@@ -23,8 +23,7 @@
 #include <livre/core/pipeline/PromiseMap.h>
 #include <livre/core/pipeline/FutureMap.h>
 #include <livre/core/pipeline/PipeFilter.h>
-#include <livre/core/pipeline/Future.h>
-#include <livre/core/pipeline/Promise.h>
+#include <livre/core/pipeline/FuturePromise.h>
 #include <livre/core/pipeline/Filter.h>
 
 namespace livre
@@ -92,6 +91,11 @@ struct PipeFilter::Impl
             promises.flush();
         }
         catch( const std::runtime_error& err )
+        {
+            promises.flush();
+            throw err;
+        }
+        catch( const std::logic_error& err )
         {
             promises.flush();
             throw err;
@@ -176,6 +180,7 @@ struct PipeFilter::Impl
         _manuallySetPortsMap.clear();
         for( auto& namePort: _outputMap )
             namePort.second.reset();
+
     }
 
     PipeFilter& _pipeFilter;
@@ -190,6 +195,11 @@ PipeFilter::PipeFilter( const std::string& name,
                         FilterPtr&& filter )
     : _impl( new Impl( *this, name, std::move( filter )))
 {}
+
+ExecutablePtr PipeFilter::clone() const
+{
+    return ExecutablePtr( new PipeFilter( *this ));
+}
 
 PipeFilter::~PipeFilter()
 {}

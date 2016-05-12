@@ -17,14 +17,82 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _Future_h_
-#define _Future_h_
+#ifndef _Promise_h_
+#define _Promise_h_
 
 #include <livre/core/pipeline/PortData.h>
 #include <livre/core/types.h>
 
 namespace livre
 {
+
+/**
+ * Is similar to the std::promise classes in functionality and it has additional
+ * information for the name and data type. It provides methods to set the data.
+ */
+class Promise
+{
+public:
+
+    /**
+     * @param dataInfo is the name and type information for the data.
+     */
+    Promise( const DataInfo& dataInfo );
+    ~Promise();
+
+    /**
+     * @return the name of the connection
+     */
+    std::type_index getDataType() const;
+
+    /**
+     * @return the name of the connection
+     */
+    std::string getName() const;
+
+    /**
+     * Sets the port with the value.
+     * @param value to be set
+     * @throw std::runtime_error when the port data is not exact
+     * type T or there is no such port name.
+     */
+    template< class T >
+    void set( const T& value )
+    {
+        _set( std::make_shared< PortDataT< T >>( value ));
+    }
+
+    /**
+     * Sets the promise with empty data if it is not set already
+     */
+    void flush();
+
+    /**
+     * @return the future, that can be queried for data retrieval.
+     * @note reset() on the promise won't effect the future object.
+     * If such behaviour is needed Future has a Future( const Promise& )
+     * consttructor
+     */
+    Future getFuture() const;
+
+    /**
+     * @resets the promise.( If related future is constructed using
+     * Future( const Promise& ) constructor, future can be re-used
+     * for different data )
+     * The behavior of the function is undefined when multiple threads
+     * execute query/get from future.
+     */
+    void reset();
+
+private:
+
+    friend class Future;
+
+    void _set( PortDataPtr data );
+
+    struct Impl;
+    std::shared_ptr<Impl> _impl;
+};
 
 /**
  * The Future class is similar to the std::future classes in functionality and it has additional
@@ -36,6 +104,12 @@ class Future
 public:
 
     ~Future();
+
+    /**
+     * Copy constructor
+     * @param future to be copied
+     */
+    Future( const Future& future );
 
     /**
      * @return name of the future
@@ -79,15 +153,26 @@ public:
      */
     bool operator!=( const Future& future ) const { return !(*this == future); }
 
+    /**
+     * @return the unique identifier for the future
+     */
+    const servus::uint128_t& getId() const;
+
+    /**
+     * Promise construction is needed when reset() on the promise
+     * affects the future directly.
+     * Further copies from the future is not effected by reset()
+     * on the promise.
+     * @param promise that future is retrieved
+     */
+    Future( const Promise& promise );
+
 private:
 
     friend class Promise;
-    Future( const AsyncData& data );
 
     friend void waitForAny( const Futures& future );
     friend bool operator<( const Future& future1, const Future& future2 );
-
-    const AsyncData& _getAsyncData() const;
 
     template< class T >
     const T& _get() const
@@ -113,5 +198,5 @@ void waitForAny( const Futures& futures );
 
 }
 
-#endif // _Future_h_
+#endif // _Promise_h_
 

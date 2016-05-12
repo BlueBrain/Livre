@@ -1,5 +1,5 @@
 /* Copyright (c) 2011-2015, EPFL/Blue Brain Project
- *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -17,40 +17,55 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _AvailableSetGenerator_h_
-#define _AvailableSetGenerator_h_
+#ifndef _VisibleSetGeneratorFilter_h_
+#define _VisibleSetGeneratorFilter_h_
 
-#include <livre/lib/api.h>
 #include <livre/lib/types.h>
+
+#include <livre/core/pipeline/Filter.h>
+#include <livre/core/render/FrameInfo.h>
 
 namespace livre
 {
 
 /**
- * The AvailableSetGenerator class generates a rendering set according to the availability
- * of the textures.
+ * Collects all the visibles for given inputs ( Frustums, Frames, Data Ranges,
+ * Rendering params and Viewports )
  */
-class AvailableSetGenerator
+class VisibleSetGeneratorFilter : public Filter
 {
+
 public:
-    /**
-     * @param textureCache is the cache for textures.
-     */
-    LIVRE_API explicit AvailableSetGenerator( const TextureCache& textureCache );
-    LIVRE_API ~AvailableSetGenerator();
 
     /**
-     * Generates the rendering set according to the given frustum.
-     * @param frameInfo Keeps the frame information
+     * Constructor
+     * @param dataSource the data source
      */
-    LIVRE_API void generateRenderingSet( FrameInfo& frameInfo ) const;
+    VisibleSetGeneratorFilter( const DataSource& dataSource );
+    ~VisibleSetGeneratorFilter();
+
+    /**
+     * @copydoc Filter::execute
+     */
+    void execute( const FutureMap& input, PromiseMap& output ) const final;
+
+    /**
+     * @copydoc Filter::getInputDataInfos
+     */
+    DataInfos getInputDataInfos() const final;
+
+    /**
+     * @copydoc Filter::getOutputDataInfos
+     *
+     */
+    DataInfos getOutputDataInfos() const final;
 
 private:
 
     struct Impl;
-    std::unique_ptr< Impl > _impl;
+    std::unique_ptr<Impl> _impl;
 };
 
-
 }
-#endif // _AvailableSetGenerator_h_
+
+#endif

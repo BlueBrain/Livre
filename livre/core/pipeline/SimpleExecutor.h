@@ -44,14 +44,14 @@ public:
      * the worker threads will share the context with the given context
      */
     SimpleExecutor( size_t threadCount,
-                 GLContextPtr glContext = GLContextPtr( ));
+                    ConstGLContextPtr glContext = ConstGLContextPtr( ));
 
     virtual ~SimpleExecutor();
 
     /**
      * @copydoc Executor::schedule
      */
-    void schedule( Executable& executable ) final;
+    void schedule( ExecutablePtr executable ) final;
 
     /**
      * @copydoc Executor::clear

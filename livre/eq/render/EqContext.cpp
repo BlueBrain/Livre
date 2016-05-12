@@ -26,6 +26,11 @@
 namespace livre
 {
 
+namespace
+{
+boost::mutex glContextMutex;
+}
+
 EqContext::EqContext( Window* const window )
     : GLContext( window->glewGetContext( ))
     , _window( window )
@@ -40,6 +45,7 @@ EqContext::~EqContext()
 void EqContext::share( const GLContext& src )
 {
     LBASSERT( _window );
+    ScopedLock lock( glContextMutex );
 
     // Context is already created so return.
     if( _systemWindow )
@@ -64,7 +70,7 @@ void EqContext::share( const GLContext& src )
     const eq::Pipe* pipe = _window->getPipe();
     _systemWindow = pipe->getWindowSystem().createWindow( _window, settings );
 
-    if( !_systemWindow->configInit( ) )
+    if( !_systemWindow->configInit( ))
     {
         delete _systemWindow;
         _systemWindow = 0;
@@ -86,6 +92,12 @@ void EqContext::makeCurrent()
 }
 
 void EqContext::doneCurrent()
-{}
+{
+    if( _systemWindow )
+    {
+        GLContext::doneCurrent();
+        _systemWindow->doneCurrent();
+    }
+}
 
 }

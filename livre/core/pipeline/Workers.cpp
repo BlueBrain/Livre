@@ -32,7 +32,7 @@ struct Workers::Impl
 {
     Impl( Workers& workers,
           const size_t nThreads,
-          const GLContextPtr& glContext )
+          const ConstGLContextPtr& glContext )
         : _workers( workers )
         , _glContext( glContext )
     {
@@ -43,34 +43,42 @@ struct Workers::Impl
 
     void execute()
     {
+        GLContextPtr context;
         if( _glContext )
         {
-            GLContextPtr context = _glContext->clone();
+            context = _glContext->clone();
             context->share( *_glContext );
             context->makeCurrent();
         }
 
         while( true )
         {
-            Executable* exec = _workQueue.pop();
+            ExecutablePtr exec = _workQueue.pop();
             if( !exec )
                 break;
 
             exec->execute();
+        }
+
+        if( context )
+        {
+            context->doneCurrent();
+            context.reset();
         }
     }
 
     ~Impl()
     {
         for( size_t i = 0; i < getSize(); ++i )
-            _workQueue.push( 0 );
+            _workQueue.push( ExecutablePtr( ));
         _threadGroup.join_all();
+        _glContext.reset();
     }
 
 
-    void submitWork( Executable& executable )
+    void submitWork( ExecutablePtr executable )
     {
-        _workQueue.push( &executable );
+        _workQueue.push( executable );
     }
 
     size_t getSize() const
@@ -79,13 +87,13 @@ struct Workers::Impl
     }
 
     Workers& _workers;
-    lunchbox::MTQueue< Executable* > _workQueue;
+    lunchbox::MTQueue< ExecutablePtr > _workQueue;
     boost::thread_group _threadGroup;
-    const GLContextPtr _glContext;
+    ConstGLContextPtr _glContext;
 };
 
 Workers::Workers( const size_t nThreads,
-                  GLContextPtr glContext )
+                  ConstGLContextPtr glContext )
     : _impl( new Workers::Impl( *this,
                                 nThreads,
                                 glContext ))
@@ -94,7 +102,7 @@ Workers::Workers( const size_t nThreads,
 Workers::~Workers()
 {}
 
-void Workers::schedule( Executable& executable )
+void Workers::schedule( ExecutablePtr executable )
 {
     _impl->submitWork( executable );
 }

@@ -24,9 +24,8 @@
 #include <livre/core/pipeline/Workers.h>
 #include <livre/core/pipeline/Executable.h>
 #include <livre/core/pipeline/FutureMap.h>
-#include <livre/core/pipeline/AsyncData.h>
-#include <livre/core/pipeline/Future.h>
-#include <livre/core/pipeline/Promise.h>
+#include <livre/core/pipeline/FuturePromise.h>
+#include <livre/core/pipeline/PipeFilter.h>
 
 #include <livre/core/data/NodeId.h>
 #include <livre/core/data/LODNode.h>
@@ -44,13 +43,13 @@ namespace livre
 
 bool operator<( const Future& future1, const Future& future2 )
 {
-    return future1._impl.get() < future2._impl.get();
+    return future1.getId() < future2.getId();
 }
 
 struct SimpleExecutor::Impl
 {
 
-    Impl( const size_t threadCount, GLContextPtr glContext )
+    Impl( const size_t threadCount, ConstGLContextPtr glContext )
         : _workers( threadCount, glContext )
         , _unlockPromise( DataInfo( "LoopUnlock", getType< bool >( )))
         , _workThread( boost::thread( boost::bind( &Impl::schedule, this )))
@@ -70,7 +69,7 @@ struct SimpleExecutor::Impl
     void schedule()
     {
         std::set< Future > inputConditions = { _unlockPromise.getFuture() };
-        Executables executables;
+        std::list< ExecutablePtr > executables;
         while( true )
         {
             waitForAny( Futures( inputConditions.begin(), inputConditions.end( )));
@@ -80,7 +79,7 @@ struct SimpleExecutor::Impl
                 {
                     while( !_mtWorkQueue.empty( ))
                     {
-                        Executable* exec = _mtWorkQueue.pop();
+                        ExecutablePtr exec = _mtWorkQueue.pop();
                         // In destruction tine "0" is pushed to the queue
                         // and no further executable is scheduled
                         if( !exec )
@@ -91,22 +90,19 @@ struct SimpleExecutor::Impl
                         inputConditions.insert( preConds.begin(), preConds.end( ));
                     }
 
-                    inputConditions.erase( _unlockPromise.getFuture( ));
                     _unlockPromise.reset();
-                    inputConditions.insert( _unlockPromise.getFuture( ));
-
                 }
             }
 
-            Executables::iterator it = executables.begin();
+            std::list< ExecutablePtr >::iterator it = executables.begin();
             while( it != executables.end( ))
             {
-                Executable* executable = *it;
+                ExecutablePtr executable = *it;
                 const Futures& preConds = executable->getPreconditions();
                 const FutureMap futureMap( preConds );
                 if( futureMap.isReady( ))
                 {
-                    _workers.schedule( *executable );
+                    _workers.schedule( executable );
                     it = executables.erase( it );
                     for( const auto& future: futureMap.getFutures( ))
                         inputConditions.erase( future );
@@ -122,23 +118,23 @@ struct SimpleExecutor::Impl
         _mtWorkQueue.clear();
     }
 
-    void schedule( Executable& exec )
+    void schedule( ExecutablePtr exec )
     {
         ScopedLock lock( _promiseReset );
         const bool wasEmpty = _mtWorkQueue.empty();
-        _mtWorkQueue.push_back( &exec );
+        _mtWorkQueue.push_back( exec );
         if( wasEmpty )
             _unlockPromise.set( true );
     }
 
-    lunchbox::MTQueue< Executable* > _mtWorkQueue;
+    lunchbox::MTQueue< ExecutablePtr > _mtWorkQueue;
     Workers _workers;
     Promise _unlockPromise;
     boost::mutex _promiseReset;
     boost::thread _workThread;
 };
 
-SimpleExecutor::SimpleExecutor( const size_t threadCount, GLContextPtr glContext )
+SimpleExecutor::SimpleExecutor( const size_t threadCount, ConstGLContextPtr glContext )
     : _impl( new Impl( threadCount, glContext ))
 {
 }
@@ -151,7 +147,7 @@ void SimpleExecutor::clear()
     _impl->clear();
 }
 
-void SimpleExecutor::schedule( Executable& executable )
+void SimpleExecutor::schedule( ExecutablePtr executable )
 {
     _impl->schedule( executable );
 }

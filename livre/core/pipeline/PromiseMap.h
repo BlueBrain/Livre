@@ -20,7 +20,7 @@
 #ifndef _PromiseMap_h_
 #define _PromiseMap_h_
 
-#include <livre/core/pipeline/Promise.h>
+#include <livre/core/pipeline/FuturePromise.h>
 #include <livre/core/types.h>
 
 namespace livre
@@ -48,8 +48,10 @@ public:
      * Sets the port with the value.
      * @param name of the promise
      * @param value to be set
+     * @throw std::logic_error when there is no promise associated with the
+     * given name
      * @throw std::runtime_error when the port data is not exact
-     * type T or there is no such port name.
+     * type T
      */
     template< class T >
     void set( const std::string& name, const T& value ) const
@@ -60,15 +62,32 @@ public:
     /**
      * Writes empty values to promises which are not set already.
      * @param name of the promise.
-     * @throw std::runtime_error there is no such port name.
+     * @throw std::logic_error when there is no promise associated with the
+     * given name
      */
     void flush( const std::string& name ) const;
 
     /**
      * Writes empty values to promises which are not set already.
-     * @throw std::runtime_error there is no such port name.
+     * @throw std::logic_error when there is no promise associated with the
+     * given name
      */
     void flush() const;
+
+    /**
+     * Resets the promise after they are done.
+     * @param name of the promise.
+     * @throw std::logic_error when there is no promise associated with the
+     * given name
+     */
+    void reset( const std::string& name ) const;
+
+    /**
+     * Resets the promises after they are done.
+     * @throw std::logic_error when there is no promise associated with the
+     * given name
+     */
+    void reset() const;
 
 private:
 
