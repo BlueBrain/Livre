@@ -47,7 +47,6 @@ set(LIVRECORE_HEADERS
   pipeline/ProcessorOutput.h
   render/FrameInfo.h
   render/Frustum.h
-  render/RenderBrick.h
   render/Renderer.h
   render/TexturePool.h
   render/TextureState.h
@@ -86,7 +85,6 @@ set(LIVRECORE_SOURCES
   render/Frustum.cpp
   render/GLContext.cpp
   render/GLSLShaders.cpp
-  render/RenderBrick.cpp
   render/Renderer.cpp
   render/TexturePool.cpp
   render/TextureState.cpp

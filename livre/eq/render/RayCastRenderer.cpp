@@ -17,9 +17,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <livre/core/data/DataSource.h>
 #include <livre/core/data/VolumeInformation.h>
 #include <livre/core/render/GLSLShaders.h>
-#include <livre/core/render/RenderBrick.h>
 #include <livre/core/render/Frustum.h>
 #include <livre/core/render/TransferFunction1D.h>
 #include <livre/core/data/LODNode.h>
@@ -27,6 +27,9 @@
 #include <livre/core/render/GLContext.h>
 
 #include <livre/lib/configuration/VolumeRendererParameters.h>
+#include <livre/lib/cache/TextureCache.h>
+#include <livre/lib/cache/TextureDataCache.h>
+#include <livre/lib/cache/TextureObject.h>
 
 #include <livre/eq/FrameData.h>
 #include <livre/eq/render/RayCastRenderer.h>
@@ -39,6 +42,31 @@
 
 namespace livre
 {
+
+// Sort helper function for sorting the textures with their distances to viewpoint
+struct DistanceOperator
+{
+    explicit DistanceOperator( const DataSource& dataSource, const Frustum& frustum )
+        : _frustum( frustum )
+        , _dataSource( dataSource )
+    { }
+
+    bool operator()( const NodeId& rb1,
+                     const NodeId& rb2 )
+    {
+        const LODNode& lodNode1 = _dataSource.getNode( rb1 );
+        const LODNode& lodNode2 = _dataSource.getNode( rb2 );
+
+        const float distance1 = ( _frustum.getMVMatrix() *
+                                  lodNode1.getWorldBox().getCenter() ).length();
+        const float distance2 = ( _frustum.getMVMatrix() *
+                                  lodNode2.getWorldBox().getCenter() ).length();
+        return  distance1 < distance2;
+    }
+    const Frustum& _frustum;
+    const DataSource& _dataSource;
+};
+
 
 #define glewGetContext() GLContext::getCurrent()->glewGetContext()
 
@@ -57,15 +85,17 @@ const uint32_t minSamplesPerRay = 512;
 
 struct RayCastRenderer::Impl
 {
-    Impl( const uint32_t samplesPerRay,
-          const uint32_t samplesPerPixel,
-          const VolumeInformation& volInfo )
+    Impl( const TextureCache& textureCache,
+          const uint32_t samplesPerRay,
+          const uint32_t samplesPerPixel )
         : _framebufferTexture( GL_TEXTURE_RECTANGLE_ARB, glewGetContext( ))
         , _nSamplesPerRay( samplesPerRay )
         , _nSamplesPerPixel( samplesPerPixel )
         , _computedSamplesPerRay( samplesPerRay )
-        , _volInfo( volInfo )
         , _transferFunctionTexture( 0 )
+        , _textureCache( textureCache )
+        , _dataSource( textureCache.getDataCache().getDataSource( ))
+        , _volInfo( _dataSource.getVolumeInfo( ))
     {
         TransferFunction1D transferFunction;
         initTransferFunction( transferFunction );
@@ -82,6 +112,15 @@ struct RayCastRenderer::Impl
     ~Impl()
     {
         _framebufferTexture.flush();
+    }
+
+    NodeIds order( const NodeIds& bricks,
+                   const Frustum& frustum ) const
+    {
+        NodeIds rbs = bricks;
+        DistanceOperator distanceOp( _dataSource, frustum );
+        std::sort( rbs.begin(), rbs.end(), distanceOp );
+        return rbs;
     }
 
     void update( const FrameData& frameData )
@@ -122,14 +161,15 @@ struct RayCastRenderer::Impl
     }
 
     void onFrameStart( const Frustum& frustum,
-                       const RenderBricks& renderBricks )
+                       const NodeIds& renderBricks )
     {
         if( _nSamplesPerRay == 0 ) // Find sampling rate
         {
             uint32_t maxLOD = 0;
-            for( const RenderBrick& rb : renderBricks )
+            for( const NodeId& rb : renderBricks )
             {
-                const uint32_t level = rb.getLODNode().getRefLevel();
+                const LODNode& lodNode = _dataSource.getNode( rb );
+                const uint32_t level = lodNode.getRefLevel();
                 if( level > maxLOD )
                     maxLOD = level;
             }
@@ -199,7 +239,68 @@ struct RayCastRenderer::Impl
         glUseProgram( 0 );
     }
 
-    void renderBrick( const PixelViewport& viewport, const RenderBrick& rb )
+    void drawBrick( const LODNode& lodNode, bool front, bool back  ) const
+    {
+        if( !front && !back )
+            return;
+        else if( front && !back )
+        {
+            glCullFace( GL_BACK );
+        }
+        else if( !front && back )
+        {
+            glCullFace( GL_FRONT );
+        }
+
+        const Boxf& worldBox = lodNode.getWorldBox();
+        const Vector3f& minPos = worldBox.getMin();
+        const Vector3f& maxPos = worldBox.getMax();
+
+        glBegin( GL_QUADS );
+        {
+            const float norm = -1.0f;
+            glNormal3f(  norm, 0.0f, 0.0f );
+            glVertex3f( minPos[ 0 ], minPos[ 1 ], minPos[ 2 ] ); // 0
+            glVertex3f( minPos[ 0 ], minPos[ 1 ], maxPos[ 2 ] ); // 1
+            glVertex3f( minPos[ 0 ], maxPos[ 1 ], maxPos[ 2 ] ); // 3
+            glVertex3f( minPos[ 0 ], maxPos[ 1 ], minPos[ 2 ] ); // 2
+
+            glNormal3f( 0.0f,  -norm, 0.0f );
+            glVertex3f( minPos[ 0 ], maxPos[ 1 ], minPos[ 2 ] ); // 2
+            glVertex3f( minPos[ 0 ], maxPos[ 1 ], maxPos[ 2 ] ); // 3
+            glVertex3f( maxPos[ 0 ], maxPos[ 1 ], maxPos[ 2 ] ); // 5
+            glVertex3f( maxPos[ 0 ], maxPos[ 1 ], minPos[ 2 ] ); // 4
+
+            glNormal3f( -norm, 0.0f, 0.0f );
+            glVertex3f( maxPos[ 0 ], maxPos[ 1 ], minPos[ 2 ] ); // 4
+            glVertex3f( maxPos[ 0 ], maxPos[ 1 ], maxPos[ 2 ] ); // 5
+            glVertex3f( maxPos[ 0 ], minPos[ 1 ], maxPos[ 2 ] ); // 7
+            glVertex3f( maxPos[ 0 ], minPos[ 1 ], minPos[ 2 ] ); // 6
+
+            glNormal3f( 0.0f,  norm, 0.0f );
+            glVertex3f( maxPos[ 0 ], minPos[ 1 ], minPos[ 2 ] ); // 6
+            glVertex3f( maxPos[ 0 ], minPos[ 1 ], maxPos[ 2 ] ); // 7
+            glVertex3f( minPos[ 0 ], minPos[ 1 ], maxPos[ 2 ] ); // 1
+            glVertex3f( minPos[ 0 ], minPos[ 1 ], minPos[ 2 ] ); // 0
+
+            glNormal3f( 0.0f, 0.0f, -norm );
+            glVertex3f( minPos[ 0 ], minPos[ 1 ], maxPos[ 2 ] ); // 1
+            glVertex3f( maxPos[ 0 ], minPos[ 1 ], maxPos[ 2 ] ); // 7
+            glVertex3f( maxPos[ 0 ], maxPos[ 1 ], maxPos[ 2 ] ); // 5
+            glVertex3f( minPos[ 0 ], maxPos[ 1 ], maxPos[ 2 ] ); // 3
+
+            glNormal3f( 0.0f, 0.0f,  norm );
+            glVertex3f( minPos[ 0 ], minPos[ 1 ], minPos[ 2 ] ); // 0
+            glVertex3f( minPos[ 0 ], maxPos[ 1 ], minPos[ 2 ] ); // 2
+            glVertex3f( maxPos[ 0 ], maxPos[ 1 ], minPos[ 2 ] ); // 4
+            glVertex3f( maxPos[ 0 ], minPos[ 1 ], minPos[ 2 ] ); // 6
+       }
+       glEnd();
+    }
+
+
+    void renderBrick( const PixelViewport& viewport,
+                      const NodeId& rb )
     {
         GLSLShaders::Handle program = _shaders.getProgram( );
         LBASSERT( program );
@@ -207,8 +308,11 @@ struct RayCastRenderer::Impl
         // Enable shaders
         glUseProgram( program );
 
-        const ConstTextureStatePtr& texState = rb.getTextureState();
-        const LODNode& lodNode = rb.getLODNode();
+        const ConstTextureObjectPtr textureObj =
+                std::static_pointer_cast< const TextureObject >( _textureCache.get( rb.getId( )));
+        const ConstTextureStatePtr& texState = textureObj->getTextureState();
+        const LODNode& lodNode = _dataSource.getNode( rb );
+
         if( texState->textureId == INVALID_TEXTURE_ID )
         {
             LBERROR << "Invalid texture for node : "
@@ -228,8 +332,7 @@ struct RayCastRenderer::Impl
         tParamNameGL = glGetUniformLocation( program, "textureMax" );
         glUniform3fv( tParamNameGL, 1, texState->textureCoordsMax.array );
 
-        const Vector3f& voxSize =
-            rb.getTextureState()->textureSize / lodNode.getWorldBox().getSize();
+        const Vector3f& voxSize = texState->textureSize / lodNode.getWorldBox().getSize();
         tParamNameGL = glGetUniformLocation( program, "voxelSpacePerWorldSpace" );
         glUniform3fv( tParamNameGL, 1, voxSize.array );
 
@@ -259,7 +362,7 @@ struct RayCastRenderer::Impl
         glUniform1i( tParamNameGL, refLevel );
 
         _usedTextures[1].push_back( texState->textureId );
-        rb.drawBrick( false /* draw front */, true /* cull back */ );
+        drawBrick( lodNode, false /* draw front */, true /* cull back */ );
 
         glUseProgram( 0 );
     }
@@ -285,17 +388,17 @@ struct RayCastRenderer::Impl
     uint32_t _nSamplesPerRay;
     uint32_t _nSamplesPerPixel;
     uint32_t _computedSamplesPerRay;
-    const VolumeInformation& _volInfo;
     uint32_t _transferFunctionTexture;
     std::vector< uint32_t > _usedTextures[2]; // last, current frame
+    const TextureCache& _textureCache;
+    const DataSource& _dataSource;
+    const VolumeInformation& _volInfo;
 };
 
-RayCastRenderer::RayCastRenderer( const uint32_t samplesPerRay,
-                                  const uint32_t samplesPerPixel,
-                                  const VolumeInformation& volInfo )
-    : _impl( new RayCastRenderer::Impl( samplesPerRay,
-                                        samplesPerPixel,
-                                        volInfo ))
+RayCastRenderer::RayCastRenderer( const TextureCache& textureCache,
+                                  const uint32_t samplesPerRay,
+                                  const uint32_t samplesPerPixel )
+    : _impl( new RayCastRenderer::Impl( textureCache, samplesPerRay, samplesPerPixel ))
 {}
 
 RayCastRenderer::~RayCastRenderer()
@@ -306,22 +409,31 @@ void RayCastRenderer::update( const FrameData& frameData )
     _impl->update( frameData );
 }
 
+
+NodeIds RayCastRenderer::_order( const NodeIds& bricks,
+                                 const Frustum& frustum ) const
+{
+    return _impl->order( bricks, frustum );
+}
+
 void RayCastRenderer::_onFrameStart( const Frustum& frustum,
                                      const PixelViewport&,
-                                     const RenderBricks& renderBricks )
+                                     const NodeIds& renderBricks )
 {
     _impl->onFrameStart( frustum, renderBricks );
 }
 
 
-void RayCastRenderer::_renderBrick( const Frustum&, const PixelViewport& view,
-                                    const RenderBrick& renderBrick )
+void RayCastRenderer::_renderBrick( const Frustum&,
+                                    const PixelViewport& view,
+                                    const NodeId& renderBrick )
 {
     _impl->renderBrick( view, renderBrick );
 }
 
-void RayCastRenderer::_onFrameEnd( const Frustum&, const PixelViewport&,
-                                   const RenderBricks& )
+void RayCastRenderer::_onFrameEnd( const Frustum&,
+                                   const PixelViewport&,
+                                   const NodeIds& )
 {
     _impl->onFrameEnd();
 }

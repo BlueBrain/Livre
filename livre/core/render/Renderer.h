@@ -43,18 +43,18 @@ public:
      */
     LIVRECORE_API void render( const Frustum& frustum,
                                const PixelViewport& view,
-                               const RenderBricks& bricks );
+                               const NodeIds& bricks );
 
 protected:
 
     /**
      * Orders the render bricks front to back ( default ).
-     * @param bricksSrc The list of bricks to be ordered.
+     * @param bricks The list of bricks to be ordered.
      * @param frustum is used to order the bricks according to view point.
      * @return the list of ordered bricks.
      */
-    LIVRECORE_API virtual RenderBricks _order( const RenderBricks& bricks,
-                                               const Frustum& frustum ) const;
+    LIVRECORE_API virtual NodeIds _order( const NodeIds& bricks,
+                                          const Frustum& frustum ) const = 0;
 
     /**
      * Is called on start of each rendering.
@@ -64,7 +64,7 @@ protected:
      */
     virtual void _onFrameStart( const Frustum& frustum LB_UNUSED,
                                 const PixelViewport& view LB_UNUSED,
-                                const RenderBricks& orderedBricks LB_UNUSED ) {}
+                                const NodeIds& orderedBricks LB_UNUSED ) {}
 
     /**
      * Is called on start of each render. Default is front to back rendering.
@@ -74,7 +74,7 @@ protected:
     */
     LIVRECORE_API virtual void _onFrameRender( const Frustum& frustum,
                                                const PixelViewport& view,
-                                               const RenderBricks& orderedBricks );
+                                               const NodeIds& orderedBricks );
 
     /**
      * Is called on end of each rendering.
@@ -84,7 +84,7 @@ protected:
      */
     virtual void _onFrameEnd( const Frustum& frustum LB_UNUSED,
                               const PixelViewport& view LB_UNUSED,
-                              const RenderBricks& orderedBricks LB_UNUSED ) {}
+                              const NodeIds& orderedBricks LB_UNUSED ) {}
 
     /**
      * Should be implemented by the derived renderer to render a render brick.
@@ -92,9 +92,9 @@ protected:
      * @param view The pixel area.
      * @param renderBrick is rendered brick
      */
-    virtual void _renderBrick(  const Frustum& frustum,
-                                const PixelViewport& view,
-                                const RenderBrick& renderBrick ) = 0;
+    virtual void _renderBrick(  const Frustum& frustum LB_UNUSED,
+                                const PixelViewport& view LB_UNUSED,
+                                const NodeId& renderBrick LB_UNUSED ) {}
 
     LIVRECORE_API virtual ~Renderer();
 };
