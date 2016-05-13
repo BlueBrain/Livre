@@ -21,7 +21,6 @@
 #include <livre/lib/cache/TextureObject.h>
 
 #include <livre/core/render/Renderer.h>
-#include <livre/core/render/RenderBrick.h>
 #include <livre/core/render/Frustum.h>
 #include <livre/core/data/DataSource.h>
 
@@ -39,7 +38,7 @@ struct RenderFilter::Impl
     void execute( const FutureMap& input,
                   PromiseMap&) const
     {
-        RenderBricks renderBricks;
+        NodeIds renderBricks;
         for( const auto& cacheObjects: input.getFutures( "CacheObjects" ))
             for( const auto& cacheObject: cacheObjects.get< ConstCacheObjects >( ))
             {
@@ -47,9 +46,7 @@ struct RenderFilter::Impl
                         std::static_pointer_cast< const TextureObject >(
                             cacheObject );
 
-                renderBricks.emplace_back(
-                            _dataSource.getNode( NodeId( texture->getId( ))),
-                                           texture->getTextureState( ));
+                renderBricks.emplace_back( texture->getId( ));
             }
 
         const auto& frustums = input.get< Frustum >( "Frustum" );
