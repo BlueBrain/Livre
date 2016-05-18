@@ -82,6 +82,11 @@ typedef vmml::Vector4f Viewport;
 const Vector2ui INVALID_FRAME_RANGE( INVALID_FRAME );
 const Vector2ui FULL_FRAME_RANGE( 0, INVALID_FRAME );
 
+/**
+ * Vector definitions
+ */
+typedef std::vector< Vector3f > Vector3fs;
+
 }
 
 #endif // _mathTypes_h_

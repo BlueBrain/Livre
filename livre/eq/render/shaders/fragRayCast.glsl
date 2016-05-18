@@ -5,8 +5,6 @@
  */
 
 // input variables to function
-
-#version 120
 #extension GL_ARB_texture_rectangle : enable
 
 #define EARLY_EXIT 0.999
