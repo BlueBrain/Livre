@@ -38,9 +38,9 @@ public:
      * @param samplesPerPixel Number of samples per pixel.
      * @param volInfo Volume information.
      */
-    RayCastRenderer( uint32_t samplesPerRay,
-                     uint32_t samplesPerPixel,
-                     const VolumeInformation& volInfo );
+    RayCastRenderer( const TextureCache& textureCache,
+                     uint32_t samplesPerRay,
+                     uint32_t samplesPerPixel );
     ~RayCastRenderer();
 
     /**
@@ -53,18 +53,22 @@ public:
     /** @internal @return number of bricks rendered in the last render() pass */
     size_t getNumBricksUsed() const;
 
-private:
+protected:
+
+    NodeIds _order( const NodeIds& bricks,
+                    const Frustum& frustum ) const override;
+
     void _onFrameStart( const Frustum& frustum,
                         const PixelViewport& view,
-                        const RenderBricks& renderBricks ) final;
+                        const NodeIds& renderBricks ) override;
 
     void _renderBrick( const Frustum& frustum,
                        const PixelViewport& view,
-                       const RenderBrick& renderBrick ) final;
+                       const NodeId& renderBrick ) override;
 
     void _onFrameEnd( const Frustum& frustum,
                       const PixelViewport& view,
-                      const RenderBricks& renderBricks ) final;
+                      const NodeIds& renderBricks ) override;
 
     struct Impl;
     std::unique_ptr< Impl > _impl;

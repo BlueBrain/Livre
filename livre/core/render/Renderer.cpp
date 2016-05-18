@@ -20,58 +20,30 @@
 #include "Renderer.h"
 
 #include <livre/core/render/Frustum.h>
-#include <livre/core/render/RenderBrick.h>
 #include <livre/core/data/LODNode.h>
+#include <livre/core/data/DataSource.h>
 #include <eq/gl.h>
 
 namespace livre
 {
 
-// Sort helper funtion for sorting the textures with their distances to viewpoint
-struct DistanceOperator
-{
-    explicit DistanceOperator( const Frustum& frustum )
-        : _frustum( frustum )
-    { }
-
-    bool operator()( const RenderBrick& rb1,
-                     const RenderBrick& rb2 )
-    {
-        const float distance1 = ( _frustum.getMVMatrix() *
-                                  rb1.getLODNode().getWorldBox().getCenter() ).length();
-        const float distance2 = ( _frustum.getMVMatrix() *
-                                  rb2.getLODNode().getWorldBox().getCenter() ).length();
-        return  distance1 < distance2;
-    }
-    const Frustum& _frustum;
-};
-
 Renderer::~Renderer()
 {
 }
 
-RenderBricks Renderer::_order( const RenderBricks& bricks,
-                               const Frustum& frustum ) const
-{
-    RenderBricks rbs = bricks;
-    DistanceOperator distanceOp( frustum );
-    std::sort( rbs.begin(), rbs.end(), distanceOp );
-    return rbs;
-}
-
 void Renderer::_onFrameRender( const Frustum& frustum,
                                const PixelViewport& view,
-                               const RenderBricks& bricks )
+                               const NodeIds& bricks )
 {
-    for( const RenderBrick& brick: bricks )
+    for( const NodeId& brick: bricks )
         _renderBrick( frustum, view, brick );
 }
 
 void Renderer::render( const Frustum& frustum,
                        const PixelViewport& view,
-                       const RenderBricks& bricks )
+                       const NodeIds& bricks )
 {
-    const RenderBricks& ordered = _order( bricks, frustum );
+    const NodeIds& ordered = _order( bricks, frustum );
     _onFrameStart( frustum, view, ordered );
     _onFrameRender( frustum, view, ordered );
     _onFrameEnd( frustum, view, ordered );

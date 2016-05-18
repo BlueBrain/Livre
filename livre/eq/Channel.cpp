@@ -51,7 +51,6 @@
 #include <livre/core/data/DataSource.h>
 #include <livre/core/render/FrameInfo.h>
 #include <livre/core/render/Frustum.h>
-#include <livre/core/render/RenderBrick.h>
 
 #ifdef LIVRE_USE_ZEROEQ
 #  include <zeroeq/publisher.h>
@@ -99,14 +98,11 @@ public:
         const uint32_t nSamplesPerPixel =
             getFrameData()->getVRParameters().getSamplesPerPixel();
 
-        const livre::Node* node =
-                static_cast< livre::Node* >( _channel->getNode( ));
-
-        const livre::DashTree& dashTree = node->getDashTree();
-        const DataSource& dataSource = dashTree.getDataSource();
-        _renderer.reset( new RayCastRenderer( nSamplesPerRay,
-                                              nSamplesPerPixel,
-                                              dataSource.getVolumeInfo( )));
+        const livre::Window* window =
+                static_cast< livre::Window* >( _channel->getWindow( ));
+        _renderer.reset( new RayCastRenderer( window->getTextureCache(),
+                                              nSamplesPerRay,
+                                              nSamplesPerPixel ));
     }
 
     const Frustum& setupFrustum()
@@ -139,24 +135,13 @@ public:
     }
 
     void generateRenderBricks( const ConstCacheObjects& renderNodes,
-                               RenderBricks& renderBricks )
+                               NodeIds& renderBricks )
     {
 
         renderBricks.reserve( renderNodes.size( ));
-
-        livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
-        livre::DashTree& dashTree = node->getDashTree();
-
         for( const ConstCacheObjectPtr& cacheObject: renderNodes )
-        {
-            const ConstTextureObjectPtr texture =
-                std::static_pointer_cast< const TextureObject >( cacheObject );
+            renderBricks.emplace_back( cacheObject->getId( ));
 
-            const LODNode& lodNode =
-                    dashTree.getDataSource().getNode( NodeId( cacheObject->getId( )));
-
-            renderBricks.emplace_back( lodNode, texture->getTextureState( ));
-        }
     }
 
     DashRenderNodes requestData()
@@ -190,52 +175,59 @@ public:
         return visitor.getVisibles();
     }
 
-    void updateRegions( const RenderBricks& bricks )
-    {
-        const Matrix4f& mvpMatrix = _frustum.getMVPMatrix();
-        for( const RenderBrick& brick : bricks )
+    void updateRegions( const NodeIds& renderBricks,
+                        const Frustum& frustum )
         {
-            const Boxf& worldBox = brick.getLODNode().getWorldBox();
-            const Vector3f& min = worldBox.getMin();
-            const Vector3f& max = worldBox.getMax();
-            const Vector3f corners[8] =
-            {
-                Vector3f( min[0], min[1], min[2] ),
-                Vector3f( max[0], min[1], min[2] ),
-                Vector3f( min[0], max[1], min[2] ),
-                Vector3f( max[0], max[1], min[2] ),
-                Vector3f( min[0], min[1], max[2] ),
-                Vector3f( max[0], min[1], max[2] ),
-                Vector3f( min[0], max[1], max[2] ),
-                Vector3f( max[0], max[1], max[2] )
-            };
+            const Matrix4f& mvpMatrix = frustum.getMVPMatrix();
 
-            Vector4f region(  std::numeric_limits< float >::max(),
-                              std::numeric_limits< float >::max(),
-                             -std::numeric_limits< float >::max(),
-                             -std::numeric_limits< float >::max( ));
+            livre::Node* node =
+                    static_cast< livre::Node* >( _channel->getNode( ));
+            const DataSource& dataSource = node->getTextureDataCache().getDataSource();
 
-            for( size_t i = 0; i < 8; ++i )
+            for( const NodeId& nodeId : renderBricks )
             {
-                const Vector3f corner = mvpMatrix * corners[i];
-                region[0] = std::min( corner[0], region[0] );
-                region[1] = std::min( corner[1], region[1] );
-                region[2] = std::max( corner[0], region[2] );
-                region[3] = std::max( corner[1], region[3] );
+                const LODNode& lodNode = dataSource.getNode( nodeId );
+                const Boxf& worldBox =lodNode.getWorldBox();
+                const Vector3f& min = worldBox.getMin();
+                const Vector3f& max = worldBox.getMax();
+                const Vector3f corners[8] =
+                {
+                    Vector3f( min[0], min[1], min[2] ),
+                    Vector3f( max[0], min[1], min[2] ),
+                    Vector3f( min[0], max[1], min[2] ),
+                    Vector3f( max[0], max[1], min[2] ),
+                    Vector3f( min[0], min[1], max[2] ),
+                    Vector3f( max[0], min[1], max[2] ),
+                    Vector3f( min[0], max[1], max[2] ),
+                    Vector3f( max[0], max[1], max[2] )
+                };
+
+                Vector4f region(  std::numeric_limits< float >::max(),
+                                  std::numeric_limits< float >::max(),
+                                 -std::numeric_limits< float >::max(),
+                                 -std::numeric_limits< float >::max( ));
+
+                for( const auto& corner: corners )
+                {
+                    const Vector3f& mvpCorner = mvpMatrix * corner;
+                    region[0] = std::min( mvpCorner[0], region[0] );
+                    region[1] = std::min( mvpCorner[1], region[1] );
+                    region[2] = std::max( mvpCorner[0], region[2] );
+                    region[3] = std::max( mvpCorner[1], region[3] );
+                }
+
+                // transform ROI from [ -1 -1 1 1 ] to normalized viewport
+                const Vector4f normalized( region[0] * .5f + .5f,
+                                           region[1] * .5f + .5f,
+                                           ( region[2] - region[0] ) * .5f,
+                                           ( region[3] - region[1] ) * .5f );
+
+                _channel->declareRegion( eq::Viewport( normalized ));
             }
-
-            // transform ROI from [ -1 -1 1 1 ] to normalized viewport
-            const Vector4f normalized( region[0] * .5f + .5f,
-                                       region[1] * .5f + .5f,
-                                       ( region[2] - region[0] ) * .5f,
-                                       ( region[3] - region[1] ) * .5f );
-
-            _channel->declareRegion( eq::Viewport( normalized ));
+    #ifndef NDEBUG
+            _channel->outlineViewport();
+    #endif
         }
-#ifndef NDEBUG
-        _channel->outlineViewport();
-#endif
-    }
 
     void freeTexture( const NodeId& nodeId )
     {
@@ -304,14 +296,14 @@ public:
         generateSet.generateRenderingSet( _frameInfo );
 
         _renderer->update( *pipe->getFrameData( ));
-        RenderBricks renderBricks;
+        NodeIds renderBricks;
         generateRenderBricks( _frameInfo.renderNodes, renderBricks );
 
         const eq::PixelViewport& vp = _channel->getPixelViewport();
         _renderer->render( _frustum,
                            PixelViewport( vp.x, vp.y, vp.w, vp.h ),
                            renderBricks );
-        updateRegions( renderBricks );
+        updateRegions( renderBricks, _frustum );
         freeTextures();
     }
 
