@@ -30,10 +30,10 @@
 #include <livre/lib/configuration/ApplicationParameters.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 
-#include <zerobuf/render/lookupTable1D.h>
-#include <zerobuf/render/frame.h>
-#include <zerobuf/render/imageJPEG.h>
-#include <zerobuf/render/exit.h>
+#include <lexis/render/lookupTable1D.h>
+#include <lexis/render/frame.h>
+#include <lexis/render/imageJPEG.h>
+#include <lexis/render/exit.h>
 #include <zeroeq/zeroeq.h>
 #include <zeroeq/hbp/hbp.h>
 #include <lunchbox/clock.h>
@@ -153,8 +153,8 @@ private:
 #ifdef ZEROEQ_USE_HTTPXX
     std::unique_ptr< ::zeroeq::http::Server > _httpServer;
 #endif
-    ::zerobuf::render::Frame _frame;
-    ::zerobuf::render::Exit _exit;
+    ::lexis::render::Frame _frame;
+    ::lexis::render::Exit _exit;
     Config& _config;
 
     void _setupRequests()

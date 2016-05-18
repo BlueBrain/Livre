@@ -123,7 +123,7 @@ public:
     void handleNetworkEvents();
 
     /** @return The JPEG image. */
-    ::zerobuf::render::ImageJPEG& getImageJPEG() const;
+    ::lexis::render::ImageJPEG& getImageJPEG() const;
 
     void renderJPEG();
 

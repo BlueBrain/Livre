@@ -37,7 +37,7 @@
 #include <livre/core/maths/maths.h>
 #include <livre/core/util/FrameUtils.h>
 
-#include <zerobuf/render/imageJPEG.h>
+#include <lexis/render/imageJPEG.h>
 
 #ifdef LIVRE_USE_ZEROEQ
 #  include <livre/eq/zeroeq/communicator.h>
@@ -66,7 +66,7 @@ public:
     EventMapper eventMapper;
     FrameData framedata;
     Boxf volumeBBox;
-    ::zerobuf::render::ImageJPEG imageJPEG;
+    ::lexis::render::ImageJPEG imageJPEG;
 #ifdef LIVRE_USE_ZEROEQ
     std::unique_ptr< zeroeq::Communicator > communicator;
 #endif
@@ -95,7 +95,7 @@ const FrameData& Config::getFrameData() const
     return _impl->framedata;
 }
 
-::zerobuf::render::ImageJPEG& Config::getImageJPEG() const
+::lexis::render::ImageJPEG& Config::getImageJPEG() const
 {
     return _impl->imageJPEG;
 }

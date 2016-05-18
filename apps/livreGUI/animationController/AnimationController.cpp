@@ -23,7 +23,7 @@
 #include <livreGUI/ui_AnimationController.h>
 #include <livre/core/types.h>
 
-#include <zerobuf/render/frame.h>
+#include <lexis/render/frame.h>
 
 namespace livre
 {
@@ -178,7 +178,7 @@ public:
     Controller& _controller;
     bool _connected;
     bool _onFirstFrame;
-    zerobuf::render::Frame _frame;
+    ::lexis::render::Frame _frame;
 };
 
 AnimationController::AnimationController( Controller& controller,

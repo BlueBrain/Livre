@@ -21,7 +21,7 @@
 #include "../Controller.h"
 
 #include <livreGUI/ui_Progress.h>
-#include <zerobuf/data/Progress.h>
+#include <lexis/data/Progress.h>
 #include <QLabel>
 #include <QProgressBar>
 #include <QTimer>
@@ -134,7 +134,7 @@ private:
     Progress* const _parent;
     Ui::Progress _ui;
     Controller& _controller;
-    ::zerobuf::data::Progress _progress;
+    ::lexis::data::Progress _progress;
 
     std::map< std::string, OperationUI* > _operations;
 };

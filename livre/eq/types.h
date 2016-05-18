@@ -26,7 +26,7 @@
 
 #include <lunchbox/refPtr.h>
 
-namespace zerobuf
+namespace lexis
 {
 namespace render
 {
