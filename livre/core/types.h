@@ -74,7 +74,6 @@ class Parameter;
 class Processor;
 class ProcessorInput;
 class ProcessorOutput;
-class RenderBrick;
 class Renderer;
 class RootNode;
 class TexturePool;
@@ -165,7 +164,6 @@ typedef std::vector< CacheId > CacheIds;
  */
 typedef std::vector< CacheObjectPtr > CacheObjects;
 typedef std::vector< ConstCacheObjectPtr > ConstCacheObjects;
-typedef std::vector< RenderBrick > RenderBricks;
 
 /**
  * Map definitions

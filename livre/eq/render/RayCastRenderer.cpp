@@ -96,13 +96,14 @@ struct RayCastRenderer::Impl
         , _textureCache( textureCache )
         , _dataSource( textureCache.getDataCache().getDataSource( ))
         , _volInfo( _dataSource.getVolumeInfo( ))
+        , _posVBO( 0 )
     {
         TransferFunction1D transferFunction;
         initTransferFunction( transferFunction );
 
         // TODO: Add the shaders from resource directory
         const int error = _shaders.loadShaders( ShaderData( vertRayCast_glsl,
-                                                             fragRayCast_glsl ));
+                                                            fragRayCast_glsl ));
         if( error != GL_NO_ERROR )
             LBTHROW( std::runtime_error( "Can't load glsl shaders: " +
                                          eq::glError( error ) +
@@ -199,6 +200,9 @@ struct RayCastRenderer::Impl
         tParamNameGL = glGetUniformLocation( program, "invModelViewMatrix" );
         glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getInvMVMatrix( ).array );
 
+        tParamNameGL = glGetUniformLocation( program, "modelViewProjectionMatrix" );
+        glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getMVPMatrix( ).array );
+
         // Because the volume is centered to the origin we can compute the volume AABB by using
         // the volume total size.
         const Vector3f halfWorldSize = _volInfo.worldSize / 2.0;
@@ -237,70 +241,116 @@ struct RayCastRenderer::Impl
 
         // Disable shader
         glUseProgram( 0 );
+
+        createAndFillVertexBuffer( renderBricks );
     }
 
-    void drawBrick( const LODNode& lodNode, bool front, bool back  ) const
+    void createAndFillVertexBuffer( const NodeIds& renderBricks )
     {
-        if( !front && !back )
-            return;
-        else if( front && !back )
+        Vector3fs positions;
+        positions.reserve( 36 * renderBricks.size( ));
+        for( const NodeId& rb: renderBricks )
         {
-            glCullFace( GL_BACK );
-        }
-        else if( !front && back )
-        {
-            glCullFace( GL_FRONT );
+            const LODNode& lodNode = _dataSource.getNode( rb );
+            createBrick( lodNode, positions );
         }
 
+        glGenBuffers( 1, &_posVBO );
+        glBindBuffer( GL_ARRAY_BUFFER, _posVBO );
+        glBufferData( GL_ARRAY_BUFFER,
+                      positions.size() * 3 * sizeof( float ),
+                      positions.data(), GL_STATIC_DRAW );
+    }
+
+    void createBrick( const LODNode& lodNode, Vector3fs& positions  ) const
+    {
         const Boxf& worldBox = lodNode.getWorldBox();
         const Vector3f& minPos = worldBox.getMin();
         const Vector3f& maxPos = worldBox.getMax();
 
-        glBegin( GL_QUADS );
-        {
-            const float norm = -1.0f;
-            glNormal3f(  norm, 0.0f, 0.0f );
-            glVertex3f( minPos[ 0 ], minPos[ 1 ], minPos[ 2 ] ); // 0
-            glVertex3f( minPos[ 0 ], minPos[ 1 ], maxPos[ 2 ] ); // 1
-            glVertex3f( minPos[ 0 ], maxPos[ 1 ], maxPos[ 2 ] ); // 3
-            glVertex3f( minPos[ 0 ], maxPos[ 1 ], minPos[ 2 ] ); // 2
+        // BACK
+        positions.emplace_back( maxPos[0], minPos[1], minPos[2] );
+        positions.emplace_back( minPos[0], minPos[1], minPos[2] );
+        positions.emplace_back( minPos[0], maxPos[1], minPos[2] );
 
-            glNormal3f( 0.0f,  -norm, 0.0f );
-            glVertex3f( minPos[ 0 ], maxPos[ 1 ], minPos[ 2 ] ); // 2
-            glVertex3f( minPos[ 0 ], maxPos[ 1 ], maxPos[ 2 ] ); // 3
-            glVertex3f( maxPos[ 0 ], maxPos[ 1 ], maxPos[ 2 ] ); // 5
-            glVertex3f( maxPos[ 0 ], maxPos[ 1 ], minPos[ 2 ] ); // 4
+        positions.emplace_back( minPos[0], maxPos[1], minPos[2] );
+        positions.emplace_back( maxPos[0], maxPos[1], minPos[2] );
+        positions.emplace_back( maxPos[0], minPos[1], minPos[2] );
 
-            glNormal3f( -norm, 0.0f, 0.0f );
-            glVertex3f( maxPos[ 0 ], maxPos[ 1 ], minPos[ 2 ] ); // 4
-            glVertex3f( maxPos[ 0 ], maxPos[ 1 ], maxPos[ 2 ] ); // 5
-            glVertex3f( maxPos[ 0 ], minPos[ 1 ], maxPos[ 2 ] ); // 7
-            glVertex3f( maxPos[ 0 ], minPos[ 1 ], minPos[ 2 ] ); // 6
+        // FRONT
+        positions.emplace_back( maxPos[0], maxPos[1], maxPos[2] );
+        positions.emplace_back( minPos[0], maxPos[1], maxPos[2] );
+        positions.emplace_back( minPos[0], minPos[1], maxPos[2] );
 
-            glNormal3f( 0.0f,  norm, 0.0f );
-            glVertex3f( maxPos[ 0 ], minPos[ 1 ], minPos[ 2 ] ); // 6
-            glVertex3f( maxPos[ 0 ], minPos[ 1 ], maxPos[ 2 ] ); // 7
-            glVertex3f( minPos[ 0 ], minPos[ 1 ], maxPos[ 2 ] ); // 1
-            glVertex3f( minPos[ 0 ], minPos[ 1 ], minPos[ 2 ] ); // 0
+        positions.emplace_back( minPos[0], minPos[1], maxPos[2] );
+        positions.emplace_back( maxPos[0], minPos[1], maxPos[2] );
+        positions.emplace_back( maxPos[0], maxPos[1], maxPos[2] );
 
-            glNormal3f( 0.0f, 0.0f, -norm );
-            glVertex3f( minPos[ 0 ], minPos[ 1 ], maxPos[ 2 ] ); // 1
-            glVertex3f( maxPos[ 0 ], minPos[ 1 ], maxPos[ 2 ] ); // 7
-            glVertex3f( maxPos[ 0 ], maxPos[ 1 ], maxPos[ 2 ] ); // 5
-            glVertex3f( minPos[ 0 ], maxPos[ 1 ], maxPos[ 2 ] ); // 3
+        // LEFT
+        positions.emplace_back( minPos[0], maxPos[1], minPos[2] );
+        positions.emplace_back( minPos[0], minPos[1], minPos[2] );
+        positions.emplace_back( minPos[0], minPos[1], maxPos[2] );
 
-            glNormal3f( 0.0f, 0.0f,  norm );
-            glVertex3f( minPos[ 0 ], minPos[ 1 ], minPos[ 2 ] ); // 0
-            glVertex3f( minPos[ 0 ], maxPos[ 1 ], minPos[ 2 ] ); // 2
-            glVertex3f( maxPos[ 0 ], maxPos[ 1 ], minPos[ 2 ] ); // 4
-            glVertex3f( maxPos[ 0 ], minPos[ 1 ], minPos[ 2 ] ); // 6
-       }
-       glEnd();
+        positions.emplace_back( minPos[0], minPos[1], maxPos[2] );
+        positions.emplace_back( minPos[0], maxPos[1], maxPos[2] );
+        positions.emplace_back( minPos[0], maxPos[1], minPos[2] );
+
+        // RIGHT
+        positions.emplace_back( maxPos[0], maxPos[1], maxPos[2] );
+        positions.emplace_back( maxPos[0], minPos[1], maxPos[2] );
+        positions.emplace_back( maxPos[0], minPos[1], minPos[2] );
+
+        positions.emplace_back( maxPos[0], minPos[1], minPos[2] );
+        positions.emplace_back( maxPos[0], maxPos[1], minPos[2] );
+        positions.emplace_back( maxPos[0], maxPos[1], maxPos[2] );
+
+        // BOTTOM
+        positions.emplace_back( maxPos[0], minPos[1], maxPos[2] );
+        positions.emplace_back( minPos[0], minPos[1], maxPos[2] );
+        positions.emplace_back( minPos[0], minPos[1], minPos[2] );
+
+        positions.emplace_back( minPos[0], minPos[1], minPos[2] );
+        positions.emplace_back( maxPos[0], minPos[1], minPos[2] );
+        positions.emplace_back( maxPos[0], minPos[1], maxPos[2] );
+
+        // TOP
+        positions.emplace_back( maxPos[0], maxPos[1], minPos[2] );
+        positions.emplace_back( minPos[0], maxPos[1], minPos[2] );
+        positions.emplace_back( minPos[0], maxPos[1], maxPos[2] );
+
+        positions.emplace_back( minPos[0], maxPos[1], maxPos[2] );
+        positions.emplace_back( maxPos[0], maxPos[1], maxPos[2] );
+        positions.emplace_back( maxPos[0], maxPos[1], minPos[2] );
     }
 
+    void onFrameRender( const PixelViewport& view,
+                        const NodeIds& bricks )
+    {
+        size_t index = 0;
+        for( const NodeId& brick: bricks )
+            renderBrick( view, brick, index++ );
+    }
+
+    void renderVBO( const size_t index, bool front, bool back )
+    {
+        if( !front && !back )
+            return;
+
+        else if( front && !back )
+            glCullFace( GL_BACK );
+
+        else if( !front && back )
+            glCullFace( GL_FRONT );
+
+        glBindBuffer( GL_ARRAY_BUFFER, _posVBO );
+        glEnableVertexAttribArray( 0 );
+        glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, NULL );
+        glDrawArrays( GL_TRIANGLES, index * 36, 36 );
+    }
 
     void renderBrick( const PixelViewport& viewport,
-                      const NodeId& rb )
+                      const NodeId& rb,
+                      const size_t index )
     {
         GLSLShaders::Handle program = _shaders.getProgram( );
         LBASSERT( program );
@@ -362,7 +412,8 @@ struct RayCastRenderer::Impl
         glUniform1i( tParamNameGL, refLevel );
 
         _usedTextures[1].push_back( texState->textureId );
-        drawBrick( lodNode, false /* draw front */, true /* cull back */ );
+
+        renderVBO( index, false /* draw front */, true /* cull back */ );
 
         glUseProgram( 0 );
     }
@@ -381,6 +432,8 @@ struct RayCastRenderer::Impl
 #endif
         _usedTextures[0].swap( _usedTextures[1] );
         _usedTextures[1].clear();
+
+        glDeleteBuffers( 1, &_posVBO );
     }
 
     eq::util::Texture _framebufferTexture;
@@ -393,6 +446,7 @@ struct RayCastRenderer::Impl
     const TextureCache& _textureCache;
     const DataSource& _dataSource;
     const VolumeInformation& _volInfo;
+    GLuint _posVBO;
 };
 
 RayCastRenderer::RayCastRenderer( const TextureCache& textureCache,
@@ -423,12 +477,11 @@ void RayCastRenderer::_onFrameStart( const Frustum& frustum,
     _impl->onFrameStart( frustum, renderBricks );
 }
 
-
-void RayCastRenderer::_renderBrick( const Frustum&,
-                                    const PixelViewport& view,
-                                    const NodeId& renderBrick )
+void RayCastRenderer::_onFrameRender( const Frustum&,
+                                      const PixelViewport& view,
+                                      const NodeIds& orderedBricks )
 {
-    _impl->renderBrick( view, renderBrick );
+    _impl->onFrameRender( view, orderedBricks );
 }
 
 void RayCastRenderer::_onFrameEnd( const Frustum&,

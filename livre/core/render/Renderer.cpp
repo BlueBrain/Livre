@@ -31,13 +31,6 @@ Renderer::~Renderer()
 {
 }
 
-void Renderer::_onFrameRender( const Frustum& frustum,
-                               const PixelViewport& view,
-                               const NodeIds& bricks )
-{
-    for( const NodeId& brick: bricks )
-        _renderBrick( frustum, view, brick );
-}
 
 void Renderer::render( const Frustum& frustum,
                        const PixelViewport& view,
