@@ -2,11 +2,14 @@ Changelog {#Changelog}
 =========
 
 # master {#master}
+
+* [#291](https://github.com/BlueBrain/Livre/pull/291):
+  Livre uses OpenGL 4.2 for rendering ( removed copying-from-to
+  CPU memory )
 * [#265](https://github.com/BlueBrain/Livre/pull/265):
   Livre uses the following ZeroBuf events: LookOut, imageJPEG, Frame,
   VolumeRendererParameters, LookupTable1D. LivreGUI can load and save
   the transfer function in .tf .1dt .lbb .lba formats
-
 * [#281](https://github.com/BlueBrain/Livre/pull/281):
   LivreGUI: Show progress bar for ongoing operations
 * [#279](https://github.com/BlueBrain/Livre/pull/279):

@@ -5,6 +5,7 @@
  */
 
 // input variables to function
+#version 420 core
 #extension GL_ARB_texture_rectangle : enable
 
 #define EARLY_EXIT 0.999
@@ -12,7 +13,8 @@
 
 uniform sampler3D volumeTex; //gx, gy, gz, v
 uniform sampler1D transferFnTex;
-uniform sampler2DRect frameBufferTex;
+layout( location = 0 ) out vec4 FragColor;
+layout( rgba32f ) uniform image2DRect renderTexture;
 
 uniform mat4 invProjectionMatrix;
 uniform mat4 invModelViewMatrix;
@@ -27,6 +29,8 @@ uniform vec3 textureMin;
 uniform vec3 textureMax;
 uniform vec3 voxelSpacePerWorldSpace;
 uniform vec3 worldEyePosition;
+uniform bool firstPass;
+uniform bool lastPass;
 
 uniform vec2 depthRange;
 
@@ -108,10 +112,9 @@ vec4 composite( vec4 src, vec4 dst, float alphaCorrection )
 
 void main( void )
 {
-    vec4 result = texture2DRect( frameBufferTex, gl_FragCoord.xy );
-
+    vec4 result = imageLoad( renderTexture, ivec2( gl_FragCoord.xy ));
     if( result.a > EARLY_EXIT )
-         discard;
+        discard;
 
     vec4 brickResult = vec4( 0.0f );
 
@@ -166,8 +169,8 @@ void main( void )
         for ( float travel = distance( rayStop, rayStart ); travel > 0.0; pos += step, travel -= stepSize )
         {
             vec3 texPos = calcTexturePositionFromAABBPos( pos );
-            float density = texture3D( volumeTex, texPos ).r;
-            vec4 transferFn  = texture1D( transferFnTex, density );
+            float density = texture( volumeTex, texPos ).r;
+            vec4 transferFn  = texture( transferFnTex, density );
             localResult = composite( transferFn, localResult, alphaCorrection );
 
             if( localResult.a > EARLY_EXIT )
@@ -175,5 +178,6 @@ void main( void )
         }
         brickResult += localResult;
     }
-    gl_FragColor = brickResult / nSamplesPerPixel;
+
+    imageStore( renderTexture, ivec2( gl_FragCoord.xy ), brickResult / nSamplesPerPixel );
 }
