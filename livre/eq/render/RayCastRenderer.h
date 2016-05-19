@@ -62,9 +62,9 @@ protected:
                         const PixelViewport& view,
                         const NodeIds& renderBricks ) override;
 
-    void _renderBrick( const Frustum& frustum,
-                       const PixelViewport& view,
-                       const NodeId& renderBrick ) override;
+    void _onFrameRender( const Frustum& frustum,
+                         const PixelViewport& view,
+                         const NodeIds& orderedBricks ) final;
 
     void _onFrameEnd( const Frustum& frustum,
                       const PixelViewport& view,

@@ -260,8 +260,6 @@ struct RayCastRenderer::Impl
         glBufferData( GL_ARRAY_BUFFER,
                       positions.size() * 3 * sizeof( float ),
                       positions.data(), GL_STATIC_DRAW );
-
-        _currentIndex = 0;
     }
 
     void createBrick( const LODNode& lodNode, Vector3fs& positions  ) const
@@ -325,7 +323,15 @@ struct RayCastRenderer::Impl
         positions.emplace_back( maxPos[0], maxPos[1], minPos[2] );
     }
 
-    void renderVBO( bool front, bool back )
+    void onFrameRender( const PixelViewport& view,
+                        const NodeIds& bricks )
+    {
+        size_t index = 0;
+        for( const NodeId& brick: bricks )
+            renderBrick( view, brick, index++ );
+    }
+
+    void renderVBO( const size_t index, bool front, bool back )
     {
         if( !front && !back )
             return;
@@ -339,12 +345,12 @@ struct RayCastRenderer::Impl
         glBindBuffer( GL_ARRAY_BUFFER, _posVBO );
         glEnableVertexAttribArray( 0 );
         glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, NULL );
-        glDrawArrays( GL_TRIANGLES, _currentIndex * 36, 36 );
-        _currentIndex++;
+        glDrawArrays( GL_TRIANGLES, index * 36, 36 );
     }
 
     void renderBrick( const PixelViewport& viewport,
-                      const NodeId& rb )
+                      const NodeId& rb,
+                      const size_t index )
     {
         GLSLShaders::Handle program = _shaders.getProgram( );
         LBASSERT( program );
@@ -407,7 +413,7 @@ struct RayCastRenderer::Impl
 
         _usedTextures[1].push_back( texState->textureId );
 
-        renderVBO( false /* draw front */, true /* cull back */ );
+        renderVBO( index, false /* draw front */, true /* cull back */ );
 
         glUseProgram( 0 );
     }
@@ -441,7 +447,6 @@ struct RayCastRenderer::Impl
     const DataSource& _dataSource;
     const VolumeInformation& _volInfo;
     GLuint _posVBO;
-    size_t _currentIndex;
 };
 
 RayCastRenderer::RayCastRenderer( const TextureCache& textureCache,
@@ -472,12 +477,11 @@ void RayCastRenderer::_onFrameStart( const Frustum& frustum,
     _impl->onFrameStart( frustum, renderBricks );
 }
 
-
-void RayCastRenderer::_renderBrick( const Frustum&,
-                                    const PixelViewport& view,
-                                    const NodeId& renderBrick )
+void RayCastRenderer::_onFrameRender( const Frustum&,
+                                      const PixelViewport& view,
+                                      const NodeIds& orderedBricks )
 {
-    _impl->renderBrick( view, renderBrick );
+    _impl->onFrameRender( view, orderedBricks );
 }
 
 void RayCastRenderer::_onFrameEnd( const Frustum&,

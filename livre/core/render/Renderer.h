@@ -72,9 +72,9 @@ protected:
      * @param view The pixel area.
      * @param orderedBricks is the list of ordered bricks.
     */
-    LIVRECORE_API virtual void _onFrameRender( const Frustum& frustum,
-                                               const PixelViewport& view,
-                                               const NodeIds& orderedBricks );
+    virtual void _onFrameRender( const Frustum& frustum LB_UNUSED,
+                                 const PixelViewport& view LB_UNUSED,
+                                 const NodeIds& orderedBricks LB_UNUSED ) {}
 
     /**
      * Is called on end of each rendering.
@@ -85,16 +85,6 @@ protected:
     virtual void _onFrameEnd( const Frustum& frustum LB_UNUSED,
                               const PixelViewport& view LB_UNUSED,
                               const NodeIds& orderedBricks LB_UNUSED ) {}
-
-    /**
-     * Should be implemented by the derived renderer to render a render brick.
-     * @param frustum is used for rendering the bricks according to view point.
-     * @param view The pixel area.
-     * @param renderBrick is rendered brick
-     */
-    virtual void _renderBrick(  const Frustum& frustum LB_UNUSED,
-                                const PixelViewport& view LB_UNUSED,
-                                const NodeId& renderBrick LB_UNUSED ) {}
 
     LIVRECORE_API virtual ~Renderer();
 };
