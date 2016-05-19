@@ -32,9 +32,6 @@
 #include <livre/eq/FrameData.h>
 #include <livre/eq/settings/VolumeSettings.h>
 #include <livre/eq/settings/CameraSettings.h>
-#ifdef LIVRE_USE_RESTBRIDGE
-#  include <restbridge/RestBridge.h>
-#endif
 
 namespace livre
 {
@@ -76,9 +73,6 @@ struct Client::Impl
 
         std::stringstream os;
         os << conf;
-    #ifdef LIVRE_USE_RESTBRIDGE
-        os << std::endl << restbridge::RestBridge::getHelp();
-    #endif
         return os.str();
     }
 

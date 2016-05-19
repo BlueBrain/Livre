@@ -31,10 +31,6 @@ if(LibJpegTurbo_FOUND)
   list(APPEND LIVREEQ_LINK_LIBRARIES PRIVATE ${LibJpegTurbo_LIBRARIES})
 endif()
 
-if(RESTBRIDGE_FOUND)
-  list(APPEND LIVREEQ_LINK_LIBRARIES PRIVATE RESTBridge)
-endif()
-
 set(LIVREEQ_INCLUDE_NAME livre/eq)
 set(LIVREEQ_NAMESPACE livreeq)
 common_library(LivreEq)

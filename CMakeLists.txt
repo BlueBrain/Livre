@@ -45,7 +45,6 @@ common_find_package(Boost REQUIRED COMPONENTS filesystem program_options thread
 common_find_package(Collage REQUIRED)
 common_find_package(dash REQUIRED)
 common_find_package(Equalizer REQUIRED)
-common_find_package(FlatBuffers)
 common_find_package(Lexis REQUIRED)
 common_find_package(LibJpegTurbo)
 common_find_package(Lunchbox REQUIRED)
@@ -60,12 +59,6 @@ common_find_package(Tuvok)
 common_find_package(VTune)
 common_find_package(ZeroEQ)
 common_find_package(ZeroBuf REQUIRED)
-
-if(ZEROEQ_FOUND AND FlatBuffers_FOUND)
-  list(APPEND COMMON_FIND_PACKAGE_DEFINES LIVRE_USE_REMOTE_DATASOURCE)
-  set(LIVRE_USE_REMOTE_DATASOURCE 1)
-endif()
-
 common_find_package_post()
 
 include(EqGLLibraries)
