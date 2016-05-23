@@ -12,7 +12,9 @@ include(StringifyShaders)
 include(Files.cmake)
 
 set(LIVREEQ_SHADERS render/shaders/vertRayCast.glsl
-                    render/shaders/fragRayCast.glsl )
+                    render/shaders/fragRayCast.glsl
+                    render/shaders/vertTexCopy.glsl
+                    render/shaders/fragTexCopy.glsl )
 stringify_shaders(${LIVREEQ_SHADERS})
 list(APPEND LIVREEQ_SOURCES ${SHADER_SOURCES})
 include_directories(${PROJECT_BINARY_DIR})
