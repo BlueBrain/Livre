@@ -83,6 +83,13 @@ std::string where( const char* file, const int line )
 const uint32_t maxSamplesPerRay = 32;
 const uint32_t minSamplesPerRay = 512;
 
+const GLfloat fullScreenQuad[] = { -1.0f, -1.0f, 0.0f,
+                                    1.0f, -1.0f, 0.0f,
+                                   -1.0f,  1.0f, 0.0f,
+                                   -1.0f,  1.0f, 0.0f,
+                                    1.0f, -1.0f, 0.0f,
+                                    1.0f,  1.0f, 0.0f };
+
 }
 
 struct RayCastRenderer::Impl
@@ -119,11 +126,16 @@ struct RayCastRenderer::Impl
                                          eq::glError( error ) +
                                          where( __FILE__, __LINE__ )));
 
+        // Create QUAD VBO
+        glGenBuffers( 1, &_quadVBO );
+        glBindBuffer( GL_ARRAY_BUFFER, _quadVBO );
+        glBufferData( GL_ARRAY_BUFFER, sizeof( fullScreenQuad ), fullScreenQuad, GL_STATIC_DRAW );
     }
 
     ~Impl()
     {
         _renderTexture.flush();
+        glDeleteBuffers( 1, &_quadVBO );
     }
 
     NodeIds order( const NodeIds& bricks,
@@ -174,13 +186,12 @@ struct RayCastRenderer::Impl
         {
             _renderTexture.flush();
             _renderTexture.init( GL_RGBA32F, width, height );
+            const Floats emptyBuffer( _renderTexture.getWidth() * _renderTexture.getHeight() * 4,
+                                      0.0 );
+            _renderTexture.upload( _renderTexture.getWidth(),
+                                   _renderTexture.getHeight(),
+                                   emptyBuffer.data( ));
         }
-
-        const Floats emptyBuffer( _renderTexture.getWidth() * _renderTexture.getHeight() * 4, 0.0 );
-        _renderTexture.upload( _renderTexture.getWidth(),
-                               _renderTexture.getHeight(),
-                               emptyBuffer.data( ));
-
     }
 
     void onFrameStart( const Frustum& frustum,
@@ -365,7 +376,7 @@ struct RayCastRenderer::Impl
             renderBrick( brick, index++ );
     }
 
-    void renderVBO( const size_t index, bool front, bool back )
+    void renderBrickVBO( const size_t index, bool front, bool back )
     {
         if( !front && !back )
             return;
@@ -419,16 +430,10 @@ struct RayCastRenderer::Impl
         tParamNameGL = glGetUniformLocation( program, "voxelSpacePerWorldSpace" );
         glUniform3fv( tParamNameGL, 1, voxSize.array );
 
-        tParamNameGL = glGetUniformLocation( program, "firstPass" );
-        glUniform1i( tParamNameGL, firstPass );
-
-        tParamNameGL = glGetUniformLocation( program, "lastPass" );
-        glUniform1i( tParamNameGL, lastPass );
-
         glActiveTexture( GL_TEXTURE0 );
-        texState->bind( );
+        texState->bind();
         tParamNameGL = glGetUniformLocation( program, "volumeTex" );
-        glUniform1i( tParamNameGL, 0 ); //f-shader
+        glUniform1i( tParamNameGL, 0 );
 
         const uint32_t refLevel = lodNode.getRefLevel();
 
@@ -437,37 +442,25 @@ struct RayCastRenderer::Impl
 
         _usedTextures[1].push_back( texState->textureId );
 
-        renderVBO( index, false /* draw front */, true /* cull back */ );
+        renderBrickVBO( index, false /* draw front */, true /* cull back */ );
         glMemoryBarrier( GL_SHADER_IMAGE_ACCESS_BARRIER_BIT );
 
         glUseProgram( 0 );
     }
 
-    void copyTextureToFrameBuffer()
+    void copyTexToFrameBufAndClear()
     {
         GLSLShaders::Handle program = _texCopyShaders.getProgram( );
         LBASSERT( program );
 
-        static const GLfloat fullScreenQuad[] = { -1.0f, -1.0f, 0.0f,
-                                                   1.0f, -1.0f, 0.0f,
-                                                  -1.0f,  1.0f, 0.0f,
-                                                  -1.0f,  1.0f, 0.0f,
-                                                   1.0f, -1.0f, 0.0f,
-                                                   1.0f,  1.0f, 0.0f };
-
-        GLuint quadVBO;
-        glGenBuffers( 1, &quadVBO );
-        glBindBuffer( GL_ARRAY_BUFFER, quadVBO );
-        glBufferData( GL_ARRAY_BUFFER, sizeof( fullScreenQuad ), fullScreenQuad, GL_STATIC_DRAW );
-
         glUseProgram( program );
         glBindImageTexture( 0, _renderTexture.getName(),
-                            0, GL_FALSE, 0, GL_READ_ONLY,
+                            0, GL_FALSE, 0, GL_READ_WRITE,
                             _renderTexture.getInternalFormat( ));
         GLint tParamNameGL = glGetUniformLocation( program, "renderTexture" );
         glUniform1i( tParamNameGL, 0 );
 
-        glBindBuffer( GL_ARRAY_BUFFER, quadVBO );
+        glBindBuffer( GL_ARRAY_BUFFER, _quadVBO );
         glEnableVertexAttribArray( 0 );
         glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, NULL );
 
@@ -475,7 +468,6 @@ struct RayCastRenderer::Impl
         glDrawArrays( GL_TRIANGLES, 0, 6 );
 
         glUseProgram( 0 );
-        glDeleteBuffers( 1, &quadVBO );
     }
 
     void onFrameEnd()
@@ -494,7 +486,7 @@ struct RayCastRenderer::Impl
         _usedTextures[1].clear();
 
         glDeleteBuffers( 1, &_posVBO );
-        copyTextureToFrameBuffer();
+        copyTexToFrameBufAndClear();
     }
 
     eq::util::Texture _renderTexture;
@@ -509,6 +501,7 @@ struct RayCastRenderer::Impl
     const DataSource& _dataSource;
     const VolumeInformation& _volInfo;
     GLuint _posVBO;
+    GLuint _quadVBO;
 };
 
 RayCastRenderer::RayCastRenderer( const TextureCache& textureCache,
