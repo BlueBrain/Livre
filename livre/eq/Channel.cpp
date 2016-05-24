@@ -55,7 +55,7 @@
 #ifdef LIVRE_USE_ZEROEQ
 #  include <zeroeq/publisher.h>
 #endif
-#include <zerobuf/data/Progress.h>
+#include <lexis/data/Progress.h>
 #include <eq/eq.h>
 #include <eq/gl.h>
 
@@ -593,7 +593,7 @@ public:
     FrameGrabber _frameGrabber;
     FrameInfo _frameInfo;
     std::unique_ptr< RayCastRenderer > _renderer;
-    ::zerobuf::data::Progress _progress;
+    ::lexis::data::Progress _progress;
 #ifdef LIVRE_USE_ZEROEQ
     zeroeq::Publisher _publisher;
 #endif

@@ -19,7 +19,7 @@ stringify_shaders(${LIVREEQ_SHADERS})
 list(APPEND LIVREEQ_SOURCES ${SHADER_SOURCES})
 include_directories(${PROJECT_BINARY_DIR})
 
-set(LIVREEQ_LINK_LIBRARIES PUBLIC LivreLib Equalizer ZeroBufData)
+set(LIVREEQ_LINK_LIBRARIES PUBLIC Lexis LivreLib Equalizer)
 
 if(TARGET ZeroEQ)
   list(APPEND LIVREEQ_HEADERS zeroeq/communicator.h)
@@ -29,10 +29,6 @@ endif()
 
 if(LibJpegTurbo_FOUND)
   list(APPEND LIVREEQ_LINK_LIBRARIES PRIVATE ${LibJpegTurbo_LIBRARIES})
-endif()
-
-if(RESTBRIDGE_FOUND)
-  list(APPEND LIVREEQ_LINK_LIBRARIES PRIVATE RESTBridge)
 endif()
 
 set(LIVREEQ_INCLUDE_NAME livre/eq)

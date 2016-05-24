@@ -79,28 +79,3 @@ BOOST_AUTO_TEST_CASE( memoryDataSource )
 
     _testDataSource( volumeName.str( ));
 }
-
-#ifdef LIVRE_USE_REMOTE_DATASOURCE
-BOOST_AUTO_TEST_CASE( remoteMemoryDataSource )
-{
-    char** argv = boost::unit_test::framework::master_test_suite().argv;
-    if( std::string( argv[0] ).find( "perf-" ) == std::string::npos )
-        return;
-
-    std::stringstream volumeName;
-    volumeName << "remotemem://#" << VOXEL_SIZE_X << "," << VOXEL_SIZE_Y << ","
-               << VOXEL_SIZE_Z << "," << BLOCK_SIZE;
-    try
-    {
-        _testDataSource( volumeName.str( ));
-    }
-    catch( const std::runtime_error& e )
-    {
-        const std::string error( e.what( ));
-        const std::string noSource( "Cannot connect to publisher" );
-        if( error != noSource )
-            BOOST_CHECK_EQUAL( error,
-                               std::string( "Empty servus implementation" ));
-    }
-}
-#endif

@@ -28,7 +28,7 @@ namespace zeroeq
 
 /**
  * Communicator using ZeroEQ to setup publishers and subscribers for event
- * exchange with other applications and RESTBridge.
+ * exchange with other applications.
  * @version 0.4
  */
 class Communicator
