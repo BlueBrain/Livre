@@ -26,13 +26,13 @@
 namespace livre
 {
 
-typedef boost::shared_future< PortDataPtr > ConstPortDataFuture;
-typedef boost::promise< PortDataPtr > ConstPortDataPromise;
-typedef std::vector< ConstPortDataFuture > ConstPortDataFutures;
+typedef boost::shared_future< PortDataPtr > PortDataFuture;
+typedef boost::promise< PortDataPtr > PortDataPromise;
+typedef std::vector< PortDataFuture > PortDataFutures;
 
 struct Future::Impl
 {
-    Impl( const ConstPortDataFuture& future,
+    Impl( const PortDataFuture& future,
           const std::string& name,
           const servus::uint128_t& uuid )
         : _name( name )
@@ -69,7 +69,7 @@ struct Future::Impl
     }
 
     std::string _name;
-    mutable ConstPortDataFuture _future;
+    mutable PortDataFuture _future;
     servus::uint128_t _uuid;
 };
 
@@ -121,7 +121,7 @@ struct Promise::Impl
         {
         }
 
-        ConstPortDataPromise promise;
+        PortDataPromise promise;
         _promise.swap( promise );
         _uuid = servus::make_UUID();
         _futureImpl->_future = _promise.get_future();
@@ -138,7 +138,7 @@ struct Promise::Impl
         {}
     }
 
-    ConstPortDataPromise _promise;
+    PortDataPromise _promise;
     const DataInfo _dataInfo;
     servus::uint128_t _uuid;
     std::shared_ptr< Future::Impl > _futureImpl;
@@ -235,7 +235,7 @@ void waitForAny( const Futures& futures )
     if( futures.empty( ))
         return;
 
-    ConstPortDataFutures boostFutures;
+    PortDataFutures boostFutures;
     boostFutures.reserve( futures.size( ));
     for( const auto& future: futures )
         boostFutures.push_back( future._impl->_future );
