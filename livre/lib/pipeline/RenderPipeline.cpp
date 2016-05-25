@@ -48,7 +48,7 @@ struct RenderPipeline::Impl
 
     void createAndConnectUploaders( Pipeline& uploadPipeline,
                                     PipeFilter& visibleSetGenerator,
-                                    PipeFilter& output  ) const
+                                    PipeFilter& output ) const
     {
         for( size_t i = 0; i < _nUploadThreads; ++i )
         {
