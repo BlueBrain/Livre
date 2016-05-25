@@ -122,10 +122,7 @@ public:
 
     void handleNetworkEvents();
 
-    /** @return The JPEG image. */
-    ::lexis::render::ImageJPEG& getImageJPEG() const;
-
-    void renderJPEG();
+    std::string renderJPEG();
 
 private:
     LIVREEQ_API virtual ~Config();

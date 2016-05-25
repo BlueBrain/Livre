@@ -30,20 +30,13 @@
 #include <livre/lib/configuration/ApplicationParameters.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 
-#include <lexis/render/lookupTable1D.h>
-#include <lexis/render/frame.h>
-#include <lexis/render/imageJPEG.h>
-#include <lexis/render/exit.h>
+#include <lexis/lexis.h>
 #include <zeroeq/zeroeq.h>
-#include <zeroeq/hbp/hbp.h>
 #include <lunchbox/clock.h>
-#include <servus/uri.h>
 
 #include <functional>
 #include <map>
 #include <unordered_map>
-
-#define DEFAULT_HEARTBEAT_TIME 1000.0f
 
 namespace livre
 {
@@ -59,18 +52,8 @@ public:
             return;
 
         _setupRequests();
-        _config.getImageJPEG().registerSerializeCallback( [&]
-            { return _config.renderJPEG(); });
-        _frame.registerDeserializedCallback( [&] { updateFrame(); });
-        _exit.registerSerializeCallback( [&] { requestExit(); });
         _setupSubscriber();
         _setupHTTPServer( argc, argv );
-    }
-
-    bool publishExit()
-    {
-        return _publisher.publish(
-                    ::zeroeq::Event( ::zeroeq::vocabulary::EVENT_EXIT ));
     }
 
     bool publishFrame()
@@ -91,20 +74,19 @@ public:
         return _publisher.publish( _getFrameData().getCameraSettings( ));
     }
 
-    void publishHeartbeat()
+    bool frameDirty()
     {
-        if( _heartbeatClock.getTimef() >= DEFAULT_HEARTBEAT_TIME )
-        {
-            _heartbeatClock.reset();
-            _publisher.publish(
-                ::zeroeq::Event( ::zeroeq::vocabulary::EVENT_HEARTBEAT ));
-        }
+        const auto& frameSettings = _getFrameData().getFrameSettings();
+        const auto& params = _config.getApplicationParameters();
+        return _frame.getCurrent() != frameSettings.getFrameNumber() ||
+               _frame.getDelta() != params.animation ||
+               _frame.getStart() != params.frames.x() ||
+               _frame.getEnd() != params.frames.y();
     }
 
-    bool onRequest( const ::zeroeq::Event& event )
+    bool onRequest( ::lexis::ConstRequestPtr request )
     {
-        const auto& eventType = ::zeroeq::vocabulary::deserializeRequest( event );
-        const auto& i = _requests.find( eventType );
+        const auto& i = _requests.find( request->getEvent( ));
         if( i == _requests.end( ))
             return false;
         return i->second();
@@ -154,17 +136,12 @@ private:
     std::unique_ptr< ::zeroeq::http::Server > _httpServer;
 #endif
     ::lexis::render::Frame _frame;
-    ::lexis::render::Exit _exit;
     Config& _config;
 
     void _setupRequests()
     {
         _requests[ _frame.getTypeIdentifier() ] = [&]
             { return publishFrame(); };
-        _requests[ _config.getImageJPEG().getTypeIdentifier( )] = [&]
-            { return _publisher.publish( _config.getImageJPEG( )); };
-        _requests[ _exit.getTypeIdentifier() ] = [&]
-            { return _publisher.publish( _exit ); };
         _requests[ _getFrameData().getVRParameters().getTypeIdentifier( )] = [&]
             { return _publisher.publish( _getFrameData().getVRParameters( )); };
         _requests[ _getFrameData().getCameraSettings().getTypeIdentifier( )] = [&]
@@ -184,9 +161,14 @@ private:
         if( !_httpServer )
             return;
 
+        _httpServer->subscribe( ::lexis::render::Exit::ZEROBUF_TYPE_NAME(),
+                                [&] { return requestExit(); } );
+
+        _httpServer->register_( ::lexis::render::ImageJPEG::ZEROBUF_TYPE_NAME(),
+                                [&](){ return _config.renderJPEG(); });
+
         _httpServer->add( _frame );
-        _httpServer->subscribe( _exit );
-        _httpServer->register_( _config.getImageJPEG( ));
+        _httpServer->add( _getFrameData().getVRParameters( ));
         _httpServer->add( _getFrameData().getCameraSettings( ));
         _httpServer->add( _getRenderSettings().getTransferFunction( ));
 #endif
@@ -194,10 +176,15 @@ private:
 
     void _setupSubscriber()
     {
-        _subscriber.registerHandler( ::zeroeq::vocabulary::EVENT_REQUEST,
-                                     [ this ]( const ::zeroeq::Event& event )
-                                         { onRequest( event ); } );
+        _subscriber.subscribe( ::lexis::Request::ZEROBUF_TYPE_IDENTIFIER(),
+            [&]( const void* data, const size_t size )
+            {
+                onRequest( ::lexis::Request::create( data, size ));
+            });
+
+        _frame.registerDeserializedCallback( [&] { updateFrame(); });
         _subscriber.subscribe( _frame );
+
         _subscriber.subscribe( _getFrameData().getVRParameters( ));
         _subscriber.subscribe( _getFrameData().getCameraSettings( ));
         _subscriber.subscribe( _getRenderSettings().getTransferFunction( ));
@@ -220,19 +207,10 @@ Communicator::~Communicator()
 {
 }
 
-void Communicator::publishHeartbeat()
-{
-    _impl->publishHeartbeat();
-}
-
-void Communicator::publishExit()
-{
-    _impl->publishExit();
-}
-
 void Communicator::publishFrame()
 {
-    _impl->publishFrame();
+    if( _impl->frameDirty( ))
+        _impl->publishFrame();
 }
 
 void Communicator::publishCamera()

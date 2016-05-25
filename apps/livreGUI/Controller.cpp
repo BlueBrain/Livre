@@ -25,9 +25,9 @@
 
 #include <zeroeq/zeroeq.h>
 #include <zerobuf/Zerobuf.h>
+#include <lexis/request.h>
 
 #include <algorithm>
-#include <mutex>
 #include <thread>
 
 namespace livre
@@ -42,70 +42,27 @@ public:
         , _subscriberPoll( std::bind( &Impl::pollSubscriber, this ))
         , _continuePolling( true )
     {
-        _replySubscriber.registerHandler( ::zeroeq::vocabulary::EVENT_HEARTBEAT,
-                     std::bind( &Impl::onHeartBeatReceived, this ));
     }
 
     ~Impl()
     {
-        _replySubscriber.deregisterHandler( ::zeroeq::vocabulary::EVENT_HEARTBEAT );
-
         _continuePolling = false;
         _subscriberPoll.join();
     }
 
-    void onHeartBeatReceived()
+    void onReply( const ::zeroeq::uint128_t& event )
     {
-        for( const auto& request : _requests )
-            _publisher.publish( ::zeroeq::vocabulary::serializeRequest( request ));
-    }
-
-    void onReply( const ::zeroeq::Event& event )
-    {
-        const auto& i = std::find( _requests.begin(), _requests.end(),
-                                   event.getType( ));
+        const auto& i = std::find( _requests.begin(), _requests.end(), event );
         if( i == _requests.end( ))
             return;
 
         _requests.erase( i );
-        _replySubscriber.deregisterHandler( event.getType( ));
-    }
-
-    bool publish( const zeroeq::Event& event )
-    {
-        return _publisher.publish( event );
+        _replySubscriber.unsubscribe( event );
     }
 
     bool publish( const ::zerobuf::Zerobuf& zerobuf )
     {
         return _publisher.publish( zerobuf );
-    }
-
-    bool registerHandler( const zeroeq::uint128_t& event,
-                          const zeroeq::EventFunc& func )
-    {
-        if( !_subscriber.registerHandler( event, func ))
-            return false;
-
-        _requests.push_back( event );
-        return _replySubscriber.registerHandler( event,
-                                                std::bind( &Impl::onReply, this,
-                                                       std::placeholders::_1 ));
-    }
-
-    bool deregisterHandler( const zeroeq::uint128_t& event )
-    {
-        if( !_subscriber.deregisterHandler( event ))
-            return false;
-
-        const auto& i = std::find( _requests.begin(), _requests.end(), event );
-        if( i != _requests.end( ))
-        {
-            _requests.erase( i );
-            _replySubscriber.deregisterHandler( event );
-        }
-
-        return true;
     }
 
     bool subscribe( ::zerobuf::Zerobuf& zerobuf )
@@ -114,9 +71,8 @@ public:
             return false;
 
         _requests.push_back( zerobuf.getTypeIdentifier( ));
-        return _replySubscriber.registerHandler( zerobuf.getTypeIdentifier(),
-                                                std::bind( &Impl::onReply, this,
-                                                       std::placeholders::_1 ));
+        return _replySubscriber.subscribe( zerobuf.getTypeIdentifier(),
+            [&]() { onReply( zerobuf.getTypeIdentifier( )); });
     }
 
     bool unsubscribe( const ::zerobuf::Zerobuf& zerobuf )
@@ -129,7 +85,7 @@ public:
         if( i != _requests.end( ))
         {
             _requests.erase( i );
-            _replySubscriber.deregisterHandler( zerobuf.getTypeIdentifier( ));
+            _replySubscriber.unsubscribe( zerobuf.getTypeIdentifier( ));
         }
 
         return true;
@@ -139,7 +95,11 @@ private:
     void pollSubscriber()
     {
         while( _continuePolling )
+        {
+            for( const auto& request : _requests )
+                _publisher.publish( ::lexis::Request( request ));
             _subscriber.receive( 100 );
+        }
     }
 
     zeroeq::Publisher _publisher;
@@ -160,25 +120,9 @@ Controller::Controller()
 Controller::~Controller()
 {}
 
-bool Controller::publish( const zeroeq::Event& event )
-{
-    return _impl->publish( event );
-}
-
 bool Controller::publish( const ::zerobuf::Zerobuf& zerobuf )
 {
     return _impl->publish( zerobuf );
-}
-
-bool Controller::registerHandler( const zeroeq::uint128_t& event,
-                                  const zeroeq::EventFunc& func )
-{
-    return _impl->registerHandler( event, func );
-}
-
-bool Controller::deregisterHandler( const zeroeq::uint128_t& event )
-{
-    return _impl->deregisterHandler( event );
 }
 
 bool Controller::subscribe( ::zerobuf::Zerobuf& zerobuf )
