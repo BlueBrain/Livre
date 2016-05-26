@@ -150,7 +150,6 @@ public:
     {
         for( const auto& future: futures )
             addFuture( future.getName(), future );
-
     }
 };
 

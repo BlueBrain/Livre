@@ -67,7 +67,7 @@ struct RedrawFilter : public Filter
 
 public:
 
-    RedrawFilter( Channel* channel )
+    explicit RedrawFilter( Channel* channel )
         : _channel( channel )
     {}
 

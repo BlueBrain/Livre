@@ -20,6 +20,7 @@
 #ifndef _Filter_h_
 #define _Filter_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <livre/core/pipeline/FuturePromise.h>
 #include <livre/core/pipeline/FutureMap.h>
@@ -51,16 +52,16 @@ public:
      * communication. In execution time using these names and types,
      * data can be set.
      */
-    virtual DataInfos getInputDataInfos() const  { return DataInfos(); }
+    LIVRECORE_API virtual DataInfos getInputDataInfos() const  { return DataInfos(); }
 
     /**
      * @return map for the name and data types for the filter
      * communication. In execution time using these names and types,
      * data can be retrieved.
      */
-    virtual DataInfos getOutputDataInfos() const { return DataInfos(); }
+    LIVRECORE_API virtual DataInfos getOutputDataInfos() const { return DataInfos(); }
 
-    virtual ~Filter() {}
+    LIVRECORE_API virtual ~Filter() {}
 };
 
 }

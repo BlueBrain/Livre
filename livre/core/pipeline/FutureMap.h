@@ -20,6 +20,7 @@
 #ifndef _FutureMap_h_
 #define _FutureMap_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <livre/core/pipeline/FuturePromise.h>
 
@@ -30,8 +31,8 @@ namespace livre
  * FutureMap is a wrapper class to query the map of ( name, future )
  * futures with for data and state. In the map there can be multiple futures
  * with the same name. i.e. if there are multiple futures with the same name
- * "x", the get() function will block until all the futures with name "x" are
- * ready and get() will return a vector of results.
+ * "FutureName", the get() function will block until all the futures with
+ * name "FutureName" are ready and get() will return a vector of results.
  *
  * Filters has named ports to communicate with other filters and those ports
  * are communicated through promise/future couples. The futures are named
@@ -47,8 +48,8 @@ public:
      * @param futures is the list of futures
      * future names are used for name-future association.
      */
-    explicit FutureMap( const Futures& futures );
-    ~FutureMap();
+    LIVRECORE_API explicit FutureMap( const Futures& futures );
+    LIVRECORE_API ~FutureMap();
 
     /**
      * Gets a copy of value(s) with the given type T. Until all
@@ -97,12 +98,12 @@ public:
      * @param name of the future.
      * @return the futures with the given name
      */
-    Futures getFutures( const std::string& name ) const;
+    LIVRECORE_API Futures getFutures( const std::string& name ) const;
 
     /**
      * @return the futures
      */
-    Futures getFutures() const;
+    LIVRECORE_API Futures getFutures() const;
 
     /**
      * Queries if futures are ready with a given name
@@ -111,7 +112,7 @@ public:
      * @throw std::logic_error when there is no future associated with the
      * given name
      */
-    bool isReady( const std::string& name ) const;
+    LIVRECORE_API bool isReady( const std::string& name ) const;
 
     /**
      * Queries if all futures are ready
@@ -119,7 +120,7 @@ public:
      * @throw std::runtime_error when there is no future associated with the
      * given name
      */
-    bool isReady() const;
+    LIVRECORE_API bool isReady() const;
 
     /**
      * Waits all futures associated with a given name
@@ -127,14 +128,14 @@ public:
      * @throw std::logic_error when there is no future associated with the
      * given name
      */
-    void wait( const std::string& name ) const;
+    LIVRECORE_API void wait( const std::string& name ) const;
 
     /**
      * Waits all futures
      * @throw std::runtime_error when there is no future associated with the
      * given name
      */
-    void wait() const;
+    LIVRECORE_API void wait() const;
 
     /**
      * Waits all futures associated with a given name.
@@ -142,14 +143,14 @@ public:
      * @throw std::logic_error when there is no future associated with the
      * given name
      */
-    void waitForAny( const std::string& name ) const;
+    LIVRECORE_API void waitForAny( const std::string& name ) const;
 
     /**
      * Waits all futures.
      * @throw std::logic_error when there is no future associated with the
      * given name
      */
-    void waitForAny() const;
+    LIVRECORE_API void waitForAny() const;
 
 private:
 
@@ -170,8 +171,8 @@ public:
      * @param futures the list of futures.
      * @throw std::logic_error when futures are not unique in names
      */
-    explicit UniqueFutureMap( const Futures& futures );
-    ~UniqueFutureMap();
+    LIVRECORE_API explicit UniqueFutureMap( const Futures& futures );
+    LIVRECORE_API ~UniqueFutureMap();
 
     /**
      * Gets the copy of value(s) with the given type T. If input
@@ -196,12 +197,12 @@ public:
      * @throw std::logic_error when there is no future associated with the
      * given name
      */
-    Future getFuture( const std::string& name ) const;
+    LIVRECORE_API Future getFuture( const std::string& name ) const;
 
     /**
      * @return all the futures.
      */
-    Futures getFutures() const;
+    LIVRECORE_API Futures getFutures() const;
 
     /**
      * Queries if future is ready for a given name
@@ -210,7 +211,7 @@ public:
      * @throw std::logic_error when there is no future associated with the
      * given name
      */
-    bool isReady( const std::string& name ) const;
+    LIVRECORE_API bool isReady( const std::string& name ) const;
 
     /**
      * Queries if future is ready for a given name
@@ -218,7 +219,7 @@ public:
      * @throw std::logic_error when there is no future associated with the
      * given name
      */
-    bool isReady() const;
+    LIVRECORE_API bool isReady() const;
 
     /**
      * Waits for the future associated with a given name
@@ -226,19 +227,19 @@ public:
      * @throw std::logic_error when there is no future associated with the
      * given name
      */
-    void wait( const std::string& name ) const;
+    LIVRECORE_API void wait( const std::string& name ) const;
 
     /**
      * Waits for all the futures
      * @throw std::logic_error when there is no future associated with the
      * given name
      */
-    void wait() const;
+    LIVRECORE_API void wait() const;
 
     /**
      * Waits for any future to be ready.
      */
-    void waitForAny() const;
+    LIVRECORE_API void waitForAny() const;
 
 private:
 

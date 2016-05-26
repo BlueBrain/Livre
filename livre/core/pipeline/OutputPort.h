@@ -20,6 +20,7 @@
 #ifndef _OutputPort_h_
 #define _OutputPort_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 
 namespace livre
@@ -30,40 +31,38 @@ namespace livre
  */
 class OutputPort
 {
-
 public:
-
     /**
      * @param dataInfo is the name and type information for the data.
      */
-    OutputPort( const DataInfo& dataInfo );
-    ~OutputPort();
+    LIVRECORE_API explicit OutputPort( const DataInfo& dataInfo );
+    LIVRECORE_API ~OutputPort();
 
     /**
      * @return name of the port
      */
-    std::string getName() const;
+    LIVRECORE_API std::string getName() const;
 
     /**
      * @return data type of the port
      */
-    std::type_index getDataType() const;
+    LIVRECORE_API std::type_index getDataType() const;
 
     /**
      * @return the promise, that data can be written to
      */
-    Promise getPromise() const;
+    LIVRECORE_API Promise getPromise() const;
 
     /**
      * Connects an output port to input port
      * @param port input port
      */
-    void connect( InputPort& port );
+    LIVRECORE_API void connect( InputPort& port );
 
     /**
      * Resets the promise/future
      */
-    void reset();
+    LIVRECORE_API void reset();
 
 private:
 

@@ -20,6 +20,7 @@
 #ifndef _PromiseMap_h_
 #define _PromiseMap_h_
 
+#include <livre/core/api.h>
 #include <livre/core/pipeline/FuturePromise.h>
 #include <livre/core/types.h>
 
@@ -35,14 +36,14 @@ class PromiseMap
 
 public:
 
-    explicit PromiseMap( const Promises& promises );
-    ~PromiseMap();
+    LIVRECORE_API explicit PromiseMap( const Promises& promises );
+    LIVRECORE_API ~PromiseMap();
 
     /**
      * @param name of the promise
      * @return the promise related to the port name.
      */
-    Promise getPromise( const std::string& name ) const;
+    LIVRECORE_API Promise getPromise( const std::string& name ) const;
 
     /**
      * Sets the port with the value.
@@ -65,14 +66,14 @@ public:
      * @throw std::logic_error when there is no promise associated with the
      * given name
      */
-    void flush( const std::string& name ) const;
+    LIVRECORE_API void flush( const std::string& name ) const;
 
     /**
      * Writes empty values to promises which are not set already.
      * @throw std::logic_error when there is no promise associated with the
      * given name
      */
-    void flush() const;
+    LIVRECORE_API void flush() const;
 
     /**
      * Resets the promise after they are done.
@@ -80,14 +81,14 @@ public:
      * @throw std::logic_error when there is no promise associated with the
      * given name
      */
-    void reset( const std::string& name ) const;
+    LIVRECORE_API void reset( const std::string& name ) const;
 
     /**
      * Resets the promises after they are done.
      * @throw std::logic_error when there is no promise associated with the
      * given name
      */
-    void reset() const;
+    LIVRECORE_API void reset() const;
 
 private:
 

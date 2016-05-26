@@ -20,6 +20,7 @@
 #ifndef _Promise_h_
 #define _Promise_h_
 
+#include <livre/core/api.h>
 #include <livre/core/pipeline/PortData.h>
 #include <livre/core/types.h>
 
@@ -37,18 +38,18 @@ public:
     /**
      * @param dataInfo is the name and type information for the data.
      */
-    Promise( const DataInfo& dataInfo );
-    ~Promise();
+    LIVRECORE_API Promise( const DataInfo& dataInfo );
+    LIVRECORE_API ~Promise();
 
     /**
      * @return the name of the connection
      */
-    std::type_index getDataType() const;
+    LIVRECORE_API std::type_index getDataType() const;
 
     /**
      * @return the name of the connection
      */
-    std::string getName() const;
+    LIVRECORE_API std::string getName() const;
 
     /**
      * Sets the port with the value.
@@ -73,7 +74,7 @@ public:
      * If such behaviour is needed Future has a Future( const Promise& )
      * consttructor
      */
-    Future getFuture() const;
+    LIVRECORE_API Future getFuture() const;
 
     /**
      * @resets the promise.( If related future is constructed using
@@ -82,7 +83,7 @@ public:
      * The behavior of the function is undefined when multiple threads
      * execute query/get from future.
      */
-    void reset();
+    LIVRECORE_API void reset();
 
 private:
 

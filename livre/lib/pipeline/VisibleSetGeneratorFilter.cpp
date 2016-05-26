@@ -31,7 +31,7 @@ namespace livre
 
 struct VisibleSetGeneratorFilter::Impl
 {
-    Impl( const DataSource& dataSource )
+    explicit Impl( const DataSource& dataSource )
         : _dataSource( dataSource )
     {}
 

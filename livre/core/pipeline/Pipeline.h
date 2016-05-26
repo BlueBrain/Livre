@@ -20,6 +20,7 @@
 #ifndef _Pipeline_h_
 #define _Pipeline_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <livre/core/pipeline/PipeFilter.h>
 #include <livre/core/pipeline/Executable.h>
@@ -33,13 +34,12 @@ namespace livre
  */
 class Pipeline : public Executable
 {
-
 public:
 
     typedef std::unique_ptr< Executable > UniqueExecutablePtr;
 
-    Pipeline();
-    ~Pipeline();
+    LIVRECORE_API Pipeline();
+    LIVRECORE_API ~Pipeline();
 
     /**
      * Adds a pipeline to be executed.
@@ -83,27 +83,27 @@ public:
      * @return the executable
      * @throw std::runtime_error if a pipe filter or pipeline does not exist
      */
-    const Executable& getExecutable( const std::string& name ) const;
+    LIVRECORE_API const Executable& getExecutable( const std::string& name ) const;
 
     /**
      * @copydoc Executable::execute
      */
-    void execute() final;
+    LIVRECORE_API void execute() final;
 
     /**
      * @copydoc Executable::getPostconditions
      */
-    Futures getPostconditions() const final;
+    LIVRECORE_API Futures getPostconditions() const final;
 
     /**
      * @copydoc Executable::getPreconditions
      */
-    Futures getPreconditions() const final;
+    LIVRECORE_API Futures getPreconditions() const final;
 
     /**
      * @copydoc Executable::reset
      */
-    void reset() final;
+    LIVRECORE_API void reset() final;
 
 private:
 

@@ -41,7 +41,7 @@ public:
      * Constructor
      * @param dataSource the data source
      */
-    VisibleSetGeneratorFilter( const DataSource& dataSource );
+    explicit VisibleSetGeneratorFilter( const DataSource& dataSource );
     ~VisibleSetGeneratorFilter();
 
     /**

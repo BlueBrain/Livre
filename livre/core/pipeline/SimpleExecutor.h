@@ -20,6 +20,7 @@
 #ifndef _SimpleExecutor_h_
 #define _SimpleExecutor_h_
 
+#include <livre/core/api.h>
 #include <livre/core/pipeline/Executor.h>
 #include <livre/core/types.h>
 
@@ -43,20 +44,20 @@ public:
      * @param glContext if a gl context is provided, a new context will be created and
      * the worker threads will share the context with the given context
      */
-    SimpleExecutor( size_t threadCount,
-                    ConstGLContextPtr glContext = ConstGLContextPtr( ));
+    LIVRECORE_API SimpleExecutor( size_t threadCount,
+                                  ConstGLContextPtr glContext = ConstGLContextPtr( ));
 
-    virtual ~SimpleExecutor();
+    LIVRECORE_API virtual ~SimpleExecutor();
 
     /**
      * @copydoc Executor::schedule
      */
-    void schedule( ExecutablePtr executable ) final;
+    LIVRECORE_API void schedule( ExecutablePtr executable ) final;
 
     /**
      * @copydoc Executor::clear
      */
-    void clear() final;
+    LIVRECORE_API void clear() final;
 
 private:
 

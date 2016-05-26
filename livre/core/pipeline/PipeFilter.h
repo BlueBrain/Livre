@@ -20,6 +20,7 @@
 #ifndef _PipeFilter_h_
 #define _PipeFilter_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <livre/core/pipeline/Executable.h>
 
@@ -36,12 +37,12 @@ class PipeFilter : public Executable
 {
 public:
 
-    ~PipeFilter();
+    LIVRECORE_API ~PipeFilter();
 
     /**
      * @return the unique name of the filter.
      */
-    std::string getName() const;
+    LIVRECORE_API std::string getName() const;
 
     /**
      * Connects to given pipe filter with the given port names. Both filters
@@ -51,7 +52,7 @@ public:
      * @param dstPortName connection port name.
      * @throw std::runtime_error if connection can not be established
      */
-    void connect( const std::string& srcPortName,
+    LIVRECORE_API void connect( const std::string& srcPortName,
                   PipeFilter& dst,
                   const std::string& dstPortName );
 
@@ -62,27 +63,27 @@ public:
      * @throw std::logic_error if there is already a connection if there is
      * no input port or it is a notification port.
      */
-    Promise getPromise( const std::string& portName );
+    LIVRECORE_API Promise getPromise( const std::string& portName );
 
     /**
      * @copydoc Executable::execute
      */
-    void execute() final;
+    LIVRECORE_API void execute() final;
 
     /**
      * @copydoc Executable::getPostconditions
      */
-    Futures getPostconditions() const final;
+    LIVRECORE_API Futures getPostconditions() const final;
 
     /**
      * @copydoc Executable::getPreconditions
      */
-    Futures getPreconditions() const final;
+    LIVRECORE_API Futures getPreconditions() const final;
 
     /**
      * @copydoc Executable::reset
      */
-    void reset() final;
+    LIVRECORE_API void reset() final;
 
 protected:
 

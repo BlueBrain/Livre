@@ -40,7 +40,7 @@ public:
      * Constructor
      * @param textureCache the texture cache
      */
-    RenderingSetGeneratorFilter( const TextureCache& textureCache );
+    explicit RenderingSetGeneratorFilter( const TextureCache& textureCache );
     ~RenderingSetGeneratorFilter();
 
     /**

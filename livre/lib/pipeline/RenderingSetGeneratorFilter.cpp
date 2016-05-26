@@ -30,7 +30,7 @@ namespace livre
 
 struct RenderingSetGenerator
 {
-    RenderingSetGenerator( const TextureCache& textureCache )
+    explicit RenderingSetGenerator( const TextureCache& textureCache )
         : _textureCache( textureCache )
     {}
 
@@ -110,7 +110,7 @@ struct RenderingSetGenerator
 
 struct RenderingSetGeneratorFilter::Impl
 {
-    Impl( const TextureCache& cache )
+    explicit Impl( const TextureCache& cache )
         : _cache( cache )
     {}
 

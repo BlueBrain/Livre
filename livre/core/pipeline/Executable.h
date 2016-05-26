@@ -20,6 +20,7 @@
 #ifndef _Executable_h_
 #define _Executable_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 #include <livre/core/pipeline/FuturePromise.h>
 #include <livre/core/pipeline/Executor.h>
@@ -45,7 +46,7 @@ public:
      * @param executor schedules the executable
      * @return the post conditions
      */
-    Futures schedule( Executor& executor );
+    LIVRECORE_API Futures schedule( Executor& executor );
 
     /**
      * @return the output conditions for getting the outputs of the executable. The post
@@ -64,7 +65,7 @@ public:
      * Resets the executable by setting all pre and post conditions to an clean state
      * ( The futures are not ready )
      */
-    virtual void reset() {}
+    LIVRECORE_API virtual void reset() {}
 
     /**
      * @return returns a copy

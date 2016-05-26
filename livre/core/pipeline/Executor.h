@@ -36,7 +36,7 @@ class Executor
 {
 public:
 
-    virtual ~Executor() {}
+    LIVRECORE_API virtual ~Executor() {}
 
     /**
      * Schedules the executables for execution. The deriving class should implement a
@@ -52,7 +52,7 @@ protected:
     /**
      * Clears the executor ( i.e : Implementation can empty the work queue )
      */
-    virtual void clear() {}
+    LIVRECORE_API virtual void clear() {}
 
 };
 

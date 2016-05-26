@@ -20,6 +20,7 @@
 #ifndef _Workers_h_
 #define _Workers_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 
 namespace livre
@@ -38,21 +39,21 @@ public:
      * @param glContext if given, the threads can share this
      * context.
      */
-    Workers( size_t nThreads = 4,
-             ConstGLContextPtr glContext = ConstGLContextPtr( ));
-    ~Workers();
+    LIVRECORE_API Workers( size_t nThreads = 4,
+                           ConstGLContextPtr glContext = ConstGLContextPtr( ));
+    LIVRECORE_API ~Workers();
 
     /**
      * Submitted executable is scheduled to the execution
      * queue.
      * @param executable is executed by thread pool.
      */
-    void schedule( ExecutablePtr executable );
+    LIVRECORE_API void schedule( ExecutablePtr executable );
 
     /**
      * @return the size of thread pool.
      */
-    size_t getSize() const;
+    LIVRECORE_API size_t getSize() const;
 
 private:
 

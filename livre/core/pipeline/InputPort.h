@@ -20,6 +20,7 @@
 #ifndef _InputPort_h_
 #define _InputPort_h_
 
+#include <livre/core/api.h>
 #include <livre/core/types.h>
 
 namespace livre
@@ -35,34 +36,34 @@ public:
     /**
      * @param dataInfo is the name and type information for the data.
      */
-    explicit InputPort( const DataInfo& dataInfo );
-    ~InputPort();
+    LIVRECORE_API explicit InputPort( const DataInfo& dataInfo );
+    LIVRECORE_API ~InputPort();
 
     /**
      * @return name of the port
      */
-    std::string getName() const;
+    LIVRECORE_API std::string getName() const;
 
     /**
      * @return data type of the port
      */
-    std::type_index getDataType() const;
+    LIVRECORE_API std::type_index getDataType() const;
 
     /**
      * @return the number of the connected outputs to the port
      */
-    size_t getSize() const;
+    LIVRECORE_API size_t getSize() const;
 
     /**
      * @return Return all the futures this port has.
      */
-    const Futures& getFutures() const;
+    LIVRECORE_API const Futures& getFutures() const;
 
     /**
      * Connects an output port to input port
      * @param port is the connected output port.
      */
-    void connect( const OutputPort& port );
+    LIVRECORE_API void connect( const OutputPort& port );
 
     /**
      * Disconnects an output port from input port
@@ -70,7 +71,7 @@ public:
      * @return true if output port is found as a connection and removed
      * for the connections
      */
-    bool disconnect( const OutputPort& port );
+    LIVRECORE_API bool disconnect( const OutputPort& port );
 
 private:
 
