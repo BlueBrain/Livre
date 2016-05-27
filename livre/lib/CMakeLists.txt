@@ -19,17 +19,14 @@ set(LIVRELIB_PUBLIC_HEADERS
   cache/TextureDataCache.h
   cache/TextureObject.h
   cache/TextureDataObject.h
-  data/MemoryDataSource.h
   configuration/ApplicationParameters.h
   configuration/VolumeRendererParameters.h
-  render/AvailableSetGenerator.h
-  uploaders/DataUploadProcessor.h
-  uploaders/TextureUploadProcessor.h
-  visitor/CollectionTraversal.h
-  visitor/DFSTraversal.h)
-
-set(LIVRELIB_HEADERS
-  render/SelectVisibles.h)
+  pipeline/DataUploadFilter.h
+  pipeline/RenderFilter.h
+  pipeline/RenderingSetGeneratorFilter.h
+  pipeline/RenderPipeline.h
+  pipeline/VisibleSetGeneratorFilter.h
+  data/MemoryDataSource.h)
 
 set(LIVRELIB_SOURCES
   ${ZEROBUF_GENERATED_SOURCES}
@@ -38,14 +35,14 @@ set(LIVRELIB_SOURCES
   cache/TextureDataCache.cpp
   cache/TextureObject.cpp
   cache/TextureDataObject.cpp
-  data/MemoryDataSource.cpp
   configuration/ApplicationParameters.cpp
   configuration/VolumeRendererParameters.cpp
-  render/AvailableSetGenerator.cpp
-  uploaders/DataUploadProcessor.cpp
-  uploaders/TextureUploadProcessor.cpp
-  visitor/CollectionTraversal.cpp
-  visitor/DFSTraversal.cpp)
+  pipeline/DataUploadFilter.cpp
+  pipeline/RenderFilter.cpp
+  pipeline/RenderingSetGeneratorFilter.cpp
+  pipeline/RenderPipeline.cpp
+  pipeline/VisibleSetGeneratorFilter.cpp
+  data/MemoryDataSource.cpp)
 
 set(LIVRELIB_LINK_LIBRARIES PUBLIC LivreCore
                             PRIVATE Equalizer ${VTUNE_LIBRARIES})

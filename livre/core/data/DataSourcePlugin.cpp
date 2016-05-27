@@ -23,6 +23,7 @@ namespace livre
 {
 
 DataSourcePlugin::DataSourcePlugin()
+    : _lodNodeMap( 128 )
 {}
 
 LODNode DataSourcePlugin::getNode( const NodeId& nodeId ) const

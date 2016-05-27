@@ -27,13 +27,11 @@
 namespace livre
 {
 
-class DataUploadProcessor;
-class RenderNodeVisitor;
+class RenderPipeline;
 class TextureCache;
 class TextureDataCache;
 class TextureDataObject;
 class TextureObject;
-class TextureUploadProcessor;
 struct ApplicationParameters;
 
 typedef std::shared_ptr< const TextureDataObject > ConstTextureDataObjectPtr;
@@ -42,8 +40,6 @@ typedef std::shared_ptr< TextureDataObject > TextureDataObjectPtr;
 typedef std::shared_ptr< TextureObject > TextureObjectPtr;
 
 static const uint32_t CONNECTION_ID( 0u );
-
-typedef std::vector< DashRenderNode > DashRenderNodes;
 
 }
 

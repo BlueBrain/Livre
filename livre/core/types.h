@@ -25,8 +25,6 @@
 #include <lunchbox/uri.h>
 #include <servus/uint128_t.h>
 
-#include <dash/types.h>
-
 #include <boost/program_options.hpp>
 #include <boost/program_options/options_description.hpp>
 
@@ -45,6 +43,9 @@
 #include <unordered_map>
 #include <list>
 
+#include <functional>
+#include <typeindex>
+
 namespace livre
 {
 
@@ -53,13 +54,6 @@ class Cache;
 class CacheObject;
 class CacheStatistics;
 class Configuration;
-class DashConnection;
-class DashProcessor;
-class DashProcessorInput;
-class DashProcessorOutput;
-class DashRenderNode;
-class DashRenderStatus;
-class DashTree;
 class EventHandler;
 class EventHandlerFactory;
 class EventInfo;
@@ -70,6 +64,7 @@ class GLSLShaders;
 class LODNode;
 class MemoryUnit;
 class NodeId;
+class NodeVisitor;
 class Parameter;
 class Processor;
 class ProcessorInput;
@@ -81,6 +76,27 @@ class VisitState;
 class DataSource;
 class DataSourcePlugin;
 class DataSourcePluginData;
+
+/**
+ * Pipeline
+ */
+class AsyncData;
+class Executor;
+class Executable;
+class Filter;
+class Future;
+class FutureMap;
+class FutureMap;
+class InputPort;
+class PortData;
+class Promise;
+class PromiseMap;
+class OutputPort;
+class OutFutures;
+class UniqueFutureMap;
+class Pipeline;
+class PipeFilter;
+class Workers;
 
 struct FrameInfo;
 struct TextureState;
@@ -98,12 +114,8 @@ typedef std::array< float, 2 > Range;
  */
 
 typedef std::shared_ptr< AllocMemoryUnit > AllocMemoryUnitPtr;
-typedef std::shared_ptr< DashConnection > DashConnectionPtr;
-typedef std::shared_ptr< Processor > ProcessorPtr;
-typedef std::shared_ptr< DashProcessor > DashProcessorPtr;
-typedef std::shared_ptr< ProcessorInput > ProcessorInputPtr;
-typedef std::shared_ptr< ProcessorOutput > ProcessorOutputPtr;
 typedef std::shared_ptr< GLContext > GLContextPtr;
+typedef std::shared_ptr< const GLContext > ConstGLContextPtr;
 typedef std::shared_ptr< TextureState > TextureStatePtr;
 typedef std::shared_ptr< const TextureState > ConstTextureStatePtr;
 typedef std::shared_ptr< DataSource > DataSourcePtr;
@@ -116,6 +128,10 @@ typedef std::shared_ptr< CacheObject > CacheObjectPtr;
 typedef std::shared_ptr< const CacheObject > ConstCacheObjectPtr;
 typedef std::shared_ptr< CacheObject > CacheObjectPtr;
 typedef std::shared_ptr< const CacheObject > ConstCacheObjectPtr;
+typedef std::shared_ptr< PortData > PortDataPtr;
+typedef std::shared_ptr< Executable > ExecutablePtr;
+
+typedef std::unique_ptr< Filter > FilterPtr;
 
 /**
  * Helper classes for shared_ptr objects
@@ -166,13 +182,29 @@ typedef std::vector< CacheObjectPtr > CacheObjects;
 typedef std::vector< ConstCacheObjectPtr > ConstCacheObjects;
 
 /**
+ * List definitions for complex types
+ */
+typedef std::list< Executable* > Executables;
+typedef std::list< Future > Futures;
+typedef std::list< Promise > Promises;
+
+/**
  * Map definitions
  */
 typedef std::unordered_map< CacheId, CacheObjectPtr > CacheMap;
 typedef std::unordered_map< CacheId, ConstCacheObjectPtr > ConstCacheMap;
 typedef std::unordered_map< uint32_t, bool > BoolMap;
 typedef std::unordered_map< uint32_t, EventHandlerPtr > EventHandlerMap;
-typedef std::unordered_map< uint32_t, DashConnectionPtr > DashConnectionMap;
+
+template < class T >
+inline std::type_index getType()
+{
+    typedef typename std::remove_const<T>::type UnconstT;
+    return std::type_index( typeid( UnconstT ));
+}
+
+typedef std::map< std::string, std::type_index > DataInfos;
+typedef DataInfos::value_type DataInfo;
 
 /**
  * Set definitions
@@ -202,9 +234,9 @@ const Identifier INVALID_CACHE_ID = -1; //!< Invalid cache id.
 const Identifier INVALID_NODE_ID = -1; //!< Invalid node ID.
 
 const uint32_t MAX_CHILDREN_BITS = 4; //!< Maximum number of children is 16
-const uint32_t NODEID_LEVEL_BITS = 4; //>! @see NodeId
-const uint32_t NODEID_BLOCK_BITS = 14; //>! @see NodeId
-const uint32_t NODEID_FRAME_BITS = 18; //>! @see NodeId
+const uint32_t NODEID_LEVEL_BITS = 4; //>! see NodeId
+const uint32_t NODEID_BLOCK_BITS = 14; //>! see NodeId
+const uint32_t NODEID_FRAME_BITS = 18; //>! see NodeId
 
 const uint32_t INVALID_POSITION = ( 1u << NODEID_BLOCK_BITS ) - 1; //!< Invalid node ID.
 const uint32_t INVALID_LEVEL = ( 1u << NODEID_LEVEL_BITS ) - 1; //!< Invalid tree level.4 bits is on

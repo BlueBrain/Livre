@@ -33,11 +33,11 @@ struct FrameInfo
     LIVRECORE_API FrameInfo( const Frustum& frustum,
                              const uint32_t frameId );
 
-    NodeIds allNodes; //!< The list of nodes to be rendered.
-    NodeIds notAvailableRenderNodes; //!< The unavailable nodes for rendering.
-    ConstCacheObjects renderNodes; //!< The list of nodes to be rendered.
     Frustum frustum; //!< The current frustum.
     uint32_t frameId ; //!< The current frame id.
+
+    size_t nAvailable; //!< Number of available nodes
+    size_t nNotAvailable; //!< Number of not available nodes
 };
 }
 

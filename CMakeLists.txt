@@ -43,7 +43,6 @@ common_find_package(BBPTestData)
 common_find_package(Boost REQUIRED COMPONENTS filesystem program_options thread
                                          system regex unit_test_framework)
 common_find_package(Collage REQUIRED)
-common_find_package(dash REQUIRED)
 common_find_package(Equalizer REQUIRED)
 common_find_package(Lexis REQUIRED)
 common_find_package(LibJpegTurbo)
@@ -62,7 +61,7 @@ common_find_package(ZeroBuf REQUIRED)
 common_find_package_post()
 
 include(EqGLLibraries)
-set(LIVRE_DEPENDENT_LIBRARIES vmmlib Lunchbox dash Equalizer ZeroBuf)
+set(LIVRE_DEPENDENT_LIBRARIES vmmlib Lunchbox Equalizer ZeroBuf)
 
 add_definitions(-DBOOST_PROGRAM_OPTIONS_DYN_LINK) # Fix for windows and shared boost.
 add_subdirectory(livre)

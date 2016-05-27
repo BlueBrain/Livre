@@ -3,6 +3,10 @@ Changelog {#Changelog}
 
 # master {#master}
 
+* [#256](https://github.com/BlueBrain/Livre/pull/256):
+  A new architecture for loading data, executing rendering
+  is implemented. There are preformance gains 2x to 10x
+  in frame rate and data upload.
 * [#291](https://github.com/BlueBrain/Livre/pull/291):
   Livre uses OpenGL 4.2 for rendering ( removed copying-from-to
   CPU memory )

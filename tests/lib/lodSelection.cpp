@@ -18,18 +18,17 @@
  */
 
 #define BOOST_TEST_MODULE LodSelection
-#include <boost/test/unit_test.hpp>
-
-#include <livre/core/dash/DashTree.h>
-#include <livre/core/data/DataSource.h>
 
 #include <livre/lib/data/MemoryDataSource.h>
-#include <livre/lib/render/SelectVisibles.h>
-#include <livre/lib/visitor/DFSTraversal.h>
 
+#include <livre/core/data/DataSource.h>
+#include <livre/core/render/SelectVisibles.h>
+#include <livre/core/visitor/DFSTraversal.h>
 #include <livre/core/render/Frustum.h>
 
 #include <lunchbox/pluginRegisterer.h>
+
+#include <boost/test/unit_test.hpp>
 
 // Explicit registration required because the folder of the data source plugin is not
 // in the LD_LIBRARY_PATH of the test executable.
@@ -43,8 +42,6 @@ Identifiers getVisibles( const livre::DataSource& dataSource,
                          const uint32_t minLOD,
                          const uint32_t maxLOD )
 {
-    livre::DashTree dashTree( dataSource );
-    dashTree.createContext()->setCurrent();
     const float projArray[] = { 2.0, 0, 0, 0,
                                 0, 2.0, 0, 0,
                                 0, 0, -1.01342285, -1,
@@ -60,7 +57,7 @@ Identifiers getVisibles( const livre::DataSource& dataSource,
     const livre::Matrix4f mvMat( mvArray, mvArray + 16 );
     const livre::Frustum frustum( mvMat, projMat );
 
-    livre::SelectVisibles selectVisibles( dashTree,
+    livre::SelectVisibles selectVisibles( dataSource,
                                           frustum,
                                           windowHeight,
                                           screenSpaceError,
@@ -74,8 +71,8 @@ Identifiers getVisibles( const livre::DataSource& dataSource,
 
 
     Identifiers visibles;
-    for( const livre::DashRenderNode& dashNode: selectVisibles.getVisibles( ))
-        visibles.push_back( dashNode.getLODNode().getNodeId().getId( ));
+    for( const livre::NodeId& nodeId: selectVisibles.getVisibles( ))
+        visibles.push_back( nodeId.getId( ));
 
     std::sort( visibles.begin(), visibles.end( ));
     return visibles;

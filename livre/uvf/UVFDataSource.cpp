@@ -19,7 +19,6 @@
 
 #include <livre/uvf/UVFDataSource.h>
 
-#include <livre/core/dash/DashRenderNode.h>
 #include <livre/core/data/LODNode.h>
 #include <livre/core/data/MemoryUnit.h>
 
