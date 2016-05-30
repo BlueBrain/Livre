@@ -98,7 +98,7 @@ set(LIVRECORE_SOURCES
   visitor/VisitState.cpp)
 
 set(LIVRECORE_LINK_LIBRARIES
-  PUBLIC ${Boost_LIBRARIES} Collage Lexis Lunchbox vmmlib ZeroBufRender
+  PUBLIC ${Boost_LIBRARIES} Collage Lexis Lunchbox vmmlib ZeroBuf
   PRIVATE Equalizer ${GLEW_MX_LIBRARIES})
 
 set(LIVRECORE_INCLUDE_NAME livre/core)

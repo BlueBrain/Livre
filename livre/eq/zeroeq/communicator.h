@@ -45,12 +45,6 @@ public:
      */
     void publishImageJPEG( const uint8_t* data, const uint64_t size );
 
-    /** Publish EVENT_HEARTBEAT on the REST schema. */
-    void publishHeartbeat();
-
-    /** Publish EVENT_EXIT on the REST schema. */
-    void publishExit();
-
     /** Publish frame (start, current, end, delta) parameters */
     void publishFrame();
 

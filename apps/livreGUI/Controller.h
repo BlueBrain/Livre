@@ -23,7 +23,6 @@
 #ifndef _Controller_h_
 #define _Controller_h_
 
-#include <zeroeq/types.h>
 #include <zerobuf/types.h>
 
 namespace livre
@@ -41,35 +40,11 @@ public:
     ~Controller();
 
     /**
-     * @param event the serialized event to publish
-     * @return true if the publication of the event was successful, false
-     *         otherwise
-     */
-    bool publish( const zeroeq::Event& event );
-
-    /**
      * @param zerobuf the ZeroBuf object to publish
      * @return true if the publication of the object was successful, false
      *         otherwise
      */
     bool publish( const ::zerobuf::Zerobuf& zerobuf );
-
-    /**
-     * Register the handler for the given event and publish requests for that
-     * event as well.
-     *
-     * @param event the event type of interest
-     * @param func the callback function on receive of event
-     * @return true if the function was successfully registered
-     */
-    bool registerHandler( const zeroeq::uint128_t& event,
-                          const zeroeq::EventFunc& func );
-
-    /**
-     * @param event the event type of interest
-     * @return true if function was successfully deregistered
-     */
-    bool deregisterHandler( const zeroeq::uint128_t& event );
 
     /**
      * Subscribe the given ZeroBuf object and publish a request for a first-time

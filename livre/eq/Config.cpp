@@ -66,7 +66,6 @@ public:
     EventMapper eventMapper;
     FrameData framedata;
     Boxf volumeBBox;
-    ::lexis::render::ImageJPEG imageJPEG;
 #ifdef LIVRE_USE_ZEROEQ
     std::unique_ptr< zeroeq::Communicator > communicator;
 #endif
@@ -95,26 +94,31 @@ const FrameData& Config::getFrameData() const
     return _impl->framedata;
 }
 
-::lexis::render::ImageJPEG& Config::getImageJPEG() const
+std::string Config::renderJPEG()
 {
-    return _impl->imageJPEG;
-}
-
-void Config::renderJPEG()
-{
-    _impl->imageJPEG.setData( std::vector< uint8_t >( ));
     getFrameData().getFrameSettings().setGrabFrame( true );
     frame();
 
-    while( _impl->imageJPEG.getData().empty())
+    for( ;; )
     {
         eq::EventICommand event = getNextEvent();
-
         if( !event.isValid( ))
             continue;
 
+        if( event.getEventType() == GRAB_IMAGE )
+        {
+            const uint64_t dataSize = event.read< uint64_t >();
+            const uint8_t* dataPtr =
+                reinterpret_cast< const uint8_t* >( event.getRemainingBuffer( dataSize ) );
+
+            ::lexis::render::ImageJPEG imageJPEG;
+            imageJPEG.setData( dataPtr, dataSize );
+            return imageJPEG.toJSON();
+        }
+
         handleEvent( event );
     }
+    return "";
 }
 
 const ApplicationParameters& Config::getApplicationParameters() const
@@ -248,10 +252,6 @@ bool Config::exit()
     _impl->framedata.deregisterObjects();
     if( !_deregisterFrameData() )
         ret = false;
-#ifdef LIVRE_USE_ZEROEQ
-    _impl->communicator->publishExit();
-#endif
-
     return ret;
 }
 
@@ -355,7 +355,6 @@ void Config::handleNetworkEvents()
 {
 #ifdef LIVRE_USE_ZEROEQ
     _impl->communicator->handleEvents();
-    _impl->communicator->publishHeartbeat();
 #endif
 }
 
@@ -411,17 +410,6 @@ bool Config::handleEvent( eq::EventICommand command )
         _impl->volumeBBox = command.read< Boxf >();
         return false;
 
-#ifdef LIVRE_USE_ZEROEQ
-    case GRAB_IMAGE:
-    {
-        const uint64_t dataSize = command.read< uint64_t >();
-        const uint8_t* dataPtr =
-            reinterpret_cast< const uint8_t* >( command.getRemainingBuffer( dataSize ) );
-
-        _impl->imageJPEG.setData( dataPtr, dataSize );
-        return false;
-    }
-#endif
     case VOLUME_FRAME_RANGE:
     {
         _impl->dataFrameRange = command.read< Vector2ui >();

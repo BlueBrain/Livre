@@ -24,7 +24,7 @@ set(LIVREEQ_LINK_LIBRARIES PUBLIC Lexis LivreLib Equalizer)
 if(TARGET ZeroEQ)
   list(APPEND LIVREEQ_HEADERS zeroeq/communicator.h)
   list(APPEND LIVREEQ_SOURCES zeroeq/communicator.cpp)
-  list(APPEND LIVREEQ_LINK_LIBRARIES PRIVATE ZeroEQ ZeroEQHBP)
+  list(APPEND LIVREEQ_LINK_LIBRARIES PRIVATE ZeroEQ)
 endif()
 
 if(LibJpegTurbo_FOUND)
