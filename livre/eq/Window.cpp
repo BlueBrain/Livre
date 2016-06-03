@@ -1,4 +1,4 @@
-/* Copyright (c) 2007-2015, Stefan Eilemann <eile@equalizergraphics.com>
+/* Copyright (c) 2007-2016, Stefan Eilemann <eile@equalizergraphics.com>
  *                          Maxim Makhinya  <maxmah@gmail.com>
  *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
@@ -36,8 +36,6 @@
 #include <livre/lib/cache/TextureCache.h>
 
 #include <eq/gl.h>
-
-const uint32_t maxQueueSize = 65536;
 
 namespace livre
 {

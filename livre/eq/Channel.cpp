@@ -256,7 +256,7 @@ public:
 
         renderPipeline.render( pipe->getFrameData()->getVRParameters(),
                                _frameInfo,
-                               { _drawRange.start, _drawRange.end },
+                               {{ _drawRange.start, _drawRange.end }},
                                PixelViewport( vp.x, vp.y, vp.w, vp.h ),
                                PipeFilterT< RedrawFilter >( "RedrawFilter", _channel ),
                                *_renderer,

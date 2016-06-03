@@ -20,7 +20,6 @@ Livre is an out-of-core rendering engine that has the following features:
 
 - Distributed rendering using Equalizer library (https://github.com/Eyescale/Equalizer)
 (Sort-first is implemented, sort-last is in progress)
-- Lock-free data sharing using DASH library (https://github.com/BlueBrain/dash)
 - Octree based out-of-core rendering.
 - Visualisation of pre-processed UVF format.
   ([source code](https://github.com/SCIInstitute/Tuvok.git)) volume data sets.
@@ -38,16 +37,6 @@ Livre is an out-of-core rendering engine that has the following features:
 @image html ViewLOD.png "View-based LOD selection [2]"
 
 - Single-pass GPU Raycasting.
-
-@section Architecture Architecture
-
-The architecture can be summarized with the picture below:
-
-@image html DataFlow.png
-
-For each thread, the DASH library provides different views of data. And, because of its tree structure,
-the volume octree can be represented using the DASH tree. The changes are then propagated between
-threads.
 
 @subsection Render_Thread Render thread
 
@@ -70,7 +59,7 @@ the required nodes.
 @subsection Livre_Library Livre library
 
 Livre is composed of 3 main libraries:
-- core: Collection of base classes for Cache, Dash based pipeline, Visitors and Rendering.
+- core: Collection of base classes for Cache, Pipeline, Visitors and Rendering.
 - Eq: Collection of implementations of classes for Equalizer classes.
 - Lib: Collection of implementations of classes for Cache such as "Data Cache", "Texture Cache"
 and Rendering.
