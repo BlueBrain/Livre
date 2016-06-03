@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -40,8 +40,7 @@ public:
     /**
      * @copydoc NodeVisitor::visit
      */
-    virtual void visit( const LODNode& node,
-                        VisitState& state ) = 0;
+    virtual void visit( const LODNode& node, VisitState& state ) = 0;
 
     /**
      * @return Returns the data source
@@ -50,10 +49,9 @@ public:
 
 private:
 
-    LIVRECORE_API void visit( const NodeId& nodeId,
-                              VisitState& state ) final;
+    LIVRECORE_API void visit( const NodeId& nodeId, VisitState& state ) final;
 
-    struct Impl;
+    class Impl;
     std::unique_ptr<Impl> _impl;
 };
 
