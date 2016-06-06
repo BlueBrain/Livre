@@ -254,6 +254,7 @@ public:
         const livre::Window* window = static_cast< const livre::Window* >( _channel->getWindow( ));
         const RenderPipeline& renderPipeline = window->getRenderPipeline();
 
+        _renderer->update( *pipe->getFrameData( ));
         renderPipeline.render( pipe->getFrameData()->getVRParameters(),
                                _frameInfo,
                                {{ _drawRange.start, _drawRange.end }},
