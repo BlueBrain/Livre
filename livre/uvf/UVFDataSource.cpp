@@ -263,7 +263,7 @@ public:
                      (const unsigned char*)_tuvokLargeMMapFilePtr->rd(
                                                         offset, length ).get( );
 
-             memUnitPtr.reset( new ConstMemoryUnit( dataPtr, blockInfo.m_iLength  ) );
+             memUnitPtr.reset( new ConstMemoryUnit( dataPtr, blockInfo.m_iLength ));
         }
         else
         {
