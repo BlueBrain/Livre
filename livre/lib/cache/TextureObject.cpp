@@ -98,9 +98,8 @@ struct TextureObject::Impl
         const Vector3f& size = lodNode.getVoxelBox().getSize();
         const Vector3f& maxSize = _dataSource.getVolumeInfo().maximumBlockSize;
         const Vector3f& overlapf = overlap / maxSize;
-        _textureState->textureCoordsMax = size / maxSize;
+        _textureState->textureCoordsMax = overlapf + size / maxSize;
         _textureState->textureCoordsMin = overlapf;
-        _textureState->textureCoordsMax= _textureState->textureCoordsMax - overlapf;
         _textureState->textureSize =
                 _textureState->textureCoordsMax - _textureState->textureCoordsMin;
     }
