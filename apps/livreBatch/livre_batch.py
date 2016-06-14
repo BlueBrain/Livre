@@ -109,27 +109,27 @@ class LivreBatch(object):
         values['num_frames'] = end - start
 
         sbatch_script = '\n'.join((
-            "#!/bin/bash",
-            "#SBATCH --job-name=\"{slurm[job_name]}\"",
-            "#SBATCH --time={slurm[job_time]}",
-            "#SBATCH --partition={slurm[queue]}",
-            "#SBATCH --account={slurm[account]}",
-            "#SBATCH --nodes={slurm[nodes]}",
-            "#SBATCH --ntasks-per-node={slurm[tasks_per_node]}",
-            "#SBATCH --output={slurm[output_dir]}/%j_out.txt",
-            "#SBATCH --error={slurm[output_dir]}/%j_err.txt",
-            "",
-            "export EQ_WINDOW_IATTR_HINT_WIDTH={livre[width]}",
-            "export EQ_WINDOW_IATTR_HINT_HEIGHT={livre[height]}",
-            "export EQ_CHANNEL_SATTR_DUMP_IMAGE={image}",
-            "export ZEROEQ_SESSION=$SLURM_JOB_ID",
-            "livre --eq-layout {livre[eq_layout]} --volume {livre[volume]} "\
-            "--sse {livre[sse]} --samples-per-ray {livre[samples_per_ray]} "\
-            "--synchronous --animation --frames \"{start} {end}\" "\
-            "--num-frames {num_frames} "\
-            "--camera-position \"{livre[camera_position]}\" "\
-            "--camera-lookat \"{livre[camera_lookat]}\" "\
-            "--transfer-function \"{livre[transfer_function]}\""
+            '#!/bin/bash',
+            '#SBATCH --job-name="{slurm[job_name]}"',
+            '#SBATCH --time="{slurm[job_time]}"',
+            '#SBATCH --partition="{slurm[queue]}"',
+            '#SBATCH --account="{slurm[account]}"',
+            '#SBATCH --nodes="{slurm[nodes]}"',
+            '#SBATCH --ntasks-per-node="{slurm[tasks_per_node]}"',
+            '#SBATCH --output="{slurm[output_dir]}/%j_out.txt"',
+            '#SBATCH --error="{slurm[output_dir]}/%j_err.txt"',
+            '',
+            'export EQ_WINDOW_IATTR_HINT_WIDTH="{livre[width]}"',
+            'export EQ_WINDOW_IATTR_HINT_HEIGHT="{livre[height]}"',
+            'export EQ_CHANNEL_SATTR_DUMP_IMAGE="{image}"',
+            'export ZEROEQ_SESSION="$SLURM_JOB_ID"',
+            'livre --eq-layout "{livre[eq_layout]}" --volume "{livre[volume]}" '\
+            '--sse "{livre[sse]}" --samples-per-ray "{livre[samples_per_ray]}" '\
+            '--synchronous --animation --frames "{start} {end}" '\
+            '--num-frames "{num_frames}" '\
+            '--camera-position "{livre[camera_position]}" '\
+            '--camera-lookat "{livre[camera_lookat]}" '\
+            '--transfer-function "{livre[transfer_function]}"'
         )).format(**values)
 
         if self.verbose:
