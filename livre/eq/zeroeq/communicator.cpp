@@ -30,6 +30,8 @@
 #include <livre/lib/configuration/ApplicationParameters.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 
+#include <livre/core/data/Histogram.h>
+
 #include <lexis/lexis.h>
 #include <zeroeq/zeroeq.h>
 #include <lunchbox/clock.h>
@@ -72,6 +74,11 @@ public:
     bool publishCamera()
     {
         return _publisher.publish( _getFrameData().getCameraSettings( ));
+    }
+
+    bool publishHistogram( const Histogram& histogram )
+    {
+        return _publisher.publish( histogram );
     }
 
     bool frameDirty()
@@ -211,6 +218,11 @@ void Communicator::publishFrame()
 {
     if( _impl->frameDirty( ))
         _impl->publishFrame();
+}
+
+bool Communicator::publishHistogram( const Histogram& histogram )
+{
+    return _impl->publishHistogram( histogram );
 }
 
 void Communicator::publishCamera()

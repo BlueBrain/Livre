@@ -46,6 +46,11 @@ public:
      */
     TextureDataCache& getTextureDataCache();
 
+    /**
+     * @return The histogram cache.
+     */
+    HistogramCache& getHistogramCache();
+
 private:
     bool configInit( const eq::uint128_t& initId ) final;
     void frameStart(  const eq::uint128_t& frameId,

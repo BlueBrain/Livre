@@ -42,6 +42,7 @@
 
 #include <livre/core/cache/CacheStatistics.h>
 #include <livre/core/data/DataSource.h>
+#include <livre/core/data/Histogram.h>
 #include <livre/core/render/FrameInfo.h>
 #include <livre/core/render/Frustum.h>
 #include <livre/core/visitor/DFSTraversal.h>
@@ -64,9 +65,6 @@ const float farPlane = 15.0f;
 
 struct RedrawFilter : public Filter
 {
-
-public:
-
     explicit RedrawFilter( Channel* channel )
         : _channel( channel )
     {}
@@ -95,6 +93,41 @@ public:
 };
 
 
+struct SendHistogramFilter : public Filter
+{
+    explicit SendHistogramFilter( Channel* channel )
+        : _channel( channel )
+    {}
+
+    ~SendHistogramFilter() {}
+    void execute( const FutureMap& input,
+                  PromiseMap& ) const final
+    {
+        const UniqueFutureMap uniqueInputs( input.getFutures( ));
+        const auto histogram = uniqueInputs.get< Histogram >( "Histogram" );
+        const auto viewport = uniqueInputs.get< Viewport >( "RelativeViewport" );
+        const auto frameCounter =  uniqueInputs.get< uint32_t >( "Id" );
+        const_cast< eq::Config *>( _channel ->getConfig())->sendEvent( HISTOGRAM_DATA )
+                << ( viewport[ 2 ] * viewport[ 3 ])
+                << frameCounter
+                << histogram;
+    }
+
+    DataInfos getInputDataInfos() const final
+    {
+        return
+        {
+            { "Histogram" ,getType< Histogram >() },
+            { "RelativeViewport" ,getType< Viewport >() },
+            { "Id" ,getType< uint32_t >() },
+        };
+    }
+
+    Channel* _channel;
+};
+
+
+
 struct EqRaycastRenderer : public RayCastRenderer
 {
     EqRaycastRenderer( Channel::Impl& channel,
@@ -118,8 +151,9 @@ struct Channel::Impl
 public:
     explicit Impl( Channel* channel )
           : _channel( channel )
-          , _frameInfo( Frustum( Matrix4f(), Matrix4f()), INVALID_FRAME )
+          , _frameInfo( Frustum( Matrix4f(), Matrix4f()), INVALID_FRAME, INVALID_FRAME )
           , _progress( "Loading bricks", 0 )
+          , _frameCounter( INVALID_FRAME )
     {}
 
     void initializeFrame()
@@ -234,7 +268,13 @@ public:
 #endif
     }
 
-    void frameDraw( const eq::uint128_t& )
+    void frameStart( const uint32_t frameCounter )
+    {
+        _drawRange = eq::Range::ALL;
+        _frameCounter = frameCounter;
+    }
+
+    void frameDraw()
     {
 
         const Pipe* pipe = static_cast< Pipe* >( _channel->getPipe( ));
@@ -246,9 +286,12 @@ public:
 
         applyCamera();
         const Frustum& frustum = setupFrustum();
-        _frameInfo = FrameInfo( frustum, frame );
+        _frameInfo = FrameInfo( frustum, frame, _frameCounter );
 
-        const eq::PixelViewport& vp = _channel->getPixelViewport();
+        const eq::PixelViewport& pixVp = _channel->getPixelViewport();
+        _drawRange = _channel->getRange();
+
+        const eq::Viewport& vp = _channel->getViewport();
         _drawRange = _channel->getRange();
 
         const livre::Window* window = static_cast< const livre::Window* >( _channel->getWindow( ));
@@ -258,8 +301,10 @@ public:
         renderPipeline.render( pipe->getFrameData()->getVRParameters(),
                                _frameInfo,
                                {{ _drawRange.start, _drawRange.end }},
-                               PixelViewport( vp.x, vp.y, vp.w, vp.h ),
+                               PixelViewport( pixVp.x, pixVp.y, pixVp.w, pixVp.h ),
+                               Viewport( vp.x, vp.y, vp.w, vp.h ),
                                PipeFilterT< RedrawFilter >( "RedrawFilter", _channel ),
+                               PipeFilterT< SendHistogramFilter >( "SendHistogramFilter", _channel ),
                                *_renderer,
                                _frameInfo.nAvailable,
                                _frameInfo.nNotAvailable );
@@ -546,6 +591,7 @@ public:
 #ifdef LIVRE_USE_ZEROEQ
     zeroeq::Publisher _publisher;
 #endif
+    uint32_t _frameCounter;
 };
 
 void EqRaycastRenderer::_onFrameStart( const Frustum& frustum,
@@ -582,16 +628,16 @@ bool Channel::configExit()
 }
 
 void Channel::frameStart( const eq::uint128_t& frameID,
-                          const uint32_t frameNumber )
+                          const uint32_t frameCounter )
 {
-    _impl->_drawRange = eq::Range::ALL;
-    eq::Channel::frameStart( frameID, frameNumber );
+    _impl->frameStart( frameCounter );
+    eq::Channel::frameStart( frameID, frameCounter );
 }
 
 void Channel::frameDraw( const lunchbox::uint128_t& frameId )
 {
     eq::Channel::frameDraw( frameId );
-    _impl->frameDraw( frameId );
+    _impl->frameDraw();
 }
 
 void Channel::frameViewStart( const uint128_t& frameId )

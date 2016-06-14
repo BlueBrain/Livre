@@ -56,6 +56,12 @@ public:
     LIVRECORE_API bool boxInFrustum( const Boxf &worldBox ) const;
 
     /**
+     * @param worldBox AABB box.
+     * @return the visibility intersection of the box
+     */
+    LIVRECORE_API vmml::Visibility getBoxIntersection( const Boxf& worldBox ) const;
+
+    /**
      * @return The modelview matrix.
      */
     LIVRECORE_API const Matrix4f& getMVMatrix() const;

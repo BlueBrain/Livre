@@ -97,6 +97,11 @@ bool Frustum::boxInFrustum( const Boxf& worldBox ) const
     return _impl->boxInFrustum( worldBox );
 }
 
+vmml::Visibility Frustum::getBoxIntersection( const Boxf& worldBox ) const
+{
+    return _impl->_culler.test( worldBox );
+}
+
 const Matrix4f& Frustum::getMVMatrix() const
 {
     return _impl->_mvMatrix;

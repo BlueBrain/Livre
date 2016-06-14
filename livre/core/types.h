@@ -61,6 +61,7 @@ class EventMapper;
 class Frustum;
 class GLContext;
 class GLSLShaders;
+class Histogram;
 class LODNode;
 class MemoryUnit;
 class NodeId;

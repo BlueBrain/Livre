@@ -37,13 +37,16 @@ public:
     /**
      * Constructor
      * @param textureCache the texture cache
+     * @param histogramCache the histogram cache
      * @param nComputeThreads number of compute threads
      * @param nUploadThreads number of upload threads
      * @param glContext the gl context that will be shared
      */
     RenderPipeline( TextureCache& textureCache,
-                    const size_t nComputeThreads,
-                    const size_t nUploadThreads,
+                    HistogramCache& histogramCache,
+                    size_t nRenderThreads,
+                    size_t nUploadThreads,
+                    size_t nComputeThreads,
                     ConstGLContextPtr glContext );
 
     ~RenderPipeline();
@@ -55,6 +58,7 @@ public:
      * @param dataRange range of the data
      * @param pixelViewPort the view port
      * @param redrawFilter executed on data update
+     * @param sendHistogramFilter executed on histogram computation
      * @param renderer the rendering algorithm
      * @param nAvailable number of available texture blocks
      * @param nNotAvailable number of not available texture blocks
@@ -63,7 +67,9 @@ public:
                  const FrameInfo& frameInfo,
                  const Range& dataRange,
                  const PixelViewport& pixelViewPort,
+                 const Viewport& viewport,
                  const PipeFilter& redrawFilter,
+                 const PipeFilter& sendHistogramFilter,
                  Renderer& renderer,
                  size_t& nAvailable,
                  size_t& nNotAvailable ) const;

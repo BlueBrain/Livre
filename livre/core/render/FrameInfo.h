@@ -31,10 +31,12 @@ namespace livre
 struct FrameInfo
 {
     LIVRECORE_API FrameInfo( const Frustum& frustum,
-                             const uint32_t frameId );
+                             const uint32_t frameId,
+                             const uint32_t frameCounter );
 
     Frustum frustum; //!< The current frustum.
     uint32_t frameId ; //!< The current frame id.
+    uint32_t frameCounter; //!< The incarnation for each rendered frame
 
     size_t nAvailable; //!< Number of available nodes
     size_t nNotAvailable; //!< Number of not available nodes

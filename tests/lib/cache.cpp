@@ -21,9 +21,13 @@
 #include <livre/lib/cache/TextureDataCache.h>
 #include <livre/lib/cache/TextureDataObject.h>
 
+#include <livre/lib/cache/HistogramCache.h>
+#include <livre/lib/cache/HistogramObject.h>
+
 #include <livre/core/cache/CacheStatistics.h>
 #include <livre/core/data/DataSource.h>
 #include <livre/core/data/NodeId.h>
+#include <livre/core/data/Histogram.h>
 #include <livre/core/data/LODNode.h>
 #include <livre/core/data/MemoryUnit.h>
 #include <livre/core/data/VolumeInformation.h>
@@ -33,7 +37,7 @@
 #include <boost/test/unit_test.hpp>
 
 
-const uint32_t BLOCK_SIZE = 32;
+const uint32_t BLOCK_SIZE = 40; // 32 + 2 * 4 voxels is padding
 const uint32_t VOXEL_SIZE_X = 1024;
 const uint32_t VOXEL_SIZE_Y = 1024;
 const uint32_t VOXEL_SIZE_Z = 512;
@@ -74,8 +78,8 @@ BOOST_AUTO_TEST_CASE( testDataCache )
     BOOST_CHECK( dataCache.getCount() == 0 );
     BOOST_CHECK( !constData );
 
-    livre::CacheObjectPtr data = dataCache.load( firstChildNodeId.getId( ));
-    BOOST_CHECK( data->isLoaded( ));
+    livre::CacheObjectPtr dataCacheObject = dataCache.load( firstChildNodeId.getId( ));
+    BOOST_CHECK( dataCacheObject->isLoaded( ));
 
     constData = dataCache.get( livre::INVALID_CACHE_ID );
     BOOST_CHECK( dataCache.getCount() == 1 );
@@ -87,7 +91,7 @@ BOOST_AUTO_TEST_CASE( testDataCache )
     BOOST_CHECK( dataCache.getCount() == 1 );
 
     livre::TextureDataObjectPtr dataObject =
-            std::dynamic_pointer_cast< livre::TextureDataObject >( data );
+            std::dynamic_pointer_cast< livre::TextureDataObject >( dataCacheObject );
 
     BOOST_CHECK( dataObject );
     BOOST_CHECK( dataObject->getSize() == allocSize );
@@ -99,4 +103,21 @@ BOOST_AUTO_TEST_CASE( testDataCache )
     BOOST_CHECK_EQUAL_COLLECTIONS( manual, manual + allocSize,
                                    cached, cached + allocSize );
 
+    livre::HistogramCache histogramCache( 1024, dataCache );
+    livre::CacheObjectPtr histCacheObject = histogramCache.load( firstChildNodeId.getId( ));
+    BOOST_CHECK( histCacheObject->isLoaded( ));
+
+    livre::HistogramObjectPtr histObject =
+            std::dynamic_pointer_cast< livre::HistogramObject >( histCacheObject );
+    const livre::Histogram& histogram = histObject->getHistogram();
+    const uint64_t* bins = histogram.getBins();
+
+    BOOST_CHECK_EQUAL( histogram.getMinIndex(), 0 );
+    BOOST_CHECK_EQUAL( histogram.getMaxIndex(), 17 );
+    BOOST_CHECK_EQUAL( bins[ size_t( histogram.getMaxIndex( )) ], 1u << 24 );
+
+    livre::Histogram hist = histogram;
+    hist += histogram;
+    const uint64_t* binAcc = hist.getBins();
+    BOOST_CHECK_EQUAL( binAcc[ size_t( hist.getMaxIndex( )) ], 1u << 25 );
 }

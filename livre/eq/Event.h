@@ -31,7 +31,8 @@ enum ConfigEventType
     VOLUME_BOUNDING_BOX = eq::Event::USER,
     GRAB_IMAGE,
     VOLUME_FRAME_RANGE,
-    REDRAW
+    REDRAW,
+    HISTOGRAM_DATA
 };
 
 }

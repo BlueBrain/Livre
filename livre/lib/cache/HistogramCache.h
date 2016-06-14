@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -17,25 +17,44 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/core/data/LODNodeTrait.h>
-#include <livre/core/data/LODNode.h>
+#ifndef _HistogramCache_h_
+#define _HistogramCache_h_
+
+#include <livre/lib/api.h>
+#include <livre/lib/types.h>
+
+#include <livre/core/cache/Cache.h>
 
 namespace livre
 {
 
-LODNodeTrait::LODNodeTrait()
+/**
+ * The HistogramCache class stores the histogram per block
+ */
+class HistogramCache : public Cache
 {
-    lodNodePtr_.reset( new LODNode() );
-}
+public:
+    /**
+     * @param maxMemBytes Maximum data memory
+     * @param dataCache the data cache to read histogram from.
+     */
+    LIVRE_API HistogramCache( size_t maxMemBytes,
+                              const TextureDataCache& dataCache );
 
-LODNodeTrait::LODNodeTrait( ConstLODNodePtr lodNodePtr )
-    : lodNodePtr_( lodNodePtr )
-{
-}
+    ~HistogramCache();
 
-ConstLODNodePtr LODNodeTrait::getLODNode() const
-{
-    return lodNodePtr_;
-}
+    /**
+     * @return the data cache
+     */
+    LIVRE_API const TextureDataCache& getDataCache() const;
+
+private:
+
+    CacheObject* _generate( const CacheId& cacheId );
+
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
+};
 
 }
+#endif //_HistogramCache_h_

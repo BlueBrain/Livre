@@ -7,6 +7,7 @@
 
 set(LIVRECORE_PUBLIC_HEADERS
   data/LODNode.h
+  data/Histogram.h
   data/NodeId.h
   data/MemoryUnit.h
   data/DataSourcePlugin.h
@@ -66,6 +67,7 @@ set(LIVRECORE_SOURCES
   configuration/Configuration.cpp
   configuration/Parameters.cpp
   data/LODNode.cpp
+  data/Histogram.cpp
   data/MemoryUnit.cpp
   data/NodeId.cpp
   data/DataSource.cpp
