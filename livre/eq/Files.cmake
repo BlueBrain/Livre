@@ -39,10 +39,15 @@ set(LIVREEQ_SOURCES
   Node.cpp
   Pipe.cpp
   render/EqContext.cpp
-  render/RayCastRenderer.cpp
   settings/CameraSettings.cpp
   settings/FrameSettings.cpp
   settings/RenderSettings.cpp
   settings/VolumeSettings.cpp
   Window.cpp
   )
+
+if(APPLE)
+    list(APPEND LIVREEQ_SOURCES render/RayCastRendererGL2.cpp)
+else()
+    list(APPEND LIVREEQ_SOURCES render/RayCastRenderer.cpp)
+endif()

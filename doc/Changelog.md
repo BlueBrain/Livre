@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # master {#master}
 
+* [#303](https://github.com/BlueBrain/Livre/pull/303):
+  Old renderer is revived for OSX. Fix #296
 * [#256](https://github.com/BlueBrain/Livre/pull/256):
   A new architecture for loading data, executing rendering
   is implemented. There are preformance gains 2x to 10x
