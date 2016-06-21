@@ -97,21 +97,16 @@ public:
         , dataFrameRange( INVALID_FRAME_RANGE )
     {}
 
-    void gatherHistogram( const float area, const uint32_t id, const Histogram& histogram )
+    void gatherHistogram( const Histogram& histogram, const float area, const uint32_t currentId )
     {
-        std::cout << histogram << std::endl;
-
-        ViewHistogram viewHistogram( histogram, area, id );
-
         const uint32_t oldestId = histogramQueue.empty() ? -1u :
                                   histogramQueue.back().id;
-
-        const uint32_t currentId = viewHistogram.id;
 
         // If we get a very old frame skip it
         if( oldestId != -1u && currentId < oldestId )
             return;
 
+        const ViewHistogram viewHistogram( histogram, area, currentId );
         auto it = histogramQueue.begin();
         while( it != histogramQueue.end( ))
         {
@@ -143,7 +138,7 @@ public:
             ++it;
         }
 
-        if( histogramQueue.empty() && !viewHistogram.isComplete( ))
+       if( histogramQueue.empty() && !viewHistogram.isComplete( ))
         {
             histogramQueue.push_back( viewHistogram );
             return;
@@ -520,10 +515,10 @@ bool Config::handleEvent( eq::EventICommand command )
 #ifdef LIVRE_USE_ZEROEQ
     case HISTOGRAM_DATA:
     {
+        const Histogram& histogram = command.read< Histogram >();
         const float area = command.read< float >();
         const uint32_t id = command.read< uint32_t>();
-        const Histogram& histogram = command.read< Histogram >();
-        _impl->gatherHistogram( area, id, histogram );
+        _impl->gatherHistogram( histogram, area, id );
         return false;
     }
 #endif

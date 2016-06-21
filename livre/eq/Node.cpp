@@ -59,7 +59,8 @@ public:
         _textureDataCache.reset( new TextureDataCache( maxMemBytes,
                                                        *_dataSource.get(),
                                                        GL_UNSIGNED_BYTE ));
-        const size_t histCacheSize = 128 * LB_1MB; // Histogram cache is 128 MB
+        const size_t histCacheSize =
+                32 * LB_1MB; // Histogram cache is 32 MB. Can hold approx 16k hists
         _histogramCache.reset( new HistogramCache( histCacheSize,
                                                    *_textureDataCache ));
     }

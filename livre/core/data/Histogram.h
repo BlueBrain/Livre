@@ -49,24 +49,25 @@ public:
      * Computes the addition of two histograms and modifies the object
      * @param histogram is the histogram to add
      * @return the modified histogram
-     * @throw std::logic_error if ids of histograms does not match
      */
     LIVRECORE_API Histogram& operator+=( const Histogram& histogram );
 
     /**
      * Queries uniformity of the data. ( If histogram has only one value )
-     * @param uniformIndex is set with unfiorm index if data is uniform
-     * @return true data is composed of uniform values
+     * @param uniformIndex is set when only one bin has all the data
+     * @return true data has only one bin filled.
      */
     LIVRECORE_API bool isUniform( size_t& uniformIndex ) const;
 
     /**
-     * @return the index with the minimum value
+     * @return the index with the minimum value ( if there are multiple indices for
+     * min value, the smallest index is returned )
      */
     LIVRECORE_API size_t getMinIndex() const;
 
     /**
-     * @return the index with the maximum value
+     * @return the index with the maximum value ( if there are multiple indices for
+     * max value, the smallest index is returned )
      */
     LIVRECORE_API size_t getMaxIndex() const;
 

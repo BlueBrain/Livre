@@ -108,9 +108,9 @@ struct SendHistogramFilter : public Filter
         const auto viewport = uniqueInputs.get< Viewport >( "RelativeViewport" );
         const auto frameCounter =  uniqueInputs.get< uint32_t >( "Id" );
         const_cast< eq::Config *>( _channel ->getConfig())->sendEvent( HISTOGRAM_DATA )
+                << histogram
                 << ( viewport[ 2 ] * viewport[ 3 ])
-                << frameCounter
-                << histogram;
+                << frameCounter;
     }
 
     DataInfos getInputDataInfos() const final
@@ -125,8 +125,6 @@ struct SendHistogramFilter : public Filter
 
     Channel* _channel;
 };
-
-
 
 struct EqRaycastRenderer : public RayCastRenderer
 {
@@ -276,7 +274,6 @@ public:
 
     void frameDraw()
     {
-
         const Pipe* pipe = static_cast< Pipe* >( _channel->getPipe( ));
         const uint32_t frame =
                 pipe->getFrameData()->getFrameSettings().getFrameNumber();
@@ -630,8 +627,8 @@ bool Channel::configExit()
 void Channel::frameStart( const eq::uint128_t& frameID,
                           const uint32_t frameCounter )
 {
-    _impl->frameStart( frameCounter );
     eq::Channel::frameStart( frameID, frameCounter );
+    _impl->frameStart( frameCounter );
 }
 
 void Channel::frameDraw( const lunchbox::uint128_t& frameId )

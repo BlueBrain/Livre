@@ -106,7 +106,7 @@ struct HistogramFilter::Impl
                     continue;
                 }
 
-                const vmml::Visibility result = frustum.getBoxIntersection( lodNode.getWorldBox( ));
+                const vmml::Visibility result = frustum.getBoxVisibility( lodNode.getWorldBox( ));
                 switch( result )
                 {
                     case vmml::VISIBILITY_PARTIAL:

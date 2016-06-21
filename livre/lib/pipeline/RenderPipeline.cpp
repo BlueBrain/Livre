@@ -145,7 +145,7 @@ struct RenderPipeline::Impl
         histogramFilter.connect( "Histogram", sendHistogramFilter, "Histogram" );
         histogramFilter.getPromise( "RelativeViewport" ).set( viewport );
         sendHistogramFilter.getPromise( "RelativeViewport" ).set( viewport );
-        sendHistogramFilter.getPromise( "Id" ).set( frameInfo.frameCounter );
+        sendHistogramFilter.getPromise( "Id" ).set( frameInfo.id );
 
         Pipeline renderPipeline;
         Pipeline uploadPipeline;

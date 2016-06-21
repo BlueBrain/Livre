@@ -62,10 +62,20 @@ Histogram& Histogram::operator+=( const Histogram& histogram )
 
 bool Histogram::isUniform( size_t& uniformIndex ) const
 {
-    const bool uniform = getMinIndex() == getMaxIndex();
-    if( uniform )
-        uniformIndex = getMinIndex();
-    return uniform;
+    const uint64_t* bins = getBins();
+    size_t nonZeroCount = 0;
+    for( size_t i = 0; i < binCount; ++i )
+    {
+        if( bins[ i ] > 0 )
+        {
+            uniformIndex = i;
+            ++nonZeroCount;
+        }
+
+        if( nonZeroCount > 1 )
+            break;
+    }
+    return nonZeroCount == 1 ;
 }
 
 size_t Histogram::getMinIndex() const

@@ -57,9 +57,9 @@ public:
 
     /**
      * @param worldBox AABB box.
-     * @return the visibility intersection of the box
+     * @return the visibility intersection type of the box
      */
-    LIVRECORE_API vmml::Visibility getBoxIntersection( const Boxf& worldBox ) const;
+    LIVRECORE_API vmml::Visibility getBoxVisibility( const Boxf& worldBox ) const;
 
     /**
      * @return The modelview matrix.

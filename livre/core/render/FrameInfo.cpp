@@ -24,10 +24,10 @@ namespace livre
 
 FrameInfo::FrameInfo( const Frustum& frustum_,
                       const uint32_t frameId_,
-                      const uint32_t frameCounter_ )
+                      const uint32_t id_ )
     : frustum( frustum_ )
     , frameId( frameId_ )
-    , frameCounter( frameCounter_ )
+    , id( id_ )
     , nAvailable( 0 )
     , nNotAvailable( 0 )
 {
