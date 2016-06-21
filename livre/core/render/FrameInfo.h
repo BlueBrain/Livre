@@ -37,10 +37,28 @@ struct FrameInfo
     Frustum frustum; //!< The current frustum.
     uint32_t frameId ; //!< The current frame id for livre data sources.
     uint32_t id; //!< The unique id for each rendered frame
+};
+
+
+/** Keeps the number information of avalibility of the nodes in cache */
+struct NodeAvailability
+{
+    LIVRECORE_API NodeAvailability()
+     : nAvailable( 0 )
+     , nNotAvailable( 0 )
+    {}
+
+    LIVRECORE_API NodeAvailability& operator+=( const NodeAvailability& na )
+    {
+        nAvailable += na.nAvailable;
+        nNotAvailable += na.nNotAvailable;
+        return *this;
+    }
 
     size_t nAvailable; //!< Number of available nodes
     size_t nNotAvailable; //!< Number of not available nodes
 };
+
 }
 
 #endif

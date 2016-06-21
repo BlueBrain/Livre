@@ -104,12 +104,12 @@ struct SendHistogramFilter : public Filter
                   PromiseMap& ) const final
     {
         const UniqueFutureMap uniqueInputs( input.getFutures( ));
-        const auto histogram = uniqueInputs.get< Histogram >( "Histogram" );
-        const auto viewport = uniqueInputs.get< Viewport >( "RelativeViewport" );
+        const auto& histogram = uniqueInputs.get< Histogram >( "Histogram" );
+        const auto& viewport = uniqueInputs.get< Viewport >( "RelativeViewport" );
         const auto frameCounter =  uniqueInputs.get< uint32_t >( "Id" );
         const_cast< eq::Config *>( _channel ->getConfig())->sendEvent( HISTOGRAM_DATA )
                 << histogram
-                << ( viewport[ 2 ] * viewport[ 3 ])
+                << ( viewport[ 2 ] * viewport[ 3 ]) // area of the viewport ( w * h )
                 << frameCounter;
     }
 
@@ -119,7 +119,7 @@ struct SendHistogramFilter : public Filter
         {
             { "Histogram" ,getType< Histogram >() },
             { "RelativeViewport" ,getType< Viewport >() },
-            { "Id" ,getType< uint32_t >() },
+            { "Id" ,getType< uint32_t >() }
         };
     }
 
@@ -303,8 +303,7 @@ public:
                                PipeFilterT< RedrawFilter >( "RedrawFilter", _channel ),
                                PipeFilterT< SendHistogramFilter >( "SendHistogramFilter", _channel ),
                                *_renderer,
-                               _frameInfo.nAvailable,
-                               _frameInfo.nNotAvailable );
+                               _availability );
     }
 
     void applyCamera()
@@ -350,11 +349,11 @@ public:
         }
 
 #ifdef LIVRE_USE_ZEROEQ
-        const size_t all = _frameInfo.nAvailable + _frameInfo.nNotAvailable;
+        const size_t all = _availability.nAvailable + _availability.nNotAvailable;
         if( all > 0 )
         {
             _progress.restart( all );
-            _progress += _frameInfo.nAvailable;
+            _progress += _availability.nAvailable;
             _publisher.publish( _progress );
         }
 #endif
@@ -375,8 +374,8 @@ public:
         glMatrixMode( GL_MODELVIEW );
 
         livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
-        const size_t all = _frameInfo.nAvailable + _frameInfo.nNotAvailable;
-        const size_t missing = _frameInfo.nNotAvailable;
+        const size_t all = _availability.nAvailable + _availability.nNotAvailable;
+        const size_t missing = _availability.nNotAvailable;
         const float done = all > 0 ? float( all - missing ) / float( all ) : 0;
         Window* window = static_cast< Window* >( _channel->getWindow( ));
 
@@ -583,6 +582,7 @@ public:
     eq::Frame _frame;
     FrameGrabber _frameGrabber;
     FrameInfo _frameInfo;
+    NodeAvailability _availability;
     std::unique_ptr< RayCastRenderer > _renderer;
     ::lexis::data::Progress _progress;
 #ifdef LIVRE_USE_ZEROEQ

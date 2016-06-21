@@ -25,6 +25,8 @@
 #include <livre/core/pipeline/Workers.h>
 #include <livre/core/pipeline/PortData.h>
 
+#include <livre/core/render/FrameInfo.h>
+
 namespace livre
 {
 
@@ -66,14 +68,14 @@ struct RenderingSetGenerator
     }
 
     ConstCacheObjects generateRenderingSet( const NodeIds& visibles,
-                                            size_t& nAvailable,
-                                            size_t& nNotAvailable ) const
+                                            NodeAvailability& availability ) const
     {
         ConstCacheMap cacheMap;
         for( const NodeId& nodeId : visibles )
         {
             collectLoadedTextures( nodeId, cacheMap );
-            cacheMap.count( nodeId.getId( )) > 0 ? ++nAvailable : ++nNotAvailable;
+            cacheMap.count( nodeId.getId( )) > 0 ?
+                        ++availability.nAvailable : ++availability.nNotAvailable;
         }
 
         if( visibles.size() != cacheMap.size( ))
@@ -121,25 +123,21 @@ struct RenderingSetGeneratorFilter::Impl
 
         ConstCacheObjects cacheObjects;
         size_t nVisible = 0;
-        size_t nAvailable = 0;
-        size_t nNotAvailable = 0;
+        NodeAvailability cumulativeAvailability;
         for( const auto& visibles: input.get< NodeIds >( "VisibleNodes" ))
         {
-            size_t available = 0;
-            size_t notAvailable = 0;
+            NodeAvailability avaliability;
             const ConstCacheObjects& objs = renderSetGenerator.generateRenderingSet( visibles,
-                                                                                     available,
-                                                                                     notAvailable );
+                                                                                     avaliability );
             cacheObjects.insert( cacheObjects.end(), objs.begin(), objs.end( ));
             nVisible += visibles.size();
-            nAvailable += available;
-            nNotAvailable += notAvailable;
+            cumulativeAvailability += avaliability;
         }
 
         output.set( "CacheObjects", cacheObjects );
         output.set( "RenderingDone", cacheObjects.size() == nVisible );
-        output.set( "AvailableCount", nAvailable );
-        output.set( "NotAvailableCount", nNotAvailable );
+        output.set( "NodeAvailability",  cumulativeAvailability );
+
     }
 
     DataInfos getInputDataInfos() const
@@ -156,8 +154,7 @@ struct RenderingSetGeneratorFilter::Impl
         {
             { "CacheObjects", getType< ConstCacheObjects >( )},
             { "RenderingDone", getType< bool >() },
-            { "AvailableCount", getType< size_t >() },
-            { "NotAvailableCount", getType< size_t >() },
+            { "NodeAvailability", getType< NodeAvailability >() },
         };
     }
 

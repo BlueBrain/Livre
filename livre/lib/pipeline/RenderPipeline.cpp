@@ -30,6 +30,8 @@
 #include <livre/core/pipeline/SimpleExecutor.h>
 #include <livre/core/pipeline/Pipeline.h>
 
+#include <livre/core/render/FrameInfo.h>
+
 namespace livre
 {
 
@@ -136,8 +138,7 @@ struct RenderPipeline::Impl
                  PipeFilter redrawFilter,
                  PipeFilter sendHistogramFilter,
                  Renderer& renderer,
-                 size_t& nAvailable,
-                 size_t& nNotAvailable ) const
+                 NodeAvailability& availability ) const
     {
         PipeFilterT< RenderFilter > renderFilter( "RenderFilter", _dataSource, renderer );
         PipeFilterT< HistogramFilter > histogramFilter( "HistogramFilter", _histogramCache );
@@ -186,8 +187,8 @@ struct RenderPipeline::Impl
         if( vrParams.getSynchronousMode( ))
         {
             const UniqueFutureMap futures( visibleSetGenerator.getPostconditions( ));
-            nAvailable = futures.get< NodeIds >( "VisibleNodes" ).size();
-            nNotAvailable = 0;
+            availability.nAvailable = futures.get< NodeIds >( "VisibleNodes" ).size();
+            availability.nNotAvailable = 0;
         }
         else
         {
@@ -196,8 +197,7 @@ struct RenderPipeline::Impl
                         renderPipeline.getExecutable( "RenderingSetGenerator" ));
 
             const UniqueFutureMap futures( renderingSetGenerator.getPostconditions( ));
-            nAvailable = futures.get< size_t >( "AvailableCount" );
-            nNotAvailable = futures.get< size_t >( "NotAvailableCount" );
+            availability = futures.get< NodeAvailability >( "NodeAvailability" );
         }
     }
 
@@ -235,8 +235,7 @@ void RenderPipeline::render( const VolumeRendererParameters& vrParams,
                              const PipeFilter& redrawFilter,
                              const PipeFilter& sendHistogramFilter,
                              Renderer& renderer,
-                             size_t& nAvailable,
-                             size_t& nNotAvailable ) const
+                             NodeAvailability& avaibility ) const
 {
     _impl->render( vrParams,
                    frameInfo,
@@ -246,8 +245,7 @@ void RenderPipeline::render( const VolumeRendererParameters& vrParams,
                    redrawFilter,
                    sendHistogramFilter,
                    renderer,
-                   nAvailable,
-                   nNotAvailable );
+                   avaibility );
 }
 
 }

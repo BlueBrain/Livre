@@ -60,8 +60,7 @@ public:
      * @param redrawFilter executed on data update
      * @param sendHistogramFilter executed on histogram computation
      * @param renderer the rendering algorithm
-     * @param nAvailable number of available texture blocks
-     * @param nNotAvailable number of not available texture blocks
+     * @param availability the number of available and not available nodes are written
      */
     void render( const VolumeRendererParameters& vrParams,
                  const FrameInfo& frameInfo,
@@ -71,8 +70,7 @@ public:
                  const PipeFilter& redrawFilter,
                  const PipeFilter& sendHistogramFilter,
                  Renderer& renderer,
-                 size_t& nAvailable,
-                 size_t& nNotAvailable ) const;
+                 NodeAvailability& avaibility ) const;
 private:
 
     struct Impl;
