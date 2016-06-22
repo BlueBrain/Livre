@@ -38,15 +38,10 @@ public:
      * Constructor
      * @param textureCache the texture cache
      * @param histogramCache the histogram cache
-     * @param nComputeThreads number of compute threads
-     * @param nUploadThreads number of upload threads
      * @param glContext the gl context that will be shared
      */
     RenderPipeline( TextureCache& textureCache,
                     HistogramCache& histogramCache,
-                    size_t nRenderThreads,
-                    size_t nUploadThreads,
-                    size_t nComputeThreads,
                     ConstGLContextPtr glContext );
 
     ~RenderPipeline();

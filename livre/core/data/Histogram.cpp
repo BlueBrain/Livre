@@ -22,12 +22,8 @@
 namespace livre
 {
 
-const size_t Histogram::binCount = 256;
-
 Histogram::Histogram()
-{
-    std::memset( getBins(), 0, sizeof( uint64_t ) * binCount );
-}
+{}
 
 Histogram::Histogram( const Histogram& histogram )
     : co::Distributable< ::lexis::render::Histogram >( histogram )
@@ -43,9 +39,7 @@ Histogram& Histogram::operator=( const Histogram& histogram )
     if( this == &histogram )
         return *this;
 
-    const uint64_t* srcBins = histogram.getBins();
-    uint64_t* bins = getBins();
-    std::memcpy( bins, srcBins, sizeof( uint64_t) * binCount );
+    static_cast< ::lexis::render::Histogram& >( *this ) = histogram;
     return *this;
 }
 
@@ -54,17 +48,17 @@ Histogram& Histogram::operator+=( const Histogram& histogram )
     const uint64_t* srcBins = histogram.getBins();
 
     uint64_t* bins = getBins();
-    for( size_t i = 0; i < binCount; ++i )
+    for( size_t i = 0; i < getBinsSize(); ++i )
         bins[ i ] += srcBins[ i ];
 
     return *this;
 }
 
-bool Histogram::isUniform( size_t& uniformIndex ) const
+bool Histogram::isDataUniform( size_t& uniformIndex ) const
 {
     const uint64_t* bins = getBins();
     size_t nonZeroCount = 0;
-    for( size_t i = 0; i < binCount; ++i )
+    for( size_t i = 0; i < getBinsSize(); ++i )
     {
         if( bins[ i ] > 0 )
         {
@@ -81,13 +75,13 @@ bool Histogram::isUniform( size_t& uniformIndex ) const
 size_t Histogram::getMinIndex() const
 {
     const uint64_t* bins = getBins();
-    return std::distance( bins, std::min_element( bins, bins + binCount ));
+    return std::distance( bins, std::min_element( bins, bins + getBinsSize( )));
 }
 
 size_t Histogram::getMaxIndex() const
 {
     const uint64_t* bins = getBins();
-    return std::distance( bins, std::max_element( bins, bins + binCount ));
+    return std::distance( bins, std::max_element( bins, bins + getBinsSize( )));
 }
 
 std::ostream& operator<<( std::ostream& os, const Histogram& histogram )
@@ -97,7 +91,7 @@ std::ostream& operator<<( std::ostream& os, const Histogram& histogram )
        << std::endl;
 
     const uint64_t* data = histogram.getBins();
-    for( size_t i = 0; i < Histogram::binCount; ++i )
+    for( size_t i = 0; i < histogram.getBinsSize(); ++i )
         os << data[ i ] << " ";
     os << std::endl;
     return os;

@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE( testDataCache )
     BOOST_CHECK( dataCache.getCount() == 0 );
     BOOST_CHECK( !constData );
 
-    livre::CacheObjectPtr dataCacheObject = dataCache.load( firstChildNodeId.getId( ));
+    livre::ConstCacheObjectPtr dataCacheObject = dataCache.load( firstChildNodeId.getId( ));
     BOOST_CHECK( dataCacheObject->isLoaded( ));
 
     constData = dataCache.get( livre::INVALID_CACHE_ID );
@@ -87,11 +87,11 @@ BOOST_AUTO_TEST_CASE( testDataCache )
 
     // get() on cache returns already loaded data
     constData = dataCache.get( firstChildNodeId.getId( ));
-    BOOST_CHECK( constData->isLoaded( ));
+    BOOST_CHECK( constData && constData->isLoaded( ));
     BOOST_CHECK( dataCache.getCount() == 1 );
 
-    livre::TextureDataObjectPtr dataObject =
-            std::dynamic_pointer_cast< livre::TextureDataObject >( dataCacheObject );
+    livre::ConstTextureDataObjectPtr dataObject =
+            std::dynamic_pointer_cast< const livre::TextureDataObject >( dataCacheObject );
 
     BOOST_CHECK( dataObject );
     BOOST_CHECK( dataObject->getSize() == allocSize );
@@ -104,11 +104,11 @@ BOOST_AUTO_TEST_CASE( testDataCache )
                                    cached, cached + allocSize );
 
     livre::HistogramCache histogramCache( 1024, dataCache );
-    livre::CacheObjectPtr histCacheObject = histogramCache.load( firstChildNodeId.getId( ));
+    livre::ConstCacheObjectPtr histCacheObject = histogramCache.load( firstChildNodeId.getId( ));
     BOOST_CHECK( histCacheObject->isLoaded( ));
 
-    livre::HistogramObjectPtr histObject =
-            std::dynamic_pointer_cast< livre::HistogramObject >( histCacheObject );
+    livre::ConstHistogramObjectPtr histObject =
+            std::dynamic_pointer_cast< const livre::HistogramObject >( histCacheObject );
     const livre::Histogram& histogram = histObject->getHistogram();
     const uint64_t* bins = histogram.getBins();
 

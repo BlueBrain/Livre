@@ -54,9 +54,9 @@ public:
      * Loads the object to cache. If object is not in the cache it is created.
      * @param cacheId The object cache id to be loaded.
      * @return the loaded or previously loaded cache object. Return empty pointer
-     * if cache id is invalid
+     * if cache id is invalid or object cannot be loaded.
      */
-    LIVRECORE_API CacheObjectPtr load( const CacheId& cacheId );
+    LIVRECORE_API ConstCacheObjectPtr load( const CacheId& cacheId );
 
     /**
      * Unloads the object from the memory, if there are not any references. The

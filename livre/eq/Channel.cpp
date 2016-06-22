@@ -117,9 +117,9 @@ struct SendHistogramFilter : public Filter
     {
         return
         {
-            { "Histogram" ,getType< Histogram >() },
-            { "RelativeViewport" ,getType< Viewport >() },
-            { "Id" ,getType< uint32_t >() }
+            { "Histogram", getType< Histogram >() },
+            { "RelativeViewport", getType< Viewport >() },
+            { "Id", getType< uint32_t >() }
         };
     }
 
@@ -266,12 +266,6 @@ public:
 #endif
     }
 
-    void frameStart( const uint32_t frameCounter )
-    {
-        _drawRange = eq::Range::ALL;
-        _frameCounter = frameCounter;
-    }
-
     void frameDraw()
     {
         const Pipe* pipe = static_cast< Pipe* >( _channel->getPipe( ));
@@ -283,7 +277,7 @@ public:
 
         applyCamera();
         const Frustum& frustum = setupFrustum();
-        _frameInfo = FrameInfo( frustum, frame, _frameCounter );
+        _frameInfo = FrameInfo( frustum, frame, pipe->getCurrentFrame( ));
 
         const eq::PixelViewport& pixVp = _channel->getPixelViewport();
         _drawRange = _channel->getRange();
@@ -628,7 +622,7 @@ void Channel::frameStart( const eq::uint128_t& frameID,
                           const uint32_t frameCounter )
 {
     eq::Channel::frameStart( frameID, frameCounter );
-    _impl->frameStart( frameCounter );
+    _impl->_drawRange = eq::Range::ALL;
 }
 
 void Channel::frameDraw( const lunchbox::uint128_t& frameId )

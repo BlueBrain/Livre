@@ -99,11 +99,8 @@ public:
 
     void gatherHistogram( const Histogram& histogram, const float area, const uint32_t currentId )
     {
-        const uint32_t oldestId = histogramQueue.empty() ? -1u :
-                                  histogramQueue.back().id;
-
-        // If we get a very old frame skip it
-        if( oldestId != -1u && currentId < oldestId )
+      // If we get a very old frame skip it
+        if( !histogramQueue.empty() && currentId < histogramQueue.back().id )
             return;
 
         const ViewHistogram viewHistogram( histogram, area, currentId );

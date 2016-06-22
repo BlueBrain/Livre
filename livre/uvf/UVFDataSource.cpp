@@ -245,7 +245,7 @@ public:
     MemoryUnitPtr tuvokBrickToMemoryUnit( const LODNode& node,
                                            const uint32_t brickIndex ) const
     {
-        const uint32_t frame = node.getNodeId().getFrame();
+        const uint32_t frame = node.getNodeId().getTimeStep();
         const tuvok::BrickKey brickKey =
                 tuvok::BrickKey( frame, treeLevelToTuvokLevel(
                                             node.getRefLevel( )), brickIndex );
@@ -299,7 +299,7 @@ public:
 
     LODNode internalNodeToLODNode( const NodeId& internalNode ) const
     {
-        const uint32_t frame = internalNode.getFrame();
+        const uint32_t frame = internalNode.getTimeStep();
         const uint32_t lod = treeLevelToTuvokLevel( internalNode.getLevel() );
         const UINTVECTOR3& tuvokBricksInLod =
                 _uvfDataSetPtr->GetBrickLayout( lod, frame );

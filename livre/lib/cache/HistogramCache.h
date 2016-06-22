@@ -29,7 +29,7 @@ namespace livre
 {
 
 /**
- * The HistogramCache class stores the histogram per block
+ * The HistogramCache class stores the histogram per node in the LOD octree
  */
 class HistogramCache : public Cache
 {

@@ -28,10 +28,9 @@
 
 namespace livre
 {
-
 namespace
 {
-const float infinite = 100000.0f;
+const float infinite = std::numeric_limits< float >::max();
 }
 
 struct HistogramFilter::Impl
@@ -44,8 +43,7 @@ struct HistogramFilter::Impl
 
     bool isCenterInViewport( const Frustum& frustum,
                              const Boxf& worldBox,
-                             const Vector3f& minNdc = Vector3f( -1.0f ),
-                             const Vector3f& maxNdc = Vector3f( 1.0f )) const
+                             const Viewport& viewport ) const
     {
         Vector4f center = worldBox.getCenter();
         center[ 3 ] = 1.0;
@@ -53,17 +51,13 @@ struct HistogramFilter::Impl
         Vector4f mvpCenter = frustum.getMVPMatrix() * center;
         Vector3f mvpCenterHom = mvpCenter / mvpCenter[ 3 ];
 
-        const Boxf ndcCube( minNdc, maxNdc );
-        return ndcCube.isIn( mvpCenterHom );
-    }
+        const bool isNegXBorder = viewport[ 0 ] == 0.0f; // left
+        const bool isPosXBorder = viewport[ 0 ] + viewport[ 2 ] == 1.0f; // left + width
+        const bool isNegYBorder = viewport[ 1 ] == 0.0f; // top
+        const bool isPosYBorder = viewport[ 1 ] + viewport[ 3 ] == 1.0f; // top + height
 
-    void scaleNdcIfBorder( const Viewport& border, Vector3f& minBox, Vector3f& maxBox ) const
-    {
-        const bool isNegXBorder = border.x() == 0.0f;
-        const bool isPosXBorder = border.x() + border.z() == 1.0f;
-        const bool isNegYBorder = border.y() == 0.0f;
-        const bool isPosYBorder = border.y() + border.w() == 1.0f;
-
+        Vector3f minBox( -1.0f );
+        Vector3f maxBox( 1.0f );
         if( isNegXBorder )
             minBox[ 0 ] = -infinite;
         if( isPosXBorder )
@@ -72,6 +66,12 @@ struct HistogramFilter::Impl
             minBox[ 1 ] = -infinite;
         if( isPosYBorder )
             maxBox[ 1 ] = infinite;
+
+        minBox[ 2 ] = -infinite;
+        maxBox[ 2 ] = infinite;
+
+        const Boxf ndcCube( minBox, maxBox );
+        return ndcCube.isIn( mvpCenterHom );
     }
 
     void execute( const FutureMap& input, PromiseMap& output ) const
@@ -85,7 +85,7 @@ struct HistogramFilter::Impl
             {
                 const CacheId& cacheId = cacheObject->getId();
                 ConstCacheObjectPtr histCacheObject = _histogramCache.load( cacheId );
-                if( !histCacheObject->isLoaded( ))
+                if( !histCacheObject )
                     continue;
 
                 const ConstHistogramObjectPtr& histogramObj =
@@ -94,35 +94,13 @@ struct HistogramFilter::Impl
 
                 // When a frame is rendered in multi-channel, multi-node, etc
                 // config, some nodes are rendered twice in sort-first renderings
-                // To avoid that, we check whether the center of the node is in
-                // frustum or, if node is in the viewport border. To do this we
-                // project the center of the node to the normalized device coordinates
-                // (NDC), in case of partial intersection we extend the borders of
-                // NDC in border directions
+                // To avoid counting nodes twice, we check if the center of the node is in
+                // this frustum (because it can only be in one tile at a time). For viewports
+                // on the border of the absolute viewport, the frustum is virtually extended
+                // to infinity on the boundary.
                 const LODNode& lodNode = _dataSource.getNode( NodeId( cacheId ));
-                if( isCenterInViewport( frustum, lodNode.getWorldBox( )))
-                {
+                if( isCenterInViewport( frustum, lodNode.getWorldBox( ), viewport))
                     histogramAccumulated += histogramObj->getHistogram();
-                    continue;
-                }
-
-                const vmml::Visibility result = frustum.getBoxVisibility( lodNode.getWorldBox( ));
-                switch( result )
-                {
-                    case vmml::VISIBILITY_PARTIAL:
-                    {
-                        Vector3f minBox( -1.0f, -1.0f, -infinite );
-                        Vector3f maxBox( 1.0f, 1.0f, infinite );
-                        scaleNdcIfBorder( viewport, minBox, maxBox );
-                        if( isCenterInViewport( frustum, lodNode.getWorldBox( ), minBox, maxBox ))
-                            histogramAccumulated += histogramObj->getHistogram();
-                    }
-                    break;
-                    case vmml::VISIBILITY_FULL:
-                    case vmml::VISIBILITY_NONE:
-                    default:
-                        break;
-                }
             }
 
         output.set( "Histogram", histogramAccumulated );

@@ -57,7 +57,7 @@ public:
      * @param uniformIndex is set when only one bin has all the data
      * @return true data has only one bin filled.
      */
-    LIVRECORE_API bool isUniform( size_t& uniformIndex ) const;
+    LIVRECORE_API bool isDataUniform( size_t& uniformIndex ) const;
 
     /**
      * @return the index with the minimum value ( if there are multiple indices for
@@ -70,11 +70,6 @@ public:
      * max value, the smallest index is returned )
      */
     LIVRECORE_API size_t getMaxIndex() const;
-
-    /**
-     * @return the bin count.
-     */
-    static const size_t binCount;
 };
 
 /** Outputs the histogram information */

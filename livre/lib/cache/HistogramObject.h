@@ -44,7 +44,7 @@ private:
     friend class HistogramCache;
 
     HistogramObject( const CacheId& cacheId,
-                     const HistogramCache& dataCache );
+                     const HistogramCache& histogramCache );
 
     size_t _getSize() const;
     bool _load() final;

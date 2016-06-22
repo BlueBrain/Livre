@@ -105,7 +105,7 @@ struct Cache::Impl
         }
     }
 
-    CacheObjectPtr load( const CacheId& cacheId )
+    ConstCacheObjectPtr load( const CacheId& cacheId )
     {
         WriteLock writeLock( _mutex );
         CacheObjectPtr obj = getFromMap( cacheId );
@@ -125,7 +125,7 @@ struct Cache::Impl
             return obj;
         }
 
-        return CacheObjectPtr();
+        return ConstCacheObjectPtr();
     }
 
     bool unloadFromCache( const CacheId& cacheId )
@@ -210,10 +210,10 @@ Cache::Cache( const std::string& name, const size_t maxMemBytes )
 Cache::~Cache()
 {}
 
-CacheObjectPtr Cache::load( const CacheId& cacheId )
+ConstCacheObjectPtr Cache::load( const CacheId& cacheId )
 {
     if( cacheId == INVALID_CACHE_ID )
-        return CacheObjectPtr();
+        return ConstCacheObjectPtr();
 
     return _impl->load( cacheId );
 }

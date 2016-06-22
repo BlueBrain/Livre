@@ -60,7 +60,7 @@ protected:
     void visit( const LODNode& lodNode, VisitState& state ) final
     {
         const Boxf& worldBox = lodNode.getWorldBox();
-        if( !_frustum.boxInFrustum( worldBox ) )
+        if( !_frustum.isInFrustum( worldBox ) )
         {
            state.setVisitChild( false );
            return;

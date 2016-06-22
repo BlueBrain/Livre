@@ -136,8 +136,7 @@ struct RenderingSetGeneratorFilter::Impl
 
         output.set( "CacheObjects", cacheObjects );
         output.set( "RenderingDone", cacheObjects.size() == nVisible );
-        output.set( "NodeAvailability",  cumulativeAvailability );
-
+        output.set( "NodeAvailability", cumulativeAvailability );
     }
 
     DataInfos getInputDataInfos() const

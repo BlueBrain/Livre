@@ -53,13 +53,7 @@ public:
      * @param worldBox AABB box.
      * @return True if box is intersecting or in the frustum.
      */
-    LIVRECORE_API bool boxInFrustum( const Boxf &worldBox ) const;
-
-    /**
-     * @param worldBox AABB box.
-     * @return the visibility intersection type of the box
-     */
-    LIVRECORE_API vmml::Visibility getBoxVisibility( const Boxf& worldBox ) const;
+    LIVRECORE_API bool isInFrustum( const Boxf& worldBox ) const;
 
     /**
      * @return The modelview matrix.

@@ -31,12 +31,12 @@ namespace livre
 struct FrameInfo
 {
     LIVRECORE_API FrameInfo( const Frustum& frustum,
-                             const uint32_t frameId,
-                             const uint32_t id );
+                             const uint32_t timeStep,
+                             const uint32_t frameId );
 
     Frustum frustum; //!< The current frustum.
-    uint32_t frameId ; //!< The current frame id for livre data sources.
-    uint32_t id; //!< The unique id for each rendered frame
+    uint32_t timeStep ; //!< The current time step for livre data sources.
+    uint32_t frameId; //!< The unique id for each rendered frame
 };
 
 

@@ -49,60 +49,18 @@ public:
 
     size_t getSize() const
     {
-        return _histogram.get() ? sizeof( uint64_t ) * Histogram::binCount : 0;
-    }
-
-    void binData( const int8_t* rawData,
-                  Histogram& histogram,
-                  const Vector3ui& blockSize,
-                  const Vector3ui& padding,
-                  const size_t compCount,
-                  const uint64_t scaleFactor) const
-    {
-        uint64_t* bins = histogram.getBins();
-        for( size_t i = padding.x(); i < blockSize.x() - padding.x(); ++i )
-            for( size_t j = padding.y(); j < blockSize.y() - padding.y(); ++j )
-                for( size_t k = padding.z(); k < blockSize.z() -padding.z(); ++k )
-                    for( size_t c = 0; c < compCount; ++c )
-                    {
-                        const size_t index = compCount * i * blockSize.y() * blockSize.z() +
-                                             compCount * j * blockSize.z() +
-                                             compCount * k + c;
-                        bins[ 128 + rawData[ index ]] += scaleFactor;
-                    }
-    }
-
-    void binData( const uint8_t* rawData,
-                  Histogram& histogram,
-                  const Vector3ui& blockSize,
-                  const Vector3ui& padding,
-                  const size_t compCount,
-                  const uint64_t scaleFactor ) const
-    {
-
-        uint64_t* bins = histogram.getBins();
-        for( size_t i = padding.x(); i < ( blockSize.x() - padding.x( )); ++i )
-            for( size_t j = padding.y(); j < ( blockSize.y() - padding.y( )); ++j )
-                for( size_t k = padding.z(); ( k < blockSize.z() -padding.z( )); ++k )
-                    for( size_t c = 0; c < compCount; ++c )
-                    {
-                        const size_t index = compCount * i * blockSize.y() * blockSize.z() +
-                                             compCount * j * blockSize.z() +
-                                             compCount * k + c;
-                        const uint8_t data = rawData[ index ];
-                        bins[ data ] += scaleFactor;
-                    }
+        return _histogram.get() ? sizeof( uint64_t ) * _histogram->getBinsSize() : 0;
     }
 
     template< class SRC_TYPE >
     void binData( const SRC_TYPE* rawData,
-                  Histogram& histogram,
                   const Vector3ui& blockSize,
                   const Vector3ui& padding,
                   const size_t compCount,
                   const uint64_t scaleFactor ) const
     {
-        uint64_t* bins = histogram.getBins();
+        uint64_t* bins = _histogram->getBins();
+        const size_t binCount = _histogram->getBinsSize();
         const float minVal = std::numeric_limits< SRC_TYPE >::min();
         const float maxVal = std::numeric_limits< SRC_TYPE >::max();
         const float range = maxVal - minVal;
@@ -118,8 +76,8 @@ public:
                         const float data = rawData[ index ];
                         const size_t binIndex =
                                 std::is_unsigned< SRC_TYPE >::value ?
-                                ( data - minVal ) / range * Histogram::binCount :
-                                (( data / range ) + 0.5f ) * Histogram::binCount;
+                                ( data - minVal ) / range * binCount :
+                                (( data / range ) + 0.5f ) * binCount;
                         bins[ binIndex ] += scaleFactor;
                     }
     }
@@ -151,32 +109,32 @@ public:
         const uint64_t scaleFactor = scaleFactor1d * scaleFactor1d * scaleFactor1d;
 
         const DataType dataType = volumeInfo.dataType;
-        Histogram histogram;
+        _histogram.reset( new Histogram );
         switch( dataType )
         {
            case DT_UINT8:
-                binData( static_cast< const uint8_t* >( rawData ), histogram,
-                         voxelBox, padding, compCount, scaleFactor  );
+                binData< uint8_t >( static_cast< const uint8_t* >( rawData ),
+                            voxelBox, padding, compCount, scaleFactor );
                 break;
            case DT_UINT16:
-                binData< uint16_t >( static_cast< const uint16_t* >( rawData ), histogram,
-                                     voxelBox, padding, compCount, scaleFactor  );
+                binData< uint16_t >( static_cast< const uint16_t* >( rawData ),
+                                     voxelBox, padding, compCount, scaleFactor );
                 break;
            case DT_UINT32:
-                binData< uint32_t >( static_cast< const uint32_t* >( rawData ), histogram,
-                                     voxelBox, padding, compCount, scaleFactor  );
+                binData< uint32_t >( static_cast< const uint32_t* >( rawData ),
+                                     voxelBox, padding, compCount, scaleFactor );
                 break;
            case DT_INT8:
-                binData( static_cast< const int8_t* >( rawData ), histogram,
-                         voxelBox, padding, compCount, scaleFactor  );
+                binData< int8_t >( static_cast< const int8_t* >( rawData ),
+                         voxelBox, padding, compCount, scaleFactor );
                 break;
            case DT_INT16:
-                binData< int16_t >( static_cast< const int16_t* >( rawData ), histogram,
-                                    voxelBox, padding, compCount, scaleFactor  );
+                binData< int16_t >( static_cast< const int16_t* >( rawData ),
+                                    voxelBox, padding, compCount, scaleFactor );
                 break;
            case DT_INT32:
-                binData< int32_t >( static_cast< const int32_t* >( rawData ), histogram,
-                                    voxelBox, padding, compCount, scaleFactor  );
+                binData< int32_t >( static_cast< const int32_t* >( rawData ),
+                                    voxelBox, padding, compCount, scaleFactor );
                 break;
            case DT_FLOAT32:
            case DT_FLOAT64:
@@ -186,7 +144,7 @@ public:
                 LBTHROW( std::runtime_error( "Unimplemented data type." ));
            }
         }
-         _histogram.reset( new Histogram( histogram ));
+
         return true;
     }
 

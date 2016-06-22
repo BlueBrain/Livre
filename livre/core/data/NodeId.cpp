@@ -36,7 +36,7 @@ NodeId::NodeId( const uint32_t level, const Vector3ui& position,
     , _blockPosX( position[ 0 ])
     , _blockPosY( position[ 1 ])
     , _blockPosZ( position[ 2 ])
-    , _frame( frame )
+    , _timeStep( frame )
 {}
 
 Vector3ui NodeId::getPosition( ) const
@@ -64,13 +64,13 @@ NodeId NodeId::getParent() const
         return NodeId();
 
     const Vector3ui parentPos = getPosition() / 2;
-    return NodeId( _level - 1, parentPos, _frame );
+    return NodeId( _level - 1, parentPos, _timeStep );
 }
 
 bool NodeId::isParent( const NodeId& parentNodeId ) const
 {
     if( parentNodeId._level >= _level ||
-        parentNodeId._frame != _frame ||
+        parentNodeId._timeStep != _timeStep ||
         parentNodeId._id == _id )
     {
         return false;
@@ -104,7 +104,7 @@ NodeIds NodeId::getChildren() const
                 const Vector3ui pos( childPos[ 0 ] + x,
                                      childPos[ 1 ] + y,
                                      childPos[ 2 ] + z );
-                nodeIds.push_back( NodeId( _level + 1, pos, _frame ) );
+                nodeIds.push_back( NodeId( _level + 1, pos, _timeStep ) );
             }
         }
     }
@@ -113,7 +113,7 @@ NodeIds NodeId::getChildren() const
 
 NodeId NodeId::getRoot() const
 {
-    return NodeId( 0, getPosition() / ( 1u << _level ), _frame );
+    return NodeId( 0, getPosition() / ( 1u << _level ), _timeStep );
 }
 
 NodeIds NodeId::getSiblings( ) const
@@ -154,7 +154,7 @@ NodeIds NodeId::getChildrenAtLevel( const uint32_t level ) const
                 const Vector3ui pos( startPosInLevel[ 0 ] + x,
                                      startPosInLevel[ 1 ] + y,
                                      startPosInLevel[ 2 ] + z );
-                nodeIds.push_back( NodeId( level, pos, _frame ) );
+                nodeIds.push_back( NodeId( level, pos, _timeStep ) );
             }
         }
     }

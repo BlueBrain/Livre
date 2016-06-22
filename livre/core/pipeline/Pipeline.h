@@ -83,7 +83,7 @@ public:
      * @return the executable
      * @throw std::runtime_error if a pipe filter or pipeline does not exist
      */
-    LIVRECORE_API const Executable& getExecutable( const std::string& name ) const;
+    LIVRECORE_API Executable& getExecutable( const std::string& name );
 
     /**
      * @copydoc Executable::execute

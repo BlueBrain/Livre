@@ -28,7 +28,9 @@ namespace livre
 {
 
 /**
- * Histogram filter computes the accumulated histogram for data
+ * Histogram filter computes the accumulated histogram for given node ids that
+ * are in or intersecting the frustum.
+ *
  */
 class HistogramFilter : public Filter
 {

@@ -91,7 +91,7 @@ MemoryUnitPtr MemoryDataSource::getData( const LODNode& node )
     const Identifier nodeID = node.getNodeId().getId();
     const uint8_t* id = reinterpret_cast< const uint8_t* >( &nodeID );
     const uint8_t value =  ( id[0] ^ id[1] ^ id[2] ^ id[3] ) + 16 +
-        127 * std::sin( ((float)node.getNodeId().getFrame() + 1) / 200.f);
+        127 * std::sin( ((float)node.getNodeId().getTimeStep() + 1) / 200.f);
 
     AllocMemoryUnitPtr memoryUnit( new AllocMemoryUnit );
     memoryUnit->alloc( dataSize );

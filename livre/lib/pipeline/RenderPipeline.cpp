@@ -35,13 +35,17 @@
 namespace livre
 {
 
+namespace
+{
+const size_t nRenderThreads = 2;
+size_t nUploadThreads = 4;
+size_t nComputeThreads = 2;
+}
+
 struct RenderPipeline::Impl
 {
     Impl( TextureCache& textureCache,
           HistogramCache& histogramCache,
-          const size_t nRenderThreads,
-          const size_t nUploadThreads,
-          const size_t nComputeThreads,
           ConstGLContextPtr glContext )
         : _textureCache( textureCache )
         , _histogramCache( histogramCache )
@@ -146,7 +150,7 @@ struct RenderPipeline::Impl
         histogramFilter.connect( "Histogram", sendHistogramFilter, "Histogram" );
         histogramFilter.getPromise( "RelativeViewport" ).set( viewport );
         sendHistogramFilter.getPromise( "RelativeViewport" ).set( viewport );
-        sendHistogramFilter.getPromise( "Id" ).set( frameInfo.id );
+        sendHistogramFilter.getPromise( "Id" ).set( frameInfo.frameId );
 
         Pipeline renderPipeline;
         Pipeline uploadPipeline;
@@ -168,7 +172,7 @@ struct RenderPipeline::Impl
                     renderPipeline.getExecutable( "VisibleSetGenerator" ));
 
         visibleSetGenerator.getPromise( "Frustum" ).set( frameInfo.frustum );
-        visibleSetGenerator.getPromise( "Frame" ).set( frameInfo.frameId );
+        visibleSetGenerator.getPromise( "Frame" ).set( frameInfo.timeStep );
         visibleSetGenerator.getPromise( "DataRange" ).set( dataRange );
         visibleSetGenerator.getPromise( "Params" ).set( vrParams );
         visibleSetGenerator.getPromise( "Viewport" ).set( pixelViewPort );
@@ -212,15 +216,9 @@ struct RenderPipeline::Impl
 
 RenderPipeline::RenderPipeline( TextureCache& textureCache,
                                 HistogramCache& histogramCache,
-                                const size_t nRenderThreads,
-                                const size_t nUploadThreads,
-                                const size_t nComputeThreads,
                                 ConstGLContextPtr glContext )
     : _impl( new RenderPipeline::Impl( textureCache,
                                        histogramCache,
-                                       nRenderThreads,
-                                       nComputeThreads,
-                                       nUploadThreads,
                                        glContext ))
 {}
 
