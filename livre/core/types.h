@@ -240,7 +240,7 @@ const uint32_t NODEID_TIMESTEP_BITS = 18; //>! see NodeId
 const uint32_t INVALID_POSITION = ( 1u << NODEID_BLOCK_BITS ) - 1; //!< Invalid node ID.
 const uint32_t INVALID_LEVEL = ( 1u << NODEID_LEVEL_BITS ) - 1; //!< Invalid tree level.4 bits is on
 const uint32_t INVALID_TIMESTEP = ( 1u << NODEID_TIMESTEP_BITS ) - 1; //!< Invalid time step. 18 bits is on
-
+const uint32_t INVALID_FRAMEID = -1;
 const uint32_t LATEST_FRAME = INT_MAX; //!< Maximum frame number
 
 

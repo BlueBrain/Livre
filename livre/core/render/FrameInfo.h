@@ -33,6 +33,7 @@ struct FrameInfo
     LIVRECORE_API FrameInfo( const Frustum& frustum,
                              const uint32_t timeStep,
                              const uint32_t frameId );
+    LIVRECORE_API FrameInfo();
 
     Frustum frustum; //!< The current frustum.
     uint32_t timeStep ; //!< The current time step for livre data sources.

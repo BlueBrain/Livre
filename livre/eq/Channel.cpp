@@ -149,7 +149,6 @@ struct Channel::Impl
 public:
     explicit Impl( Channel* channel )
           : _channel( channel )
-          , _frameInfo( Frustum( Matrix4f(), Matrix4f()), INVALID_TIMESTEP, INVALID_TIMESTEP )
           , _progress( "Loading bricks", 0 )
     {}
 

@@ -28,7 +28,12 @@ FrameInfo::FrameInfo( const Frustum& frustum_,
     : frustum( frustum_ )
     , timeStep( timeStep_ )
     , frameId( frameId_ )
-{
-}
+{}
+
+FrameInfo::FrameInfo()
+    : frustum( Matrix4f(), Matrix4f( ))
+    , timeStep( INVALID_TIMESTEP )
+    , frameId( INVALID_FRAMEID )
+{}
 
 }

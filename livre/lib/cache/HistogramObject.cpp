@@ -61,9 +61,9 @@ public:
     {
         uint64_t* bins = _histogram->getBins();
         const size_t binCount = _histogram->getBinsSize();
-        const float minVal = std::numeric_limits< SRC_TYPE >::min();
-        const float maxVal = std::numeric_limits< SRC_TYPE >::max();
-        const float range = maxVal - minVal;
+        const double minVal = std::numeric_limits< SRC_TYPE >::min();
+        const double maxVal = std::numeric_limits< SRC_TYPE >::max();
+        const double range = maxVal - minVal;
 
         for( size_t i = padding.x(); i < blockSize.x() - padding.x(); ++i )
             for( size_t j = padding.y(); j < blockSize.y() - padding.y(); ++j )
@@ -73,7 +73,7 @@ public:
                         const size_t index = compCount * i * blockSize.y() * blockSize.z() +
                                              compCount * j * blockSize.z() +
                                              compCount * k + c;
-                        const float data = rawData[ index ];
+                        const double data = rawData[ index ];
                         const size_t binIndex =
                                 std::is_unsigned< SRC_TYPE >::value ?
                                 ( data - minVal ) / range * binCount :
