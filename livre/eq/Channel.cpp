@@ -151,7 +151,6 @@ public:
           : _channel( channel )
           , _frameInfo( Frustum( Matrix4f(), Matrix4f()), INVALID_FRAME, INVALID_FRAME )
           , _progress( "Loading bricks", 0 )
-          , _frameCounter( INVALID_FRAME )
     {}
 
     void initializeFrame()
@@ -582,7 +581,6 @@ public:
 #ifdef LIVRE_USE_ZEROEQ
     zeroeq::Publisher _publisher;
 #endif
-    uint32_t _frameCounter;
 };
 
 void EqRaycastRenderer::_onFrameStart( const Frustum& frustum,
