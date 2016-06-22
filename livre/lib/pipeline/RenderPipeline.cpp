@@ -38,8 +38,8 @@ namespace livre
 namespace
 {
 const size_t nRenderThreads = 2;
-size_t nUploadThreads = 4;
-size_t nComputeThreads = 2;
+const size_t nUploadThreads = 4;
+const size_t nComputeThreads = 2;
 }
 
 struct RenderPipeline::Impl
