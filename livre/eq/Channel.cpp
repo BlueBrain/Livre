@@ -149,7 +149,7 @@ struct Channel::Impl
 public:
     explicit Impl( Channel* channel )
           : _channel( channel )
-          , _frameInfo( Frustum( Matrix4f(), Matrix4f()), INVALID_FRAME, INVALID_FRAME )
+          , _frameInfo( Frustum( Matrix4f(), Matrix4f()), INVALID_TIMESTEP, INVALID_TIMESTEP )
           , _progress( "Loading bricks", 0 )
     {}
 
@@ -271,7 +271,7 @@ public:
         const uint32_t frame =
                 pipe->getFrameData()->getFrameSettings().getFrameNumber();
 
-        if( frame >= INVALID_FRAME )
+        if( frame >= INVALID_TIMESTEP )
             return;
 
         applyCamera();

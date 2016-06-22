@@ -35,7 +35,7 @@ FrameSettings::FrameSettings()
 void FrameSettings::reset()
 {
     currentViewId_ = lunchbox::uint128_t( 0 );
-    frameNumber_ = INVALID_FRAME;
+    frameNumber_ = INVALID_TIMESTEP;
     screenShot_ = 0;
     statistics_ = false;
     help_ = false;
