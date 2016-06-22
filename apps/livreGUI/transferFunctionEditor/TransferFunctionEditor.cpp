@@ -40,30 +40,28 @@ TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
     : QWidget( tfParentWidget )
     , _controller( controller )
     , _ui( new Ui::TransferFunctionEditor )
-    , _redWidget( new ColorMapWidget( ColorMapWidget::RED_SHADE, this ))
-    , _greenWidget( new ColorMapWidget( ColorMapWidget::GREEN_SHADE, this ))
-    , _blueWidget( new ColorMapWidget( ColorMapWidget::BLUE_SHADE, this ))
-    , _alphaWidget( new ColorMapWidget( ColorMapWidget::ARGB_SHADE, this ))
 {
     qRegisterMetaType< UInt8s >("UInt8s");
-
     _ui->setupUi( this );
+
+    for( size_t i = 0; i < ColorMapWidget::SHADE_COUNT; ++i )
+    {
+        _colorWidgets[ i ] = new ColorMapWidget( ColorMapWidget::ShadeType( i ), this );
+        connect( _colorWidgets[ i ], SIGNAL( colorsChanged( )), this, SLOT( _onColorsChanged()));
+    }
+
+    connect( _colorWidgets[  ColorMapWidget::ALPHA_SHADE ], SIGNAL( histIndexChanged(size_t,uint64_t)),
+             this, SLOT( _onHistIndexChanged(size_t,uint64_t)));
 
     // Add the widgets to the layouts to match the exact positions on the
     // TransferFunctionEditor
-    _ui->redLayout->addWidget( _redWidget );
-    _ui->greenLayout->addWidget( _greenWidget );
-    _ui->blueLayout->addWidget( _blueWidget );
-    _ui->rgbaLayout->addWidget( _alphaWidget );
+    _ui->redLayout->addWidget( _colorWidgets[ ColorMapWidget::RED_SHADE ] );
+    _ui->greenLayout->addWidget( _colorWidgets[ ColorMapWidget::GREEN_SHADE ] );
+    _ui->blueLayout->addWidget( _colorWidgets[ ColorMapWidget::BLUE_SHADE ] );
+    _ui->rgbaLayout->addWidget( _colorWidgets[ ColorMapWidget::ALPHA_SHADE ] );
 
-    connect( _redWidget, SIGNAL( colorsChanged( )), this,
-             SLOT( _pointsUpdated()));
-    connect( _greenWidget, SIGNAL( colorsChanged( )), this,
-             SLOT( _pointsUpdated( )));
-    connect( _blueWidget, SIGNAL( colorsChanged( )), this,
-             SLOT( _pointsUpdated( )));
-    connect( _alphaWidget, SIGNAL( colorsChanged( )), this,
-             SLOT( _pointsUpdated( )));
+    connect( _ui->histogramScaleCheckBox, SIGNAL( stateChanged( int )), this,
+             SLOT( _onScaleChanged( int )));
 
     connect( _ui->resetButton, SIGNAL( clicked()), this, SLOT( _setDefault()));
     connect( _ui->clearButton, SIGNAL( clicked()), this, SLOT( _clear()));
@@ -73,129 +71,146 @@ TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
     connect( this, &TransferFunctionEditor::transferFunctionChanged,
              this, &TransferFunctionEditor::_onTransferFunctionChanged );
 
+    connect( this, &TransferFunctionEditor::histogramChanged,
+             this, &TransferFunctionEditor::_onHistogramChanged );
+
     QTimer::singleShot( 50, this, SLOT( _setDefault()));
 
     _controller.subscribe( _lut );
+    _controller.subscribe( _histogram );
     _lut.registerDeserializedCallback( [&]
         { return _onTransferFunction(); });
+    _histogram.registerDeserializedCallback( [&]
+        { return emit histogramChanged(); });
 }
 
 TransferFunctionEditor::~TransferFunctionEditor()
 {
     _controller.unsubscribe( _lut );
+    _controller.unsubscribe( _histogram );
     delete _ui;
 }
 
-void TransferFunctionEditor::_pointsUpdated()
+void TransferFunctionEditor::_setGradientStops()
 {
-    const double alphaWidgetWidth = _alphaWidget->width();
-    QGradientStops stops;
-    QPolygonF redPoints, greenPoints, bluePoints, alphaPoints, allPoints;
-
-    redPoints = _redWidget->getPoints();
-    greenPoints = _greenWidget->getPoints();
-    bluePoints = _blueWidget->getPoints();
-    alphaPoints = _alphaWidget->getPoints();
-
-    std::sort( redPoints.begin(), redPoints.end(), xLessThan );
-    std::sort( greenPoints.begin(), greenPoints.end(), xLessThan );
-    std::sort( bluePoints.begin(), bluePoints.end(), xLessThan );
-    std::sort( alphaPoints.begin(), alphaPoints.end(), xLessThan );
-
-    allPoints = redPoints;
-    allPoints += greenPoints;
-    allPoints += bluePoints;
-    allPoints += alphaPoints;
+    QPolygonF allPoints;
+    for( auto& widget: _colorWidgets )
+    {
+        QPolygonF points = widget->getPoints();
+        std::sort( points.begin(), points.end(), xLessThan );
+        allPoints += points;
+    }
     std::sort( allPoints.begin(), allPoints.end(), xLessThan );
 
-    for( int32_t i = 0; i < allPoints.size(); ++i )
+    QGradientStops stops;
+    const float colorWidgetWidth = _colorWidgets[ ColorMapWidget::ALPHA_SHADE  ]->width();
+    for( int i = 0; i < allPoints.size(); ++i )
     {
-        const int xPoint = int( allPoints.at(i).x());
-        if( i + 1 < allPoints.size() && xPoint == allPoints.at(i + 1).x( ))
+        const int xPoint = int( allPoints.at( i ).x());
+        if( i + 1 < allPoints.size() && xPoint == allPoints.at( i + 1 ).x( ))
             continue;
 
-        const int red = _redWidget->getColorAtPoint( xPoint );
-        const int green = _greenWidget->getColorAtPoint( xPoint );
-        const int blue = _blueWidget->getColorAtPoint( xPoint );
-        const int alpha = _alphaWidget->getColorAtPoint( xPoint );
-        QColor color((0x00ff0000 & red) >> 16,      // R (16)
-                     (0x0000ff00 & green) >> 8,     // G (8)
-                     (0x000000ff & blue),           // B (1)
-                     (0xff000000 & alpha) >> 24);   // A (24)
+        int colors[ ColorMapWidget::SHADE_COUNT ] = { 0 };
+        for( size_t j = 0; j < ColorMapWidget::SHADE_COUNT; ++j )
+            colors[ j ] = _colorWidgets[ j ]->getColorAtPoint( xPoint );
+
+        QColor color((0x00ff0000 & colors[ 0 ]) >> 16,  // R (16)
+                     (0x0000ff00 & colors[ 1 ]) >> 8,   // G (8)
+                     (0x000000ff & colors[ 2 ]),        // B (1)
+                     (0xff000000 & colors[ 3 ]) >> 24); // A (24)
 
         // Outlier
-        if( xPoint / alphaWidgetWidth > 1 )
+        if( xPoint / colorWidgetWidth > 1 )
             return;
 
-        stops << QGradientStop( xPoint / alphaWidgetWidth, color );
+        stops << QGradientStop( xPoint / colorWidgetWidth, color );
     }
+    _colorWidgets[ ColorMapWidget::ALPHA_SHADE  ]->setGradientStops( stops );
+}
 
-    _publishTransferFunction();
-    _alphaWidget->setGradientStops( stops );
+void TransferFunctionEditor::_setHistogram()
+{
+    const bool isLogScale = _ui->histogramScaleCheckBox->checkState() == Qt::Checked;
+    _colorWidgets[ ColorMapWidget::ALPHA_SHADE  ]->setHistogram( _histogram, isLogScale );
+}
+
+void TransferFunctionEditor::_widgetsUpdated()
+{
+    for( auto& widget: _colorWidgets )
+        widget->update();
 }
 
 void TransferFunctionEditor::_setDefault()
 {
-    QPolygonF points;
-    double h = _redWidget->height();
-    double w = _redWidget->width();
-    points << QPointF( 0.0 * w, h );
-    points << QPointF( 0.4 * w, h );
-    points << QPointF( 0.6 * w, 0.0 );
-    points << QPointF( 1.0 * w, 0.0 );
-    _redWidget->setPoints( points );
+    for( auto& widget: _colorWidgets )
+    {
+        const float h = widget->height();
+        const float w = widget->width();
+        QPolygonF points;
+        switch( widget->getShadeType( ))
+        {
+        case ColorMapWidget::RED_SHADE:
+        case ColorMapWidget::GREEN_SHADE:
+            points << QPointF( 0.0 * w, h );
+            points << QPointF( 0.4 * w, h );
+            points << QPointF( 0.6 * w, 0.0 );
+            points << QPointF( 1.0 * w, 0.0 );
+            break;
+        case ColorMapWidget::BLUE_SHADE:
+            points << QPointF( 0.0 * w, h );
+            points << QPointF( 0.2 * w, 0.0 );
+            points << QPointF( 0.6 * w, 0.0 );
+            points << QPointF( 0.8 * w, h );
+            points << QPointF( 1.0 * w, h );
+            break;
+        case ColorMapWidget::ALPHA_SHADE:
+            points << QPointF( 0.0 * w, h );
+            points << QPointF( 0.1 * w, 0.8 * h );
+            points << QPointF( 1.0 * w, 0.1 * h );
+            break;
+        case ColorMapWidget::SHADE_COUNT:
+        default:
+            break;
+        }
+        widget->setPoints( points );
+    }
 
-    h = _greenWidget->height();
-    w = _greenWidget->width();
-    points.clear();
-    points << QPointF( 0.0 * w, h );
-    points << QPointF( 0.2 * w, 0.0 );
-    points << QPointF( 0.6 * w, 0.0 );
-    points << QPointF( 0.8 * w, h );
-    points << QPointF( 1.0 * w, h );
-    _greenWidget->setPoints( points );
+    _setHistogram();
+    _onColorsChanged();
+    _widgetsUpdated();
+    _publishTransferFunction();
+}
 
-    h = _blueWidget->height();
-    w = _blueWidget->width();
-    points.clear();
-    points << QPointF( 0.0 * w, 0.0 );
-    points << QPointF( 0.2 * w, 0.0 );
-    points << QPointF( 0.4 * w, h );
-    points << QPointF( 0.8 * w, h );
-    points << QPointF( 1.0 * w, 0.0 );
-    _blueWidget->setPoints( points );
+void TransferFunctionEditor::_onColorsChanged()
+{
+    _setGradientStops();
+    _widgetsUpdated();
+    _publishTransferFunction();
+}
 
-    h = _alphaWidget->height();
-    w = _alphaWidget->width();
-    points.clear();
-    points << QPointF( 0.0 * w, h );
-    points << QPointF( 0.1 * w, 0.8 * h );
-    points << QPointF( 1.0 * w, 0.1 * h );
-    _alphaWidget->setPoints( points );
-
-    _pointsUpdated();
+void TransferFunctionEditor::_onHistIndexChanged( size_t index, uint64_t value )
+{
+    const QString indexText = index == -1u ? "" : QString( "%1" ).arg( index, 4 );
+    const QString valText = index == -1u ? "" : QString( "%1" ).arg( value, 12 );
+    _ui->histogramValLabel->setText( valText );
+    _ui->histogramIndexLabel->setText( indexText );
 }
 
 void TransferFunctionEditor::_publishTransferFunction()
 {
-    const UInt8s& redCurve =  _redWidget->getCurve();
-    const UInt8s& greenCurve =  _greenWidget->getCurve();
-    const UInt8s& blueCurve =  _blueWidget->getCurve();
-    const UInt8s& alphaCurve =  _alphaWidget->getCurve();
-
-    if( redCurve.empty() || greenCurve.empty() || blueCurve.empty() ||
-        alphaCurve.empty() || redCurve.size() * 4 != _lut.getLutSize( ))
+    for( const auto& widget: _colorWidgets )
     {
-        return;
+        const UInt8s& curve = widget->getCurve();
+        if( curve.empty() || curve.size() * 4 != _lut.getLutSize( ))
+            return;
     }
 
     uint8_t* lut = _lut.getLut();
-    for( uint32_t i = 0; i < redCurve.size(); ++i )
+    for( size_t i = 0; i < ColorMapWidget::SHADE_COUNT; ++i )
     {
-        lut[ 4*i + 0 ] = redCurve[i];
-        lut[ 4*i + 1 ] = greenCurve[i];
-        lut[ 4*i + 2 ] = blueCurve[i];
-        lut[ 4*i + 3 ] = alphaCurve[i];
+        const UInt8s& curve =  _colorWidgets[ i ]->getCurve();
+        for( uint32_t j = 0; j < _lut.getLutSize() / ColorMapWidget::SHADE_COUNT; ++j )
+            lut[ ColorMapWidget::SHADE_COUNT * j + i ] = curve[ j ];
     }
 
     _controller.publish( _lut );
@@ -209,17 +224,20 @@ void TransferFunctionEditor::_onTransferFunction()
 
 void TransferFunctionEditor::_clear()
 {
+    const float h = _colorWidgets[ 0 ]->height();
+    const float w = _colorWidgets[ 0 ]->width();
     QPolygonF points;
-    const double h = _redWidget->height();
-    const double w = _redWidget->width();
+
     points << QPointF( 0.0 * w, h );
     points << QPointF( 1.0 * w, 0.0 );
 
-    _redWidget->setPoints( points );
-    _greenWidget->setPoints( points );
-    _blueWidget->setPoints( points );
-    _alphaWidget->setPoints( points );
-    _pointsUpdated();
+    for( auto& widget: _colorWidgets )
+        widget->setPoints( points );
+
+    _colorWidgets[ ColorMapWidget::ALPHA_SHADE ]->setHistogram( Histogram(), false );
+    _onColorsChanged();
+    _widgetsUpdated();
+    _publishTransferFunction();
 }
 
 namespace
@@ -244,7 +262,6 @@ void TransferFunctionEditor::_load()
 
     if( selectedFilter == TF_FILE_FILTER )
     {
-
         QFile file( filename );
         file.open( QIODevice::ReadOnly );
         QDataStream in( &file );
@@ -259,18 +276,16 @@ void TransferFunctionEditor::_load()
         if( version != TF_FILE_VERSION )
             return;
 
-        QPolygonF redPoints, greenPoints, bluePoints, alphaPoints;
-        QGradientStops gradientStops;
-        in >> redPoints
-           >> greenPoints
-           >> bluePoints
-           >> alphaPoints;
+        for( auto& widget: _colorWidgets )
+        {
+            QPolygonF points;
+            in >> points;
+            widget->setPoints( points );
+        }
 
-        _redWidget->setPoints( redPoints );
-        _greenWidget->setPoints( greenPoints );
-        _blueWidget->setPoints( bluePoints );
-        _alphaWidget->setPoints( alphaPoints );
-        _pointsUpdated();
+        _setHistogram();
+        _widgetsUpdated();
+        _publishTransferFunction();
         return;
     }
     else if(( selectedFilter == DT_FILE_FILTER ) ||
@@ -301,10 +316,9 @@ void TransferFunctionEditor::_save()
         out.setVersion( QDataStream::Qt_5_0 );
 
         out << TF_FILE_HEADER << TF_FILE_VERSION;
-        out << _redWidget->getPoints()
-            << _greenWidget->getPoints()
-            << _blueWidget->getPoints()
-            << _alphaWidget->getPoints();
+
+        for( size_t i = 0; i < ColorMapWidget::SHADE_COUNT; ++i )
+            out << _colorWidgets[ i ]->getPoints();
     }
     else if( selectedFilter == DT_FILE_FILTER )
     {
@@ -313,16 +327,16 @@ void TransferFunctionEditor::_save()
 
         std::ofstream file;
         file.open( filename.toStdString( ));
-        size_t tfSize = _lut.getLutSize() / 4;
+        size_t tfSize = _lut.getLutSize() / ColorMapWidget::SHADE_COUNT;
         file << tfSize << " uint8" << std::endl;
 
         for( size_t i = 0; i < tfSize; ++i )
         {
-            file << (uint32_t)_redWidget->getCurve()[i] << " "
-                 << (uint32_t)_greenWidget->getCurve()[i] << " "
-                 << (uint32_t)_blueWidget->getCurve()[i] << " "
-                 << (uint32_t)_alphaWidget->getCurve()[i] << std::endl;
+            for( const auto& widget: _colorWidgets )
+                file << (uint32_t)widget->getCurve()[ i ] << " ";
+            file << std::endl;
         }
+
     }
     else if( selectedFilter == LBA_FILE_FILTER )
     {
@@ -356,7 +370,7 @@ QPolygon _filterPoints( const QPolygon& points )
         bool change = std::abs(prevSlope - currentSlope) > std::numeric_limits<float>::epsilon();
         if( change )
         {
-            const QLine nextLine( currentPoint, points[i+1] );
+            const QLine nextLine( currentPoint, points[ i + 1 ] );
             const float nextSlope = float(nextLine.dy()) / float(nextLine.dx());
             if( std::abs(prevSlope - nextSlope) <= std::numeric_limits<float>::epsilon( ))
                 change = false;
@@ -390,34 +404,35 @@ QPolygonF _convertPoints( const QPolygon& points, const int width, const int hei
 
 void TransferFunctionEditor::_onTransferFunctionChanged()
 {
-    QPolygon redPoints, bluePoints, greenPoints, alphaPoints;
+
     const uint8_t* lut = _lut.getLut();
-    for( size_t i = 0; i < _lut.getLutSize(); i += 4 )
+    for( size_t i = 0; i < ColorMapWidget::SHADE_COUNT; ++i )
     {
-        redPoints << QPoint( i / 4, lut[i+0] );
-        greenPoints << QPoint( i / 4, lut[i+1] );
-        bluePoints << QPoint( i / 4, lut[i+2] );
-        alphaPoints << QPoint( i / 4, lut[i+3] );
+        QPolygon points;
+        const float h = _colorWidgets[ i ]->height();
+        const float w = _colorWidgets[ i ]->width();
+        for( size_t j = 0; j < _lut.getLutSize() / ColorMapWidget::SHADE_COUNT; ++j )
+            points << QPoint( j, lut[ j * ColorMapWidget::SHADE_COUNT + i ] );
+
+        QPolygonF fPoints = _convertPoints( _filterPoints( points ), w, h );
+        _colorWidgets[ i ]->setPoints( fPoints );
     }
 
-    QPolygonF redPointsF = _convertPoints( _filterPoints( redPoints ),
-                                           _redWidget->width(),
-                                           _redWidget->height());
-    QPolygonF greenPointsF = _convertPoints( _filterPoints( greenPoints ),
-                                             _greenWidget->width(),
-                                             _greenWidget->height());
-    QPolygonF bluePointsF = _convertPoints( _filterPoints( bluePoints ),
-                                            _blueWidget->width(),
-                                            _blueWidget->height());
-    QPolygonF alphaPointsF = _convertPoints( _filterPoints( alphaPoints ),
-                                             _alphaWidget->width(),
-                                             _alphaWidget->height());
+    _setHistogram();
+    _widgetsUpdated();
+    _publishTransferFunction();
+}
 
-    _redWidget->setPoints( redPointsF );
-    _greenWidget->setPoints( greenPointsF );
-    _blueWidget->setPoints( bluePointsF );
-    _alphaWidget->setPoints( alphaPointsF );
-    _pointsUpdated();
+void TransferFunctionEditor::_onScaleChanged( int )
+{
+     emit histogramChanged();
+}
+
+void TransferFunctionEditor::_onHistogramChanged()
+{
+    _setGradientStops();
+    _setHistogram();
+    _widgetsUpdated();
 }
 
 }
