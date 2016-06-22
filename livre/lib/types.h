@@ -27,17 +27,24 @@
 namespace livre
 {
 
+class HistogramCache;
+class HistogramObject;
 class RenderPipeline;
 class TextureCache;
 class TextureDataCache;
 class TextureDataObject;
 class TextureObject;
+
 struct ApplicationParameters;
 
 typedef std::shared_ptr< const TextureDataObject > ConstTextureDataObjectPtr;
 typedef std::shared_ptr< const TextureObject > ConstTextureObjectPtr;
+typedef std::shared_ptr< const HistogramObject > ConstHistogramObjectPtr;
 typedef std::shared_ptr< TextureDataObject > TextureDataObjectPtr;
 typedef std::shared_ptr< TextureObject > TextureObjectPtr;
+typedef std::shared_ptr< HistogramObject > HistogramObjectPtr;
+
+typedef std::unordered_map< Identifier, Histogram > HistogramMap;
 
 static const uint32_t CONNECTION_ID( 0u );
 

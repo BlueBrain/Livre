@@ -29,12 +29,12 @@
 #include <livre/eq/settings/CameraSettings.h>
 #include <livre/eq/settings/FrameSettings.h>
 #include <livre/eq/settings/RenderSettings.h>
-
 #include <livre/lib/configuration/ApplicationParameters.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 
 #include <livre/core/events/EventMapper.h>
 #include <livre/core/maths/maths.h>
+#include <livre/core/data/Histogram.h>
 #include <livre/core/util/FrameUtils.h>
 
 #include <lexis/render/imageJPEG.h>
@@ -45,11 +45,48 @@
 
 #include <eq/eq.h>
 
+#include <deque>
+
 namespace livre
 {
+namespace
+{
+const uint32_t histogramLatency = 5;
+}
+
 class Config::Impl
 {
 public:
+
+
+    struct ViewHistogram
+    {
+        ViewHistogram( const Histogram& histogram_, const float area_, const uint32_t id_ )
+            : histogram( histogram_ )
+            , area( area_ )
+            , id( id_ )
+        {}
+
+        ViewHistogram& operator+=( const ViewHistogram& hist )
+        {
+            histogram += hist.histogram;
+            area += hist.area;
+            return *this;
+        }
+
+        bool isComplete() const
+        {
+            const float eps = 0.0001f;
+            return std::abs( 1.0f - area ) <= eps;
+        }
+
+        Histogram histogram;
+        float area;
+        uint32_t id;
+    };
+
+    typedef std::deque< ViewHistogram > ViewHistogramQueue;
+
     explicit Impl( Config* config_ )
         : config( config_ )
         , defaultLatency( 0 )
@@ -59,6 +96,62 @@ public:
         , redraw( true )
         , dataFrameRange( INVALID_FRAME_RANGE )
     {}
+
+    void gatherHistogram( const Histogram& histogram, const float area, const uint32_t currentId )
+    {
+      // If we get a very old frame skip it
+        if( !histogramQueue.empty() && currentId < histogramQueue.back().id )
+            return;
+
+        const ViewHistogram viewHistogram( histogram, area, currentId );
+        auto it = histogramQueue.begin();
+        while( it != histogramQueue.end( ))
+        {
+            auto& data = *it;
+            bool dataMerged = false;
+
+            if( currentId == data.id )
+            {
+                dataMerged = true;
+                data += viewHistogram;
+            }
+            else if( currentId > data.id )
+            {
+                dataMerged = true;
+                it = histogramQueue.emplace( it, viewHistogram );
+            }
+
+            if( (*it).isComplete( )) // Send histogram & remove all old ones
+            {
+#ifdef LIVRE_USE_ZEROEQ
+                communicator->publishHistogram( (*it ).histogram );
+#endif
+                histogramQueue.erase( it, histogramQueue.end( ));
+                return;
+            }
+
+            if( dataMerged )
+                break;
+            ++it;
+        }
+
+       if( histogramQueue.empty() && !viewHistogram.isComplete( ))
+        {
+            histogramQueue.push_back( viewHistogram );
+            return;
+        }
+
+        if( viewHistogram.isComplete( ))
+        {
+#ifdef LIVRE_USE_ZEROEQ
+            communicator->publishHistogram( viewHistogram.histogram );
+#endif
+            return;
+        }
+
+        if( histogramQueue.size() > histogramLatency )
+            histogramQueue.pop_back();
+    }
 
     Config* config;
     uint32_t defaultLatency;
@@ -71,6 +164,7 @@ public:
 #endif
     bool redraw;
     Vector2ui dataFrameRange;
+    ViewHistogramQueue histogramQueue;
 };
 
 Config::Config( eq::ServerPtr parent )
@@ -415,7 +509,16 @@ bool Config::handleEvent( eq::EventICommand command )
         _impl->dataFrameRange = command.read< Vector2ui >();
         return false;
     }
-
+#ifdef LIVRE_USE_ZEROEQ
+    case HISTOGRAM_DATA:
+    {
+        const Histogram& histogram = command.read< Histogram >();
+        const float area = command.read< float >();
+        const uint32_t id = command.read< uint32_t>();
+        _impl->gatherHistogram( histogram, area, id );
+        return false;
+    }
+#endif
     case REDRAW:
         _impl->redraw = true;
         return true;

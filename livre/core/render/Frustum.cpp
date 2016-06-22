@@ -47,7 +47,7 @@ struct Frustum::Impl
         return _culler.getNearPlane();
     }
 
-    bool boxInFrustum( const Boxf &worldBox ) const
+    bool isInFrustum( const Boxf &worldBox ) const
     {
         const vmml::Visibility vis = _culler.test( worldBox );
         return vis != vmml::VISIBILITY_NONE;
@@ -92,9 +92,9 @@ const Plane& Frustum::getNearPlane() const
     return _impl->getNearPlane();
 }
 
-bool Frustum::boxInFrustum( const Boxf& worldBox ) const
+bool Frustum::isInFrustum( const Boxf& worldBox ) const
 {
-    return _impl->boxInFrustum( worldBox );
+    return _impl->isInFrustum( worldBox );
 }
 
 const Matrix4f& Frustum::getMVMatrix() const

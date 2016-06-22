@@ -23,12 +23,17 @@ namespace livre
 {
 
 FrameInfo::FrameInfo( const Frustum& frustum_,
+                      const uint32_t timeStep_,
                       const uint32_t frameId_ )
     : frustum( frustum_ )
+    , timeStep( timeStep_ )
     , frameId( frameId_ )
-    , nAvailable( 0 )
-    , nNotAvailable( 0 )
-{
-}
+{}
+
+FrameInfo::FrameInfo()
+    : frustum( Matrix4f(), Matrix4f( ))
+    , timeStep( INVALID_TIMESTEP )
+    , frameId( INVALID_FRAMEID )
+{}
 
 }

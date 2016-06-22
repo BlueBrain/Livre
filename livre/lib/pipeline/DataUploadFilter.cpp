@@ -47,7 +47,7 @@ public:
             ConstCacheObjectPtr texture = _textureCache.get( nodeId.getId( ));
             if( !texture )
             {
-                CacheObjectPtr data = _textureCache.getDataCache().load( nodeId.getId( ));
+                ConstCacheObjectPtr data = _textureCache.getDataCache().load( nodeId.getId( ));
                 cacheObjects.push_back( _textureCache.load( nodeId.getId( )));
                 data.reset();
             }

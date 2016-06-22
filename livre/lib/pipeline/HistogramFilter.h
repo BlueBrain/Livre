@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -17,40 +17,55 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _LODNodeTrait_h_
-#define _LODNodeTrait_h_
+#ifndef _HistogramFilter_h_
+#define _HistogramFilter_h_
 
-#include <livre/core/api.h>
-#include <livre/core/types.h>
+#include <livre/lib/types.h>
+
+#include <livre/core/pipeline/Filter.h>
 
 namespace livre
 {
 
 /**
- * LODNodeTrait adds LODNode property to the derived classes.
+ * Histogram filter computes the accumulated histogram for given node ids that
+ * are in or intersecting the frustum.
+ *
  */
-class LODNodeTrait
+class HistogramFilter : public Filter
 {
+
 public:
-    /**
-     * @return \see LODNode.
-     */
-    LIVRECORE_API ConstLODNodePtr getLODNode() const;
-
-protected:
-    LIVRECORE_API LODNodeTrait();
 
     /**
-     * @param lodNodePtr the livre::LODNode.
+     * Constructor
+     * @param histogramCache the cache for histogram
      */
-    LIVRECORE_API LODNodeTrait( ConstLODNodePtr lodNodePtr );
+    HistogramFilter( HistogramCache& histogramCache );
+    ~HistogramFilter();
 
+    /**
+     * @copydoc Filter::execute
+     */
+    void execute( const FutureMap& input, PromiseMap& output ) const final;
 
-    ConstLODNodePtr lodNodePtr_; //!< LODNode pointer
+    /**
+     * @copydoc Filter::getInputDataInfos
+     */
+    DataInfos getInputDataInfos() const final;
 
+    /**
+     * @copydoc Filter::getOutputDataInfos
+     */
+    DataInfos getOutputDataInfos() const final;
+
+private:
+
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
-
 
 }
 
-#endif // _LODNodeTrait_h_
+#endif
+

@@ -51,6 +51,9 @@ public:
     /** Publish Camera */
     void publishCamera();
 
+    /** Publish Histogram */
+    bool publishHistogram( const Histogram& histogram );
+
     /** Non-blocking receive & handle of all pending events. */
     void handleEvents();
 

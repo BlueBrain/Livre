@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # master {#master}
 
+* [#301](https://github.com/BlueBrain/Livre/pull/301):
+  Histogram computation and ZeroEQ publishing.
 * [#303](https://github.com/BlueBrain/Livre/pull/303):
   Old renderer is revived for OSX. Fix #296
 * [#256](https://github.com/BlueBrain/Livre/pull/256):

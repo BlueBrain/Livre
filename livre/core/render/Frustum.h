@@ -53,7 +53,7 @@ public:
      * @param worldBox AABB box.
      * @return True if box is intersecting or in the frustum.
      */
-    LIVRECORE_API bool boxInFrustum( const Boxf &worldBox ) const;
+    LIVRECORE_API bool isInFrustum( const Boxf& worldBox ) const;
 
     /**
      * @return The modelview matrix.

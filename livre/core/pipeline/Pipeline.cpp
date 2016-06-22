@@ -85,7 +85,7 @@ struct Pipeline::Impl
         return executables;
     }
 
-    const Executable& getExecutable( const std::string& name ) const
+    Executable& getExecutable( const std::string& name )
     {
         if( _executableMap.count( name ) == 0 )
             LBTHROW( std::runtime_error( name + " executable does not exist"));
@@ -141,7 +141,7 @@ void Pipeline::_add( const std::string& name,
     _impl->add( name, std::move( exec ), wait );
 }
 
-const Executable& Pipeline::getExecutable( const std::string& name ) const
+Executable& Pipeline::getExecutable( const std::string& name )
 {
     return _impl->getExecutable( name );
 }

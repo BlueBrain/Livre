@@ -8,17 +8,65 @@
 #       Main Authors: Ahmet Bilgili
 #
 #
-include(StringifyShaders)
-include(Files.cmake)
 
+set(LIVREEQ_HEADERS
+      Channel.h
+      Client.h
+      Config.h
+      ConnectionDefinitions.h
+      Error.h
+      events/EqEventHandlerFactory.h
+      events/EqEventHandlerFactory.h
+      events/EqEventInfo.h
+      events/Events.h
+      events/handlers/ChannelPointerHandler.h
+      events/handlers/KeyboardHandler.h
+      FrameData.h
+      FrameGrabber.h
+      Node.h
+      Pipe.h
+      render/EqContext.h
+      render/RayCastRenderer.h
+      settings/CameraSettings.h
+      settings/FrameSettings.h
+      settings/RenderSettings.h
+      settings/VolumeSettings.h
+      Window.h
+      coTypes.h
+      types.h)
+
+set( LIVREEQ_SOURCES
+      Channel.cpp
+      Client.cpp
+      Config.cpp
+      Error.cpp
+      events/EqEventHandler.cpp
+      events/EqEventHandlerFactory.cpp
+      events/handlers/ChannelPointerHandler.cpp
+      events/handlers/KeyboardHandler.cpp
+      FrameData.cpp
+      FrameGrabber.cpp
+      Node.cpp
+      Pipe.cpp
+      render/EqContext.cpp
+      settings/CameraSettings.cpp
+      settings/FrameSettings.cpp
+      settings/RenderSettings.cpp
+      settings/VolumeSettings.cpp
+      Window.cpp
+      )
+
+include(StringifyShaders)
 set(LIVREEQ_SHADERS render/shaders/vertRayCast.glsl
                     render/shaders/vertTexCopy.glsl
                     render/shaders/fragTexCopy.glsl )
 
 if(APPLE)
     list(APPEND LIVREEQ_SHADERS render/shaders/fragRayCastGL2.glsl)
+    list(APPEND LIVREEQ_SOURCES render/RayCastRendererGL2.cpp)
 else()
     list(APPEND LIVREEQ_SHADERS render/shaders/fragRayCast.glsl)
+    list(APPEND LIVREEQ_SOURCES render/RayCastRenderer.cpp)
 endif()
 
 stringify_shaders(${LIVREEQ_SHADERS})

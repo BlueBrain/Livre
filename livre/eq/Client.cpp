@@ -57,7 +57,7 @@ struct Client::Impl
         }
 
         if( _applicationParameters.dataFileName.empty())
-            _applicationParameters.dataFileName = "mem:///#4096,4096,4096,32";
+            _applicationParameters.dataFileName = "mem:///#4096,4096,4096,40";
 
         return true;
     }

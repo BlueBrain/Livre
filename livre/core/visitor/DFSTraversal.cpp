@@ -89,7 +89,7 @@ bool DFSTraversal::traverse( const RootNode& rootNode, const NodeId& node,
 }
 
 void DFSTraversal::traverse( const RootNode& rootNode, NodeVisitor& visitor,
-                             const uint32_t frame )
+                             const uint32_t timeStep )
 {
     visitor.visitPre();
     const Vector3ui& blockSize = rootNode.getBlockSize();
@@ -97,7 +97,7 @@ void DFSTraversal::traverse( const RootNode& rootNode, NodeVisitor& visitor,
         for( uint32_t y = 0; y < blockSize.y(); ++y )
             for( uint32_t z = 0; z < blockSize.z(); ++z )
             {
-                _impl->traverse( NodeId( 0, Vector3ui( x, y, z ), frame ),
+                _impl->traverse( NodeId( 0, Vector3ui( x, y, z ), timeStep ),
                                  rootNode.getDepth(), visitor );
             }
     visitor.visitPost();

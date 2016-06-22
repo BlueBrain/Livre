@@ -42,13 +42,13 @@ uint32_t FrameUtils::getCurrent( const uint32_t frameNumber,
                                  const bool latestAlways ) const
 {
     if( _frameRange == INVALID_FRAME_RANGE )
-        return INVALID_FRAME;
+        return INVALID_TIMESTEP;
 
     const uint32_t lastFrame =  _frameRange[1] - 1;
     if( latestAlways )
         return lastFrame;
 
-    const uint32_t currentFrame = frameNumber == INVALID_FRAME ? 0 : frameNumber;
+    const uint32_t currentFrame = frameNumber == INVALID_TIMESTEP ? 0 : frameNumber;
 
     return std::min( std::max( _frameRange[0], currentFrame ), lastFrame );
 }
@@ -56,7 +56,7 @@ uint32_t FrameUtils::getCurrent( const uint32_t frameNumber,
 uint32_t FrameUtils::getNext( uint32_t current, const int32_t delta ) const
 {
     if( _frameRange == INVALID_FRAME_RANGE )
-        return INVALID_FRAME;
+        return INVALID_TIMESTEP;
 
     const uint32_t interval = _frameRange[1] - _frameRange[0];
 

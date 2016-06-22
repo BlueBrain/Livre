@@ -42,6 +42,7 @@
 
 #include <livre/core/cache/CacheStatistics.h>
 #include <livre/core/data/DataSource.h>
+#include <livre/core/data/Histogram.h>
 #include <livre/core/render/FrameInfo.h>
 #include <livre/core/render/Frustum.h>
 #include <livre/core/visitor/DFSTraversal.h>
@@ -64,9 +65,6 @@ const float farPlane = 15.0f;
 
 struct RedrawFilter : public Filter
 {
-
-public:
-
     explicit RedrawFilter( Channel* channel )
         : _channel( channel )
     {}
@@ -95,6 +93,39 @@ public:
 };
 
 
+struct SendHistogramFilter : public Filter
+{
+    explicit SendHistogramFilter( Channel* channel )
+        : _channel( channel )
+    {}
+
+    ~SendHistogramFilter() {}
+    void execute( const FutureMap& input,
+                  PromiseMap& ) const final
+    {
+        const UniqueFutureMap uniqueInputs( input.getFutures( ));
+        const auto& histogram = uniqueInputs.get< Histogram >( "Histogram" );
+        const auto& viewport = uniqueInputs.get< Viewport >( "RelativeViewport" );
+        const auto frameCounter =  uniqueInputs.get< uint32_t >( "Id" );
+        const_cast< eq::Config *>( _channel ->getConfig())->sendEvent( HISTOGRAM_DATA )
+                << histogram
+                << ( viewport[ 2 ] * viewport[ 3 ]) // area of the viewport ( w * h )
+                << frameCounter;
+    }
+
+    DataInfos getInputDataInfos() const final
+    {
+        return
+        {
+            { "Histogram", getType< Histogram >() },
+            { "RelativeViewport", getType< Viewport >() },
+            { "Id", getType< uint32_t >() }
+        };
+    }
+
+    Channel* _channel;
+};
+
 struct EqRaycastRenderer : public RayCastRenderer
 {
     EqRaycastRenderer( Channel::Impl& channel,
@@ -118,7 +149,6 @@ struct Channel::Impl
 public:
     explicit Impl( Channel* channel )
           : _channel( channel )
-          , _frameInfo( Frustum( Matrix4f(), Matrix4f()), INVALID_FRAME )
           , _progress( "Loading bricks", 0 )
     {}
 
@@ -234,21 +264,23 @@ public:
 #endif
     }
 
-    void frameDraw( const eq::uint128_t& )
+    void frameDraw()
     {
-
         const Pipe* pipe = static_cast< Pipe* >( _channel->getPipe( ));
         const uint32_t frame =
                 pipe->getFrameData()->getFrameSettings().getFrameNumber();
 
-        if( frame >= INVALID_FRAME )
+        if( frame >= INVALID_TIMESTEP )
             return;
 
         applyCamera();
         const Frustum& frustum = setupFrustum();
-        _frameInfo = FrameInfo( frustum, frame );
+        _frameInfo = FrameInfo( frustum, frame, pipe->getCurrentFrame( ));
 
-        const eq::PixelViewport& vp = _channel->getPixelViewport();
+        const eq::PixelViewport& pixVp = _channel->getPixelViewport();
+        _drawRange = _channel->getRange();
+
+        const eq::Viewport& vp = _channel->getViewport();
         _drawRange = _channel->getRange();
 
         const livre::Window* window = static_cast< const livre::Window* >( _channel->getWindow( ));
@@ -258,11 +290,12 @@ public:
         renderPipeline.render( pipe->getFrameData()->getVRParameters(),
                                _frameInfo,
                                {{ _drawRange.start, _drawRange.end }},
-                               PixelViewport( vp.x, vp.y, vp.w, vp.h ),
+                               PixelViewport( pixVp.x, pixVp.y, pixVp.w, pixVp.h ),
+                               Viewport( vp.x, vp.y, vp.w, vp.h ),
                                PipeFilterT< RedrawFilter >( "RedrawFilter", _channel ),
+                               PipeFilterT< SendHistogramFilter >( "SendHistogramFilter", _channel ),
                                *_renderer,
-                               _frameInfo.nAvailable,
-                               _frameInfo.nNotAvailable );
+                               _availability );
     }
 
     void applyCamera()
@@ -308,11 +341,11 @@ public:
         }
 
 #ifdef LIVRE_USE_ZEROEQ
-        const size_t all = _frameInfo.nAvailable + _frameInfo.nNotAvailable;
+        const size_t all = _availability.nAvailable + _availability.nNotAvailable;
         if( all > 0 )
         {
             _progress.restart( all );
-            _progress += _frameInfo.nAvailable;
+            _progress += _availability.nAvailable;
             _publisher.publish( _progress );
         }
 #endif
@@ -333,8 +366,8 @@ public:
         glMatrixMode( GL_MODELVIEW );
 
         livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
-        const size_t all = _frameInfo.nAvailable + _frameInfo.nNotAvailable;
-        const size_t missing = _frameInfo.nNotAvailable;
+        const size_t all = _availability.nAvailable + _availability.nNotAvailable;
+        const size_t missing = _availability.nNotAvailable;
         const float done = all > 0 ? float( all - missing ) / float( all ) : 0;
         Window* window = static_cast< Window* >( _channel->getWindow( ));
 
@@ -541,6 +574,7 @@ public:
     eq::Frame _frame;
     FrameGrabber _frameGrabber;
     FrameInfo _frameInfo;
+    NodeAvailability _availability;
     std::unique_ptr< RayCastRenderer > _renderer;
     ::lexis::data::Progress _progress;
 #ifdef LIVRE_USE_ZEROEQ
@@ -582,16 +616,16 @@ bool Channel::configExit()
 }
 
 void Channel::frameStart( const eq::uint128_t& frameID,
-                          const uint32_t frameNumber )
+                          const uint32_t frameCounter )
 {
+    eq::Channel::frameStart( frameID, frameCounter );
     _impl->_drawRange = eq::Range::ALL;
-    eq::Channel::frameStart( frameID, frameNumber );
 }
 
 void Channel::frameDraw( const lunchbox::uint128_t& frameId )
 {
     eq::Channel::frameDraw( frameId );
-    _impl->frameDraw( frameId );
+    _impl->frameDraw();
 }
 
 void Channel::frameViewStart( const uint128_t& frameId )

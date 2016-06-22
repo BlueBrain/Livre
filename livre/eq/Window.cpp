@@ -69,14 +69,9 @@ public:
                         pipe->getFrameData()->getVRParameters().getMaxGPUCacheMemoryMB();
         _textureCache.reset( new TextureCache( node->getTextureDataCache(),
                                                maxGpuMemory * LB_1MB, GL_LUMINANCE8 ));
-
-        const size_t computeThreads = 4;
-        const size_t uploadThreads = 4;
         _renderPipeline.reset( new RenderPipeline( *_textureCache,
-                                                   computeThreads,
-                                                   uploadThreads,
+                                                   node->getHistogramCache(),
                                                    _glContext ));
-
     }
 
     void shareGLContexts()

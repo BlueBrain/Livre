@@ -31,6 +31,7 @@
 
 #include <livre/eq/settings/VolumeSettings.h>
 #include <livre/lib/cache/TextureDataCache.h>
+#include <livre/lib/cache/HistogramCache.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/core/data/DataSource.h>
 
@@ -55,9 +56,13 @@ public:
         const size_t maxMemBytes =
                 vrRenderParameters.getMaxCPUCacheMemoryMB() * LB_1MB;
 
-        _textureDataCache.reset( new livre::TextureDataCache( maxMemBytes,
-                                                              *_dataSource.get(),
-                                                              GL_UNSIGNED_BYTE ));
+        _textureDataCache.reset( new TextureDataCache( maxMemBytes,
+                                                       *_dataSource.get(),
+                                                       GL_UNSIGNED_BYTE ));
+        const size_t histCacheSize =
+                32 * LB_1MB; // Histogram cache is 32 MB. Can hold approx 16k hists
+        _histogramCache.reset( new HistogramCache( histCacheSize,
+                                                   *_textureDataCache ));
     }
 
     bool initializeVolume()
@@ -108,6 +113,7 @@ public:
     livre::Config* const _config;
     std::unique_ptr< DataSource > _dataSource;
     std::unique_ptr< TextureDataCache > _textureDataCache;
+    std::unique_ptr< HistogramCache > _histogramCache;
 };
 
 Node::Node( eq::Config* parent )
@@ -156,6 +162,12 @@ bool Node::configExit()
 TextureDataCache& Node::getTextureDataCache()
 {
     return *_impl->_textureDataCache;
+}
+
+
+livre::HistogramCache& livre::Node::getHistogramCache()
+{
+    return *_impl->_histogramCache;
 }
 
 void Node::frameStart( const eq::uint128_t &frameId,

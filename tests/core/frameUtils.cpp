@@ -87,19 +87,19 @@ BOOST_AUTO_TEST_CASE( testCurrentFrameInvalidFrame )
     livre::Vector2ui frameRange( 0, 4 );
     livre::Vector2ui boundaries( 0, 4 );
     livre::FrameUtils frameUtils( frameRange, boundaries );
-    BOOST_CHECK_EQUAL( frameUtils.getCurrent( livre::INVALID_FRAME ), 0 );
+    BOOST_CHECK_EQUAL( frameUtils.getCurrent( livre::INVALID_TIMESTEP ), 0 );
 
     frameRange = { 2, 4 };
     frameUtils = livre::FrameUtils( frameRange, boundaries );
-    BOOST_CHECK_EQUAL( frameUtils.getCurrent( livre::INVALID_FRAME ), 2 );
+    BOOST_CHECK_EQUAL( frameUtils.getCurrent( livre::INVALID_TIMESTEP ), 2 );
 
     // INVALID_FRAME as output (querying an INVALID_FRAME_RANGE)
     frameRange = { 0, 8 };
     boundaries = { 16, 23 };
     frameUtils = livre::FrameUtils( frameRange, boundaries );
     BOOST_REQUIRE_EQUAL( frameUtils.getFrameRange(), livre::INVALID_FRAME_RANGE );
-    BOOST_CHECK_EQUAL( frameUtils.getCurrent( 0 ), livre::INVALID_FRAME );
-    BOOST_CHECK_EQUAL( frameUtils.getCurrent( 16 ), livre::INVALID_FRAME );
+    BOOST_CHECK_EQUAL( frameUtils.getCurrent( 0 ), livre::INVALID_TIMESTEP );
+    BOOST_CHECK_EQUAL( frameUtils.getCurrent( 16 ), livre::INVALID_TIMESTEP );
 }
 
 BOOST_AUTO_TEST_CASE( testCurrentFrameLatest )
@@ -132,6 +132,6 @@ BOOST_AUTO_TEST_CASE( testNextFrameNumberInvalidFrame )
     livre::Vector2ui boundaries = { 16, 23 };
     livre::FrameUtils frameUtils( frameRange, boundaries );
     BOOST_REQUIRE_EQUAL( frameUtils.getFrameRange(), livre::INVALID_FRAME_RANGE );
-    BOOST_CHECK_EQUAL( frameUtils.getNext( 0, 1 ), livre::INVALID_FRAME );
-    BOOST_CHECK_EQUAL( frameUtils.getNext( 16 , 1 ), livre::INVALID_FRAME );
+    BOOST_CHECK_EQUAL( frameUtils.getNext( 0, 1 ), livre::INVALID_TIMESTEP );
+    BOOST_CHECK_EQUAL( frameUtils.getNext( 16 , 1 ), livre::INVALID_TIMESTEP );
 }

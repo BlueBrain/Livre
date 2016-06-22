@@ -45,7 +45,7 @@ class NodeId
            Identifier _blockPosX : NODEID_BLOCK_BITS; //>! Maximum 16384 blocks in X dimension
            Identifier _blockPosY : NODEID_BLOCK_BITS; //>! Maximum 16384 blocks in Y dimension
            Identifier _blockPosZ : NODEID_BLOCK_BITS; //>! Maximum 16384 blocks in Z dimension
-           Identifier _frame     : NODEID_FRAME_BITS; //>! Maximum 262144 frames
+           Identifier _timeStep  : NODEID_TIMESTEP_BITS; //>! Maximum 262144 frames
         };
         Identifier _id;
     };
@@ -66,14 +66,14 @@ public:
      * Constructs a LOD identifier
      * @param level Level in the octree, 0 is the coarsest level
      * @param position Position in the current level of octree
-     * @param frame The temporal coordinate of the volume
+     * @param timeStep The temporal coordinate of the volume
      */
     LIVRECORE_API NodeId( const uint32_t level,
                           const Vector3ui& position,
-                          const uint32_t frame = 0 );
+                          const uint32_t timeStep = 0 );
 
     LIVRECORE_API uint32_t getLevel() const  { return _level; } //!< The octree level
-    LIVRECORE_API uint32_t getFrame() const { return _frame; } //!< Temporal position
+    LIVRECORE_API uint32_t getTimeStep() const { return _timeStep; } //!< Temporal position
     LIVRECORE_API bool isRoot() const { return _level == 0; } //!< Is one of the root nodes
     LIVRECORE_API Vector3ui getPosition() const; //!< Return position in current level of octree
     LIVRECORE_API NodeIds getParents() const; //!< Return all parents
@@ -174,7 +174,7 @@ inline std::ostream& operator<<( std::ostream& os, const NodeId& nodeId )
 {
     return os << "Level: " << nodeId.getLevel()
               << " Position: " << nodeId.getPosition()
-              << " Frame: " << nodeId.getFrame();
+              << " Time Step: " << nodeId.getTimeStep();
 }
 
 }

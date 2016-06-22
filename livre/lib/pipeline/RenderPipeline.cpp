@@ -22,6 +22,7 @@
 #include <livre/lib/pipeline/VisibleSetGeneratorFilter.h>
 #include <livre/lib/pipeline/DataUploadFilter.h>
 #include <livre/lib/pipeline/RenderFilter.h>
+#include <livre/lib/pipeline/HistogramFilter.h>
 
 #include <livre/lib/cache/TextureCache.h>
 #include <livre/lib/cache/TextureDataCache.h>
@@ -29,17 +30,27 @@
 #include <livre/core/pipeline/SimpleExecutor.h>
 #include <livre/core/pipeline/Pipeline.h>
 
+#include <livre/core/render/FrameInfo.h>
+
 namespace livre
 {
+
+namespace
+{
+const size_t nRenderThreads = 2;
+const size_t nUploadThreads = 4;
+const size_t nComputeThreads = 2;
+}
 
 struct RenderPipeline::Impl
 {
     Impl( TextureCache& textureCache,
-          const size_t nComputeThreads,
-          const size_t nUploadThreads,
+          HistogramCache& histogramCache,
           ConstGLContextPtr glContext )
         : _textureCache( textureCache )
+        , _histogramCache( histogramCache )
         , _dataSource( textureCache.getDataCache().getDataSource( ))
+        , _renderExecutor( nRenderThreads, glContext )
         , _computeExecutor( nComputeThreads, glContext )
         , _uploadExecutor( nUploadThreads, glContext )
         , _nUploadThreads( nUploadThreads )
@@ -59,6 +70,7 @@ struct RenderPipeline::Impl
                                                             i,
                                                             _nUploadThreads,
                                                             _textureCache );
+
             visibleSetGenerator.connect( "VisibleNodes",
                                          uploader, "VisibleNodes" );
             visibleSetGenerator.connect( "Params",
@@ -68,29 +80,41 @@ struct RenderPipeline::Impl
     }
 
     void createSyncPipeline( PipeFilter& renderFilter,
-                             Pipeline& computePipeline,
+                             PipeFilter& histogramFilter,
+                             Pipeline& renderPipeline,
                              Pipeline& uploadPipeline ) const
     {
         PipeFilter visibleSetGenerator =
-                computePipeline.add< VisibleSetGeneratorFilter >(
+                renderPipeline.add< VisibleSetGeneratorFilter >(
                     "VisibleSetGenerator", _dataSource );
 
         createAndConnectUploaders( uploadPipeline,
                                    visibleSetGenerator,
                                    renderFilter );
+
+        for( size_t i = 0; i < _nUploadThreads; ++i )
+        {
+            std::stringstream name;
+            name << "DataUploader" << i;
+            PipeFilter uploader =
+                    static_cast< const livre::PipeFilter& >(
+                        uploadPipeline.getExecutable( name.str( )));
+            uploader.connect( "CacheObjects", histogramFilter, "CacheObjects" );
+        }
     }
 
     void createAsyncPipeline( PipeFilter& renderFilter,
                               PipeFilter& redrawFilter,
-                              Pipeline& computePipeline,
+                              PipeFilter& histogramFilter,
+                              Pipeline& renderPipeline,
                               Pipeline& uploadPipeline ) const
     {
         PipeFilter visibleSetGenerator =
-                computePipeline.add< VisibleSetGeneratorFilter >(
+                renderPipeline.add< VisibleSetGeneratorFilter >(
                     "VisibleSetGenerator", _dataSource );
 
         PipeFilter renderingSetGenerator =
-                computePipeline.add< RenderingSetGeneratorFilter >(
+                renderPipeline.add< RenderingSetGeneratorFilter >(
                     "RenderingSetGenerator", _textureCache );
 
         visibleSetGenerator.connect( "VisibleNodes",
@@ -98,6 +122,9 @@ struct RenderPipeline::Impl
 
         renderingSetGenerator.connect( "CacheObjects",
                                       renderFilter, "CacheObjects" );
+
+        renderingSetGenerator.connect( "CacheObjects",
+                                      histogramFilter, "CacheObjects" );
 
         renderingSetGenerator.connect( "RenderingDone",
                                        redrawFilter, "RenderingDone" );
@@ -111,33 +138,41 @@ struct RenderPipeline::Impl
                  const FrameInfo& frameInfo,
                  const Range& dataRange,
                  const PixelViewport& pixelViewPort,
+                 const Viewport& viewport,
                  PipeFilter redrawFilter,
+                 PipeFilter sendHistogramFilter,
                  Renderer& renderer,
-                 size_t& nAvailable,
-                 size_t& nNotAvailable ) const
+                 NodeAvailability& availability ) const
     {
-
         PipeFilterT< RenderFilter > renderFilter( "RenderFilter", _dataSource, renderer );
+        PipeFilterT< HistogramFilter > histogramFilter( "HistogramFilter", _histogramCache );
+        histogramFilter.getPromise( "Frustum" ).set( frameInfo.frustum );
+        histogramFilter.connect( "Histogram", sendHistogramFilter, "Histogram" );
+        histogramFilter.getPromise( "RelativeViewport" ).set( viewport );
+        sendHistogramFilter.getPromise( "RelativeViewport" ).set( viewport );
+        sendHistogramFilter.getPromise( "Id" ).set( frameInfo.frameId );
 
-        Pipeline computePipeline;
+        Pipeline renderPipeline;
         Pipeline uploadPipeline;
 
         if( vrParams.getSynchronousMode( ))
             createSyncPipeline( renderFilter,
-                                computePipeline,
+                                histogramFilter,
+                                renderPipeline,
                                 uploadPipeline );
         else
             createAsyncPipeline( renderFilter,
                                  redrawFilter,
-                                 computePipeline,
+                                 histogramFilter,
+                                 renderPipeline,
                                  uploadPipeline );
 
         PipeFilter visibleSetGenerator =
                 static_cast< const livre::PipeFilter& >(
-                    computePipeline.getExecutable( "VisibleSetGenerator" ));
+                    renderPipeline.getExecutable( "VisibleSetGenerator" ));
 
         visibleSetGenerator.getPromise( "Frustum" ).set( frameInfo.frustum );
-        visibleSetGenerator.getPromise( "Frame" ).set( frameInfo.frameId );
+        visibleSetGenerator.getPromise( "Frame" ).set( frameInfo.timeStep );
         visibleSetGenerator.getPromise( "DataRange" ).set( dataRange );
         visibleSetGenerator.getPromise( "Params" ).set( vrParams );
         visibleSetGenerator.getPromise( "Viewport" ).set( pixelViewPort );
@@ -146,44 +181,44 @@ struct RenderPipeline::Impl
         renderFilter.getPromise( "Viewport" ).set( pixelViewPort );
 
         if( !vrParams.getSynchronousMode( ))
-            redrawFilter.schedule( _computeExecutor );
-        computePipeline.schedule( _computeExecutor );
+            redrawFilter.schedule( _renderExecutor );
+        renderPipeline.schedule( _renderExecutor );
         uploadPipeline.schedule( _uploadExecutor );
-
+        sendHistogramFilter.schedule( _computeExecutor );
+        histogramFilter.schedule( _computeExecutor );
         renderFilter.execute();
 
         if( vrParams.getSynchronousMode( ))
         {
             const UniqueFutureMap futures( visibleSetGenerator.getPostconditions( ));
-            nAvailable = futures.get< NodeIds >( "VisibleNodes" ).size();
-            nNotAvailable = 0;
+            availability.nAvailable = futures.get< NodeIds >( "VisibleNodes" ).size();
+            availability.nNotAvailable = 0;
         }
         else
         {
             const PipeFilter renderingSetGenerator =
                     static_cast< const livre::PipeFilter& >(
-                        computePipeline.getExecutable( "RenderingSetGenerator" ));
+                        renderPipeline.getExecutable( "RenderingSetGenerator" ));
 
             const UniqueFutureMap futures( renderingSetGenerator.getPostconditions( ));
-            nAvailable = futures.get< size_t >( "AvailableCount" );
-            nNotAvailable = futures.get< size_t >( "NotAvailableCount" );
+            availability = futures.get< NodeAvailability >( "NodeAvailability" );
         }
     }
 
     TextureCache& _textureCache;
+    HistogramCache& _histogramCache;
     const DataSource& _dataSource;
+    mutable SimpleExecutor _renderExecutor;
     mutable SimpleExecutor _computeExecutor;
     mutable SimpleExecutor _uploadExecutor;
     const size_t _nUploadThreads;
 };
 
 RenderPipeline::RenderPipeline( TextureCache& textureCache,
-                                const size_t nComputeThreads,
-                                const size_t nUploadThreads,
+                                HistogramCache& histogramCache,
                                 ConstGLContextPtr glContext )
     : _impl( new RenderPipeline::Impl( textureCache,
-                                       nComputeThreads,
-                                       nUploadThreads,
+                                       histogramCache,
                                        glContext ))
 {}
 
@@ -194,19 +229,21 @@ void RenderPipeline::render( const VolumeRendererParameters& vrParams,
                              const FrameInfo& frameInfo,
                              const Range& dataRange,
                              const PixelViewport& pixelViewPort,
+                             const Viewport& viewport,
                              const PipeFilter& redrawFilter,
+                             const PipeFilter& sendHistogramFilter,
                              Renderer& renderer,
-                             size_t& nAvailable,
-                             size_t& nNotAvailable ) const
+                             NodeAvailability& avaibility ) const
 {
     _impl->render( vrParams,
                    frameInfo,
                    dataRange,
                    pixelViewPort,
+                   viewport,
                    redrawFilter,
+                   sendHistogramFilter,
                    renderer,
-                   nAvailable,
-                   nNotAvailable );
+                   avaibility );
 }
 
 }
