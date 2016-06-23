@@ -24,8 +24,11 @@
 
 #include <livreGUI/types.h>
 #include <livre/core/render/TransferFunction1D.h>
+#include <livre/core/data/Histogram.h>
 #include <lunchbox/monitor.h> // member
 #include <QWidget>
+
+#include <array>
 
 namespace Ui { class TransferFunctionEditor; }
 
@@ -52,6 +55,7 @@ public:
 signals:
     void gradientStopsChanged( const QGradientStops& stops );
     void transferFunctionChanged();
+    void histogramChanged();
 
 private Q_SLOTS:
 
@@ -59,21 +63,27 @@ private Q_SLOTS:
     void _load();
     void _save();
     void _setDefault();
-    void _pointsUpdated();
+    void _onColorsChanged();
+    void _onHistIndexChanged( size_t index, double value);
+    void _onHistogramChanged();
     void _onTransferFunctionChanged();
+    void _onScaleChanged( int state );
 
 private:
 
     void _publishTransferFunction();
     void _onTransferFunction();
+    void _setGradientStops();
+    void _setHistogram();
+    void _widgetsUpdated();
 
     livre::TransferFunction1D _lut;
+    livre::Histogram _histogram;
     livre::Controller& _controller;
     Ui::TransferFunctionEditor* _ui;
-    ColorMapWidget* _redWidget;
-    ColorMapWidget* _greenWidget;
-    ColorMapWidget* _blueWidget;
-    ColorMapWidget* _alphaWidget;
+
+    typedef std::array< ColorMapWidget*, 4 > ColorWidgets;
+    ColorWidgets _colorWidgets;
 };
 
 }

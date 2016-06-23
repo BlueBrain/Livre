@@ -48,7 +48,7 @@ protected:
 
     void _createCheckersBackground();
 
-    QImage _shade;
+    QImage _background;
     QLinearGradient _gradient;
 };
 

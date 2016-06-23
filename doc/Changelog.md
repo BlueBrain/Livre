@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # master {#master}
 
+* [#302](https://github.com/BlueBrain/Livre/pull/302):
+  Histogram visualisation added to GUI.
 * [#301](https://github.com/BlueBrain/Livre/pull/301):
   Histogram computation and ZeroEQ publishing.
 * [#303](https://github.com/BlueBrain/Livre/pull/303):

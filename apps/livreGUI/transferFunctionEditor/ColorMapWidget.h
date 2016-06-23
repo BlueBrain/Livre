@@ -22,6 +22,7 @@
 #define _ColorMapWidget_h_
 
 #include <livreGUI/transferFunctionEditor/TFWidget.h> // base class
+#include <livre/core/data/Histogram.h>
 #include <livre/core/types.h>
 
 namespace livre
@@ -44,10 +45,11 @@ public:
      */
     enum ShadeType
     {
-        RED_SHADE,
-        GREEN_SHADE,
-        BLUE_SHADE,
-        ARGB_SHADE
+        RED_SHADE   = 0,
+        GREEN_SHADE = 1,
+        BLUE_SHADE  = 2,
+        ALPHA_SHADE = 3,
+        SHADE_COUNT = 4
     };
 
     /**
@@ -58,10 +60,22 @@ public:
     ColorMapWidget( const ShadeType type, QWidget* parent );
 
     /**
+     * @return the shade type
+     */
+    ShadeType getShadeType() const { return _shadeType; }
+
+    /**
      * Set the gradient stops.
      * @param stops The stop points for gradient calculation.
      */
     void setGradientStops( const QGradientStops& stops );
+
+    /**
+     * Sets the histogram and scale to visualise
+     * @param histogram the histogram.
+     * @param isLogScale if true the histogram is visualised as log scale.
+     */
+    void setHistogram( const Histogram& histogram, bool isLogScale );
 
     /**
      * paintEvent
@@ -112,12 +126,23 @@ signals:
      */
     void colorsChanged();
 
+    /**
+     * Hist index changed signal
+     */
+    void histIndexChanged( size_t index, double ratio );
+
 private:
 
-    void _generateShade();
+    void mouseMoveEvent( QMouseEvent* event );
+    void leaveEvent( QEvent* event );
+
+    void _generateBackground();
+    void _drawHistogram();
 
     ShadeType _shadeType;
     HoverPoints* _hoverPoints;
+    Histogram _histogram;
+    bool _isLogScale;
 };
 
 }

@@ -27,10 +27,14 @@ namespace livre
 ColorMapWidget::ColorMapWidget( const ShadeType type, QWidget* parent_ )
     : TFWidget( parent_ )
     , _shadeType( type )
+    , _isLogScale( false )
 {
-    // Add checkers background for the alpha widget.
-    _shadeType == ARGB_SHADE ? _createCheckersBackground()
-                             : setAttribute( Qt::WA_NoBackground );
+    setMouseTracking( true );
+
+    if( _shadeType == ALPHA_SHADE )
+        _createCheckersBackground();
+    else
+        setAttribute( Qt::WA_NoBackground );
 
     QPolygonF points;
     points << QPointF( 0, sizeHint().height())
@@ -54,32 +58,29 @@ QPolygonF ColorMapWidget::getPoints() const
 
 uint32_t ColorMapWidget::getColorAtPoint( const int32_t xPosition )
 {
-    _generateShade();
+    _generateBackground();
 
     const QPolygonF& hoverPoints = _hoverPoints->points();
     for( int i = 1; i < hoverPoints.size(); ++i )
     {
-        if( hoverPoints.at(i - 1).x() > xPosition ||
-            hoverPoints.at(i).x() < xPosition )
-        {
+        if( hoverPoints.at(i - 1).x() > xPosition || hoverPoints.at(i).x() < xPosition )
             continue;
-        }
 
         QLineF line( hoverPoints.at( i-1 ), hoverPoints.at( i ) );
         line.setLength(( xPosition - line.x1( )) / line.dx() * line.length( ));
 
-        if( _shadeType != ARGB_SHADE )
-            return _shade.pixel( qRound( qMin( line.x2(),
-                                               qreal( _shade.width() - 1 ))),
+        if( _shadeType != ALPHA_SHADE )
+            return _background.pixel( qRound( qMin( line.x2(),
+                                               qreal( _background.width() - 1 ))),
                                  qRound( qMin( line.y2(),
-                                               qreal( _shade.height() - 1 ))));
+                                               qreal( _background.height() - 1 ))));
 
         const float alpha = std::min( 1.f,
                                       float( line.y2( )) /
-                                      float( _shade.height() - 1 ));
+                                      float( _background.height() - 1 ));
         const uint32_t pixel =
-            _shade.pixel( qRound( qMin( line.x2(),
-                                        qreal( _shade.width() - 1 ))), 0 );
+            _background.pixel( qRound( qMin( line.x2(),
+                                        qreal( _background.width() - 1 ))), 0 );
         return ( pixel & 0xffffffu ) |
             ( qMin( unsigned( (1.f - alpha) * 255 ), 255u ) << 24u );
     }
@@ -111,9 +112,27 @@ UInt8s ColorMapWidget::getCurve() const
     return curve;
 }
 
+void ColorMapWidget::mouseMoveEvent( QMouseEvent* mouseEvent )
+{
+    if( _shadeType != ALPHA_SHADE || _histogram.isEmpty( ))
+        return;
+
+    const size_t index = (float)_histogram.getBinsSize() *
+                         (float)mouseEvent->pos().x() / (float)width();
+    emit histIndexChanged( index, _histogram.getRatio( index ));
+}
+
+void ColorMapWidget::leaveEvent( QEvent* )
+{
+    if( _shadeType != ALPHA_SHADE )
+        return;
+
+    emit histIndexChanged( -1u, 0.0f );
+}
+
 void ColorMapWidget::setGradientStops( const QGradientStops& stops )
 {
-    if( _shadeType != ARGB_SHADE )
+    if( _shadeType != ALPHA_SHADE )
         return;
 
     _gradient = QLinearGradient( 0.0f, 0.0f, width(), 0.0f );
@@ -121,52 +140,103 @@ void ColorMapWidget::setGradientStops( const QGradientStops& stops )
     for( int i = 0; i < stops.size(); ++i )
         _gradient.setColorAt( stops.at( i ).first, stops.at( i ).second );
 
-    _shade = QImage();
-    _generateShade();
-    update();
+    _background = QImage();
+    _generateBackground();
+}
+
+void ColorMapWidget::setHistogram( const Histogram& histogram, const bool isLogScale )
+{
+    if( _shadeType != ALPHA_SHADE )
+        return;
+
+    _histogram = histogram;
+    _isLogScale = isLogScale;
 }
 
 void ColorMapWidget::paintEvent( QPaintEvent* )
 {
-    _generateShade();
+    _generateBackground();
+    _drawHistogram();
 
     QPainter painter( this );
-    painter.drawImage( 0, 0, _shade );
+    painter.drawImage( 0, 0, _background );
 
     painter.setPen( QColor( 255, 255, 255 ));
     painter.drawRect( 0, 0, width(), height());
 }
 
-void ColorMapWidget::_generateShade()
+void ColorMapWidget::_generateBackground()
 {
-    if( _shade.isNull() || _shade.size() != size( ))
+    if( !_background.isNull() && _background.size() == size( ))
+        return;
+
+    _background = QImage( size(), _shadeType == ALPHA_SHADE
+                             ? QImage::Format_ARGB32_Premultiplied
+                             : QImage::Format_RGB32 );
+
+    // Alpha widget
+    if( _shadeType == ALPHA_SHADE )
     {
-        // Alpha widget
-        if( _shadeType == ARGB_SHADE )
-        {
-            _shade = QImage( size(), QImage::Format_ARGB32_Premultiplied );
-            _shade.fill( 0 );
-            QPainter painter( &_shade );
-            painter.fillRect( rect(), _gradient );
-        }
-        else // RGB widgets
-        {
-            _shade = QImage( size(), QImage::Format_RGB32 );
-            QLinearGradient shade( 0, 0, 0, height());
-
-            shade.setColorAt( 1, Qt::black );
-
-            if( _shadeType == RED_SHADE )
-                shade.setColorAt( 0, Qt::red );
-            else if ( _shadeType == GREEN_SHADE )
-                shade.setColorAt( 0, Qt::green );
-            else
-                shade.setColorAt( 0, Qt::blue );
-
-            QPainter painter( &_shade );
-            painter.fillRect( rect(), shade );
-        }
+        _background.fill( 0 );
+        QPainter painter( &_background );
+        painter.fillRect( _background.rect(), _gradient );
+        return;
     }
+
+    QLinearGradient gradient( 0, 0, 0, height( ));
+    gradient.setColorAt( 1, Qt::black );
+
+    if( _shadeType == RED_SHADE )
+        gradient.setColorAt( 0, Qt::red );
+    else if ( _shadeType == GREEN_SHADE )
+        gradient.setColorAt( 0, Qt::green );
+    else
+        gradient.setColorAt( 0, Qt::blue );
+
+    QPainter painter( &_background );
+    painter.fillRect( rect(), gradient );
+}
+
+void ColorMapWidget::_drawHistogram()
+{
+    if( _shadeType != ALPHA_SHADE || _background.isNull() || _histogram.isEmpty( ))
+        return;
+
+    const QRect viewPort = rect();
+    const int xLeft = viewPort.left();
+    const int xRight = viewPort.right();
+    const int yBottom = viewPort.bottom();
+    const int xWidth = viewPort.width();
+    const int xHeight = viewPort.height();
+
+    const size_t nbBins = _histogram.getBinsSize();
+    const uint64_t* bins = _histogram.getBins();
+    // Find maximum height in bins unit
+    const uint64_t heightMax = bins[ _histogram.getMaxIndex( )];
+    if( heightMax == 0 )
+        return;
+
+    const float wScale = float( nbBins ) / float( xWidth );
+    const float hScale =  xHeight * 0.98f / ( _isLogScale ? std::log( float( heightMax ))
+                                                 : float( heightMax ));
+    QPen pen;
+    QPainterPath path;
+    pen.setColor( Qt::black );
+    pen.setWidth( 2 );
+    QPainter painter( &_background );
+    painter.setPen( pen );
+    pen.setStyle( Qt::SolidLine );
+    path.moveTo( QPoint( float( xLeft ) + 0.5f, yBottom ));
+    for( int i = 0; i < xWidth; ++i )
+    {
+        float value = bins[ size_t( wScale * i ) ];
+        if( _isLogScale && value <= 1.0f )
+            value = 1.0f;
+        path.lineTo( QPoint( float( xLeft + i ) + 0.5,
+                           yBottom - hScale * ( _isLogScale ? std::log( value ) : value )));
+    }
+    path.lineTo( QPoint( float( xRight ) + 0.5f, yBottom ));
+    painter.drawPath( path );
 }
 
 HoverPoints* ColorMapWidget::getHoverPoints() const
