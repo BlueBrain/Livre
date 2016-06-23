@@ -84,6 +84,30 @@ size_t Histogram::getMaxIndex() const
     return std::distance( bins, std::max_element( bins, bins + getBinsSize( )));
 }
 
+bool Histogram::isEmpty() const
+{
+    return getSum() == 0u;
+}
+
+uint64_t Histogram::getSum() const
+{
+    const uint64_t* bins = getBins();
+    return std::accumulate( bins, bins + getBinsSize(), (uint64_t)0, std::plus<uint64_t>());
+}
+
+double Histogram::getRatio( const size_t index ) const
+{
+    if( index >= getBinsSize( ))
+        return 0.0f;
+
+    const uint64_t sum = getSum();
+    if( sum == 0 )
+        return 0.0f;
+
+    const uint64_t* bins = getBins();
+    return (double)bins[ index ] / (double)sum;
+}
+
 std::ostream& operator<<( std::ostream& os, const Histogram& histogram )
 {
     os << " Min value index: " << histogram.getMinIndex()

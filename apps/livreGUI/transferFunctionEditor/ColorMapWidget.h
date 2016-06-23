@@ -129,7 +129,7 @@ signals:
     /**
      * Hist index changed signal
      */
-    void histIndexChanged( size_t index, uint64_t value );
+    void histIndexChanged( size_t index, double ratio );
 
 private:
 

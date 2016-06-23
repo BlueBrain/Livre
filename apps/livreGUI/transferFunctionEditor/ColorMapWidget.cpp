@@ -114,11 +114,11 @@ UInt8s ColorMapWidget::getCurve() const
 
 void ColorMapWidget::mouseMoveEvent( QMouseEvent* mouseEvent )
 {
-    if( _shadeType != ALPHA_SHADE )
+    if( _shadeType != ALPHA_SHADE || _histogram.isEmpty( ))
         return;
 
     const size_t index = 256.0f * (float)mouseEvent->pos().x() / (float)width();
-    emit histIndexChanged( index, _histogram.getBins()[ index ]);
+    emit histIndexChanged( index, _histogram.getRatio( index ));
 }
 
 void ColorMapWidget::leaveEvent( QEvent* )
@@ -126,7 +126,7 @@ void ColorMapWidget::leaveEvent( QEvent* )
     if( _shadeType != ALPHA_SHADE )
         return;
 
-    emit histIndexChanged( -1u, 0  );
+    emit histIndexChanged( -1u, 0.0f );
 }
 
 void ColorMapWidget::setGradientStops( const QGradientStops& stops )
@@ -198,7 +198,7 @@ void ColorMapWidget::_generateBackground()
 
 void ColorMapWidget::_drawHistogram()
 {
-    if( _shadeType != ALPHA_SHADE || _background.isNull( ))
+    if( _shadeType != ALPHA_SHADE || _background.isNull() || _histogram.isEmpty( ))
         return;
 
     const QRect viewPort = rect();

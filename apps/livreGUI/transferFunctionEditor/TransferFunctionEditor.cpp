@@ -50,8 +50,8 @@ TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
         connect( _colorWidgets[ i ], SIGNAL( colorsChanged( )), this, SLOT( _onColorsChanged()));
     }
 
-    connect( _colorWidgets[  ColorMapWidget::ALPHA_SHADE ], SIGNAL( histIndexChanged(size_t,uint64_t)),
-             this, SLOT( _onHistIndexChanged(size_t,uint64_t)));
+    connect( _colorWidgets[  ColorMapWidget::ALPHA_SHADE ], SIGNAL( histIndexChanged(size_t,double)),
+             this, SLOT( _onHistIndexChanged(size_t,double)));
 
     // Add the widgets to the layouts to match the exact positions on the
     // TransferFunctionEditor
@@ -188,10 +188,10 @@ void TransferFunctionEditor::_onColorsChanged()
     _publishTransferFunction();
 }
 
-void TransferFunctionEditor::_onHistIndexChanged( size_t index, uint64_t value )
+void TransferFunctionEditor::_onHistIndexChanged( size_t index, const double ratio )
 {
     const QString indexText = index == -1u ? "" : QString( "%1" ).arg( index, 4 );
-    const QString valText = index == -1u ? "" : QString( "%1" ).arg( value, 12 );
+    const QString valText = index == -1u ? "" : QString( "%1" ).arg( ratio * 100.0, 4, 'f', 3 );
     _ui->histogramValLabel->setText( valText );
     _ui->histogramIndexLabel->setText( indexText );
 }

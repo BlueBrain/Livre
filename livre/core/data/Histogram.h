@@ -70,6 +70,24 @@ public:
      * max value, the smallest index is returned )
      */
     LIVRECORE_API size_t getMaxIndex() const;
+
+    /**
+     * @return true if histogram has no values
+     */
+    LIVRECORE_API bool isEmpty() const;
+
+    /**
+     * @return the sum of the histogram
+     */
+    LIVRECORE_API uint64_t getSum() const;
+
+    /**
+     * Computes the ratio of the value at a given index.
+     * @param index the index of the histogram value
+     * @return the ratio at given index. If histogram is empty or index exceeds
+     * the histogram bin count, returns 0.0.
+     */
+    LIVRECORE_API double getRatio( size_t index ) const;
 };
 
 /** Outputs the histogram information */

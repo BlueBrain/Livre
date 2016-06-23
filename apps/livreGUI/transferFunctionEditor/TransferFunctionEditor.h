@@ -64,7 +64,7 @@ private Q_SLOTS:
     void _save();
     void _setDefault();
     void _onColorsChanged();
-    void _onHistIndexChanged(size_t index, uint64_t value);
+    void _onHistIndexChanged( size_t index, double value);
     void _onHistogramChanged();
     void _onTransferFunctionChanged();
     void _onScaleChanged( int state );
