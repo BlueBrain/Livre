@@ -86,13 +86,23 @@ size_t Histogram::getMaxIndex() const
 
 bool Histogram::isEmpty() const
 {
-    return getSum() == 0u;
+    const uint64_t* bins = getBins();
+    for( size_t i = 0; i < getBinsSize(); ++i )
+    {
+        if( bins[ i ] > 0 )
+            return false;
+    }
+    return true;
 }
 
 uint64_t Histogram::getSum() const
 {
     const uint64_t* bins = getBins();
-    return std::accumulate( bins, bins + getBinsSize(), (uint64_t)0, std::plus<uint64_t>());
+    uint64_t sum = 0;
+    for( size_t i = 0; i < getBinsSize(); ++i )
+        sum +=  bins[ i ];
+
+    return sum;
 }
 
 double Histogram::getRatio( const size_t index ) const

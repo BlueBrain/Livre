@@ -53,7 +53,6 @@ struct RenderPipeline::Impl
         , _renderExecutor( nRenderThreads, glContext )
         , _computeExecutor( nComputeThreads, glContext )
         , _uploadExecutor( nUploadThreads, glContext )
-        , _nUploadThreads( nUploadThreads )
     {
     }
 
@@ -61,14 +60,14 @@ struct RenderPipeline::Impl
                                     PipeFilter& visibleSetGenerator,
                                     PipeFilter& output ) const
     {
-        for( size_t i = 0; i < _nUploadThreads; ++i )
+        for( size_t i = 0; i < nUploadThreads; ++i )
         {
             std::stringstream name;
             name << "DataUploader" << i;
             PipeFilter uploader =
                     uploadPipeline.add< DataUploadFilter >( name.str(),
                                                             i,
-                                                            _nUploadThreads,
+                                                            nUploadThreads,
                                                             _textureCache );
 
             visibleSetGenerator.connect( "VisibleNodes",
@@ -92,7 +91,7 @@ struct RenderPipeline::Impl
                                    visibleSetGenerator,
                                    renderFilter );
 
-        for( size_t i = 0; i < _nUploadThreads; ++i )
+        for( size_t i = 0; i < nUploadThreads; ++i )
         {
             std::stringstream name;
             name << "DataUploader" << i;
@@ -211,7 +210,6 @@ struct RenderPipeline::Impl
     mutable SimpleExecutor _renderExecutor;
     mutable SimpleExecutor _computeExecutor;
     mutable SimpleExecutor _uploadExecutor;
-    const size_t _nUploadThreads;
 };
 
 RenderPipeline::RenderPipeline( TextureCache& textureCache,

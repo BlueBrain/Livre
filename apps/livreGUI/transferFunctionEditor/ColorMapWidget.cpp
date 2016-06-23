@@ -117,7 +117,8 @@ void ColorMapWidget::mouseMoveEvent( QMouseEvent* mouseEvent )
     if( _shadeType != ALPHA_SHADE || _histogram.isEmpty( ))
         return;
 
-    const size_t index = 256.0f * (float)mouseEvent->pos().x() / (float)width();
+    const size_t index = (float)_histogram.getBinsSize() *
+                         (float)mouseEvent->pos().x() / (float)width();
     emit histIndexChanged( index, _histogram.getRatio( index ));
 }
 

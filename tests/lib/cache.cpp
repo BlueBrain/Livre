@@ -115,9 +115,15 @@ BOOST_AUTO_TEST_CASE( testDataCache )
     BOOST_CHECK_EQUAL( histogram.getMinIndex(), 0 );
     BOOST_CHECK_EQUAL( histogram.getMaxIndex(), 17 );
     BOOST_CHECK_EQUAL( bins[ size_t( histogram.getMaxIndex( )) ], 1u << 24 );
+    BOOST_CHECK_EQUAL( histogram.getSum(), 1u << 24 );
+    BOOST_CHECK( !histogram.isEmpty( ));
 
-    livre::Histogram hist = histogram;
+    livre::Histogram hist;
+    BOOST_CHECK( hist.isEmpty( ));
+    BOOST_CHECK_EQUAL( hist.getSum(), 0 );
+    hist = histogram;
     hist += histogram;
     const uint64_t* binAcc = hist.getBins();
     BOOST_CHECK_EQUAL( binAcc[ size_t( hist.getMaxIndex( )) ], 1u << 25 );
+    BOOST_CHECK_EQUAL( hist.getSum(), 1u << 25 );
 }

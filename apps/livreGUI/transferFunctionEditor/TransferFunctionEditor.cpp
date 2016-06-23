@@ -50,7 +50,7 @@ TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
         connect( _colorWidgets[ i ], SIGNAL( colorsChanged( )), this, SLOT( _onColorsChanged()));
     }
 
-    connect( _colorWidgets[  ColorMapWidget::ALPHA_SHADE ], SIGNAL( histIndexChanged(size_t,double)),
+    connect( _colorWidgets[ ColorMapWidget::ALPHA_SHADE ], SIGNAL( histIndexChanged(size_t,double)),
              this, SLOT( _onHistIndexChanged(size_t,double)));
 
     // Add the widgets to the layouts to match the exact positions on the
