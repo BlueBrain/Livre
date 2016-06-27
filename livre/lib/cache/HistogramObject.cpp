@@ -76,8 +76,8 @@ public:
                         const double data = rawData[ index ];
                         const size_t binIndex =
                                 std::is_unsigned< SRC_TYPE >::value ?
-                                ( data - minVal ) / range * binCount :
-                                (( data / range ) + 0.5f ) * binCount;
+                                ( data - minVal ) / range * ( binCount - 1 ):
+                                (( data / range ) + 0.5f ) * ( binCount - 1 );
                         bins[ binIndex ] += scaleFactor;
                     }
     }
