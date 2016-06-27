@@ -33,7 +33,6 @@
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 
 #include <livre/core/events/EventMapper.h>
-#include <livre/core/maths/maths.h>
 #include <livre/core/data/Histogram.h>
 #include <livre/core/util/FrameUtils.h>
 

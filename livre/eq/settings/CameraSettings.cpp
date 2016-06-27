@@ -22,7 +22,6 @@
 
 #include <livre/eq/settings/CameraSettings.h>
 
-#include <livre/core/maths/maths.h>
 #include <co/co.h>
 
 #include <algorithm>

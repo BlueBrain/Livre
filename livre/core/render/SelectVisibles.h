@@ -22,7 +22,6 @@
 
 #include <livre/lib/types.h>
 #include <livre/core/data/LODNode.h>
-#include <livre/core/maths/maths.h>
 #include <livre/core/data/VolumeInformation.h>
 #include <livre/core/visitor/DataSourceVisitor.h>
 #include <livre/core/visitor/VisitState.h>

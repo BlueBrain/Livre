@@ -31,7 +31,6 @@ set(LIVRECORE_HEADERS
   events/EventHandlerFactory.h
   events/EventInfo.h
   events/EventMapper.h
-  maths/maths.h
   maths/Quantizer.h
   pipeline/Executable.h
   pipeline/Filter.h
