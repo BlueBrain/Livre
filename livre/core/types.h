@@ -66,7 +66,6 @@ class LODNode;
 class MemoryUnit;
 class NodeId;
 class NodeVisitor;
-class NodeAvailability;
 class Parameter;
 class Renderer;
 class RootNode;
@@ -98,6 +97,7 @@ class PipeFilter;
 class Workers;
 
 struct FrameInfo;
+struct NodeAvailability;
 struct TextureState;
 struct VolumeInformation;
 
