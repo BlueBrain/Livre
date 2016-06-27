@@ -58,7 +58,10 @@ struct LRUCachePolicy
         while( it != _lruQueue.end( ))
         {
             if( *it == cacheId )
+            {
                 _lruQueue.erase( it );
+                return;
+            }
             else
                 ++it;
         }
@@ -151,19 +154,16 @@ struct Cache::Impl
         {
             ReadLock readLock( _mutex );
             it = _cacheMap.find( cacheId );
+            if( it != _cacheMap.end( ))
+                return it->second;
         }
 
-        CacheObjectPtr cacheObject;
+        WriteLock writeLock( _mutex );
+        it = _cacheMap.find( cacheId );
         if( it == _cacheMap.end( ))
-        {
-            cacheObject.reset( _cache._generate( cacheId ));
-            WriteLock writeLock( _mutex );
-            _cacheMap[ cacheId ] = cacheObject;
-        }
-        else
-            cacheObject = it->second;
+            _cacheMap[ cacheId ] = CacheObjectPtr( _cache._generate( cacheId ) );
 
-        return cacheObject;
+        return _cacheMap[ cacheId ];
     }
 
     CacheObjectPtr getFromMap( const CacheId& cacheId ) const

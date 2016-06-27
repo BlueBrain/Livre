@@ -369,7 +369,7 @@ public:
         const size_t all = _availability.nAvailable + _availability.nNotAvailable;
         const size_t missing = _availability.nNotAvailable;
         const float done = all > 0 ? float( all - missing ) / float( all ) : 0;
-        Window* window = static_cast< Window* >( _channel->getWindow( ));
+        const Window* window = static_cast< Window* >( _channel->getWindow( ));
 
         std::ostringstream os;
         os << node->getTextureDataCache().getStatistics() << "  "
@@ -386,7 +386,7 @@ public:
             unit = "um";
             voxelSize *= 1000000;
         }
-        if( voxelSize.x() < 0.001f )
+        else if( voxelSize.x() < 0.001f )
         {
             unit = "mm";
             voxelSize *= 1000;
@@ -404,7 +404,7 @@ public:
 
         float y = 240.f;
         std::string text = os.str();
-        const eq::util::BitmapFont* font =_channel->getWindow()->getSmallFont();
+        const eq::util::BitmapFont* font = _channel->getWindow()->getSmallFont();
         for( size_t pos = text.find( '\n' ); pos != std::string::npos;
              pos = text.find( '\n' ))
         {

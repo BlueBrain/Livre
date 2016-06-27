@@ -67,27 +67,20 @@ struct TextureObject::Impl
         initialize( );
         _texturePool.generateTexture( _textureState );
         LBASSERT( _textureState->textureId );
-        loadTextureToGPU( );
+        loadTextureToGPU();
         _dataObject.reset();
         return true;
     }
 
-    void unload( )
+    void unload()
     {
         if( _textureState && _textureState->textureId == INVALID_TEXTURE_ID )
             return;
 
         _texturePool.releaseTexture( _textureState );
-    #ifdef _DEBUG_
-        LBVERB << "Texture released : " << NodeId( getId( ))
-               << " Last used at : " << getLastUsed()
-               << " Number of references : " << getReferenceCount_( )
-               << std::endl;
-
-    #endif //_DEBUG
     }
 
-    void initialize( )
+    void initialize()
     {
         // TODO: The internal format size should be calculated correctly
         const Vector3f& overlap = _dataSource.getVolumeInfo().overlap;
