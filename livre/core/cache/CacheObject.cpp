@@ -69,6 +69,8 @@ size_t CacheObject::getSize() const
 bool CacheObject::_notifyLoad()
 {
     WriteLock lock( _status->mutex );
+    if( _isLoaded( ))
+        return true;
     return _load();
 }
 

@@ -212,7 +212,7 @@ void TextureObject::_unload()
 
 size_t TextureObject::_getSize() const
 {
-    if( !isValid() )
+    if( !_isValid() )
         return 0;
 
     return _impl->getSize();

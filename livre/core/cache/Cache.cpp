@@ -107,17 +107,17 @@ struct Cache::Impl
 
     ConstCacheObjectPtr load( const CacheId& cacheId )
     {
-        WriteLock writeLock( _mutex );
-        CacheObjectPtr obj = getFromMap( cacheId );
-        if( obj->isLoaded( ))
         {
-            _statistics.notifyHit();
-            _policy.insert( cacheId );
-            return obj;
+            ReadLock readLock( _mutex );
+            CacheMap::const_iterator it = _cacheMap.find( cacheId );
+            if( it != _cacheMap.end( ))
+                return it->second;
         }
 
+        CacheObjectPtr obj = getFromMap( cacheId );
         if( obj->_notifyLoad( ))
         {
+            WriteLock writeLock( _mutex );
             _statistics.notifyMiss();
             _statistics.notifyLoaded( *obj );
             _policy.insert( cacheId );
@@ -147,18 +147,28 @@ struct Cache::Impl
 
     CacheObjectPtr getFromMap( const CacheId& cacheId )
     {
-        CacheMap::iterator it = _cacheMap.find( cacheId );
-        if( it == _cacheMap.end( ))
+        CacheMap::const_iterator it;
         {
-            CacheObjectPtr cacheObject( _cache._generate( cacheId ));
-            _cacheMap[ cacheId ] = cacheObject;
+            ReadLock readLock( _mutex );
+            it = _cacheMap.find( cacheId );
         }
 
-        return _cacheMap[ cacheId ];
+        CacheObjectPtr cacheObject;
+        if( it == _cacheMap.end( ))
+        {
+            cacheObject.reset( _cache._generate( cacheId ));
+            WriteLock writeLock( _mutex );
+            _cacheMap[ cacheId ] = cacheObject;
+        }
+        else
+            cacheObject = it->second;
+
+        return cacheObject;
     }
 
     CacheObjectPtr getFromMap( const CacheId& cacheId ) const
     {
+        ReadLock readLock( _mutex );
         CacheMap::const_iterator it = _cacheMap.find( cacheId );
         if( it == _cacheMap.end( ))
             return CacheObjectPtr();
@@ -174,7 +184,6 @@ struct Cache::Impl
 
     ConstCacheObjectPtr get( const CacheId& cacheId ) const
     {
-        ReadLock lock( _mutex );
         return getFromMap( cacheId );
     }
 
