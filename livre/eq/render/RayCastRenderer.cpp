@@ -219,6 +219,8 @@ struct RayCastRenderer::Impl
         glEnable( GL_CULL_FACE );
         glDisable( GL_DEPTH_TEST );
         glDisable( GL_BLEND );
+        glGetIntegerv( GL_DRAW_BUFFER, &_drawBuffer );
+        glDrawBuffer( GL_NONE );
 
         GLSLShaders::Handle program = _rayCastShaders.getProgram( );
         LBASSERT( program );
@@ -484,8 +486,8 @@ struct RayCastRenderer::Impl
 #endif
         _usedTextures[0].swap( _usedTextures[1] );
         _usedTextures[1].clear();
-
         glDeleteBuffers( 1, &_posVBO );
+        glDrawBuffer( _drawBuffer );
         copyTexToFrameBufAndClear();
     }
 
@@ -502,6 +504,7 @@ struct RayCastRenderer::Impl
     const VolumeInformation& _volInfo;
     GLuint _posVBO;
     GLuint _quadVBO;
+    GLint _drawBuffer;
 };
 
 RayCastRenderer::RayCastRenderer( const TextureCache& textureCache,
