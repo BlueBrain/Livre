@@ -33,9 +33,9 @@ class TextureCache;
 class TextureDataCache;
 class TextureDataObject;
 class TextureObject;
+class VolumeRendererParameters;
 
 struct ApplicationParameters;
-struct VolumeRendererParameters;
 
 typedef std::shared_ptr< const TextureDataObject > ConstTextureDataObjectPtr;
 typedef std::shared_ptr< const TextureObject > ConstTextureObjectPtr;
