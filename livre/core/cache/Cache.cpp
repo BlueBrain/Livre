@@ -161,7 +161,7 @@ struct Cache::Impl
         WriteLock writeLock( _mutex );
         it = _cacheMap.find( cacheId );
         if( it == _cacheMap.end( ))
-            _cacheMap[ cacheId ] = CacheObjectPtr( _cache._generate( cacheId ) );
+            _cacheMap[ cacheId ] = CacheObjectPtr( _cache._generate( cacheId ));
 
         return _cacheMap[ cacheId ];
     }

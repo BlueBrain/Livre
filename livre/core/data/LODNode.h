@@ -86,17 +86,17 @@ public:
     /**
      * @return The tree level.
      */
-    LIVRECORE_API uint32_t getRefLevel( ) const { return _nodeId.getLevel(); }
+    LIVRECORE_API uint32_t getRefLevel() const { return _nodeId.getLevel(); }
 
     /**
      * @return The unique node id.
      */
-    LIVRECORE_API NodeId getNodeId( ) const { return _nodeId; }
+    LIVRECORE_API NodeId getNodeId() const { return _nodeId; }
 
     /**
      * @return True if node is valid.
      */
-    LIVRECORE_API bool isValid( ) const { return _nodeId.isValid(); }
+    LIVRECORE_API bool isValid() const { return _nodeId.isValid(); }
 
     /**
      * @param node The node to compare.

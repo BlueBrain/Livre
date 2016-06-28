@@ -38,6 +38,7 @@
 #include <livre/lib/cache/TextureCache.h>
 #include <livre/lib/cache/TextureDataCache.h>
 #include <livre/lib/cache/TextureObject.h>
+#include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/lib/pipeline/RenderPipeline.h>
 
 #include <livre/core/cache/CacheStatistics.h>

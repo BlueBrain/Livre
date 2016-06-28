@@ -23,7 +23,7 @@
 #include <livre/lib/pipeline/DataUploadFilter.h>
 #include <livre/lib/pipeline/RenderFilter.h>
 #include <livre/lib/pipeline/HistogramFilter.h>
-
+#include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/lib/cache/TextureCache.h>
 #include <livre/lib/cache/TextureDataCache.h>
 

@@ -24,6 +24,8 @@
 #include <livre/core/render/Frustum.h>
 #include <livre/core/data/DataSource.h>
 
+#include <livre/lib/configuration/VolumeRendererParameters.h>
+
 namespace livre
 {
 

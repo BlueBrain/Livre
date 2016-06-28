@@ -61,7 +61,7 @@ void LODNode::_computeWorldBox( const Vector3ui& levelTotalBlockDimensions )
 
 void LODNode::_initialize( )
 {
-    const Vector3i pntPos = getAbsolutePosition() * _blockSize;
+    const Vector3ui& pntPos = getAbsolutePosition() * _blockSize;
     _localVoxelBox = Boxui( pntPos, pntPos + _blockSize );
 }
 

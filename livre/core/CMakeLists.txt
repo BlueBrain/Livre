@@ -88,6 +88,7 @@ set(LIVRECORE_SOURCES
   render/GLContext.cpp
   render/GLSLShaders.cpp
   render/Renderer.cpp
+  render/SelectVisibles.cpp
   render/TexturePool.cpp
   render/TextureState.cpp
   render/TransferFunction1D.cpp
