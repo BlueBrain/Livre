@@ -67,7 +67,7 @@ The volume renderer is executed through the command line. To test if the volume
 renderer is working, you can simply execute :
 
 \code
-livre --volume mem://1024,1024,512,32
+livre --volume mem://#1024,1024,512,32
 \endcode
 
 which will render an in memory test volume data structure. Here 1024, 1024 and
@@ -81,23 +81,22 @@ The command line parameters are shown below:
 
 \code
 Application Parameters
-  --volume arg                          URI of volume data source
   --animation [=arg(=1)] (=0)           Enable animation mode (optional frame
                                         delta for animation speed, use
                                         --animation=-<int> for reverse
                                         animation)
   --animation-follow-data               Enable animation and follow volume data
                                         stream (overrides --animation=value)
-  --frames arg (=[          0 4294967295 ])
+  --frames arg (=[          0     262143 ])
                                         Frames to render [start end)
   --num-frames arg (=4294967295)        Maximum nuber of frames to render
-  --camera-position arg (=[          0          0          1 ])
+  --camera-position arg (=[          0          0        1.5 ])
                                         Camera position
   --camera-lookat arg (=[          0          0          0 ])
                                         Camera orientation
-  --sync-camera                         Synchronize camera with other
-                                        applications
-  --zeroeq-schema arg (=hbp://)         ZeroEQ schema
+  --volume arg                          URI of volume data source
+  --transfer-function arg               .1dt transfer function file (from
+                                        ImageVis3D)
 
 Volume Renderer Parameters
   --gpu-cache-mem arg (=3072)  Maximum GPU cache memory (MB) - caches the
@@ -108,15 +107,10 @@ Volume Renderer Parameters
   --synchronous                Enable synchronous mode
   --min-lod arg (=0)           Minimum level of detail
   --max-lod arg (=9)           Maximum level of detail
-  --samples-per-ray arg (=512) Number of samples per ray
+  --samples-per-ray arg (=0)   Number of samples per ray. The value of 0
+                               (default) sets the number of samples
+                               automatically, based on the volume size
   --samples-per-pixel arg (=1) Number of samples per pixel
-  --transfer-function arg      .1dt transfer function file (from ImageVis3D)
-
-
-  --rest [host][:port]: Enable the REST bridge. Optional parameters
-        configure the web server, running by default on :4020
-  --zeroeq-publisher: URI where the application publishes ZeroEQ events
-  --zeroeq-subscriber: URI to where the application subscribes to
 
 \endcode
 
@@ -138,7 +132,9 @@ and other controllers for the interactive super computing.
 - Transfer function editor helps the users to attach different colors and
   opacities to voxel values. This editor automatically finds the livre application
   remotely and can modify the colors of the volumes. Each color channel and
-  alpha channel can be modified separately.
+  alpha channel can be modified separately. It is possible to see the histogram
+  in the alpha channel. With the help of the histogram, users can set their colors
+  and alphas to visualise specific part of the data.
 
 - The animation controller lets you play wşth the frames in Livre. It is enabled
   when livre is executed using the "--animation" parameters.

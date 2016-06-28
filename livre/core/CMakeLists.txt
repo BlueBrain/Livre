@@ -31,7 +31,6 @@ set(LIVRECORE_HEADERS
   events/EventHandlerFactory.h
   events/EventInfo.h
   events/EventMapper.h
-  maths/maths.h
   maths/Quantizer.h
   pipeline/Executable.h
   pipeline/Filter.h
@@ -89,6 +88,7 @@ set(LIVRECORE_SOURCES
   render/GLContext.cpp
   render/GLSLShaders.cpp
   render/Renderer.cpp
+  render/SelectVisibles.cpp
   render/TexturePool.cpp
   render/TextureState.cpp
   render/TransferFunction1D.cpp

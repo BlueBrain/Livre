@@ -5,8 +5,8 @@
 -# @ref Technical_Features
 -# @ref Architecture
     -# @ref Render_Thread
-    -# @ref GPU_Thread
-    -# @ref Data_Thread
+    -# @ref Upload_Threads
+    -# @ref Compute_Threads
     -# @ref Livre_Library
 -# @ref References
 
@@ -25,6 +25,7 @@ Livre is an out-of-core rendering engine that has the following features:
   ([source code](https://github.com/SCIInstitute/Tuvok.git)) volume data sets.
 - Real-time voxelisation of different data sources (surface meshes, BBP morphologies,
   local-field potentials, etc) through the use of plugins.
+- Highly parallel architecture for rendering, data uploading and different computational tasks.
 
 @image html livre_datasource.png "Livre rendering using an external data source"
 
@@ -38,35 +39,32 @@ Livre is an out-of-core rendering engine that has the following features:
 
 - Single-pass GPU Raycasting.
 
+@section Architecture Architecture
+
 @subsection Render_Thread Render thread
 
 - Computing the LOD tree according to the viewpoint and sending the request to other threads for
 the required nodes.
 - Rendering the scene with the retrieved/available data.
 
-@subsection GPU_Thread GPU upload thread
+@subsection Upload_Threads Upload threads
 
-- Uploading the data to the GPU, and modifying the tree.
+- Uploading the data to the to CPU memory and GPU memory
 - Sending results to the rendering thread.
-- Maintaining the GPU cache.
 
-@subsection Data_Thread Data thread
+@subsection Compute_Threads Compute threads
 
-- Uploading the data to CPU memory from disk/network etc and modifying the tree.
-- Sending results to the GPU thread.
-- Maintaining the main memory cache.
+- Computing the histogram of the visualised data.
 
 @subsection Livre_Library Livre library
 
 Livre is composed of 3 main libraries:
-- core: Collection of base classes for Cache, Pipeline, Visitors and Rendering.
-- Eq: Collection of implementations of classes for Equalizer classes.
-- Lib: Collection of implementations of classes for Cache such as "Data Cache", "Texture Cache"
-and Rendering.
+- core: Base classes for Cache, Pipeline, Visitors and Rendering.
+- Lib: Implementations of Cache classes i.e "Data Cache", "Texture Cache",
+implementation of the rendering pipeline.
+- Eq: Equalizer class implementations, RayCastRenderer.
 
-Additionally, there are 3 different data sources that make use of the VolumeDataSourcePlugin
-to support the following types of data sets:
-- remote: Proxy for a remote ZeroEQ-based data source service.
+There are 2 different data sources included in the Livre repository:
 - UVF: Supports pre-processed UVF volume data sets.
 - memory (livre/Lib/Data/MemoryDataSource): Generates in-memory volume data.
 

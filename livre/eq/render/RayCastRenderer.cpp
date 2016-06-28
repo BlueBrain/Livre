@@ -23,7 +23,6 @@
 #include <livre/core/render/Frustum.h>
 #include <livre/core/render/TransferFunction1D.h>
 #include <livre/core/data/LODNode.h>
-#include <livre/core/maths/maths.h>
 #include <livre/core/render/GLContext.h>
 
 #include <livre/lib/configuration/VolumeRendererParameters.h>

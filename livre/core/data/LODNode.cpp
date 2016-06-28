@@ -23,33 +23,31 @@
 namespace livre
 {
 
-LODNode LODNode::empty = LODNode();
-
 LODNode::LODNode( ) :
-    blockSize_( 0u )
+    _blockSize( 0u )
 {}
 
 LODNode::LODNode( const NodeId& nodeId,
                   const Vector3ui& blockSize,
                   const Vector3ui& levelTotalBlockDimensions )
-   : nodeId_( nodeId )
-   , blockSize_( blockSize )
+   : _nodeId( nodeId )
+   , _blockSize( blockSize )
 {
-    initialize_();
-    computeWorldBox_( levelTotalBlockDimensions );
+    _initialize();
+    _computeWorldBox( levelTotalBlockDimensions );
 }
 
 LODNode::LODNode( const NodeId& nodeId,
                   const Vector3ui& blockSize,
                   const Boxf& worldBox )
-   : nodeId_( nodeId )
-   , blockSize_( blockSize )
-   , worldBox_( worldBox )
+   : _nodeId( nodeId )
+   , _blockSize( blockSize )
+   , _worldBox( worldBox )
 {
-    initialize_();
+    _initialize();
 }
 
-void LODNode::computeWorldBox_( const Vector3ui& levelTotalBlockDimensions )
+void LODNode::_computeWorldBox( const Vector3ui& levelTotalBlockDimensions )
 {
     Vector3f lBoxCoordMin = getAbsolutePosition();
     Vector3f lBoxCoordMax( lBoxCoordMin + Vector3ui( 1 ));
@@ -58,18 +56,28 @@ void LODNode::computeWorldBox_( const Vector3ui& levelTotalBlockDimensions )
     lBoxCoordMin = lBoxCoordMin / levelTotalBlockDimensions[index];
     lBoxCoordMax = lBoxCoordMax / levelTotalBlockDimensions[index];
 
-    worldBox_ =  Boxf( lBoxCoordMin, lBoxCoordMax );
+    _worldBox = Boxf( lBoxCoordMin, lBoxCoordMax );
 }
 
-void LODNode::initialize_( )
+void LODNode::_initialize( )
 {
-    const Vector3i pntPos = getAbsolutePosition() * blockSize_;
-    localVoxelBox_ = Boxui( pntPos, pntPos + blockSize_ );
+    const Vector3ui& pntPos = getAbsolutePosition() * _blockSize;
+    _localVoxelBox = Boxui( pntPos, pntPos + _blockSize );
 }
 
 Vector3f LODNode::getRelativePosition() const
 {
     return Vector3f( getAbsolutePosition( )) / float( 1 << getRefLevel( ));
+}
+
+std::ostream& operator<<( std::ostream& os, const LODNode& lodNode )
+{
+    os << "Node Id: " << lodNode.getNodeId()
+       << " World coords: " << lodNode.getWorldBox()
+       << " Voxel box: " << lodNode.getVoxelBox()
+       << " Block size: " << lodNode.getBlockSize();
+
+    return os;
 }
 
 }

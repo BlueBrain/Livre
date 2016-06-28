@@ -19,6 +19,8 @@
 
 #include <livre/lib/pipeline/VisibleSetGeneratorFilter.h>
 #include <livre/lib/cache/TextureCache.h>
+#include <livre/lib/configuration/VolumeRendererParameters.h>
+
 #include <livre/core/pipeline/InputPort.h>
 #include <livre/core/pipeline/Workers.h>
 #include <livre/core/render/SelectVisibles.h>

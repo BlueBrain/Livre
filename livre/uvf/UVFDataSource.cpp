@@ -250,7 +250,7 @@ public:
                 tuvok::BrickKey( frame, treeLevelToTuvokLevel(
                                             node.getRefLevel( )), brickIndex );
 
-        const UINT64VECTOR4 coords = _uvfDataSetPtr->KeyToTOCVector( brickKey );
+        const UINT64VECTOR4& coords = _uvfDataSetPtr->KeyToTOCVector( brickKey );
         const TOCEntry& blockInfo = _uvfTOCBlock->GetBrickInfo( coords );
 
         MemoryUnitPtr memUnitPtr;

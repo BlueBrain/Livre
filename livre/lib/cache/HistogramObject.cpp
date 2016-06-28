@@ -94,7 +94,7 @@ public:
                 std::static_pointer_cast< const TextureDataObject >(
                     _dataCache.get( _histogramObject.getId( )));
 
-        if( !textureData->isLoaded( ))
+        if( !textureData )
             return false;
 
         const void* rawData = textureData->getDataPtr();

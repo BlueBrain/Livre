@@ -22,7 +22,6 @@
 #define _livreTypes_h_
 
 #include <livre/core/types.h>
-#include <livre/lib/configuration/VolumeRendererParameters.h>
 
 namespace livre
 {
@@ -34,6 +33,7 @@ class TextureCache;
 class TextureDataCache;
 class TextureDataObject;
 class TextureObject;
+class VolumeRendererParameters;
 
 struct ApplicationParameters;
 
@@ -43,10 +43,6 @@ typedef std::shared_ptr< const HistogramObject > ConstHistogramObjectPtr;
 typedef std::shared_ptr< TextureDataObject > TextureDataObjectPtr;
 typedef std::shared_ptr< TextureObject > TextureObjectPtr;
 typedef std::shared_ptr< HistogramObject > HistogramObjectPtr;
-
-typedef std::unordered_map< Identifier, Histogram > HistogramMap;
-
-static const uint32_t CONNECTION_ID( 0u );
 
 }
 

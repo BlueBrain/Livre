@@ -42,7 +42,6 @@ TexturePool::TexturePool( const Vector3ui& maxBlockSize,
 void TexturePool::generateTexture( TextureStatePtr textureState )
 {
     LBASSERT( textureState->textureId == INVALID_TEXTURE_ID );
-
     if( !_textureStack.empty() )
     {
         textureState->textureId = _textureStack.back();
@@ -61,21 +60,19 @@ void TexturePool::generateTexture( TextureStatePtr textureState )
 
         // Allocate a texture
         glTexImage3D( GL_TEXTURE_3D, 0, _internalFormat,
-                      _maxBlockSize[0], _maxBlockSize[1], _maxBlockSize[2], 0,
+                      _maxBlockSize[ 0 ], _maxBlockSize[ 1 ], _maxBlockSize[ 2 ], 0,
                       _format, _gpuDataType, (GLvoid *)NULL );
 
         const GLenum glErr = glGetError();
-        if ( glErr != GL_NO_ERROR )
-        {
-            LBERROR << "Error loading the texture into GPU, error number : " << glErr  << std::endl;
-        }
+        if( glErr != GL_NO_ERROR )
+            LBERROR << "Error loading the texture into GPU, error number: " << glErr << std::endl;
+
     }
 }
 
 void TexturePool::releaseTexture( TextureStatePtr textureState )
 {
     LBASSERT( textureState->textureId );
-
     _textureStack.push_back( textureState->textureId );
     textureState->textureId = INVALID_TEXTURE_ID;
 }

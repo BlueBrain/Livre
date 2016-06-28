@@ -20,8 +20,11 @@
 #include <livre/lib/pipeline/DataUploadFilter.h>
 #include <livre/lib/cache/TextureCache.h>
 #include <livre/lib/cache/TextureDataCache.h>
+#include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/core/pipeline/Pipeline.h>
 #include <livre/core/data/NodeId.h>
+
+#include <eq/gl.h>
 
 namespace livre
 {
@@ -42,6 +45,7 @@ public:
     {
         ConstCacheObjects cacheObjects;
         cacheObjects.reserve( visibles.size( ));
+        bool isTextureUploaded = false;
         for( const NodeId& nodeId: visibles )
         {
             ConstCacheObjectPtr texture = _textureCache.get( nodeId.getId( ));
@@ -50,10 +54,14 @@ public:
                 ConstCacheObjectPtr data = _textureCache.getDataCache().load( nodeId.getId( ));
                 cacheObjects.push_back( _textureCache.load( nodeId.getId( )));
                 data.reset();
+                isTextureUploaded = true;
             }
             else
                 cacheObjects.push_back( texture );
         }
+
+        if( isTextureUploaded )
+            glFinish();
 
         return cacheObjects;
     }
