@@ -664,7 +664,7 @@ std::string Channel::getDumpImageFileName() const
 {
     std::stringstream filename;
     filename << std::setw( 5 ) << std::setfill('0')
-             << _impl->_frameInfo.frameId << ".png";
+             << _impl->_frameInfo.timeStep << ".png";
     return filename.str();
 }
 
