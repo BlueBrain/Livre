@@ -77,6 +77,8 @@ bool CacheObject::_notifyLoad()
 void CacheObject::_notifyUnload()
 {
     WriteLock lock( _status->mutex );
+    if( !_isLoaded( ))
+        return;
     _unload();
 }
 
