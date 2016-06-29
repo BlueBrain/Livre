@@ -33,11 +33,11 @@
 #include <livre/core/data/VolumeInformation.h>
 #include <livre/core/mathTypes.h>
 
-#define BOOST_TEST_MODULE DataCache
+#define BOOST_TEST_MODULE Cache
 #include <boost/test/unit_test.hpp>
 
 
-const uint32_t BLOCK_SIZE = 40; // 32 + 2 * 4 voxels is padding
+const uint32_t BLOCK_SIZE = 32;
 const uint32_t VOXEL_SIZE_X = 1024;
 const uint32_t VOXEL_SIZE_Y = 1024;
 const uint32_t VOXEL_SIZE_Z = 512;

@@ -110,14 +110,15 @@ public:
      */
     LIVRECORE_API bool isParent( const LODNode& parentNode ) const;
 
-    LIVRECORE_API const Vector3ui& getBlockSize() const { return _blockSize; } //!< @internal
+    /** @return the size of the block without paddings */
+    LIVRECORE_API const Vector3ui& getBlockSize() const { return _blockSize; }
 
 private:
 
     NodeId _nodeId; //!< Node id.
-    Vector3ui _blockSize; //!< Number of blocks in each dimension.
+    Vector3ui _blockSize; //!< Number of voxels in each dimension without paddings.
     Boxui _localVoxelBox; //!< Voxelwise position and dimension in reflevel resolution in model space.
-    Boxf _worldBox; //!< World box.
+    Boxf _worldBox; //!< World space box in normalized coordinates [ 0, 1.0 ).
     void _initialize( ); //!< Computes the internal values of LODBox (voxel extents, block extents, etc ).
     void _computeWorldBox( const Vector3ui& levelTotalBlockDimensions ); //!< compute world box.
 };
