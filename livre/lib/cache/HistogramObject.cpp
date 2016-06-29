@@ -60,18 +60,19 @@ public:
                   const uint64_t scaleFactor ) const
     {
         uint64_t* bins = _histogram->getBins();
-        const size_t binCount = _histogram->getBinsSize();
+        const double binCount = _histogram->getBinsSize();
         const double minVal = std::numeric_limits< SRC_TYPE >::min();
         const double maxVal = std::numeric_limits< SRC_TYPE >::max();
         const double range = maxVal - minVal;
 
-        for( size_t i = padding.x(); i < blockSize.x() - padding.x(); ++i )
-            for( size_t j = padding.y(); j < blockSize.y() - padding.y(); ++j )
-                for( size_t k = padding.z(); k < blockSize.z() -padding.z(); ++k )
+        const Vector3ui dataBlockSize = blockSize + padding * 2;
+        for( size_t i = padding.x(); i < dataBlockSize.x() - padding.x(); ++i )
+            for( size_t j = padding.y(); j < dataBlockSize.x() - padding.y(); ++j )
+                for( size_t k = padding.z(); k < dataBlockSize.x() - padding.z(); ++k )
                     for( size_t c = 0; c < compCount; ++c )
                     {
-                        const size_t index = compCount * i * blockSize.y() * blockSize.z() +
-                                             compCount * j * blockSize.z() +
+                        const size_t index = compCount * i * dataBlockSize.y() * dataBlockSize.z() +
+                                             compCount * j * dataBlockSize.z() +
                                              compCount * k + c;
                         const double data = rawData[ index ];
                         const size_t binIndex =
@@ -94,7 +95,7 @@ public:
                 std::static_pointer_cast< const TextureDataObject >(
                     _dataCache.get( _histogramObject.getId( )));
 
-        if( !textureData )
+        if( !textureData || !textureData->isLoaded( ))
             return false;
 
         const void* rawData = textureData->getDataPtr();
@@ -144,7 +145,6 @@ public:
                 LBTHROW( std::runtime_error( "Unimplemented data type." ));
            }
         }
-
         return true;
     }
 
