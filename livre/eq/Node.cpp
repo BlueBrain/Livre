@@ -164,8 +164,12 @@ TextureDataCache& Node::getTextureDataCache()
     return *_impl->_textureDataCache;
 }
 
-
 livre::HistogramCache& livre::Node::getHistogramCache()
+{
+    return *_impl->_histogramCache;
+}
+
+const livre::HistogramCache& livre::Node::getHistogramCache() const
 {
     return *_impl->_histogramCache;
 }

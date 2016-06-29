@@ -19,6 +19,7 @@
 
 #include <livre/core/data/DataSource.h>
 #include <livre/core/data/VolumeInformation.h>
+#include <livre/core/data/Histogram.h>
 #include <livre/core/render/GLSLShaders.h>
 #include <livre/core/render/Frustum.h>
 #include <livre/core/render/TransferFunction1D.h>
@@ -28,7 +29,9 @@
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/lib/cache/TextureCache.h>
 #include <livre/lib/cache/TextureDataCache.h>
+#include <livre/lib/cache/HistogramCache.h>
 #include <livre/lib/cache/TextureObject.h>
+#include <livre/lib/cache/HistogramObject.h>
 
 #include <livre/eq/FrameData.h>
 #include <livre/eq/render/RayCastRenderer.h>
@@ -93,7 +96,8 @@ const GLfloat fullScreenQuad[] = { -1.0f, -1.0f, 0.0f,
 
 struct RayCastRenderer::Impl
 {
-    Impl( const TextureCache& textureCache,
+    Impl( const HistogramCache& histogramCache,
+          const TextureCache& textureCache,
           const uint32_t samplesPerRay,
           const uint32_t samplesPerPixel )
         : _renderTexture( GL_TEXTURE_RECTANGLE_ARB, glewGetContext( ))
@@ -102,13 +106,12 @@ struct RayCastRenderer::Impl
         , _computedSamplesPerRay( samplesPerRay )
         , _transferFunctionTexture( 0 )
         , _textureCache( textureCache )
+        , _histogramCache( histogramCache )
         , _dataSource( textureCache.getDataCache().getDataSource( ))
         , _volInfo( _dataSource.getVolumeInfo( ))
         , _posVBO( 0 )
     {
-        TransferFunction1D transferFunction;
-        initTransferFunction( transferFunction );
-
+        updateTransferFunctionTexture();
         int error = _rayCastShaders.loadShaders( ShaderData( vertRayCast_glsl,
                                                              fragRayCast_glsl ));
 
@@ -148,15 +151,16 @@ struct RayCastRenderer::Impl
 
     void update( const FrameData& frameData )
     {
-        initTransferFunction( frameData.getRenderSettings().getTransferFunction( ));
+        _transferFunction = frameData.getRenderSettings().getTransferFunction();
         _nSamplesPerRay = frameData.getVRParameters().getSamplesPerRay();
         _computedSamplesPerRay = _nSamplesPerRay;
         _nSamplesPerPixel = frameData.getVRParameters().getSamplesPerPixel();
+        updateTransferFunctionTexture();
     }
 
-    void initTransferFunction( const TransferFunction1D& transferFunction )
+    void updateTransferFunctionTexture()
     {
-        assert( transferFunction.getNumChannels() == 4u );
+        assert( _transferFunction.getNumChannels() == 4u );
 
         if( _transferFunctionTexture == 0 )
         {
@@ -171,9 +175,9 @@ struct RayCastRenderer::Impl
         }
         glBindTexture( GL_TEXTURE_1D, _transferFunctionTexture );
 
-        const uint8_t* transferFunctionData = transferFunction.getLut();
+        const uint8_t* transferFunctionData = _transferFunction.getLut();
         glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA,
-                       GLsizei( transferFunction.getLutSize() / 4u ), 0,
+                       GLsizei( _transferFunction.getLutSize() / 4u ), 0,
                        GL_RGBA, GL_UNSIGNED_BYTE, transferFunctionData );
     }
 
@@ -370,11 +374,42 @@ struct RayCastRenderer::Impl
         positions.emplace_back( maxPos[0], maxPos[1], minPos[2] );
     }
 
+    bool isBrickVisible( const NodeId& nodeId ) const
+    {
+        ConstHistogramObjectPtr cacheObject = std::static_pointer_cast< const HistogramObject >(
+                    _histogramCache.get( nodeId.getId( )));
+        if( !cacheObject || !cacheObject->isLoaded())
+            return true;
+
+        const Histogram& histogram = cacheObject->getHistogram();
+        const size_t nChannels = _transferFunction.getNumChannels();
+        if(( _transferFunction.getLutSize() / nChannels ) != histogram.getBinsSize( ))
+            return true;
+
+        const uint64_t* histData = histogram.getBins();
+        const uint8_t* lutData = _transferFunction.getLut();
+
+        for( size_t i = 0; i < histogram.getBinsSize(); ++i )
+           if( histData[ i ] * (uint64_t)lutData[ i * nChannels + 3 ] > 0 )
+               return true;
+
+        return false;
+    }
+
     void onFrameRender( const NodeIds& bricks )
     {
         size_t index = 0;
         for( const NodeId& brick: bricks )
-            renderBrick( brick, index++ );
+        {
+            std::cout << "Rendering: " << brick.getId() << " ";
+            if( isBrickVisible( brick ))
+            {
+                std::cout << " Rendered" ;
+                renderBrick( brick, index++ );
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
     }
 
     void renderBrickVBO( const size_t index, bool front, bool back )
@@ -499,17 +534,23 @@ struct RayCastRenderer::Impl
     uint32_t _transferFunctionTexture;
     std::vector< uint32_t > _usedTextures[2]; // last, current frame
     const TextureCache& _textureCache;
+    const HistogramCache& _histogramCache;
     const DataSource& _dataSource;
     const VolumeInformation& _volInfo;
     GLuint _posVBO;
     GLuint _quadVBO;
     GLint _drawBuffer;
+    TransferFunction1D _transferFunction;
 };
 
-RayCastRenderer::RayCastRenderer( const TextureCache& textureCache,
+RayCastRenderer::RayCastRenderer( const HistogramCache& histogramCache,
+                                  const TextureCache& textureCache,
                                   const uint32_t samplesPerRay,
                                   const uint32_t samplesPerPixel )
-    : _impl( new RayCastRenderer::Impl( textureCache, samplesPerRay, samplesPerPixel ))
+    : _impl( new RayCastRenderer::Impl( histogramCache,
+                                        textureCache,
+                                        samplesPerRay,
+                                        samplesPerPixel ))
 {}
 
 RayCastRenderer::~RayCastRenderer()

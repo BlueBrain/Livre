@@ -51,6 +51,11 @@ public:
      */
     HistogramCache& getHistogramCache();
 
+    /**
+     * @return The histogram cache.
+     */
+    const HistogramCache& getHistogramCache() const;
+
 private:
     bool configInit( const eq::uint128_t& initId ) final;
     void frameStart(  const eq::uint128_t& frameId,

@@ -130,10 +130,11 @@ struct SendHistogramFilter : public Filter
 struct EqRaycastRenderer : public RayCastRenderer
 {
     EqRaycastRenderer( Channel::Impl& channel,
+                       const HistogramCache& histogramCache,
                        const TextureCache& textureCache,
                        uint32_t samplesPerRay,
                        uint32_t samplesPerPixel )
-        : RayCastRenderer( textureCache, samplesPerRay, samplesPerPixel )
+        : RayCastRenderer( histogramCache, textureCache, samplesPerRay, samplesPerPixel )
         , _channel( channel )
     {}
 
@@ -178,7 +179,10 @@ public:
             getFrameData()->getVRParameters().getSamplesPerPixel();
 
         const Window* window = static_cast< const Window* >( _channel->getWindow( ));
+        const Node* node = static_cast< const Node* >( _channel->getNode( ));
+
         _renderer.reset( new EqRaycastRenderer( *this,
+                                                node->getHistogramCache(),
                                                 window->getTextureCache(),
                                                 nSamplesPerRay,
                                                 nSamplesPerPixel ));

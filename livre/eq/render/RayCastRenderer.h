@@ -38,7 +38,8 @@ public:
      * @param samplesPerPixel Number of samples per pixel.
      * @param volInfo Volume information.
      */
-    RayCastRenderer( const TextureCache& textureCache,
+    RayCastRenderer( const HistogramCache& histogramCache,
+                     const TextureCache& textureCache,
                      uint32_t samplesPerRay,
                      uint32_t samplesPerPixel );
     ~RayCastRenderer();
