@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # master {#master}
 
+# Release 0.6 (2016-06-30)
+
 * [#302](https://github.com/BlueBrain/Livre/pull/302):
   Histogram visualisation added to GUI.
 * [#301](https://github.com/BlueBrain/Livre/pull/301):
@@ -25,7 +27,7 @@ Changelog {#Changelog}
 * [#279](https://github.com/BlueBrain/Livre/pull/279):
   Adapt to the renaming of zeq to ZeroEQ
 
-# Release 0.5 (2016-04-06) {#Release050}
+# Release 0.5 (2016-04-06)
 
 * [#270](https://github.com/BlueBrain/Livre/pull/270):
   Fix #113. SSE selection algorithm is simplified
@@ -44,7 +46,7 @@ Changelog {#Changelog}
 * [#219](https://github.com/BlueBrain/Livre/pull/219):
   LivreGUI: Editable frame range in animation panel
 
-# Release 0.4 (2015-11-09) {#Release040}
+# Release 0.4 (2015-11-09)
 
 * [#213](https://github.com/BlueBrain/Livre/pull/213):
   Fix [#207](https://github.com/BlueBrain/Livre/issues/207).
@@ -94,7 +96,7 @@ Changelog {#Changelog}
   Fix [LIV-157](https://bbpteam.epfl.ch/project/issues/browse/LIV-157)
   rendering of overlapping LOD nodes from different levels
 
-# Release 0.3 (2015-07-07) {#Release030}
+# Release 0.3 (2015-07-07)
 
 * [#37](https://github.com/BlueBrain/Livre/pull/37):
   New command line option to enable synchronous mode (wait until every block has
@@ -164,6 +166,6 @@ Changelog {#Changelog}
   Window title has been improved to show the application name and its version
   number
 
-# Release 0.2 (2014-10-15) {#Release020}
+# Release 0.2 (2014-10-15)
 
 * BBP internal release
