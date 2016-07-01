@@ -192,7 +192,7 @@ public:
         return Frustum( modelView, projection );
     }
 
-    eq::Matrix4f computeModelView() const
+    Matrix4f computeModelView() const
     {
         const CameraSettings& cameraSettings =
             getFrameData()->getCameraSettings();

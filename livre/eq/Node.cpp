@@ -106,6 +106,7 @@ public:
         const livre::VolumeInformation& info =
                 _dataSource->getVolumeInfo();
 
+        _config->sendEvent( VOLUME_BOUNDING_BOX ) << info.boundingBox;
         _config->sendEvent( VOLUME_FRAME_RANGE ) << info.frameRange;
     }
 
