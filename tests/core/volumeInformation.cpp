@@ -50,7 +50,8 @@ BOOST_AUTO_TEST_CASE( defaultVolumeInformation )
     BOOST_CHECK_EQUAL( volume.maxPos, livre::Vector3f( 0.f ));
     BOOST_CHECK_EQUAL( volume.voxels, livre::Vector3ui( 256u ));
     BOOST_CHECK_EQUAL( volume.worldSize, livre::Vector3f( 0.f ));
-    BOOST_CHECK_EQUAL( volume.boundingBox, livre::Boxf::makeUnitBox( ));
+    BOOST_CHECK_EQUAL( volume.dataToLivreTransform, livre::Matrix4f( ));
+    BOOST_CHECK_EQUAL( volume.meterToDataUnitRatio, 1.0f );
     BOOST_CHECK_EQUAL( volume.worldSpacePerVoxel, 0.f );
     BOOST_CHECK_EQUAL( volume.frameRange, livre::INVALID_FRAME_RANGE );
 }

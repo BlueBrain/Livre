@@ -382,18 +382,16 @@ public:
         const DataSource& dataSource =
                 node->getTextureDataCache().getDataSource();
         const VolumeInformation& info = dataSource.getVolumeInfo();
-        Vector3f voxelSize = info.boundingBox.getSize() / info.voxels;
-        std::string unit = "m";
-        if( voxelSize.x() < 0.000001f )
-        {
+        const Vector3f resolution = info.resolution;
+
+        const float ratio = 1.0f / dataSource.getVolumeInfo().meterToDataUnitRatio;
+        std::string unit = "unit unknown";
+        if( ratio == 1e-6 )
             unit = "um";
-            voxelSize *= 1000000;
-        }
-        else if( voxelSize.x() < 0.001f )
-        {
+        else if( ratio == 1e-3 )
             unit = "mm";
-            voxelSize *= 1000;
-        }
+        else if( ratio == 1.0f )
+            unit = "m";
 
         const size_t nBricks = _renderer->getNumBricksUsed();
         const float mbBricks =
@@ -402,8 +400,9 @@ public:
         os << nBricks << " bricks / " << mbBricks << " MB rendered" << std::endl
            << "Total resolution " << info.voxels << " depth "
            << info.rootNode.getDepth() << std::endl
-           << "Block resolution " << info.maximumBlockSize << std::endl
-           << unit << "/voxel " << voxelSize;
+           << "Block resolution " << info.maximumBlockSize << std::endl;
+        if( resolution.find_min() > 0.0f )
+            os << resolution << "voxel/" << unit;
 
         float y = 240.f;
         std::string text = os.str();
@@ -606,7 +605,7 @@ Channel::~Channel()
 
 bool Channel::configInit( const eq::uint128_t& initId )
 {
-    if( !eq::Channel::configInit( initId ) )
+    if( !eq::Channel::configInit( initId ))
         return false;
 
     _impl->configInit();

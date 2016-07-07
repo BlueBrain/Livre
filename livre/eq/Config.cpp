@@ -91,7 +91,6 @@ public:
         , defaultLatency( 0 )
         , currentCanvas( 0 )
         , eventMapper( EventHandlerFactoryPtr( new EqEventHandlerFactory ))
-        , volumeBBox( Boxf::makeUnitBox( ))
         , redraw( true )
         , dataFrameRange( INVALID_FRAME_RANGE )
     {}
@@ -157,7 +156,7 @@ public:
     eq::Canvas* currentCanvas;
     EventMapper eventMapper;
     FrameData framedata;
-    Boxf volumeBBox;
+    Matrix4f dataToLivreTransform;
 #ifdef LIVRE_USE_ZEROEQ
     std::unique_ptr< zeroeq::Communicator > communicator;
 #endif
@@ -499,8 +498,8 @@ bool Config::handleEvent( eq::EventICommand command )
 {
     switch( command.getEventType( ))
     {
-    case VOLUME_BOUNDING_BOX:
-        _impl->volumeBBox = command.read< Boxf >();
+    case DATA_TO_LIVRE_TRANSFORM:
+        _impl->dataToLivreTransform = command.read< Matrix4f >();
         return false;
 
     case VOLUME_FRAME_RANGE:

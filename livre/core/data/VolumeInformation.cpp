@@ -34,8 +34,9 @@ VolumeInformation::VolumeInformation()
     , maxPos( 0.0f )
     , voxels( 256u )
     , worldSize( 0.0f )
-    , boundingBox( Boxf::makeUnitBox( ))
+    , resolution( Vector3f( -1.0f, -1.0f, -1.0f ))
     , worldSpacePerVoxel( 0.0f )
+    , meterToDataUnitRatio( 1.0f )
     , frameRange( INVALID_FRAME_RANGE )
 {}
 

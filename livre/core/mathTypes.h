@@ -24,6 +24,7 @@
 
 #include <livre/core/types.h>
 #include <vmmlib/types.hpp>
+#include <vmmlib/matrix.hpp>
 #include <vmmlib/vector.hpp> // inline constants
 
 namespace livre
