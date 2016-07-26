@@ -28,8 +28,7 @@ namespace livre
 
 enum ConfigEventType
 {
-    DATA_TO_LIVRE_TRANSFORM = eq::Event::USER,
-    GRAB_IMAGE,
+    GRAB_IMAGE = eq::Event::USER,
     VOLUME_FRAME_RANGE,
     REDRAW,
     HISTOGRAM_DATA

@@ -45,6 +45,7 @@
 #include <eq/eq.h>
 
 #include <deque>
+#include <functional>
 
 namespace livre
 {
@@ -156,7 +157,6 @@ public:
     eq::Canvas* currentCanvas;
     EventMapper eventMapper;
     FrameData framedata;
-    Matrix4f dataToLivreTransform;
 #ifdef LIVRE_USE_ZEROEQ
     std::unique_ptr< zeroeq::Communicator > communicator;
 #endif
@@ -241,15 +241,16 @@ void Config::resetCamera()
         getApplicationParameters().cameraPosition );
     _impl->framedata.getCameraSettings().setCameraLookAt(
         getApplicationParameters().cameraLookAt );
-#ifdef LIVRE_USE_ZEROEQ
-    _impl->communicator->publishCamera();
-#endif
 }
 
 bool Config::init( const int argc LB_UNUSED, char** argv LB_UNUSED )
 {
 #ifdef LIVRE_USE_ZEROEQ
     _impl->communicator.reset( new zeroeq::Communicator( *this, argc, argv ));
+
+    _impl->framedata.getCameraSettings().registerNotifyChanged(
+                std::bind( &zeroeq::Communicator::publishCamera,
+                           _impl->communicator.get(), std::placeholders::_1 ));
 #endif
 
     resetCamera();
@@ -482,10 +483,6 @@ bool Config::handleEvent( const eq::ConfigEvent* event )
 
     if( hasEvent )
     {
-#ifdef LIVRE_USE_ZEROEQ
-        if( _impl->framedata.getCameraSettings() != cameraSettings )
-            _impl->communicator->publishCamera();
-#endif
         _impl->redraw = true;
         return true;
     }
@@ -498,10 +495,6 @@ bool Config::handleEvent( eq::EventICommand command )
 {
     switch( command.getEventType( ))
     {
-    case DATA_TO_LIVRE_TRANSFORM:
-        _impl->dataToLivreTransform = command.read< Matrix4f >();
-        return false;
-
     case VOLUME_FRAME_RANGE:
     {
         _impl->dataFrameRange = command.read< Vector2ui >();

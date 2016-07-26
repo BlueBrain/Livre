@@ -4,6 +4,7 @@ Changelog {#Changelog}
 # master {#master}
 
 * [#313](https://github.com/BlueBrain/Livre/pull/313):
+  Fixed the camera synchronization between applications.
   Replaced the data bounding box by the data to Livre spaces 
   transform matrix computed by the datasource for camera 
   synchronization. 

@@ -106,7 +106,6 @@ public:
         const livre::VolumeInformation& info =
                 _dataSource->getVolumeInfo();
 
-        _config->sendEvent( DATA_TO_LIVRE_TRANSFORM ) << info.dataToLivreTransform;
         _config->sendEvent( VOLUME_FRAME_RANGE ) << info.frameRange;
     }
 

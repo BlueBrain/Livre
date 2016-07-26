@@ -384,7 +384,7 @@ public:
         const VolumeInformation& info = dataSource.getVolumeInfo();
         const Vector3f resolution = info.resolution;
 
-        const float ratio = 1.0f / dataSource.getVolumeInfo().meterToDataUnitRatio;
+        const float ratio = 1.0f / info.meterToDataUnitRatio;
         std::string unit = "unit unknown";
         if( ratio == 1e-6 )
             unit = "um";

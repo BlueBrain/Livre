@@ -30,15 +30,11 @@ BOOST_AUTO_TEST_CASE( defaultCameraSettings )
 {
     livre::CameraSettings cameraSettings;
 
-    float matrixValues[16];
-    std::copy( cameraSettings.getMatrix(),
-               cameraSettings.getMatrix() + 16, matrixValues );
-
     livre::Matrix4f identity;
 
     for( int i = 0; i < 16; ++i )
     {
-        BOOST_CHECK_CLOSE( matrixValues[i], identity.data()[i],
+        BOOST_CHECK_CLOSE( cameraSettings.getModelViewMatrix().data()[i], identity.data()[i],
                            TOLERANCE );
     }
 }
@@ -55,12 +51,11 @@ BOOST_AUTO_TEST_CASE( cameraSettingsSpinModel )
 
     cameraSettings.spinModel( deltaX, deltaY );
 
-    float matrixValues[16];
-    std::copy( cameraSettings.getMatrix(),
-               cameraSettings.getMatrix() + 16, matrixValues );
-
     for( int i = 0; i < 16; ++i )
-        BOOST_CHECK_CLOSE( matrixValues[i], correctMatrix[i], TOLERANCE );
+    {
+        BOOST_CHECK_CLOSE( cameraSettings.getModelViewMatrix().data()[i], correctMatrix[i],
+                           TOLERANCE );
+    }
 }
 
 BOOST_AUTO_TEST_CASE( cameraSettingsMoveCamera )
@@ -76,12 +71,11 @@ BOOST_AUTO_TEST_CASE( cameraSettingsMoveCamera )
 
     cameraSettings.moveCamera( deltaX, deltaY, deltaZ );
 
-    float matrixValues[16];
-    std::copy( cameraSettings.getMatrix(),
-               cameraSettings.getMatrix() + 16, matrixValues );
-
     for( int i = 0; i < 16; ++i )
-        BOOST_CHECK_CLOSE( matrixValues[i], correctMatrix[i], TOLERANCE );
+    {
+        BOOST_CHECK_CLOSE( cameraSettings.getModelViewMatrix().data()[i], correctMatrix[i],
+                           TOLERANCE );
+    }
 }
 
 BOOST_AUTO_TEST_CASE( cameraSettingsSetCameraPosition )
@@ -96,12 +90,11 @@ BOOST_AUTO_TEST_CASE( cameraSettingsSetCameraPosition )
 
     cameraSettings.setCameraPosition( pos );
 
-    float matrixValues[16];
-    std::copy( cameraSettings.getMatrix(),
-               cameraSettings.getMatrix() + 16, matrixValues );
-
     for( int i = 0; i < 16; ++i )
-        BOOST_CHECK_CLOSE( matrixValues[i], correctMatrix[i], TOLERANCE );
+    {
+        BOOST_CHECK_CLOSE( cameraSettings.getModelViewMatrix().data()[i], correctMatrix[i],
+                           TOLERANCE );
+    }
 }
 
 BOOST_AUTO_TEST_CASE( cameraSettingsSetCameraLookat )
@@ -117,12 +110,11 @@ BOOST_AUTO_TEST_CASE( cameraSettingsSetCameraLookat )
 
     cameraSettings.setCameraLookAt( lookat );
 
-    float matrixValues[16];
-    std::copy( cameraSettings.getMatrix(),
-               cameraSettings.getMatrix() + 16, matrixValues );
-
     for( int i = 0; i < 16; ++i )
-        BOOST_CHECK_CLOSE( matrixValues[i], correctMatrix[i], TOLERANCE );
+    {
+        BOOST_CHECK_CLOSE( cameraSettings.getModelViewMatrix().data()[i], correctMatrix[i],
+                           TOLERANCE );
+    }
 }
 
 BOOST_AUTO_TEST_CASE( cameraSettingsEverything )
@@ -144,10 +136,9 @@ BOOST_AUTO_TEST_CASE( cameraSettingsEverything )
     cameraSettings.spinModel( deltaX, deltaY );
     cameraSettings.moveCamera( deltaX, deltaY, deltaZ );
 
-    float matrixValues[16];
-    std::copy( cameraSettings.getMatrix(),
-               cameraSettings.getMatrix() + 16, matrixValues );
-
     for( int i = 0; i < 16; ++i )
-        BOOST_CHECK_CLOSE( matrixValues[i], correctMatrix[i], TOLERANCE );
+    {
+        BOOST_CHECK_CLOSE( cameraSettings.getModelViewMatrix().data()[i], correctMatrix[i],
+                           TOLERANCE );
+    }
 }
