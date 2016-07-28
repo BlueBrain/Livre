@@ -31,6 +31,7 @@
 #include <livre/core/pipeline/Pipeline.h>
 
 #include <livre/core/render/FrameInfo.h>
+#include <livre/core/render/ClipPlanes.h>
 
 namespace livre
 {
@@ -140,6 +141,7 @@ struct RenderPipeline::Impl
                  const Viewport& viewport,
                  PipeFilter redrawFilter,
                  PipeFilter sendHistogramFilter,
+                 const ClipPlanes& clipPlanes,
                  Renderer& renderer,
                  NodeAvailability& availability ) const
     {
@@ -175,9 +177,11 @@ struct RenderPipeline::Impl
         visibleSetGenerator.getPromise( "DataRange" ).set( dataRange );
         visibleSetGenerator.getPromise( "Params" ).set( vrParams );
         visibleSetGenerator.getPromise( "Viewport" ).set( pixelViewPort );
+        visibleSetGenerator.getPromise( "ClipPlanes" ).set( clipPlanes );
 
         renderFilter.getPromise( "Frustum" ).set( frameInfo.frustum );
         renderFilter.getPromise( "Viewport" ).set( pixelViewPort );
+        renderFilter.getPromise( "ClipPlanes" ).set( clipPlanes );
 
         if( !vrParams.getSynchronousMode( ))
             redrawFilter.schedule( _renderExecutor );
@@ -230,6 +234,7 @@ void RenderPipeline::render( const VolumeRendererParameters& vrParams,
                              const Viewport& viewport,
                              const PipeFilter& redrawFilter,
                              const PipeFilter& sendHistogramFilter,
+                             const ClipPlanes& clipPlanes,
                              Renderer& renderer,
                              NodeAvailability& avaibility ) const
 {
@@ -240,6 +245,7 @@ void RenderPipeline::render( const VolumeRendererParameters& vrParams,
                    viewport,
                    redrawFilter,
                    sendHistogramFilter,
+                   clipPlanes,
                    renderer,
                    avaibility );
 }

@@ -25,6 +25,7 @@
 #include <livre/core/render/SelectVisibles.h>
 #include <livre/core/visitor/DFSTraversal.h>
 #include <livre/core/render/Frustum.h>
+#include <livre/core/render/ClipPlanes.h>
 
 #include <lunchbox/pluginRegisterer.h>
 
@@ -57,13 +58,15 @@ Identifiers getVisibles( const livre::DataSource& dataSource,
     const livre::Matrix4f mvMat( mvArray, mvArray + 16 );
     const livre::Frustum frustum( mvMat, projMat );
 
+    livre::ClipPlanes planes;
     livre::SelectVisibles selectVisibles( dataSource,
                                           frustum,
                                           windowHeight,
                                           screenSpaceError,
                                           minLOD,
                                           maxLOD,
-                                          {{ 0.0f, 1.0f }});
+                                          {{ 0.0f, 1.0f }},
+                                          planes );
 
     livre::DFSTraversal traverser;
     traverser.traverse( dataSource.getVolumeInfo().rootNode,

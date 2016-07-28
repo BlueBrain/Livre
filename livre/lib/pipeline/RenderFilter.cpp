@@ -22,9 +22,8 @@
 
 #include <livre/core/render/Renderer.h>
 #include <livre/core/render/Frustum.h>
+#include <livre/core/render/ClipPlanes.h>
 #include <livre/core/data/DataSource.h>
-
-#include <livre/lib/configuration/VolumeRendererParameters.h>
 
 namespace livre
 {
@@ -52,8 +51,9 @@ struct RenderFilter::Impl
             }
 
         const auto& frustums = input.get< Frustum >( "Frustum" );
+        const auto& clipPlanes = input.get< ClipPlanes >( "ClipPlanes" );
         const auto& viewports = input.get< PixelViewport >( "Viewport" );
-        _renderer.render( frustums[ 0 ], viewports[ 0 ], renderBricks );
+        _renderer.render( frustums[ 0 ], clipPlanes[ 0 ], viewports[ 0 ], renderBricks );
     }
 
     DataInfos getInputDataInfos() const
@@ -62,7 +62,8 @@ struct RenderFilter::Impl
         {
             { "CacheObjects" ,getType< ConstCacheObjects >() },
             { "Frustum" ,getType< Frustum >() },
-            { "Viewport" ,getType< PixelViewport >() }
+            { "Viewport" ,getType< PixelViewport >() },
+            { "ClipPlanes" ,getType< ClipPlanes >() }
         };
     }
 

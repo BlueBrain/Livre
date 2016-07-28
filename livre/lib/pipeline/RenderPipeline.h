@@ -54,6 +54,7 @@ public:
      * @param pixelViewPort the view port
      * @param redrawFilter executed on data update
      * @param sendHistogramFilter executed on histogram computation
+     * @param clipPlanes clipping planes
      * @param renderer the rendering algorithm
      * @param availability the number of available and not available nodes are written
      */
@@ -64,6 +65,7 @@ public:
                  const Viewport& viewport,
                  const PipeFilter& redrawFilter,
                  const PipeFilter& sendHistogramFilter,
+                 const ClipPlanes& clipPlanes,
                  Renderer& renderer,
                  NodeAvailability& avaibility ) const;
 private:

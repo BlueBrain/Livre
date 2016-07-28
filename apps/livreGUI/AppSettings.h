@@ -28,19 +28,14 @@
 namespace livre
 {
 
-
-#define COMPANY_NAME "Blue Brain Project"
-#define PRODUCT_NAME "Livre Controller"
-
-
 /**
  * settings for QSettings initialization, company and product names.
  */
 
 LB_UNUSED static void setCoreSettingsNames()
 {
-    QCoreApplication::setOrganizationName( COMPANY_NAME );
-    QCoreApplication::setApplicationName( PRODUCT_NAME );
+    QCoreApplication::setOrganizationName( "Blue Brain Project" );
+    QCoreApplication::setApplicationName( "Livre Controller" );
 }
 
 }

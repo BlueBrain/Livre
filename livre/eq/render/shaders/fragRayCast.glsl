@@ -40,6 +40,9 @@ uniform int nSamplesPerPixel;
 uniform float shininess;
 uniform int refLevel;
 
+uniform int nClipPlanes;
+uniform vec4 clipPlanes[ 8 ];
+
 struct Ray
 {
     vec3 Origin;
@@ -127,6 +130,7 @@ void main( void )
         vec4 subPixelCoord = gl_FragCoord + vec4( xPixelDelta, yPixelDelta, 0.0f, 0.0f );
         vec4 pixelEyeSpacePos = calcPositionInEyeSpaceFromWindowSpace( subPixelCoord );
         vec3 pixelWorldSpacePos = vec3(( invModelViewMatrix * pixelEyeSpacePos ).xyz );
+
         vec3 rayDirection = normalize( pixelWorldSpacePos - worldEyePosition );
         Ray eye = Ray( worldEyePosition, rayDirection );
 
@@ -152,6 +156,23 @@ void main( void )
 
         if( residu > 0.0f )
             tnear += stepSize - residu;
+
+        if( tnear > tfar )
+            discard;
+
+        for( int i = 0; i < nClipPlanes; i++ )
+        {
+            vec3 planeNormal = clipPlanes[ i ].xyz;
+            float rn = dot( rayDirection, planeNormal );
+            if( rn == 0 )
+                rn = EPSILON;
+            float d = clipPlanes[ i ].w;
+            float t = -( dot( planeNormal, worldEyePosition ) + d ) / rn;
+            if( rn > 0.0 ) // opposite direction plane
+                tnear = max( tnear, t );
+            else
+                tfar = min( tfar, t );
+        }
 
         if( tnear > tfar )
             discard;

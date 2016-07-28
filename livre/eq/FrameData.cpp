@@ -180,12 +180,12 @@ void FrameData::unmap( eq::Config* config )
         config->unmapObject( _impl.get() );
 }
 
-bool FrameData::registerToConfig_( eq::Config* config )
+bool FrameData::registerToConfig( eq::Config* config )
 {
     return config->registerObject( _impl.get() );
 }
 
-bool FrameData::deregisterFromConfig_( eq::Config *config )
+bool FrameData::deregisterFromConfig( eq::Config *config )
 {
     config->deregisterObject( _impl.get() );
     return true;

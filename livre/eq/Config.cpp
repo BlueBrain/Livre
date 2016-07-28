@@ -529,12 +529,12 @@ bool Config::handleEvent( eq::EventICommand command )
 
 bool Config::_registerFrameData()
 {
-    return _impl->framedata.registerToConfig_( this );
+    return _impl->framedata.registerToConfig( this );
 }
 
 bool Config::_deregisterFrameData()
 {
-    return _impl->framedata.deregisterFromConfig_( this );
+    return _impl->framedata.deregisterFromConfig( this );
 }
 
 void Config::_initEvents()

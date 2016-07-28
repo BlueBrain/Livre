@@ -26,6 +26,7 @@ set(LIVREGUI_HEADERS
   Controller.h
   MainWindow.h
   animationController/AnimationController.h
+  clipPlanesController/ClipPlanesController.h
   progress/Progress.h
   renderParametersController/RenderParametersController.h
   transferFunctionEditor/ColorMapWidget.h
@@ -42,6 +43,8 @@ set(LIVREGUI_SOURCES
   MainWindow.ui
   animationController/AnimationController.cpp
   animationController/AnimationController.ui
+  clipPlanesController/ClipPlanesController.cpp
+  clipPlanesController/ClipPlanesController.ui
   livreGUI.cpp
   progress/Progress.cpp
   progress/Progress.ui

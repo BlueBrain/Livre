@@ -25,6 +25,7 @@
 #include <livre/lib/types.h>
 
 #include <livre/core/render/TransferFunction1D.h>
+#include <livre/core/render/ClipPlanes.h>
 
 #include <co/serializable.h>
 
@@ -37,7 +38,8 @@ class RenderSettings : public co::Serializable
     enum DirtyBits
     {
         DIRTY_TF = co::Serializable::DIRTY_CUSTOM << 0u,
-        DIRTY_DEPTH = co::Serializable::DIRTY_CUSTOM << 1u
+        DIRTY_DEPTH = co::Serializable::DIRTY_CUSTOM << 1u,
+        DIRTY_CLIPPLANES = co::Serializable::DIRTY_CUSTOM << 2u
     };
 
 public:
@@ -45,7 +47,7 @@ public:
     /**
      * @brief RenderSettings constructor.
      */
-    RenderSettings( );
+    RenderSettings();
 
     /**
      * @brief setTransferFunction Sets the transfer function.
@@ -56,14 +58,26 @@ public:
     /**
      * @brief resetTransferFunction Resets the transfer function.
      */
-    void resetTransferFunction( );
+    void resetTransferFunction();
 
     /**
      * @return Returns the transfer function.
      */
-    TransferFunction1D& getTransferFunction() { return transferFunction_; }
-    const TransferFunction1D& getTransferFunction( ) const
-        { return transferFunction_; }
+    TransferFunction1D& getTransferFunction() { return _transferFunction; }
+    const TransferFunction1D& getTransferFunction() const
+        { return _transferFunction; }
+
+    /**
+     * @brief Sets the clip planes.
+     * @param clipPlanes the clip planes
+     */
+    void setClipPlanes( const ClipPlanes& clipPlanes );
+
+    /**
+     * @return Returns the transfer function.
+     */
+    ClipPlanes& getClipPlanes() { return _clipPlanes; }
+    const ClipPlanes& getClipPlanes( ) const { return _clipPlanes; }
 
     /**
      * @param depth Sets the maximum rendering depth.
@@ -96,8 +110,9 @@ private:
     virtual void serialize(   co::DataOStream& os, const uint64_t dirtyBits );
     virtual void deserialize( co::DataIStream& is, const uint64_t dirtyBits );
 
-    TransferFunction1D transferFunction_;
-    uint8_t depth_;
+    TransferFunction1D _transferFunction;
+    ClipPlanes _clipPlanes;
+    uint8_t _depth;
 };
 
 }

@@ -33,13 +33,14 @@ Renderer::~Renderer()
 
 
 void Renderer::render( const Frustum& frustum,
+                       const ClipPlanes& planes,
                        const PixelViewport& view,
                        const NodeIds& bricks )
 {
     const NodeIds& ordered = _order( bricks, frustum );
-    _onFrameStart( frustum, view, ordered );
-    _onFrameRender( frustum, view, ordered );
-    _onFrameEnd( frustum, view, ordered );
+    _onFrameStart( frustum, planes, view, ordered );
+    _onFrameRender( frustum, planes, view, ordered );
+    _onFrameEnd( frustum, planes, view, ordered );
 }
 
 }

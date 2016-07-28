@@ -44,6 +44,7 @@ set(LIVRECORE_HEADERS
   pipeline/PromiseMap.h
   pipeline/SimpleExecutor.h
   pipeline/Workers.h
+  render/ClipPlanes.cpp
   render/FrameInfo.h
   render/Frustum.h
   render/Renderer.h
@@ -83,6 +84,7 @@ set(LIVRECORE_SOURCES
   pipeline/PromiseMap.cpp
   pipeline/SimpleExecutor.cpp
   pipeline/Workers.cpp
+  render/ClipPlanes.cpp
   render/FrameInfo.cpp
   render/Frustum.cpp
   render/GLContext.cpp

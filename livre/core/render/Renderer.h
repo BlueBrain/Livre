@@ -42,6 +42,7 @@ public:
      * @param bricks The list of render bricks.
      */
     LIVRECORE_API void render( const Frustum& frustum,
+                               const ClipPlanes& planes,
                                const PixelViewport& view,
                                const NodeIds& bricks );
 
@@ -59,30 +60,36 @@ protected:
     /**
      * Is called on start of each rendering.
      * @param frustum is used for rendering the bricks according to view point.
+     * @param clipPlanes rendering is clipped against planes.
      * @param view The pixel area.
      * @param orderedBricks is the list of ordered bricks.
      */
     virtual void _onFrameStart( const Frustum& frustum LB_UNUSED,
+                                const ClipPlanes& planes LB_UNUSED,
                                 const PixelViewport& view LB_UNUSED,
                                 const NodeIds& orderedBricks LB_UNUSED ) {}
 
     /**
      * Is called on start of each render. Default is front to back rendering.
      * @param frustum is used for rendering the bricks according to view point.
+     * @param clipPlanes rendering is clipped against planes.
      * @param view The pixel area.
      * @param orderedBricks is the list of ordered bricks.
     */
     virtual void _onFrameRender( const Frustum& frustum LB_UNUSED,
+                                 const ClipPlanes& planes LB_UNUSED,
                                  const PixelViewport& view LB_UNUSED,
                                  const NodeIds& orderedBricks LB_UNUSED ) {}
 
     /**
      * Is called on end of each rendering.
      * @param frustum is used for rendering the bricks according to view point.
+     * @param clipPlanes rendering is clipped against planes
      * @param view The pixel area.
      * @param orderedBricks is the list of ordered bricks.
      */
     virtual void _onFrameEnd( const Frustum& frustum LB_UNUSED,
+                              const ClipPlanes& planes LB_UNUSED,
                               const PixelViewport& view LB_UNUSED,
                               const NodeIds& orderedBricks LB_UNUSED ) {}
 
