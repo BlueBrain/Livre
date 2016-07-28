@@ -110,9 +110,9 @@ struct HistogramFilter::Impl
     {
         return
         {
-            { "Frustum" ,getType< Frustum >() },
-            { "RelativeViewport" ,getType< Viewport >() },
-            { "CacheObjects" ,getType< ConstCacheObjects >() },
+            { "Frustum", getType< Frustum >() },
+            { "RelativeViewport", getType< Viewport >() },
+            { "CacheObjects", getType< ConstCacheObjects >() },
         };
     }
 
@@ -120,7 +120,7 @@ struct HistogramFilter::Impl
     {
         return
         {
-            { "Histogram" ,getType< Histogram >() },
+            { "Histogram", getType< Histogram >() },
         };
     }
 

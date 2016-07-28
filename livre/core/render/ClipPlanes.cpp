@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -69,7 +69,7 @@ void ClipPlanes::clear()
 
 void ClipPlanes::reset()
 {
-    getPlanes().clear();
+    clear();
     for( size_t i = 0; i < 6; ++i )
     {
         ::lexis::render::Plane plane;

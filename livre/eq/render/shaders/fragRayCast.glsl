@@ -41,7 +41,7 @@ uniform float shininess;
 uniform int refLevel;
 
 uniform int nClipPlanes;
-uniform vec4 clipPlanes[ 8 ];
+uniform vec4 clipPlanes[6];
 
 struct Ray
 {

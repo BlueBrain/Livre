@@ -74,7 +74,7 @@ public:
     void setClipPlanes( const ClipPlanes& clipPlanes );
 
     /**
-     * @return Returns the transfer function.
+     * @return Returns the clip planes.
      */
     ClipPlanes& getClipPlanes() { return _clipPlanes; }
     const ClipPlanes& getClipPlanes( ) const { return _clipPlanes; }

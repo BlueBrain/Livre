@@ -76,12 +76,12 @@ struct VisibleSetGeneratorFilter::Impl
     DataInfos getInputDataInfos() const
     {
         return {
-            { "Frustum" ,getType< Frustum >() },
-            { "Frame" ,getType< uint32_t >() },
-            { "DataRange" ,getType< Range >() },
-            { "Params" ,getType< VolumeRendererParameters >() },
-            { "Viewport" ,getType< PixelViewport >() },
-            { "ClipPlanes" ,getType< ClipPlanes >() }
+            { "Frustum", getType< Frustum >() },
+            { "Frame", getType< uint32_t >() },
+            { "DataRange", getType< Range >() },
+            { "Params", getType< VolumeRendererParameters >() },
+            { "Viewport", getType< PixelViewport >() },
+            { "ClipPlanes", getType< ClipPlanes >() }
         };
     }
 
@@ -89,8 +89,8 @@ struct VisibleSetGeneratorFilter::Impl
     {
         return
         {
-            { "VisibleNodes" ,getType< NodeIds >( )},
-            { "Params" ,getType< VolumeRendererParameters >() }
+            { "VisibleNodes", getType< NodeIds >( )},
+            { "Params", getType< VolumeRendererParameters >() }
         };
     }
 

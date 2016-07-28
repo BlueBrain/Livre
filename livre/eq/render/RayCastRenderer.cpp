@@ -529,6 +529,7 @@ struct RayCastRenderer::Impl
     const VolumeInformation& _volInfo;
     GLuint _posVBO;
     GLuint _quadVBO;
+    GLint _drawBuffer;
 };
 
 RayCastRenderer::RayCastRenderer( const TextureCache& textureCache,

@@ -60,10 +60,10 @@ struct RenderFilter::Impl
     {
         return
         {
-            { "CacheObjects" ,getType< ConstCacheObjects >() },
-            { "Frustum" ,getType< Frustum >() },
-            { "Viewport" ,getType< PixelViewport >() },
-            { "ClipPlanes" ,getType< ClipPlanes >() }
+            { "CacheObjects", getType< ConstCacheObjects >() },
+            { "Frustum", getType< Frustum >() },
+            { "Viewport", getType< PixelViewport >() },
+            { "ClipPlanes", getType< ClipPlanes >() }
         };
     }
 

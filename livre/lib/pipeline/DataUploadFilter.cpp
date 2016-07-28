@@ -117,8 +117,8 @@ public:
     {
         return
         {
-            { "Params" ,getType< VolumeRendererParameters >( )},
-            { "VisibleNodes" ,getType< NodeIds >() },
+            { "Params", getType< VolumeRendererParameters >( )},
+            { "VisibleNodes", getType< NodeIds >() },
         };
     }
 
@@ -126,7 +126,7 @@ public:
     {
         return
         {
-            { "CacheObjects" ,getType< ConstCacheObjects >() },
+            { "CacheObjects", getType< ConstCacheObjects >() },
         };
     }
 

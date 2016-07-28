@@ -149,13 +149,13 @@ private:
     {
         _requests[ _frame.getTypeIdentifier() ] = [&]{ return publishFrame(); };
         _requests[ _getFrameData().getVRParameters().getTypeIdentifier( )] = [&]
-            {   return _publisher.publish( _getFrameData().getVRParameters( )); };
+            { return _publisher.publish( _getFrameData().getVRParameters( )); };
         _requests[ _getFrameData().getCameraSettings().getTypeIdentifier( )] = [&]
-            {   return _publisher.publish( _getFrameData().getCameraSettings()); };
+            { return _publisher.publish( _getFrameData().getCameraSettings()); };
         _requests[ _getRenderSettings().getTransferFunction().getTypeIdentifier( )] = [&]
             { return _publisher.publish( _getRenderSettings().getTransferFunction( )); };
         _requests[ _getRenderSettings().getClipPlanes().getTypeIdentifier( )] = [&]
-            {   return _publisher.publish( _getRenderSettings().getClipPlanes( )); };
+            { return _publisher.publish( _getRenderSettings().getClipPlanes( )); };
     }
 
     void _setupHTTPServer( const int argc LB_UNUSED, char** argv LB_UNUSED )
