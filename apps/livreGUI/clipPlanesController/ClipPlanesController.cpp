@@ -34,16 +34,14 @@ struct ClipPlanesController::Impl
         , _controller( controller )
     {
         _ui.setupUi( parent );
-
         QWidget *slidersWidget = _ui.clipPlanesWidget;
         slidersWidget->setEnabled( false);
+        _clipPlanes.clear();
 
-        parent->connect( parent,
-            static_cast<void (ClipPlanesController::*)()>(&ClipPlanesController::clipPlanesReceived),
+        parent->connect( parent, &ClipPlanesController::clipPlanesReceived,
                          [&](){ clipPlanesReceived( );});
 
-        slidersWidget->connect( _ui.clipPlanesCheckBox,
-            static_cast<void (QCheckBox::*)(int)>(&QCheckBox::stateChanged),
+        slidersWidget->connect( _ui.clipPlanesCheckBox, &QCheckBox::stateChanged,
                  [&]( int value )
                  {
                     _ui.clipPlanesWidget->setEnabled( value != 0 );
@@ -54,11 +52,14 @@ struct ClipPlanesController::Impl
                         _controller.publish( planes );
                     }
                     else
+                    {
+                        if( _clipPlanes.isEmpty( ))
+                            _clipPlanes.reset();
                         _controller.publish( _clipPlanes );
+                    }
                  });
 
-        slidersWidget->connect( _ui.clipPlanesResetButton,
-            static_cast<void (QPushButton::*)(bool)>(&QPushButton::clicked),
+        slidersWidget->connect( _ui.clipPlanesResetButton, &QPushButton::clicked,
                  [&](bool)
                  {
                     _clipPlanes.reset();
@@ -83,7 +84,7 @@ struct ClipPlanesController::Impl
 
         for( QSlider* slider: _clipPlaneSliders )
         {
-            slidersWidget->connect( slider, static_cast<void (QSlider::*)(int)>(&QSlider::valueChanged),
+            slidersWidget->connect( slider, &QSlider::valueChanged,
                      [&]( int ) { updateClipPlanesSpinBoxes(); });
         }
 
@@ -94,8 +95,12 @@ struct ClipPlanesController::Impl
                      [&]( double ) { updateClipPlanesSliders(); });
         }
 
-        _clipPlanes.registerDeserializedCallback( [&]{ emit _parent->clipPlanesReceived(); });
-        _controller.subscribe( _clipPlanes );
+        controller.subscribe( _clipPlanes );
+        _clipPlanes.registerDeserializedCallback(
+                    [&]{
+                          emit _parent->clipPlanesReceived();
+                          _clipPlanes.registerDeserializedCallback( nullptr );
+                       });
     }
 
     ~Impl()
@@ -131,6 +136,7 @@ struct ClipPlanesController::Impl
         if( changed )
            _controller.publish( _clipPlanes );
     }
+
     void updateClipPlanesSpinBoxes()
     {
         if( _clipPlanes.isEmpty( ))
@@ -163,7 +169,6 @@ struct ClipPlanesController::Impl
     void clipPlanesReceived()
     {
         updateClipPlanesUi( _clipPlanes );
-        _clipPlanes.registerDeserializedCallback( nullptr );
     }
 
     void updateClipPlanesUi( ClipPlanes& clipPlanes )
