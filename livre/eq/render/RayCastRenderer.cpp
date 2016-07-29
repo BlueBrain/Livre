@@ -194,6 +194,7 @@ struct RayCastRenderer::Impl
     }
 
     void onFrameStart( const Frustum& frustum,
+                       const ClipPlanes& planes,
                        const NodeIds& renderBricks )
     {
         if( _nSamplesPerRay == 0 ) // Find sampling rate
@@ -220,6 +221,7 @@ struct RayCastRenderer::Impl
         glDisable( GL_BLEND );
         glGetIntegerv( GL_DRAW_BUFFER, &_drawBuffer );
         glDrawBuffer( GL_NONE );
+
 
         GLSLShaders::Handle program = _rayCastShaders.getProgram( );
         LBASSERT( program );
@@ -272,6 +274,29 @@ struct RayCastRenderer::Impl
 
         tParamNameGL = glGetUniformLocation( program, "nearPlaneDist" );
         glUniform1f( tParamNameGL, frustum.nearPlane( ));
+
+        const auto& clipPlanes = planes.getPlanes();
+        const size_t nPlanes = clipPlanes.size();
+        tParamNameGL = glGetUniformLocation( program, "nClipPlanes" );
+        glUniform1i( tParamNameGL, nPlanes );
+
+        if( nPlanes > 0 )
+        {
+            Floats planesData;
+            planesData.reserve( 4 * nPlanes );
+            for( size_t i = 0; i < nPlanes; ++i )
+            {
+                const ::lexis::render::Plane& plane = clipPlanes[ i ];
+                const float* normal = plane.getNormal();
+                planesData.push_back( normal[ 0 ]);
+                planesData.push_back( normal[ 1 ]);
+                planesData.push_back( normal[ 2 ]);
+                planesData.push_back( plane.getD( ));
+            }
+
+            tParamNameGL = glGetUniformLocation( program, "clipPlanes" );
+            glUniform4fv( tParamNameGL, nPlanes, planesData.data( ));
+        }
 
         createAndFillVertexBuffer( renderBricks );
         createAndInitializeRenderTexture( viewport );
@@ -485,6 +510,7 @@ struct RayCastRenderer::Impl
 #endif
         _usedTextures[0].swap( _usedTextures[1] );
         _usedTextures[1].clear();
+
         glDeleteBuffers( 1, &_posVBO );
         glDrawBuffer( _drawBuffer );
         copyTexToFrameBufAndClear();
@@ -528,13 +554,15 @@ NodeIds RayCastRenderer::_order( const NodeIds& bricks,
 }
 
 void RayCastRenderer::_onFrameStart( const Frustum& frustum,
+                                     const ClipPlanes& planes,
                                      const PixelViewport&,
                                      const NodeIds& renderBricks )
 {
-    _impl->onFrameStart( frustum, renderBricks );
+    _impl->onFrameStart( frustum, planes, renderBricks );
 }
 
 void RayCastRenderer::_onFrameRender( const Frustum&,
+                                      const ClipPlanes&,
                                       const PixelViewport&,
                                       const NodeIds& orderedBricks )
 {
@@ -542,6 +570,7 @@ void RayCastRenderer::_onFrameRender( const Frustum&,
 }
 
 void RayCastRenderer::_onFrameEnd( const Frustum&,
+                                   const ClipPlanes&,
                                    const PixelViewport&,
                                    const NodeIds& )
 {

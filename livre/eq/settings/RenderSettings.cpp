@@ -23,11 +23,16 @@
 namespace livre
 {
 
-RenderSettings::RenderSettings( )
-    :  depth_( 0 )
+RenderSettings::RenderSettings()
+    :  _depth( 0 )
 {
-    transferFunction_.registerDeserializedCallback( [this]
+    _transferFunction.registerDeserializedCallback( [this]
         { setDirty( DIRTY_TF ); });
+
+    _clipPlanes.registerDeserializedCallback( [this]
+        { setDirty( DIRTY_CLIPPLANES ); });
+
+    _clipPlanes.clear();
 }
 
 void RenderSettings::resetTransferFunction( )
@@ -37,17 +42,26 @@ void RenderSettings::resetTransferFunction( )
 
 void RenderSettings::setTransferFunction( const TransferFunction1D& tf )
 {
-    transferFunction_ = tf;
+    _transferFunction = tf;
     setDirty( DIRTY_TF );
+}
+
+void RenderSettings::setClipPlanes( const ClipPlanes& clipPlanes )
+{
+    _clipPlanes = clipPlanes;
+    setDirty( DIRTY_CLIPPLANES );
 }
 
 void RenderSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
 {
     if( dirtyBits & DIRTY_TF )
-        os << transferFunction_;
+        os << _transferFunction;
 
     if( dirtyBits & DIRTY_DEPTH )
-        os << depth_;
+        os << _depth;
+
+    if( dirtyBits & DIRTY_CLIPPLANES )
+        os << _clipPlanes;
 
     co::Serializable::serialize( os, dirtyBits );
 }
@@ -55,23 +69,26 @@ void RenderSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
 void RenderSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits )
 {
     if( dirtyBits & DIRTY_TF )
-        is >> transferFunction_;
+        is >> _transferFunction;
 
     if( dirtyBits & DIRTY_DEPTH )
-        is >> depth_;
+        is >> _depth;
+
+    if( dirtyBits & DIRTY_CLIPPLANES )
+        is >> _clipPlanes;
 
     co::Serializable::deserialize( is, dirtyBits );
 }
 
 void RenderSettings::setMaxTreeDepth( const uint8_t depth )
 {
-    depth_ = depth;
+    _depth = depth;
     setDirty( DIRTY_DEPTH );
 }
 
 uint8_t RenderSettings::getMaxTreeDepth( ) const
 {
-    return depth_;
+    return _depth;
 }
 
 }

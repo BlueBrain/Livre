@@ -5,6 +5,9 @@ Changelog {#Changelog}
 
 # Release 0.6 (2016-06-30)
 
+* [#315](https://github.com/BlueBrain/Livre/pull/315):
+  Clip planes support added. User can adjust the region
+  of interest.
 * [#302](https://github.com/BlueBrain/Livre/pull/302):
   Histogram visualisation added to GUI.
 * [#301](https://github.com/BlueBrain/Livre/pull/301):

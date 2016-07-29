@@ -147,17 +147,15 @@ private:
 
     void _setupRequests()
     {
-        _requests[ _frame.getTypeIdentifier() ] = [&]
-            { return publishFrame(); };
+        _requests[ _frame.getTypeIdentifier() ] = [&]{ return publishFrame(); };
         _requests[ _getFrameData().getVRParameters().getTypeIdentifier( )] = [&]
             { return _publisher.publish( _getFrameData().getVRParameters( )); };
         _requests[ _getFrameData().getCameraSettings().getTypeIdentifier( )] = [&]
-            { return _publisher.publish( _getFrameData().getCameraSettings());};
+            { return _publisher.publish( _getFrameData().getCameraSettings()); };
         _requests[ _getRenderSettings().getTransferFunction().getTypeIdentifier( )] = [&]
-            {
-                return _publisher.publish(
-                    _getRenderSettings().getTransferFunction( ));
-            };
+            { return _publisher.publish( _getRenderSettings().getTransferFunction( )); };
+        _requests[ _getRenderSettings().getClipPlanes().getTypeIdentifier( )] = [&]
+            { return _publisher.publish( _getRenderSettings().getClipPlanes( )); };
     }
 
     void _setupHTTPServer( const int argc LB_UNUSED, char** argv LB_UNUSED )
@@ -178,6 +176,7 @@ private:
         _httpServer->add( _getFrameData().getVRParameters( ));
         _httpServer->add( _getFrameData().getCameraSettings( ));
         _httpServer->add( _getRenderSettings().getTransferFunction( ));
+        _httpServer->add( _getRenderSettings().getClipPlanes( ));
 #endif
     }
 
@@ -195,14 +194,13 @@ private:
         _subscriber.subscribe( _getFrameData().getVRParameters( ));
         _subscriber.subscribe( _getFrameData().getCameraSettings( ));
         _subscriber.subscribe( _getRenderSettings().getTransferFunction( ));
+        _subscriber.subscribe( _getRenderSettings().getClipPlanes( ));
     }
 
     FrameData& _getFrameData() { return _config.getFrameData(); }
     const FrameData& _getFrameData() const { return _config.getFrameData(); }
-    RenderSettings& _getRenderSettings()
-        { return _getFrameData().getRenderSettings(); }
-    const RenderSettings& _getRenderSettings() const
-        { return _getFrameData().getRenderSettings(); }
+    RenderSettings& _getRenderSettings() { return _getFrameData().getRenderSettings(); }
+    const RenderSettings& _getRenderSettings() const { return _getFrameData().getRenderSettings(); }
 };
 
 Communicator::Communicator( Config& config, const int argc, char* argv[] )

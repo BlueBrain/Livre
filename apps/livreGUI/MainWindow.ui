@@ -68,6 +68,12 @@ background-color: darkGray; width: 1px; height: 1px;
    </attribute>
    <widget class="QWidget" name="renderParametersDockWidgetPlaceholder"/>
   </widget>
+  <widget class="QDockWidget" name="clipPlanesDockWidget">
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents"/>
+  </widget>
  </widget>
  <resources/>
  <connections/>

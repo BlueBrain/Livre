@@ -21,10 +21,7 @@
 #define _SelectVisibles_h_
 
 #include <livre/core/types.h>
-#include <livre/core/data/LODNode.h>
-#include <livre/core/data/VolumeInformation.h>
 #include <livre/core/visitor/DataSourceVisitor.h>
-#include <livre/core/visitor/VisitState.h>
 #include <livre/core/render/Frustum.h>
 
 namespace livre
@@ -42,6 +39,7 @@ public:
      * @param minLOD minimum level of detail
      * @param maxLOD maximum level of detail
      * @param range range of the data
+     * @param ClipPlanes clip planes
      */
     SelectVisibles( const DataSource& dataSource,
                     const Frustum& frustum,
@@ -49,12 +47,15 @@ public:
                     const float screenSpaceError,
                     const uint32_t minLOD,
                     const uint32_t maxLOD,
-                    const Range& range );
+                    const Range& range,
+                    const ClipPlanes& clipPlanes );
+
+    ~SelectVisibles();
 
     /**
      * @return the list of visibles
      */
-    const NodeIds& getVisibles() const { return _visibles; }
+    const NodeIds& getVisibles() const;
 
 protected:
 
@@ -64,13 +65,8 @@ protected:
 
 private:
 
-    const Frustum _frustum;
-    const uint32_t _windowHeight;
-    const float _screenSpaceError;
-    const uint32_t _minLOD;
-    const uint32_t _maxLOD;
-    const Range _range;
-    NodeIds _visibles;
+    struct Impl;
+    std::unique_ptr< Impl > _impl;
 };
 }
 #endif //_SelectVisibles_h_

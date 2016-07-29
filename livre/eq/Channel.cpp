@@ -138,6 +138,7 @@ struct EqRaycastRenderer : public RayCastRenderer
     {}
 
     void _onFrameStart( const Frustum& frustum,
+                        const ClipPlanes& planes,
                         const PixelViewport& view,
                         const NodeIds& renderBricks ) final;
 
@@ -295,6 +296,7 @@ public:
                                Viewport( vp.x, vp.y, vp.w, vp.h ),
                                PipeFilterT< RedrawFilter >( "RedrawFilter", _channel ),
                                PipeFilterT< SendHistogramFilter >( "SendHistogramFilter", _channel ),
+                               pipe->getFrameData()->getRenderSettings().getClipPlanes(),
                                *_renderer,
                                _availability );
     }
@@ -422,7 +424,7 @@ public:
 
     void frameReadback( const eq::Frames& frames ) const
     {
-        for( eq::Frame* frame : frames ) // Drop depth buffer from output frames
+        for( eq::Frame* frame: frames ) // Drop depth buffer from output frames
             frame->disableBuffer( eq::Frame::BUFFER_DEPTH );
     }
 
@@ -584,11 +586,12 @@ public:
 };
 
 void EqRaycastRenderer::_onFrameStart( const Frustum& frustum,
+                                       const ClipPlanes& planes,
                                        const PixelViewport& view,
                                        const NodeIds& renderBricks )
 {
     _channel.updateRegions( renderBricks, frustum );
-    RayCastRenderer::_onFrameStart( frustum, view, renderBricks );
+    RayCastRenderer::_onFrameStart( frustum, planes, view, renderBricks );
 }
 
 Channel::Channel( eq::Window* parent )

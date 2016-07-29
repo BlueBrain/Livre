@@ -37,7 +37,7 @@ public:
      */
     RenderParametersController( Controller& controller,
                                 QWidget *parentWgt = nullptr );
-    ~RenderParametersController( );
+    ~RenderParametersController();
 
 private:
     struct Impl;

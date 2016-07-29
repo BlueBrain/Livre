@@ -59,14 +59,17 @@ protected:
                     const Frustum& frustum ) const override;
 
     void _onFrameStart( const Frustum& frustum,
+                        const ClipPlanes& planes,
                         const PixelViewport& view,
                         const NodeIds& renderBricks ) override;
 
     void _onFrameRender( const Frustum& frustum,
+                         const ClipPlanes& planes,
                          const PixelViewport& view,
                          const NodeIds& orderedBricks ) final;
 
     void _onFrameEnd( const Frustum& frustum,
+                      const ClipPlanes& planes,
                       const PixelViewport& view,
                       const NodeIds& renderBricks ) override;
 

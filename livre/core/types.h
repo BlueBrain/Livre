@@ -53,6 +53,7 @@ class AllocMemoryUnit;
 class Cache;
 class CacheObject;
 class CacheStatistics;
+class ClipPlanes;
 class Configuration;
 class EventHandler;
 class EventHandlerFactory;

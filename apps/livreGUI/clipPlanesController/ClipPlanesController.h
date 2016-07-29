@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
- *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+ *                          ahmet.bilgili@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -17,30 +17,39 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Renderer.h"
 
-#include <livre/core/render/Frustum.h>
-#include <livre/core/data/LODNode.h>
-#include <livre/core/data/DataSource.h>
-#include <eq/gl.h>
+#ifndef _ClipPlanesController_h_
+#define _ClipPlanesControllerr_h_
+
+#include <livreGUI/types.h>
+#include <QWidget>
 
 namespace livre
 {
 
-Renderer::~Renderer()
+/** A widget which shows and modifies the clip planes of Livre. */
+class ClipPlanesController : public QWidget
 {
+    Q_OBJECT
+
+public:
+    /**
+     * @param controller The GUI connection to ZeroEQ world.
+     * @param parentWgt Parent widget.
+     */
+    ClipPlanesController( Controller& controller,
+                          QWidget* parentWgt = nullptr );
+    virtual ~ClipPlanesController();
+
+signals:
+
+    void clipPlanesReceived();
+
+private:
+    struct Impl;
+    std::unique_ptr< Impl > _impl;
+};
+
 }
 
-
-void Renderer::render( const Frustum& frustum,
-                       const ClipPlanes& planes,
-                       const PixelViewport& view,
-                       const NodeIds& bricks )
-{
-    const NodeIds& ordered = _order( bricks, frustum );
-    _onFrameStart( frustum, planes, view, ordered );
-    _onFrameRender( frustum, planes, view, ordered );
-    _onFrameEnd( frustum, planes, view, ordered );
-}
-
-}
+#endif

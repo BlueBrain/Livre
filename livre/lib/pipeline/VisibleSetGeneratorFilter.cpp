@@ -23,8 +23,9 @@
 
 #include <livre/core/pipeline/InputPort.h>
 #include <livre/core/pipeline/Workers.h>
-#include <livre/core/render/SelectVisibles.h>
 #include <livre/core/pipeline/PortData.h>
+#include <livre/core/render/SelectVisibles.h>
+#include <livre/core/render/ClipPlanes.h>
 #include <livre/core/data/DataSource.h>
 #include <livre/core/visitor/DFSTraversal.h>
 
@@ -47,6 +48,7 @@ struct VisibleSetGeneratorFilter::Impl
         const auto& range = uniqueInputs.get< Range >( "DataRange" );
         const auto& params = uniqueInputs.get< VolumeRendererParameters >( "Params" );
         const auto& vp = uniqueInputs.get< PixelViewport >( "Viewport" );
+        const auto& clipPlanes = uniqueInputs.get< ClipPlanes >( "ClipPlanes" );
 
         const uint32_t windowHeight = vp[ 3 ];
         const float sse = params.getSSE();
@@ -59,7 +61,8 @@ struct VisibleSetGeneratorFilter::Impl
                                 sse,
                                 minLOD,
                                 maxLOD,
-                                range );
+                                range,
+                                clipPlanes );
 
         DFSTraversal traverser;
         traverser.traverse( _dataSource.getVolumeInfo().rootNode,
@@ -73,11 +76,12 @@ struct VisibleSetGeneratorFilter::Impl
     DataInfos getInputDataInfos() const
     {
         return {
-            { "Frustum" ,getType< Frustum >() },
-            { "Frame" ,getType< uint32_t >() },
-            { "DataRange" ,getType< Range >() },
-            { "Params" ,getType< VolumeRendererParameters >() },
-            { "Viewport" ,getType< PixelViewport >() }
+            { "Frustum", getType< Frustum >() },
+            { "Frame", getType< uint32_t >() },
+            { "DataRange", getType< Range >() },
+            { "Params", getType< VolumeRendererParameters >() },
+            { "Viewport", getType< PixelViewport >() },
+            { "ClipPlanes", getType< ClipPlanes >() }
         };
     }
 
@@ -85,8 +89,8 @@ struct VisibleSetGeneratorFilter::Impl
     {
         return
         {
-            { "VisibleNodes" ,getType< NodeIds >( )},
-            { "Params" ,getType< VolumeRendererParameters >() }
+            { "VisibleNodes", getType< NodeIds >( )},
+            { "Params", getType< VolumeRendererParameters >() }
         };
     }
 
