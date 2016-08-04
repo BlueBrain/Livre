@@ -48,8 +48,11 @@ public:
     /** Publish frame (start, current, end, delta) parameters */
     void publishFrame();
 
-    /** Publish Camera */
-    void publishCamera();
+    /**
+     * Publish Camera
+     * @param modelview the livre space modelview matrix
+     */
+    void publishCamera( const Matrix4f& modelview );
 
     /** Publish Histogram */
     bool publishHistogram( const Histogram& histogram );

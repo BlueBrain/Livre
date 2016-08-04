@@ -56,6 +56,11 @@ public:
      */
     LIVRECORE_API const VolumeInformation& getVolumeInfo() const;
 
+    /**
+     * @return The volume information.
+     */
+    LIVRECORE_API static VolumeInformation getVolumeInfo( const lunchbox::URI& uri );
+
     /** Initializes the GL specific functions. */
     LIVRECORE_API bool initializeGL();
 

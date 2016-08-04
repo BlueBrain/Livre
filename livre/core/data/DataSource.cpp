@@ -127,6 +127,12 @@ ConstMemoryUnitPtr DataSource::getData( const NodeId& nodeId ) const
     return _impl->plugin->getData( lodNode );
 }
 
+VolumeInformation DataSource::getVolumeInfo( const lunchbox::URI& uri )
+{
+    const DataSource source( uri );
+    return source.getVolumeInfo();
+}
+
 DataSource::~DataSource()
 {}
 

@@ -24,15 +24,14 @@
 
 #include <livre/core/mathTypes.h>
 #include <eq/fabric/vmmlib.h>
-#include <co/distributable.h> // base class
-#include <lexis/render/lookOut.h> // base class
+#include <co/serializable.h> // base class
 
 namespace livre
 {
 /**
  * The CameraSettings class is the information sent from app node to the clients for camera operations
  */
-class CameraSettings : public co::Distributable< ::lexis::render::LookOut >
+class CameraSettings : public co::Serializable
 {
 public:
     /**
@@ -63,13 +62,33 @@ public:
     void setCameraPosition( const Vector3f& position );
 
     /**
+     * Register a callback for camera changes.
+     * @param notifyChangedFunc the callback function.
+     */
+    void registerNotifyChanged( const std::function< void( const Matrix4f& )>& notifyChangedFunc );
+
+    /**
      * Sets the camera orientation, defined by a lookAt vector.
      * @param lookAt the reference point position to orient the camera to.
      */
     void setCameraLookAt( const Vector3f& lookAt );
 
+    /**
+     * Sets the camera's modelview matrix.
+     * @param modelview the new modelview matrix.
+     */
+    void setModelViewMatrix( const Matrix4f& modelview );
+
     /** @return the camera transformation */
     Matrix4f getModelViewMatrix() const;
+
+private:
+
+    virtual void serialize( co::DataOStream& os, const uint64_t dirtyBits );
+    virtual void deserialize( co::DataIStream& is, const uint64_t dirtyBits );
+
+    Matrix4f _modelview;
+    std::function< void( const Matrix4f& )> _notifyChangedFunc;
 };
 
 }

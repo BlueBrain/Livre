@@ -26,11 +26,14 @@
 #include <livre/eq/settings/CameraSettings.h>
 #include <livre/eq/settings/FrameSettings.h>
 #include <livre/eq/settings/RenderSettings.h>
+#include <livre/eq/settings/VolumeSettings.h>
 
 #include <livre/lib/configuration/ApplicationParameters.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 
+#include <livre/core/data/VolumeInformation.h>
 #include <livre/core/data/Histogram.h>
+#include <livre/core/data/DataSource.h>
 
 #include <lexis/lexis.h>
 #include <zeroeq/zeroeq.h>
@@ -50,6 +53,10 @@ public:
     Impl( Config& config, const int argc, char** argv )
         : _config( config )
     {
+        const lunchbox::URI& uri =
+                lunchbox::URI( _config.getFrameData().getVolumeSettings().getURI( ));
+        _volumeInfo = DataSource::getVolumeInfo( uri );
+
         if( !servus::Servus::isAvailable( ))
             return;
 
@@ -70,10 +77,61 @@ public:
 
         return _publisher.publish( _frame );
     }
-
-    bool publishCamera()
+    ::lexis::render::LookOut _getLookOut( const Matrix4f& livreModelView )
     {
-        return _publisher.publish( _getFrameData().getCameraSettings( ));
+        // this computation does not work if spaces are rotated in respect to each other.
+        Matrix4f rotation;
+        rotation.setSubMatrix< 3, 3 >( livreModelView.getSubMatrix< 3, 3 >( 0, 0 ), 0, 0 );
+
+        Vector4f translation = livreModelView.getColumn( 3 );
+
+        translation = -rotation.inverse() * translation;
+        translation[3] = 1;
+
+        translation = -rotation * _volumeInfo.dataToLivreTransform.inverse() * translation;
+        translation[0] *= ( 1.0 / _volumeInfo.meterToDataUnitRatio );
+        translation[3] = 1.0f;
+
+        Matrix4f networkModelView;
+        networkModelView.setSubMatrix< 3, 3 >( rotation.getSubMatrix< 3, 3 >( 0, 0 ), 0, 0 );
+        networkModelView.setColumn( 3, translation );
+
+        ::lexis::render::LookOut lookOut;
+
+        std::copy( &networkModelView.array[0], &networkModelView.array[0] + 16,
+                   lookOut.getMatrix( ));
+        return lookOut;
+    }
+
+    bool publishCamera( const Matrix4f& livreModelview )
+    {
+        return _publisher.publish( _getLookOut( livreModelview ));
+    }
+
+    void onCamera( const ::lexis::render::LookOut& lookOut )
+    {
+        // this computation does not work if spaces are rotated in respect to each other.
+        float matrixValues[16];
+        std::copy( lookOut.getMatrix(), lookOut.getMatrix() + 16, matrixValues );
+
+        Matrix4f networkModelView( &matrixValues[0], &matrixValues[0] + 16 );
+
+        Vector4f translation = networkModelView.getColumn( 3 );
+        Matrix4f rotation;
+        rotation.setSubMatrix< 3, 3 >( networkModelView.getSubMatrix< 3, 3 >( 0, 0 ), 0, 0 );
+
+        translation = -rotation.inverse() * translation;
+        translation *= _volumeInfo.meterToDataUnitRatio;
+        translation[3] = 1;
+
+        translation = -rotation * _volumeInfo.dataToLivreTransform * translation;
+        translation[3] = 1;
+
+        Matrix4f livreModelView;
+        livreModelView.setSubMatrix< 3, 3 >( rotation.getSubMatrix< 3, 3 >( 0, 0 ), 0, 0 );
+        livreModelView.setColumn( 3, translation );
+
+        _getFrameData().getCameraSettings().setModelViewMatrix( livreModelView );
     }
 
     bool publishHistogram( const Histogram& histogram )
@@ -143,6 +201,7 @@ private:
     std::unique_ptr< ::zeroeq::http::Server > _httpServer;
 #endif
     ::lexis::render::Frame _frame;
+    livre::VolumeInformation _volumeInfo;
     Config& _config;
 
     void _setupRequests()
@@ -150,8 +209,8 @@ private:
         _requests[ _frame.getTypeIdentifier() ] = [&]{ return publishFrame(); };
         _requests[ _getFrameData().getVRParameters().getTypeIdentifier( )] = [&]
             { return _publisher.publish( _getFrameData().getVRParameters( )); };
-        _requests[ _getFrameData().getCameraSettings().getTypeIdentifier( )] = [&]
-            { return _publisher.publish( _getFrameData().getCameraSettings()); };
+        _requests[ ::lexis::render::LookOut::ZEROBUF_TYPE_IDENTIFIER()] = [&]
+            { return publishCamera( _getFrameData().getCameraSettings().getModelViewMatrix( )); };
         _requests[ _getRenderSettings().getTransferFunction().getTypeIdentifier( )] = [&]
             { return _publisher.publish( _getRenderSettings().getTransferFunction( )); };
         _requests[ _getRenderSettings().getClipPlanes().getTypeIdentifier( )] = [&]
@@ -172,9 +231,22 @@ private:
         _httpServer->register_( ::lexis::render::ImageJPEG::ZEROBUF_TYPE_NAME(),
                                 [&](){ return _config.renderJPEG(); });
 
+        _httpServer->subscribe( ::lexis::render::LookOut::ZEROBUF_TYPE_NAME(),
+                                [&]( const std::string& json )
+                                {
+                                    ::lexis::render::LookOut lookOut;
+                                    if( !lookOut.fromJSON( json ))
+                                        return false;
+
+                                    onCamera( lookOut );
+                                    return true;
+                                });
+
+        _httpServer->register_( ::lexis::render::LookOut::ZEROBUF_TYPE_NAME(),
+                                [&](){ return _getLookOut( _getFrameData().getCameraSettings().getModelViewMatrix( )).toJSON(); });
+
         _httpServer->add( _frame );
         _httpServer->add( _getFrameData().getVRParameters( ));
-        _httpServer->add( _getFrameData().getCameraSettings( ));
         _httpServer->add( _getRenderSettings().getTransferFunction( ));
         _httpServer->add( _getRenderSettings().getClipPlanes( ));
 #endif
@@ -188,11 +260,16 @@ private:
                 onRequest( ::lexis::Request::create( data, size ));
             });
 
+        _subscriber.subscribe( ::lexis::render::LookOut::ZEROBUF_TYPE_IDENTIFIER(),
+            [&]( const void* data, const size_t size )
+            {
+                onCamera( *::lexis::render::LookOut::create( data, size ));
+            });
+
         _frame.registerDeserializedCallback( [&] { updateFrame(); });
         _subscriber.subscribe( _frame );
 
         _subscriber.subscribe( _getFrameData().getVRParameters( ));
-        _subscriber.subscribe( _getFrameData().getCameraSettings( ));
         _subscriber.subscribe( _getRenderSettings().getTransferFunction( ));
         _subscriber.subscribe( _getRenderSettings().getClipPlanes( ));
     }
@@ -223,9 +300,9 @@ bool Communicator::publishHistogram( const Histogram& histogram )
     return _impl->publishHistogram( histogram );
 }
 
-void Communicator::publishCamera()
+void Communicator::publishCamera( const Matrix4f& modelview )
 {
-    _impl->publishCamera();
+    _impl->publishCamera( modelview );
 }
 
 void Communicator::handleEvents()

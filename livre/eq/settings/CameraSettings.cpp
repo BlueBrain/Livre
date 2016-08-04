@@ -1,5 +1,6 @@
 
-/* Copyright (c) 2006-2016, Stefan Eilemann <eile@equalizergraphics.com>
+/* Copyright (c) 2006-2016, Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
+ *                          Stefan Eilemann <eile@equalizergraphics.com>
  *                          Maxim Makhinya  <maxmah@gmail.com>
  *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
  *                          Daniel.Nachbaur@epfl.ch
@@ -30,9 +31,18 @@ namespace livre
 {
 
 CameraSettings::CameraSettings()
+    : _notifyChangedFunc([&]( const Matrix4f& ){})
+{}
+
+void CameraSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
 {
-    Matrix4f initial;
-    std::copy( &initial.array[0], &initial.array[0] + 16, getMatrix( ));
+    co::Serializable::serialize( os, dirtyBits );
+    os << _modelview;
+}
+void CameraSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits )
+{
+    co::Serializable::deserialize( is, dirtyBits );
+    is >> _modelview;
 }
 
 void CameraSettings::spinModel( const float x, const float y )
@@ -41,48 +51,59 @@ void CameraSettings::spinModel( const float x, const float y )
         return;
 
     float translation[3];
-    translation[0] = getMatrix()[12];
-    translation[1] = getMatrix()[13];
-    translation[2] = getMatrix()[14];
+    translation[0] = _modelview(0,3);
+    translation[1] = _modelview(1,3);
+    translation[2] = _modelview(2,3);
 
-    Matrix4d modelview( &getMatrix()[0], &getMatrix()[0] + 16 );
+    _modelview(0,3) = 0.0;
+    _modelview(1,3) = 0.0;
+    _modelview(2,3) = 0.0;
 
-    modelview(0,3) = 0.0;
-    modelview(1,3) = 0.0;
-    modelview(2,3) = 0.0;
+    _modelview.pre_rotate_x( x );
+    _modelview.pre_rotate_y( y );
 
-    modelview.pre_rotate_x( x );
-    modelview.pre_rotate_y( y );
+    _modelview(0,3) = translation[0];
+    _modelview(1,3) = translation[1];
+    _modelview(2,3) = translation[2];
 
-    modelview(0,3) = translation[0];
-    modelview(1,3) = translation[1];
-    modelview(2,3) = translation[2];
+    setDirty( DIRTY_ALL );
 
-    std::copy( &modelview.array[0], &modelview.array[0] + 16, getMatrix( ));
-    notifyChanged();
+    _notifyChangedFunc( _modelview );
 }
 
 void CameraSettings::moveCamera( const float x, const float y, const float z )
 {
-    getMatrix()[12] += x;
-    getMatrix()[13] += y;
-    getMatrix()[14] += z;
-    notifyChanged();
+    _modelview(0,3) += x;
+    _modelview(1,3) += y;
+    _modelview(2,3) += z;
+
+    setDirty( DIRTY_ALL );
+
+    _notifyChangedFunc( _modelview );
 }
 
 void CameraSettings::setCameraPosition( const Vector3f& pos )
 {
-    getMatrix()[12] = pos.x();
-    getMatrix()[13] = pos.y();
-    getMatrix()[14] = pos.z();
-    notifyChanged();
+    _modelview(0,3) = pos.x();
+    _modelview(1,3) = pos.y();
+    _modelview(2,3) = pos.z();
+
+    setDirty( DIRTY_ALL );
+
+    _notifyChangedFunc( _modelview );
+}
+
+void CameraSettings::registerNotifyChanged( const std::function< void( const Matrix4f& )>&
+                                            notifyChangedFunc )
+{
+     _notifyChangedFunc = notifyChangedFunc;
 }
 
 void CameraSettings::setCameraLookAt( const Vector3f& lookAt )
 {
-    const Vector3f eye( (float)getMatrix()[12],
-                        (float)getMatrix()[13],
-                        (float)getMatrix()[14]);
+    const Vector3f eye( _modelview(0,3),
+                        _modelview(1,3),
+                        _modelview(2,3));
     const Vector3f zAxis = vmml::normalize( eye - lookAt );
 
     // Avoid Gimbal lock effect when looking upwards/downwards
@@ -97,15 +118,21 @@ void CameraSettings::setCameraLookAt( const Vector3f& lookAt )
         up.normalize();
     }
 
-    Matrix4f modelview( eye, lookAt, up );
-    std::copy( &modelview.array[0], &modelview.array[0] + 16, getMatrix( ));
+    _modelview = Matrix4f( eye, lookAt, up );
+
+    setDirty( DIRTY_ALL );
+
+    _notifyChangedFunc( _modelview );
+}
+
+void CameraSettings::setModelViewMatrix( const Matrix4f& modelview )
+{
+    _modelview = modelview;
+     setDirty( DIRTY_ALL );
 }
 
 Matrix4f CameraSettings::getModelViewMatrix() const
 {
-    float matrixValues[16];
-    std::copy( getMatrix(), getMatrix() + 16, matrixValues );
-
-    return Matrix4f( &matrixValues[0], &matrixValues[0] + 16 );
+    return _modelview;
 }
 }
