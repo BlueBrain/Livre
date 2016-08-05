@@ -77,7 +77,7 @@ struct LRUCachePolicy
 
     void clear()
     {
-        _lruQueue.clear();;
+        _lruQueue.clear();
     }
 
     const size_t _maxMemBytes;
@@ -133,9 +133,7 @@ struct Cache::Impl
             return obj;
         }
         catch( const std::runtime_error& )
-        {
-            return ConstCacheObjectPtr();
-        }
+        {}
 
         return ConstCacheObjectPtr();
     }
@@ -278,7 +276,7 @@ const CacheStatistics& Cache::getStatistics() const
 
 void Cache::purge()
 {
-    return _impl->purge();
+    _impl->purge();
 }
 
 }

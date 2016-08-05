@@ -36,13 +36,13 @@ class Node : public eq::Node
 {
 public:
     /**
-     * @param parent Parent config that owns the Node.
+     * @param parent config that owns the Node.
      */
     LIVREEQ_API Node( eq::Config* parent );
     LIVREEQ_API ~Node();
 
     /**
-     * @return The texture data cache.
+     * @return The data cache.
      */
     DataCache& getDataCache();
 

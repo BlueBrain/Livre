@@ -40,11 +40,8 @@ public:
      * Constructor
      * @param name of the cache statistics
      * @param maxMemBytes maximum memory.
-     * @param queueSize the queue size of the load/unload information to keep
      */
-    LIVRECORE_API CacheStatistics( const std::string& name,
-                                   size_t maxMemBytes,
-                                   const size_t queueSize = CACHE_LOG_SIZE );
+    LIVRECORE_API CacheStatistics( const std::string& name, size_t maxMemBytes );
 
     LIVRECORE_API ~CacheStatistics();
 
@@ -64,7 +61,7 @@ public:
     LIVRECORE_API size_t getMaximumMemory() const { return _maxMemBytes; }
 
     /**
-     * @return he name of the statistics
+     * @return the name of the statistics
      */
     LIVRECORE_API std::string getName() const { return _name; }
 
@@ -101,7 +98,7 @@ public:
      * @return The output stream.
      */
     LIVRECORE_API friend std::ostream& operator<<( std::ostream& stream,
-                                     const CacheStatistics& statistics );
+                                                   const CacheStatistics& statistics );
 
 private:
 
@@ -110,14 +107,7 @@ private:
     const size_t _maxMemBytes;
     size_t _objCount;
     size_t _cacheHit;
-    size_t _cacheMiss;
-
-    struct LoadInfo;
-    typedef std::shared_ptr< LoadInfo > LoadInfoPtr;
-    typedef lunchbox::MTQueue< LoadInfoPtr > LoadInfoPtrQueue;
-
-    LoadInfoPtrQueue _ioQueue;
-    const size_t _queueSize;
+    size_t _cacheMiss;  
 };
 
 }

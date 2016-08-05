@@ -15,12 +15,12 @@ set(LIVRELIB_PUBLIC_HEADERS
   ${ZEROBUF_GENERATED_HEADERS}
   types.h
   animation/CameraPath.h
+  cache/DataCache.h
+  cache/DataObject.h
   cache/HistogramCache.h
   cache/HistogramObject.h
   cache/TextureCache.h
-  cache/DataCache.h
   cache/TextureObject.h
-  cache/DataObject.h
   configuration/ApplicationParameters.h
   configuration/VolumeRendererParameters.h
   pipeline/DataUploadFilter.h
