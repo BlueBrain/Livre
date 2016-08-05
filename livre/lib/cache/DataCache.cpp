@@ -18,8 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/lib/cache/TextureDataCache.h>
-#include <livre/lib/cache/TextureDataObject.h>
+#include <livre/lib/cache/DataCache.h>
+#include <livre/lib/cache/DataObject.h>
 
 #include <livre/core/data/LODNode.h>
 #include <livre/core/data/DataSource.h>
@@ -31,7 +31,7 @@
 namespace livre
 {
 
-struct TextureDataCache::Impl
+struct DataCache::Impl
 {
 public:
     Impl( DataSource& dataSource,
@@ -40,43 +40,43 @@ public:
         , _textureType( textureType )
     {}
 
-    CacheObject* generate( const CacheId& cacheId, TextureDataCache& cache )
+    CacheObject* generate( const CacheId& cacheId, DataCache& cache )
     {
-        return new TextureDataObject( cacheId, cache );
+        return new DataObject( cacheId, cache );
     }
 
     DataSource& _dataSource;
     const uint32_t _textureType;
 };
 
-TextureDataCache::TextureDataCache( const size_t maxMemBytes,
-                                    DataSource& dataSource,
-                                    const uint32_t textureType )
+DataCache::DataCache( const size_t maxMemBytes,
+                      DataSource& dataSource,
+                      const uint32_t textureType )
     : Cache( "Data cache CPU", maxMemBytes )
     , _impl( new Impl( dataSource, textureType ))
 {}
 
-CacheObject* TextureDataCache::_generate( const CacheId& cacheId )
+CacheObject* DataCache::_generate( const CacheId& cacheId )
 {
     return _impl->generate( cacheId, *this );
 }
 
-TextureDataCache::~TextureDataCache()
+DataCache::~DataCache()
 {
     _unloadAll();
 }
 
-DataSource& TextureDataCache::getDataSource()
+DataSource& DataCache::getDataSource()
 {
     return _impl->_dataSource;
 }
 
-const DataSource& TextureDataCache::getDataSource() const
+const DataSource& DataCache::getDataSource() const
 {
     return _impl->_dataSource;
 }
 
-uint32_t TextureDataCache::getTextureType() const
+uint32_t DataCache::getTextureType() const
 {
     return _impl->_textureType;
 }

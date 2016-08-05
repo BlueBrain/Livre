@@ -19,7 +19,7 @@
 
 #include <livre/lib/pipeline/DataUploadFilter.h>
 #include <livre/lib/cache/TextureCache.h>
-#include <livre/lib/cache/TextureDataCache.h>
+#include <livre/lib/cache/DataCache.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/core/pipeline/Pipeline.h>
 #include <livre/core/data/NodeId.h>

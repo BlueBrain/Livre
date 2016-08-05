@@ -3,6 +3,10 @@ Changelog {#Changelog}
 
 # master {#master}
 
+* [#315](https://github.com/BlueBrain/Livre/pull/315):
+  * Added purge support for cache
+  * The cache objects now uses RAII for allocation of data
+  * Rename TextureDataCache to DataCache, TextureDataObject to DataObject
 * [#313](https://github.com/BlueBrain/Livre/pull/313):
   Fixed the camera synchronization between applications.
   Replaced the data bounding box by the data to Livre spaces 

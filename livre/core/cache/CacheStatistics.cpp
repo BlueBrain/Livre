@@ -121,6 +121,15 @@ void CacheStatistics::notifyUnloaded( const CacheObject& cacheObject )
                                               cacheObject.getSize( ))));
 }
 
+void CacheStatistics::clear()
+{
+    _usedMemBytes = 0;
+    _objCount = 0;
+    _cacheHit = 0;
+    _cacheMiss = 0;
+    _ioQueue.clear();
+}
+
 std::ostream& operator<<( std::ostream& stream,
                           const CacheStatistics& statistics )
 {

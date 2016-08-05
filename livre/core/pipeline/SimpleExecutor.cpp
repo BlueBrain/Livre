@@ -122,7 +122,7 @@ struct SimpleExecutor::Impl
     {
         ScopedLock lock( _promiseReset );
         const bool wasEmpty = _mtWorkQueue.empty();
-        _mtWorkQueue.push_back( exec );
+        _mtWorkQueue.pushFront( exec );
         if( wasEmpty )
             _unlockPromise.set( true );
     }

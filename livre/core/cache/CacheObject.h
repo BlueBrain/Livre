@@ -49,12 +49,7 @@ public:
      */
     LIVRECORE_API CacheId getId() const;
 
-    /**
-     * @return The object is loaded in cache. The function is thread safe.
-     */
-    LIVRECORE_API bool isLoaded() const;
-
-    /**
+   /**
      * @return The memory size of the object in bytes.
      */
     LIVRECORE_API size_t getSize() const;
@@ -68,20 +63,11 @@ protected:
 
     friend class Cache;
 
+    /**
+     * Constructor
+     * The inheriting class should throw std::runtime_error if the object can not be constructed
+     */
     LIVRECORE_API explicit CacheObject( const CacheId& cacheId = INVALID_CACHE_ID );
-
-    /**
-     * Implemented by the derived class, for loading data to memory. Thread safety is satisfied for
-     * loading and unloading.
-     * @return True if data is loaded.
-     */
-    virtual bool _load() = 0;
-
-    /**
-     * Implemented by the derived class, for unloading data from memory. Thread safety is satisfied for
-     * loading and unloading.
-     */
-    virtual void _unload() = 0;
 
     /**
      * @return The validity of derived class.
@@ -89,22 +75,11 @@ protected:
     virtual bool _isValid() const;
 
     /**
-     * @return True if object is loaded into memory.
-     */
-    virtual bool _isLoaded() const = 0;
-
-    /**
      * @return The memory size of the object in bytes.
      */
     virtual size_t _getSize() const;
 
 private:
-
-    /** Used by cache to load the data */
-    bool _notifyLoad();
-
-    /** Used by cache to unload the data */
-    void _notifyUnload();
 
     struct Status;
     mutable std::shared_ptr< Status > _status;

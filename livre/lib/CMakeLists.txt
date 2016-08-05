@@ -18,9 +18,9 @@ set(LIVRELIB_PUBLIC_HEADERS
   cache/HistogramCache.h
   cache/HistogramObject.h
   cache/TextureCache.h
-  cache/TextureDataCache.h
+  cache/DataCache.h
   cache/TextureObject.h
-  cache/TextureDataObject.h
+  cache/DataObject.h
   configuration/ApplicationParameters.h
   configuration/VolumeRendererParameters.h
   pipeline/DataUploadFilter.h
@@ -34,12 +34,12 @@ set(LIVRELIB_PUBLIC_HEADERS
 set(LIVRELIB_SOURCES
   ${ZEROBUF_GENERATED_SOURCES}
   animation/CameraPath.cpp
+  cache/DataCache.cpp
+  cache/DataObject.cpp
   cache/HistogramCache.cpp
   cache/HistogramObject.cpp
   cache/TextureCache.cpp
-  cache/TextureDataCache.cpp
   cache/TextureObject.cpp
-  cache/TextureDataObject.cpp
   configuration/ApplicationParameters.cpp
   configuration/VolumeRendererParameters.cpp
   pipeline/DataUploadFilter.cpp

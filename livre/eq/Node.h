@@ -44,7 +44,7 @@ public:
     /**
      * @return The texture data cache.
      */
-    TextureDataCache& getTextureDataCache();
+    DataCache& getDataCache();
 
     /**
      * @return The histogram cache.

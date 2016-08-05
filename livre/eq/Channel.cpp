@@ -36,7 +36,7 @@
 #include <livre/eq/Window.h>
 
 #include <livre/lib/cache/TextureCache.h>
-#include <livre/lib/cache/TextureDataCache.h>
+#include <livre/lib/cache/DataCache.h>
 #include <livre/lib/cache/TextureObject.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/lib/pipeline/RenderPipeline.h>
@@ -219,7 +219,7 @@ public:
 
         livre::Node* node =
                 static_cast< livre::Node* >( _channel->getNode( ));
-        const DataSource& dataSource = node->getTextureDataCache().getDataSource();
+        const DataSource& dataSource = node->getDataCache().getDataSource();
 
         for( const NodeId& nodeId : renderBricks )
         {
@@ -375,12 +375,12 @@ public:
         const Window* window = static_cast< Window* >( _channel->getWindow( ));
 
         std::ostringstream os;
-        os << node->getTextureDataCache().getStatistics() << "  "
+        os << node->getDataCache().getStatistics() << "  "
            << int( 100.f * done + .5f ) << "% loaded" << std::endl
            << window->getTextureCache().getStatistics();
 
         const DataSource& dataSource =
-                node->getTextureDataCache().getDataSource();
+                node->getDataCache().getDataSource();
         const VolumeInformation& info = dataSource.getVolumeInfo();
         const Vector3f resolution = info.resolution;
 

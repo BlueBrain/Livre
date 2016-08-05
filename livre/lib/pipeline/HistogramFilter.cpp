@@ -19,7 +19,7 @@
 
 #include <livre/lib/pipeline/HistogramFilter.h>
 #include <livre/lib/cache/HistogramCache.h>
-#include <livre/lib/cache/TextureDataCache.h>
+#include <livre/lib/cache/DataCache.h>
 #include <livre/lib/cache/HistogramObject.h>
 
 #include <livre/core/data/DataSource.h>

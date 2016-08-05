@@ -64,6 +64,11 @@ public:
     LIVRECORE_API size_t getMaximumMemory() const { return _maxMemBytes; }
 
     /**
+     * @return he name of the statistics
+     */
+    LIVRECORE_API std::string getName() const { return _name; }
+
+    /**
      * Notifies the statistics for cache misses
      */
     void notifyMiss() { ++_cacheMiss; }
@@ -84,6 +89,11 @@ public:
      * @param cacheObject is the cache object.
      */
     LIVRECORE_API void notifyUnloaded( const CacheObject& cacheObject );
+
+    /**
+      * Clears the statistics
+      */
+    LIVRECORE_API void clear();
 
     /**
      * @param stream Output stream.

@@ -18,8 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/lib/cache/TextureDataObject.h>
-#include <livre/lib/cache/TextureDataCache.h>
+#include <livre/lib/cache/DataObject.h>
+#include <livre/lib/cache/DataCache.h>
 
 #include <livre/core/data/LODNode.h>
 #include <livre/core/data/MemoryUnit.h>
@@ -31,22 +31,25 @@
 namespace livre
 {
 
-struct TextureDataObject::Impl
+struct DataObject::Impl
 {
 public:
 
-    Impl( TextureDataObject& dataObject,
-          TextureDataCache& dataCache )
+    Impl( DataObject& dataObject,
+          DataCache& dataCache )
         : _data( new AllocMemoryUnit( ))
         , _dataObject( dataObject )
         , _dataCache( dataCache )
         , _dataSource( dataCache.getDataSource( ))
         , _gpuDataType( dataCache.getTextureType( ))
-    {}
-
-    bool isLoaded() const
     {
-        return _data->getMemSize() > 0;
+        if( !load())
+            LBTHROW( std::runtime_error( "Unable to construct histogram cache object" ));
+    }
+
+    ~Impl()
+    {
+        _data->release();
     }
 
     size_t getDataSize() const
@@ -178,40 +181,23 @@ public:
         return false;
     }
 
-    void unload()
-    {
-        _data->release();
-
-        const NodeId nodeId( _dataObject.getId( ));
-           LBVERB << "Texture Data released: " << nodeId
-               << std::endl;
-    }
-
     AllocMemoryUnitPtr _data;
-    TextureDataObject& _dataObject;
-    TextureDataCache& _dataCache;
+    DataObject& _dataObject;
+    DataCache& _dataCache;
     DataSource& _dataSource;
     uint32_t _gpuDataType;
 };
 
-TextureDataObject::TextureDataObject( const CacheId& cacheId,
-                                     TextureDataCache& dataCache )
+DataObject::DataObject( const CacheId& cacheId,
+                                     DataCache& dataCache )
     : CacheObject( cacheId )
     , _impl( new Impl( *this, dataCache ))
 {}
 
-TextureDataObject::~TextureDataObject()
+DataObject::~DataObject()
 {}
 
-bool TextureDataObject::_isLoaded( ) const
-{
-    if( !_isValid( ))
-        return 0;
-
-    return _impl->isLoaded();
-}
-
-size_t TextureDataObject::_getSize() const
+size_t DataObject::_getSize() const
 {
     if( !_isValid( ))
         return 0;
@@ -219,19 +205,9 @@ size_t TextureDataObject::_getSize() const
     return _impl->getSize();
 }
 
-const void* TextureDataObject::getDataPtr() const
+const void* DataObject::getDataPtr() const
 {
     return _impl->getDataPtr();
-}
-
-bool TextureDataObject::_load()
-{
-    return _impl->load();
-}
-
-void TextureDataObject::_unload()
-{
-    return _impl->unload();
 }
 
 }

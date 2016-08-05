@@ -76,6 +76,12 @@ public:
      */
     LIVRECORE_API const CacheStatistics& getStatistics() const;
 
+    /**
+     * Purges the cache by removing cached objects. The objects are not unloaded
+     * and they will be in memory until no reference is left.
+     */
+    LIVRECORE_API void purge();
+
 protected:
 
     /**
