@@ -67,8 +67,8 @@ public:
 
         const Vector3ui dataBlockSize = blockSize + padding * 2;
         for( size_t i = padding.x(); i < dataBlockSize.x() - padding.x(); ++i )
-            for( size_t j = padding.y(); j < dataBlockSize.x() - padding.y(); ++j )
-                for( size_t k = padding.z(); k < dataBlockSize.x() - padding.z(); ++k )
+            for( size_t j = padding.y(); j < dataBlockSize.y() - padding.y(); ++j )
+                for( size_t k = padding.z(); k < dataBlockSize.z() - padding.z(); ++k )
                     for( size_t c = 0; c < compCount; ++c )
                     {
                         const size_t index = compCount * i * dataBlockSize.y() * dataBlockSize.z() +
