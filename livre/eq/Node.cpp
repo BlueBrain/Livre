@@ -30,7 +30,7 @@
 #include <livre/eq/Event.h>
 
 #include <livre/eq/settings/VolumeSettings.h>
-#include <livre/lib/cache/TextureDataCache.h>
+#include <livre/lib/cache/DataCache.h>
 #include <livre/lib/cache/HistogramCache.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/core/data/DataSource.h>
@@ -53,24 +53,19 @@ public:
         const VolumeRendererParameters& vrRenderParameters =
                 _config->getFrameData().getVRParameters();
 
-        const size_t maxMemBytes =
-                vrRenderParameters.getMaxCPUCacheMemoryMB() * LB_1MB;
+        const size_t maxMemBytes = vrRenderParameters.getMaxCPUCacheMemoryMB() * LB_1MB;
 
-        _textureDataCache.reset( new TextureDataCache( maxMemBytes,
-                                                       *_dataSource.get(),
-                                                       GL_UNSIGNED_BYTE ));
+        _dataCache.reset( new DataCache( maxMemBytes, *_dataSource.get(), GL_UNSIGNED_BYTE ));
         const size_t histCacheSize =
                 32 * LB_1MB; // Histogram cache is 32 MB. Can hold approx 16k hists
-        _histogramCache.reset( new HistogramCache( histCacheSize,
-                                                   *_textureDataCache ));
+        _histogramCache.reset( new HistogramCache( histCacheSize, *_dataCache ));
     }
 
     bool initializeVolume()
     {
         try
         {
-            const VolumeSettings& volumeSettings =
-                    _config->getFrameData().getVolumeSettings();
+            const VolumeSettings& volumeSettings = _config->getFrameData().getVolumeSettings();
             const lunchbox::URI& uri = lunchbox::URI( volumeSettings.getURI( ));
             _dataSource.reset( new livre::DataSource( uri ));
         }
@@ -112,7 +107,7 @@ public:
     livre::Node* const _node;
     livre::Config* const _config;
     std::unique_ptr< DataSource > _dataSource;
-    std::unique_ptr< TextureDataCache > _textureDataCache;
+    std::unique_ptr< DataCache > _dataCache;
     std::unique_ptr< HistogramCache > _histogramCache;
 };
 
@@ -159,9 +154,9 @@ bool Node::configExit()
     return eq::Node::configExit();
 }
 
-TextureDataCache& Node::getTextureDataCache()
+DataCache& Node::getDataCache()
 {
-    return *_impl->_textureDataCache;
+    return *_impl->_dataCache;
 }
 
 

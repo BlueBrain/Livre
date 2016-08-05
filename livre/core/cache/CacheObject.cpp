@@ -40,14 +40,9 @@ CacheObject::CacheObject( const CacheId& cacheId )
 {
 }
 
-bool CacheObject::isLoaded() const
-{
-    ReadLock lock( _status->mutex );
-    return _isValid() && _isLoaded();
-}
-
 CacheObject::~CacheObject()
-{}
+{
+}
 
 bool CacheObject::isValid() const
 {
@@ -64,22 +59,6 @@ size_t CacheObject::getSize() const
 {
     ReadLock lock( _status->mutex );
     return _getSize();
-}
-
-bool CacheObject::_notifyLoad()
-{
-    WriteLock lock( _status->mutex );
-    if( _isLoaded( ))
-        return true;
-    return _load();
-}
-
-void CacheObject::_notifyUnload()
-{
-    WriteLock lock( _status->mutex );
-    if( !_isLoaded( ))
-        return;
-    _unload();
 }
 
 bool CacheObject::_isValid() const

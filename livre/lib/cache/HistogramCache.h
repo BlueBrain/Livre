@@ -39,14 +39,14 @@ public:
      * @param dataCache the data cache to read histogram from.
      */
     LIVRE_API HistogramCache( size_t maxMemBytes,
-                              const TextureDataCache& dataCache );
+                              const DataCache& dataCache );
 
     ~HistogramCache();
 
     /**
      * @return the data cache
      */
-    LIVRE_API const TextureDataCache& getDataCache() const;
+    LIVRE_API const DataCache& getDataCache() const;
 
 private:
 

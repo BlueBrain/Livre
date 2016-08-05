@@ -20,8 +20,8 @@
 #include <livre/lib/cache/HistogramCache.h>
 #include <livre/lib/cache/HistogramObject.h>
 
-#include <livre/lib/cache/TextureDataCache.h>
-#include <livre/lib/cache/TextureDataObject.h>
+#include <livre/lib/cache/DataCache.h>
+#include <livre/lib/cache/DataObject.h>
 
 namespace livre
 {
@@ -29,22 +29,22 @@ namespace livre
 struct HistogramCache::Impl
 {
 public:
-    Impl( const TextureDataCache& dataCache )
+    Impl( const DataCache& dataCache )
         : _dataCache( dataCache )
     {}
 
-   const TextureDataCache& _dataCache;
+   const DataCache& _dataCache;
 };
 
 HistogramCache::HistogramCache( const size_t maxMemBytes,
-                                const TextureDataCache& dataCache )
+                                const DataCache& dataCache )
     : Cache( "Histogram Cache", maxMemBytes )
     , _impl( new Impl( dataCache ))
 {}
 
 CacheObject* HistogramCache::_generate( const CacheId& cacheId )
 {
-    return new HistogramObject( cacheId, *this );
+    return new HistogramObject( cacheId, _impl->_dataCache );
 }
 
 HistogramCache::~HistogramCache()
@@ -52,7 +52,7 @@ HistogramCache::~HistogramCache()
     _unloadAll();
 }
 
-const TextureDataCache& HistogramCache::getDataCache() const
+const DataCache& HistogramCache::getDataCache() const
 {
     return _impl->_dataCache;
 }

@@ -36,30 +36,12 @@ public:
      */
     ValidCacheObject( const livre::CacheId& cacheId )
         : livre::CacheObject( cacheId )
-        , _isLoaded_( false )
     { }
 
     size_t _getSize( ) const final { return OBJECT_SIZE; }
 
 private:
 
-    bool _load() final
-    {
-        _isLoaded_ = true;
-        return true;
-    }
-
-    void _unload() final
-    {
-        _isLoaded_ = false;
-    }
-
-    bool _isLoaded() const final
-    {
-        return _isLoaded_;
-    }
-
-    bool _isLoaded_;
 };
 
 typedef std::shared_ptr< ValidCacheObject > ValidCacheObjectPtr;

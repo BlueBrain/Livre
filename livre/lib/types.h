@@ -30,19 +30,16 @@ class HistogramCache;
 class HistogramObject;
 class RenderPipeline;
 class TextureCache;
-class TextureDataCache;
-class TextureDataObject;
+class DataCache;
+class DataObject;
 class TextureObject;
 class VolumeRendererParameters;
 
 struct ApplicationParameters;
 
-typedef std::shared_ptr< const TextureDataObject > ConstTextureDataObjectPtr;
+typedef std::shared_ptr< const DataObject > ConstDataObjectPtr;
 typedef std::shared_ptr< const TextureObject > ConstTextureObjectPtr;
 typedef std::shared_ptr< const HistogramObject > ConstHistogramObjectPtr;
-typedef std::shared_ptr< TextureDataObject > TextureDataObjectPtr;
-typedef std::shared_ptr< TextureObject > TextureObjectPtr;
-typedef std::shared_ptr< HistogramObject > HistogramObjectPtr;
 
 }
 

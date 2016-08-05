@@ -28,9 +28,7 @@ namespace livre
 {
 
 /**
- * The HistogramObject class holds the histogram per texture data object. As textureData
- * object holds the converted data for rendering, histogram represents the rendered data,
- * not the original data.
+ * The HistogramObject class holds the histogram per texture raw data.
  */
 class HistogramObject : public CacheObject
 {
@@ -43,13 +41,16 @@ private:
 
     friend class HistogramCache;
 
+    /**
+     * Constructor
+     * @param cacheId is the unique identifier
+     * @param dataCache the histogram source data is retrieved from data cache
+     * @throws std::runtime_error when the data cache does not have the data for cache id
+     */
     HistogramObject( const CacheId& cacheId,
-                     const HistogramCache& histogramCache );
+                     const DataCache& dataCache );
 
     size_t _getSize() const;
-    bool _load() final;
-    void _unload() final;
-    bool _isLoaded() const final;
 
     struct Impl;
     std::unique_ptr<Impl> _impl;

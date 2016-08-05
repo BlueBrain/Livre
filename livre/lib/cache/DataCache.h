@@ -18,46 +18,54 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _TextureDataObject_h_
-#define _TextureDataObject_h_
+#ifndef _DataCache_h_
+#define _DataCache_h_
 
+#include <livre/lib/api.h>
 #include <livre/lib/types.h>
 
-#include <livre/core/cache/CacheObject.h> // base class
+#include <livre/core/cache/Cache.h>
 
 namespace livre
 {
 
 /**
- * The TextureDataObject class gets raw data from the volume data source and
- * stores the quantized/formatted data for the GPU.
+ * The DataCache class stores the quantized/modified data for GPU
+ * uploading. Therefore it decreases the amount of processing while data is
+ * dropped from GPU and re-uploaded to GPU.
  */
-class TextureDataObject : public CacheObject
+class DataCache : public Cache
 {
 public:
-    ~TextureDataObject();
+    /**
+     * @param maxMemBytes Maximum data memory
+     * @param dataSource The source where the volume data should
+     * be loaded from
+     * @param textureType The type of the data for the GPU.
+     */
+    LIVRE_API DataCache( size_t maxMemBytes,
+                                DataSource& dataSource,
+                                uint32_t textureType );
 
-    /** @return A pointer to the data or 0 if no data is loaded. */
-    const void* getDataPtr() const;
+    ~DataCache();
 
-    /** @copydoc livre::CacheObject::getSize */
-    size_t _getSize() const final;
+    /** @return the data source. */
+    LIVRE_API DataSource& getDataSource();
+
+    /** @return the data source. */
+    LIVRE_API const DataSource& getDataSource() const;
+
+    /**
+     * @return The GPU data type.
+     */
+    LIVRE_API uint32_t getTextureType() const;
 
 private:
-    friend class TextureDataCache;
-
-    TextureDataObject( const CacheId& cacheId,
-                       TextureDataCache& dataCache );
-
-    bool _load() final;
-    void _unload() final;
-    bool _isLoaded() const final;
+    CacheObject* _generate( const CacheId& cacheId );
 
     struct Impl;
     std::unique_ptr<Impl> _impl;
-
 };
 
 }
-
-#endif // _TextureDataObject_h_
+#endif //_DataCache_h_

@@ -78,7 +78,7 @@ struct Workers::Impl
 
     void submitWork( ExecutablePtr executable )
     {
-        _workQueue.push( executable );
+        _workQueue.pushFront( executable );
     }
 
     size_t getSize() const

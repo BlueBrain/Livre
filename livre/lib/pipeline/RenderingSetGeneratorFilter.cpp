@@ -56,7 +56,7 @@ struct RenderingSetGenerator
         {
             const NodeId& currentNodeId = current;
             const ConstCacheObjectPtr texture = _textureCache.get( currentNodeId.getId( ));
-            if( texture && texture->isLoaded( ))
+            if( texture )
             {
                 cacheMap[ currentNodeId.getId() ] = texture;
                 break;

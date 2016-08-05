@@ -18,8 +18,8 @@
  */
 
 #include <livre/lib/cache/TextureCache.h>
-#include <livre/lib/cache/TextureDataCache.h>
-#include <livre/lib/cache/TextureDataObject.h>
+#include <livre/lib/cache/DataCache.h>
+#include <livre/lib/cache/DataObject.h>
 #include <livre/lib/cache/TextureObject.h>
 
 #include <livre/core/data/LODNode.h>
@@ -49,22 +49,25 @@ struct TextureObject::Impl
        , _dataSource( textureCache.getDataCache().getDataSource( ))
        , _texturePool( textureCache.getTexturePool( ))
        , _textureType( textureCache.getDataCache( ).getTextureType( ))
-    {}
-
-    bool isLoaded() const
     {
-        return _textureState && _textureState->textureId != INVALID_TEXTURE_ID;
+        if( !load())
+            LBTHROW( std::runtime_error( "Unable to construct histogram cache object" ));
+    }
+
+    ~Impl()
+    {
+        unload();
     }
 
     bool load()
     {
-        _dataObject = std::static_pointer_cast< const TextureDataObject >(
+        _dataObject = std::static_pointer_cast< const DataObject >(
                     _textureCache.getDataCache().get( _textureObject.getId( )));
 
-        if( !_dataObject->isLoaded( ))
+        if( !_dataObject )
             return false;
 
-        initialize( );
+        initialize();
         _texturePool.generateTexture( _textureState );
         LBASSERT( _textureState->textureId );
         loadTextureToGPU();
@@ -159,7 +162,7 @@ struct TextureObject::Impl
 
     TextureObject& _textureObject;
     TextureCache& _textureCache;
-    ConstTextureDataObjectPtr _dataObject;
+    ConstDataObjectPtr _dataObject;
     TextureStatePtr _textureState;
     DataSource& _dataSource;
     TexturePool& _texturePool;
@@ -178,11 +181,6 @@ TextureObject::~TextureObject()
 {
 }
 
-bool TextureObject::_isLoaded() const
-{
-    return _impl->isLoaded();
-}
-
 TextureStatePtr TextureObject::getTextureState()
 {
     return _impl->_textureState;
@@ -191,16 +189,6 @@ TextureStatePtr TextureObject::getTextureState()
 ConstTextureStatePtr TextureObject::getTextureState() const
 {
     return _impl->_textureState;
-}
-
-bool TextureObject::_load()
-{
-    return _impl->load();
-}
-
-void TextureObject::_unload()
-{
-    _impl->unload();
 }
 
 size_t TextureObject::_getSize() const

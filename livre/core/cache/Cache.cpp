@@ -75,6 +75,11 @@ struct LRUCachePolicy
         return ids;
     }
 
+    void clear()
+    {
+        _lruQueue.clear();
+    }
+
     const size_t _maxMemBytes;
     const float _cleanUpRatio;
     LRUQueue _lruQueue;
@@ -117,9 +122,9 @@ struct Cache::Impl
                 return it->second;
         }
 
-        CacheObjectPtr obj = getFromMap( cacheId );
-        if( obj->_notifyLoad( ))
+        try
         {
+            CacheObjectPtr obj = getFromMap( cacheId );
             WriteLock writeLock( _mutex );
             _statistics.notifyMiss();
             _statistics.notifyLoaded( *obj );
@@ -127,6 +132,8 @@ struct Cache::Impl
             applyPolicy();
             return obj;
         }
+        catch( const std::runtime_error& )
+        {}
 
         return ConstCacheObjectPtr();
     }
@@ -141,8 +148,8 @@ struct Cache::Impl
         if( obj.use_count() > 1 )
             return false;
 
-        obj->_notifyUnload();
         _statistics.notifyUnloaded( *obj );
+        obj.reset();
         _policy.remove( cacheId );
         _cacheMap.erase( cacheId );
         return true;
@@ -205,6 +212,15 @@ struct Cache::Impl
         return _cacheMap.size();
     }
 
+    void purge()
+    {
+        WriteLock lock( _mutex );
+        _statistics.clear();
+        _policy.clear();
+        _cacheMap.clear();
+    }
+
+
     mutable LRUCachePolicy _policy;
     Cache& _cache;
     mutable CacheStatistics _statistics;
@@ -256,6 +272,11 @@ size_t Cache::getCount() const
 const CacheStatistics& Cache::getStatistics() const
 {
     return _impl->_statistics;
+}
+
+void Cache::purge()
+{
+    _impl->purge();
 }
 
 }

@@ -41,7 +41,7 @@ public:
      * @param maxMemBytes Maximum texture memory.
      * @param internalTextureFormat Internal texture format of OpenGL, it defines the memory usage.
      */
-    LIVRE_API TextureCache( TextureDataCache& dataCache,
+    LIVRE_API TextureCache( DataCache& dataCache,
                             size_t maxMemBytes,
                             int internalTextureFormat );
 
@@ -55,12 +55,12 @@ public:
     /**
      * @return the data cache
      */
-    LIVRE_API TextureDataCache& getDataCache();
+    LIVRE_API DataCache& getDataCache();
 
     /**
      * @return the data cache
      */
-    LIVRE_API const TextureDataCache& getDataCache() const;
+    LIVRE_API const DataCache& getDataCache() const;
 
 private:
 

@@ -69,4 +69,8 @@ BOOST_AUTO_TEST_CASE( testCache )
     BOOST_CHECK_EQUAL( cacheObjectTriggerClean->getId(), 3 );
     BOOST_CHECK_EQUAL( cacheObjectTriggerClean.use_count(), 2 );
     BOOST_CHECK_EQUAL( cache.getStatistics().getUsedMemory(), cacheSize );
+
+    cache.purge();
+    BOOST_CHECK_EQUAL( cache.getCount(), 0 );
+    BOOST_CHECK_EQUAL( cache.getStatistics().getUsedMemory(), 0 );
 }

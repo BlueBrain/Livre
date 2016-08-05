@@ -25,68 +25,13 @@
 namespace livre
 {
 
-struct CacheStatistics::LoadInfo
-{
-    enum Operation
-    {
-        OP_LOAD,
-        OP_UNLOAD
-    };
-
-    LoadInfo( )
-        : op( OP_LOAD ),
-          cacheSize( 0 ),
-          cumulativeCacheSize( 0 ),
-          cumulativeNbNodes( 0 )
-    {
-        time = ThreadClock::getClock().getTimed();
-    }
-
-    LoadInfo(  const LoadInfo& previous,
-               Operation operation,
-               const size_t cSize )
-        : op( operation ), cacheSize( cSize )
-    {
-        time = ThreadClock::getClock().getTimed();
-        switch( op )
-        {
-        case OP_LOAD:
-            cumulativeCacheSize = previous.cumulativeCacheSize + cacheSize;
-            cumulativeNbNodes = previous.cumulativeNbNodes + 1;
-            break;
-        case OP_UNLOAD:
-            cumulativeCacheSize = previous.cumulativeCacheSize - cacheSize;
-            cumulativeNbNodes = previous.cumulativeNbNodes - 1;
-            break;
-        }
-    }
-
-    friend std::ostream& operator<<( std::ostream& stream, const LoadInfo& loadInfo )
-    {
-        stream << "Time: " << loadInfo.time
-               << " Cumulative Nodes: " << loadInfo.cumulativeNbNodes
-               << " Cumulative Size: " << loadInfo.cumulativeCacheSize;
-        return stream;
-    }
-
-    Operation op;
-    double time;
-    size_t cacheSize;
-    size_t cumulativeCacheSize;
-    size_t cumulativeNbNodes;
-    double loadTime;
-};
-
-CacheStatistics::CacheStatistics( const std::string& name,
-                                  const size_t maxMemBytes,
-                                  const size_t queueSize /* = CACHE_LOG_SIZE */ )
+CacheStatistics::CacheStatistics( const std::string& name, const size_t maxMemBytes )
     : _name( name )
     , _usedMemBytes( 0 )
     , _maxMemBytes( maxMemBytes )
     , _objCount( 0 )
     , _cacheHit( 0 )
     , _cacheMiss( 0 )
-    , _queueSize( queueSize )
 {
 }
 
@@ -94,35 +39,23 @@ void CacheStatistics::notifyLoaded( const CacheObject& cacheObject )
 {
    ++_objCount;
    _usedMemBytes += cacheObject.getSize();
-
-   if( _ioQueue.empty() )
-       _ioQueue.push( LoadInfoPtr( new LoadInfo()) );
-
-   if( _ioQueue.getSize() == _queueSize )
-       _ioQueue.pop( );
-
-   LoadInfoPtr previous;
-   _ioQueue.getBack( previous );
-   _ioQueue.push( LoadInfoPtr( new LoadInfo( *previous, LoadInfo::OP_LOAD,
-                                             cacheObject.getSize( ))));
 }
 
 void CacheStatistics::notifyUnloaded( const CacheObject& cacheObject )
 {
     --_objCount;
     _usedMemBytes -= cacheObject.getSize();
-
-    if( _ioQueue.getSize() == _queueSize )
-        _ioQueue.pop( );
-
-    LoadInfoPtr previous;
-    _ioQueue.getBack( previous );
-    _ioQueue.push( LoadInfoPtr( new LoadInfo( *previous, LoadInfo::OP_UNLOAD,
-                                              cacheObject.getSize( ))));
 }
 
-std::ostream& operator<<( std::ostream& stream,
-                          const CacheStatistics& statistics )
+void CacheStatistics::clear()
+{
+    _usedMemBytes = 0;
+    _objCount = 0;
+    _cacheHit = 0;
+    _cacheMiss = 0;
+}
+
+std::ostream& operator<<( std::ostream& stream, const CacheStatistics& statistics )
 {
     const int hits = int(
         100.f * float( statistics._cacheHit ) /

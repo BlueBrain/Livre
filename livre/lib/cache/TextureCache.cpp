@@ -18,8 +18,8 @@
  */
 
 #include <livre/lib/cache/TextureCache.h>
-#include <livre/lib/cache/TextureDataCache.h>
-#include <livre/lib/cache/TextureDataObject.h>
+#include <livre/lib/cache/DataCache.h>
+#include <livre/lib/cache/DataObject.h>
 #include <livre/lib/cache/TextureObject.h>
 
 #include <livre/core/data/LODNode.h>
@@ -33,7 +33,7 @@ namespace livre
 {
 struct TextureCache::Impl
 {
-    Impl( TextureDataCache& dataCache,
+    Impl( DataCache& dataCache,
           const int internalTextureFormat )
         : _dataCache( dataCache )
     {
@@ -65,11 +65,11 @@ struct TextureCache::Impl
         return new TextureObject( cacheId, cache );
     }
 
-    TextureDataCache& _dataCache;
+    DataCache& _dataCache;
     std::unique_ptr< TexturePool > _texturePool;
 };
 
-TextureCache::TextureCache( TextureDataCache& dataCache,
+TextureCache::TextureCache( DataCache& dataCache,
                             const size_t maxMemBytes,
                             const GLint internalTextureFormat )
     : Cache( "Texture cache GPU", maxMemBytes )
@@ -91,12 +91,12 @@ TexturePool& TextureCache::getTexturePool() const
     return *_impl->_texturePool.get();
 }
 
-TextureDataCache& TextureCache::getDataCache()
+DataCache& TextureCache::getDataCache()
 {
     return _impl->_dataCache;
 }
 
-const TextureDataCache& TextureCache::getDataCache() const
+const DataCache& TextureCache::getDataCache() const
 {
     return _impl->_dataCache;
 }

@@ -18,8 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/lib/cache/TextureDataCache.h>
-#include <livre/lib/cache/TextureDataObject.h>
+#include <livre/lib/cache/DataCache.h>
+#include <livre/lib/cache/DataObject.h>
 
 #include <livre/lib/cache/HistogramCache.h>
 #include <livre/lib/cache/HistogramObject.h>
@@ -73,13 +73,13 @@ BOOST_AUTO_TEST_CASE( testDataCache )
     // Read same data with the data cache
     const size_t maxMemory = 2048;
     const uint32_t destGPUDataType = 5121; // GL_UNSIGNED_BYTE;
-    livre::TextureDataCache dataCache( maxMemory, source, destGPUDataType );
+    livre::DataCache dataCache( maxMemory, source, destGPUDataType );
     livre::ConstCacheObjectPtr constData = dataCache.get( firstChildNodeId.getId( ));
     BOOST_CHECK( dataCache.getCount() == 0 );
     BOOST_CHECK( !constData );
 
     livre::ConstCacheObjectPtr dataCacheObject = dataCache.load( firstChildNodeId.getId( ));
-    BOOST_CHECK( dataCacheObject->isLoaded( ));
+    BOOST_CHECK( dataCacheObject );
 
     constData = dataCache.get( livre::INVALID_CACHE_ID );
     BOOST_CHECK( dataCache.getCount() == 1 );
@@ -87,11 +87,11 @@ BOOST_AUTO_TEST_CASE( testDataCache )
 
     // get() on cache returns already loaded data
     constData = dataCache.get( firstChildNodeId.getId( ));
-    BOOST_CHECK( constData && constData->isLoaded( ));
+    BOOST_CHECK( constData );
     BOOST_CHECK( dataCache.getCount() == 1 );
 
-    livre::ConstTextureDataObjectPtr dataObject =
-            std::dynamic_pointer_cast< const livre::TextureDataObject >( dataCacheObject );
+    livre::ConstDataObjectPtr dataObject =
+            std::dynamic_pointer_cast< const livre::DataObject >( dataCacheObject );
 
     BOOST_CHECK( dataObject );
     BOOST_CHECK( dataObject->getSize() == allocSize );
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE( testDataCache )
 
     livre::HistogramCache histogramCache( 1024, dataCache );
     livre::ConstCacheObjectPtr histCacheObject = histogramCache.load( firstChildNodeId.getId( ));
-    BOOST_CHECK( histCacheObject->isLoaded( ));
+    BOOST_CHECK( histCacheObject );
 
     livre::ConstHistogramObjectPtr histObject =
             std::dynamic_pointer_cast< const livre::HistogramObject >( histCacheObject );

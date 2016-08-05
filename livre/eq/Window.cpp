@@ -67,7 +67,7 @@ public:
         Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
         const size_t maxGpuMemory =
                         pipe->getFrameData()->getVRParameters().getMaxGPUCacheMemoryMB();
-        _textureCache.reset( new TextureCache( node->getTextureDataCache(),
+        _textureCache.reset( new TextureCache( node->getDataCache(),
                                                maxGpuMemory * LB_1MB, GL_LUMINANCE8 ));
         _renderPipeline.reset( new RenderPipeline( *_textureCache,
                                                    node->getHistogramCache(),

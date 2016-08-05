@@ -27,7 +27,7 @@
 
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/lib/cache/TextureCache.h>
-#include <livre/lib/cache/TextureDataCache.h>
+#include <livre/lib/cache/DataCache.h>
 #include <livre/lib/cache/TextureObject.h>
 
 #include <livre/eq/FrameData.h>

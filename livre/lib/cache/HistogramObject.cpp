@@ -19,8 +19,8 @@
 
 #include <livre/lib/cache/HistogramObject.h>
 #include <livre/lib/cache/HistogramCache.h>
-#include <livre/lib/cache/TextureDataCache.h>
-#include <livre/lib/cache/TextureDataObject.h>
+#include <livre/lib/cache/DataCache.h>
+#include <livre/lib/cache/DataObject.h>
 
 #include <livre/core/data/LODNode.h>
 #include <livre/core/data/MemoryUnit.h>
@@ -37,14 +37,12 @@ struct HistogramObject::Impl
 public:
 
     Impl( const HistogramObject& histogramObject,
-          const HistogramCache& cache )
+          const DataCache& dataCache )
         : _histogramObject( histogramObject )
-        , _dataCache( cache.getDataCache( ))
-    {}
-
-    bool isLoaded() const
+        , _dataCache( dataCache )
     {
-        return _histogram.get();
+        if( !load())
+            LBTHROW( std::runtime_error( "Unable to construct histogram cache object" ));
     }
 
     size_t getSize() const
@@ -91,14 +89,14 @@ public:
         if( compCount > 1 )
             LBTHROW( std::runtime_error( "Multiple channels are not supported "));
 
-        ConstTextureDataObjectPtr textureData =
-                std::static_pointer_cast< const TextureDataObject >(
+        ConstDataObjectPtr data =
+                std::static_pointer_cast< const DataObject >(
                     _dataCache.get( _histogramObject.getId( )));
 
-        if( !textureData )
+        if( !data )
             return false;
 
-        const void* rawData = textureData->getDataPtr();
+        const void* rawData = data->getDataPtr();
         const LODNode& lodNode = _dataCache.getDataSource().getNode(
                     NodeId( _histogramObject.getId( )));
         const Vector3ui& voxelBox = lodNode.getVoxelBox().getSize();
@@ -148,18 +146,13 @@ public:
         return true;
     }
 
-    void unload()
-    {
-        _histogram.reset();
-    }
-
     const HistogramObject& _histogramObject;
-    const TextureDataCache& _dataCache;
+    const DataCache& _dataCache;
     std::unique_ptr< Histogram > _histogram;
 };
 
 HistogramObject::HistogramObject( const CacheId& cacheId,
-                                  const HistogramCache& cache )
+                                  const DataCache& cache )
     : CacheObject( cacheId )
     , _impl( new Impl( *this, cache ))
 {}
@@ -167,24 +160,9 @@ HistogramObject::HistogramObject( const CacheId& cacheId,
 HistogramObject::~HistogramObject()
 {}
 
-bool HistogramObject::_isLoaded( ) const
-{
-    return _impl->isLoaded();
-}
-
 size_t HistogramObject::_getSize() const
 {
     return _impl->getSize();
-}
-
-bool HistogramObject::_load()
-{
-    return _impl->load();
-}
-
-void HistogramObject::_unload()
-{
-    return _impl->unload();
 }
 
 Histogram HistogramObject::getHistogram() const
