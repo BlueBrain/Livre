@@ -32,7 +32,7 @@ namespace livre
  * textures into the texture slots. The methods are not thread safe.
  */
 class TexturePool
-{   
+{
 public:
 
     /**
@@ -51,11 +51,6 @@ public:
      * @return The OpenGL GPU internal format of the texture data.
      */
     LIVRECORE_API int32_t getInternalFormat() const;
-
-    /**
-     * @return The OpenGL format of the texture data kept in memory. Channel count etc.
-     */
-    LIVRECORE_API uint32_t getGPUDataType() const;
 
     /**
      * @return The OpenGL data type of the texture data.

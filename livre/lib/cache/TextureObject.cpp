@@ -48,7 +48,6 @@ struct TextureObject::Impl
        , _textureState( new TextureState( ))
        , _dataSource( textureCache.getDataCache().getDataSource( ))
        , _texturePool( textureCache.getTexturePool( ))
-       , _textureType( textureCache.getDataCache( ).getTextureType( ))
     {
         if( !load())
         {
@@ -105,28 +104,9 @@ struct TextureObject::Impl
 
     size_t getSize() const
     {
-        // L (luminance, e.g. greyscale): width * height * type size.
-        // LA (luminance and alpha, common for fonts): width * height * type size bytes.
-        // RGB (color, no alpha): width * height * type size bytes.
-        // RGBA (color with alpha): width * height * type size bytes.
-
-        uint32_t elementSize = 0;
-        switch( _textureType )
-        {
-            case GL_UNSIGNED_BYTE:
-                elementSize = sizeof( char );
-                break;
-            case GL_FLOAT:
-                elementSize = sizeof( float );
-                break;
-            case GL_UNSIGNED_SHORT:
-                elementSize = sizeof( short );
-                break;
-        }
-
         const Vector3ui& textureSize =
                 _dataSource.getVolumeInfo().maximumBlockSize;
-        return textureSize.product() * elementSize;
+        return textureSize.product() * _dataSource.getVolumeInfo().getBytesPerVoxel();
     }
 
     bool loadTextureToGPU() const
@@ -145,10 +125,9 @@ struct TextureObject::Impl
                 lodNode.getBlockSize() + overlap * 2;
 
         _textureState->bind( );
-        glTexSubImage3D( GL_TEXTURE_3D, 0, 0, 0, 0,
-                         voxSizeVec[0], voxSizeVec[1], voxSizeVec[2],
-                         _texturePool.getFormat() ,
-                         _texturePool.getGPUDataType(),
+
+        glTexSubImage3D( GL_TEXTURE_3D, 0, 0, 0, 0, voxSizeVec[0], voxSizeVec[1], voxSizeVec[2],
+                         _texturePool.getFormat() , _textureCache.getTextureType(),
                          _dataObject->getDataPtr( ));
 
         // Something went wrong with loading the data
@@ -169,7 +148,6 @@ struct TextureObject::Impl
     TextureStatePtr _textureState;
     DataSource& _dataSource;
     TexturePool& _texturePool;
-    uint32_t _textureType;
 };
 
 

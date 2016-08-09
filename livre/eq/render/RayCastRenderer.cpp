@@ -41,6 +41,10 @@
 #include <eq/eq.h>
 #include <eq/gl.h>
 
+#define SH_UINT 0
+#define SH_INT 1
+#define SH_FLOAT 2
+
 namespace livre
 {
 
@@ -280,6 +284,35 @@ struct RayCastRenderer::Impl
         tParamNameGL = glGetUniformLocation( program, "nClipPlanes" );
         glUniform1i( tParamNameGL, nPlanes );
 
+        switch( _dataSource.getVolumeInfo().dataType )
+        {
+            case DT_UINT8:
+            case DT_UINT16:
+            case DT_UINT32:
+                tParamNameGL = glGetUniformLocation( program, "datatype" );
+                glUniform1ui( tParamNameGL, SH_UINT );
+                break;
+            case DT_FLOAT:
+                tParamNameGL = glGetUniformLocation( program, "datatype" );
+                glUniform1ui( tParamNameGL, SH_FLOAT );
+                break;
+            case DT_INT8:
+            case DT_INT16:
+            case DT_INT32:
+                tParamNameGL = glGetUniformLocation( program, "datatype" );
+                glUniform1ui( tParamNameGL, SH_INT );
+                break;
+            case DT_UNDEFINED:
+            default:
+                LBTHROW( std::runtime_error( "Unsupported type in the shader." ));
+                break;
+        }
+
+        // This is temporary. In the future it will be given by the gui.
+        Vector2f dataSourceRange( 0.0f, 255.0f );
+        tParamNameGL = glGetUniformLocation( program, "dataSourceRange" );
+        glUniform2fv( tParamNameGL, 1, dataSourceRange.array );
+
         if( nPlanes > 0 )
         {
             Floats planesData;
@@ -458,7 +491,10 @@ struct RayCastRenderer::Impl
 
         glActiveTexture( GL_TEXTURE0 );
         texState->bind();
-        tParamNameGL = glGetUniformLocation( program, "volumeTex" );
+        tParamNameGL = glGetUniformLocation( program, "volumeTexUint8" );
+        glUniform1i( tParamNameGL, 0 );
+
+        tParamNameGL = glGetUniformLocation( program, "volumeTexFloat" );
         glUniform1i( tParamNameGL, 0 );
 
         const uint32_t refLevel = lodNode.getRefLevel();

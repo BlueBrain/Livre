@@ -82,11 +82,6 @@ GLint TexturePool::getInternalFormat() const
     return _internalFormat;
 }
 
-GLenum TexturePool::getGPUDataType() const
-{
-    return _gpuDataType;
-}
-
 GLenum TexturePool::getFormat() const
 {
     return _format;

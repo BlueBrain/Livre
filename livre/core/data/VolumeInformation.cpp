@@ -42,9 +42,7 @@ size_t VolumeInformation::getBytesPerVoxel() const
 {
     switch( dataType )
     {
-    case DT_FLOAT64:
-        return 8;
-    case DT_FLOAT32:
+    case DT_FLOAT:
     case DT_UINT32:
     case DT_INT32:
         return 4;

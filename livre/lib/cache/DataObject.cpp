@@ -41,7 +41,6 @@ public:
         , _dataObject( dataObject )
         , _dataCache( dataCache )
         , _dataSource( dataCache.getDataSource( ))
-        , _gpuDataType( dataCache.getTextureType( ))
     {
         if( !load())
         {
@@ -82,7 +81,7 @@ public:
     }
 
     template< class DEST_TYPE >
-    bool readTextureData( const bool quantize )
+    bool readTextureData()
     {
         const NodeId nodeId( _dataObject.getId( ));
         ConstMemoryUnitPtr data = _dataSource.getData( nodeId );
@@ -90,96 +89,32 @@ public:
             return false;
 
         const void* rawData = data->getData< void >();
-        if( quantize )
-        {
-            std::vector< DEST_TYPE > textureData;
-            convertData( rawData, textureData );
-            _data->allocAndSetData( textureData );
-        }
-        else
-            _data->allocAndSetData( rawData, getDataSize( ));
+        _data->allocAndSetData( rawData, getDataSize( ));
 
         return true;
-    }
-
-    template< class SRC_TYPE, class DEST_TYPE >
-    void quantizeData( const SRC_TYPE* rawData,
-                       std::vector< DEST_TYPE >& formattedData ) const
-    {
-        const VolumeInformation& volumeInfo = _dataSource.getVolumeInfo();
-        const uint32_t compCount = volumeInfo.compCount;
-        const size_t dataSize = getDataSize();
-
-        const Vector3f min( std::numeric_limits< DEST_TYPE >::min( ));
-        const Vector3f max( std::numeric_limits< DEST_TYPE >::max( ));
-        if( std::is_signed< SRC_TYPE >::value )
-        {
-            signedQuantize( rawData, &formattedData[ 0 ], dataSize,
-                            compCount, min, max );
-        }
-        else
-        {
-            unsignedQuantize( rawData, &formattedData[ 0 ], dataSize,
-                              compCount, min, max );
-        }
-    }
-
-    template< class DEST_TYPE >
-    void convertData( const void* rawData,
-                      std::vector< DEST_TYPE >& formattedData ) const
-    {
-
-        const VolumeInformation& volumeInfo = _dataSource.getVolumeInfo();
-        const DataType dataType = volumeInfo.dataType;
-        const size_t dataSize = getDataSize();
-        formattedData.resize( dataSize );
-
-        switch( dataType )
-        {
-           case DT_UINT8:
-                quantizeData< uint8_t, DEST_TYPE >( static_cast< const uint8_t* >( rawData ),
-                                                    formattedData );
-                break;
-           case DT_UINT16:
-                quantizeData< uint16_t, DEST_TYPE >( static_cast< const uint16_t* >( rawData ),
-                                                     formattedData );
-                break;
-           case DT_UINT32:
-                quantizeData< uint32_t, DEST_TYPE >( static_cast< const uint32_t* >( rawData ),
-                                                     formattedData );
-                break;
-           case DT_INT8:
-                quantizeData< int8_t, DEST_TYPE >( static_cast< const int8_t* >( rawData ),
-                                                   formattedData );
-                break;
-           case DT_INT16:
-                quantizeData< int16_t, DEST_TYPE >( static_cast< const int16_t* >( rawData ),
-                                                    formattedData );
-                break;
-           case DT_INT32:
-                quantizeData< int32_t, DEST_TYPE >( static_cast< const int32_t* >( rawData ),
-                                                    formattedData );
-                break;
-           case DT_UNDEFINED:
-           case DT_FLOAT32:
-           case DT_FLOAT64:
-           {
-                LBTHROW( std::runtime_error( "Unimplemented data type." ));
-           }
-        }
     }
 
     bool load()
     {
         const DataType dataType = _dataSource.getVolumeInfo().dataType;
-        switch( _gpuDataType )
+        switch( dataType )
         {
-            case GL_UNSIGNED_BYTE:
-                return readTextureData< uint8_t >( dataType != DT_UINT8 );
-            case GL_FLOAT:
-                return readTextureData< float >( dataType != DT_FLOAT32 );
-            case GL_UNSIGNED_SHORT:
-                return readTextureData< uint16_t >( dataType != DT_UINT16 );
+            case DT_UINT8:
+                return readTextureData< uint8_t >();
+            case DT_UINT16:
+                return readTextureData< uint16_t >();
+            case DT_UINT32:
+                return readTextureData< uint32_t >();
+            case DT_INT8:
+                return readTextureData< int8_t >();
+            case DT_INT16:
+                return readTextureData< int16_t >();
+            case DT_INT32:
+                return readTextureData< int32_t >();
+            case DT_FLOAT:
+                return readTextureData< float >();
+            case DT_UNDEFINED:
+                LBTHROW( std::runtime_error( "Undefined data type" ));
         }
         return false;
     }
@@ -188,7 +123,6 @@ public:
     DataObject& _dataObject;
     DataCache& _dataCache;
     DataSource& _dataSource;
-    uint32_t _gpuDataType;
 };
 
 DataObject::DataObject( const CacheId& cacheId,

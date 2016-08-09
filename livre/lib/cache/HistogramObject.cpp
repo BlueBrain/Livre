@@ -138,8 +138,7 @@ public:
                 binData< int32_t >( static_cast< const int32_t* >( rawData ),
                                     voxelBox, padding, compCount, scaleFactor );
                 break;
-           case DT_FLOAT32:
-           case DT_FLOAT64:
+           case DT_FLOAT:
            case DT_UNDEFINED:
            default:
            {
