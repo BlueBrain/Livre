@@ -132,7 +132,7 @@ struct Cache::Impl
             applyPolicy();
             return obj;
         }
-        catch( const std::runtime_error& )
+        catch( const CacheLoadException& )
         {}
 
         return ConstCacheObjectPtr();

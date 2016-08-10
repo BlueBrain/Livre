@@ -45,8 +45,8 @@ private:
     /**
      * Constructor
      * @param cacheId is the unique identifier
-     * @param dataCache the histogram source data is retrieved from data cache
-     * @throws std::runtime_error when the data cache does not have the data for cache id
+     * @param dataCache the cache the data object is created
+     * @throws CacheLoadException when the data cache does not have the data for cache id
      */
     DataObject( const CacheId& cacheId, DataCache& dataCache );
 

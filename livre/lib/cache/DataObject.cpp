@@ -44,7 +44,10 @@ public:
         , _gpuDataType( dataCache.getTextureType( ))
     {
         if( !load())
-            LBTHROW( std::runtime_error( "Unable to construct histogram cache object" ));
+        {
+            LBTHROW( CacheLoadException( dataObject.getId(),
+                                         "Unable to construct data cache object" ));
+        }
     }
 
     ~Impl()
@@ -189,7 +192,7 @@ public:
 };
 
 DataObject::DataObject( const CacheId& cacheId,
-                                     DataCache& dataCache )
+                        DataCache& dataCache )
     : CacheObject( cacheId )
     , _impl( new Impl( *this, dataCache ))
 {}

@@ -41,8 +41,11 @@ public:
         : _histogramObject( histogramObject )
         , _dataCache( dataCache )
     {
-        if( !load())
-            LBTHROW( std::runtime_error( "Unable to construct histogram cache object" ));
+        if( !load( ))
+        {
+            LBTHROW( CacheLoadException( histogramObject.getId(),
+                                         "Unable to construct histogram cache object" ));
+        }
     }
 
     size_t getSize() const
