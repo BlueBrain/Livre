@@ -51,6 +51,12 @@ public:
 
 private:
 
+    /**
+     * Constructor
+     * @param cacheId is the unique identifier
+     * @param textureCache the cache the texture object is created
+     * @throws CacheLoadException when the data cache does not have the data for cache id
+     */
     TextureObject( const CacheId& cacheId,
                    TextureCache& textureCache );
 

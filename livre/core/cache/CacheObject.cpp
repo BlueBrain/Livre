@@ -25,6 +25,19 @@
 namespace livre
 {
 
+CacheLoadException::CacheLoadException( const Identifier& id,
+                                        const std::string& message )
+    : _id( id )
+    , _message( message )
+{}
+
+const char* CacheLoadException::what() const throw()
+{
+    std::stringstream message;
+    message << "Id: " << _id << " " << _message << std::endl;
+    return message.str().c_str();
+}
+
 struct CacheObject::Status
 {
     Status( const CacheId& cacheId_ )

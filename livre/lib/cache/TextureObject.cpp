@@ -51,7 +51,10 @@ struct TextureObject::Impl
        , _textureType( textureCache.getDataCache( ).getTextureType( ))
     {
         if( !load())
-            LBTHROW( std::runtime_error( "Unable to construct histogram cache object" ));
+        {
+            LBTHROW( CacheLoadException( textureObject.getId(),
+                                         "Unable to construct texture cache object" ));
+        }
     }
 
     ~Impl()
