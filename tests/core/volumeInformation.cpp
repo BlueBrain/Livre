@@ -46,8 +46,6 @@ BOOST_AUTO_TEST_CASE( defaultVolumeInformation )
     BOOST_CHECK_EQUAL( volume.dataType, livre::DT_UINT8 );
     BOOST_CHECK_EQUAL( volume.overlap, livre::Vector3ui( 0u ));
     BOOST_CHECK_EQUAL( volume.maximumBlockSize, livre::Vector3ui( 0u ));
-    BOOST_CHECK_EQUAL( volume.minPos, livre::Vector3f( 0.f ));
-    BOOST_CHECK_EQUAL( volume.maxPos, livre::Vector3f( 0.f ));
     BOOST_CHECK_EQUAL( volume.voxels, livre::Vector3ui( 256u ));
     BOOST_CHECK_EQUAL( volume.worldSize, livre::Vector3f( 0.f ));
     BOOST_CHECK_EQUAL( volume.dataToLivreTransform, livre::Matrix4f( ));

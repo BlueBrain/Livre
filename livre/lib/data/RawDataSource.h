@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -17,46 +17,45 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/core/data/VolumeInformation.h>
+#ifndef _RawDataSource_h_
+#define _RawDataSource_h_
+
 #include <livre/core/data/DataSourcePlugin.h>
-#include <livre/core/data/LODNode.h>
+
+#include <livre/lib/types.h>
 
 namespace livre
 {
 
-VolumeInformation::VolumeInformation()
-    : isBigEndian( false )
-    , compCount( 1u )
-    , dataType( DT_UINT8 )
-    , overlap( 0u )
-    , maximumBlockSize( 0u )
-    , voxels( 256u )
-    , worldSize( 0.0f )
-    , resolution( Vector3f( -1.0f, -1.0f, -1.0f ))
-    , worldSpacePerVoxel( 0.0f )
-    , meterToDataUnitRatio( 1.0f )
-    , frameRange( INVALID_FRAME_RANGE )
-{}
-
-size_t VolumeInformation::getBytesPerVoxel() const
+/**
+ * Reads a *.raw data with given details or nrrd volume. The limitation
+ * is, the volumes should fit into the GPU memory.
+ *
+ * Parses URIs in the form: raw://filename.raw#1024,1024,1024,uint8 or
+ *                          raw://filename.nrrd
+ *
+ */
+class RawDataSource : public DataSourcePlugin
 {
-    switch( dataType )
-    {
-    case DT_FLOAT64:
-        return 8;
-    case DT_FLOAT32:
-    case DT_UINT32:
-    case DT_INT32:
-        return 4;
-    case DT_UINT16:
-    case DT_INT16:
-        return 2;
-    case DT_UINT8:
-    case DT_INT8:
-        return 1;
-    default:
-        return -1;
-    }
-}
+public:
+
+    RawDataSource( const DataSourcePluginData& initData );
+    ~RawDataSource();
+
+    /**
+     * Read the data for a given node.
+     * @param node LODNode to be read.
+     * @return The block data for the node.
+     */
+    MemoryUnitPtr getData( const LODNode& node ) final;
+
+    static bool handles( const DataSourcePluginData& initData );
+private:
+
+    struct Impl;
+    std::unique_ptr< Impl > _impl;
+};
 
 }
+
+#endif // _RawDataSource_h_

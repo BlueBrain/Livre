@@ -19,6 +19,18 @@ file(COPY "uvf/mouse_reduced.uvf" DESTINATION ${UVF_DATA_DIR})
 
 add_definitions(-DUVF_DATA_FILE=\"${UVF_DATA_FILE}\")
 
+set(RAW_DATA_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+set(RAW_DATA_FILE "${RAW_DATA_DIR}/nucleon.raw")
+file(COPY "lib/nucleon.raw" DESTINATION ${RAW_DATA_DIR})
+
+add_definitions(-DRAW_DATA_FILE=\"${RAW_DATA_FILE}\")
+
+set(NRRD_DATA_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+set(NRRD_DATA_FILE "${NRRD_DATA_DIR}/nucleon.nrrd")
+file(COPY "lib/nucleon.nrrd" DESTINATION ${NRRD_DATA_DIR})
+
+add_definitions(-DNRRD_DATA_FILE=\"${NRRD_DATA_FILE}\")
+
 # Create and install all the tests
 include(CommonCTest)
 

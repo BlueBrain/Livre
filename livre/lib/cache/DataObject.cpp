@@ -112,7 +112,7 @@ public:
 
         const Vector3f min( std::numeric_limits< DEST_TYPE >::min( ));
         const Vector3f max( std::numeric_limits< DEST_TYPE >::max( ));
-        if( std::is_signed< DEST_TYPE >::value )
+        if( std::is_signed< SRC_TYPE >::value )
         {
             signedQuantize( rawData, &formattedData[ 0 ], dataSize,
                             compCount, min, max );

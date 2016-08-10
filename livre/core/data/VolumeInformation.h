@@ -72,16 +72,6 @@ struct VolumeInformation
      */
     Vector3ui maximumBlockSize;
 
-    /**
-     * The minimum position of a volume.
-     */
-    Vector3f minPos;
-
-    /**
-     * The maximum position of a volume.
-     */
-    Vector3f maxPos;
-
     Vector3ui voxels; //!< The size (number of voxels) in each dimension
 
     /** The normalized size of the volume. */

@@ -29,7 +29,8 @@ set(LIVRELIB_PUBLIC_HEADERS
   pipeline/RenderingSetGeneratorFilter.h
   pipeline/RenderPipeline.h
   pipeline/VisibleSetGeneratorFilter.h
-  data/MemoryDataSource.h)
+  data/MemoryDataSource.h
+  data/RawDataSource.h)
 
 set(LIVRELIB_SOURCES
   ${ZEROBUF_GENERATED_SOURCES}
@@ -48,7 +49,8 @@ set(LIVRELIB_SOURCES
   pipeline/RenderingSetGeneratorFilter.cpp
   pipeline/RenderPipeline.cpp
   pipeline/VisibleSetGeneratorFilter.cpp
-  data/MemoryDataSource.cpp)
+  data/MemoryDataSource.cpp
+  data/RawDataSource.cpp)
 
 set(LIVRELIB_LINK_LIBRARIES PUBLIC LivreCore
                             PRIVATE Equalizer ${VTUNE_LIBRARIES})
