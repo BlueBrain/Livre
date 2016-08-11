@@ -1,7 +1,6 @@
 
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
- *                          Stefan.Eilemann@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -48,13 +47,16 @@ struct RawDataSource::Impl
 {
     Impl( const DataSourcePluginData& initData, VolumeInformation& volInfo )
         : _volInfo( volInfo )
-        , _mmapPtr( 0 )
+        , _mmapPtr( nullptr )
+        , _fd( -1 )
         , _rawDataSize( 0 )
         , _headerSize( 0 )
     {
         const servus::URI& uri = initData.getURI();
         const std::string& path = uri.getPath();
-        const bool isExtensionRaw = boost::algorithm::ends_with( path, ".raw" );
+        const bool isExtensionRaw =
+                boost::algorithm::ends_with( path, ".raw" ) ||
+                boost::algorithm::ends_with( path, ".img" );
         const bool isExtensionNrrd = boost::algorithm::ends_with( path, ".nrrd" );
 
         if( !isExtensionRaw && !isExtensionNrrd )
@@ -79,25 +81,31 @@ struct RawDataSource::Impl
 
     ~Impl()
     {
-        ::munmap( (void *)_mmapPtr, _rawDataSize + _headerSize );
+        if( _mmapPtr != nullptr )
+            ::munmap((void *)_mmapPtr, _rawDataSize + _headerSize );
+
+        if( _fd != -1 )
+            close( _fd );
     }
 
     bool memoryMap( const std::string& filename, const size_t headerSize = 0 )
     {
-        int fd = open( filename.c_str(), O_RDONLY );
-        if( fd == -1 )
+        _fd = open( filename.c_str(), O_RDONLY );
+        if( _fd == -1 )
             return false;
 
         struct stat sb;
-        if( ::fstat( fd, &sb ) == -1 )
+        if( ::fstat( _fd, &sb ) == -1 )
             return false;
 
         _rawDataSize = sb.st_size - headerSize;
 
-        _mmapPtr = ::mmap( 0, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0 );
+        _mmapPtr = mmap( 0, sb.st_size, PROT_READ, MAP_PRIVATE, _fd, 0 );
         if( _mmapPtr == MAP_FAILED )
         {
-            ::close( fd );
+            ::close( _fd );
+            _fd = -1;
+            _mmapPtr = nullptr;
             return false;
         }
 
@@ -144,7 +152,7 @@ struct RawDataSource::Impl
         using boost::lexical_cast;
         if( parameters.size() < 4 ) // use defaults
         {
-            LBTHROW( std::runtime_error( "Not enough parameters for the " ));
+            LBTHROW( std::runtime_error( "Not enough parameters for the raw file" ));
         }
         else
         {
@@ -201,6 +209,7 @@ struct RawDataSource::Impl
 
     VolumeInformation& _volInfo;
     void* _mmapPtr;
+    int32_t _fd;
     size_t _rawDataSize;
     size_t _headerSize;
 };

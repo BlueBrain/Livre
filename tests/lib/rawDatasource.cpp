@@ -1,6 +1,5 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
- *                          Stefan.Eilemann@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -18,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define BOOST_TEST_MODULE UVFDataSource
+#define BOOST_TEST_MODULE RawDataSource
 #include <boost/test/unit_test.hpp>
 
 #include <livre/core/data/DataSource.h>

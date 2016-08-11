@@ -28,10 +28,11 @@ namespace livre
 {
 
 /**
- * Reads a *.raw data with given details or nrrd volume. The limitation
- * is, the volumes should fit into the GPU memory.
+ * Provides a data source for *.[raw|img] data with given details or nrrd volume .
+ * The limitation is, the volumes should fit into the GPU memory. If the data does not
+ * fit GPU memory, texture upload will fail with OpenGL error number 1281.
  *
- * Parses URIs in the form: raw://filename.raw#1024,1024,1024,uint8 or
+ * Parses URIs in the form: raw://filename.[raw|img]#1024,1024,1024,uint8 or
  *                          raw://filename.nrrd
  *
  */
