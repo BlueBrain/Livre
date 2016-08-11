@@ -203,9 +203,9 @@ public:
                                           tuvokBricksInThisLod.z );
 
         uint32_t brickIndex = getBrickIndex( minPos[ 0 ],
-                                              minPos[ 1 ],
-                                              minPos[ 2 ],
-                                              bricksInThisLod );
+                                             minPos[ 1 ],
+                                             minPos[ 2 ],
+                                             bricksInThisLod );
 
         MemoryUnitPtr memUnitPtr;
         switch( _volumeInfo.dataType )

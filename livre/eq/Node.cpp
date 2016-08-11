@@ -98,9 +98,7 @@ public:
     {
         _dataSource->update();
 
-        const livre::VolumeInformation& info =
-                _dataSource->getVolumeInfo();
-
+        const livre::VolumeInformation& info = _dataSource->getVolumeInfo();
         _config->sendEvent( VOLUME_FRAME_RANGE ) << info.frameRange;
     }
 

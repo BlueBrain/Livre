@@ -3,7 +3,9 @@ Changelog {#Changelog}
 
 # master {#master}
 
-* [#315](https://github.com/BlueBrain/Livre/pull/315):
+* [#318](https://github.com/BlueBrain/Livre/pull/318):
+  * Added support for NRRD and Raw volumes
+* [#317](https://github.com/BlueBrain/Livre/pull/317):
   * Added purge support for cache
   * The cache objects now uses RAII for allocation of data
   * Rename TextureDataCache to DataCache, TextureDataObject to DataObject
