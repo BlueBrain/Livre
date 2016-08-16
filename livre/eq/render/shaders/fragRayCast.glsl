@@ -10,8 +10,17 @@
 
 #define EARLY_EXIT 0.999
 #define EPSILON 0.0000000001f
+#define SH_UINT 0
+#define SH_INT 1
+#define SH_FLOAT 2
 
-uniform sampler3D volumeTex; //gx, gy, gz, v
+uniform uint datatype;
+uniform sampler3D volumeTexFloat;
+uniform usampler3D volumeTexUint;
+uniform isampler3D volumeTexInt;
+
+uniform vec2 dataSourceRange;
+
 uniform sampler1D transferFnTex;
 layout( location = 0 ) out vec4 FragColor;
 layout( rgba32f ) uniform image2DRect renderTexture;
@@ -186,11 +195,23 @@ void main( void )
         vec3 pos = rayStart;
         vec3 step = normalize( rayStop - rayStart ) * stepSize;
 
+        //Used later for MAD optimization in the raymarching loop
+        const float multiplyer = 1 / ( dataSourceRange.g - dataSourceRange.r );
+        const float addedValue = -dataSourceRange.r / ( dataSourceRange.g - dataSourceRange.r );
+
         // Front-to-back absorption-emission integrator
         for ( float travel = distance( rayStop, rayStart ); travel > 0.0; pos += step, travel -= stepSize )
         {
             vec3 texPos = calcTexturePositionFromAABBPos( pos );
-            float density = texture( volumeTex, texPos ).r;
+
+            float density = 0;
+            if( datatype == SH_UINT )
+                density = texture( volumeTexUint, texPos ).r * multiplyer + addedValue;
+            else if( datatype == SH_INT )
+                density = texture( volumeTexInt, texPos ).r * multiplyer + addedValue;
+            else if( datatype == SH_FLOAT )
+                density = texture( volumeTexFloat, texPos ).r * multiplyer + addedValue;
+
             vec4 transferFn  = texture( transferFnTex, density );
             localResult = composite( transferFn, localResult, alphaCorrection );
 

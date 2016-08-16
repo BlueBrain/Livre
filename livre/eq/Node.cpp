@@ -55,7 +55,7 @@ public:
 
         const size_t maxMemBytes = vrRenderParameters.getMaxCPUCacheMemoryMB() * LB_1MB;
 
-        _dataCache.reset( new DataCache( maxMemBytes, *_dataSource.get(), GL_UNSIGNED_BYTE ));
+        _dataCache.reset( new DataCache( maxMemBytes, *_dataSource.get( )));
         const size_t histCacheSize =
                 32 * LB_1MB; // Histogram cache is 32 MB. Can hold approx 16k hists
         _histogramCache.reset( new HistogramCache( histCacheSize, *_dataCache ));

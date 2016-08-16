@@ -72,8 +72,7 @@ BOOST_AUTO_TEST_CASE( testDataCache )
 
     // Read same data with the data cache
     const size_t maxMemory = 2048;
-    const uint32_t destGPUDataType = 5121; // GL_UNSIGNED_BYTE;
-    livre::DataCache dataCache( maxMemory, source, destGPUDataType );
+    livre::DataCache dataCache( maxMemory, source );
     livre::ConstCacheObjectPtr constData = dataCache.get( firstChildNodeId.getId( ));
     BOOST_CHECK( dataCache.getCount() == 0 );
     BOOST_CHECK( !constData );

@@ -41,11 +41,8 @@ public:
      * @param maxMemBytes Maximum data memory
      * @param dataSource The source where the volume data should
      * be loaded from
-     * @param textureType The type of the data for the GPU.
      */
-    LIVRE_API DataCache( size_t maxMemBytes,
-                         DataSource& dataSource,
-                         uint32_t textureType );
+    LIVRE_API DataCache( size_t maxMemBytes, DataSource& dataSource );
 
     ~DataCache();
 
@@ -54,9 +51,6 @@ public:
 
     /** @return the data source. */
     LIVRE_API const DataSource& getDataSource() const;
-
-    /** @return The GPU data type. */
-    LIVRE_API uint32_t getTextureType() const;
 
 private:
     CacheObject* _generate( const CacheId& cacheId );

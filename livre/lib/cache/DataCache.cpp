@@ -34,10 +34,8 @@ namespace livre
 struct DataCache::Impl
 {
 public:
-    Impl( DataSource& dataSource,
-          const uint32_t textureType  )
+    Impl( DataSource& dataSource )
         : _dataSource( dataSource )
-        , _textureType( textureType )
     {}
 
     CacheObject* generate( const CacheId& cacheId, DataCache& cache )
@@ -46,14 +44,11 @@ public:
     }
 
     DataSource& _dataSource;
-    const uint32_t _textureType;
 };
 
-DataCache::DataCache( const size_t maxMemBytes,
-                      DataSource& dataSource,
-                      const uint32_t textureType )
+DataCache::DataCache( const size_t maxMemBytes, DataSource& dataSource )
     : Cache( "Data cache CPU", maxMemBytes )
-    , _impl( new Impl( dataSource, textureType ))
+    , _impl( new Impl( dataSource ))
 {}
 
 CacheObject* DataCache::_generate( const CacheId& cacheId )
@@ -74,11 +69,6 @@ DataSource& DataCache::getDataSource()
 const DataSource& DataCache::getDataSource() const
 {
     return _impl->_dataSource;
-}
-
-uint32_t DataCache::getTextureType() const
-{
-    return _impl->_textureType;
 }
 
 }

@@ -33,31 +33,64 @@ namespace livre
 {
 struct TextureCache::Impl
 {
-    Impl( DataCache& dataCache,
-          const int internalTextureFormat )
+    Impl( DataCache& dataCache )
         : _dataCache( dataCache )
     {
         const DataSource& dataSource = _dataCache.getDataSource();
         const VolumeInformation& info = dataSource.getVolumeInfo();
 
+        if( info.compCount != 1 )
+            LBTHROW( std::runtime_error( "Unsupported number of channels." ));
+
+        uint32_t internalTextureFormat;
         uint32_t format;
-        switch( info.compCount )
+        switch( dataSource.getVolumeInfo().dataType )
         {
-            case 1:
+            case DT_UINT8:
+                internalTextureFormat = GL_R8UI;
+                format = GL_RED_INTEGER;
+                _textureType = GL_UNSIGNED_BYTE;
+            break;
+            case DT_UINT16:
+                internalTextureFormat = GL_R16UI;
+                format = GL_RED_INTEGER;
+                _textureType = GL_UNSIGNED_SHORT;
+            break;
+            case DT_UINT32:
+                internalTextureFormat = GL_R32UI;
+                format = GL_RED_INTEGER;
+                _textureType = GL_UNSIGNED_INT;
+            break;
+            case DT_INT8:
+                internalTextureFormat = GL_R8I;
+                format = GL_RED_INTEGER;
+                _textureType = GL_BYTE;
+            break;
+            case DT_INT16:
+                internalTextureFormat = GL_R16I;
+                format = GL_RED_INTEGER;
+                _textureType = GL_SHORT;
+            break;
+            case DT_INT32:
+                internalTextureFormat = GL_R32I;
+                format = GL_RED_INTEGER;
+                _textureType = GL_INT;
+            break;
+            case DT_FLOAT:
+                internalTextureFormat = GL_R32F;
                 format = GL_RED;
-                break;
-            case 3:
-                format = GL_RGB;
-                break;
+                _textureType = GL_FLOAT;
+            break;
+            case DT_UNDEFINED:
             default:
-                LBTHROW( std::runtime_error( "Unsupported texture format" ));
-                break;
+                LBTHROW( std::runtime_error( "Undefined data type" ));
+            break;
         }
 
         _texturePool.reset( new TexturePool( info.maximumBlockSize,
                                              internalTextureFormat,
                                              format,
-                                             dataCache.getTextureType( )));
+                                             _textureType ));
     }
 
     CacheObject* generate( const CacheId& cacheId, TextureCache& cache )
@@ -67,13 +100,13 @@ struct TextureCache::Impl
 
     DataCache& _dataCache;
     std::unique_ptr< TexturePool > _texturePool;
+    uint32_t _textureType;
 };
 
 TextureCache::TextureCache( DataCache& dataCache,
-                            const size_t maxMemBytes,
-                            const GLint internalTextureFormat )
+                            const size_t maxMemBytes )
     : Cache( "Texture cache GPU", maxMemBytes )
-    , _impl( new Impl( dataCache, internalTextureFormat ))
+    , _impl( new Impl( dataCache ))
 {}
 
 CacheObject* TextureCache::_generate( const CacheId& cacheId )
@@ -84,6 +117,11 @@ CacheObject* TextureCache::_generate( const CacheId& cacheId )
 TextureCache::~TextureCache()
 {
     _unloadAll();
+}
+
+uint32_t TextureCache::getTextureType() const
+{
+    return _impl->_textureType;
 }
 
 TexturePool& TextureCache::getTexturePool() const

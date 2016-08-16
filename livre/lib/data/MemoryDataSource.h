@@ -55,6 +55,7 @@ public:
 
     static bool handles( const DataSourcePluginData& initData );
 
+private:
     float _sparsity;
 };
 

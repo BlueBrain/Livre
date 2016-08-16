@@ -135,7 +135,7 @@ struct RawDataSource::Impl
         else if( dataType == "unsigned int" || dataType == "uint32" )
             _volInfo.dataType = DT_UINT32;
         else if( dataType == "float" )
-            _volInfo.dataType = DT_FLOAT32;
+            _volInfo.dataType = DT_FLOAT;
         else
             LBTHROW( std::runtime_error( "Not supported data format" ));
     }

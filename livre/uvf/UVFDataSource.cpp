@@ -90,9 +90,9 @@ public:
             if( _uvfDataSetPtr->GetIsFloat() )
             {
                 if( bitWidth == 32 )
-                    _volumeInfo.dataType = DT_FLOAT32;
+                    _volumeInfo.dataType = DT_FLOAT;
                 else if( bitWidth == 64 )
-                    _volumeInfo.dataType = DT_FLOAT64;
+                    LBTHROW( std::runtime_error( "Livre doesn't suppport double data type." ));
             }
             else if( !_uvfDataSetPtr->GetIsSigned() )
             {
@@ -210,11 +210,8 @@ public:
         MemoryUnitPtr memUnitPtr;
         switch( _volumeInfo.dataType )
         {
-            case  DT_FLOAT32 :
+            case  DT_FLOAT :
               memUnitPtr = tuvokBrickToMemoryUnit< float >( node, brickIndex );
-              break;
-            case  DT_FLOAT64 :
-              memUnitPtr = tuvokBrickToMemoryUnit< double >( node, brickIndex );
               break;
             case  DT_UINT8 :
               memUnitPtr = tuvokBrickToMemoryUnit< uint8_t >( node,brickIndex );
