@@ -95,8 +95,9 @@ public:
     /**
      * Updates the data source. For example, data sources may update their
      * temporal range based on newly available data.
+     * @return true if the datasource has changed since the last update().
      */
-    LIVRECORE_API virtual void update() {}
+    LIVRECORE_API virtual bool update() { return false; }
 
     /**
      * @param nodeId The nodeId to get the node for.

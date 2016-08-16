@@ -124,6 +124,8 @@ public:
 
     std::string renderJPEG();
 
+    const VolumeInformation& getVolumeInformation() const;
+
 private:
     LIVREEQ_API virtual ~Config();
     bool handleEvent( const eq::ConfigEvent* event ) final;

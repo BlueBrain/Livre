@@ -26,6 +26,7 @@
 #include <livre/eq/events/EqEventInfo.h>
 #include <livre/eq/events/Events.h>
 #include <livre/eq/FrameData.h>
+#include <livre/eq/coSerialization.h>
 #include <livre/eq/settings/CameraSettings.h>
 #include <livre/eq/settings/FrameSettings.h>
 #include <livre/eq/settings/RenderSettings.h>
@@ -35,6 +36,7 @@
 
 #include <livre/core/events/EventMapper.h>
 #include <livre/core/data/Histogram.h>
+#include <livre/core/data/VolumeInformation.h>
 #include <livre/core/util/FrameUtils.h>
 
 #include <lexis/render/imageJPEG.h>
@@ -99,7 +101,6 @@ public:
         , currentCanvas( 0 )
         , eventMapper( EventHandlerFactoryPtr( new EqEventHandlerFactory ))
         , redraw( true )
-        , dataFrameRange( INVALID_FRAME_RANGE )
         , dataSourceRange( 0.0f, 255.0f ) // Default range for uint8 data sources
         , frameStart( config->getTime( ))
     {}
@@ -190,7 +191,7 @@ public:
     std::unique_ptr< zeroeq::Communicator > communicator;
 #endif
     bool redraw;
-    Vector2ui dataFrameRange;
+    VolumeInformation volumeInfo;
     ViewHistogramQueue histogramQueue;
     Vector2f dataSourceRange;
     int64_t frameStart;
@@ -242,6 +243,11 @@ std::string Config::renderJPEG()
         handleEvent( event );
     }
     return "";
+}
+
+const VolumeInformation& Config::getVolumeInformation() const
+{
+    return _impl->volumeInfo;
 }
 
 const ApplicationParameters& Config::getApplicationParameters() const
@@ -320,13 +326,13 @@ bool Config::init( const int argc LB_UNUSED, char** argv LB_UNUSED )
 
 bool Config::frame()
 {
-    if( _impl->dataFrameRange == INVALID_FRAME_RANGE )
+    if( _impl->volumeInfo.frameRange == INVALID_FRAME_RANGE )
         return false;
 
     ApplicationParameters& params = getApplicationParameters();
     FrameSettings& frameSettings = _impl->framedata.getFrameSettings();
 
-    const FrameUtils frameUtils( params.frames, _impl->dataFrameRange );
+    const FrameUtils frameUtils( params.frames, _impl->volumeInfo.frameRange );
     params.frames = frameUtils.getFrameRange();
 
     // Set current frame (start/end may have changed)
@@ -365,7 +371,7 @@ bool Config::frame()
 
 uint32_t Config::getDataFrameCount() const
 {
-    const Vector2ui& range = _impl->dataFrameRange;
+    const Vector2ui& range = _impl->volumeInfo.frameRange;
     return range[1] > range[0] ? range[1] - range[0] : 0;
 }
 
@@ -530,9 +536,9 @@ bool Config::handleEvent( eq::EventICommand command )
 {
     switch( command.getEventType( ))
     {
-    case VOLUME_FRAME_RANGE:
+    case VOLUME_INFO:
     {
-        _impl->dataFrameRange = command.read< Vector2ui >();
+        command >> _impl->volumeInfo;
         return false;
     }
 #ifdef LIVRE_USE_ZEROEQ

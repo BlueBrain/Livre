@@ -61,10 +61,9 @@ bool KeyboardHandler::operator ()( EqEventInfo& eqEventInfo )
             renderSettings.setMaxTreeDepth( renderSettings.getMaxTreeDepth()-1);
             return true;
 
-        case eq::KC_F1:
-        case 'h':
-        case 'H':
-            frameSettings.toggleHelp();
+        case 'i':
+        case 'I':
+            frameSettings.toggleInfo();
             return true;
 
         case ' ':

@@ -81,7 +81,7 @@ public:
     LIVRECORE_API LODNode getNode( const NodeId& nodeId ) const;
 
     /** @copydoc DataSourcePlugin::update() */
-    LIVRECORE_API void update();
+    LIVRECORE_API bool update();
 
 private:
 

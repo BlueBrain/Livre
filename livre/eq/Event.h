@@ -29,7 +29,7 @@ namespace livre
 enum ConfigEventType
 {
     GRAB_IMAGE = eq::Event::USER,
-    VOLUME_FRAME_RANGE,
+    VOLUME_INFO,
     REDRAW,
     HISTOGRAM_DATA
 };

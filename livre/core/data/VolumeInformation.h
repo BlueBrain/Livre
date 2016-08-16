@@ -21,9 +21,7 @@
 #define _VolumeInformation_h_
 
 #include <livre/core/api.h>
-#include <livre/core/mathTypes.h>
 #include <livre/core/data/NodeId.h>
-#include <vmmlib/aabb.hpp> // memver
 
 namespace livre
 {
@@ -109,7 +107,8 @@ struct VolumeInformation
       */
     Vector2ui frameRange;
 
-
+    /** Optional description for end users. */
+    std::string description;
 };
 
 }

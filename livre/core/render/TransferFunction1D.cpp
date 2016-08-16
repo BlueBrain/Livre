@@ -68,6 +68,9 @@ TransferFunction1D::TransferFunction1D()
 
 void TransferFunction1D::_createTfFromFile( const std::string& file )
 {
+    if( file.empty( ))
+        return;
+
     if( file.substr( file.find_last_of(".") + 1 ) == "lbb" )
     {
         lunchbox::loadBinary( *this, file );

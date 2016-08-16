@@ -78,7 +78,7 @@ struct Promise::Impl
     Impl( const DataInfo& dataInfo )
         : _dataInfo( dataInfo )
         , _uuid( servus::make_UUID( ))
-        , _futureImpl( new Future::Impl( _promise.get_future(),
+        , _futureImpl( new Future::Impl( PortDataFuture( _promise.get_future()),
                                          dataInfo.first,
                                          _uuid ))
     {}

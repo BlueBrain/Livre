@@ -28,6 +28,7 @@
 #include <livre/eq/FrameData.h>
 #include <livre/eq/Pipe.h>
 #include <livre/eq/Event.h>
+#include <livre/eq/coSerialization.h>
 
 #include <livre/eq/settings/VolumeSettings.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
@@ -86,6 +87,8 @@ public:
         if( !initializeVolume( ))
             return false;
 
+        auto event = _config->sendEvent( VOLUME_INFO );
+        event << _dataSource->getVolumeInfo();
         initializeCache();
         return true;
     }
@@ -96,12 +99,13 @@ public:
             _config->getFrameData().sync( frameId );
     }
 
-    void updateAndSendFrameRange()
+    void updateDataSource()
     {
-        _dataSource->update();
+        if( !_dataSource->update( ))
+            return;
 
-        const livre::VolumeInformation& info = _dataSource->getVolumeInfo();
-        _config->sendEvent( VOLUME_FRAME_RANGE ) << info.frameRange;
+        auto event = _config->sendEvent( VOLUME_INFO );
+        event << _dataSource->getVolumeInfo();
     }
 
     livre::Node* const _node;
@@ -130,9 +134,11 @@ bool Node::configInit( const eq::uint128_t& initId )
     if( !eq::Node::configInit( initId ))
         return false;
 
+    if( !_impl->configInit( ))
+        return false;
+
     livre::Client* client = static_cast<livre::Client*>( getClient( ).get());
-    client->setIdleFunction( std::bind( &Impl::updateAndSendFrameRange,
-                                        _impl.get()));
+    client->setIdleFunction( std::bind( &Impl::updateDataSource, _impl.get( )));
 
     if( !isApplicationNode( ))
     {
@@ -140,7 +146,7 @@ bool Node::configInit( const eq::uint128_t& initId )
         config->mapFrameData( initId );
     }
 
-    return _impl->configInit();
+    return true;
 }
 
 bool Node::configExit()

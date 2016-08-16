@@ -336,8 +336,7 @@ public:
 
     void frameViewFinish()
     {
-        _channel->applyBuffer();
-        _channel->applyViewport();
+        _channel->applyOverlayState();
 
         const FrameSettings& frameSettings = getFrameData()->getFrameSettings();
         if( frameSettings.getStatistics( ))
@@ -345,6 +344,8 @@ public:
             _channel->drawStatistics();
             drawCacheStatistics();
         }
+        if( frameSettings.getShowInfo( ))
+            drawVolumeInfo();
 
 #ifdef LIVRE_USE_ZEROEQ
         const size_t all = _availability.nAvailable + _availability.nNotAvailable;
@@ -355,22 +356,59 @@ public:
             _publisher.publish( _progress );
         }
 #endif
+        _channel->resetOverlayState();
+    }
+
+    void drawVolumeInfo()
+    {
+        livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
+        const VolumeInformation& info = node->getDataSource().getVolumeInfo();
+
+        std::ostringstream os;
+        const size_t nBricks = _renderer->getNumBricksUsed();
+        const float mbBricks =
+            float( info.maximumBlockSize.product( )) /
+            1024.f / 1024.f * float( nBricks );
+        os << nBricks << " bricks / " << mbBricks << " MB rendered" << std::endl
+           << "Total resolution " << info.voxels << " depth "
+           << info.rootNode.getDepth() << std::endl
+           << "Block resolution " << info.maximumBlockSize << std::endl;
+
+        std::string unit;
+        const float epsilon = std::numeric_limits< float >::epsilon();
+        if( std::abs(info.meterToDataUnitRatio - 1e6f) <= epsilon )
+            unit = "um";
+        else if( std::abs(info.meterToDataUnitRatio - 1e3f) <= epsilon )
+            unit = "mm";
+        else if( std::abs(info.meterToDataUnitRatio - 1e1f) <= epsilon )
+            unit = "m";
+        const Vector3f& resolution = info.resolution;
+        if( resolution.find_min() > 0.0f && !unit.empty( ))
+            os << Vector3f(1.0f)/resolution << " " << unit << "/voxel"
+               << std::endl;
+
+        if( !info.description.empty( ))
+            os << "Data source: " << info.description << std::endl;
+
+        float y = 80.f;
+        std::string text = os.str();
+        const eq::util::BitmapFont* font = _channel->getWindow()->getSmallFont();
+        for( size_t pos = text.find( '\n' ); pos != std::string::npos;
+             pos = text.find( '\n' ))
+        {
+            glRasterPos3f( 10.f, y, 0.99f );
+
+            font->draw( text.substr( 0, pos ));
+            text = text.substr( pos + 1 );
+            y -= 16.f;
+        }
+        // last line might not end with /n
+        glRasterPos3f( 10.f, y, 0.99f );
+        font->draw( text );
     }
 
     void drawCacheStatistics()
     {
-        glLogicOp( GL_XOR );
-        glEnable( GL_COLOR_LOGIC_OP );
-        glDisable( GL_LIGHTING );
-        glDisable( GL_DEPTH_TEST );
-
-        glColor3f( 1.f, 1.f, 1.f );
-
-        glMatrixMode( GL_PROJECTION );
-        glLoadIdentity();
-        _channel->applyScreenFrustum();
-        glMatrixMode( GL_MODELVIEW );
-
         livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
         const size_t all = _availability.nAvailable + _availability.nNotAvailable;
         const size_t missing = _availability.nNotAvailable;
@@ -382,31 +420,7 @@ public:
            << int( 100.f * done + .5f ) << "% loaded" << std::endl
            << window->getTextureCache().getStatistics();
 
-        const DataSource& dataSource = node->getDataSource();
-        const VolumeInformation& info = dataSource.getVolumeInfo();
-        const Vector3f resolution = info.resolution;
-
-        const float ratio = 1.0f / info.meterToDataUnitRatio;
-        std::string unit = "unit unknown";
-        if( ratio == 1e-6 )
-            unit = "um";
-        else if( ratio == 1e-3 )
-            unit = "mm";
-        else if( ratio == 1.0f )
-            unit = "m";
-
-        const size_t nBricks = _renderer->getNumBricksUsed();
-        const float mbBricks =
-            float( dataSource.getVolumeInfo().maximumBlockSize.product( )) /
-            1024.f / 1024.f * float( nBricks );
-        os << nBricks << " bricks / " << mbBricks << " MB rendered" << std::endl
-           << "Total resolution " << info.voxels << " depth "
-           << info.rootNode.getDepth() << std::endl
-           << "Block resolution " << info.maximumBlockSize << std::endl;
-        if( resolution.find_min() > 0.0f )
-            os << resolution << "voxel/" << unit;
-
-        float y = 240.f;
+        float y = 260.f;
         std::string text = os.str();
         const eq::util::BitmapFont* font = _channel->getWindow()->getSmallFont();
         for( size_t pos = text.find( '\n' ); pos != std::string::npos;
