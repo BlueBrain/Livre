@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
- *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2016, EPFL/Blue Brain Project
+ *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -23,8 +23,7 @@
 #include <livre/core/api.h>
 #include <livre/core/mathTypes.h>
 #include <co/distributable.h> // base class
-
-#include <lexis/render/clipPlanes.h> // base class
+#include <lexis/render/clipPlanes.h> // CRTP base class
 
 
 namespace livre

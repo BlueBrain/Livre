@@ -1,5 +1,5 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
- *                          ahmet.bilgili@epfl.ch
+/* Copyright (c) 2016, EPFL/Blue Brain Project
+ *                     Ahmet.Bilgili@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -19,7 +19,7 @@
 
 
 #ifndef _ClipPlanesController_h_
-#define _ClipPlanesControllerr_h_
+#define _ClipPlanesController_h_
 
 #include <livreGUI/types.h>
 #include <QWidget>

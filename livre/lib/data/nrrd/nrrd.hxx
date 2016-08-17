@@ -63,7 +63,7 @@ namespace NRRD
     }
 
     // Template for endian conversion of one element
-    template <int N> inline void swapBytes(void* v) {}
+    template <int N> inline void swapBytes(void* v);
 
     /// swap 2 bytes (convert short endian)
     template <> inline void swapBytes<2>(void* v) {
@@ -248,7 +248,7 @@ namespace NRRD
 		bool endian_file=(*hdr_fields)["endian"]!="little";
 		bool endian_machine=is_cpu_BIG_endian();
 
-		// Make sure the file type matches 
+		// Make sure the file type matches
 		if ((*hdr_fields)["type"]!=typeName<T>())
 		{
 			int n=1;
@@ -257,7 +257,7 @@ namespace NRRD
 				std::cerr << "NDDR::load<T>(...): Unknown type.\n";
 				return false;
 			}
-			if (false) 0;
+			if (false) /*nop*/;
 			#define _DEFINE_TYPE(X)												\
 				else if ((*hdr_fields)["type"]==#X) {							\
 					X* tmp=0x0;													\

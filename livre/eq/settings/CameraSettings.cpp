@@ -67,7 +67,6 @@ void CameraSettings::spinModel( const float x, const float y )
     _modelview(2,3) = translation[2];
 
     setDirty( DIRTY_ALL );
-
     _notifyChangedFunc( _modelview );
 }
 
@@ -78,7 +77,6 @@ void CameraSettings::moveCamera( const float x, const float y, const float z )
     _modelview(2,3) += z;
 
     setDirty( DIRTY_ALL );
-
     _notifyChangedFunc( _modelview );
 }
 
@@ -89,7 +87,6 @@ void CameraSettings::setCameraPosition( const Vector3f& pos )
     _modelview(2,3) = pos.z();
 
     setDirty( DIRTY_ALL );
-
     _notifyChangedFunc( _modelview );
 }
 
@@ -121,7 +118,6 @@ void CameraSettings::setCameraLookAt( const Vector3f& lookAt )
     _modelview = Matrix4f( eye, lookAt, up );
 
     setDirty( DIRTY_ALL );
-
     _notifyChangedFunc( _modelview );
 }
 
