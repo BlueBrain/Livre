@@ -33,23 +33,7 @@ namespace livre
   */
 class TextureObject : public CacheObject
 {
-    friend class TextureCache;
-
 public:
-
-    LIVRE_API virtual ~TextureObject();
-
-    /**
-     * @return The texture state.
-     */
-    LIVRE_API TextureStatePtr getTextureState();
-
-    /**
-     * @return The texture state ( const ).
-     */
-    LIVRE_API ConstTextureStatePtr getTextureState() const;
-
-private:
 
     /**
      * Constructor
@@ -57,10 +41,20 @@ private:
      * @param textureCache the cache the texture object is created
      * @throws CacheLoadException when the data cache does not have the data for cache id
      */
-    TextureObject( const CacheId& cacheId,
-                   TextureCache& textureCache );
+    LIVRE_API TextureObject( const CacheId& cacheId,
+                             const Cache& dataCache,
+                             const DataSource& dataSource,
+                             TexturePool& texturePool );
 
-    size_t _getSize() const final;
+    LIVRE_API virtual ~TextureObject();
+
+    /** @copydoc livre::CacheObject::getSize */
+    LIVRE_API size_t getSize() const final;
+
+    /** @return The texture state ( const ).*/
+    LIVRE_API const TextureState& getTextureState() const;
+
+private:
 
     struct Impl;
     std::unique_ptr<Impl> _impl;

@@ -34,11 +34,14 @@ class RayCastRenderer : public Renderer
 public:
 
     /**
+     * Constructor
+     * @param dataSource the data source
      * @param samplesPerRay Number of samples per ray.
      * @param samplesPerPixel Number of samples per pixel.
      * @param volInfo Volume information.
      */
-    RayCastRenderer( const TextureCache& textureCache,
+    RayCastRenderer( const DataSource& dataSource,
+                     const Cache& textureCache,
                      uint32_t samplesPerRay,
                      uint32_t samplesPerPixel );
     ~RayCastRenderer();

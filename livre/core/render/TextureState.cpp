@@ -19,6 +19,8 @@
 
 #include "TextureState.h"
 
+#include <livre/core/render/TexturePool.h>
+
 #include <livre/core/defines.h>
 #include <eq/gl.h>
 
@@ -26,12 +28,19 @@ namespace livre
 {
 
 
-TextureState::TextureState()
+TextureState::TextureState( TexturePool& texturePool )
     : textureCoordsMin( 0.0f )
     , textureCoordsMax( 0.0f )
     , textureSize( 0.0f )
     , textureId( INVALID_TEXTURE_ID )
+    , _texturePool( texturePool )
 {
+    _texturePool.generateTexture( *this );
+}
+
+TextureState::~TextureState()
+{
+    _texturePool.releaseTexture( *this );
 }
 
 void TextureState::bind() const

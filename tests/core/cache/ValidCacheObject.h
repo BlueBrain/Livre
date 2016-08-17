@@ -38,7 +38,7 @@ public:
         : livre::CacheObject( cacheId )
     { }
 
-    size_t _getSize( ) const final { return OBJECT_SIZE; }
+    size_t getSize( ) const final { return OBJECT_SIZE; }
 
 private:
 

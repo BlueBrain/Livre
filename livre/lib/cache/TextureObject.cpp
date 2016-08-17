@@ -17,13 +17,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/lib/cache/TextureCache.h>
-#include <livre/lib/cache/DataCache.h>
 #include <livre/lib/cache/DataObject.h>
 #include <livre/lib/cache/TextureObject.h>
 
+#include <livre/core/cache/Cache.h>
 #include <livre/core/data/LODNode.h>
-#include <livre/core/data/DataSource.h>
 #include <livre/core/data/DataSource.h>
 #include <livre/core/render/GLContext.h>
 #include <livre/core/render/Renderer.h>
@@ -33,6 +31,14 @@
 
 namespace livre
 {
+namespace
+{
+size_t getTextureSize( const DataSource& dataSource )
+{
+    const Vector3ui& textureSize = dataSource.getVolumeInfo().maximumBlockSize;
+    return textureSize.product() * dataSource.getVolumeInfo().getBytesPerVoxel();
+}
+}
 
 #define glewGetContext() GLContext::glewGetContext()
 
@@ -41,97 +47,76 @@ namespace livre
   */
 struct TextureObject::Impl
 {
-    Impl( TextureObject& textureObject,
-          TextureCache& textureCache )
-       : _textureObject( textureObject )
-       , _textureCache( textureCache )
-       , _textureState( new TextureState( ))
-       , _dataSource( textureCache.getDataCache().getDataSource( ))
-       , _texturePool( textureCache.getTexturePool( ))
-    {
-        if( !load())
-        {
-            LBTHROW( CacheLoadException( textureObject.getId(),
-                                         "Unable to construct texture cache object" ));
-        }
+
+    Impl( const CacheId& cacheId,
+          const Cache& dataCache,
+          const DataSource& dataSource,
+          TexturePool& texturePool )
+       : _textureState( texturePool )
+       , _textureSize( getTextureSize( dataSource ))
+   {
+        LBASSERT( _textureState.textureId );
+        if( !load( cacheId, dataCache, dataSource, texturePool ))
+            LBTHROW( CacheLoadException( cacheId, "Unable to construct texture cache object" ));
     }
 
     ~Impl()
-    {
-        unload();
-    }
+    {}
 
-    bool load()
+    bool load( const CacheId& cacheId,
+               const Cache& dataCache,
+               const DataSource& dataSource,
+               const TexturePool& texturePool )
     {
-        _dataObject = std::static_pointer_cast< const DataObject >(
-                    _textureCache.getDataCache().get( _textureObject.getId( )));
+        ConstDataObjectPtr data =
+                std::static_pointer_cast< const DataObject >( dataCache.get( cacheId ));
 
-        if( !_dataObject )
+        if( !data )
             return false;
 
-        initialize();
-        _texturePool.generateTexture( _textureState );
-        LBASSERT( _textureState->textureId );
-        loadTextureToGPU();
-        _dataObject.reset();
+        initialize( cacheId, dataSource, texturePool, data );
         return true;
     }
 
-    void unload()
-    {
-        if( _textureState && _textureState->textureId == INVALID_TEXTURE_ID )
-            return;
-
-        _texturePool.releaseTexture( _textureState );
-    }
-
-    void initialize()
+    void initialize( const CacheId& cacheId,
+                     const DataSource& dataSource,
+                     const TexturePool& texturePool,
+                     const ConstDataObjectPtr& data )
     {
         // TODO: The internal format size should be calculated correctly
-        const Vector3f& overlap = _dataSource.getVolumeInfo().overlap;
-
-        const LODNode& lodNode =
-                _dataSource.getNode( NodeId( _textureObject.getId( )));
-
+        const Vector3f& overlap = dataSource.getVolumeInfo().overlap;
+        const LODNode& lodNode = dataSource.getNode( NodeId( cacheId ));
         const Vector3f& size = lodNode.getVoxelBox().getSize();
-        const Vector3f& maxSize = _dataSource.getVolumeInfo().maximumBlockSize;
+        const Vector3f& maxSize = dataSource.getVolumeInfo().maximumBlockSize;
         const Vector3f& overlapf = overlap / maxSize;
-        _textureState->textureCoordsMax = overlapf + size / maxSize;
-        _textureState->textureCoordsMin = overlapf;
-        _textureState->textureSize =
-                _textureState->textureCoordsMax - _textureState->textureCoordsMin;
+        _textureState.textureCoordsMax = overlapf + size / maxSize;
+        _textureState.textureCoordsMin = overlapf;
+        _textureState.textureSize = _textureState.textureCoordsMax -
+                                    _textureState.textureCoordsMin;
+
+        loadTextureToGPU( lodNode, dataSource, texturePool, data );
     }
 
-    size_t getSize() const
+    bool loadTextureToGPU( const LODNode& lodNode,
+                           const DataSource& dataSource,
+                           const TexturePool& texturePool,
+                           const ConstDataObjectPtr& data ) const
     {
-        const Vector3ui& textureSize =
-                _dataSource.getVolumeInfo().maximumBlockSize;
-        return textureSize.product() * _dataSource.getVolumeInfo().getBytesPerVoxel();
-    }
-
-    bool loadTextureToGPU() const
-    {
-        const NodeId nodeId( _textureObject.getId( ));
-        const LODNode& lodNode = _dataSource.getNode( nodeId );
-
     #ifdef LIVRE_DEBUG_RENDERING
-        std::cout << "Upload "  << nodeId.getLevel() << ' '
+        std::cout << "Upload "  << lodNode.getNodeId().getLevel() << ' '
                   << lodNode.getRelativePosition() << " to "
-                  << _textureState->textureId << std::endl;
+                  << _textureState.textureId << std::endl;
     #endif
-        const Vector3ui& overlap = _dataSource.getVolumeInfo().overlap;
+        const Vector3ui& overlap = dataSource.getVolumeInfo().overlap;
+        const Vector3ui& voxSizeVec = lodNode.getBlockSize() + overlap * 2;
+        _textureState.bind();
 
-        const Vector3ui& voxSizeVec =
-                lodNode.getBlockSize() + overlap * 2;
+        glTexSubImage3D( GL_TEXTURE_3D, 0, 0, 0, 0,
+                         voxSizeVec[0], voxSizeVec[1], voxSizeVec[2],
+                         texturePool.getFormat() ,
+                         texturePool.getTextureType(),
+                         data->getDataPtr( ));
 
-        _textureState->bind( );
-
-        glTexSubImage3D( GL_TEXTURE_3D, 0, 0, 0, 0, voxSizeVec[0], voxSizeVec[1], voxSizeVec[2],
-                         _texturePool.getFormat() , _textureCache.getTextureType(),
-                         _dataObject->getDataPtr( ));
-
-        // Something went wrong with loading the data
-        // TODO: Log message
         const GLenum glErr = glGetError();
         if ( glErr != GL_NO_ERROR )
         {
@@ -142,42 +127,30 @@ struct TextureObject::Impl
         return true;
     }
 
-    TextureObject& _textureObject;
-    TextureCache& _textureCache;
-    ConstDataObjectPtr _dataObject;
-    TextureStatePtr _textureState;
-    DataSource& _dataSource;
-    TexturePool& _texturePool;
+    TextureState _textureState;
+    size_t _textureSize;
 };
 
 
 TextureObject::TextureObject( const CacheId& cacheId,
-                              TextureCache& textureCache )
+                              const Cache& dataCache,
+                              const DataSource& dataSource,
+                              TexturePool& texturePool )
    : CacheObject( cacheId )
-   , _impl( new Impl( *this, textureCache ))
-{
-}
+   , _impl( new Impl( cacheId, dataCache, dataSource, texturePool ))
+{}
 
 TextureObject::~TextureObject()
-{
-}
+{}
 
-TextureStatePtr TextureObject::getTextureState()
-{
-    return _impl->_textureState;
-}
-
-ConstTextureStatePtr TextureObject::getTextureState() const
+const TextureState& TextureObject::getTextureState() const
 {
     return _impl->_textureState;
 }
 
-size_t TextureObject::_getSize() const
+size_t TextureObject::getSize() const
 {
-    if( !_isValid() )
-        return 0;
-
-    return _impl->getSize();
+    return _impl->_textureSize;
 }
 
 }

@@ -33,7 +33,9 @@
 
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/lib/pipeline/RenderPipeline.h>
-#include <livre/lib/cache/TextureCache.h>
+
+#include <livre/core/cache/Cache.h>
+#include <livre/core/render/TexturePool.h>
 
 #include <eq/gl.h>
 
@@ -56,6 +58,7 @@ public:
     {
         _glContext->doneCurrent();
         _glContext.reset();
+        _textureCache->purge();
         return true;
     }
 
@@ -67,9 +70,14 @@ public:
         Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
         const size_t maxGpuMemory =
                         pipe->getFrameData()->getVRParameters().getMaxGPUCacheMemoryMB();
-        _textureCache.reset( new TextureCache( node->getDataCache(), maxGpuMemory * LB_1MB ));
-        _renderPipeline.reset( new RenderPipeline( *_textureCache,
+
+        _texturePool.reset( new TexturePool( node->getDataSource( )));
+        _textureCache.reset( new Cache( "TextureCache", maxGpuMemory * LB_1MB ));
+        _renderPipeline.reset( new RenderPipeline( node->getDataSource(),
+                                                   node->getDataCache(),
+                                                   *_textureCache,
                                                    node->getHistogramCache(),
+                                                   *_texturePool,
                                                    _glContext ));
     }
 
@@ -87,8 +95,9 @@ public:
 
     Window* const _window;
     GLContextPtr _glContext;
-    std::unique_ptr< TextureCache > _textureCache;
+    std::unique_ptr< Cache > _textureCache;
     std::unique_ptr< RenderPipeline > _renderPipeline;
+    std::unique_ptr< TexturePool > _texturePool;
 };
 
 Window::Window( eq::Pipe *parent )
@@ -143,7 +152,12 @@ bool Window::configExitGL()
     return _impl->configExitGL();
 }
 
-TextureCache& Window::getTextureCache()
+Cache& Window::getTextureCache()
+{
+    return *_impl->_textureCache;
+}
+
+const Cache& Window::getTextureCache() const
 {
     return *_impl->_textureCache;
 }
@@ -151,11 +165,6 @@ TextureCache& Window::getTextureCache()
 const RenderPipeline& Window::getRenderPipeline() const
 {
     return *_impl->_renderPipeline;
-}
-
-const TextureCache& Window::getTextureCache() const
-{
-    return *_impl->_textureCache;
 }
 
 }

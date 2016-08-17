@@ -19,8 +19,8 @@
  */
 
 #include <livre/lib/cache/DataObject.h>
-#include <livre/lib/cache/DataCache.h>
 
+#include <livre/core/cache/Cache.h>
 #include <livre/core/data/LODNode.h>
 #include <livre/core/data/MemoryUnit.h>
 #include <livre/core/data/DataSource.h>
@@ -30,22 +30,32 @@
 
 namespace livre
 {
+namespace
+{
+size_t getDataSize( const CacheId& cacheId, DataSource& dataSource )
+{
+    const LODNode& lodNode = dataSource.getNode( NodeId( cacheId ));
+    const VolumeInformation& volInfo = dataSource.getVolumeInfo();
+
+    const Vector3ui& overlap = volInfo.overlap;
+    const size_t elemSize = volInfo.getBytesPerVoxel();
+    const uint32_t compCount = volInfo.compCount;
+    const Vector3ui blockSize = lodNode.getBlockSize() + overlap * 2;
+    return blockSize.product() * elemSize * compCount;
+}
+}
 
 struct DataObject::Impl
 {
 public:
 
-    Impl( DataObject& dataObject,
-          DataCache& dataCache )
+    Impl( const CacheId& cacheId, DataSource& dataSource )
         : _data( new AllocMemoryUnit( ))
-        , _dataObject( dataObject )
-        , _dataCache( dataCache )
-        , _dataSource( dataCache.getDataSource( ))
+        , _dataSize( getDataSize( cacheId, dataSource ))
     {
-        if( !load())
+        if( !load( cacheId, dataSource ))
         {
-            LBTHROW( CacheLoadException( dataObject.getId(),
-                                         "Unable to construct data cache object" ));
+            LBTHROW( CacheLoadException( cacheId, "Unable to construct data cache object" ));
         }
     }
 
@@ -54,65 +64,43 @@ public:
         _data->release();
     }
 
-    size_t getDataSize() const
-    {
-        const LODNode& lodNode =
-                _dataSource.getNode( NodeId( _dataObject.getId( )));
-
-        const Vector3ui& overlap =
-                    _dataSource.getVolumeInfo().overlap;
-        const size_t elemSize =
-                    _dataSource.getVolumeInfo().getBytesPerVoxel();
-        const uint32_t compCount =
-                    _dataSource.getVolumeInfo().compCount;
-        const Vector3ui blockSize =
-                    lodNode.getBlockSize() + overlap * 2;
-        return blockSize.product() * elemSize * compCount;
-    }
-
-    size_t getSize() const
-    {
-        return getDataSize();
-    }
-
     const void* getDataPtr() const
     {
         return _data->getData< void >();
     }
 
     template< class DEST_TYPE >
-    bool readTextureData()
+    bool readTextureData( const CacheId& cacheId, DataSource& dataSource )
     {
-        const NodeId nodeId( _dataObject.getId( ));
-        ConstMemoryUnitPtr data = _dataSource.getData( nodeId );
+        const NodeId nodeId( cacheId );
+        ConstMemoryUnitPtr data = dataSource.getData( nodeId );
         if( !data )
             return false;
 
         const void* rawData = data->getData< void >();
-        _data->allocAndSetData( rawData, getDataSize( ));
-
+        _data->allocAndSetData( rawData, _dataSize );
         return true;
     }
 
-    bool load()
+    bool load( const CacheId& cacheId, DataSource& dataSource )
     {
-        const DataType dataType = _dataSource.getVolumeInfo().dataType;
+        const DataType dataType = dataSource.getVolumeInfo().dataType;
         switch( dataType )
         {
             case DT_UINT8:
-                return readTextureData< uint8_t >();
+                return readTextureData< uint8_t >( cacheId, dataSource );
             case DT_UINT16:
-                return readTextureData< uint16_t >();
+                return readTextureData< uint16_t >( cacheId, dataSource );
             case DT_UINT32:
-                return readTextureData< uint32_t >();
+                return readTextureData< uint32_t >( cacheId, dataSource );
             case DT_INT8:
-                return readTextureData< int8_t >();
+                return readTextureData< int8_t >( cacheId, dataSource );
             case DT_INT16:
-                return readTextureData< int16_t >();
+                return readTextureData< int16_t >( cacheId, dataSource );
             case DT_INT32:
-                return readTextureData< int32_t >();
+                return readTextureData< int32_t >( cacheId, dataSource );
             case DT_FLOAT:
-                return readTextureData< float >();
+                return readTextureData< float >( cacheId, dataSource );
             case DT_UNDEFINED:
                 LBTHROW( std::runtime_error( "Undefined data type" ));
         }
@@ -120,26 +108,20 @@ public:
     }
 
     AllocMemoryUnitPtr _data;
-    DataObject& _dataObject;
-    DataCache& _dataCache;
-    DataSource& _dataSource;
+    size_t _dataSize;
 };
 
-DataObject::DataObject( const CacheId& cacheId,
-                        DataCache& dataCache )
+DataObject::DataObject( const CacheId& cacheId, DataSource& dataSource )
     : CacheObject( cacheId )
-    , _impl( new Impl( *this, dataCache ))
+    , _impl( new Impl( cacheId, dataSource ))
 {}
 
 DataObject::~DataObject()
 {}
 
-size_t DataObject::_getSize() const
+size_t DataObject::getSize() const
 {
-    if( !_isValid( ))
-        return 0;
-
-    return _impl->getSize();
+    return _impl->_dataSize;
 }
 
 const void* DataObject::getDataPtr() const

@@ -21,6 +21,9 @@
 
 #include <livre/core/defines.h>
 #include <livre/core/render/GLContext.h>
+
+#include <livre/core/data/DataSource.h>
+
 #include <eq/gl.h>
 
 namespace livre
@@ -28,30 +31,75 @@ namespace livre
 
 #define glewGetContext() GLContext::glewGetContext()
 
-TexturePool::TexturePool( const Vector3ui& maxBlockSize,
-                          const GLint internalFormat,
-                          const GLenum format,
-                          const GLenum gpuDataType )
-    : _maxBlockSize( maxBlockSize )
-    , _internalFormat( internalFormat )
-    , _format( format )
-    , _gpuDataType( gpuDataType )
+TexturePool::TexturePool( const DataSource& dataSource )
+    : _maxBlockSize( dataSource.getVolumeInfo().maximumBlockSize )
+    , _internalTextureFormat( 0 )
+    , _format( 0 )
+    , _textureType( 0 )
 {
+    if( dataSource.getVolumeInfo().compCount != 1 )
+        LBTHROW( std::runtime_error( "Unsupported number of channels." ));
+
+    switch( dataSource.getVolumeInfo().dataType )
+    {
+    case DT_UINT8:
+        _internalTextureFormat = GL_R8UI;
+        _format = GL_RED_INTEGER;
+        _textureType = GL_UNSIGNED_BYTE;
+    break;
+    case DT_UINT16:
+        _internalTextureFormat = GL_R16UI;
+        _format = GL_RED_INTEGER;
+        _textureType = GL_UNSIGNED_SHORT;
+    break;
+    case DT_UINT32:
+        _internalTextureFormat = GL_R32UI;
+        _format = GL_RED_INTEGER;
+        _textureType = GL_UNSIGNED_INT;
+    break;
+    case DT_INT8:
+        _internalTextureFormat = GL_R8I;
+        _format = GL_RED_INTEGER;
+        _textureType = GL_BYTE;
+    break;
+    case DT_INT16:
+        _internalTextureFormat = GL_R16I;
+        _format = GL_RED_INTEGER;
+        _textureType = GL_SHORT;
+    break;
+    case DT_INT32:
+        _internalTextureFormat = GL_R32I;
+        _format = GL_RED_INTEGER;
+        _textureType = GL_INT;
+    break;
+    case DT_FLOAT:
+        _internalTextureFormat = GL_R32F;
+        _format = GL_RED;
+        _textureType = GL_FLOAT;
+    break;
+    case DT_UNDEFINED:
+    default:
+       LBTHROW( std::runtime_error( "Undefined data type" ));
+    break;
+    }
 }
 
-void TexturePool::generateTexture( TextureStatePtr textureState )
+TexturePool::~TexturePool()
+{}
+
+void TexturePool::generateTexture( TextureState& textureState )
 {
-    LBASSERT( textureState->textureId == INVALID_TEXTURE_ID );
+    LBASSERT( textureState.textureId == INVALID_TEXTURE_ID );
     if( !_textureStack.empty() )
     {
-        textureState->textureId = _textureStack.back();
+        textureState.textureId = _textureStack.back();
         _textureStack.pop_back();
     }
     else
     {
-        glGenTextures( 1, &textureState->textureId );
+        glGenTextures( 1, &textureState.textureId );
         glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-        textureState->bind();
+        textureState.bind();
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -59,9 +107,9 @@ void TexturePool::generateTexture( TextureStatePtr textureState )
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
         // Allocate a texture
-        glTexImage3D( GL_TEXTURE_3D, 0, _internalFormat,
+        glTexImage3D( GL_TEXTURE_3D, 0, _internalTextureFormat,
                       _maxBlockSize[ 0 ], _maxBlockSize[ 1 ], _maxBlockSize[ 2 ], 0,
-                      _format, _gpuDataType, (GLvoid *)NULL );
+                      _format, _textureType, (GLvoid *)NULL );
 
         const GLenum glErr = glGetError();
         if( glErr != GL_NO_ERROR )
@@ -70,21 +118,10 @@ void TexturePool::generateTexture( TextureStatePtr textureState )
     }
 }
 
-void TexturePool::releaseTexture( TextureStatePtr textureState )
+void TexturePool::releaseTexture( TextureState& textureState )
 {
-    LBASSERT( textureState->textureId );
-    _textureStack.push_back( textureState->textureId );
-    textureState->textureId = INVALID_TEXTURE_ID;
-}
-
-GLint TexturePool::getInternalFormat() const
-{
-    return _internalFormat;
-}
-
-GLenum TexturePool::getFormat() const
-{
-    return _format;
+    LBASSERT( textureState.textureId );
+    _textureStack.push_back( textureState.textureId );
 }
 
 }

@@ -41,7 +41,9 @@ public:
      * Constructor
      * @param histogramCache the cache for histogram
      */
-    HistogramFilter( HistogramCache& histogramCache );
+    HistogramFilter( Cache& histogramCache,
+                     const Cache& dataCache,
+                     const DataSource& dataSource );
     ~HistogramFilter();
 
     /**

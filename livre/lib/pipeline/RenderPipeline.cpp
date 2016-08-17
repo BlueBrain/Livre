@@ -24,12 +24,12 @@
 #include <livre/lib/pipeline/RenderFilter.h>
 #include <livre/lib/pipeline/HistogramFilter.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
-#include <livre/lib/cache/TextureCache.h>
-#include <livre/lib/cache/DataCache.h>
 
+#include <livre/core/cache/Cache.h>
 #include <livre/core/pipeline/SimpleExecutor.h>
 #include <livre/core/pipeline/Pipeline.h>
 
+#include <livre/core/render/TexturePool.h>
 #include <livre/core/render/FrameInfo.h>
 #include <livre/core/render/ClipPlanes.h>
 
@@ -45,12 +45,17 @@ const size_t nComputeThreads = 2;
 
 struct RenderPipeline::Impl
 {
-    Impl( TextureCache& textureCache,
-          HistogramCache& histogramCache,
+    Impl( DataSource& dataSource,
+          Cache& dataCache,
+          Cache& textureCache,
+          Cache& histogramCache,
+          TexturePool& texturePool,
           ConstGLContextPtr glContext )
-        : _textureCache( textureCache )
+        : _dataSource( dataSource )
+        , _dataCache( dataCache )
+        , _textureCache( textureCache )
         , _histogramCache( histogramCache )
-        , _dataSource( textureCache.getDataCache().getDataSource( ))
+        , _texturePool( texturePool )
         , _renderExecutor( nRenderThreads, glContext )
         , _computeExecutor( nComputeThreads, glContext )
         , _uploadExecutor( nUploadThreads, glContext )
@@ -69,7 +74,10 @@ struct RenderPipeline::Impl
                     uploadPipeline.add< DataUploadFilter >( name.str(),
                                                             i,
                                                             nUploadThreads,
-                                                            _textureCache );
+                                                            _dataCache,
+                                                            _textureCache,
+                                                            _dataSource,
+                                                            _texturePool );
 
             visibleSetGenerator.connect( "VisibleNodes",
                                          uploader, "VisibleNodes" );
@@ -146,7 +154,10 @@ struct RenderPipeline::Impl
                  NodeAvailability& availability ) const
     {
         PipeFilterT< RenderFilter > renderFilter( "RenderFilter", _dataSource, renderer );
-        PipeFilterT< HistogramFilter > histogramFilter( "HistogramFilter", _histogramCache );
+        PipeFilterT< HistogramFilter > histogramFilter( "HistogramFilter",
+                                                        _histogramCache,
+                                                        _dataCache,
+                                                        _dataSource );
         histogramFilter.getPromise( "Frustum" ).set( frameInfo.frustum );
         histogramFilter.connect( "Histogram", sendHistogramFilter, "Histogram" );
         histogramFilter.getPromise( "RelativeViewport" ).set( viewport );
@@ -208,19 +219,27 @@ struct RenderPipeline::Impl
         }
     }
 
-    TextureCache& _textureCache;
-    HistogramCache& _histogramCache;
-    const DataSource& _dataSource;
+    DataSource& _dataSource;
+    Cache& _dataCache;
+    Cache& _textureCache;
+    Cache& _histogramCache;
+    TexturePool& _texturePool;
     mutable SimpleExecutor _renderExecutor;
     mutable SimpleExecutor _computeExecutor;
     mutable SimpleExecutor _uploadExecutor;
 };
 
-RenderPipeline::RenderPipeline( TextureCache& textureCache,
-                                HistogramCache& histogramCache,
+RenderPipeline::RenderPipeline( DataSource& dataSource,
+                                Cache& dataCache,
+                                Cache& textureCache,
+                                Cache& histogramCache,
+                                TexturePool& texturePool,
                                 ConstGLContextPtr glContext )
-    : _impl( new RenderPipeline::Impl( textureCache,
+    : _impl( new RenderPipeline::Impl( dataSource,
+                                       dataCache,
+                                       textureCache,
                                        histogramCache,
+                                       texturePool,
                                        glContext ))
 {}
 

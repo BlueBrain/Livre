@@ -18,10 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/lib/cache/DataCache.h>
+#include <livre/core/cache/Cache.h>
 #include <livre/lib/cache/DataObject.h>
-
-#include <livre/lib/cache/HistogramCache.h>
 #include <livre/lib/cache/HistogramObject.h>
 
 #include <livre/core/cache/CacheStatistics.h>
@@ -42,7 +40,7 @@ const uint32_t VOXEL_SIZE_X = 1024;
 const uint32_t VOXEL_SIZE_Y = 1024;
 const uint32_t VOXEL_SIZE_Z = 512;
 
-BOOST_AUTO_TEST_CASE( testDataCache )
+BOOST_AUTO_TEST_CASE( testCache )
 {
     std::stringstream volumeName;
     volumeName << "mem://#" << VOXEL_SIZE_X << "," << VOXEL_SIZE_Y << ","
@@ -72,12 +70,14 @@ BOOST_AUTO_TEST_CASE( testDataCache )
 
     // Read same data with the data cache
     const size_t maxMemory = 2048;
-    livre::DataCache dataCache( maxMemory, source );
+    livre::Cache dataCache( "DataCache", maxMemory );
+
     livre::ConstCacheObjectPtr constData = dataCache.get( firstChildNodeId.getId( ));
     BOOST_CHECK( dataCache.getCount() == 0 );
     BOOST_CHECK( !constData );
 
-    livre::ConstCacheObjectPtr dataCacheObject = dataCache.load( firstChildNodeId.getId( ));
+    livre::ConstCacheObjectPtr dataCacheObject =
+            dataCache.load< livre::DataObject >( firstChildNodeId.getId( ), source );
     BOOST_CHECK( dataCacheObject );
 
     constData = dataCache.get( livre::INVALID_CACHE_ID );
@@ -102,8 +102,11 @@ BOOST_AUTO_TEST_CASE( testDataCache )
     BOOST_CHECK_EQUAL_COLLECTIONS( manual, manual + allocSize,
                                    cached, cached + allocSize );
 
-    livre::HistogramCache histogramCache( 1024, dataCache );
-    livre::ConstCacheObjectPtr histCacheObject = histogramCache.load( firstChildNodeId.getId( ));
+    livre::Cache histogramCache( "HistogramCache", 1024 );
+    livre::ConstCacheObjectPtr histCacheObject =
+            histogramCache.load< livre::HistogramObject >( firstChildNodeId.getId( ),
+                                                           dataCache,
+                                                           source );
     BOOST_CHECK( histCacheObject );
 
     livre::ConstHistogramObjectPtr histObject =

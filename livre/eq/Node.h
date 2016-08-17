@@ -41,20 +41,21 @@ public:
     LIVREEQ_API Node( eq::Config* parent );
     LIVREEQ_API ~Node();
 
-    /**
-     * @return The data cache.
-     */
-    DataCache& getDataCache();
+    /** @return The data source. */
+    DataSource& getDataSource();
 
-    /**
-     * @return The histogram cache.
-     */
-    HistogramCache& getHistogramCache();
+    /** @return The data source. */
+    const DataSource& getDataSource() const;
+
+    /** @return The data cache. */
+    Cache& getDataCache();
+
+    /** @return The histogram cache. */
+    Cache& getHistogramCache();
 
 private:
     bool configInit( const eq::uint128_t& initId ) final;
-    void frameStart(  const eq::uint128_t& frameId,
-                      const uint32_t frameNumber ) final;
+    void frameStart(  const eq::uint128_t& frameId, const uint32_t frameNumber ) final;
     bool configExit() final;
 
     struct Impl;

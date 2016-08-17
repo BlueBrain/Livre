@@ -28,6 +28,21 @@ namespace livre
 {
 
 /**
+ * Thrown by CacheObjects when loading fails
+ */
+class CacheLoadException : public std::exception
+{
+public:
+    CacheLoadException( const Identifier& id, const std::string& message );
+    ~CacheLoadException() throw() {}
+    char const* what() const throw();
+
+private:
+    Identifier _id;
+    std::string _message;
+};
+
+/**
  * The Cache class manages the \see CacheObject s according to LRU Policy, methods
  * are thread safe inserting/querying nodes.
  */
@@ -51,14 +66,6 @@ public:
     LIVRECORE_API ConstCacheObjectPtr get( const CacheId& cacheId ) const;
 
     /**
-     * Loads the object to cache. If object is not in the cache it is created.
-     * @param cacheId The object cache id to be loaded.
-     * @return the loaded or previously loaded cache object. Return empty pointer
-     * if cache id is invalid or object cannot be loaded.
-     */
-    LIVRECORE_API ConstCacheObjectPtr load( const CacheId& cacheId );
-
-    /**
      * Unloads the object from the memory, if there are not any references. The
      * objects are removed from cache
      * @param cacheId The object cache id to be unloaded.
@@ -72,30 +79,57 @@ public:
     LIVRECORE_API size_t getCount() const;
 
     /**
+     * Loads the object to cache. If object is not in the cache it is created.
+     * @param cacheId The object cache id to be loaded.
+     * @param args parameters of the cache object constructor. If there is already
+     * a cache object with the same cache id, the args are not considered.
+     * @return the loaded or previously loaded cache object. Return empty pointer
+     * if cache id is invalid or object cannot be loaded.
+     */
+    template< class CacheObjectT, class... Args >
+    ConstCacheObjectPtr load( const CacheId& cacheId, Args&&... args )
+    {
+        ConstCacheObjectPtr obj = get( cacheId );
+        if( obj )
+            return obj;
+
+        try
+        {
+            return _load( new CacheObjectT( cacheId, args... ));
+        }
+        catch( const CacheLoadException& )
+        {}
+
+        return obj;
+    }
+
+    /**
      * @return Statistics.
      */
     LIVRECORE_API const CacheStatistics& getStatistics() const;
 
     /**
-     * Purges the cache by removing cached objects. The objects are not unloaded
+     * Purges the cache by removing cached objects. The purged objects are not unloaded
      * and they will be in memory until no reference is left.
      */
     LIVRECORE_API void purge();
 
+    /**
+     * Purges the cache by removing cached object. The purged objects are not unloaded
+     * and they will be in memory until no reference is left.
+     * @param cacheId The object cache id to be purged.
+     */
+    LIVRECORE_API void purge( const CacheId& cacheId );
+
 protected:
 
     /**
-     * @param cacheId The derived class allocates an \see CacheObject with the given ID
-     * @return The allocated object.
+     * Loads the object to cache. If object is not in the cache it is created.
+     * @param obj The cache object to be loaded
+     * @return the loaded or previously loaded cache object. Return empty pointer
+     * if cache id is invalid or object cannot be loaded.
      */
-    virtual CacheObject* _generate( const CacheId& cacheId ) = 0;
-
-    /**
-     * @return Enforce unloading all objects. This function is convinient when
-     * object has references to the parent cache and on cache destruction time
-     * objects want to use their parent caches.
-     */
-    LIVRECORE_API void _unloadAll();
+    ConstCacheObjectPtr _load( CacheObject* cacheObject );
 
 private:
 

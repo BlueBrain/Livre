@@ -37,46 +37,41 @@ public:
 
     /**
      * Constructor.
-     * @param maxBlockSize is the maximum block size of a data souce
-     * @param internalFormat The OpenGL GPU internal format of the texture data
-     * @param format he OpenGL format of the texture data kept in memory
-     * @param gpuDataType The OpenGL format of the texture data kept in memory
+     * @param dataSource the data source
+     * @throws std::runtime_error if data has multiple channels
      */
-    LIVRECORE_API TexturePool( const Vector3ui& maxBlockSize,
-                               int internalFormat,
-                               uint32_t format,
-                               uint32_t gpuDataType );
+    LIVRECORE_API TexturePool( const DataSource& dataSource );
+    LIVRECORE_API ~TexturePool();
 
-    /**
-     * @return The OpenGL GPU internal format of the texture data.
-     */
-    LIVRECORE_API int32_t getInternalFormat() const;
+    /** @return The OpenGL GPU internal format of the texture data. */
+    LIVRECORE_API int32_t getInternalFormat() const { return _internalTextureFormat; }
 
-    /**
-     * @return The OpenGL data type of the texture data.
-     */
-    LIVRECORE_API uint32_t getFormat() const;
+    /** @return The OpenGL data type of the texture data. */
+    LIVRECORE_API uint32_t getFormat() const { return _format; }
+
+    /** @return The OpenGL data type of the texture data. */
+    LIVRECORE_API uint32_t getTextureType() const { return _textureType; };
 
     /**
      * Generates / uses a preallocated a 3D OpenGL texture based on OpenGL parameters.
      * @param textureState The destination state is filled with needed information.
      */
-    LIVRECORE_API void generateTexture( TextureStatePtr textureState );
+    LIVRECORE_API void generateTexture( TextureState& textureState );
 
     /**
      * Releases a texture slot.
      * @param textureState The destination state is filled with needed information.
      */
-    LIVRECORE_API void releaseTexture( TextureStatePtr textureState );
+    LIVRECORE_API void releaseTexture( TextureState& textureState );
 
 private:
 
     UInt32s _textureStack;
 
     const Vector3ui _maxBlockSize;
-    const int32_t _internalFormat;
-    const uint32_t _format;
-    const uint32_t _gpuDataType;
+    int32_t _internalTextureFormat;
+    uint32_t _format;
+    uint32_t _textureType;
 };
 
 
