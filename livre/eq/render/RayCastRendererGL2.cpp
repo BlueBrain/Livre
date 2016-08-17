@@ -469,14 +469,16 @@ NodeIds RayCastRenderer::_order( const NodeIds& bricks,
     return _impl->order( bricks, frustum );
 }
 
-void RayCastRenderer::_onFrameStart( const Frustum& frustum,
-                                     const PixelViewport&,
-                                     const NodeIds& renderBricks )
+void RayCastRenderer::_onFrameStart(  const Frustum& frustum,
+                                      const ClipPlanes&,
+                                      const PixelViewport&,
+                                      const NodeIds& renderBricks )
 {
     _impl->onFrameStart( frustum, renderBricks );
 }
 
 void RayCastRenderer::_onFrameRender( const Frustum&,
+                                      const ClipPlanes&,
                                       const PixelViewport& view,
                                       const NodeIds& orderedBricks )
 {
@@ -484,6 +486,7 @@ void RayCastRenderer::_onFrameRender( const Frustum&,
 }
 
 void RayCastRenderer::_onFrameEnd( const Frustum&,
+                                   const ClipPlanes&,
                                    const PixelViewport&,
                                    const NodeIds& )
 {
