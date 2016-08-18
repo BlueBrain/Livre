@@ -56,13 +56,13 @@ public:
         bool isTextureUploaded = false;
         for( const NodeId& nodeId: visibles )
         {
-            ConstCacheObjectPtr texture = _textureCache.get( nodeId.getId( ));
+            ConstTextureObjectPtr texture = _textureCache.get< TextureObject >( nodeId.getId( ));
             if( !texture )
             {
                 if( !_dataCache.load< DataObject>( nodeId.getId( ), _dataSource ))
                     continue;
 
-                texture = _textureCache.load< TextureObject>( nodeId.getId(),
+                texture = _textureCache.load< TextureObject >( nodeId.getId(),
                                                               _dataCache,
                                                               _dataSource,
                                                               _texturePool );
@@ -88,7 +88,7 @@ public:
         cacheObjects.reserve( visibles.size( ));
         for( const NodeId& nodeId: visibles )
         {
-            ConstCacheObjectPtr texture = _textureCache.get( nodeId.getId( ));
+            ConstCacheObjectPtr texture = _textureCache.get< TextureObject>( nodeId.getId( ));
             cacheObjects.push_back( texture );
         }
 

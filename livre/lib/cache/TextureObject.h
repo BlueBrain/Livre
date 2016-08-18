@@ -38,7 +38,8 @@ public:
     /**
      * Constructor
      * @param cacheId is the unique identifier
-     * @param textureCache the cache the texture object is created
+     * @param dataCache source for the raw data
+     * @param dataSource provides information about spatial structure of texture
      * @throws CacheLoadException when the data cache does not have the data for cache id
      */
     LIVRE_API TextureObject( const CacheId& cacheId,

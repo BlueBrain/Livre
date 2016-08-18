@@ -70,14 +70,14 @@ BOOST_AUTO_TEST_CASE( testCache )
 
     // Read same data with the data cache
     const size_t maxMemory = 2048;
-    livre::Cache dataCache( "DataCache", maxMemory );
+    livre::Cache dataCache( "DataCache", maxMemory, livre::getType< livre::DataObject >( ));
 
     livre::ConstCacheObjectPtr constData = dataCache.get( firstChildNodeId.getId( ));
     BOOST_CHECK( dataCache.getCount() == 0 );
     BOOST_CHECK( !constData );
 
     livre::ConstCacheObjectPtr dataCacheObject =
-            dataCache.load< livre::DataObject >( firstChildNodeId.getId( ), source );
+            dataCache.load< livre::DataObject >( firstChildNodeId.getId(), source );
     BOOST_CHECK( dataCacheObject );
 
     constData = dataCache.get( livre::INVALID_CACHE_ID );
@@ -90,11 +90,14 @@ BOOST_AUTO_TEST_CASE( testCache )
     BOOST_CHECK( dataCache.getCount() == 1 );
 
     livre::ConstDataObjectPtr dataObject =
-            std::dynamic_pointer_cast< const livre::DataObject >( dataCacheObject );
+            dataCache.get< livre::DataObject >( firstChildNodeId.getId( ));
 
     BOOST_CHECK( dataObject );
     BOOST_CHECK( dataObject->getSize() == allocSize );
     BOOST_CHECK( dataCache.getStatistics().getUsedMemory() == allocSize );
+
+    BOOST_CHECK_THROW( dataCache.get< livre::HistogramObject >( firstChildNodeId.getId( )),
+                       std::runtime_error );
 
     const uint8_t* manual = memUnit->getData< const uint8_t >();
     const uint8_t* cached = static_cast< const uint8_t* >( dataObject->getDataPtr( ));
@@ -102,15 +105,17 @@ BOOST_AUTO_TEST_CASE( testCache )
     BOOST_CHECK_EQUAL_COLLECTIONS( manual, manual + allocSize,
                                    cached, cached + allocSize );
 
-    livre::Cache histogramCache( "HistogramCache", 1024 );
+    livre::Cache histogramCache( "HistogramCache", 1024,
+                                 livre::getType< livre::HistogramObject >( ));
     livre::ConstCacheObjectPtr histCacheObject =
-            histogramCache.load< livre::HistogramObject >( firstChildNodeId.getId( ),
+            histogramCache.load< livre::HistogramObject >( firstChildNodeId.getId(),
                                                            dataCache,
                                                            source );
     BOOST_CHECK( histCacheObject );
 
     livre::ConstHistogramObjectPtr histObject =
-            std::dynamic_pointer_cast< const livre::HistogramObject >( histCacheObject );
+            histogramCache.get< livre::HistogramObject >( firstChildNodeId.getId( ));
+
     const livre::Histogram& histogram = histObject->getHistogram();
     const uint64_t* bins = histogram.getBins();
 

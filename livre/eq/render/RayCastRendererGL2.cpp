@@ -410,7 +410,7 @@ struct RayCastRenderer::Impl
         tParamNameGL = glGetUniformLocation( program, "refLevel" );
         glUniform1i( tParamNameGL, refLevel );
 
-        _usedTextures[1].push_back( texState->textureId );
+        _usedTextures[1].push_back( texState.textureId );
 
         renderVBO( index, false /* draw front */, true /* cull back */ );
 

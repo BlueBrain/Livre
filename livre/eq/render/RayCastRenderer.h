@@ -36,9 +36,9 @@ public:
     /**
      * Constructor
      * @param dataSource the data source
+     * @param textureCache the source for cached textures
      * @param samplesPerRay Number of samples per ray.
      * @param samplesPerPixel Number of samples per pixel.
-     * @param volInfo Volume information.
      */
     RayCastRenderer( const DataSource& dataSource,
                      const Cache& textureCache,

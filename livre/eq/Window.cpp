@@ -33,6 +33,7 @@
 
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/lib/pipeline/RenderPipeline.h>
+#include <livre/lib/cache/TextureObject.h>
 
 #include <livre/core/cache/Cache.h>
 #include <livre/core/render/TexturePool.h>
@@ -72,7 +73,9 @@ public:
                         pipe->getFrameData()->getVRParameters().getMaxGPUCacheMemoryMB();
 
         _texturePool.reset( new TexturePool( node->getDataSource( )));
-        _textureCache.reset( new Cache( "TextureCache", maxGpuMemory * LB_1MB ));
+        _textureCache.reset( new Cache( "TextureCache",
+                                        maxGpuMemory * LB_1MB,
+                                        getType< TextureObject >( )));
         _renderPipeline.reset( new RenderPipeline( node->getDataSource(),
                                                    node->getDataCache(),
                                                    *_textureCache,

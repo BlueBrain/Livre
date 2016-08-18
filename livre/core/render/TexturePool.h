@@ -72,6 +72,8 @@ private:
     int32_t _internalTextureFormat;
     uint32_t _format;
     uint32_t _textureType;
+
+    boost::mutex _mutex;
 };
 
 

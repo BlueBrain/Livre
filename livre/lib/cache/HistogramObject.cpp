@@ -34,20 +34,20 @@ namespace
 {
 template< class SRC_TYPE >
 void binData( const SRC_TYPE* rawData,
-              uint64_t* dstData,
+              Histogram& histogram,
               const Vector3ui& blockSize,
               const Vector3ui& padding,
               const size_t compCount,
-              const uint64_t scaleFactor,
-              const size_t resolution )
+              const uint64_t scaleFactor )
 {
     const Vector2f dataSourceRange( std::numeric_limits< SRC_TYPE >::min(),
                                     std::numeric_limits< SRC_TYPE >::max());
-    const double binCount = resolution;
+    const double binCount = histogram.getBinsSize();
     const double minVal = dataSourceRange[ 0 ];
     const double maxVal = dataSourceRange[ 1 ];
     const double range = maxVal - minVal;
 
+    uint64_t* dstData = histogram.getBins();
     const Vector3ui dataBlockSize = blockSize + padding * 2;
     for( size_t i = padding.x(); i < dataBlockSize.x() - padding.x(); ++i )
         for( size_t j = padding.y(); j < dataBlockSize.y() - padding.y(); ++j )
@@ -94,9 +94,7 @@ public:
         if( compCount > 1 )
             LBTHROW( std::runtime_error( "Multiple channels are not supported "));
 
-        ConstDataObjectPtr data =
-                std::static_pointer_cast< const DataObject >(
-                    dataCache.get( cacheId ));
+        ConstDataObjectPtr data = dataCache.get< DataObject >( cacheId );
 
         if( !data )
             return false;
@@ -116,33 +114,27 @@ public:
         {
            case DT_UINT8:
                 binData( static_cast< const uint8_t* >( rawData ),
-                         _histogram.getBins(), voxelBox, padding, compCount,
-                         scaleFactor, _histogram.getBinsSize( ));
+                         _histogram, voxelBox, padding, compCount, scaleFactor );
                 break;
            case DT_UINT16:
                 binData( static_cast< const uint16_t* >( rawData ),
-                         _histogram.getBins(), voxelBox, padding, compCount,
-                         scaleFactor, _histogram.getBinsSize( ));
+                         _histogram, voxelBox, padding, compCount, scaleFactor );
                 break;
            case DT_UINT32:
                 binData( static_cast< const uint32_t* >( rawData ),
-                         _histogram.getBins(), voxelBox, padding, compCount,
-                         scaleFactor, _histogram.getBinsSize( ));
+                         _histogram, voxelBox, padding, compCount, scaleFactor );
                 break;
            case DT_INT8:
                 binData( static_cast< const int8_t* >( rawData ),
-                          _histogram.getBins(), voxelBox, padding, compCount,
-                          scaleFactor, _histogram.getBinsSize( ));
+                         _histogram, voxelBox, padding, compCount, scaleFactor );
                 break;
            case DT_INT16:
                 binData( static_cast< const int16_t* >( rawData ),
-                         _histogram.getBins(), voxelBox, padding, compCount,
-                         scaleFactor, _histogram.getBinsSize( ));
+                         _histogram, voxelBox, padding, compCount, scaleFactor );
                 break;
            case DT_INT32:
                 binData( static_cast< const int32_t* >( rawData ),
-                         _histogram.getBins(), voxelBox, padding, compCount,
-                         scaleFactor, _histogram.getBinsSize( ));
+                         _histogram, voxelBox, padding, compCount, scaleFactor );
                 break;
            case DT_FLOAT:
            case DT_UNDEFINED:

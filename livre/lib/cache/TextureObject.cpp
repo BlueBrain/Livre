@@ -68,9 +68,7 @@ struct TextureObject::Impl
                const DataSource& dataSource,
                const TexturePool& texturePool )
     {
-        ConstDataObjectPtr data =
-                std::static_pointer_cast< const DataObject >( dataCache.get( cacheId ));
-
+        ConstDataObjectPtr data = dataCache.get< DataObject >( cacheId );
         if( !data )
             return false;
 
@@ -130,7 +128,6 @@ struct TextureObject::Impl
     TextureState _textureState;
     size_t _textureSize;
 };
-
 
 TextureObject::TextureObject( const CacheId& cacheId,
                               const Cache& dataCache,

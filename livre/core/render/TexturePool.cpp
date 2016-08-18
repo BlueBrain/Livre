@@ -89,6 +89,7 @@ TexturePool::~TexturePool()
 
 void TexturePool::generateTexture( TextureState& textureState )
 {
+    ScopedLock lock( _mutex );
     LBASSERT( textureState.textureId == INVALID_TEXTURE_ID );
     if( !_textureStack.empty() )
     {
@@ -120,6 +121,7 @@ void TexturePool::generateTexture( TextureState& textureState )
 
 void TexturePool::releaseTexture( TextureState& textureState )
 {
+    ScopedLock lock( _mutex );
     LBASSERT( textureState.textureId );
     _textureStack.push_back( textureState.textureId );
 }

@@ -31,6 +31,9 @@
 
 #include <livre/eq/settings/VolumeSettings.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
+#include <livre/lib/cache/DataObject.h>
+#include <livre/lib/cache/HistogramObject.h>
+
 #include <livre/core/data/DataSource.h>
 #include <livre/core/cache/Cache.h>
 
@@ -53,11 +56,13 @@ public:
                 _config->getFrameData().getVRParameters();
 
         const size_t maxMemBytes = vrRenderParameters.getMaxCPUCacheMemoryMB() * LB_1MB;
-        _dataCache.reset( new Cache( "DataCache", maxMemBytes ));
+        _dataCache.reset( new Cache( "DataCache", maxMemBytes, getType< DataObject >( )));
 
         const size_t histCacheSize =
                 32 * LB_1MB; // Histogram cache is 32 MB. Can hold approx 16k hists
-        _histogramCache.reset( new Cache( "HistogramCache", histCacheSize ));
+        _histogramCache.reset( new Cache( "HistogramCache",
+                                          histCacheSize,
+                                          getType< HistogramObject >( )));
     }
 
     bool initializeVolume()

@@ -44,7 +44,7 @@ private:
 
 /**
  * The Cache class manages the \see CacheObject s according to LRU Policy, methods
- * are thread safe inserting/querying nodes.
+ * are thread safe inserting/querying nodes. The type safety check is done in runtime.
  */
 class Cache
 {
@@ -53,17 +53,47 @@ public:
     /**
      * @param name is the name of the cache.
      * @param maxMemBytes maximum memory.
+     * @param cacheObjectType type info for the cached object.
      */
-    LIVRECORE_API explicit Cache( const std::string& name,
-                                  size_t maxMemBytes );
+    Cache( const std::string& name,
+           size_t maxMemBytes,
+           const std::type_index& cacheObjectType );
+
     LIVRECORE_API virtual ~Cache();
 
     /**
+     * Gets the cached object from the cache.
      * @param cacheId The object cache id to be queried.
      * @return The cache object from cache, if object is not in the list an empty cache
      * object is returned.
      */
-    LIVRECORE_API ConstCacheObjectPtr get( const CacheId& cacheId ) const;
+    LIVRECORE_API ConstCacheObjectPtr get( const CacheId& cacheId ) const
+    {
+        return _get( cacheId );
+    }
+
+    /**
+     * Gets the cached object from the cache with a given type and d
+     * @param cacheId The object cache id to be queried.
+     * @return The cache object from cache, if object is not in the list an empty cache
+     * object is returned.
+     * @throw std::runtime_error if cached object is not CacheObjectT type
+     */
+    template< class CacheObjectT >
+    LIVRECORE_API std::shared_ptr< const CacheObjectT > get( const CacheId& cacheId ) const
+    {
+        if( _getCacheObjectType() != getType< CacheObjectT >( ))
+            LBTHROW( std::runtime_error( "The cache type casting failed for cached object" ));
+
+        ConstCacheObjectPtr obj = _get( cacheId );
+        if( !obj )
+            return std::shared_ptr< const CacheObjectT >();
+
+        std::shared_ptr< const CacheObjectT > typedObj =
+                std::dynamic_pointer_cast< const CacheObjectT >( obj );
+
+        return typedObj;
+    }
 
     /**
      * Unloads the object from the memory, if there are not any references. The
@@ -80,22 +110,35 @@ public:
 
     /**
      * Loads the object to cache. If object is not in the cache it is created.
-     * @param cacheId The object cache id to be loaded.
+     * @param cacheId the id of the cache object to be loaded
      * @param args parameters of the cache object constructor. If there is already
      * a cache object with the same cache id, the args are not considered.
      * @return the loaded or previously loaded cache object. Return empty pointer
      * if cache id is invalid or object cannot be loaded.
      */
     template< class CacheObjectT, class... Args >
-    ConstCacheObjectPtr load( const CacheId& cacheId, Args&&... args )
+    LIVRECORE_API std::shared_ptr< const CacheObjectT > load( const CacheId& cacheId,
+                                                              Args&&... args )
     {
-        ConstCacheObjectPtr obj = get( cacheId );
+        if( _getCacheObjectType() != getType< CacheObjectT >( ))
+            LBTHROW( std::runtime_error( "The cache does not support the type" ));
+
+        std::shared_ptr< const CacheObjectT > obj = get< CacheObjectT >( cacheId );
         if( obj )
             return obj;
 
         try
         {
-            return _load( new CacheObjectT( cacheId, args... ));
+            ConstCacheObjectPtr cacheObject
+                    = _load( ConstCacheObjectPtr( new CacheObjectT( cacheId, args... )));
+
+            std::shared_ptr< const CacheObjectT > typedObj =
+                    std::dynamic_pointer_cast< const CacheObjectT >( cacheObject );
+
+            if( !typedObj )
+                LBTHROW( std::runtime_error( "The cache type casting failed for cached object" ));
+
+            return typedObj;
         }
         catch( const CacheLoadException& )
         {}
@@ -115,23 +158,17 @@ public:
     LIVRECORE_API void purge();
 
     /**
-     * Purges the cache by removing cached object. The purged objects are not unloaded
+     * Purges a cached object from the cache. The purged object is not unloaded
      * and they will be in memory until no reference is left.
      * @param cacheId The object cache id to be purged.
      */
     LIVRECORE_API void purge( const CacheId& cacheId );
 
-protected:
-
-    /**
-     * Loads the object to cache. If object is not in the cache it is created.
-     * @param obj The cache object to be loaded
-     * @return the loaded or previously loaded cache object. Return empty pointer
-     * if cache id is invalid or object cannot be loaded.
-     */
-    ConstCacheObjectPtr _load( CacheObject* cacheObject );
-
 private:
+
+    ConstCacheObjectPtr _load( ConstCacheObjectPtr cacheObject );
+    ConstCacheObjectPtr _get( const CacheId& cacheId ) const;
+    const std::type_index& _getCacheObjectType() const;
 
     struct Impl;
     std::unique_ptr<Impl> _impl;
