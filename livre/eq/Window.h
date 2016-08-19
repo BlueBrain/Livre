@@ -40,14 +40,11 @@ public:
     /** @param parent The pipe that owns the window. */
     LIVREEQ_API Window( eq::Pipe* parent );
 
-    /** Commits changes. */
-    void commit();
+    /** @return The texture cache. */
+    Cache& getTextureCache();
 
-    /** @return The texture data cache. */
-    TextureCache& getTextureCache();
-
-    /** @return The texture data cache. */
-    const TextureCache& getTextureCache() const;
+    /** @return The texture cache. */
+    const Cache& getTextureCache() const;
 
     /** @return The rendering pipeline. */
     const RenderPipeline& getRenderPipeline() const;

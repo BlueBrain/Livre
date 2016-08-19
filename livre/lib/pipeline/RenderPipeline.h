@@ -36,12 +36,18 @@ public:
 
     /**
      * Constructor
+     * @param dataSource the data source
+     * @param dataCache the data cache
      * @param textureCache the texture cache
      * @param histogramCache the histogram cache
+     * @param texturePool the pool for textures
      * @param glContext the gl context that will be shared
      */
-    RenderPipeline( TextureCache& textureCache,
-                    HistogramCache& histogramCache,
+    RenderPipeline( DataSource& dataSource,
+                    Cache& dataCache,
+                    Cache& textureCache,
+                    Cache& histogramCache,
+                    TexturePool& texturePool,
                     ConstGLContextPtr glContext );
 
     ~RenderPipeline();
@@ -50,7 +56,8 @@ public:
      * Renders a frame using the given frustum and view
      * @param vrParams rendering parameters
      * @param frameInfo frustum and frame id
-     * @param dataRange range of the data
+     * @param dataRange range of the data for sort-last rendering
+     * @param dataSourceRange Value range of the data source
      * @param pixelViewPort the view port
      * @param redrawFilter executed on data update
      * @param sendHistogramFilter executed on histogram computation

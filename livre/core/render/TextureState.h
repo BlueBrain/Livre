@@ -28,23 +28,36 @@ namespace livre
 {
 
 /**
- * The TextureState struct is a holder for the texture information such as OpenGL texture id, coordinates, etc.
+ * The TextureState struct is a holder for the texture information such as OpenGL texture id,
+ * coordinates, etc.
  */
 struct TextureState
 {
 public:
-    LIVRECORE_API TextureState();
 
     /**
-     * OpenGL bind() the texture.
+     * Constructor
+     * @param pool is responsible for the object. On construction TextureState is registered and
+     * on destruction it is removed from the pool.
+     * @return
      */
+    LIVRECORE_API TextureState( TexturePool& pool );
+    LIVRECORE_API ~TextureState();
+
+    /** OpenGL bind() the texture. */
     LIVRECORE_API void bind() const;
 
-    Vector3f textureCoordsMin; //!< Minimum texture coordinates in the maximum texture block in \see TexturePool.
-    Vector3f textureCoordsMax; //!< Maximum texture coordinates in the maximum texture block in \see TexturePool.
+    Vector3f textureCoordsMin; //!< Minimum texture coordinates in the maximum texture block.
+    Vector3f textureCoordsMax; //!< Maximum texture coordinates in the maximum texture block.
     Vector3f textureSize; //!< The texture size.
-
     uint32_t textureId; //!< The OpenGL texture id.
+
+private:
+
+    TexturePool& _texturePool;
+
+    TextureState(const TextureState&) = delete;
+    TextureState& operator=(const TextureState&) = delete;
 };
 
 }

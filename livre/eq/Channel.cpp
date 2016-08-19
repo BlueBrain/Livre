@@ -35,12 +35,11 @@
 #include <livre/eq/settings/RenderSettings.h>
 #include <livre/eq/Window.h>
 
-#include <livre/lib/cache/TextureCache.h>
-#include <livre/lib/cache/DataCache.h>
 #include <livre/lib/cache/TextureObject.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/lib/pipeline/RenderPipeline.h>
 
+#include <livre/core/cache/Cache.h>
 #include <livre/core/cache/CacheStatistics.h>
 #include <livre/core/data/DataSource.h>
 #include <livre/core/data/Histogram.h>
@@ -130,10 +129,11 @@ struct SendHistogramFilter : public Filter
 struct EqRaycastRenderer : public RayCastRenderer
 {
     EqRaycastRenderer( Channel::Impl& channel,
-                       const TextureCache& textureCache,
+                       const DataSource& dataSource,
+                       const Cache& textureCache,
                        uint32_t samplesPerRay,
                        uint32_t samplesPerPixel )
-        : RayCastRenderer( textureCache, samplesPerRay, samplesPerPixel )
+        : RayCastRenderer( dataSource, textureCache, samplesPerRay, samplesPerPixel )
         , _channel( channel )
     {}
 
@@ -172,14 +172,13 @@ public:
 
     void initializeRenderer()
     {
-        const uint32_t nSamplesPerRay =
-            getFrameData()->getVRParameters().getSamplesPerRay();
-
-        const uint32_t nSamplesPerPixel =
-            getFrameData()->getVRParameters().getSamplesPerPixel();
+        const uint32_t nSamplesPerRay = getFrameData()->getVRParameters().getSamplesPerRay();
+        const uint32_t nSamplesPerPixel = getFrameData()->getVRParameters().getSamplesPerPixel();
 
         const Window* window = static_cast< const Window* >( _channel->getWindow( ));
+        const Node* node = static_cast< const Node* >( _channel->getNode( ));
         _renderer.reset( new EqRaycastRenderer( *this,
+                                                node->getDataSource(),
                                                 window->getTextureCache(),
                                                 nSamplesPerRay,
                                                 nSamplesPerPixel ));
@@ -219,7 +218,7 @@ public:
 
         livre::Node* node =
                 static_cast< livre::Node* >( _channel->getNode( ));
-        const DataSource& dataSource = node->getDataCache().getDataSource();
+        const DataSource& dataSource = node->getDataSource();
 
         for( const NodeId& nodeId : renderBricks )
         {
@@ -303,8 +302,7 @@ public:
 
     void applyCamera()
     {
-        const CameraSettings& cameraSettings =
-            getFrameData()->getCameraSettings();
+        const CameraSettings& cameraSettings = getFrameData()->getCameraSettings();
         glMultMatrixf( cameraSettings.getModelViewMatrix().array );
     }
 
@@ -379,8 +377,7 @@ public:
            << int( 100.f * done + .5f ) << "% loaded" << std::endl
            << window->getTextureCache().getStatistics();
 
-        const DataSource& dataSource =
-                node->getDataCache().getDataSource();
+        const DataSource& dataSource = node->getDataSource();
         const VolumeInformation& info = dataSource.getVolumeInfo();
         const Vector3f resolution = info.resolution;
 

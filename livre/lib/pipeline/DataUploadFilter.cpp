@@ -17,12 +17,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <livre/lib/cache/DataObject.h>
+#include <livre/lib/cache/TextureObject.h>
 #include <livre/lib/pipeline/DataUploadFilter.h>
-#include <livre/lib/cache/TextureCache.h>
-#include <livre/lib/cache/DataCache.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
+
 #include <livre/core/pipeline/Pipeline.h>
 #include <livre/core/data/NodeId.h>
+#include <livre/core/cache/Cache.h>
 
 #include <eq/gl.h>
 
@@ -35,10 +37,16 @@ public:
 
     Impl( const size_t id,
           const size_t nUploaders,
-          TextureCache& textureCache )
-        : _textureCache( textureCache )
-        , _id( id )
+          Cache& dataCache,
+          Cache& textureCache,
+          DataSource& dataSource,
+          TexturePool& texturePool )
+        : _id( id )
         , _nUploaders( nUploaders )
+        , _dataCache( dataCache )
+        , _textureCache( textureCache )
+        , _dataSource( dataSource )
+        , _texturePool( texturePool )
     {}
 
     ConstCacheObjects load( const NodeIds& visibles ) const
@@ -48,12 +56,20 @@ public:
         bool isTextureUploaded = false;
         for( const NodeId& nodeId: visibles )
         {
-            ConstCacheObjectPtr texture = _textureCache.get( nodeId.getId( ));
+            ConstTextureObjectPtr texture = _textureCache.get< TextureObject >( nodeId.getId( ));
             if( !texture )
             {
-                ConstCacheObjectPtr data = _textureCache.getDataCache().load( nodeId.getId( ));
-                cacheObjects.push_back( _textureCache.load( nodeId.getId( )));
-                data.reset();
+                if( !_dataCache.load< DataObject>( nodeId.getId( ), _dataSource ))
+                    continue;
+
+                texture = _textureCache.load< TextureObject >( nodeId.getId(),
+                                                              _dataCache,
+                                                              _dataSource,
+                                                              _texturePool );
+                if( !texture )
+                    continue;
+
+                cacheObjects.push_back( texture );
                 isTextureUploaded = true;
             }
             else
@@ -72,7 +88,7 @@ public:
         cacheObjects.reserve( visibles.size( ));
         for( const NodeId& nodeId: visibles )
         {
-            ConstCacheObjectPtr texture = _textureCache.get( nodeId.getId( ));
+            ConstCacheObjectPtr texture = _textureCache.get< TextureObject>( nodeId.getId( ));
             cacheObjects.push_back( texture );
         }
 
@@ -130,17 +146,26 @@ public:
         };
     }
 
-    TextureCache& _textureCache;
     const size_t _id;
     const size_t _nUploaders;
+    Cache& _dataCache;
+    Cache& _textureCache;
+    DataSource& _dataSource;
+    TexturePool& _texturePool;
 };
 
 DataUploadFilter::DataUploadFilter( const size_t id,
                                     const size_t nUploaders,
-                                    TextureCache& textureCache)
+                                    Cache& dataCache,
+                                    Cache& textureCache,
+                                    DataSource& dataSource,
+                                    TexturePool& texturePool )
     : _impl( new DataUploadFilter::Impl( id,
                                          nUploaders,
-                                         textureCache ))
+                                         dataCache,
+                                         textureCache,
+                                         dataSource,
+                                         texturePool ))
 {
 }
 

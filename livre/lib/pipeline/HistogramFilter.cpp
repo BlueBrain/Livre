@@ -18,10 +18,9 @@
  */
 
 #include <livre/lib/pipeline/HistogramFilter.h>
-#include <livre/lib/cache/HistogramCache.h>
-#include <livre/lib/cache/DataCache.h>
 #include <livre/lib/cache/HistogramObject.h>
 
+#include <livre/core/cache/Cache.h>
 #include <livre/core/data/DataSource.h>
 #include <livre/core/data/Histogram.h>
 #include <livre/core/render/Frustum.h>
@@ -35,10 +34,12 @@ const float infinite = std::numeric_limits< float >::max();
 
 struct HistogramFilter::Impl
 {
-    Impl( HistogramCache& histogramCache )
+    Impl( Cache& histogramCache,
+          const Cache& dataCache,
+          const DataSource& dataSource )
         : _histogramCache( histogramCache )
-        , _dataSource( histogramCache.getDataCache().getDataSource( ))
-        , _components( _dataSource.getVolumeInfo().compCount )
+        , _dataCache( dataCache )
+        , _dataSource( dataSource )
     {}
 
     bool isCenterInViewport( const Frustum& frustum,
@@ -84,11 +85,14 @@ struct HistogramFilter::Impl
             for( const auto& cacheObject: cacheObjects.get< ConstCacheObjects >( ))
             {
                 const CacheId& cacheId = cacheObject->getId();
-                ConstCacheObjectPtr histCacheObject = _histogramCache.load( cacheId );
+                ConstCacheObjectPtr histCacheObject =
+                        _histogramCache.load< HistogramObject >( cacheId,
+                                                                 _dataCache,
+                                                                 _dataSource );
                 if( !histCacheObject )
                     continue;
 
-                const ConstHistogramObjectPtr& histogramObj =
+                ConstHistogramObjectPtr histogramObj =
                         std::static_pointer_cast< const HistogramObject >(
                             histCacheObject );
 
@@ -113,6 +117,7 @@ struct HistogramFilter::Impl
             { "Frustum", getType< Frustum >() },
             { "RelativeViewport", getType< Viewport >() },
             { "CacheObjects", getType< ConstCacheObjects >() },
+            { "DataSourceRange", getType< Vector2f >() },
         };
     }
 
@@ -124,13 +129,17 @@ struct HistogramFilter::Impl
         };
     }
 
-    HistogramCache& _histogramCache;
+    Cache& _histogramCache;
+    const Cache& _dataCache;
     const DataSource& _dataSource;
-    const size_t _components;
 };
 
-HistogramFilter::HistogramFilter( HistogramCache& histogramCache )
-    : _impl( new HistogramFilter::Impl( histogramCache ))
+HistogramFilter::HistogramFilter( Cache& histogramCache,
+                                  const Cache& dataCache,
+                                  const DataSource& dataSource )
+    : _impl( new HistogramFilter::Impl( histogramCache,
+                                        dataCache,
+                                        dataSource ))
 {
 }
 

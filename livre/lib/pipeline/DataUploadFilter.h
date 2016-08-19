@@ -40,11 +40,17 @@ public:
      * Constructor
      * @param id of the data uploader ( in a group of other uploaders )
      * @param nbUploaders total number of uploders
+     * @param dataCache data cache
      * @param textureCache texture cache
+     * @param dataSource data source
+     * @param texturePool the pool for 3D textures
      */
     DataUploadFilter( const size_t id,
                       const size_t nbUploaders,
-                      TextureCache& textureCache );
+                      Cache& dataCache,
+                      Cache& textureCache,
+                      DataSource& dataSource,
+                      TexturePool& texturePool );
     ~DataUploadFilter();
 
     /**

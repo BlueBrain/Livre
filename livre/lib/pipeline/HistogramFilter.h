@@ -40,8 +40,12 @@ public:
     /**
      * Constructor
      * @param histogramCache the cache for histogram
+     * @param dataCache data cache
+     * @param dataSource data source
      */
-    HistogramFilter( HistogramCache& histogramCache );
+    HistogramFilter( Cache& histogramCache,
+                     const Cache& dataCache,
+                     const DataSource& dataSource );
     ~HistogramFilter();
 
     /**

@@ -25,6 +25,19 @@
 namespace livre
 {
 
+CacheLoadException::CacheLoadException( const Identifier& id,
+                                        const std::string& message )
+    : _id( id )
+    , _message( message )
+{}
+
+const char* CacheLoadException::what() const throw()
+{
+    std::stringstream message;
+    message << "Id: " << _id << " " << _message << std::endl;
+    return message.str().c_str();
+}
+
 struct LRUCachePolicy
 {
     typedef std::deque< CacheId > LRUQueue;
@@ -89,11 +102,13 @@ struct Cache::Impl
 {
     Impl( Cache& cache,
           const std::string& name,
-          const size_t maxMemBytes )
+          const size_t maxMemBytes,
+          const std::type_index& cacheObjectType )
         : _policy( maxMemBytes )
         , _cache( cache )
         , _statistics( name, maxMemBytes )
         , _cacheMap( 128 )
+        , _cacheObjectType( cacheObjectType )
     {}
 
     ~Impl()
@@ -113,38 +128,29 @@ struct Cache::Impl
         }
     }
 
-    ConstCacheObjectPtr load( const CacheId& cacheId )
+    ConstCacheObjectPtr load( ConstCacheObjectPtr obj )
     {
-        {
-            ReadLock readLock( _mutex );
-            CacheMap::const_iterator it = _cacheMap.find( cacheId );
-            if( it != _cacheMap.end( ))
-                return it->second;
-        }
+        WriteLock writeLock( _mutex );
+        const CacheId& cacheId = obj->getId();
+        ConstCacheMap::const_iterator it = _cacheMap.find( cacheId );
+        if( it != _cacheMap.end( ))
+            return it->second;
 
-        try
-        {
-            CacheObjectPtr obj = getFromMap( cacheId );
-            WriteLock writeLock( _mutex );
-            _statistics.notifyMiss();
-            _statistics.notifyLoaded( *obj );
-            _policy.insert( cacheId );
-            applyPolicy();
-            return obj;
-        }
-        catch( const CacheLoadException& )
-        {}
-
-        return ConstCacheObjectPtr();
+        _cacheMap[ cacheId ] = obj;
+        _statistics.notifyMiss();
+        _statistics.notifyLoaded( *obj );
+        _policy.insert( cacheId );
+        applyPolicy();
+        return obj;
     }
 
     bool unloadFromCache( const CacheId& cacheId )
     {
-        CacheMap::iterator it = _cacheMap.find( cacheId );
+        ConstCacheMap::iterator it = _cacheMap.find( cacheId );
         if( it == _cacheMap.end( ))
             return false;
 
-        CacheObjectPtr& obj = it->second;
+        ConstCacheObjectPtr& obj = it->second;
         if( obj.use_count() > 1 )
             return false;
 
@@ -155,28 +161,10 @@ struct Cache::Impl
         return true;
     }
 
-    CacheObjectPtr getFromMap( const CacheId& cacheId )
-    {
-        CacheMap::const_iterator it;
-        {
-            ReadLock readLock( _mutex );
-            it = _cacheMap.find( cacheId );
-            if( it != _cacheMap.end( ))
-                return it->second;
-        }
-
-        WriteLock writeLock( _mutex );
-        it = _cacheMap.find( cacheId );
-        if( it == _cacheMap.end( ))
-            _cacheMap[ cacheId ] = CacheObjectPtr( _cache._generate( cacheId ));
-
-        return _cacheMap[ cacheId ];
-    }
-
-    CacheObjectPtr getFromMap( const CacheId& cacheId ) const
+    ConstCacheObjectPtr getFromMap( const CacheId& cacheId ) const
     {
         ReadLock readLock( _mutex );
-        CacheMap::const_iterator it = _cacheMap.find( cacheId );
+        ConstCacheMap::const_iterator it = _cacheMap.find( cacheId );
         if( it == _cacheMap.end( ))
             return CacheObjectPtr();
 
@@ -194,18 +182,6 @@ struct Cache::Impl
         return getFromMap( cacheId );
     }
 
-    void unloadAll()
-    {
-        WriteLock lock( _mutex );
-        CacheIds ids;
-        ids.reserve( _cacheMap.size( ));
-        for( CacheMap::iterator it = _cacheMap.begin(); it != _cacheMap.end(); ++it )
-            ids.push_back( it->first );
-
-        for( const CacheId& cacheId: ids )
-            unloadFromCache( cacheId );
-    }
-
     size_t getCount() const
     {
         ReadLock lock( _mutex );
@@ -220,27 +196,33 @@ struct Cache::Impl
         _cacheMap.clear();
     }
 
+    void purge( const CacheId& cacheId )
+    {
+        WriteLock lock( _mutex );
+        _cacheMap.erase( cacheId );
+    }
 
     mutable LRUCachePolicy _policy;
     Cache& _cache;
     mutable CacheStatistics _statistics;
-    CacheMap _cacheMap;
+    ConstCacheMap _cacheMap;
     mutable ReadWriteMutex _mutex;
+    const std::type_index _cacheObjectType;
 };
 
-Cache::Cache( const std::string& name, const size_t maxMemBytes )
-    : _impl( new Cache::Impl( *this, name, maxMemBytes ))
+Cache::Cache( const std::string& name, size_t maxMemBytes, const std::type_index& cacheObjectType )
+    : _impl( new Cache::Impl( *this, name, maxMemBytes, cacheObjectType ))
 {}
 
 Cache::~Cache()
 {}
 
-ConstCacheObjectPtr Cache::load( const CacheId& cacheId )
+ConstCacheObjectPtr Cache::_load( ConstCacheObjectPtr obj )
 {
-    if( cacheId == INVALID_CACHE_ID )
+    if( obj->getId() == INVALID_CACHE_ID )
         return ConstCacheObjectPtr();
 
-    return _impl->load( cacheId );
+    return _impl->load( obj );
 }
 
 bool Cache::unload( const CacheId& cacheId )
@@ -259,9 +241,9 @@ ConstCacheObjectPtr Cache::get( const CacheId& cacheId ) const
     return _impl->get( cacheId );
 }
 
-void Cache::_unloadAll()
+const std::type_index& Cache::_getCacheObjectType() const
 {
-    _impl->unloadAll();
+    return _impl->_cacheObjectType;
 }
 
 size_t Cache::getCount() const
@@ -277,6 +259,11 @@ const CacheStatistics& Cache::getStatistics() const
 void Cache::purge()
 {
     _impl->purge();
+}
+
+void Cache::purge( const CacheId& cacheId )
+{
+    _impl->purge( cacheId );
 }
 
 }

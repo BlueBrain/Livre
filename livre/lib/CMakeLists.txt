@@ -15,11 +15,8 @@ set(LIVRELIB_PUBLIC_HEADERS
   ${ZEROBUF_GENERATED_HEADERS}
   types.h
   animation/CameraPath.h
-  cache/DataCache.h
   cache/DataObject.h
-  cache/HistogramCache.h
   cache/HistogramObject.h
-  cache/TextureCache.h
   cache/TextureObject.h
   configuration/ApplicationParameters.h
   configuration/VolumeRendererParameters.h
@@ -35,11 +32,8 @@ set(LIVRELIB_PUBLIC_HEADERS
 set(LIVRELIB_SOURCES
   ${ZEROBUF_GENERATED_SOURCES}
   animation/CameraPath.cpp
-  cache/DataCache.cpp
   cache/DataObject.cpp
-  cache/HistogramCache.cpp
   cache/HistogramObject.cpp
-  cache/TextureCache.cpp
   cache/TextureObject.cpp
   configuration/ApplicationParameters.cpp
   configuration/VolumeRendererParameters.cpp

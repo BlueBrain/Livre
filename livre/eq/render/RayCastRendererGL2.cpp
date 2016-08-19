@@ -17,6 +17,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <livre/eq/FrameData.h>
+#include <livre/eq/render/RayCastRenderer.h>
+#include <livre/eq/render/shaders/fragRayCastGL2.glsl.h>
+#include <livre/eq/render/shaders/vertRayCast.glsl.h>
+#include <livre/eq/settings/RenderSettings.h>
+
+#include <livre/lib/configuration/VolumeRendererParameters.h>
+#include <livre/lib/cache/TextureObject.h>
+
+#include <livre/core/cache/Cache.h>
 #include <livre/core/data/DataSource.h>
 #include <livre/core/data/VolumeInformation.h>
 #include <livre/core/render/GLSLShaders.h>
@@ -24,17 +34,6 @@
 #include <livre/core/render/TransferFunction1D.h>
 #include <livre/core/data/LODNode.h>
 #include <livre/core/render/GLContext.h>
-
-#include <livre/lib/configuration/VolumeRendererParameters.h>
-#include <livre/lib/cache/TextureCache.h>
-#include <livre/lib/cache/DataCache.h>
-#include <livre/lib/cache/TextureObject.h>
-
-#include <livre/eq/FrameData.h>
-#include <livre/eq/render/RayCastRenderer.h>
-#include <livre/eq/render/shaders/fragRayCastGL2.glsl.h>
-#include <livre/eq/render/shaders/vertRayCast.glsl.h>
-#include <livre/eq/settings/RenderSettings.h>
 
 #include <eq/eq.h>
 #include <eq/gl.h>
@@ -84,7 +83,8 @@ const uint32_t minSamplesPerRay = 512;
 
 struct RayCastRenderer::Impl
 {
-    Impl( const TextureCache& textureCache,
+    Impl( const DataSource& dataSource,
+          const Cache& textureCache,
           const uint32_t samplesPerRay,
           const uint32_t samplesPerPixel )
         : _framebufferTexture( GL_TEXTURE_RECTANGLE_ARB, glewGetContext( ))
@@ -93,7 +93,7 @@ struct RayCastRenderer::Impl
         , _computedSamplesPerRay( samplesPerRay )
         , _transferFunctionTexture( 0 )
         , _textureCache( textureCache )
-        , _dataSource( textureCache.getDataCache().getDataSource( ))
+        , _dataSource( dataSource )
         , _volInfo( _dataSource.getVolumeInfo( ))
         , _posVBO( 0 )
     {
@@ -359,10 +359,10 @@ struct RayCastRenderer::Impl
 
         const ConstTextureObjectPtr textureObj =
                 std::static_pointer_cast< const TextureObject >( _textureCache.get( rb.getId( )));
-        const ConstTextureStatePtr& texState = textureObj->getTextureState();
+        const TextureState& texState = textureObj->getTextureState();
         const LODNode& lodNode = _dataSource.getNode( rb );
 
-        if( texState->textureId == INVALID_TEXTURE_ID )
+        if( texState.textureId == INVALID_TEXTURE_ID )
         {
             LBERROR << "Invalid texture for node : "
                     << lodNode.getNodeId() << std::endl;
@@ -376,12 +376,12 @@ struct RayCastRenderer::Impl
         glUniform3fv( tParamNameGL, 1, lodNode.getWorldBox().getMax().array );
 
         tParamNameGL = glGetUniformLocation( program, "textureMin" );
-        glUniform3fv( tParamNameGL, 1, texState->textureCoordsMin.array );
+        glUniform3fv( tParamNameGL, 1, texState.textureCoordsMin.array );
 
         tParamNameGL = glGetUniformLocation( program, "textureMax" );
-        glUniform3fv( tParamNameGL, 1, texState->textureCoordsMax.array );
+        glUniform3fv( tParamNameGL, 1, texState.textureCoordsMax.array );
 
-        const Vector3f& voxSize = texState->textureSize / lodNode.getWorldBox().getSize();
+        const Vector3f& voxSize = texState.textureSize / lodNode.getWorldBox().getSize();
         tParamNameGL = glGetUniformLocation( program, "voxelSpacePerWorldSpace" );
         glUniform3fv( tParamNameGL, 1, voxSize.array );
 
@@ -401,7 +401,7 @@ struct RayCastRenderer::Impl
         glUniform1i( tParamNameGL, 1 ); //f-shader
 
         glActiveTexture( GL_TEXTURE0 );
-        texState->bind( );
+        texState.bind( );
         tParamNameGL = glGetUniformLocation( program, "volumeTex" );
         glUniform1i( tParamNameGL, 0 ); //f-shader
 
@@ -410,7 +410,7 @@ struct RayCastRenderer::Impl
         tParamNameGL = glGetUniformLocation( program, "refLevel" );
         glUniform1i( tParamNameGL, refLevel );
 
-        _usedTextures[1].push_back( texState->textureId );
+        _usedTextures[1].push_back( texState.textureId );
 
         renderVBO( index, false /* draw front */, true /* cull back */ );
 
@@ -442,16 +442,20 @@ struct RayCastRenderer::Impl
     uint32_t _computedSamplesPerRay;
     uint32_t _transferFunctionTexture;
     std::vector< uint32_t > _usedTextures[2]; // last, current frame
-    const TextureCache& _textureCache;
+    const Cache& _textureCache;
     const DataSource& _dataSource;
     const VolumeInformation& _volInfo;
     GLuint _posVBO;
 };
 
-RayCastRenderer::RayCastRenderer( const TextureCache& textureCache,
+RayCastRenderer::RayCastRenderer( const DataSource& dataSource,
+                                  const Cache& textureCache,
                                   const uint32_t samplesPerRay,
                                   const uint32_t samplesPerPixel )
-    : _impl( new RayCastRenderer::Impl( textureCache, samplesPerRay, samplesPerPixel ))
+    : _impl( new RayCastRenderer::Impl( dataSource,
+                                        textureCache,
+                                        samplesPerRay,
+                                        samplesPerPixel ))
 {}
 
 RayCastRenderer::~RayCastRenderer()

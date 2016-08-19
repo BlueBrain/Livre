@@ -18,8 +18,8 @@
  */
 
 #include <livre/lib/pipeline/RenderingSetGeneratorFilter.h>
-#include <livre/lib/cache/TextureCache.h>
 
+#include <livre/core/cache/Cache.h>
 #include <livre/core/pipeline/PipeFilter.h>
 #include <livre/core/pipeline/InputPort.h>
 #include <livre/core/pipeline/Workers.h>
@@ -32,7 +32,7 @@ namespace livre
 
 struct RenderingSetGenerator
 {
-    explicit RenderingSetGenerator( const TextureCache& textureCache )
+    explicit RenderingSetGenerator( const Cache& textureCache )
         : _textureCache( textureCache )
     {}
 
@@ -107,12 +107,12 @@ struct RenderingSetGenerator
         return cacheObjects;
     }
 
-    const TextureCache& _textureCache;
+    const Cache& _textureCache;
 };
 
 struct RenderingSetGeneratorFilter::Impl
 {
-    explicit Impl( const TextureCache& cache )
+    explicit Impl( const Cache& cache )
         : _cache( cache )
     {}
 
@@ -157,10 +157,10 @@ struct RenderingSetGeneratorFilter::Impl
         };
     }
 
-    const TextureCache& _cache;
+    const Cache& _cache;
 };
 
-RenderingSetGeneratorFilter::RenderingSetGeneratorFilter( const TextureCache& cache )
+RenderingSetGeneratorFilter::RenderingSetGeneratorFilter( const Cache& cache )
     : _impl( new RenderingSetGeneratorFilter::Impl( cache ))
 {
 }

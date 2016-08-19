@@ -21,6 +21,7 @@
 #ifndef _DataObject_h_
 #define _DataObject_h_
 
+#include <livre/lib/api.h>
 #include <livre/lib/types.h>
 
 #include <livre/core/cache/CacheObject.h> // base class
@@ -34,24 +35,23 @@ namespace livre
 class DataObject : public CacheObject
 {
 public:
-    ~DataObject();
-
-    /** @return A pointer to the data or 0 if no data is loaded. */
-    const void* getDataPtr() const;
-
-private:
-    friend class DataCache;
 
     /**
      * Constructor
      * @param cacheId is the unique identifier
-     * @param dataCache the cache the data object is created
+     * @param dataSource the data source cache object is created from
      * @throws CacheLoadException when the data cache does not have the data for cache id
      */
-    DataObject( const CacheId& cacheId, DataCache& dataCache );
+    LIVRE_API DataObject( const CacheId& cacheId, DataSource& dataSource );
+    LIVRE_API ~DataObject();
+
+    /** @return A pointer to the data or 0 if no data is loaded. */
+    LIVRE_API const void* getDataPtr() const;
 
     /** @copydoc livre::CacheObject::getSize */
-    size_t _getSize() const final;
+    LIVRE_API size_t getSize() const final;
+
+private:
 
     struct Impl;
     std::unique_ptr<Impl> _impl;

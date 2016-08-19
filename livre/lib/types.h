@@ -26,11 +26,8 @@
 namespace livre
 {
 
-class HistogramCache;
 class HistogramObject;
 class RenderPipeline;
-class TextureCache;
-class DataCache;
 class DataObject;
 class TextureObject;
 class VolumeRendererParameters;

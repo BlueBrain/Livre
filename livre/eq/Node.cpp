@@ -30,10 +30,12 @@
 #include <livre/eq/Event.h>
 
 #include <livre/eq/settings/VolumeSettings.h>
-#include <livre/lib/cache/DataCache.h>
-#include <livre/lib/cache/HistogramCache.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
+#include <livre/lib/cache/DataObject.h>
+#include <livre/lib/cache/HistogramObject.h>
+
 #include <livre/core/data/DataSource.h>
+#include <livre/core/cache/Cache.h>
 
 #include <eq/eq.h>
 #include <eq/gl.h>
@@ -54,11 +56,11 @@ public:
                 _config->getFrameData().getVRParameters();
 
         const size_t maxMemBytes = vrRenderParameters.getMaxCPUCacheMemoryMB() * LB_1MB;
+        _dataCache.reset( new CacheT< DataObject >( "DataCache", maxMemBytes ));
 
-        _dataCache.reset( new DataCache( maxMemBytes, *_dataSource.get( )));
         const size_t histCacheSize =
                 32 * LB_1MB; // Histogram cache is 32 MB. Can hold approx 16k hists
-        _histogramCache.reset( new HistogramCache( histCacheSize, *_dataCache ));
+        _histogramCache.reset( new CacheT< HistogramObject >( "HistogramCache", histCacheSize ));
     }
 
     bool initializeVolume()
@@ -105,8 +107,8 @@ public:
     livre::Node* const _node;
     livre::Config* const _config;
     std::unique_ptr< DataSource > _dataSource;
-    std::unique_ptr< DataCache > _dataCache;
-    std::unique_ptr< HistogramCache > _histogramCache;
+    std::unique_ptr< Cache > _dataCache;
+    std::unique_ptr< Cache > _histogramCache;
 };
 
 Node::Node( eq::Config* parent )
@@ -152,13 +154,22 @@ bool Node::configExit()
     return eq::Node::configExit();
 }
 
-DataCache& Node::getDataCache()
+DataSource& Node::getDataSource()
+{
+    return *_impl->_dataSource;
+}
+
+const DataSource& Node::getDataSource() const
+{
+    return *_impl->_dataSource;
+}
+
+Cache& Node::getDataCache()
 {
     return *_impl->_dataCache;
 }
 
-
-livre::HistogramCache& livre::Node::getHistogramCache()
+livre::Cache& livre::Node::getHistogramCache()
 {
     return *_impl->_histogramCache;
 }

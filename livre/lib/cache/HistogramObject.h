@@ -20,6 +20,7 @@
 #ifndef _HistogramObject_h_
 #define _HistogramObject_h_
 
+#include <livre/lib/api.h>
 #include <livre/lib/types.h>
 
 #include <livre/core/cache/CacheObject.h> // base class
@@ -33,24 +34,27 @@ namespace livre
 class HistogramObject : public CacheObject
 {
 public:
-    ~HistogramObject();
-
-    Histogram getHistogram() const;
-
-private:
-
-    friend class HistogramCache;
 
     /**
      * Constructor
      * @param cacheId is the unique identifier
      * @param dataCache the histogram source data is retrieved from data cache
+     * @param dataSource the data source
      * @throws CacheLoadException when the data cache does not have the data for cache id
      */
-    HistogramObject( const CacheId& cacheId,
-                     const DataCache& dataCache );
+    LIVRE_API HistogramObject( const CacheId& cacheId,
+                               const Cache& dataCache,
+                               const DataSource& dataSource );
 
-    size_t _getSize() const;
+    LIVRE_API ~HistogramObject();
+
+    /** @copydoc livre::CacheObject::getSize */
+    LIVRE_API size_t getSize() const final;
+
+    /** @return the histogram */
+    LIVRE_API Histogram getHistogram() const;
+
+private:
 
     struct Impl;
     std::unique_ptr<Impl> _impl;
