@@ -73,9 +73,7 @@ public:
                         pipe->getFrameData()->getVRParameters().getMaxGPUCacheMemoryMB();
 
         _texturePool.reset( new TexturePool( node->getDataSource( )));
-        _textureCache.reset( new Cache( "TextureCache",
-                                        maxGpuMemory * LB_1MB,
-                                        getType< TextureObject >( )));
+        _textureCache.reset( new CacheT< TextureObject >( "TextureCache", maxGpuMemory * LB_1MB ));
         _renderPipeline.reset( new RenderPipeline( node->getDataSource(),
                                                    node->getDataCache(),
                                                    *_textureCache,

@@ -56,13 +56,11 @@ public:
                 _config->getFrameData().getVRParameters();
 
         const size_t maxMemBytes = vrRenderParameters.getMaxCPUCacheMemoryMB() * LB_1MB;
-        _dataCache.reset( new Cache( "DataCache", maxMemBytes, getType< DataObject >( )));
+        _dataCache.reset( new CacheT< DataObject >( "DataCache", maxMemBytes ));
 
         const size_t histCacheSize =
                 32 * LB_1MB; // Histogram cache is 32 MB. Can hold approx 16k hists
-        _histogramCache.reset( new Cache( "HistogramCache",
-                                          histCacheSize,
-                                          getType< HistogramObject >( )));
+        _histogramCache.reset( new CacheT< HistogramObject >( "HistogramCache", histCacheSize ));
     }
 
     bool initializeVolume()

@@ -43,21 +43,12 @@ private:
 };
 
 /**
- * The Cache class manages the \see CacheObject s according to LRU Policy, methods
+ * The Cache class manages the \see CacheObjects according to LRU Policy, methods
  * are thread safe inserting/querying nodes. The type safety check is done in runtime.
  */
 class Cache
 {
 public:
-
-    /**
-     * @param name is the name of the cache.
-     * @param maxMemBytes maximum memory.
-     * @param cacheObjectType type info for the cached object.
-     */
-    Cache( const std::string& name,
-           size_t maxMemBytes,
-           const std::type_index& cacheObjectType );
 
     LIVRECORE_API virtual ~Cache();
 
@@ -164,6 +155,17 @@ public:
      */
     LIVRECORE_API void purge( const CacheId& cacheId );
 
+protected:
+
+    /**
+     * @param name is the name of the cache.
+     * @param maxMemBytes maximum memory.
+     * @param cacheObjectType type info for the cached object.
+     */
+    LIVRECORE_API Cache( const std::string& name,
+                         size_t maxMemBytes,
+                         const std::type_index& cacheObjectType );
+
 private:
 
     ConstCacheObjectPtr _load( ConstCacheObjectPtr cacheObject );
@@ -172,6 +174,18 @@ private:
 
     struct Impl;
     std::unique_ptr<Impl> _impl;
+};
+
+/** Helper class for enabling cache to be constructed for CacheObjects */
+template< class CacheObjectT >
+class CacheT : public Cache
+{
+public:
+    template< class Q = CacheObjectT >
+    LIVRECORE_API CacheT( const std::string& name, size_t maxMemBytes,
+            typename std::enable_if< std::is_base_of< CacheObject, Q >::value, Q >::type* = 0 )
+        : Cache( name, maxMemBytes, getType< CacheObjectT >( ))
+    {}
 };
 
 }
