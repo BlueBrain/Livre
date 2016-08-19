@@ -86,10 +86,10 @@ public:
         Vector4f translation = livreModelView.getColumn( 3 );
 
         translation = -rotation.inverse() * translation;
-        translation[3] = 1;
+        translation[3] = 1.0f;
 
         translation = -rotation * _volumeInfo.dataToLivreTransform.inverse() * translation;
-        translation[0] *= ( 1.0 / _volumeInfo.meterToDataUnitRatio );
+        translation *= ( 1.0f / _volumeInfo.meterToDataUnitRatio );
         translation[3] = 1.0f;
 
         Matrix4f networkModelView;
@@ -122,10 +122,10 @@ public:
 
         translation = -rotation.inverse() * translation;
         translation *= _volumeInfo.meterToDataUnitRatio;
-        translation[3] = 1;
+        translation[3] = 1.0f;
 
         translation = -rotation * _volumeInfo.dataToLivreTransform * translation;
-        translation[3] = 1;
+        translation[3] = 1.0f;
 
         Matrix4f livreModelView;
         livreModelView.setSubMatrix< 3, 3 >( rotation.getSubMatrix< 3, 3 >( 0, 0 ), 0, 0 );
