@@ -67,10 +67,9 @@ BOOST_AUTO_TEST_CASE( testCache )
     const size_t allocSize = blockSize.product() *
                              info.compCount * info.getBytesPerVoxel();
 
-
     // Read same data with the data cache
     const size_t maxMemory = 2048;
-    livre::Cache dataCache( "DataCache", maxMemory, livre::getType< livre::DataObject >( ));
+    livre::CacheT< livre::DataObject > dataCache( "DataCache", maxMemory );
 
     livre::ConstCacheObjectPtr constData = dataCache.get( firstChildNodeId.getId( ));
     BOOST_CHECK( dataCache.getCount() == 0 );
@@ -105,8 +104,7 @@ BOOST_AUTO_TEST_CASE( testCache )
     BOOST_CHECK_EQUAL_COLLECTIONS( manual, manual + allocSize,
                                    cached, cached + allocSize );
 
-    livre::Cache histogramCache( "HistogramCache", 1024,
-                                 livre::getType< livre::HistogramObject >( ));
+    livre::CacheT< livre::HistogramObject > histogramCache( "HistogramCache", 1024 );
     livre::ConstCacheObjectPtr histCacheObject =
             histogramCache.load< livre::HistogramObject >( firstChildNodeId.getId(),
                                                            dataCache,

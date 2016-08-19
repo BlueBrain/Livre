@@ -58,10 +58,7 @@ public:
      * @return The cache object from cache, if object is not in the list an empty cache
      * object is returned.
      */
-    LIVRECORE_API ConstCacheObjectPtr get( const CacheId& cacheId ) const
-    {
-        return _get( cacheId );
-    }
+    LIVRECORE_API ConstCacheObjectPtr get( const CacheId& cacheId ) const;
 
     /**
      * Gets the cached object from the cache with a given type and d
@@ -76,14 +73,11 @@ public:
         if( _getCacheObjectType() != getType< CacheObjectT >( ))
             LBTHROW( std::runtime_error( "The cache type casting failed for cached object" ));
 
-        ConstCacheObjectPtr obj = _get( cacheId );
+        ConstCacheObjectPtr obj = get( cacheId );
         if( !obj )
             return std::shared_ptr< const CacheObjectT >();
 
-        std::shared_ptr< const CacheObjectT > typedObj =
-                std::dynamic_pointer_cast< const CacheObjectT >( obj );
-
-        return typedObj;
+        return std::static_pointer_cast< const CacheObjectT >( obj );
     }
 
     /**
@@ -169,7 +163,6 @@ protected:
 private:
 
     ConstCacheObjectPtr _load( ConstCacheObjectPtr cacheObject );
-    ConstCacheObjectPtr _get( const CacheId& cacheId ) const;
     const std::type_index& _getCacheObjectType() const;
 
     struct Impl;

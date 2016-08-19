@@ -233,7 +233,7 @@ bool Cache::unload( const CacheId& cacheId )
     return _impl->unload( cacheId );
 }
 
-ConstCacheObjectPtr Cache::_get( const CacheId& cacheId ) const
+ConstCacheObjectPtr Cache::get( const CacheId& cacheId ) const
 {
     if( cacheId == INVALID_CACHE_ID )
         return ConstCacheObjectPtr();

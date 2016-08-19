@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE( testCache )
 {
     const size_t maxMemBytes = 2048u;
 
-    livre::Cache cache( "Test Cache", maxMemBytes, livre::getType< test::ValidCacheObject >( ));
+    livre::CacheT< test::ValidCacheObject > cache( "Test Cache", maxMemBytes );
     BOOST_CHECK_EQUAL( cache.getCount(), 0 );
     BOOST_CHECK_EQUAL( cache.getStatistics().getMaximumMemory(), maxMemBytes );
 

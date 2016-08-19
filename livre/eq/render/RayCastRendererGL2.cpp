@@ -362,7 +362,7 @@ struct RayCastRenderer::Impl
         const TextureState& texState = textureObj->getTextureState();
         const LODNode& lodNode = _dataSource.getNode( rb );
 
-        if( texState->textureId == INVALID_TEXTURE_ID )
+        if( texState.textureId == INVALID_TEXTURE_ID )
         {
             LBERROR << "Invalid texture for node : "
                     << lodNode.getNodeId() << std::endl;
