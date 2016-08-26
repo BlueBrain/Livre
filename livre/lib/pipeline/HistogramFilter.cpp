@@ -77,8 +77,11 @@ struct HistogramFilter::Impl
 
     void execute( const FutureMap& input, PromiseMap& output ) const
     {
-        const auto frustum = input.get< Frustum >( "Frustum" ).front();
-        const auto viewport = input.get< Viewport >( "RelativeViewport" ).front();
+        const auto& frustums = input.get< Frustum >( "Frustum" );
+        const auto& viewports = input.get< Viewport >( "RelativeViewport" );
+
+        const auto& frustum = frustums.front();
+        const auto& viewport = viewports.front();
 
         Histogram histogramAccumulated;
         for( const auto& cacheObjects: input.getFutures( "CacheObjects" ))
