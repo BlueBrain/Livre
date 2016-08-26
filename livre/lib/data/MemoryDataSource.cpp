@@ -37,8 +37,10 @@ namespace
 }
 
 template<typename T>
-MemoryUnitPtr computeData( const LODNode& node, const size_t dataSize,
-                           const float sparsity, const Vector3i& blockSize )
+MemoryUnitPtr computeData( const LODNode& node,
+                           const size_t dataSize,
+                           const float sparsity,
+                           const Vector3ui& blockSize )
 {
     const Identifier nodeId = node.getNodeId().getId();
     const uint8_t* id = reinterpret_cast< const uint8_t* >( &nodeId );
@@ -47,19 +49,17 @@ MemoryUnitPtr computeData( const LODNode& node, const size_t dataSize,
 
     AllocMemoryUnitPtr memoryUnit( new AllocMemoryUnit );
     memoryUnit->alloc( dataSize );
-    T* data = memoryUnit->getData< T >();
-
-    if( sparsity < 1.f )
+    T* dstData = memoryUnit->getData< T >();
+    for( size_t i = 0; i < blockSize.product(); ++i )
     {
-        for( int32_t i = 0; i < blockSize.product(); ++i )
+        if( sparsity < 1.f )
         {
-            const int random = rand() % 1000000 + 1;
-            data[ i ] = random < 1000000 * sparsity ? value : 0;
+            const int32_t random = rand() % 1000000 + 1;
+            dstData[ i ] =  random < 1000000.0f * sparsity ? value : 0;
         }
+        else
+            dstData[ i ] = value ;
     }
-    else
-        ::memset( data, value, dataSize );
-
     return memoryUnit;
 }
 
@@ -76,18 +76,18 @@ MemoryDataSource::MemoryDataSource( const DataSourcePluginData& initData )
     try
     {
         servus::URI::ConstKVIter i = uri.findQuery( "sparsity" );
-        _sparsity = i == uri.queryEnd() ? 1.0f : lexical_cast<float>(i->second);
+        _sparsity = i == uri.queryEnd() ? 1.0f : lexical_cast< float >( i->second );
 
         i = uri.findQuery( "datatype" );
-        if( i == uri.queryEnd( ) || i->second == "uint8" )
+        if( i == uri.queryEnd() || i->second == "uint8" )
             _volumeInfo.dataType = DT_UINT8;
         else if( i->second == "uint16" )
             _volumeInfo.dataType = DT_UINT16;
         else if( i->second == "uint32" )
             _volumeInfo.dataType = DT_UINT32;
-        else if( i->second == "int8" )
+        else if( i->second == "int8" || i->second == "char" )
             _volumeInfo.dataType = DT_INT8;
-        else if( i->second == "int16" )
+        else if( i->second == "int16" || i->second == "short" )
             _volumeInfo.dataType = DT_INT16;
         else if( i->second == "int32" )
             _volumeInfo.dataType = DT_INT32;
