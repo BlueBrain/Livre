@@ -56,7 +56,7 @@ public:
      * Renders a frame using the given frustum and view
      * @param vrParams rendering parameters
      * @param frameInfo frustum and frame id
-     * @param dataRange range of the data for sort-last rendering
+     * @param renderDataRange range of the data for sort-last rendering
      * @param dataSourceRange Value range of the data source
      * @param pixelViewPort the view port
      * @param redrawFilter executed on data update
@@ -67,7 +67,8 @@ public:
      */
     void render( const VolumeRendererParameters& vrParams,
                  const FrameInfo& frameInfo,
-                 const Range& dataRange,
+                 const Range& renderDataRange,
+                 const Vector2f& dataSourceRange,
                  const PixelViewport& pixelViewPort,
                  const Viewport& viewport,
                  const PipeFilter& redrawFilter,

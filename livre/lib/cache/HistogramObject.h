@@ -23,6 +23,7 @@
 #include <livre/lib/api.h>
 #include <livre/lib/types.h>
 
+#include <livre/core/mathTypes.h>
 #include <livre/core/cache/CacheObject.h> // base class
 
 namespace livre
@@ -40,11 +41,14 @@ public:
      * @param cacheId is the unique identifier
      * @param dataCache the histogram source data is retrieved from data cache
      * @param dataSource the data source
+     * @param dataSourceRange range of the data source. The range is expanded with the loaded
+     * data
      * @throws CacheLoadException when the data cache does not have the data for cache id
      */
     LIVRE_API HistogramObject( const CacheId& cacheId,
                                const Cache& dataCache,
-                               const DataSource& dataSource );
+                               const DataSource& dataSource,
+                               const Vector2f& dataSourceRange );
 
     LIVRE_API ~HistogramObject();
 
@@ -52,7 +56,7 @@ public:
     LIVRE_API size_t getSize() const final;
 
     /** @return the histogram */
-    LIVRE_API Histogram getHistogram() const;
+    LIVRE_API const Histogram& getHistogram() const;
 
 private:
 

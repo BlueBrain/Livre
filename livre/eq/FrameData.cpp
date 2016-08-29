@@ -144,6 +144,11 @@ VolumeSettings& FrameData::getVolumeSettings()
     return _impl->volumeSettings;
 }
 
+const VolumeSettings& FrameData::getVolumeSettings() const
+{
+    return _impl->volumeSettings;
+}
+
 const VolumeRendererParameters& FrameData::getVRParameters() const
 {
     return _impl->vrParameters;

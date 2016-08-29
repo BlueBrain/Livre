@@ -144,7 +144,8 @@ struct RenderPipeline::Impl
 
     void render( const VolumeRendererParameters& vrParams,
                  const FrameInfo& frameInfo,
-                 const Range& dataRange,
+                 const Range& renderDataRange,
+                 const Vector2f& dataSourceRange,
                  const PixelViewport& pixelViewPort,
                  const Viewport& viewport,
                  PipeFilter redrawFilter,
@@ -161,6 +162,7 @@ struct RenderPipeline::Impl
         histogramFilter.getPromise( "Frustum" ).set( frameInfo.frustum );
         histogramFilter.connect( "Histogram", sendHistogramFilter, "Histogram" );
         histogramFilter.getPromise( "RelativeViewport" ).set( viewport );
+        histogramFilter.getPromise( "DataSourceRange" ).set( dataSourceRange );
         sendHistogramFilter.getPromise( "RelativeViewport" ).set( viewport );
         sendHistogramFilter.getPromise( "Id" ).set( frameInfo.frameId );
 
@@ -185,7 +187,7 @@ struct RenderPipeline::Impl
 
         visibleSetGenerator.getPromise( "Frustum" ).set( frameInfo.frustum );
         visibleSetGenerator.getPromise( "Frame" ).set( frameInfo.timeStep );
-        visibleSetGenerator.getPromise( "DataRange" ).set( dataRange );
+        visibleSetGenerator.getPromise( "DataRange" ).set( renderDataRange );
         visibleSetGenerator.getPromise( "Params" ).set( vrParams );
         visibleSetGenerator.getPromise( "Viewport" ).set( pixelViewPort );
         visibleSetGenerator.getPromise( "ClipPlanes" ).set( clipPlanes );
@@ -248,7 +250,8 @@ RenderPipeline::~RenderPipeline()
 
 void RenderPipeline::render( const VolumeRendererParameters& vrParams,
                              const FrameInfo& frameInfo,
-                             const Range& dataRange,
+                             const Range& renderDataRange,
+                             const Vector2f& dataSourceRange,
                              const PixelViewport& pixelViewPort,
                              const Viewport& viewport,
                              const PipeFilter& redrawFilter,
@@ -259,7 +262,8 @@ void RenderPipeline::render( const VolumeRendererParameters& vrParams,
 {
     _impl->render( vrParams,
                    frameInfo,
-                   dataRange,
+                   renderDataRange,
+                   dataSourceRange,
                    pixelViewPort,
                    viewport,
                    redrawFilter,

@@ -33,6 +33,7 @@
 #include <livre/eq/settings/CameraSettings.h>
 #include <livre/eq/settings/FrameSettings.h>
 #include <livre/eq/settings/RenderSettings.h>
+#include <livre/eq/settings/VolumeSettings.h>
 #include <livre/eq/Window.h>
 
 #include <livre/lib/cache/TextureObject.h>
@@ -291,6 +292,7 @@ public:
         renderPipeline.render( pipe->getFrameData()->getVRParameters(),
                                _frameInfo,
                                {{ _drawRange.start, _drawRange.end }},
+                               pipe->getFrameData()->getVolumeSettings().getDataSourceRange(),
                                PixelViewport( pixVp.x, pixVp.y, pixVp.w, pixVp.h ),
                                Viewport( vp.x, vp.y, vp.w, vp.h ),
                                PipeFilterT< RedrawFilter >( "RedrawFilter", _channel ),

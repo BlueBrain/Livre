@@ -23,6 +23,7 @@
 #define _VolumeSettings_h_
 
 #include <livre/lib/types.h>
+#include <livre/core/mathTypes.h>
 #include <co/serializable.h>
 
 namespace livre
@@ -35,33 +36,37 @@ class VolumeSettings : public co::Serializable
 {
 public:
 
-    /**
-     * @brief VolumeSettings constructor.
-     */
-    VolumeSettings( );
+    /** VolumeSettings constructor. */
+    VolumeSettings();
+
+    /** reset Resets the information. */
+    void reset();
 
     /**
-     * @brief reset Resets the information.
-     */
-    void reset( );
-
-    /**
-     * @brief setModelFileName Sets the models source uri.
+     * Sets the models source uri.
      * @param uri The uri of the source data.
      */
     void setURI( const std::string& uri );
 
-    /**
-     * @return Returns the uri of the source data.
-     */
+    /** @return Returns the uri of the source data. */
     const std::string& getURI( ) const;
+
+    /**
+     * Sets the accumulated data range for the volume.
+     * @param range of the data source.
+     */
+    void setDataSourceRange( const Vector2f& range );
+
+    /** @return Returns the accumulated data range for the volume. */
+    const Vector2f& getDataSourceRange() const;
 
 private:
 
     virtual void serialize(   co::DataOStream& os, const uint64_t dirtyBits );
     virtual void deserialize( co::DataIStream& is, const uint64_t dirtyBits );
 
-    std::string uri_;
+    std::string _uri;
+    Vector2f _dataSourceRange;
 };
 
 }

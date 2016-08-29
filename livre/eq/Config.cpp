@@ -29,6 +29,7 @@
 #include <livre/eq/settings/CameraSettings.h>
 #include <livre/eq/settings/FrameSettings.h>
 #include <livre/eq/settings/RenderSettings.h>
+#include <livre/eq/settings/VolumeSettings.h>
 #include <livre/lib/configuration/ApplicationParameters.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 
@@ -58,13 +59,17 @@ class Config::Impl
 {
 public:
 
+    typedef std::vector< Histogram > Histograms;
 
     struct ViewHistogram
     {
-        ViewHistogram( const Histogram& histogram_, const float area_, const uint32_t id_ )
+        ViewHistogram( const Histogram& histogram_,
+                       const float area_,
+                       const uint32_t id_ )
             : histogram( histogram_ )
             , area( area_ )
             , id( id_ )
+
         {}
 
         ViewHistogram& operator+=( const ViewHistogram& hist )
@@ -83,6 +88,7 @@ public:
         Histogram histogram;
         float area;
         uint32_t id;
+
     };
 
     typedef std::deque< ViewHistogram > ViewHistogramQueue;
@@ -94,13 +100,26 @@ public:
         , eventMapper( EventHandlerFactoryPtr( new EqEventHandlerFactory ))
         , redraw( true )
         , dataFrameRange( INVALID_FRAME_RANGE )
+        , dataSourceRange( std::numeric_limits<uint8_t>::min(), // This will change with the new TF
+                           std::numeric_limits<uint8_t>::max( ))
     {}
 
     void gatherHistogram( const Histogram& histogram, const float area, const uint32_t currentId )
     {
-      // If we get a very old frame skip it
+        // If we get a very old frame skip it
         if( !histogramQueue.empty() && currentId < histogramQueue.back().id )
             return;
+
+        // Always enlarge the range
+        dataSourceRange[ 0 ] =
+                histogram.getMin() < dataSourceRange[ 0 ] ? histogram.getMin() :
+                                                            dataSourceRange[ 0 ];
+
+        dataSourceRange[ 1 ] =
+                histogram.getMax() > dataSourceRange[ 1 ] ? histogram.getMax() :
+                                                            dataSourceRange[ 1 ];
+
+        config->getFrameData().getVolumeSettings().setDataSourceRange( dataSourceRange );
 
         const ViewHistogram viewHistogram( histogram, area, currentId );
         auto it = histogramQueue.begin();
@@ -111,8 +130,16 @@ public:
 
             if( currentId == data.id )
             {
-                dataMerged = true;
-                data += viewHistogram;
+                try
+                {
+                    data += viewHistogram;
+                    dataMerged = true;
+                }
+                catch( std::runtime_error& )
+                {
+                    histogramQueue.erase( it, histogramQueue.end( ));
+                    return;
+                }
             }
             else if( currentId > data.id )
             {
@@ -134,7 +161,7 @@ public:
             ++it;
         }
 
-       if( histogramQueue.empty() && !viewHistogram.isComplete( ))
+        if( histogramQueue.empty() && !viewHistogram.isComplete( ))
         {
             histogramQueue.push_back( viewHistogram );
             return;
@@ -163,6 +190,7 @@ public:
     bool redraw;
     Vector2ui dataFrameRange;
     ViewHistogramQueue histogramQueue;
+    Vector2f dataSourceRange;
 };
 
 Config::Config( eq::ServerPtr parent )

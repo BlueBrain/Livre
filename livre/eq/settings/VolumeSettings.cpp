@@ -33,31 +33,44 @@ VolumeSettings::VolumeSettings()
 
 void VolumeSettings::reset()
 {
-    uri_ = "";
+    _uri = "";
+    _dataSourceRange = Vector2f( std::numeric_limits< float >::infinity(),
+                                 -std::numeric_limits< float >::infinity( ));
     setDirty( DIRTY_ALL );
 }
 
 const std::string& VolumeSettings::getURI() const
 {
-    return uri_;
+    return _uri;
 }
 
-void VolumeSettings::setURI(const std::string& uri )
+void VolumeSettings::setDataSourceRange( const Vector2f& range )
 {
-    uri_ = uri;
+    _dataSourceRange = range;
+    setDirty( DIRTY_ALL );
+}
+
+const vmml::Vector2f& VolumeSettings::getDataSourceRange() const
+{
+    return _dataSourceRange;
+}
+
+void VolumeSettings::setURI( const std::string& uri )
+{
+    _uri = uri;
     setDirty( DIRTY_ALL );
 }
 
 void VolumeSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
 {
     co::Serializable::serialize( os, dirtyBits );
-    os  << uri_;
+    os  << _uri << _dataSourceRange;
 }
 
 void VolumeSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits )
 {
     co::Serializable::deserialize( is, dirtyBits );
-    is >> uri_;
+    is >> _uri >> _dataSourceRange;
 }
 
 }

@@ -23,7 +23,10 @@ namespace livre
 {
 
 Histogram::Histogram()
-{}
+{
+    setMin( std::numeric_limits<float>::infinity( ));
+    setMax( -std::numeric_limits<float>::infinity( ));
+}
 
 Histogram::Histogram( const Histogram& histogram )
     : co::Distributable< ::lexis::render::Histogram >( histogram )
@@ -45,10 +48,17 @@ Histogram& Histogram::operator=( const Histogram& histogram )
 
 Histogram& Histogram::operator+=( const Histogram& histogram )
 {
-    const uint64_t* srcBins = histogram.getBins();
+    if( histogram.getBins().size() != getBins().size() ||
+        histogram.getMin() != getMin() ||
+        histogram.getMax() != getMax( ))
+    {
+        LBTHROW( std::runtime_error( "Addition of incompatible histograms"));
+    }
 
-    uint64_t* bins = getBins();
-    for( size_t i = 0; i < getBinsSize(); ++i )
+    const uint64_t* srcBins = histogram.getBins().data();
+
+    uint64_t* bins = getBins().data();
+    for( size_t i = 0; i < getBins().size(); ++i )
         bins[ i ] += srcBins[ i ];
 
     return *this;
@@ -56,9 +66,9 @@ Histogram& Histogram::operator+=( const Histogram& histogram )
 
 bool Histogram::isDataUniform( size_t& uniformIndex ) const
 {
-    const uint64_t* bins = getBins();
+    const uint64_t* bins = getBins().data();
     size_t nonZeroCount = 0;
-    for( size_t i = 0; i < getBinsSize(); ++i )
+    for( size_t i = 0; i < getBins().size(); ++i )
     {
         if( bins[ i ] > 0 )
         {
@@ -74,20 +84,20 @@ bool Histogram::isDataUniform( size_t& uniformIndex ) const
 
 size_t Histogram::getMinIndex() const
 {
-    const uint64_t* bins = getBins();
-    return std::distance( bins, std::min_element( bins, bins + getBinsSize( )));
+    const uint64_t* bins = getBins().data();
+    return std::distance( bins, std::min_element( bins, bins + getBins().size( )));
 }
 
 size_t Histogram::getMaxIndex() const
 {
-    const uint64_t* bins = getBins();
-    return std::distance( bins, std::max_element( bins, bins + getBinsSize( )));
+    const uint64_t* bins = getBins().data();
+    return std::distance( bins, std::max_element( bins, bins + getBins().size( )));
 }
 
 bool Histogram::isEmpty() const
 {
-    const uint64_t* bins = getBins();
-    for( size_t i = 0; i < getBinsSize(); ++i )
+    const uint64_t* bins = getBins().data();
+    for( size_t i = 0; i < getBins().size(); ++i )
     {
         if( bins[ i ] > 0 )
             return false;
@@ -97,25 +107,39 @@ bool Histogram::isEmpty() const
 
 uint64_t Histogram::getSum() const
 {
-    const uint64_t* bins = getBins();
+    const uint64_t* bins = getBins().data();
     uint64_t sum = 0;
-    for( size_t i = 0; i < getBinsSize(); ++i )
+    for( size_t i = 0; i < getBins().size(); ++i )
         sum +=  bins[ i ];
 
     return sum;
 }
 
+Vector2f Histogram::getRange() const
+{
+    return Vector2f( getMin(), getMax( ));
+}
+
 double Histogram::getRatio( const size_t index ) const
 {
-    if( index >= getBinsSize( ))
+    if( index >= getBins().size( ))
         return 0.0f;
 
     const uint64_t sum = getSum();
     if( sum == 0 )
         return 0.0f;
 
-    const uint64_t* bins = getBins();
+    const uint64_t* bins = getBins().data();
     return (double)bins[ index ] / (double)sum;
+}
+
+void Histogram::resize( size_t newSize )
+{
+    getBins().clear();
+    for( size_t i = 0; i < newSize; ++i )
+    {
+        getBins().push_back( 0 );
+    }
 }
 
 std::ostream& operator<<( std::ostream& os, const Histogram& histogram )
@@ -124,8 +148,8 @@ std::ostream& operator<<( std::ostream& os, const Histogram& histogram )
        << " Max value index: " << histogram.getMaxIndex()
        << std::endl;
 
-    const uint64_t* data = histogram.getBins();
-    for( size_t i = 0; i < histogram.getBinsSize(); ++i )
+    const uint64_t* data = histogram.getBins().data();
+    for( size_t i = 0; i < histogram.getBins().size(); ++i )
         os << data[ i ] << " ";
     os << std::endl;
     return os;
