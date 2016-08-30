@@ -289,15 +289,16 @@ public:
         const RenderPipeline& renderPipeline = window->getRenderPipeline();
 
         _renderer->update( *pipe->getFrameData( ));
-        renderPipeline.render( pipe->getFrameData()->getVRParameters(),
-                               _frameInfo,
-                               {{ _drawRange.start, _drawRange.end }},
-                               pipe->getFrameData()->getVolumeSettings().getDataSourceRange(),
-                               PixelViewport( pixVp.x, pixVp.y, pixVp.w, pixVp.h ),
-                               Viewport( vp.x, vp.y, vp.w, vp.h ),
+        renderPipeline.render( { pipe->getFrameData()->getVRParameters(),
+                                 _frameInfo,
+                                 {{ _drawRange.start, _drawRange.end }},
+                                 pipe->getFrameData()->getVolumeSettings().getDataSourceRange(),
+                                 PixelViewport( pixVp.x, pixVp.y, pixVp.w, pixVp.h ),
+                                 Viewport( vp.x, vp.y, vp.w, vp.h ),
+                                 pipe->getFrameData()->getRenderSettings().getClipPlanes(),
+                               },
                                PipeFilterT< RedrawFilter >( "RedrawFilter", _channel ),
                                PipeFilterT< SendHistogramFilter >( "SendHistogramFilter", _channel ),
-                               pipe->getFrameData()->getRenderSettings().getClipPlanes(),
                                *_renderer,
                                _availability );
     }

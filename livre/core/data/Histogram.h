@@ -95,7 +95,7 @@ public:
     LIVRECORE_API double getRatio( size_t index ) const;
 
     /**
-      * Clears the histogram and sets the number of bins to newSize
+      * Sets the number of bins to newSize and clears the histogram
       * @param newSize
       */
     LIVRECORE_API void resize( size_t newSize );

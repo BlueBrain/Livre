@@ -74,10 +74,9 @@ public:
 
         _texturePool.reset( new TexturePool( node->getDataSource( )));
         _textureCache.reset( new CacheT< TextureObject >( "TextureCache", maxGpuMemory * LB_1MB ));
+        Caches caches = { node->getDataCache(), *_textureCache, node->getHistogramCache() };
         _renderPipeline.reset( new RenderPipeline( node->getDataSource(),
-                                                   node->getDataCache(),
-                                                   *_textureCache,
-                                                   node->getHistogramCache(),
+                                                   caches,
                                                    *_texturePool,
                                                    _glContext ));
     }

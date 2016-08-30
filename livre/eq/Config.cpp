@@ -100,25 +100,23 @@ public:
         , eventMapper( EventHandlerFactoryPtr( new EqEventHandlerFactory ))
         , redraw( true )
         , dataFrameRange( INVALID_FRAME_RANGE )
-        , dataSourceRange( std::numeric_limits<uint8_t>::min(), // This will change with the new TF
-                           std::numeric_limits<uint8_t>::max( ))
+        , dataSourceRange( 0.0f, 255.0f ) // Default range for uint8 data sources
     {}
 
     void gatherHistogram( const Histogram& histogram, const float area, const uint32_t currentId )
     {
-        // If we get a very old frame skip it
+        // If we get a very old frame skip it.
         if( !histogramQueue.empty() && currentId < histogramQueue.back().id )
             return;
 
-        // Always enlarge the range
-        dataSourceRange[ 0 ] =
-                histogram.getMin() < dataSourceRange[ 0 ] ? histogram.getMin() :
-                                                            dataSourceRange[ 0 ];
+        // Extend the global histogram range if needed.
+        if( histogram.getMin() < dataSourceRange[ 0 ] )
+            dataSourceRange[ 0 ] = histogram.getMin();
 
-        dataSourceRange[ 1 ] =
-                histogram.getMax() > dataSourceRange[ 1 ] ? histogram.getMax() :
-                                                            dataSourceRange[ 1 ];
+        if( histogram.getMax() > dataSourceRange[ 1 ] )
+            dataSourceRange[ 1 ] = histogram.getMax();
 
+        // Updating the range that clients must use to set their histogram range
         config->getFrameData().getVolumeSettings().setDataSourceRange( dataSourceRange );
 
         const ViewHistogram viewHistogram( histogram, area, currentId );
@@ -137,6 +135,9 @@ public:
                 }
                 catch( std::runtime_error& )
                 {
+                    // Only compatible histograms can be added.( i.e same data range and number of
+                    // bins.) Until data range converges to the full data range combined from all
+                    // rendering clients, the histograms are thrown away
                     histogramQueue.erase( it, histogramQueue.end( ));
                     return;
                 }

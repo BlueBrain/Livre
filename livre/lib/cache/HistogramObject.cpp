@@ -41,71 +41,49 @@ void binData( const SRC_TYPE* rawData,
               const size_t compCount,
               const uint64_t scaleFactor )
 {
-    histogram.setMin( std::numeric_limits< SRC_TYPE >::min( ));
-    histogram.setMax( std::numeric_limits< SRC_TYPE >::max( ));
-    const double range = histogram.getMax() - histogram.getMin();
-
-    double binCount = histogram.getBins().size();
+    const double binCount = histogram.getBins().size();
     uint64_t* dstData = histogram.getBins().data();
 
-    const Vector3ui dataBlockSize = blockSize + padding * 2;
-    for( size_t i = padding.x(); i < dataBlockSize.x() - padding.x(); ++i )
-        for( size_t j = padding.y(); j < dataBlockSize.y() - padding.y(); ++j )
-            for( size_t k = padding.z(); k < dataBlockSize.z() - padding.z(); ++k )
-                for( size_t c = 0; c < compCount; ++c )
-                {
-                    const size_t index = compCount * i * dataBlockSize.y() * dataBlockSize.z() +
-                                         compCount * j * dataBlockSize.z() +
-                                         compCount * k + c;
-                    const double data = rawData[ index ];
-                    const size_t binIndex =  histogram.getMin() + ( data - histogram.getMin( )) /
-                                             range * ( binCount - 1 );
-                    dstData[ binIndex ] += scaleFactor;
-                }
-}
-
-void binData( const float* rawData,
-              Histogram& histogram,
-              const Vector3ui& blockSize,
-              const Vector3ui& padding,
-              const size_t compCount,
-              const uint64_t scaleFactor )
-{
-    double binCount = histogram.getBins().size();
-    uint64_t* dstData = histogram.getBins().data();
-
-    double minVal = histogram.getMin();
-    double maxVal = histogram.getMax();
-
-    const Vector3ui dataBlockSize = blockSize + padding * 2;
-    for( size_t i = padding.x(); i < dataBlockSize.x() - padding.x(); ++i )
-        for( size_t j = padding.y(); j < dataBlockSize.y() - padding.y(); ++j )
-            for( size_t k = padding.z(); k < dataBlockSize.z() - padding.z(); ++k )
-                for( size_t c = 0; c < compCount; ++c )
-                {
-                    const size_t index = compCount * i * dataBlockSize.y() * dataBlockSize.z() +
-                                         compCount * j * dataBlockSize.z() +
-                                         compCount * k + c;
-                    const double data = rawData[ index ];
-                    if( data < minVal )
-                        minVal = data;
-
-                    if( data > maxVal )
-                        maxVal = data;
-                }
-
-    histogram.setMin( minVal );
-    histogram.setMax( maxVal );
-
-    const double range = maxVal - minVal;
-    if( range == 0.0 )
+    if( std::is_integral< SRC_TYPE >::value )
     {
-        histogram.getBins().clear();
-        const size_t bins = ( dataBlockSize - padding ).product() * scaleFactor * compCount;
-        histogram.getBins().push_back( bins );
-        return;
+        histogram.setMin( std::numeric_limits< SRC_TYPE >::min( ));
+        histogram.setMax( std::numeric_limits< SRC_TYPE >::max( ));
+    }
+    else
+    {
+        double minVal = histogram.getMin();
+        double maxVal = histogram.getMax();
+
+        const Vector3ui dataBlockSize = blockSize + padding * 2;
+        for( size_t i = padding.x(); i < dataBlockSize.x() - padding.x(); ++i )
+            for( size_t j = padding.y(); j < dataBlockSize.y() - padding.y(); ++j )
+                for( size_t k = padding.z(); k < dataBlockSize.z() - padding.z(); ++k )
+                    for( size_t c = 0; c < compCount; ++c )
+                    {
+                        const size_t index = compCount * i * dataBlockSize.y() * dataBlockSize.z() +
+                                             compCount * j * dataBlockSize.z() +
+                                             compCount * k + c;
+                        const double data = rawData[ index ];
+                        if( data < minVal )
+                            minVal = data;
+                        if( data > maxVal )
+                            maxVal = data;
+                    }
+
+        histogram.setMin( minVal );
+        histogram.setMax( maxVal );
+
+        if(( maxVal - minVal ) == 0.0f )
+        {
+            histogram.getBins().clear();
+            const size_t bins = ( dataBlockSize - padding ).product() * scaleFactor * compCount;
+            histogram.getBins().push_back( bins );
+            return;
+        }
     }
 
+    const double range = histogram.getMax() - histogram.getMin();
+    const Vector3ui dataBlockSize = blockSize + padding * 2;
     for( size_t i = padding.x(); i < dataBlockSize.x() - padding.x(); ++i )
         for( size_t j = padding.y(); j < dataBlockSize.y() - padding.y(); ++j )
             for( size_t k = padding.z(); k < dataBlockSize.z() - padding.z(); ++k )
@@ -114,8 +92,9 @@ void binData( const float* rawData,
                     const size_t index = compCount * i * dataBlockSize.y() * dataBlockSize.z() +
                                          compCount * j * dataBlockSize.z() +
                                          compCount * k + c;
-                    const double data = rawData[ index ];
-                    const size_t binIndex = ( data - minVal ) / range * binCount;
+
+                    const size_t binIndex = ( rawData[ index ] - histogram.getMin( )) /
+                                            range * ( binCount - 1 );
                     dstData[ binIndex ] += scaleFactor;
                 }
 }

@@ -39,6 +39,13 @@ void VolumeSettings::reset()
     setDirty( DIRTY_ALL );
 }
 
+
+void VolumeSettings::setURI( const std::string& uri )
+{
+    _uri = uri;
+    setDirty( DIRTY_ALL );
+}
+
 const std::string& VolumeSettings::getURI() const
 {
     return _uri;
@@ -53,12 +60,6 @@ void VolumeSettings::setDataSourceRange( const Vector2f& range )
 const vmml::Vector2f& VolumeSettings::getDataSourceRange() const
 {
     return _dataSourceRange;
-}
-
-void VolumeSettings::setURI( const std::string& uri )
-{
-    _uri = uri;
-    setDirty( DIRTY_ALL );
 }
 
 void VolumeSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
