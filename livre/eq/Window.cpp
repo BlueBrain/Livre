@@ -95,9 +95,9 @@ public:
 
     Window* const _window;
     GLContextPtr _glContext;
+    std::unique_ptr< TexturePool > _texturePool;
     std::unique_ptr< Cache > _textureCache;
     std::unique_ptr< RenderPipeline > _renderPipeline;
-    std::unique_ptr< TexturePool > _texturePool;
 };
 
 Window::Window( eq::Pipe *parent )

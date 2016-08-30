@@ -41,7 +41,7 @@ void binData( const SRC_TYPE* rawData,
               const size_t compCount,
               const uint64_t scaleFactor )
 {
-    const double binCount = histogram.getBins().size();
+    const size_t binCount = histogram.getBins().size();
     uint64_t* dstData = histogram.getBins().data();
 
     if( std::is_integral< SRC_TYPE >::value )
@@ -82,7 +82,7 @@ void binData( const SRC_TYPE* rawData,
         }
     }
 
-    const double range = histogram.getMax() - histogram.getMin();
+
     const Vector3ui dataBlockSize = blockSize + padding * 2;
     for( size_t i = padding.x(); i < dataBlockSize.x() - padding.x(); ++i )
         for( size_t j = padding.y(); j < dataBlockSize.y() - padding.y(); ++j )
@@ -93,8 +93,27 @@ void binData( const SRC_TYPE* rawData,
                                          compCount * j * dataBlockSize.z() +
                                          compCount * k + c;
 
-                    const size_t binIndex = ( rawData[ index ] - histogram.getMin( )) /
-                                            range * ( binCount - 1 );
+                    size_t binIndex = 0;
+                    if( std::is_integral< SRC_TYPE >::value )
+                    {
+                        const size_t range =
+                                std::lround( histogram.getMax() - histogram.getMin( )) + 1u;
+                        const size_t perBinCount = range / binCount;
+                        binIndex = ( rawData[ index ] - std::lround( histogram.getMin( )))
+                                     / perBinCount;
+                    }
+                    else
+                    {
+                        const double data = rawData[ index ];
+                        if( data == histogram.getMax( ))
+                            binIndex = binCount - 1;
+                        else
+                        {
+                            const double range = histogram.getMax() - histogram.getMin();
+                            const double perBinCount = range / binCount;
+                            binIndex = ( rawData[ index ] - histogram.getMin( )) / perBinCount;
+                        }
+                    }
                     dstData[ binIndex ] += scaleFactor;
                 }
 }

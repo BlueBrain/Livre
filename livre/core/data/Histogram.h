@@ -34,7 +34,7 @@ class Histogram : public co::Distributable< ::lexis::render::Histogram >
 {
 public:
     /**
-     * Constructor.
+     * Constructor. The minimum value is set to +inf and maximum value is set to -inf
      */
     LIVRECORE_API Histogram();
 
