@@ -56,10 +56,13 @@ public:
     /** @internal @return number of bricks rendered in the last render() pass */
     size_t getNumBricksUsed() const;
 
-protected:
+    /**
+     * @copydoc Renderer::order
+     */
+    NodeIds order( const NodeIds& bricks,
+                   const Frustum& frustum ) const override;
 
-    NodeIds _order( const NodeIds& bricks,
-                    const Frustum& frustum ) const override;
+protected:
 
     void _onFrameStart( const Frustum& frustum,
                         const ClipPlanes& planes,

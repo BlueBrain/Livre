@@ -48,6 +48,15 @@ Histogram& Histogram::operator=( const Histogram& histogram )
 
 Histogram& Histogram::operator+=( const Histogram& histogram )
 {
+    if( histogram.getBins().empty( ))
+        return *this;
+
+    if( getBins().empty( ))
+    {
+        *this = histogram;
+        return *this;
+    }
+
     if( histogram.getBins().size() != getBins().size() ||
         histogram.getMin() != getMin() ||
         histogram.getMax() != getMax( ))

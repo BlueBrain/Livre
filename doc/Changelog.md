@@ -2,7 +2,8 @@ Changelog {#Changelog}
 =========
 
 # master {#master}
-
+* [#331](https://github.com/BlueBrain/Livre/pull/331):
+  Multiple pass mode added for high quality images for data that does not fit into GPU cache
 * [#333](https://github.com/BlueBrain/Livre/pull/333):
   Add animation-fps parameter to limit the animation frame rate
 * [#318](https://github.com/BlueBrain/Livre/pull/318):

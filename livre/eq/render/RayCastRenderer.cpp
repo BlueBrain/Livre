@@ -108,7 +108,6 @@ struct RayCastRenderer::Impl
         , _textureCache( textureCache )
         , _dataSource( dataSource )
         , _volInfo( _dataSource.getVolumeInfo( ))
-        , _posVBO( 0 )
     {
         TransferFunction1D transferFunction;
         initTransferFunction( transferFunction );
@@ -331,7 +330,6 @@ struct RayCastRenderer::Impl
             glUniform4fv( tParamNameGL, nPlanes, planesData.data( ));
         }
 
-        createAndFillVertexBuffer( renderBricks );
         createAndInitializeRenderTexture( viewport );
 
         glBindImageTexture( 0, _renderTexture.getName(),
@@ -350,7 +348,7 @@ struct RayCastRenderer::Impl
         glUseProgram( 0 );
     }
 
-    void createAndFillVertexBuffer( const NodeIds& renderBricks )
+    GLuint createAndFillVertexBuffer( const NodeIds& renderBricks )
     {
         Vector3fs positions;
         positions.reserve( 36 * renderBricks.size( ));
@@ -360,11 +358,13 @@ struct RayCastRenderer::Impl
             createBrick( lodNode, positions );
         }
 
-        glGenBuffers( 1, &_posVBO );
-        glBindBuffer( GL_ARRAY_BUFFER, _posVBO );
+        GLuint posVBO;
+        glGenBuffers( 1, &posVBO );
+        glBindBuffer( GL_ARRAY_BUFFER, posVBO );
         glBufferData( GL_ARRAY_BUFFER,
                       positions.size() * 3 * sizeof( float ),
                       positions.data(), GL_STATIC_DRAW );
+        return posVBO;
     }
 
     void createBrick( const LODNode& lodNode, Vector3fs& positions ) const
@@ -430,12 +430,17 @@ struct RayCastRenderer::Impl
 
     void onFrameRender( const NodeIds& bricks )
     {
+        const GLuint posVBO = createAndFillVertexBuffer( bricks );
         size_t index = 0;
         for( const NodeId& brick: bricks )
-            renderBrick( brick, index++ );
+            renderBrick( brick, index++, posVBO );
+
+        glDeleteBuffers( 1, &posVBO );
+        // The flush is needed because the textures are loaded asynchronously by a thread pool.
+        glFlush();
     }
 
-    void renderBrickVBO( const size_t index, bool front, bool back )
+    void renderBrickVBO( const size_t index, const GLuint posVBO, bool front, bool back )
     {
         if( !front && !back )
             return;
@@ -446,14 +451,13 @@ struct RayCastRenderer::Impl
         else if( !front && back )
             glCullFace( GL_FRONT );
 
-        glBindBuffer( GL_ARRAY_BUFFER, _posVBO );
+        glBindBuffer( GL_ARRAY_BUFFER, posVBO );
         glEnableVertexAttribArray( 0 );
         glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, NULL );
         glDrawArrays( GL_TRIANGLES, index * 36, 36 );
     }
 
-    void renderBrick( const NodeId& rb,
-                      const size_t index )
+    void renderBrick( const NodeId& rb, const size_t index, const GLuint posVBO )
     {
         GLSLShaders::Handle program = _rayCastShaders.getProgram( );
         LBASSERT( program );
@@ -504,7 +508,7 @@ struct RayCastRenderer::Impl
 
         _usedTextures[1].push_back( texState.textureId );
 
-        renderBrickVBO( index, false /* draw front */, true /* cull back */ );
+        renderBrickVBO( index, posVBO, false /* draw front */, true /* cull back */ );
         glMemoryBarrier( GL_SHADER_IMAGE_ACCESS_BARRIER_BIT );
 
         glUseProgram( 0 );
@@ -547,7 +551,6 @@ struct RayCastRenderer::Impl
         _usedTextures[0].swap( _usedTextures[1] );
         _usedTextures[1].clear();
 
-        glDeleteBuffers( 1, &_posVBO );
         glDrawBuffer( _drawBuffer );
         copyTexToFrameBufAndClear();
     }
@@ -563,7 +566,6 @@ struct RayCastRenderer::Impl
     const Cache& _textureCache;
     const DataSource& _dataSource;
     const VolumeInformation& _volInfo;
-    GLuint _posVBO;
     GLuint _quadVBO;
     GLint _drawBuffer;
 };
@@ -584,8 +586,8 @@ void RayCastRenderer::update( const FrameData& frameData )
 }
 
 
-NodeIds RayCastRenderer::_order( const NodeIds& bricks,
-                                 const Frustum& frustum ) const
+NodeIds RayCastRenderer::order( const NodeIds& bricks,
+                                const Frustum& frustum ) const
 {
     return _impl->order( bricks, frustum );
 }

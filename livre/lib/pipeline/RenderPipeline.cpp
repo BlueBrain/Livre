@@ -27,8 +27,12 @@
 #include <livre/core/cache/Cache.h>
 #include <livre/core/pipeline/SimpleExecutor.h>
 #include <livre/core/pipeline/Pipeline.h>
+#include <livre/core/data/DataSource.h>
 
 #include <livre/core/render/TexturePool.h>
+#include <livre/core/render/Renderer.h>
+
+#include <boost/progress.hpp>
 
 namespace livre
 {
@@ -82,39 +86,104 @@ struct RenderPipeline::Impl
         }
     }
 
-    void createSyncPipeline( PipeFilter& renderFilter,
-                             PipeFilter& histogramFilter,
-                             Pipeline& renderPipeline,
-                             Pipeline& uploadPipeline ) const
+    void createSyncPipeline( const RenderParams& renderParams,
+                             PipeFilter& sendHistogramFilter,
+                             Renderer& renderer,
+                             NodeAvailability& availability ) const
     {
-        PipeFilter visibleSetGenerator =
-                renderPipeline.add< VisibleSetGeneratorFilter >(
-                    "VisibleSetGenerator", _dataSource );
+        PipeFilterT< VisibleSetGeneratorFilter > visibleSetGenerator( "VisibleSetGenerator",
+                                                                      _dataSource );
 
-        createAndConnectUploaders( uploadPipeline,
-                                   visibleSetGenerator,
-                                   renderFilter );
+        visibleSetGenerator.getPromise( "Frustum" ).set( renderParams.frameInfo.frustum );
+        visibleSetGenerator.getPromise( "Frame" ).set( renderParams.frameInfo.timeStep );
+        visibleSetGenerator.getPromise( "DataRange" ).set( renderParams.renderDataRange );
+        visibleSetGenerator.getPromise( "Params" ).set( renderParams.vrParams );
+        visibleSetGenerator.getPromise( "Viewport" ).set( renderParams.pixelViewPort );
+        visibleSetGenerator.getPromise( "ClipPlanes" ).set( renderParams.clipPlanes );
 
-        for( size_t i = 0; i < nUploadThreads; ++i )
+        visibleSetGenerator.execute();
+
+        sendHistogramFilter.getPromise( "RelativeViewport" ).set( renderParams.viewport );
+        sendHistogramFilter.getPromise( "Id" ).set( renderParams.frameInfo.frameId );
+
+        const livre::UniqueFutureMap portFutures( visibleSetGenerator.getPostconditions( ));
+        const auto& nodeIds = renderer.order( portFutures.get< NodeIds >( "VisibleNodes" ),
+                                              renderParams.frameInfo.frustum );
+
+        const uint32_t maxNodesPerPass =
+                renderParams.vrParams.getMaxGPUCacheMemoryMB( ) * LB_1MB /
+                _dataSource.getVolumeInfo().maximumBlockSize.product( ); //datatype compcount
+
+        const uint32_t numberOfPasses = std::ceil( (float)nodeIds.size() / (float)maxNodesPerPass );
+
+        std::unique_ptr< boost::progress_display > showProgress;
+
+        if( numberOfPasses > 1 )
         {
-            std::stringstream name;
-            name << "DataUploader" << i;
-            PipeFilter uploader =
-                    static_cast< const livre::PipeFilter& >(
-                        uploadPipeline.getExecutable( name.str( )));
-            uploader.connect( "CacheObjects", histogramFilter, "CacheObjects" );
+            std::cout << "Multipass rendering. Number of passes: " << numberOfPasses <<std::endl;
+            showProgress.reset( new boost::progress_display( numberOfPasses ));
         }
+
+        for( uint32_t i = 0; i < numberOfPasses; ++i )
+        {
+            uint32_t renderStages = RENDER_FRAME;
+
+            if( i == 0 )
+                renderStages |= RENDER_BEGIN;
+
+            if( i == numberOfPasses - 1u )
+                renderStages |= RENDER_END;
+
+            uint32_t startIndex = i * maxNodesPerPass;
+            uint32_t endIndex = ( i + 1 ) * maxNodesPerPass - 1;
+            endIndex = endIndex < nodeIds.size() ? endIndex : nodeIds.size() - 1;
+            const NodeIds nodesPerPass( nodeIds.begin() + startIndex,
+                                        nodeIds.begin() + endIndex + 1 );
+
+            createAndExecuteSyncPass( nodesPerPass, renderParams, sendHistogramFilter, renderer,
+                                      renderStages );
+            if( numberOfPasses > 1 )
+                ++(*showProgress);
+        }
+        sendHistogramFilter.schedule( _computeExecutor );
+
+        const UniqueFutureMap futures( visibleSetGenerator.getPostconditions( ));
+        availability.nAvailable = futures.get< NodeIds >( "VisibleNodes" ).size();
+        availability.nNotAvailable = 0;
     }
 
-    void createAsyncPipeline( PipeFilter& renderFilter,
+    void createAsyncPipeline( const RenderParams& renderParams,
                               PipeFilter& redrawFilter,
-                              PipeFilter& histogramFilter,
-                              Pipeline& renderPipeline,
-                              Pipeline& uploadPipeline ) const
+                              PipeFilter& sendHistogramFilter,
+                              Renderer& renderer,
+                              NodeAvailability& availability ) const
     {
+        PipeFilterT< HistogramFilter > histogramFilter( "HistogramFilter",
+                                                        _histogramCache,
+                                                        _dataCache,
+                                                        _dataSource );
+        histogramFilter.getPromise( "Frustum" ).set( renderParams.frameInfo.frustum );
+        histogramFilter.connect( "Histogram", sendHistogramFilter, "Histogram" );
+        histogramFilter.getPromise( "RelativeViewport" ).set( renderParams.viewport );
+        histogramFilter.getPromise( "DataSourceRange" ).set( renderParams.dataSourceRange );
+        sendHistogramFilter.getPromise( "RelativeViewport" ).set( renderParams.viewport );
+        sendHistogramFilter.getPromise( "Id" ).set( renderParams.frameInfo.frameId );
+
+        Pipeline renderPipeline;
+        Pipeline uploadPipeline;
+
+        PipeFilterT< RenderFilter > renderFilter( "RenderFilter", _dataSource, renderer );
+
         PipeFilter visibleSetGenerator =
                 renderPipeline.add< VisibleSetGeneratorFilter >(
                     "VisibleSetGenerator", _dataSource );
+
+        visibleSetGenerator.getPromise( "Frustum" ).set( renderParams.frameInfo.frustum );
+        visibleSetGenerator.getPromise( "Frame" ).set( renderParams.frameInfo.timeStep );
+        visibleSetGenerator.getPromise( "DataRange" ).set( renderParams.renderDataRange );
+        visibleSetGenerator.getPromise( "Params" ).set( renderParams.vrParams );
+        visibleSetGenerator.getPromise( "Viewport" ).set( renderParams.pixelViewPort );
+        visibleSetGenerator.getPromise( "ClipPlanes" ).set( renderParams.clipPlanes );
 
         PipeFilter renderingSetGenerator =
                 renderPipeline.add< RenderingSetGeneratorFilter >(
@@ -135,15 +204,29 @@ struct RenderPipeline::Impl
         createAndConnectUploaders( uploadPipeline,
                                    visibleSetGenerator,
                                    redrawFilter );
+
+        renderFilter.getPromise( "Frustum" ).set( renderParams.frameInfo.frustum );
+        renderFilter.getPromise( "Viewport" ).set( renderParams.pixelViewPort );
+        renderFilter.getPromise( "ClipPlanes" ).set( renderParams.clipPlanes );
+        renderFilter.getPromise( "RenderStages" ).set( RENDER_ALL );
+
+        redrawFilter.schedule( _renderExecutor );
+        renderPipeline.schedule( _renderExecutor );
+        uploadPipeline.schedule( _uploadExecutor );
+        sendHistogramFilter.schedule( _computeExecutor );
+        histogramFilter.schedule( _computeExecutor );
+        renderFilter.execute();
+
+        const UniqueFutureMap futures( renderingSetGenerator.getPostconditions( ));
+        availability = futures.get< NodeAvailability >( "NodeAvailability" );
     }
 
-    void render( const RenderParams& renderParams,
-                 PipeFilter& redrawFilter,
-                 PipeFilter& sendHistogramFilter,
-                 Renderer& renderer,
-                 NodeAvailability& availability ) const
+    void createAndExecuteSyncPass( NodeIds nodeIds,
+                                   const RenderParams& renderParams,
+                                   PipeFilter& sendHistogramFilter,
+                                   Renderer& renderer,
+                                   const uint32_t renderStages ) const
     {
-        PipeFilterT< RenderFilter > renderFilter( "RenderFilter", _dataSource, renderer );
         PipeFilterT< HistogramFilter > histogramFilter( "HistogramFilter",
                                                         _histogramCache,
                                                         _dataCache,
@@ -152,62 +235,55 @@ struct RenderPipeline::Impl
         histogramFilter.connect( "Histogram", sendHistogramFilter, "Histogram" );
         histogramFilter.getPromise( "RelativeViewport" ).set( renderParams.viewport );
         histogramFilter.getPromise( "DataSourceRange" ).set( renderParams.dataSourceRange );
-        sendHistogramFilter.getPromise( "RelativeViewport" ).set( renderParams.viewport );
-        sendHistogramFilter.getPromise( "Id" ).set( renderParams.frameInfo.frameId );
 
         Pipeline renderPipeline;
         Pipeline uploadPipeline;
 
-        const bool isSynhronousMode = renderParams.vrParams.getSynchronousMode();
-        if( isSynhronousMode )
-            createSyncPipeline( renderFilter,
-                                histogramFilter,
-                                renderPipeline,
-                                uploadPipeline );
-        else
-            createAsyncPipeline( renderFilter,
-                                 redrawFilter,
-                                 histogramFilter,
-                                 renderPipeline,
-                                 uploadPipeline );
-
-        PipeFilter visibleSetGenerator =
-                static_cast< const livre::PipeFilter& >(
-                    renderPipeline.getExecutable( "VisibleSetGenerator" ));
-
-        visibleSetGenerator.getPromise( "Frustum" ).set( renderParams.frameInfo.frustum );
-        visibleSetGenerator.getPromise( "Frame" ).set( renderParams.frameInfo.timeStep );
-        visibleSetGenerator.getPromise( "DataRange" ).set( renderParams.renderDataRange );
-        visibleSetGenerator.getPromise( "Params" ).set( renderParams.vrParams );
-        visibleSetGenerator.getPromise( "Viewport" ).set( renderParams.pixelViewPort );
-        visibleSetGenerator.getPromise( "ClipPlanes" ).set( renderParams.clipPlanes );
+        PipeFilterT< RenderFilter > renderFilter( "RenderFilter", _dataSource, renderer );
 
         renderFilter.getPromise( "Frustum" ).set( renderParams.frameInfo.frustum );
         renderFilter.getPromise( "Viewport" ).set( renderParams.pixelViewPort );
         renderFilter.getPromise( "ClipPlanes" ).set( renderParams.clipPlanes );
+        renderFilter.getPromise( "RenderStages" ).set( renderStages );
 
-        if( !isSynhronousMode )
-            redrawFilter.schedule( _renderExecutor );
+        for( size_t i = 0; i < nUploadThreads; ++i )
+        {
+            std::stringstream name;
+            name << "DataUploader" << i;
+            PipeFilter uploader =
+                    uploadPipeline.add< DataUploadFilter >( name.str(),
+                                                            i,
+                                                            nUploadThreads,
+                                                            _dataCache,
+                                                            _textureCache,
+                                                            _dataSource,
+                                                            _texturePool );
+
+            uploader.getPromise( "VisibleNodes" ).set( nodeIds );
+            uploader.getPromise( "Params" ).set( renderParams.vrParams );
+
+            uploader.connect( "CacheObjects", renderFilter, "CacheObjects" );
+            uploader.connect( "CacheObjects", histogramFilter, "CacheObjects" );
+        }
+
         renderPipeline.schedule( _renderExecutor );
         uploadPipeline.schedule( _uploadExecutor );
-        sendHistogramFilter.schedule( _computeExecutor );
         histogramFilter.schedule( _computeExecutor );
         renderFilter.execute();
+    }
 
-        if( isSynhronousMode )
-        {
-            const UniqueFutureMap futures( visibleSetGenerator.getPostconditions( ));
-            availability.nAvailable = futures.get< NodeIds >( "VisibleNodes" ).size();
-            availability.nNotAvailable = 0;
-        }
+    void render( const RenderParams& renderParams,
+                 PipeFilter& redrawFilter,
+                 PipeFilter& sendHistogramFilter,
+                 Renderer& renderer,
+                 NodeAvailability& availability ) const
+    {
+        if( renderParams.vrParams.getSynchronousMode( ))
+            createSyncPipeline( renderParams, sendHistogramFilter, renderer, availability );
         else
         {
-            const PipeFilter renderingSetGenerator =
-                    static_cast< const livre::PipeFilter& >(
-                        renderPipeline.getExecutable( "RenderingSetGenerator" ));
-
-            const UniqueFutureMap futures( renderingSetGenerator.getPostconditions( ));
-            availability = futures.get< NodeAvailability >( "NodeAvailability" );
+            createAsyncPipeline( renderParams, redrawFilter, sendHistogramFilter, renderer,
+                                 availability );
         }
     }
 
