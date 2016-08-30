@@ -1,10 +1,12 @@
 /*
- * Copyright (c) 2007-2011, Maxim Makhinya  <maxmah@gmail.com>
-                 2013     , Ahmet Bilgili <ahmet.bilgili@epfl.ch>  Modified for single-pass raycasting
-                 2014     , Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
+ * Copyright (c) 2007-2016, Maxim Makhinya  <maxmah@gmail.com>
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  */
 
 // input variables to function
+
+#version 120
 #extension GL_ARB_texture_rectangle : enable
 
 #define EARLY_EXIT 0.999

@@ -20,7 +20,7 @@
 #include <livre/eq/FrameData.h>
 #include <livre/eq/render/RayCastRenderer.h>
 #include <livre/eq/render/shaders/fragRayCastGL2.glsl.h>
-#include <livre/eq/render/shaders/vertRayCast.glsl.h>
+#include <livre/eq/render/shaders/vertRayCastGL2.glsl.h>
 #include <livre/eq/settings/RenderSettings.h>
 
 #include <livre/lib/configuration/VolumeRendererParameters.h>
@@ -47,7 +47,7 @@ struct DistanceOperator
     explicit DistanceOperator( const DataSource& dataSource, const Frustum& frustum )
         : _frustum( frustum )
         , _dataSource( dataSource )
-    { }
+    {}
 
     bool operator()( const NodeId& rb1,
                      const NodeId& rb2 )
@@ -100,9 +100,8 @@ struct RayCastRenderer::Impl
         TransferFunction1D transferFunction;
         initTransferFunction( transferFunction );
 
-        // TODO: Add the shaders from resource directory
-        const int error = _shaders.loadShaders( ShaderData( vertRayCast_glsl,
-                                                            fragRayCastGL2_glsl ));
+        const int error = _shaders.loadShaders(
+            ShaderData( vertRayCastGL2_glsl, fragRayCastGL2_glsl ));
         if( error != GL_NO_ERROR )
             LBTHROW( std::runtime_error( "Can't load glsl shaders: " +
                                          eq::glError( error ) +
