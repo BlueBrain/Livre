@@ -40,6 +40,12 @@
 
 namespace livre
 {
+namespace
+{
+const uint32_t SH_UINT  = 0u;
+const uint32_t SH_INT   = 1u;
+const uint32_t SH_FLOAT = 2u;
+}
 
 // Sort helper function for sorting the textures with their distances to viewpoint
 struct DistanceOperator
@@ -160,6 +166,7 @@ struct RayCastRenderer::Impl
     }
 
     void onFrameStart( const Frustum& frustum,
+                       const ClipPlanes& planes,
                        const NodeIds& renderBricks )
     {
         if( _nSamplesPerRay == 0 ) // Find sampling rate
@@ -236,6 +243,58 @@ struct RayCastRenderer::Impl
 
         tParamNameGL = glGetUniformLocation( program, "nearPlaneDist" );
         glUniform1f( tParamNameGL, frustum.nearPlane( ));
+
+        const auto& clipPlanes = planes.getPlanes();
+        const size_t nPlanes = clipPlanes.size();
+        tParamNameGL = glGetUniformLocation( program, "nClipPlanes" );
+        glUniform1i( tParamNameGL, nPlanes );
+
+        switch( _dataSource.getVolumeInfo().dataType )
+        {
+            case DT_UINT8:
+            case DT_UINT16:
+            case DT_UINT32:
+                tParamNameGL = glGetUniformLocation( program, "datatype" );
+                glUniform1ui( tParamNameGL, SH_UINT );
+                break;
+            case DT_FLOAT:
+                tParamNameGL = glGetUniformLocation( program, "datatype" );
+                glUniform1ui( tParamNameGL, SH_FLOAT );
+                break;
+            case DT_INT8:
+            case DT_INT16:
+            case DT_INT32:
+                tParamNameGL = glGetUniformLocation( program, "datatype" );
+                glUniform1ui( tParamNameGL, SH_INT );
+                break;
+            case DT_UNDEFINED:
+            default:
+                LBTHROW( std::runtime_error( "Unsupported type in the shader." ));
+                break;
+        }
+
+        // This is temporary. In the future it will be given by the gui.
+        Vector2f dataSourceRange( 0.0f, 255.0f );
+        tParamNameGL = glGetUniformLocation( program, "dataSourceRange" );
+        glUniform2fv( tParamNameGL, 1, dataSourceRange.array );
+
+        if( nPlanes > 0 )
+        {
+            Floats planesData;
+            planesData.reserve( 4 * nPlanes );
+            for( size_t i = 0; i < nPlanes; ++i )
+            {
+                const ::lexis::render::Plane& plane = clipPlanes[ i ];
+                const float* normal = plane.getNormal();
+                planesData.push_back( normal[ 0 ]);
+                planesData.push_back( normal[ 1 ]);
+                planesData.push_back( normal[ 2 ]);
+                planesData.push_back( plane.getD( ));
+            }
+
+            tParamNameGL = glGetUniformLocation( program, "clipPlanes" );
+            glUniform4fv( tParamNameGL, nPlanes, planesData.data( ));
+        }
 
         // Disable shader
         glUseProgram( 0 );
@@ -400,9 +459,12 @@ struct RayCastRenderer::Impl
         glUniform1i( tParamNameGL, 1 ); //f-shader
 
         glActiveTexture( GL_TEXTURE0 );
-        texState.bind( );
-        tParamNameGL = glGetUniformLocation( program, "volumeTex" );
-        glUniform1i( tParamNameGL, 0 ); //f-shader
+        texState.bind();
+        tParamNameGL = glGetUniformLocation( program, "volumeTexUint8" );
+        glUniform1i( tParamNameGL, 0 );
+
+        tParamNameGL = glGetUniformLocation( program, "volumeTexFloat" );
+        glUniform1i( tParamNameGL, 0 );
 
         const uint32_t refLevel = lodNode.getRefLevel();
 
@@ -473,11 +535,11 @@ NodeIds RayCastRenderer::_order( const NodeIds& bricks,
 }
 
 void RayCastRenderer::_onFrameStart(  const Frustum& frustum,
-                                      const ClipPlanes&,
+                                      const ClipPlanes& planes,
                                       const PixelViewport&,
                                       const NodeIds& renderBricks )
 {
-    _impl->onFrameStart( frustum, renderBricks );
+    _impl->onFrameStart( frustum, planes, renderBricks );
 }
 
 void RayCastRenderer::_onFrameRender( const Frustum&,
