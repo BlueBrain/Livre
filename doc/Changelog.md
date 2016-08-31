@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # master {#master}
 
+* [#333](https://github.com/BlueBrain/Livre/pull/333):
+  Add animation-fps parameter to limit the animation frame rate
 * [#318](https://github.com/BlueBrain/Livre/pull/318):
   * Added support for NRRD and Raw volumes
 * [#317](https://github.com/BlueBrain/Livre/pull/317):

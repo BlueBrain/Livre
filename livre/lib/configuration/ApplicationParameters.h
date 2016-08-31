@@ -40,6 +40,7 @@ struct ApplicationParameters : public Parameters
     Vector2ui frames; //!< Range of frames to render: [start end).
     uint32_t maxFrames; //!< Max number of frames to render.
     int32_t animation; //!< animation forward/backward speed
+    uint32_t animationFPS; //!< animation frames per second
     bool isResident; //!< Is the main app resident.
     std::string dataFileName; //!< Data file name.
     std::string transferFunction; //!< Path to transfer function file
