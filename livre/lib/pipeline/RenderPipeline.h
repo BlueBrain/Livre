@@ -20,11 +20,35 @@
 #ifndef _RenderPipeline_h_
 #define _RenderPipeline_h_
 
+#include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/lib/types.h>
+
+#include <livre/core/render/ClipPlanes.h>
+#include <livre/core/render/FrameInfo.h>
 #include <livre/core/mathTypes.h>
 
 namespace livre
 {
+
+/** The Caches struct */
+struct Caches
+{
+    Cache& dataCache;
+    Cache& textureCache;
+    Cache& histogramCache;
+};
+
+/** Parameters for rendering */
+struct RenderParams
+{
+    VolumeRendererParameters vrParams;
+    FrameInfo frameInfo;
+    Range renderDataRange;
+    Vector2f dataSourceRange;
+    PixelViewport pixelViewPort;
+    Viewport viewport;
+    ClipPlanes clipPlanes;
+};
 
 /**
  * RenderPipeline generates and executes the rendering pipeline every frame
@@ -36,17 +60,13 @@ public:
 
     /**
      * Constructor
+     * @param caches the data, texture and histogram cache
      * @param dataSource the data source
-     * @param dataCache the data cache
-     * @param textureCache the texture cache
-     * @param histogramCache the histogram cache
      * @param texturePool the pool for textures
      * @param glContext the gl context that will be shared
      */
     RenderPipeline( DataSource& dataSource,
-                    Cache& dataCache,
-                    Cache& textureCache,
-                    Cache& histogramCache,
+                    Caches& caches,
                     TexturePool& texturePool,
                     ConstGLContextPtr glContext );
 
@@ -54,25 +74,15 @@ public:
 
     /**
      * Renders a frame using the given frustum and view
-     * @param vrParams rendering parameters
-     * @param frameInfo frustum and frame id
-     * @param dataRange range of the data for sort-last rendering
-     * @param dataSourceRange Value range of the data source
-     * @param pixelViewPort the view port
+     * @param renderParams parameters for rendering
      * @param redrawFilter executed on data update
      * @param sendHistogramFilter executed on histogram computation
-     * @param clipPlanes clipping planes
      * @param renderer the rendering algorithm
      * @param availability the number of available and not available nodes are written
      */
-    void render( const VolumeRendererParameters& vrParams,
-                 const FrameInfo& frameInfo,
-                 const Range& dataRange,
-                 const PixelViewport& pixelViewPort,
-                 const Viewport& viewport,
-                 const PipeFilter& redrawFilter,
-                 const PipeFilter& sendHistogramFilter,
-                 const ClipPlanes& clipPlanes,
+    void render( const RenderParams& renderParams,
+                 PipeFilter redrawFilter,
+                 PipeFilter sendHistogramFilter,
                  Renderer& renderer,
                  NodeAvailability& avaibility ) const;
 private:

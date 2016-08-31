@@ -34,7 +34,7 @@ class Histogram : public co::Distributable< ::lexis::render::Histogram >
 {
 public:
     /**
-     * Constructor. Initializes histogram with 0 values
+     * Constructor. The minimum value is set to +inf and maximum value is set to -inf
      */
     LIVRECORE_API Histogram();
 
@@ -82,12 +82,23 @@ public:
     LIVRECORE_API uint64_t getSum() const;
 
     /**
+     * @return the data range of the histogram
+     */
+    LIVRECORE_API Vector2f getRange() const;
+
+    /**
      * Computes the ratio of the value at a given index.
      * @param index the index of the histogram value
      * @return the ratio at given index. If histogram is empty or index exceeds
      * the histogram bin count, returns 0.0.
      */
     LIVRECORE_API double getRatio( size_t index ) const;
+
+    /**
+      * Sets the number of bins to newSize and clears the histogram
+      * @param newSize
+      */
+    LIVRECORE_API void resize( size_t newSize );
 };
 
 /** Outputs the histogram information */

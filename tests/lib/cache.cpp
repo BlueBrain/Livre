@@ -108,14 +108,15 @@ BOOST_AUTO_TEST_CASE( testCache )
     livre::ConstCacheObjectPtr histCacheObject =
             histogramCache.load< livre::HistogramObject >( firstChildNodeId.getId(),
                                                            dataCache,
-                                                           source );
+                                                           source,
+                                                           livre::Vector2f( 0.0f, 255.f));
     BOOST_CHECK( histCacheObject );
 
     livre::ConstHistogramObjectPtr histObject =
             histogramCache.get< livre::HistogramObject >( firstChildNodeId.getId( ));
 
     const livre::Histogram& histogram = histObject->getHistogram();
-    const uint64_t* bins = histogram.getBins();
+    const uint64_t* bins = histogram.getBins().data();
 
     BOOST_CHECK_EQUAL( histogram.getMinIndex(), 0 );
     BOOST_CHECK_EQUAL( histogram.getMaxIndex(), 17 );
@@ -128,7 +129,7 @@ BOOST_AUTO_TEST_CASE( testCache )
     BOOST_CHECK_EQUAL( hist.getSum(), 0 );
     hist = histogram;
     hist += histogram;
-    const uint64_t* binAcc = hist.getBins();
+    const uint64_t* binAcc = hist.getBins().data();
     BOOST_CHECK_EQUAL( binAcc[ size_t( hist.getMaxIndex( )) ], 1u << 25 );
     BOOST_CHECK_EQUAL( hist.getSum(), 1u << 25 );
 }

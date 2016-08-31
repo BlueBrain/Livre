@@ -117,7 +117,7 @@ void ColorMapWidget::mouseMoveEvent( QMouseEvent* mouseEvent )
     if( _shadeType != ALPHA_SHADE || _histogram.isEmpty( ))
         return;
 
-    const size_t index = (float)_histogram.getBinsSize() *
+    const size_t index = (float)_histogram.getBins().size() *
                          (float)mouseEvent->pos().x() / (float)width();
     emit histIndexChanged( index, _histogram.getRatio( index ));
 }
@@ -209,8 +209,8 @@ void ColorMapWidget::_drawHistogram()
     const int xWidth = viewPort.width();
     const int xHeight = viewPort.height();
 
-    const size_t nbBins = _histogram.getBinsSize();
-    const uint64_t* bins = _histogram.getBins();
+    const size_t nbBins = _histogram.getBins().size();
+    const uint64_t* bins = _histogram.getBins().data();
     // Find maximum height in bins unit
     const uint64_t heightMax = bins[ _histogram.getMaxIndex( )];
     if( heightMax == 0 )

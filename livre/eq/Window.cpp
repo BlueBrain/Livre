@@ -74,10 +74,9 @@ public:
 
         _texturePool.reset( new TexturePool( node->getDataSource( )));
         _textureCache.reset( new CacheT< TextureObject >( "TextureCache", maxGpuMemory * LB_1MB ));
+        Caches caches = { node->getDataCache(), *_textureCache, node->getHistogramCache() };
         _renderPipeline.reset( new RenderPipeline( node->getDataSource(),
-                                                   node->getDataCache(),
-                                                   *_textureCache,
-                                                   node->getHistogramCache(),
+                                                   caches,
                                                    *_texturePool,
                                                    _glContext ));
     }
@@ -96,9 +95,9 @@ public:
 
     Window* const _window;
     GLContextPtr _glContext;
+    std::unique_ptr< TexturePool > _texturePool;
     std::unique_ptr< Cache > _textureCache;
     std::unique_ptr< RenderPipeline > _renderPipeline;
-    std::unique_ptr< TexturePool > _texturePool;
 };
 
 Window::Window( eq::Pipe *parent )

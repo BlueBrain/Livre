@@ -137,6 +137,7 @@ public:
      * @return The volume settings.
      */
     VolumeSettings& getVolumeSettings();
+    const VolumeSettings& getVolumeSettings() const;
 
     /**
      * @return The volume rendering parameters.

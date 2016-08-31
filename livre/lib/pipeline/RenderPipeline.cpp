@@ -23,15 +23,12 @@
 #include <livre/lib/pipeline/DataUploadFilter.h>
 #include <livre/lib/pipeline/RenderFilter.h>
 #include <livre/lib/pipeline/HistogramFilter.h>
-#include <livre/lib/configuration/VolumeRendererParameters.h>
 
 #include <livre/core/cache/Cache.h>
 #include <livre/core/pipeline/SimpleExecutor.h>
 #include <livre/core/pipeline/Pipeline.h>
 
 #include <livre/core/render/TexturePool.h>
-#include <livre/core/render/FrameInfo.h>
-#include <livre/core/render/ClipPlanes.h>
 
 namespace livre
 {
@@ -46,15 +43,13 @@ const size_t nComputeThreads = 2;
 struct RenderPipeline::Impl
 {
     Impl( DataSource& dataSource,
-          Cache& dataCache,
-          Cache& textureCache,
-          Cache& histogramCache,
+          Caches& caches,
           TexturePool& texturePool,
           ConstGLContextPtr glContext )
         : _dataSource( dataSource )
-        , _dataCache( dataCache )
-        , _textureCache( textureCache )
-        , _histogramCache( histogramCache )
+        , _dataCache( caches.dataCache )
+        , _textureCache( caches.textureCache )
+        , _histogramCache( caches.histogramCache )
         , _texturePool( texturePool )
         , _renderExecutor( nRenderThreads, glContext )
         , _computeExecutor( nComputeThreads, glContext )
@@ -142,14 +137,9 @@ struct RenderPipeline::Impl
                                    redrawFilter );
     }
 
-    void render( const VolumeRendererParameters& vrParams,
-                 const FrameInfo& frameInfo,
-                 const Range& dataRange,
-                 const PixelViewport& pixelViewPort,
-                 const Viewport& viewport,
-                 PipeFilter redrawFilter,
-                 PipeFilter sendHistogramFilter,
-                 const ClipPlanes& clipPlanes,
+    void render( const RenderParams& renderParams,
+                 PipeFilter& redrawFilter,
+                 PipeFilter& sendHistogramFilter,
                  Renderer& renderer,
                  NodeAvailability& availability ) const
     {
@@ -158,16 +148,18 @@ struct RenderPipeline::Impl
                                                         _histogramCache,
                                                         _dataCache,
                                                         _dataSource );
-        histogramFilter.getPromise( "Frustum" ).set( frameInfo.frustum );
+        histogramFilter.getPromise( "Frustum" ).set( renderParams.frameInfo.frustum );
         histogramFilter.connect( "Histogram", sendHistogramFilter, "Histogram" );
-        histogramFilter.getPromise( "RelativeViewport" ).set( viewport );
-        sendHistogramFilter.getPromise( "RelativeViewport" ).set( viewport );
-        sendHistogramFilter.getPromise( "Id" ).set( frameInfo.frameId );
+        histogramFilter.getPromise( "RelativeViewport" ).set( renderParams.viewport );
+        histogramFilter.getPromise( "DataSourceRange" ).set( renderParams.dataSourceRange );
+        sendHistogramFilter.getPromise( "RelativeViewport" ).set( renderParams.viewport );
+        sendHistogramFilter.getPromise( "Id" ).set( renderParams.frameInfo.frameId );
 
         Pipeline renderPipeline;
         Pipeline uploadPipeline;
 
-        if( vrParams.getSynchronousMode( ))
+        const bool isSynhronousMode = renderParams.vrParams.getSynchronousMode();
+        if( isSynhronousMode )
             createSyncPipeline( renderFilter,
                                 histogramFilter,
                                 renderPipeline,
@@ -183,18 +175,18 @@ struct RenderPipeline::Impl
                 static_cast< const livre::PipeFilter& >(
                     renderPipeline.getExecutable( "VisibleSetGenerator" ));
 
-        visibleSetGenerator.getPromise( "Frustum" ).set( frameInfo.frustum );
-        visibleSetGenerator.getPromise( "Frame" ).set( frameInfo.timeStep );
-        visibleSetGenerator.getPromise( "DataRange" ).set( dataRange );
-        visibleSetGenerator.getPromise( "Params" ).set( vrParams );
-        visibleSetGenerator.getPromise( "Viewport" ).set( pixelViewPort );
-        visibleSetGenerator.getPromise( "ClipPlanes" ).set( clipPlanes );
+        visibleSetGenerator.getPromise( "Frustum" ).set( renderParams.frameInfo.frustum );
+        visibleSetGenerator.getPromise( "Frame" ).set( renderParams.frameInfo.timeStep );
+        visibleSetGenerator.getPromise( "DataRange" ).set( renderParams.renderDataRange );
+        visibleSetGenerator.getPromise( "Params" ).set( renderParams.vrParams );
+        visibleSetGenerator.getPromise( "Viewport" ).set( renderParams.pixelViewPort );
+        visibleSetGenerator.getPromise( "ClipPlanes" ).set( renderParams.clipPlanes );
 
-        renderFilter.getPromise( "Frustum" ).set( frameInfo.frustum );
-        renderFilter.getPromise( "Viewport" ).set( pixelViewPort );
-        renderFilter.getPromise( "ClipPlanes" ).set( clipPlanes );
+        renderFilter.getPromise( "Frustum" ).set( renderParams.frameInfo.frustum );
+        renderFilter.getPromise( "Viewport" ).set( renderParams.pixelViewPort );
+        renderFilter.getPromise( "ClipPlanes" ).set( renderParams.clipPlanes );
 
-        if( !vrParams.getSynchronousMode( ))
+        if( !isSynhronousMode )
             redrawFilter.schedule( _renderExecutor );
         renderPipeline.schedule( _renderExecutor );
         uploadPipeline.schedule( _uploadExecutor );
@@ -202,7 +194,7 @@ struct RenderPipeline::Impl
         histogramFilter.schedule( _computeExecutor );
         renderFilter.execute();
 
-        if( vrParams.getSynchronousMode( ))
+        if( isSynhronousMode )
         {
             const UniqueFutureMap futures( visibleSetGenerator.getPostconditions( ));
             availability.nAvailable = futures.get< NodeIds >( "VisibleNodes" ).size();
@@ -230,15 +222,11 @@ struct RenderPipeline::Impl
 };
 
 RenderPipeline::RenderPipeline( DataSource& dataSource,
-                                Cache& dataCache,
-                                Cache& textureCache,
-                                Cache& histogramCache,
+                                Caches& caches,
                                 TexturePool& texturePool,
                                 ConstGLContextPtr glContext )
     : _impl( new RenderPipeline::Impl( dataSource,
-                                       dataCache,
-                                       textureCache,
-                                       histogramCache,
+                                       caches,
                                        texturePool,
                                        glContext ))
 {}
@@ -246,25 +234,15 @@ RenderPipeline::RenderPipeline( DataSource& dataSource,
 RenderPipeline::~RenderPipeline()
 {}
 
-void RenderPipeline::render( const VolumeRendererParameters& vrParams,
-                             const FrameInfo& frameInfo,
-                             const Range& dataRange,
-                             const PixelViewport& pixelViewPort,
-                             const Viewport& viewport,
-                             const PipeFilter& redrawFilter,
-                             const PipeFilter& sendHistogramFilter,
-                             const ClipPlanes& clipPlanes,
+void RenderPipeline::render( const RenderParams& renderParams,
+                             PipeFilter redrawFilter,
+                             PipeFilter sendHistogramFilter,
                              Renderer& renderer,
                              NodeAvailability& avaibility ) const
 {
-    _impl->render( vrParams,
-                   frameInfo,
-                   dataRange,
-                   pixelViewPort,
-                   viewport,
+    _impl->render( renderParams,
                    redrawFilter,
                    sendHistogramFilter,
-                   clipPlanes,
                    renderer,
                    avaibility );
 }

@@ -80,6 +80,7 @@ struct HistogramFilter::Impl
         const auto& frustums = input.get< Frustum >( "Frustum" );
         const auto& viewports = input.get< Viewport >( "RelativeViewport" );
 
+        auto dataSourceRange = input.get< Vector2f >( "DataSourceRange" ).front();
         const auto& frustum = frustums.front();
         const auto& viewport = viewports.front();
 
@@ -88,16 +89,28 @@ struct HistogramFilter::Impl
             for( const auto& cacheObject: cacheObjects.get< ConstCacheObjects >( ))
             {
                 const CacheId& cacheId = cacheObject->getId();
-                ConstCacheObjectPtr histCacheObject =
+
+                // Hist cache object expands the data source range if data has larger values
+                ConstHistogramObjectPtr histCacheObject =
                         _histogramCache.load< HistogramObject >( cacheId,
                                                                  _dataCache,
-                                                                 _dataSource );
+                                                                 _dataSource,
+                                                                 dataSourceRange );
                 if( !histCacheObject )
                     continue;
 
-                ConstHistogramObjectPtr histogramObj =
-                        std::static_pointer_cast< const HistogramObject >(
-                            histCacheObject );
+                const Vector2f& currentRange = histCacheObject->getHistogram().getRange();
+                if( currentRange[ 0 ] < dataSourceRange[ 0 ] )
+                    dataSourceRange[ 0 ] = currentRange[ 0 ];
+                histogramAccumulated.setMin(  dataSourceRange[ 0 ] );
+
+                if( currentRange[ 1 ] > dataSourceRange[ 1 ] )
+                    dataSourceRange[ 1 ] = currentRange[ 1 ];
+                histogramAccumulated.setMax( dataSourceRange[ 1 ] );
+
+                const size_t currentBinCount = histCacheObject->getHistogram().getBins().size();
+                if( histogramAccumulated.getBins().empty( ))
+                    histogramAccumulated.resize( currentBinCount );
 
                 // When a frame is rendered in multi-channel, multi-node, etc
                 // config, some nodes are rendered twice in sort-first renderings
@@ -105,9 +118,19 @@ struct HistogramFilter::Impl
                 // this frustum (because it can only be in one tile at a time). For viewports
                 // on the border of the absolute viewport, the frustum is virtually extended
                 // to infinity on the boundary.
-                const LODNode& lodNode = _dataSource.getNode( NodeId( cacheId ));
-                if( isCenterInViewport( frustum, lodNode.getWorldBox( ), viewport))
-                    histogramAccumulated += histogramObj->getHistogram();
+                try
+                {
+                    const LODNode& lodNode = _dataSource.getNode( NodeId( cacheId ));
+                    if( isCenterInViewport( frustum, lodNode.getWorldBox(), viewport))
+                        histogramAccumulated += histCacheObject->getHistogram();
+                }
+                catch( const std::runtime_error& )
+                {
+                    // Only compatible histograms can be added.( i.e same data range and number of
+                    // bins.) Until data range converges to the full data range combined from other
+                    // rendering clients, the cache objects are purged from the cache.
+                    _histogramCache.purge( cacheId );
+                }
             }
 
         output.set( "Histogram", histogramAccumulated );
