@@ -131,6 +131,7 @@ private:
     bool _registerFrameData();
     bool _deregisterFrameData();
     void _initEvents();
+    bool _keepCurrentFrame( uint32_t fps ) const;
 
     class Impl;
     std::unique_ptr< Impl > _impl;

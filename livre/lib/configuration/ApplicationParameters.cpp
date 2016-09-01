@@ -38,6 +38,7 @@ namespace livre
 {
 
 const std::string ANIMATION_PARAM = "animation";
+const std::string ANIMATION_FPS_PARAM = "animation-fps";
 const std::string ANIMATION_FOLLOW_DATA_PARAM = "animation-follow-data";
 const std::string FRAMES_PARAM = "frames";
 const std::string NUMFRAMES_PARAM = "num-frames";
@@ -54,10 +55,13 @@ ApplicationParameters::ApplicationParameters()
     , frames( FULL_FRAME_RANGE )
     , maxFrames( std::numeric_limits< uint32_t >::max( ))
     , animation( 0 )
+    , animationFPS( 0 )
     , isResident( false )
 {
     configuration_.addDescription( configGroupName_, ANIMATION_PARAM,
                                    "Enable animation mode (optional frame delta for animation speed, use --animation=-<int> for reverse animation)", animation, 1 );
+    configuration_.addDescription( configGroupName_, ANIMATION_FPS_PARAM,
+                                   "Animation frames per second. By default (value of 0), it will request a new frame as soon as the previous one is done", animationFPS );
     configuration_.addDescription( configGroupName_, ANIMATION_FOLLOW_DATA_PARAM,
                                    "Enable animation and follow volume data stream (overrides --animation=value)", false );
     configuration_.addDescription( configGroupName_, FRAMES_PARAM,
@@ -86,6 +90,7 @@ ApplicationParameters& ApplicationParameters::operator = (
     frames = parameters.frames;
     maxFrames = parameters.maxFrames;
     animation = parameters.animation;
+    animationFPS = parameters.animationFPS;
     isResident = parameters.isResident;
     dataFileName = parameters.dataFileName;
     transferFunction = parameters.transferFunction;
@@ -96,6 +101,7 @@ ApplicationParameters& ApplicationParameters::operator = (
 void ApplicationParameters::initialize_()
 {
     animation = configuration_.getValue( ANIMATION_PARAM, animation );
+    animationFPS = configuration_.getValue( ANIMATION_FPS_PARAM, animationFPS );
     frames = configuration_.getValue( FRAMES_PARAM, frames );
     maxFrames = configuration_.getValue( NUMFRAMES_PARAM, maxFrames );
     cameraPosition = configuration_.getValue( CAMERAPOS_PARAM, cameraPosition );

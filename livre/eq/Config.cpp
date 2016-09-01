@@ -101,6 +101,7 @@ public:
         , redraw( true )
         , dataFrameRange( INVALID_FRAME_RANGE )
         , dataSourceRange( 0.0f, 255.0f ) // Default range for uint8 data sources
+        , frameStart( config->getTime( ))
     {}
 
     void gatherHistogram( const Histogram& histogram, const float area, const uint32_t currentId )
@@ -192,6 +193,7 @@ public:
     Vector2ui dataFrameRange;
     ViewHistogramQueue histogramQueue;
     Vector2f dataSourceRange;
+    int64_t frameStart;
 };
 
 Config::Config( eq::ServerPtr parent )
@@ -343,9 +345,13 @@ bool Config::frame()
     // reset data and advance current frame
     frameSettings.setGrabFrame( false );
 
-    if( !keepToLatest )
+    if( !keepToLatest && !_keepCurrentFrame( params.animationFPS ))
+    {
         frameSettings.setFrameNumber( frameUtils.getNext( current,
                                                           params.animation ));
+        // reset starting time for new frame
+         _impl->frameStart = getTime();
+    }
     _impl->redraw = false;
 
 #ifdef LIVRE_USE_ZEROEQ
@@ -546,6 +552,22 @@ bool Config::handleEvent( eq::EventICommand command )
 
     _impl->redraw |= eq::Config::handleEvent( command );
     return _impl->redraw;
+}
+
+bool Config::_keepCurrentFrame( const uint32_t fps ) const
+{
+    if( fps == 0 )
+        return false;
+
+    const double desiredTime = 1.0 / fps;
+    const int64_t end = getTime();
+
+    // If the frame duration is shorter than the desired frame time then the
+    // current frame should be kept until the duration matches (or exceeds) the
+    // expected. Otherwise, the frame number should be normally increased.
+    // This means that no frames are artificially skipped due to the fps limit
+    const double frameDuration = ( end - _impl->frameStart ) / 1e3;
+    return frameDuration < desiredTime;
 }
 
 bool Config::_registerFrameData()
