@@ -26,9 +26,7 @@ MemoryUnit::MemoryUnit()
 {}
 
 MemoryUnit::~MemoryUnit()
-{
-    // release(); is virtual and can't be called from dtor
-}
+{}
 
 ConstMemoryUnit::ConstMemoryUnit( const uint8_t* ptr, const size_t size )
     : ptr_( ptr ), size_( size )
@@ -40,14 +38,10 @@ size_t ConstMemoryUnit::getMemSize() const
     return size_;
 }
 
-const uint8_t* ConstMemoryUnit::getData_() const
+const uint8_t* ConstMemoryUnit::_getData() const
 {
     return ptr_;
 }
-
-
-AllocMemoryUnit::AllocMemoryUnit()
-{}
 
 size_t AllocMemoryUnit::getMemSize() const
 {
@@ -59,23 +53,23 @@ size_t AllocMemoryUnit::getAllocSize() const
     return _rawData.getMaxSize();
 }
 
-void AllocMemoryUnit::alloc( const size_t nBytes )
+AllocMemoryUnit::~AllocMemoryUnit()
+{
+    _rawData.clear();
+}
+
+void AllocMemoryUnit::_alloc( const size_t nBytes )
 {
     LB_TS_THREAD( thread_ );
     _rawData.reset( nBytes );
 }
 
-void AllocMemoryUnit::release()
-{
-    _rawData.clear();
-}
-
-const uint8_t* AllocMemoryUnit::getData_() const
+const uint8_t* AllocMemoryUnit::_getData() const
 {
     return _rawData.getData();
 }
 
-uint8_t* AllocMemoryUnit::getData_()
+uint8_t* AllocMemoryUnit::_getData()
 {
     return _rawData.getData();
 }

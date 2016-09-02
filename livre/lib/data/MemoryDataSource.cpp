@@ -47,8 +47,7 @@ MemoryUnitPtr computeData( const LODNode& node,
     const T value =  ( id[0] ^ id[1] ^ id[2] ^ id[3] ) + 16 +
         127 * std::sin( ((float)node.getNodeId().getTimeStep() + 1) / 200.f);
 
-    AllocMemoryUnitPtr memoryUnit( new AllocMemoryUnit );
-    memoryUnit->alloc( dataSize );
+    AllocMemoryUnitPtr memoryUnit( new AllocMemoryUnit( dataSize ));
     T* dstData = memoryUnit->getData< T >();
     for( size_t i = 0; i < blockSize.product(); ++i )
     {

@@ -140,8 +140,7 @@ struct RayCastRenderer::Impl
         glDeleteBuffers( 1, &_quadVBO );
     }
 
-    NodeIds order( const NodeIds& bricks,
-                   const Frustum& frustum ) const
+    NodeIds order( const NodeIds& bricks, const Frustum& frustum ) const
     {
         NodeIds rbs = bricks;
         DistanceOperator distanceOp( _dataSource, frustum );
@@ -184,16 +183,17 @@ struct RayCastRenderer::Impl
     {
         const int width = viewport[ 2 ] - viewport[ 0 ];
         const int height = viewport[ 3 ] - viewport[ 1 ];
-        if( _renderTexture.getWidth() != width || _renderTexture.getHeight() != height )
-        {
-            _renderTexture.flush();
-            _renderTexture.init( GL_RGBA32F, width, height );
-            const Floats emptyBuffer( _renderTexture.getWidth() * _renderTexture.getHeight() * 4,
-                                      0.0 );
-            _renderTexture.upload( _renderTexture.getWidth(),
-                                   _renderTexture.getHeight(),
-                                   emptyBuffer.data( ));
-        }
+
+        if( _renderTexture.getWidth() == width && _renderTexture.getHeight() == height )
+            return;
+
+        _renderTexture.flush();
+        _renderTexture.init( GL_RGBA32F, width, height );
+        const Floats emptyBuffer( _renderTexture.getWidth() * _renderTexture.getHeight() * 4,
+                                  0.0 );
+        _renderTexture.upload( _renderTexture.getWidth(),
+                               _renderTexture.getHeight(),
+                               emptyBuffer.data( ));
     }
 
     void onFrameStart( const Frustum& frustum,
@@ -224,7 +224,6 @@ struct RayCastRenderer::Impl
         glDisable( GL_BLEND );
         glGetIntegerv( GL_DRAW_BUFFER, &_drawBuffer );
         glDrawBuffer( GL_NONE );
-
 
         GLSLShaders::Handle program = _rayCastShaders.getProgram( );
         LBASSERT( program );
@@ -283,29 +282,29 @@ struct RayCastRenderer::Impl
         tParamNameGL = glGetUniformLocation( program, "nClipPlanes" );
         glUniform1i( tParamNameGL, nPlanes );
 
+        tParamNameGL = glGetUniformLocation( program, "datatype" );
+        uint32_t dataType = -1;
         switch( _dataSource.getVolumeInfo().dataType )
         {
             case DT_UINT8:
             case DT_UINT16:
             case DT_UINT32:
-                tParamNameGL = glGetUniformLocation( program, "datatype" );
-                glUniform1ui( tParamNameGL, SH_UINT );
+                dataType = SH_UINT;
                 break;
             case DT_FLOAT:
-                tParamNameGL = glGetUniformLocation( program, "datatype" );
-                glUniform1ui( tParamNameGL, SH_FLOAT );
+                dataType = SH_FLOAT;
                 break;
             case DT_INT8:
             case DT_INT16:
             case DT_INT32:
-                tParamNameGL = glGetUniformLocation( program, "datatype" );
-                glUniform1ui( tParamNameGL, SH_INT );
+                dataType = SH_INT;
                 break;
             case DT_UNDEFINED:
             default:
                 LBTHROW( std::runtime_error( "Unsupported type in the shader." ));
                 break;
         }
+        glUniform1ui( tParamNameGL, dataType );
 
         // This is temporary. In the future it will be given by the gui.
         Vector2f dataSourceRange( 0.0f, 255.0f );
@@ -348,7 +347,7 @@ struct RayCastRenderer::Impl
         glUseProgram( 0 );
     }
 
-    GLuint createAndFillVertexBuffer( const NodeIds& renderBricks )
+    GLuint createAndFillVertexBuffer( const NodeIds& renderBricks ) const
     {
         Vector3fs positions;
         positions.reserve( 36 * renderBricks.size( ));
@@ -431,11 +430,13 @@ struct RayCastRenderer::Impl
     void onFrameRender( const NodeIds& bricks )
     {
         const GLuint posVBO = createAndFillVertexBuffer( bricks );
+
         size_t index = 0;
         for( const NodeId& brick: bricks )
             renderBrick( brick, index++, posVBO );
 
         glDeleteBuffers( 1, &posVBO );
+
         // The flush is needed because the textures are loaded asynchronously by a thread pool.
         glFlush();
     }
@@ -444,10 +445,8 @@ struct RayCastRenderer::Impl
     {
         if( !front && !back )
             return;
-
         else if( front && !back )
             glCullFace( GL_BACK );
-
         else if( !front && back )
             glCullFace( GL_FRONT );
 

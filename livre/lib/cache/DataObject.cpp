@@ -30,39 +30,18 @@
 
 namespace livre
 {
-namespace
-{
-size_t getDataSize( const CacheId& cacheId, DataSource& dataSource )
-{
-    const LODNode& lodNode = dataSource.getNode( NodeId( cacheId ));
-    const VolumeInformation& volInfo = dataSource.getVolumeInfo();
-
-    const Vector3ui& overlap = volInfo.overlap;
-    const size_t elemSize = volInfo.getBytesPerVoxel();
-    const uint32_t compCount = volInfo.compCount;
-    const Vector3ui blockSize = lodNode.getBlockSize() + overlap * 2;
-    return blockSize.product() * elemSize * compCount;
-}
-}
-
 struct DataObject::Impl
 {
 public:
 
     Impl( const CacheId& cacheId, DataSource& dataSource )
-        : _data( new AllocMemoryUnit( ))
-        , _dataSize( getDataSize( cacheId, dataSource ))
     {
         if( !load( cacheId, dataSource ))
-        {
             LBTHROW( CacheLoadException( cacheId, "Unable to construct data cache object" ));
-        }
     }
 
     ~Impl()
-    {
-        _data->release();
-    }
+    {}
 
     const void* getDataPtr() const
     {
@@ -73,12 +52,9 @@ public:
     bool readTextureData( const CacheId& cacheId, DataSource& dataSource )
     {
         const NodeId nodeId( cacheId );
-        ConstMemoryUnitPtr data = dataSource.getData( nodeId );
-        if( !data )
+        _data = dataSource.getData( nodeId );
+        if( !_data )
             return false;
-
-        const void* rawData = data->getData< void >();
-        _data->allocAndSetData( rawData, _dataSize );
         return true;
     }
 
@@ -107,8 +83,7 @@ public:
         return false;
     }
 
-    AllocMemoryUnitPtr _data;
-    size_t _dataSize;
+    ConstMemoryUnitPtr _data;
 };
 
 DataObject::DataObject( const CacheId& cacheId, DataSource& dataSource )
@@ -121,7 +96,7 @@ DataObject::~DataObject()
 
 size_t DataObject::getSize() const
 {
-    return _impl->_dataSize;
+    return _impl->_data->getAllocSize();
 }
 
 const void* DataObject::getDataPtr() const

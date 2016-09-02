@@ -110,9 +110,13 @@ struct RenderPipeline::Impl
         const auto& nodeIds = renderer.order( portFutures.get< NodeIds >( "VisibleNodes" ),
                                               renderParams.frameInfo.frustum );
 
+        const VolumeInformation& volInfo = _dataSource.getVolumeInfo();
+        const size_t blockMemSize = volInfo.maximumBlockSize.product() *
+                                    volInfo.getBytesPerVoxel() *
+                                    volInfo.compCount;
+
         const uint32_t maxNodesPerPass =
-                renderParams.vrParams.getMaxGPUCacheMemoryMB( ) * LB_1MB /
-                _dataSource.getVolumeInfo().maximumBlockSize.product( ); //datatype compcount
+                renderParams.vrParams.getMaxGPUCacheMemoryMB() * LB_1MB / blockMemSize;
 
         const uint32_t numberOfPasses = std::ceil( (float)nodeIds.size() / (float)maxNodesPerPass );
 

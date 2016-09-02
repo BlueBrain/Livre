@@ -286,9 +286,7 @@ public:
                 zDecompress( src, dst, uncompressedSize );
             }
 
-            AllocMemoryUnit* allocUnit = new AllocMemoryUnit( );
-            allocUnit->allocAndSetData< T >( tuvokData );
-            memUnitPtr.reset( allocUnit );
+            memUnitPtr.reset( new AllocMemoryUnit( tuvokData ));
         }
 
         return memUnitPtr;
