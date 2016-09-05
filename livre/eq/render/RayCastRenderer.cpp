@@ -84,7 +84,7 @@ std::string where( const char* file, const int line )
 
 const uint32_t maxSamplesPerRay = 32;
 const uint32_t minSamplesPerRay = 512;
-
+const size_t nVerticesRenderBrick = 36;
 const GLfloat fullScreenQuad[] = { -1.0f, -1.0f, 0.0f,
                                     1.0f, -1.0f, 0.0f,
                                    -1.0f,  1.0f, 0.0f,
@@ -196,6 +196,26 @@ struct RayCastRenderer::Impl
                                emptyBuffer.data( ));
     }
 
+    uint32_t getShaderDataType() const
+    {
+        switch( _dataSource.getVolumeInfo().dataType )
+        {
+            case DT_UINT8:
+            case DT_UINT16:
+            case DT_UINT32:
+                return SH_UINT;
+            case DT_FLOAT:
+                return SH_FLOAT;
+            case DT_INT8:
+            case DT_INT16:
+            case DT_INT32:
+                return SH_INT;
+            case DT_UNDEFINED:
+            default:
+                LBTHROW( std::runtime_error( "Unsupported type in the shader." ));
+        }
+    }
+
     void onFrameStart( const Frustum& frustum,
                        const ClipPlanes& planes,
                        const NodeIds& renderBricks )
@@ -283,28 +303,7 @@ struct RayCastRenderer::Impl
         glUniform1i( tParamNameGL, nPlanes );
 
         tParamNameGL = glGetUniformLocation( program, "datatype" );
-        uint32_t dataType = -1;
-        switch( _dataSource.getVolumeInfo().dataType )
-        {
-            case DT_UINT8:
-            case DT_UINT16:
-            case DT_UINT32:
-                dataType = SH_UINT;
-                break;
-            case DT_FLOAT:
-                dataType = SH_FLOAT;
-                break;
-            case DT_INT8:
-            case DT_INT16:
-            case DT_INT32:
-                dataType = SH_INT;
-                break;
-            case DT_UNDEFINED:
-            default:
-                LBTHROW( std::runtime_error( "Unsupported type in the shader." ));
-                break;
-        }
-        glUniform1ui( tParamNameGL, dataType );
+        glUniform1ui( tParamNameGL, getShaderDataType( ));
 
         // This is temporary. In the future it will be given by the gui.
         Vector2f dataSourceRange( 0.0f, 255.0f );
@@ -350,7 +349,7 @@ struct RayCastRenderer::Impl
     GLuint createAndFillVertexBuffer( const NodeIds& renderBricks ) const
     {
         Vector3fs positions;
-        positions.reserve( 36 * renderBricks.size( ));
+        positions.reserve( nVerticesRenderBrick * renderBricks.size( ));
         for( const NodeId& rb: renderBricks )
         {
             const LODNode& lodNode = _dataSource.getNode( rb );
@@ -453,7 +452,9 @@ struct RayCastRenderer::Impl
         glBindBuffer( GL_ARRAY_BUFFER, posVBO );
         glEnableVertexAttribArray( 0 );
         glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, NULL );
-        glDrawArrays( GL_TRIANGLES, index * 36, 36 );
+
+
+        glDrawArrays( GL_TRIANGLES, index * nVerticesRenderBrick, nVerticesRenderBrick );
     }
 
     void renderBrick( const NodeId& rb, const size_t index, const GLuint posVBO )

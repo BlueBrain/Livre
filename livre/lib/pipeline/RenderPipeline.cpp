@@ -61,50 +61,40 @@ struct RenderPipeline::Impl
     {
     }
 
-    void createAndConnectUploaders( Pipeline& uploadPipeline,
-                                    PipeFilter& visibleSetGenerator,
-                                    PipeFilter& output ) const
+    void setupVisibleGeneratorFilter( PipeFilter& visibleSetGenerator,
+                                      const RenderParams& renderParams ) const
     {
-        for( size_t i = 0; i < nUploadThreads; ++i )
-        {
-            std::stringstream name;
-            name << "DataUploader" << i;
-            PipeFilter uploader =
-                    uploadPipeline.add< DataUploadFilter >( name.str(),
-                                                            i,
-                                                            nUploadThreads,
-                                                            _dataCache,
-                                                            _textureCache,
-                                                            _dataSource,
-                                                            _texturePool );
-
-            visibleSetGenerator.connect( "VisibleNodes",
-                                         uploader, "VisibleNodes" );
-            visibleSetGenerator.connect( "Params",
-                                         uploader, "Params" );
-            uploader.connect( "CacheObjects", output, "CacheObjects" );
-        }
-    }
-
-    void createSyncPipeline( const RenderParams& renderParams,
-                             PipeFilter& sendHistogramFilter,
-                             Renderer& renderer,
-                             NodeAvailability& availability ) const
-    {
-        PipeFilterT< VisibleSetGeneratorFilter > visibleSetGenerator( "VisibleSetGenerator",
-                                                                      _dataSource );
-
         visibleSetGenerator.getPromise( "Frustum" ).set( renderParams.frameInfo.frustum );
         visibleSetGenerator.getPromise( "Frame" ).set( renderParams.frameInfo.timeStep );
         visibleSetGenerator.getPromise( "DataRange" ).set( renderParams.renderDataRange );
         visibleSetGenerator.getPromise( "Params" ).set( renderParams.vrParams );
         visibleSetGenerator.getPromise( "Viewport" ).set( renderParams.pixelViewPort );
         visibleSetGenerator.getPromise( "ClipPlanes" ).set( renderParams.clipPlanes );
+    }
 
+    void setupRenderFilter( PipeFilter& renderFilter,
+                            const RenderParams& renderParams,
+                            const uint32_t renderStages ) const
+    {
+
+        renderFilter.getPromise( "Frustum" ).set( renderParams.frameInfo.frustum );
+        renderFilter.getPromise( "Viewport" ).set( renderParams.pixelViewPort );
+        renderFilter.getPromise( "ClipPlanes" ).set( renderParams.clipPlanes );
+        renderFilter.getPromise( "RenderStages" ).set( renderStages );
+    }
+
+    void renderSync( const RenderParams& renderParams,
+                     PipeFilter& sendHistogramFilter,
+                     Renderer& renderer,
+                     NodeAvailability& availability ) const
+    {
+
+        PipeFilterT< VisibleSetGeneratorFilter > visibleSetGenerator( "VisibleSetGenerator",
+                                                                      _dataSource );
+        setupVisibleGeneratorFilter( visibleSetGenerator,  renderParams );
         visibleSetGenerator.execute();
 
-        sendHistogramFilter.getPromise( "RelativeViewport" ).set( renderParams.viewport );
-        sendHistogramFilter.getPromise( "Id" ).set( renderParams.frameInfo.frameId );
+
 
         const livre::UniqueFutureMap portFutures( visibleSetGenerator.getPostconditions( ));
         const auto& nodeIds = renderer.order( portFutures.get< NodeIds >( "VisibleNodes" ),
@@ -121,30 +111,34 @@ struct RenderPipeline::Impl
         const uint32_t numberOfPasses = std::ceil( (float)nodeIds.size() / (float)maxNodesPerPass );
 
         std::unique_ptr< boost::progress_display > showProgress;
-
         if( numberOfPasses > 1 )
         {
-            std::cout << "Multipass rendering. Number of passes: " << numberOfPasses <<std::endl;
+            LBINFO << "Multipass rendering. Number of passes: " << numberOfPasses << std::endl;
             showProgress.reset( new boost::progress_display( numberOfPasses ));
         }
+
+        sendHistogramFilter.getPromise( "RelativeViewport" ).set( renderParams.viewport );
+        sendHistogramFilter.getPromise( "Id" ).set( renderParams.frameInfo.frameId );
 
         for( uint32_t i = 0; i < numberOfPasses; ++i )
         {
             uint32_t renderStages = RENDER_FRAME;
-
             if( i == 0 )
                 renderStages |= RENDER_BEGIN;
 
             if( i == numberOfPasses - 1u )
                 renderStages |= RENDER_END;
 
-            uint32_t startIndex = i * maxNodesPerPass;
-            uint32_t endIndex = ( i + 1 ) * maxNodesPerPass - 1;
-            endIndex = endIndex < nodeIds.size() ? endIndex : nodeIds.size() - 1;
+            const uint32_t startIndex = i * maxNodesPerPass;
+            const uint32_t endIndex = ( i + 1 ) * maxNodesPerPass;
             const NodeIds nodesPerPass( nodeIds.begin() + startIndex,
-                                        nodeIds.begin() + endIndex + 1 );
+                                        endIndex > nodeIds.size() ? nodeIds.end() :
+                                        nodeIds.begin() + endIndex );
 
-            createAndExecuteSyncPass( nodesPerPass, renderParams, sendHistogramFilter, renderer,
+            createAndExecuteSyncPass( nodesPerPass,
+                                      renderParams,
+                                      sendHistogramFilter,
+                                      renderer,
                                       renderStages );
             if( numberOfPasses > 1 )
                 ++(*showProgress);
@@ -156,11 +150,11 @@ struct RenderPipeline::Impl
         availability.nNotAvailable = 0;
     }
 
-    void createAsyncPipeline( const RenderParams& renderParams,
-                              PipeFilter& redrawFilter,
-                              PipeFilter& sendHistogramFilter,
-                              Renderer& renderer,
-                              NodeAvailability& availability ) const
+    void renderAsync( const RenderParams& renderParams,
+                      PipeFilter& sendHistogramFilter,
+                      Renderer& renderer,
+                      NodeAvailability& availability,
+                      PipeFilter& redrawFilter ) const
     {
         PipeFilterT< HistogramFilter > histogramFilter( "HistogramFilter",
                                                         _histogramCache,
@@ -181,38 +175,35 @@ struct RenderPipeline::Impl
         PipeFilter visibleSetGenerator =
                 renderPipeline.add< VisibleSetGeneratorFilter >(
                     "VisibleSetGenerator", _dataSource );
-
-        visibleSetGenerator.getPromise( "Frustum" ).set( renderParams.frameInfo.frustum );
-        visibleSetGenerator.getPromise( "Frame" ).set( renderParams.frameInfo.timeStep );
-        visibleSetGenerator.getPromise( "DataRange" ).set( renderParams.renderDataRange );
-        visibleSetGenerator.getPromise( "Params" ).set( renderParams.vrParams );
-        visibleSetGenerator.getPromise( "Viewport" ).set( renderParams.pixelViewPort );
-        visibleSetGenerator.getPromise( "ClipPlanes" ).set( renderParams.clipPlanes );
+        setupVisibleGeneratorFilter( visibleSetGenerator,  renderParams );
 
         PipeFilter renderingSetGenerator =
                 renderPipeline.add< RenderingSetGeneratorFilter >(
                     "RenderingSetGenerator", _textureCache );
 
-        visibleSetGenerator.connect( "VisibleNodes",
-                                     renderingSetGenerator, "VisibleNodes" );
+        visibleSetGenerator.connect( "VisibleNodes", renderingSetGenerator, "VisibleNodes" );
+        renderingSetGenerator.connect( "CacheObjects", renderFilter, "CacheObjects" );
+        renderingSetGenerator.connect( "CacheObjects", histogramFilter, "CacheObjects" );
+        renderingSetGenerator.connect( "RenderingDone", redrawFilter, "RenderingDone" );
 
-        renderingSetGenerator.connect( "CacheObjects",
-                                      renderFilter, "CacheObjects" );
+        for( size_t i = 0; i < nUploadThreads; ++i )
+        {
+            std::stringstream name;
+            name << "DataUploader" << i;
+            PipeFilter uploader =  uploadPipeline.add< DataUploadFilter >( name.str(),
+                                                                           i,
+                                                                           nUploadThreads,
+                                                                           _dataCache,
+                                                                           _textureCache,
+                                                                           _dataSource,
+                                                                           _texturePool );
 
-        renderingSetGenerator.connect( "CacheObjects",
-                                      histogramFilter, "CacheObjects" );
+            visibleSetGenerator.connect( "VisibleNodes", uploader, "VisibleNodes" );
+            visibleSetGenerator.connect( "Params", uploader, "Params" );
+            uploader.connect( "CacheObjects", redrawFilter, "CacheObjects" );
+        }
 
-        renderingSetGenerator.connect( "RenderingDone",
-                                       redrawFilter, "RenderingDone" );
-
-        createAndConnectUploaders( uploadPipeline,
-                                   visibleSetGenerator,
-                                   redrawFilter );
-
-        renderFilter.getPromise( "Frustum" ).set( renderParams.frameInfo.frustum );
-        renderFilter.getPromise( "Viewport" ).set( renderParams.pixelViewPort );
-        renderFilter.getPromise( "ClipPlanes" ).set( renderParams.clipPlanes );
-        renderFilter.getPromise( "RenderStages" ).set( RENDER_ALL );
+        setupRenderFilter( renderFilter, renderParams, RENDER_ALL );
 
         redrawFilter.schedule( _renderExecutor );
         renderPipeline.schedule( _renderExecutor );
@@ -244,28 +235,22 @@ struct RenderPipeline::Impl
         Pipeline uploadPipeline;
 
         PipeFilterT< RenderFilter > renderFilter( "RenderFilter", _dataSource, renderer );
-
-        renderFilter.getPromise( "Frustum" ).set( renderParams.frameInfo.frustum );
-        renderFilter.getPromise( "Viewport" ).set( renderParams.pixelViewPort );
-        renderFilter.getPromise( "ClipPlanes" ).set( renderParams.clipPlanes );
-        renderFilter.getPromise( "RenderStages" ).set( renderStages );
+        setupRenderFilter( renderFilter, renderParams, renderStages );
 
         for( size_t i = 0; i < nUploadThreads; ++i )
         {
             std::stringstream name;
             name << "DataUploader" << i;
-            PipeFilter uploader =
-                    uploadPipeline.add< DataUploadFilter >( name.str(),
-                                                            i,
-                                                            nUploadThreads,
-                                                            _dataCache,
-                                                            _textureCache,
-                                                            _dataSource,
-                                                            _texturePool );
+            PipeFilter uploader = uploadPipeline.add< DataUploadFilter >( name.str(),
+                                                                          i,
+                                                                          nUploadThreads,
+                                                                          _dataCache,
+                                                                          _textureCache,
+                                                                          _dataSource,
+                                                                          _texturePool );
 
             uploader.getPromise( "VisibleNodes" ).set( nodeIds );
             uploader.getPromise( "Params" ).set( renderParams.vrParams );
-
             uploader.connect( "CacheObjects", renderFilter, "CacheObjects" );
             uploader.connect( "CacheObjects", histogramFilter, "CacheObjects" );
         }
@@ -283,12 +268,10 @@ struct RenderPipeline::Impl
                  NodeAvailability& availability ) const
     {
         if( renderParams.vrParams.getSynchronousMode( ))
-            createSyncPipeline( renderParams, sendHistogramFilter, renderer, availability );
+            renderSync( renderParams, sendHistogramFilter, renderer, availability );
         else
-        {
-            createAsyncPipeline( renderParams, redrawFilter, sendHistogramFilter, renderer,
-                                 availability );
-        }
+            renderAsync( renderParams, sendHistogramFilter, renderer, availability, redrawFilter );
+
     }
 
     DataSource& _dataSource;
@@ -305,10 +288,7 @@ RenderPipeline::RenderPipeline( DataSource& dataSource,
                                 Caches& caches,
                                 TexturePool& texturePool,
                                 ConstGLContextPtr glContext )
-    : _impl( new RenderPipeline::Impl( dataSource,
-                                       caches,
-                                       texturePool,
-                                       glContext ))
+    : _impl( new RenderPipeline::Impl( dataSource, caches, texturePool, glContext ))
 {}
 
 RenderPipeline::~RenderPipeline()
@@ -320,11 +300,7 @@ void RenderPipeline::render( const RenderParams& renderParams,
                              Renderer& renderer,
                              NodeAvailability& avaibility ) const
 {
-    _impl->render( renderParams,
-                   redrawFilter,
-                   sendHistogramFilter,
-                   renderer,
-                   avaibility );
+    _impl->render( renderParams, redrawFilter, sendHistogramFilter, renderer, avaibility );
 }
 
 }

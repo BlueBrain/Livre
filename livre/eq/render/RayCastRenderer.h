@@ -59,8 +59,7 @@ public:
     /**
      * @copydoc Renderer::order
      */
-    NodeIds order( const NodeIds& bricks,
-                   const Frustum& frustum ) const override;
+    NodeIds order( const NodeIds& bricks, const Frustum& frustum ) const override;
 
 protected:
 

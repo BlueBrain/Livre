@@ -28,10 +28,10 @@
 namespace livre
 {
 
-static const uint32_t RENDER_BEGIN = 1;
-static const uint32_t RENDER_FRAME = 2;
-static const uint32_t RENDER_END = 4;
-static const uint32_t RENDER_ALL = 7;
+static const uint32_t RENDER_BEGIN = 1u;
+static const uint32_t RENDER_FRAME = 1u << 1;
+static const uint32_t RENDER_END   = 1u << 2;
+static const uint32_t RENDER_ALL   = RENDER_BEGIN | RENDER_FRAME | RENDER_END;
 
 /**
  * The Renderer class is the base class for renderers.
@@ -45,6 +45,9 @@ public:
      * @param frustum is used for rendering the bricks according to view point.
      * @param view The pixel area.
      * @param bricks The list of render bricks.
+     * @param renderStages The bitwise flags for enabling/disabling certain stages of
+     * rendering. i.e. With different settings, multipass rendering can be performed in
+     * the same frame.
      */
     LIVRECORE_API void render( const Frustum& frustum,
                                const ClipPlanes& planes,
@@ -58,8 +61,7 @@ public:
      * @param frustum is used to order the bricks according to view point.
      * @return the list of ordered bricks.
      */
-    LIVRECORE_API virtual NodeIds order( const NodeIds& bricks,
-                                         const Frustum& frustum ) const = 0;
+    LIVRECORE_API virtual NodeIds order( const NodeIds& bricks, const Frustum& frustum ) const = 0;
 protected:
 
     /**

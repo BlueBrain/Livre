@@ -47,8 +47,7 @@ public:
 
     /**
      * Computes the addition of two histograms and modifies the object.
-     * If the histogram is empty this operator behaves the same as the
-     * equal operator.
+     * If the histogram is empty this operator behaves the same as the assignment operator.
      * @param histogram is the histogram to add
      * @return the modified histogram
      */

@@ -75,9 +75,8 @@ private:
 };
 
 /**
- * The ConstMemoryUnit class shows a memory pointer that is anywhere in memory.
- * No allocation is present. i.e: Memory mapped files are managed by the OS
- * and only a handle to the memory is kept.
+ * The ConstMemoryUnit class shows a arbitrary memory pointer. No allocation is preformed.
+ * i.e: Memory mapped files are managed by the OS and only a handle to the memory is kept.
  */
 class ConstMemoryUnit : public MemoryUnit
 {
