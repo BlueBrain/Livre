@@ -37,16 +37,13 @@ public:
     LIVRECORE_API MemoryUnit();
     LIVRECORE_API virtual ~MemoryUnit();
 
-    /** Release memory */
-    virtual void release() = 0;
-
     /** @return The memory ptr in type T. */
     template< class T > const T* getData() const
-        { return reinterpret_cast< const T* >( getData_( )); }
+        { return reinterpret_cast< const T* >( _getData( )); }
 
     /** @return The memory ptr in type T. */
     template< class T > T* getData()
-        { return reinterpret_cast< T* >( getData_( )); }
+        { return reinterpret_cast< T* >( _getData( )); }
 
     /**
      * @return The size of the memory accessed.
@@ -58,93 +55,88 @@ public:
 
 protected:
     /** @return The unsigned char memory ptr to data */
-    virtual const uint8_t* getData_() const = 0;
+    virtual const uint8_t* _getData() const = 0;
 
     /** @return The unsigned char memory ptr to data */
-    virtual uint8_t* getData_() = 0;
+    virtual uint8_t* _getData() = 0;
 };
 
 /** MemoryUnit holding no data at all */
 class NoMemoryUnit : public MemoryUnit
 {
 public:
-    virtual ~NoMemoryUnit() {}
-    void release() final {}
-
+    ~NoMemoryUnit() {}
     size_t getMemSize() const final { return 0; }
     size_t getAllocSize() const final { return 0; }
 
 private:
-    const uint8_t* getData_() const final { LBDONTCALL; return 0; }
-    uint8_t* getData_() final { LBDONTCALL; return 0; }
+    const uint8_t* _getData() const final { LBDONTCALL; return 0; }
+    uint8_t* _getData() final { LBDONTCALL; return 0; }
 };
 
 /**
- * The ConstMemoryUnit class shows a memory pointer that is anywhere in memory. No allocation is present.
+ * The ConstMemoryUnit class shows a arbitrary memory pointer. No allocation is preformed.
+ * i.e: Memory mapped files are managed by the OS and only a handle to the memory is kept.
  */
 class ConstMemoryUnit : public MemoryUnit
 {
 public:
     ConstMemoryUnit( const uint8_t* ptr, const size_t size );
-
+    ~ConstMemoryUnit() {}
 protected:
     size_t getMemSize() const final;
-    size_t getAllocSize() const final { return getMemSize(); }
-    const uint8_t* getData_() const final;
-    uint8_t* getData_() final { LBDONTCALL; return 0; }
-
-    void release() final {}
-
+    size_t getAllocSize() const final { return 0; }
+    const uint8_t* _getData() const final;
+    uint8_t* _getData() final { LBDONTCALL; return 0; }
     const uint8_t* const ptr_;
     const size_t size_;
 };
 
 /**
  * The AllocMemoryUnit class shows an allocated memory pointer to keep track of memory consumption.
+ * Memory is cleaned on destruction.
  */
-class AllocMemoryUnit : public MemoryUnit, public boost::noncopyable
+class AllocMemoryUnit : public MemoryUnit
 {
 public:
-    LIVRECORE_API AllocMemoryUnit();
 
     /**
      * Allocate and copy the data from the given source and size
      * @param sourceData Source data ptr.
      * @param size Number of the elements in the source data ptr.
      */
-    template< class T >
-    void allocAndSetData( const T* sourceData, const size_t size )
+    template< typename T >
+    AllocMemoryUnit( const T* sourceData, const size_t size )
     {
-        alloc( sizeof( T ) * size );
-        ::memcpy( _rawData.getData(), sourceData, size * sizeof( T ) );
+        _allocAndSetData( sourceData, size );
     }
 
-    /** "void" specialization of allocAndSetData function */
-    void allocAndSetData( const void* sourceData, const size_t size )
+    /** "void" specialization of the constructor */
+    LIVRECORE_API AllocMemoryUnit( const void* sourceData, const size_t size )
     {
-        allocAndSetData( static_cast< const uint8_t* >( sourceData ),
-                                                        size );
+        _allocAndSetData( static_cast< const uint8_t* >( sourceData ), size );
     }
 
     /**
      * Allocate and copy the data from the given source and size
      * @param sourceData Source data vector.
      */
-    template< class T >
-    void allocAndSetData( const std::vector< T >& sourceData )
+    template< typename T >
+    explicit AllocMemoryUnit( const std::vector< T >& sourceData )
     {
-        allocAndSetData( &sourceData[ 0 ], sourceData.size());
+        _allocAndSetData( &sourceData[ 0 ], sourceData.size( ));
     }
 
     /**
-     * Allocate memory.
-     * @param nBytes Number of bytes to allocate.
+     * Allocates memory in bytes in given size
+     * @param size memory size
      */
-    LIVRECORE_API void alloc( size_t nBytes );
+    LIVRECORE_API explicit AllocMemoryUnit( const size_t size )
+    {
+        _alloc( size );
+    }
 
-    /** Release memory. */
-    LIVRECORE_API void release() final;
-
+    LIVRECORE_API ~AllocMemoryUnit();
     LIVRECORE_API size_t getMemSize() const final;
     LIVRECORE_API size_t getAllocSize() const final;
 
@@ -153,11 +145,20 @@ private:
     AllocMemoryUnit( const AllocMemoryUnit& ) = delete;
     AllocMemoryUnit& operator=( const AllocMemoryUnit& ) = delete;
 
-    const uint8_t* getData_() const final;
-    uint8_t* getData_() final;
+    template< class T >
+    void _allocAndSetData( const T* sourceData, const size_t size )
+    {
+        _alloc( sizeof( T ) * size );
+        ::memcpy( _rawData.getData(), sourceData, size * sizeof( T ) );
+    }
 
-    LB_TS_VAR( thread_ );
+    void _alloc( size_t nBytes );
+
+    const uint8_t* _getData() const final;
+    uint8_t* _getData() final;
+
     lunchbox::Bufferb _rawData;
+    LB_TS_VAR( thread_ );
 };
 
 }

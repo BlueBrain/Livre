@@ -101,15 +101,17 @@ struct SendHistogramFilter : public Filter
     {}
 
     ~SendHistogramFilter() {}
-    void execute( const FutureMap& input,
-                  PromiseMap& ) const final
+    void execute( const FutureMap& inputs, PromiseMap& ) const final
     {
-        const UniqueFutureMap uniqueInputs( input.getFutures( ));
-        const auto& histogram = uniqueInputs.get< Histogram >( "Histogram" );
-        const auto& viewport = uniqueInputs.get< Viewport >( "RelativeViewport" );
-        const auto frameCounter =  uniqueInputs.get< uint32_t >( "Id" );
+        const auto viewport = inputs.get< Viewport >( "RelativeViewport" ).front();
+        const auto frameCounter =  inputs.get< uint32_t >( "Id" ).front();
+
+        Histogram histogramAccumulated;
+        for( const auto& histogram: inputs.get< Histogram >( "Histogram" ))
+                histogramAccumulated += histogram;
+
         const_cast< eq::Config *>( _channel ->getConfig())->sendEvent( HISTOGRAM_DATA )
-                << histogram
+                << histogramAccumulated
                 << ( viewport[ 2 ] * viewport[ 3 ]) // area of the viewport ( w * h )
                 << frameCounter;
     }

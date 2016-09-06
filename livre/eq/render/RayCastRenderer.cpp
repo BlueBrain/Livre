@@ -84,7 +84,7 @@ std::string where( const char* file, const int line )
 
 const uint32_t maxSamplesPerRay = 32;
 const uint32_t minSamplesPerRay = 512;
-
+const size_t nVerticesRenderBrick = 36;
 const GLfloat fullScreenQuad[] = { -1.0f, -1.0f, 0.0f,
                                     1.0f, -1.0f, 0.0f,
                                    -1.0f,  1.0f, 0.0f,
@@ -108,7 +108,6 @@ struct RayCastRenderer::Impl
         , _textureCache( textureCache )
         , _dataSource( dataSource )
         , _volInfo( _dataSource.getVolumeInfo( ))
-        , _posVBO( 0 )
     {
         TransferFunction1D transferFunction;
         initTransferFunction( transferFunction );
@@ -141,8 +140,7 @@ struct RayCastRenderer::Impl
         glDeleteBuffers( 1, &_quadVBO );
     }
 
-    NodeIds order( const NodeIds& bricks,
-                   const Frustum& frustum ) const
+    NodeIds order( const NodeIds& bricks, const Frustum& frustum ) const
     {
         NodeIds rbs = bricks;
         DistanceOperator distanceOp( _dataSource, frustum );
@@ -185,15 +183,36 @@ struct RayCastRenderer::Impl
     {
         const int width = viewport[ 2 ] - viewport[ 0 ];
         const int height = viewport[ 3 ] - viewport[ 1 ];
-        if( _renderTexture.getWidth() != width || _renderTexture.getHeight() != height )
+
+        if( _renderTexture.getWidth() == width && _renderTexture.getHeight() == height )
+            return;
+
+        _renderTexture.flush();
+        _renderTexture.init( GL_RGBA32F, width, height );
+        const Floats emptyBuffer( _renderTexture.getWidth() * _renderTexture.getHeight() * 4,
+                                  0.0 );
+        _renderTexture.upload( _renderTexture.getWidth(),
+                               _renderTexture.getHeight(),
+                               emptyBuffer.data( ));
+    }
+
+    uint32_t getShaderDataType() const
+    {
+        switch( _dataSource.getVolumeInfo().dataType )
         {
-            _renderTexture.flush();
-            _renderTexture.init( GL_RGBA32F, width, height );
-            const Floats emptyBuffer( _renderTexture.getWidth() * _renderTexture.getHeight() * 4,
-                                      0.0 );
-            _renderTexture.upload( _renderTexture.getWidth(),
-                                   _renderTexture.getHeight(),
-                                   emptyBuffer.data( ));
+            case DT_UINT8:
+            case DT_UINT16:
+            case DT_UINT32:
+                return SH_UINT;
+            case DT_FLOAT:
+                return SH_FLOAT;
+            case DT_INT8:
+            case DT_INT16:
+            case DT_INT32:
+                return SH_INT;
+            case DT_UNDEFINED:
+            default:
+                LBTHROW( std::runtime_error( "Unsupported type in the shader." ));
         }
     }
 
@@ -225,7 +244,6 @@ struct RayCastRenderer::Impl
         glDisable( GL_BLEND );
         glGetIntegerv( GL_DRAW_BUFFER, &_drawBuffer );
         glDrawBuffer( GL_NONE );
-
 
         GLSLShaders::Handle program = _rayCastShaders.getProgram( );
         LBASSERT( program );
@@ -284,29 +302,8 @@ struct RayCastRenderer::Impl
         tParamNameGL = glGetUniformLocation( program, "nClipPlanes" );
         glUniform1i( tParamNameGL, nPlanes );
 
-        switch( _dataSource.getVolumeInfo().dataType )
-        {
-            case DT_UINT8:
-            case DT_UINT16:
-            case DT_UINT32:
-                tParamNameGL = glGetUniformLocation( program, "datatype" );
-                glUniform1ui( tParamNameGL, SH_UINT );
-                break;
-            case DT_FLOAT:
-                tParamNameGL = glGetUniformLocation( program, "datatype" );
-                glUniform1ui( tParamNameGL, SH_FLOAT );
-                break;
-            case DT_INT8:
-            case DT_INT16:
-            case DT_INT32:
-                tParamNameGL = glGetUniformLocation( program, "datatype" );
-                glUniform1ui( tParamNameGL, SH_INT );
-                break;
-            case DT_UNDEFINED:
-            default:
-                LBTHROW( std::runtime_error( "Unsupported type in the shader." ));
-                break;
-        }
+        tParamNameGL = glGetUniformLocation( program, "datatype" );
+        glUniform1ui( tParamNameGL, getShaderDataType( ));
 
         // This is temporary. In the future it will be given by the gui.
         Vector2f dataSourceRange( 0.0f, 255.0f );
@@ -331,7 +328,6 @@ struct RayCastRenderer::Impl
             glUniform4fv( tParamNameGL, nPlanes, planesData.data( ));
         }
 
-        createAndFillVertexBuffer( renderBricks );
         createAndInitializeRenderTexture( viewport );
 
         glBindImageTexture( 0, _renderTexture.getName(),
@@ -350,21 +346,23 @@ struct RayCastRenderer::Impl
         glUseProgram( 0 );
     }
 
-    void createAndFillVertexBuffer( const NodeIds& renderBricks )
+    GLuint createAndFillVertexBuffer( const NodeIds& renderBricks ) const
     {
         Vector3fs positions;
-        positions.reserve( 36 * renderBricks.size( ));
+        positions.reserve( nVerticesRenderBrick * renderBricks.size( ));
         for( const NodeId& rb: renderBricks )
         {
             const LODNode& lodNode = _dataSource.getNode( rb );
             createBrick( lodNode, positions );
         }
 
-        glGenBuffers( 1, &_posVBO );
-        glBindBuffer( GL_ARRAY_BUFFER, _posVBO );
+        GLuint posVBO;
+        glGenBuffers( 1, &posVBO );
+        glBindBuffer( GL_ARRAY_BUFFER, posVBO );
         glBufferData( GL_ARRAY_BUFFER,
                       positions.size() * 3 * sizeof( float ),
                       positions.data(), GL_STATIC_DRAW );
+        return posVBO;
     }
 
     void createBrick( const LODNode& lodNode, Vector3fs& positions ) const
@@ -430,30 +428,36 @@ struct RayCastRenderer::Impl
 
     void onFrameRender( const NodeIds& bricks )
     {
+        const GLuint posVBO = createAndFillVertexBuffer( bricks );
+
         size_t index = 0;
         for( const NodeId& brick: bricks )
-            renderBrick( brick, index++ );
+            renderBrick( brick, index++, posVBO );
+
+        glDeleteBuffers( 1, &posVBO );
+
+        // The flush is needed because the textures are loaded asynchronously by a thread pool.
+        glFlush();
     }
 
-    void renderBrickVBO( const size_t index, bool front, bool back )
+    void renderBrickVBO( const size_t index, const GLuint posVBO, bool front, bool back )
     {
         if( !front && !back )
             return;
-
         else if( front && !back )
             glCullFace( GL_BACK );
-
         else if( !front && back )
             glCullFace( GL_FRONT );
 
-        glBindBuffer( GL_ARRAY_BUFFER, _posVBO );
+        glBindBuffer( GL_ARRAY_BUFFER, posVBO );
         glEnableVertexAttribArray( 0 );
         glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, NULL );
-        glDrawArrays( GL_TRIANGLES, index * 36, 36 );
+
+
+        glDrawArrays( GL_TRIANGLES, index * nVerticesRenderBrick, nVerticesRenderBrick );
     }
 
-    void renderBrick( const NodeId& rb,
-                      const size_t index )
+    void renderBrick( const NodeId& rb, const size_t index, const GLuint posVBO )
     {
         GLSLShaders::Handle program = _rayCastShaders.getProgram( );
         LBASSERT( program );
@@ -504,7 +508,7 @@ struct RayCastRenderer::Impl
 
         _usedTextures[1].push_back( texState.textureId );
 
-        renderBrickVBO( index, false /* draw front */, true /* cull back */ );
+        renderBrickVBO( index, posVBO, false /* draw front */, true /* cull back */ );
         glMemoryBarrier( GL_SHADER_IMAGE_ACCESS_BARRIER_BIT );
 
         glUseProgram( 0 );
@@ -547,7 +551,6 @@ struct RayCastRenderer::Impl
         _usedTextures[0].swap( _usedTextures[1] );
         _usedTextures[1].clear();
 
-        glDeleteBuffers( 1, &_posVBO );
         glDrawBuffer( _drawBuffer );
         copyTexToFrameBufAndClear();
     }
@@ -563,7 +566,6 @@ struct RayCastRenderer::Impl
     const Cache& _textureCache;
     const DataSource& _dataSource;
     const VolumeInformation& _volInfo;
-    GLuint _posVBO;
     GLuint _quadVBO;
     GLint _drawBuffer;
 };
@@ -584,8 +586,8 @@ void RayCastRenderer::update( const FrameData& frameData )
 }
 
 
-NodeIds RayCastRenderer::_order( const NodeIds& bricks,
-                                 const Frustum& frustum ) const
+NodeIds RayCastRenderer::order( const NodeIds& bricks,
+                                const Frustum& frustum ) const
 {
     return _impl->order( bricks, frustum );
 }

@@ -46,7 +46,8 @@ public:
     LIVRECORE_API Histogram& operator=( const Histogram& rhs );
 
     /**
-     * Computes the addition of two histograms and modifies the object
+     * Computes the addition of two histograms and modifies the object.
+     * If the histogram is empty this operator behaves the same as the assignment operator.
      * @param histogram is the histogram to add
      * @return the modified histogram
      */

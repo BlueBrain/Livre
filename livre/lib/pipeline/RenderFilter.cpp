@@ -53,7 +53,9 @@ struct RenderFilter::Impl
         const auto& frustums = input.get< Frustum >( "Frustum" );
         const auto& clipPlanes = input.get< ClipPlanes >( "ClipPlanes" );
         const auto& viewports = input.get< PixelViewport >( "Viewport" );
-        _renderer.render( frustums[ 0 ], clipPlanes[ 0 ], viewports[ 0 ], renderBricks );
+        const auto& renderStages = input.get< uint32_t >( "RenderStages" );
+        _renderer.render( frustums[ 0 ], clipPlanes[ 0 ], viewports[ 0 ],
+                          renderBricks, renderStages[ 0 ] );
     }
 
     DataInfos getInputDataInfos() const
@@ -63,7 +65,8 @@ struct RenderFilter::Impl
             { "CacheObjects", getType< ConstCacheObjects >() },
             { "Frustum", getType< Frustum >() },
             { "Viewport", getType< PixelViewport >() },
-            { "ClipPlanes", getType< ClipPlanes >() }
+            { "ClipPlanes", getType< ClipPlanes >() },
+            { "RenderStages", getType< uint32_t >() }
         };
     }
 
