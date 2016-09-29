@@ -51,35 +51,26 @@ public:
      */
     LIVRECORE_API bool initialize( const int32_t argc, const char **argv );
 
-    /**
-     * @return The parameter name.
-     */
-    LIVRECORE_API const std::string& getParameterName( ) const;
+    /** @return The parameter name. */
+    LIVRECORE_API const std::string& getParameterName() const;
 
-    /**
-     * @return The configuration of parameters.
-     */
-    LIVRECORE_API const Configuration& getConfiguration( ) const;
+    /** @return The configuration of parameters. */
+    LIVRECORE_API const Configuration& getConfiguration() const;
 
 protected:
     /**
+     * Constructor
      * @param configGroupName Configuration group name.
      */
     LIVRECORE_API Parameters( const std::string& configGroupName );
 
-    /**
-     * Initializes member variables from configuration variables.
-     */
-    virtual void initialize_( ) = 0;
+    /** Initializes member variables from configuration variables. */
+    virtual void _initialize( ) = 0;
 
-    /**
-     * configuration_ Configuration that keeps variadic data.
-     */
-    Configuration configuration_;
+    /** Configuration that keeps variadic data. */
+    Configuration _configuration;
 
-    /**
-     * configGroupName_ Configuration group name.
-     */
+    /** Configuration group name. */
     std::string configGroupName_;
 };
 
