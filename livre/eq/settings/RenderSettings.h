@@ -23,9 +23,9 @@
 #define _RenderSettings_h_
 
 #include <livre/lib/types.h>
-
-#include <livre/core/render/TransferFunction1D.h>
 #include <livre/core/render/ClipPlanes.h>
+
+#include <lexis/render/ColorMap.h>
 
 #include <co/serializable.h>
 
@@ -37,7 +37,7 @@ class RenderSettings : public co::Serializable
     /** The changed parts of the data since the last pack( ). */
     enum DirtyBits
     {
-        DIRTY_TF = co::Serializable::DIRTY_CUSTOM << 0u,
+        DIRTY_COLORMAP = co::Serializable::DIRTY_CUSTOM << 0u,
         DIRTY_DEPTH = co::Serializable::DIRTY_CUSTOM << 1u,
         DIRTY_CLIPPLANES = co::Serializable::DIRTY_CUSTOM << 2u
     };
@@ -50,22 +50,18 @@ public:
     RenderSettings();
 
     /**
-     * @brief setTransferFunction Sets the transfer function.
-     * @param tf Transfer function.
+     * Sets the color map.
+     * @param cm is the color map
      */
-    void setTransferFunction( const TransferFunction1D& tf );
+    void setColorMap( const lexis::render::ColorMap& cm );
 
-    /**
-     * @brief resetTransferFunction Resets the transfer function.
-     */
-    void resetTransferFunction();
+    /** Resets the color map to default values */
+    void resetColorMap();
 
-    /**
-     * @return Returns the transfer function.
-     */
-    TransferFunction1D& getTransferFunction() { return _transferFunction; }
-    const TransferFunction1D& getTransferFunction() const
-        { return _transferFunction; }
+    /** @returns the color map. */
+    lexis::render::ColorMap& getColorMap() { return _colorMap; }
+    const lexis::render::ColorMap& getColorMap() const
+        { return _colorMap; }
 
     /**
      * @brief Sets the clip planes.
@@ -110,7 +106,7 @@ private:
     virtual void serialize(   co::DataOStream& os, const uint64_t dirtyBits );
     virtual void deserialize( co::DataIStream& is, const uint64_t dirtyBits );
 
-    TransferFunction1D _transferFunction;
+    lexis::render::ColorMap _colorMap;
     ClipPlanes _clipPlanes;
     uint8_t _depth;
 };

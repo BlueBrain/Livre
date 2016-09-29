@@ -125,7 +125,7 @@ struct RayCastRenderer::Impl
 
     void update( const FrameData& frameData )
     {
-        initTransferFunction( frameData.getRenderSettings().getTransferFunction( ));
+        initTransferFunction( frameData.getRenderSettings().getColorMap( ));
         _nSamplesPerRay = frameData.getVRParameters().getSamplesPerRay();
         _computedSamplesPerRay = _nSamplesPerRay;
         _nSamplesPerPixel = frameData.getVRParameters().getSamplesPerPixel();

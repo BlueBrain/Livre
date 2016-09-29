@@ -55,9 +55,9 @@ struct RenderPipeline::Impl
         , _textureCache( caches.textureCache )
         , _histogramCache( caches.histogramCache )
         , _texturePool( texturePool )
-        , _renderExecutor( nRenderThreads, glContext )
-        , _computeExecutor( nComputeThreads, glContext )
-        , _uploadExecutor( nUploadThreads, glContext )
+        , _renderExecutor( nRenderThreads, "Render Executor", glContext )
+        , _computeExecutor( nComputeThreads, "Compute Executor", glContext )
+        , _uploadExecutor( nUploadThreads, "Upload Executor", glContext )
     {
     }
 

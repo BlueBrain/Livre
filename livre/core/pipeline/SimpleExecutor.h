@@ -41,10 +41,12 @@ public:
 
     /**
      * @param threadCount is number of worker threads
+     * @param threadPoolName the threads are renamed with the given name
      * @param glContext if a gl context is provided, a new context will be created and
      * the worker threads will share the context with the given context
      */
     LIVRECORE_API SimpleExecutor( size_t threadCount,
+                                  const std::string& threadPoolName = "Simple Executor",
                                   ConstGLContextPtr glContext = ConstGLContextPtr( ));
 
     LIVRECORE_API virtual ~SimpleExecutor();

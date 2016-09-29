@@ -25,6 +25,8 @@
 
 #include <boost/thread/thread.hpp>
 
+#include <sys/prctl.h>
+
 namespace livre
 {
 
@@ -32,17 +34,20 @@ struct Workers::Impl
 {
     Impl( Workers& workers,
           const size_t nThreads,
+          const std::string& threadPoolName,
           const ConstGLContextPtr& glContext )
         : _workers( workers )
+        , _name( threadPoolName )
         , _glContext( glContext )
     {
         for( size_t i = 0; i < nThreads; ++i )
-            _threadGroup.create_thread( boost::bind( &Impl::execute,
-                                                     this ));
+            _threadGroup.create_thread( boost::bind( &Impl::execute, this ));
     }
 
     void execute()
     {
+        prctl( PR_SET_NAME, _name.c_str(), 0, 0, 0 );
+
         GLContextPtr context;
         if( _glContext )
         {
@@ -89,13 +94,16 @@ struct Workers::Impl
     Workers& _workers;
     lunchbox::MTQueue< ExecutablePtr > _workQueue;
     boost::thread_group _threadGroup;
+    const std::string _name;
     ConstGLContextPtr _glContext;
 };
 
 Workers::Workers( const size_t nThreads,
+                  const std::string& threadPoolName,
                   ConstGLContextPtr glContext )
     : _impl( new Workers::Impl( *this,
                                 nThreads,
+                                threadPoolName,
                                 glContext ))
 {}
 

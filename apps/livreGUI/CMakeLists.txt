@@ -31,9 +31,7 @@ set(LIVREGUI_HEADERS
   renderParametersController/RenderParametersController.h
   transferFunctionEditor/ColorMapWidget.h
   transferFunctionEditor/HoverPoints.h
-  transferFunctionEditor/TFWidget.h
   transferFunctionEditor/TransferFunctionEditor.h
-  transferFunctionEditor/Utilities.h
   types.h)
 
 set(LIVREGUI_SOURCES
@@ -53,7 +51,6 @@ set(LIVREGUI_SOURCES
   resources/resources.qrc
   transferFunctionEditor/ColorMapWidget.cpp
   transferFunctionEditor/HoverPoints.cpp
-  transferFunctionEditor/TFWidget.cpp
   transferFunctionEditor/TransferFunctionEditor.cpp
   transferFunctionEditor/TransferFunctionEditor.ui)
 

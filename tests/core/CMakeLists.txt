@@ -1,6 +1,0 @@
-# Copyright (c) BBP/EPFL 2015, Jafet.VillafrancaDiaz@epfl.ch
-
-file(GLOB TRANSFER_FUNCTION_FILES tf_*.1dt)
-file(COPY ${TRANSFER_FUNCTION_FILES}
-     DESTINATION ${PROJECT_BINARY_DIR}/share/Livre/examples)
-set(TEST_FILES ${TEST_FILES} ${TRANSFER_FUNCTION_FILES} PARENT_SCOPE)

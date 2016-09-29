@@ -36,11 +36,12 @@ class TexturePool
 public:
 
     /**
-     * Constructor.
+     * Constructor. Preallocates texture blocks
      * @param dataSource the data source
+     * @param gpuCacheSize the size of the GPU cache
      * @throws std::runtime_error if data has multiple channels
      */
-    LIVRECORE_API TexturePool( const DataSource& dataSource );
+    LIVRECORE_API TexturePool( const DataSource& dataSource, size_t gpuCacheSize );
     LIVRECORE_API ~TexturePool();
 
     /** @return The OpenGL GPU internal format of the texture data. */

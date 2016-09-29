@@ -208,8 +208,8 @@ private:
             { return _publisher.publish( _getFrameData().getVRParameters( )); };
         _requests[ ::lexis::render::LookOut::ZEROBUF_TYPE_IDENTIFIER()] = [&]
             { return publishCamera( _getFrameData().getCameraSettings().getModelViewMatrix( )); };
-        _requests[ _getRenderSettings().getTransferFunction().getTypeIdentifier( )] = [&]
-            { return _publisher.publish( _getRenderSettings().getTransferFunction( )); };
+        _requests[ _getRenderSettings().getColorMap().getTypeIdentifier( )] = [&]
+            { return _publisher.publish( _getRenderSettings().getColorMap( )); };
         _requests[ _getRenderSettings().getClipPlanes().getTypeIdentifier( )] = [&]
             { return _publisher.publish( _getRenderSettings().getClipPlanes( )); };
     }
@@ -244,7 +244,7 @@ private:
 
         _httpServer->add( _frame );
         _httpServer->add( _getFrameData().getVRParameters( ));
-        _httpServer->add( _getRenderSettings().getTransferFunction( ));
+        _httpServer->add( _getRenderSettings().getColorMap( ));
         _httpServer->add( _getRenderSettings().getClipPlanes( ));
 #endif
     }
@@ -267,7 +267,7 @@ private:
         _subscriber.subscribe( _frame );
 
         _subscriber.subscribe( _getFrameData().getVRParameters( ));
-        _subscriber.subscribe( _getRenderSettings().getTransferFunction( ));
+        _subscriber.subscribe( _getRenderSettings().getColorMap( ));
         _subscriber.subscribe( _getRenderSettings().getClipPlanes( ));
     }
 

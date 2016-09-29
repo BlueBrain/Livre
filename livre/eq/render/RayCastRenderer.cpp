@@ -33,9 +33,10 @@
 #include <livre/core/data/VolumeInformation.h>
 #include <livre/core/render/GLSLShaders.h>
 #include <livre/core/render/Frustum.h>
-#include <livre/core/render/TransferFunction1D.h>
 #include <livre/core/data/LODNode.h>
 #include <livre/core/render/GLContext.h>
+
+#include <lexis/render/ColorMap.h>
 
 #include <eq/eq.h>
 #include <eq/gl.h>
@@ -104,13 +105,12 @@ struct RayCastRenderer::Impl
         , _nSamplesPerRay( samplesPerRay )
         , _nSamplesPerPixel( samplesPerPixel )
         , _computedSamplesPerRay( samplesPerRay )
-        , _transferFunctionTexture( 0 )
+        , _colorMapTexture( 0 )
         , _textureCache( textureCache )
         , _dataSource( dataSource )
         , _volInfo( _dataSource.getVolumeInfo( ))
     {
-        TransferFunction1D transferFunction;
-        initTransferFunction( transferFunction );
+        initColorMap( lexis::render::ColorMap::getDefaultColorMap( 0.0f, 256.0f ));
 
         int error = _rayCastShaders.loadShaders( ShaderData( vertRayCast_glsl,
                                                              fragRayCast_glsl ));
@@ -150,33 +150,30 @@ struct RayCastRenderer::Impl
 
     void update( const FrameData& frameData )
     {
-        initTransferFunction( frameData.getRenderSettings().getTransferFunction( ));
+        initColorMap( frameData.getRenderSettings().getColorMap( ));
         _nSamplesPerRay = frameData.getVRParameters().getSamplesPerRay();
         _computedSamplesPerRay = _nSamplesPerRay;
         _nSamplesPerPixel = frameData.getVRParameters().getSamplesPerPixel();
     }
 
-    void initTransferFunction( const TransferFunction1D& transferFunction )
+    void initColorMap( const lexis::render::ColorMap colorMap )
     {
-        assert( transferFunction.getNumChannels() == 4u );
-
-        if( _transferFunctionTexture == 0 )
+        if( _colorMapTexture == 0 )
         {
-            GLuint tfTexture = 0;
-            glGenTextures( 1, &tfTexture );
-            glBindTexture( GL_TEXTURE_1D, tfTexture );
-
+            glGenTextures( 1, &_colorMapTexture );
+            glBindTexture( GL_TEXTURE_1D, _colorMapTexture );
             glTexParameteri( GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
             glTexParameteri( GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
             glTexParameteri( GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-            _transferFunctionTexture  = tfTexture;
         }
-        glBindTexture( GL_TEXTURE_1D, _transferFunctionTexture );
 
-        const uint8_t* transferFunctionData = transferFunction.getLut();
+        glBindTexture( GL_TEXTURE_1D, _colorMapTexture );
+
+        _colors = colorMap.sampleColors< uint8_t >( 256, 0.0f, 256.0f, 0 );
         glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA,
-                       GLsizei( transferFunction.getLutSize() / 4u ), 0,
-                       GL_RGBA, GL_UNSIGNED_BYTE, transferFunctionData );
+                       GLsizei( _colors.size( )), 0,
+                       GL_RGBA, GL_UNSIGNED_BYTE,
+                       reinterpret_cast< uint8_t* >( _colors.data( )));
     }
 
     void createAndInitializeRenderTexture( const Viewport& viewport )
@@ -338,7 +335,7 @@ struct RayCastRenderer::Impl
         glUniform1i( tParamNameGL, 0 );
 
         glActiveTexture( GL_TEXTURE1 );
-        glBindTexture( GL_TEXTURE_1D, _transferFunctionTexture );
+        glBindTexture( GL_TEXTURE_1D, _colorMapTexture );
         tParamNameGL = glGetUniformLocation( program, "transferFnTex" );
         glUniform1i( tParamNameGL, 1 );
 
@@ -561,13 +558,14 @@ struct RayCastRenderer::Impl
     uint32_t _nSamplesPerRay;
     uint32_t _nSamplesPerPixel;
     uint32_t _computedSamplesPerRay;
-    uint32_t _transferFunctionTexture;
+    uint32_t _colorMapTexture;
     std::vector< uint32_t > _usedTextures[2]; // last, current frame
     const Cache& _textureCache;
     const DataSource& _dataSource;
     const VolumeInformation& _volInfo;
     GLuint _quadVBO;
     GLint _drawBuffer;
+    lexis::render::Colors< uint8_t > _colors;
 };
 
 RayCastRenderer::RayCastRenderer( const DataSource& dataSource,

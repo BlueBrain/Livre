@@ -46,7 +46,7 @@ const std::string CAMERAPOS_PARAM = "camera-position";
 const std::string CAMERALOOKAT_PARAM = "camera-lookat";
 const std::string SYNC_CAMERA_PARAM = "sync-camera";
 const std::string DATAFILE_PARAM = "volume";
-const std::string TRANSFERFUNCTION_PARAM = "transfer-function";
+const std::string COLORMAP_PARAM = "colormap";
 
 ApplicationParameters::ApplicationParameters()
     : Parameters( "Application Parameters" )
@@ -74,9 +74,9 @@ ApplicationParameters::ApplicationParameters()
                                    "Camera orientation", cameraLookAt );
     configuration_.addDescription( configGroupName_, DATAFILE_PARAM,
                                    "URI of volume data source", dataFileName );
-    configuration_.addDescription( configGroupName_, TRANSFERFUNCTION_PARAM,
-                                ".1dt transfer function file (from ImageVis3D)",
-                                   transferFunction );
+    configuration_.addDescription( configGroupName_, COLORMAP_PARAM,
+                                   "Color map file (*.lba, *.lbb)",
+                                   colorMap );
 }
 
 ApplicationParameters& ApplicationParameters::operator = (
@@ -93,7 +93,7 @@ ApplicationParameters& ApplicationParameters::operator = (
     animationFPS = parameters.animationFPS;
     isResident = parameters.isResident;
     dataFileName = parameters.dataFileName;
-    transferFunction = parameters.transferFunction;
+    colorMap = parameters.colorMap;
 
     return *this;
 }
@@ -107,8 +107,7 @@ void ApplicationParameters::initialize_()
     cameraPosition = configuration_.getValue( CAMERAPOS_PARAM, cameraPosition );
     cameraLookAt = configuration_.getValue( CAMERALOOKAT_PARAM, cameraLookAt );
     dataFileName = configuration_.getValue( DATAFILE_PARAM, dataFileName );
-    transferFunction = configuration_.getValue( TRANSFERFUNCTION_PARAM,
-                                                transferFunction );
+    colorMap = configuration_.getValue( COLORMAP_PARAM, colorMap );
     bool animationFollowData = false;
     animationFollowData = configuration_.getValue( ANIMATION_FOLLOW_DATA_PARAM,
                                                    animationFollowData );
