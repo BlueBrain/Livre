@@ -23,7 +23,6 @@
 
 #include <livre/eq/types.h>
 #include <livre/lib/types.h>
-#include <livre/eq/coTypes.h>
 #include <co/objectFactory.h> // member
 
 namespace livre

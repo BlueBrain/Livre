@@ -88,9 +88,9 @@ LODNode DataSource::getNode( const NodeId& nodeId ) const
     return _impl->getNode( nodeId );
 }
 
-void DataSource::update()
+bool DataSource::update()
 {
-    _impl->plugin->update();
+    return _impl->plugin->update();
 }
 
 const VolumeInformation& DataSource::getVolumeInfo() const

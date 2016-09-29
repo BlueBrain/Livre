@@ -38,7 +38,7 @@ void FrameSettings::reset()
     frameNumber_ = INVALID_TIMESTEP;
     screenShot_ = 0;
     statistics_ = false;
-    help_ = false;
+    info_ = false;
     grabFrame_= false;
     setDirty( DIRTY_ALL );
 }
@@ -46,14 +46,14 @@ void FrameSettings::reset()
 void FrameSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
 {
     co::Serializable::serialize( os, dirtyBits );
-    os << currentViewId_ << frameNumber_ << screenShot_ << statistics_ << help_
+    os << currentViewId_ << frameNumber_ << screenShot_ << statistics_ << info_
        << grabFrame_;
 }
 
 void FrameSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits )
 {
     co::Serializable::deserialize( is, dirtyBits );
-    is >> currentViewId_ >> frameNumber_ >> screenShot_ >> statistics_ >> help_
+    is >> currentViewId_ >> frameNumber_ >> screenShot_ >> statistics_ >> info_
        >> grabFrame_;
 }
 
@@ -78,15 +78,15 @@ void FrameSettings::toggleStatistics()
     setDirty( DIRTY_ALL );
 }
 
-void FrameSettings::toggleHelp()
+void FrameSettings::toggleInfo()
 {
-    help_ = !help_;
+    info_ = !info_;
     setDirty( DIRTY_ALL );
 }
 
-bool FrameSettings::getShowHelp() const
+bool FrameSettings::getShowInfo() const
 {
-    return help_;
+    return info_;
 }
 
 bool FrameSettings::getStatistics() const

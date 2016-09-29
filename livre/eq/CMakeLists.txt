@@ -32,7 +32,7 @@ set(LIVREEQ_HEADERS
       settings/RenderSettings.h
       settings/VolumeSettings.h
       Window.h
-      coTypes.h
+      coSerialization.h
       types.h)
 
 set( LIVREEQ_SOURCES

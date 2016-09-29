@@ -40,7 +40,7 @@ namespace livre
 namespace
 {
 const size_t nRenderThreads = 2;
-const size_t nUploadThreads = 4;
+const size_t nUploadThreads = 1;
 const size_t nComputeThreads = 2;
 }
 

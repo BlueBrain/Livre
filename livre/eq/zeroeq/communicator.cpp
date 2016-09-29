@@ -53,10 +53,6 @@ public:
     Impl( Config& config, const int argc, char** argv )
         : _config( config )
     {
-        const lunchbox::URI& uri =
-                lunchbox::URI( _config.getFrameData().getVolumeSettings().getURI( ));
-        _volumeInfo = DataSource::getVolumeInfo( uri );
-
         if( !servus::Servus::isAvailable( ))
             return;
 
@@ -77,6 +73,7 @@ public:
 
         return _publisher.publish( _frame );
     }
+
     ::lexis::render::LookOut _getLookOut( const Matrix4f& livreModelView )
     {
         // this computation does not work if spaces are rotated in respect to each other.
@@ -88,8 +85,9 @@ public:
         translation = -rotation.inverse() * translation;
         translation[3] = 1.0f;
 
-        translation = -rotation * _volumeInfo.dataToLivreTransform.inverse() * translation;
-        translation *= ( 1.0f / _volumeInfo.meterToDataUnitRatio );
+        const auto& volumeInfo = _config.getVolumeInformation();
+        translation = -rotation * volumeInfo.dataToLivreTransform.inverse() * translation;
+        translation *= ( 1.0f / volumeInfo.meterToDataUnitRatio );
         translation[3] = 1.0f;
 
         Matrix4f networkModelView;
@@ -120,11 +118,12 @@ public:
         Matrix4f rotation;
         rotation.setSubMatrix< 3, 3 >( networkModelView.getSubMatrix< 3, 3 >( 0, 0 ), 0, 0 );
 
+        const auto& volumeInfo = _config.getVolumeInformation();
         translation = -rotation.inverse() * translation;
-        translation *= _volumeInfo.meterToDataUnitRatio;
+        translation *= volumeInfo.meterToDataUnitRatio;
         translation[3] = 1.0f;
 
-        translation = -rotation * _volumeInfo.dataToLivreTransform * translation;
+        translation = -rotation * volumeInfo.dataToLivreTransform * translation;
         translation[3] = 1.0f;
 
         Matrix4f livreModelView;
@@ -193,7 +192,6 @@ public:
 private:
     ::zeroeq::Subscriber _subscriber;
     ::zeroeq::Publisher _publisher;
-    lunchbox::Clock _heartbeatClock;
     typedef std::function< bool() > RequestFunc;
     typedef std::map< ::zeroeq::uint128_t, RequestFunc > RequestFuncs;
     RequestFuncs _requests;
@@ -201,7 +199,6 @@ private:
     std::unique_ptr< ::zeroeq::http::Server > _httpServer;
 #endif
     ::lexis::render::Frame _frame;
-    livre::VolumeInformation _volumeInfo;
     Config& _config;
 
     void _setupRequests()
