@@ -49,7 +49,7 @@ struct ApplicationParameters : public Parameters
     LIVRE_API ApplicationParameters& operator=( const ApplicationParameters& parameters );
 
 private:
-    void initialize_() final;
+    void _initialize() final;
 };
 
 }

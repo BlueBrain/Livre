@@ -54,7 +54,7 @@ public:
     /**
      * @return The parameter name.
      */
-    LIVRECORE_API const std::string& getParameterName( ) const;
+    LIVRECORE_API const std::string& getParameterName( z) const;
 
     /**
      * @return The configuration of parameters.
@@ -70,12 +70,12 @@ protected:
     /**
      * Initializes member variables from configuration variables.
      */
-    virtual void initialize_( ) = 0;
+    virtual void _initialize( ) = 0;
 
     /**
      * configuration_ Configuration that keeps variadic data.
      */
-    Configuration configuration_;
+    Configuration _configuration;
 
     /**
      * configGroupName_ Configuration group name.

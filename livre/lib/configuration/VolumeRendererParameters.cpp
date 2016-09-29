@@ -41,44 +41,44 @@ VolumeRendererParameters::VolumeRendererParameters()
     setMaxCPUCacheMemoryMB( 768u );
 #endif
 
-    configuration_.addDescription( configGroupName_, GPUCACHEMEM_PARAM,
+    _configuration.addDescription( configGroupName_, GPUCACHEMEM_PARAM,
                                    "Maximum GPU cache memory (MB) - "
                                    "caches the texture data in GPU memory",
                                    getMaxGPUCacheMemoryMB( ));
-    configuration_.addDescription( configGroupName_, CPUCACHEMEM_PARAM,
+    _configuration.addDescription( configGroupName_, CPUCACHEMEM_PARAM,
                                    "Maximum CPU cache memory (MB) - "
                                    "caches the volume data in CPU memory",
                                    getMaxCPUCacheMemoryMB( ));
-    configuration_.addDescription( configGroupName_, SCREENSPACEERROR_PARAM,
+    _configuration.addDescription( configGroupName_, SCREENSPACEERROR_PARAM,
                                    "Screen space error", getSSE( ));
-    configuration_.addDescription( configGroupName_, SYNCHRONOUSMODE_PARAM,
+    _configuration.addDescription( configGroupName_, SYNCHRONOUSMODE_PARAM,
                                    "Enable synchronous mode", getSynchronousMode( ));
-    configuration_.addDescription( configGroupName_, MINLOD_PARAM,
+    _configuration.addDescription( configGroupName_, MINLOD_PARAM,
                                    "Minimum level of detail", getMinLOD( ));
-    configuration_.addDescription( configGroupName_, MAXLOD_PARAM,
+    _configuration.addDescription( configGroupName_, MAXLOD_PARAM,
                                    "Maximum level of detail", getMaxLOD( ));
-    configuration_.addDescription( configGroupName_, SAMPLESPERRAY_PARAM,
+    _configuration.addDescription( configGroupName_, SAMPLESPERRAY_PARAM,
                                    "Number of samples per ray. The value of 0 (default) sets"
                                    " the number of samples automatically, based on the volume size",
                                    getSamplesPerRay( ));
-    configuration_.addDescription( configGroupName_, SAMPLESPERPIXEL_PARAM,
+    _configuration.addDescription( configGroupName_, SAMPLESPERPIXEL_PARAM,
                                    "Number of samples per pixel", getSamplesPerPixel( ));
 }
 
-void VolumeRendererParameters::initialize_()
+void VolumeRendererParameters::_initialize()
 {
-    setSynchronousMode( configuration_.getValue( SYNCHRONOUSMODE_PARAM,
+    setSynchronousMode( _configuration.getValue( SYNCHRONOUSMODE_PARAM,
                                                  getSynchronousMode( )));
-    setSSE( configuration_.getValue( SCREENSPACEERROR_PARAM, getSSE( )));
-    setMaxGPUCacheMemoryMB( configuration_.getValue( GPUCACHEMEM_PARAM,
+    setSSE( _configuration.getValue( SCREENSPACEERROR_PARAM, getSSE( )));
+    setMaxGPUCacheMemoryMB( _configuration.getValue( GPUCACHEMEM_PARAM,
                                                      getMaxGPUCacheMemoryMB( )));
-    setMaxCPUCacheMemoryMB( configuration_.getValue( CPUCACHEMEM_PARAM,
+    setMaxCPUCacheMemoryMB( _configuration.getValue( CPUCACHEMEM_PARAM,
                                                      getMaxCPUCacheMemoryMB( )));
-    setMinLOD( configuration_.getValue( MINLOD_PARAM, getMinLOD( )));
-    setMaxLOD( configuration_.getValue( MAXLOD_PARAM, getMaxLOD( )));
-    setSamplesPerRay( configuration_.getValue( SAMPLESPERRAY_PARAM,
+    setMinLOD( _configuration.getValue( MINLOD_PARAM, getMinLOD( )));
+    setMaxLOD( _configuration.getValue( MAXLOD_PARAM, getMaxLOD( )));
+    setSamplesPerRay( _configuration.getValue( SAMPLESPERRAY_PARAM,
                                                getSamplesPerRay( )));
-    setSamplesPerPixel( configuration_.getValue( SAMPLESPERPIXEL_PARAM,
+    setSamplesPerPixel( _configuration.getValue( SAMPLESPERPIXEL_PARAM,
                                                  getSamplesPerPixel( )));
 }
 

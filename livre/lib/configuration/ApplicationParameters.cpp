@@ -58,23 +58,28 @@ ApplicationParameters::ApplicationParameters()
     , animationFPS( 0 )
     , isResident( false )
 {
-    configuration_.addDescription( configGroupName_, ANIMATION_PARAM,
-                                   "Enable animation mode (optional frame delta for animation speed, use --animation=-<int> for reverse animation)", animation, 1 );
-    configuration_.addDescription( configGroupName_, ANIMATION_FPS_PARAM,
-                                   "Animation frames per second. By default (value of 0), it will request a new frame as soon as the previous one is done", animationFPS );
-    configuration_.addDescription( configGroupName_, ANIMATION_FOLLOW_DATA_PARAM,
-                                   "Enable animation and follow volume data stream (overrides --animation=value)", false );
-    configuration_.addDescription( configGroupName_, FRAMES_PARAM,
+    _configuration.addDescription( configGroupName_, ANIMATION_PARAM,
+                                   "Enable animation mode (optional frame delta for animation "
+                                   "speed, use --animation=-<int> for reverse animation)",
+                                   animation, 1 );
+    _configuration.addDescription( configGroupName_, ANIMATION_FPS_PARAM,
+                                   "Animation frames per second. By default (value of 0), it will "
+                                   "request a new frame as soon as the previous one is done",
+                                   animationFPS );
+    _configuration.addDescription( configGroupName_, ANIMATION_FOLLOW_DATA_PARAM,
+                                   "Enable animation and follow volume data stream (overrides "
+                                   "--animation=value)", false );
+    _configuration.addDescription( configGroupName_, FRAMES_PARAM,
                                    "Frames to render [start end)", frames );
-    configuration_.addDescription( configGroupName_, NUMFRAMES_PARAM,
+    _configuration.addDescription( configGroupName_, NUMFRAMES_PARAM,
                                    "Maximum nuber of frames to render", maxFrames );
-    configuration_.addDescription( configGroupName_, CAMERAPOS_PARAM,
+    _configuration.addDescription( configGroupName_, CAMERAPOS_PARAM,
                                    "Camera position", cameraPosition );
-    configuration_.addDescription( configGroupName_, CAMERALOOKAT_PARAM,
+    _configuration.addDescription( configGroupName_, CAMERALOOKAT_PARAM,
                                    "Camera orientation", cameraLookAt );
-    configuration_.addDescription( configGroupName_, DATAFILE_PARAM,
+    _configuration.addDescription( configGroupName_, DATAFILE_PARAM,
                                    "URI of volume data source", dataFileName );
-    configuration_.addDescription( configGroupName_, COLORMAP_PARAM,
+    _configuration.addDescription( configGroupName_, COLORMAP_PARAM,
                                    "Color map file (*.lba, *.lbb)",
                                    colorMap );
 }
@@ -98,18 +103,18 @@ ApplicationParameters& ApplicationParameters::operator = (
     return *this;
 }
 
-void ApplicationParameters::initialize_()
+void ApplicationParameters::_initialize()
 {
-    animation = configuration_.getValue( ANIMATION_PARAM, animation );
-    animationFPS = configuration_.getValue( ANIMATION_FPS_PARAM, animationFPS );
-    frames = configuration_.getValue( FRAMES_PARAM, frames );
-    maxFrames = configuration_.getValue( NUMFRAMES_PARAM, maxFrames );
-    cameraPosition = configuration_.getValue( CAMERAPOS_PARAM, cameraPosition );
-    cameraLookAt = configuration_.getValue( CAMERALOOKAT_PARAM, cameraLookAt );
-    dataFileName = configuration_.getValue( DATAFILE_PARAM, dataFileName );
-    colorMap = configuration_.getValue( COLORMAP_PARAM, colorMap );
+    animation = _configuration.getValue( ANIMATION_PARAM, animation );
+    animationFPS = _configuration.getValue( ANIMATION_FPS_PARAM, animationFPS );
+    frames = _configuration.getValue( FRAMES_PARAM, frames );
+    maxFrames = _configuration.getValue( NUMFRAMES_PARAM, maxFrames );
+    cameraPosition = _configuration.getValue( CAMERAPOS_PARAM, cameraPosition );
+    cameraLookAt = _configuration.getValue( CAMERALOOKAT_PARAM, cameraLookAt );
+    dataFileName = _configuration.getValue( DATAFILE_PARAM, dataFileName );
+    colorMap = _configuration.getValue( COLORMAP_PARAM, colorMap );
     bool animationFollowData = false;
-    animationFollowData = configuration_.getValue( ANIMATION_FOLLOW_DATA_PARAM,
+    animationFollowData = _configuration.getValue( ANIMATION_FOLLOW_DATA_PARAM,
                                                    animationFollowData );
     if( animationFollowData )
         animation = LATEST_FRAME;
