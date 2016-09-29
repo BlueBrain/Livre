@@ -298,8 +298,8 @@ bool Config::init( const int argc LB_UNUSED, char** argv LB_UNUSED )
     frameSettings.setFrameNumber( params.frames.x( ));
 
     RenderSettings& renderSettings = framedata.getRenderSettings();
-    const TransferFunction1D tf( params.transferFunction );
-    renderSettings.setTransferFunction( tf );
+    const lexis::render::ColorMap cm( params.colorMap );
+    renderSettings.setColorMap( cm );
 
     _impl->framedata.registerObjects();
 

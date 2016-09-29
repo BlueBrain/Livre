@@ -23,8 +23,10 @@
 #define _TransferFunctionEditor_h_
 
 #include <livreGUI/types.h>
-#include <livre/core/render/TransferFunction1D.h>
 #include <livre/core/data/Histogram.h>
+
+#include <lexis/render/ColorMap.h>
+
 #include <lunchbox/monitor.h> // member
 #include <QWidget>
 
@@ -77,7 +79,7 @@ private:
     void _setHistogram();
     void _widgetsUpdated();
 
-    livre::TransferFunction1D _lut;
+    lexis::render::ColorMap _colorMap;
     livre::Histogram _histogram;
     livre::Controller& _controller;
     Ui::TransferFunctionEditor* _ui;

@@ -41,7 +41,7 @@ public:
     LIVRE_API VolumeRendererParameters();
 
 protected:
-    LIVRE_API void initialize_() final;
+    LIVRE_API void _initialize() final;
 };
 
 }

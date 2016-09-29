@@ -24,10 +24,11 @@ namespace livre
 {
 
 RenderSettings::RenderSettings()
-    :  _depth( 0 )
+    : _colorMap( lexis::render::ColorMap::getDefaultColorMap( 0, 256 ))
+    , _depth( 0 )
 {
-    _transferFunction.registerDeserializedCallback( [this]
-        { setDirty( DIRTY_TF ); });
+    _colorMap.registerDeserializedCallback( [this]
+        { setDirty( DIRTY_COLORMAP ); });
 
     _clipPlanes.registerDeserializedCallback( [this]
         { setDirty( DIRTY_CLIPPLANES ); });
@@ -35,15 +36,15 @@ RenderSettings::RenderSettings()
     _clipPlanes.clear();
 }
 
-void RenderSettings::resetTransferFunction( )
+void RenderSettings::resetColorMap( )
 {
-    setTransferFunction( TransferFunction1D( ));
+    setColorMap( lexis::render::ColorMap::getDefaultColorMap( 0.0f, 256.0f ));
 }
 
-void RenderSettings::setTransferFunction( const TransferFunction1D& tf )
+void RenderSettings::setColorMap( const lexis::render::ColorMap& cm )
 {
-    _transferFunction = tf;
-    setDirty( DIRTY_TF );
+    _colorMap = cm;
+    setDirty( DIRTY_COLORMAP );
 }
 
 void RenderSettings::setClipPlanes( const ClipPlanes& clipPlanes )
@@ -54,8 +55,8 @@ void RenderSettings::setClipPlanes( const ClipPlanes& clipPlanes )
 
 void RenderSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
 {
-    if( dirtyBits & DIRTY_TF )
-        os << _transferFunction;
+    if( dirtyBits & DIRTY_COLORMAP )
+        os << _colorMap;
 
     if( dirtyBits & DIRTY_DEPTH )
         os << _depth;
@@ -68,8 +69,8 @@ void RenderSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
 
 void RenderSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits )
 {
-    if( dirtyBits & DIRTY_TF )
-        is >> _transferFunction;
+    if( dirtyBits & DIRTY_COLORMAP )
+        is >> _colorMap;
 
     if( dirtyBits & DIRTY_DEPTH )
         is >> _depth;

@@ -36,10 +36,12 @@ public:
     /**
      * Constructs a thread pool given the number of threads.
      * @param nThreads is the number of threads.
+     * @param threadPoolName the threads are renamed with the given name
      * @param glContext if given, the threads can share this
      * context.
      */
     LIVRECORE_API Workers( size_t nThreads = 4,
+                           const std::string& threadPoolName = "Workers",
                            ConstGLContextPtr glContext = ConstGLContextPtr( ));
     LIVRECORE_API ~Workers();
 

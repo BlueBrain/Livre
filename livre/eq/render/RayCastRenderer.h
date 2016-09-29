@@ -48,7 +48,7 @@ public:
 
     /**
      * Updates the renderer state with new values wrt samples per ray & pixel
-     * and transfer function.
+     * and color map.
      * @param frameData the current frame data containing new values
      */
     void update( const FrameData& frameData );

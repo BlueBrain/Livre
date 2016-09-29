@@ -43,13 +43,13 @@ struct ApplicationParameters : public Parameters
     uint32_t animationFPS; //!< animation frames per second
     bool isResident; //!< Is the main app resident.
     std::string dataFileName; //!< Data file name.
-    std::string transferFunction; //!< Path to transfer function file
+    std::string colorMap; //!< Path to color map file
 
     /** @param parameters The source parameters. */
     LIVRE_API ApplicationParameters& operator=( const ApplicationParameters& parameters );
 
 private:
-    void initialize_() final;
+    void _initialize() final;
 };
 
 }

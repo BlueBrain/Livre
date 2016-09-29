@@ -33,6 +33,4 @@ add_definitions(-DNRRD_DATA_FILE=\"${NRRD_DATA_FILE}\")
 
 # Create and install all the tests
 include(CommonCTest)
-
-add_subdirectory(core)
 install_files(share/Livre/tests FILES ${TEST_FILES} COMPONENT examples)

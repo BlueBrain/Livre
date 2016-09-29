@@ -21,9 +21,14 @@
 #ifndef _ColorMapWidget_h_
 #define _ColorMapWidget_h_
 
-#include <livreGUI/transferFunctionEditor/TFWidget.h> // base class
 #include <livre/core/data/Histogram.h>
 #include <livre/core/types.h>
+
+#include <lexis/render/ColorMap.h>
+
+#include <QWidget>
+#include <QtGui/QLinearGradient>
+#include <QtGui/QImage>
 
 namespace livre
 {
@@ -34,35 +39,26 @@ class HoverPoints;
  * This class is used to create color curves with controls points. Each instance of
  * this class should be responsible for one of the RGBA component.
  */
-class ColorMapWidget : public TFWidget
+class ColorMapWidget : public QWidget
 {
     Q_OBJECT
 
 public:
 
     /**
-     * The ShadeType enum
-     */
-    enum ShadeType
-    {
-        RED_SHADE   = 0,
-        GREEN_SHADE = 1,
-        BLUE_SHADE  = 2,
-        ALPHA_SHADE = 3,
-        SHADE_COUNT = 4
-    };
-
-    /**
-     * Constructor of ColorMapWidget.
-     * @param type  Type of shade used to choose the color of the curve (RGBA).
+     * Constructor.
      * @param parent Parent widget.
+     * @param colorMap the colormap carries the control points
+     * @param channel  Type of shade used to choose the color of the curve (RGBA).
      */
-    ColorMapWidget( const ShadeType type, QWidget* parent );
+    ColorMapWidget( QWidget* parent,
+                    lexis::render::ColorMap& colorMap,
+                    lexis::render::ColorMap::Channel channel );
 
     /**
      * @return the shade type
      */
-    ShadeType getShadeType() const { return _shadeType; }
+    lexis::render::ColorMap::Channel getChannel() const { return _channel; }
 
     /**
      * Set the gradient stops.
@@ -89,35 +85,9 @@ public:
     QSize sizeHint() const final;
 
     /**
-     * Get the 2d positions of control points.
-     * @return QPolygonF with the control points.
+     * @return the gradient
      */
-    QPolygonF getPoints() const;
-
-    /**
-     * Set the 2d positions of control points.
-     * @param points QPolygonF with the control points.
-     */
-    void setPoints( const QPolygonF& getPoints );
-
-    /**
-     * getHoverPoints Get the hoverpoints.
-     * @return The hoverpoints.
-     */
-    HoverPoints* getHoverPoints() const;
-
-    /**
-     * Get the color at given control point.
-     * @param xPosition Position of the mouse cursor on the x-axis.
-     * @return An uint containing RGBA 8-bits values.
-     */
-    uint32_t getColorAtPoint( int32_t xPosition );
-
-    /**
-     * Return curve's values.
-     * @return A vector of 8-bits uints with the curve values.
-     */
-    UInt8s getCurve() const;
+    const QLinearGradient& getGradient() const { return _gradient; }
 
 signals:
 
@@ -138,11 +108,15 @@ private:
 
     void _generateBackground();
     void _drawHistogram();
+    void _createCheckersBackground();
 
-    ShadeType _shadeType;
+    lexis::render::ColorMap& _colorMap;
+    lexis::render::ColorMap::Channel _channel;
     HoverPoints* _hoverPoints;
     Histogram _histogram;
     bool _isLogScale;
+    QImage _background;
+    QLinearGradient _gradient;
 };
 
 }

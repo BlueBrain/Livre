@@ -22,7 +22,6 @@
 #include <livreGUI/transferFunctionEditor/ColorMapWidget.h>
 #include <livreGUI/transferFunctionEditor/HoverPoints.h>
 #include <livreGUI/transferFunctionEditor/TransferFunctionEditor.h>
-#include <livreGUI/transferFunctionEditor/Utilities.h>
 #include <livreGUI/ui_TransferFunctionEditor.h>
 #include <livreGUI/Controller.h>
 
@@ -34,6 +33,16 @@
 
 namespace livre
 {
+namespace
+{
+const size_t nChannels = 4;
+const lexis::render::ColorMap::Channel channels[] =
+                            { lexis::render::ColorMap::Channel::red,
+                              lexis::render::ColorMap::Channel::green,
+                              lexis::render::ColorMap::Channel::blue,
+                              lexis::render::ColorMap::Channel::alpha };
+
+}
 
 TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
                                                 QWidget* tfParentWidget )
@@ -41,32 +50,37 @@ TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
     , _controller( controller )
     , _ui( new Ui::TransferFunctionEditor )
 {
-    qRegisterMetaType< UInt8s >("UInt8s");
     _ui->setupUi( this );
 
-    for( size_t i = 0; i < ColorMapWidget::SHADE_COUNT; ++i )
+    for( const auto& channel: channels )
     {
-        _colorWidgets[ i ] = new ColorMapWidget( ColorMapWidget::ShadeType( i ), this );
-        connect( _colorWidgets[ i ], SIGNAL( colorsChanged( )), this, SLOT( _onColorsChanged()));
+        _colorWidgets[ (size_t)channel ] = new ColorMapWidget( this, _colorMap, channel  );
+        connect( _colorWidgets[ (size_t)channel  ], SIGNAL( colorsChanged( )),
+                this, SLOT( _onColorsChanged()));
     }
 
-    connect( _colorWidgets[ ColorMapWidget::ALPHA_SHADE ], SIGNAL( histIndexChanged(size_t,double)),
+    connect( _colorWidgets[ (size_t)lexis::render::ColorMap::Channel::alpha ],
+             SIGNAL( histIndexChanged(size_t,double)),
              this, SLOT( _onHistIndexChanged(size_t,double)));
 
     // Add the widgets to the layouts to match the exact positions on the
     // TransferFunctionEditor
-    _ui->redLayout->addWidget( _colorWidgets[ ColorMapWidget::RED_SHADE ] );
-    _ui->greenLayout->addWidget( _colorWidgets[ ColorMapWidget::GREEN_SHADE ] );
-    _ui->blueLayout->addWidget( _colorWidgets[ ColorMapWidget::BLUE_SHADE ] );
-    _ui->rgbaLayout->addWidget( _colorWidgets[ ColorMapWidget::ALPHA_SHADE ] );
+    _ui->redLayout->addWidget(
+                _colorWidgets[ (size_t)lexis::render::ColorMap::Channel::red ]);
+    _ui->greenLayout->addWidget(
+                _colorWidgets[ (size_t)lexis::render::ColorMap::Channel::green ]);
+    _ui->blueLayout->addWidget(
+                _colorWidgets[ (size_t)lexis::render::ColorMap::Channel::blue ]);
+    _ui->rgbaLayout->addWidget(
+                _colorWidgets[ (size_t)lexis::render::ColorMap::Channel::alpha ]);
 
     connect( _ui->histogramScaleCheckBox, SIGNAL( stateChanged( int )), this,
              SLOT( _onScaleChanged( int )));
 
-    connect( _ui->resetButton, SIGNAL( clicked()), this, SLOT( _setDefault()));
-    connect( _ui->clearButton, SIGNAL( clicked()), this, SLOT( _clear()));
-    connect( _ui->loadButton, SIGNAL( clicked()), this, SLOT( _load()));
-    connect( _ui->saveButton, SIGNAL( clicked()), this, SLOT( _save()));
+    connect( _ui->resetButton, SIGNAL( clicked( )), this, SLOT( _setDefault()));
+    connect( _ui->clearButton, SIGNAL( clicked( )), this, SLOT( _clear()));
+    connect( _ui->loadButton, SIGNAL( clicked() ), this, SLOT( _load()));
+    connect( _ui->saveButton, SIGNAL( clicked( )), this, SLOT( _save()));
 
     connect( this, &TransferFunctionEditor::transferFunctionChanged,
              this, &TransferFunctionEditor::_onTransferFunctionChanged );
@@ -76,9 +90,9 @@ TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
 
     QTimer::singleShot( 50, this, SLOT( _setDefault()));
 
-    _controller.subscribe( _lut );
+    _controller.subscribe( _colorMap );
     _controller.subscribe( _histogram );
-    _lut.registerDeserializedCallback( [&]
+    _colorMap.registerDeserializedCallback( [&]
         { return _onTransferFunction(); });
     _histogram.registerDeserializedCallback( [&]
         { return emit histogramChanged(); });
@@ -86,52 +100,32 @@ TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
 
 TransferFunctionEditor::~TransferFunctionEditor()
 {
-    _controller.unsubscribe( _lut );
+    _controller.unsubscribe( _colorMap );
     _controller.unsubscribe( _histogram );
     delete _ui;
 }
 
 void TransferFunctionEditor::_setGradientStops()
 {
-    QPolygonF allPoints;
-    for( auto& widget: _colorWidgets )
-    {
-        QPolygonF points = widget->getPoints();
-        std::sort( points.begin(), points.end(), xLessThan );
-        allPoints += points;
-    }
-    std::sort( allPoints.begin(), allPoints.end(), xLessThan );
-
     QGradientStops stops;
-    const float colorWidgetWidth = _colorWidgets[ ColorMapWidget::ALPHA_SHADE  ]->width();
-    for( int i = 0; i < allPoints.size(); ++i )
+    const auto& colors = _colorMap.sampleColors< uint8_t >( 256 );
+    float xPos = 0.0f;
+    const float diff = width() / 256.0f;
+    for( const auto& color: colors )
     {
-        const int xPoint = int( allPoints.at( i ).x());
-        if( i + 1 < allPoints.size() && xPoint == allPoints.at( i + 1 ).x( ))
-            continue;
-
-        int colors[ ColorMapWidget::SHADE_COUNT ] = { 0 };
-        for( size_t j = 0; j < ColorMapWidget::SHADE_COUNT; ++j )
-            colors[ j ] = _colorWidgets[ j ]->getColorAtPoint( xPoint );
-
-        QColor color((0x00ff0000 & colors[ 0 ]) >> 16,  // R (16)
-                     (0x0000ff00 & colors[ 1 ]) >> 8,   // G (8)
-                     (0x000000ff & colors[ 2 ]),        // B (1)
-                     (0xff000000 & colors[ 3 ]) >> 24); // A (24)
-
-        // Outlier
-        if( xPoint / colorWidgetWidth > 1 )
-            return;
-
-        stops << QGradientStop( xPoint / colorWidgetWidth, color );
+        const QColor col( color.r, color.g, color.b, color.a );
+        stops << QGradientStop( xPos / width(), col );
+        xPos += diff;
     }
-    _colorWidgets[ ColorMapWidget::ALPHA_SHADE  ]->setGradientStops( stops );
+
+    _colorWidgets[ (size_t)lexis::render::ColorMap::Channel::alpha ]->setGradientStops( stops );
 }
 
 void TransferFunctionEditor::_setHistogram()
 {
     const bool isLogScale = _ui->histogramScaleCheckBox->checkState() == Qt::Checked;
-    _colorWidgets[ ColorMapWidget::ALPHA_SHADE  ]->setHistogram( _histogram, isLogScale );
+    _colorWidgets[ (size_t)lexis::render::ColorMap::Channel::alpha  ]->setHistogram( _histogram,
+                                                                                     isLogScale );
 }
 
 void TransferFunctionEditor::_widgetsUpdated()
@@ -142,39 +136,7 @@ void TransferFunctionEditor::_widgetsUpdated()
 
 void TransferFunctionEditor::_setDefault()
 {
-    for( auto& widget: _colorWidgets )
-    {
-        const float h = widget->height();
-        const float w = widget->width();
-        QPolygonF points;
-        switch( widget->getShadeType( ))
-        {
-        case ColorMapWidget::RED_SHADE:
-        case ColorMapWidget::GREEN_SHADE:
-            points << QPointF( 0.0 * w, h );
-            points << QPointF( 0.4 * w, h );
-            points << QPointF( 0.6 * w, 0.0 );
-            points << QPointF( 1.0 * w, 0.0 );
-            break;
-        case ColorMapWidget::BLUE_SHADE:
-            points << QPointF( 0.0 * w, h );
-            points << QPointF( 0.2 * w, 0.0 );
-            points << QPointF( 0.6 * w, 0.0 );
-            points << QPointF( 0.8 * w, h );
-            points << QPointF( 1.0 * w, h );
-            break;
-        case ColorMapWidget::ALPHA_SHADE:
-            points << QPointF( 0.0 * w, h );
-            points << QPointF( 0.1 * w, 0.8 * h );
-            points << QPointF( 1.0 * w, 0.1 * h );
-            break;
-        case ColorMapWidget::SHADE_COUNT:
-        default:
-            break;
-        }
-        widget->setPoints( points );
-    }
-
+    _colorMap = lexis::render::ColorMap::getDefaultColorMap( 0.0f, 256.0f );
     _setHistogram();
     _onColorsChanged();
     _widgetsUpdated();
@@ -198,43 +160,27 @@ void TransferFunctionEditor::_onHistIndexChanged( size_t index, const double rat
 
 void TransferFunctionEditor::_publishTransferFunction()
 {
-    for( const auto& widget: _colorWidgets )
-    {
-        const UInt8s& curve = widget->getCurve();
-        if( curve.empty() || curve.size() * 4 != _lut.getLutSize( ))
-            return;
-    }
-
-    uint8_t* lut = _lut.getLut();
-    for( size_t i = 0; i < ColorMapWidget::SHADE_COUNT; ++i )
-    {
-        const UInt8s& curve =  _colorWidgets[ i ]->getCurve();
-        for( uint32_t j = 0; j < _lut.getLutSize() / ColorMapWidget::SHADE_COUNT; ++j )
-            lut[ ColorMapWidget::SHADE_COUNT * j + i ] = curve[ j ];
-    }
-
-    _controller.publish( _lut );
+    _controller.publish( _colorMap );
 }
 
 void TransferFunctionEditor::_onTransferFunction()
 {
     emit transferFunctionChanged();
-    _lut.registerDeserializedCallback( nullptr );
+    _colorMap.registerDeserializedCallback( nullptr );
 }
 
 void TransferFunctionEditor::_clear()
 {
-    const float h = _colorWidgets[ 0 ]->height();
-    const float w = _colorWidgets[ 0 ]->width();
-    QPolygonF points;
+    _colorMap.clear();
 
-    points << QPointF( 0.0 * w, h );
-    points << QPointF( 1.0 * w, 0.0 );
+    for( const auto& channel: channels )
+    {
+        _colorMap.addControlPoint( { 0.0f, 0.0f }, channel );
+        _colorMap.addControlPoint( { 255.0f, 1.0f }, channel );
+    }
 
-    for( auto& widget: _colorWidgets )
-        widget->setPoints( points );
-
-    _colorWidgets[ ColorMapWidget::ALPHA_SHADE ]->setHistogram( Histogram(), false );
+    _colorWidgets[ (size_t)lexis::render::ColorMap::Channel::alpha ]->setHistogram( Histogram(),
+                                                                                    false );
     _onColorsChanged();
     _widgetsUpdated();
     _publishTransferFunction();
@@ -242,61 +188,39 @@ void TransferFunctionEditor::_clear()
 
 namespace
 {
-const quint32 TF_FILE_HEADER = 0xdeadbeef;
-const quint32 TF_FILE_VERSION = 1;
-const QString TF_FILE_FILTER( "Transfer function's control points, *.tf" );
-const QString DT_FILE_FILTER( "ImageVis3d compatible ascii, *.1dt" );
 const QString LBA_FILE_FILTER( "Transfer function's values ascii, *.lba" );
 const QString LBB_FILE_FILTER( "Transfer function's values binary, *.lbb" );
-const QString TF_FILTERS( TF_FILE_FILTER + ";;" + DT_FILE_FILTER + ";;" +
-                          LBA_FILE_FILTER + ";;" + LBB_FILE_FILTER );
+const QString TF_FILTERS( LBA_FILE_FILTER + ";;" + LBB_FILE_FILTER );
 }
 void TransferFunctionEditor::_load()
 {
     QString selectedFilter;
-    const QString filename = QFileDialog::getOpenFileName( this, "Load transfer function",
-                                                           QString(),
-                                                           TF_FILTERS, &selectedFilter );
+    QString filename = QFileDialog::getOpenFileName( this, "Load transfer function",
+                                                     QString(),
+                                                     TF_FILTERS, &selectedFilter );
     if( filename.isEmpty( ))
         return;
 
-    if( selectedFilter == TF_FILE_FILTER )
+    lexis::render::ColorMap colorMap;
+
+    if( selectedFilter == LBA_FILE_FILTER )
     {
-        QFile file( filename );
-        file.open( QIODevice::ReadOnly );
-        QDataStream in( &file );
+        if( !filename.endsWith( ".lba" ))
+            filename.append( ".lba" );
 
-        quint32 header;
-        in >> header;
-        if( header != TF_FILE_HEADER )
-            return;
-
-        quint32 version;
-        in >> version;
-        if( version != TF_FILE_VERSION )
-            return;
-
-        for( auto& widget: _colorWidgets )
-        {
-            QPolygonF points;
-            in >> points;
-            widget->setPoints( points );
-        }
-
-        _setHistogram();
-        _widgetsUpdated();
-        _publishTransferFunction();
-        return;
+        lunchbox::loadAscii( colorMap, filename.toStdString( ));
     }
-    else if(( selectedFilter == DT_FILE_FILTER ) ||
-            ( selectedFilter == LBA_FILE_FILTER ) ||
-            ( selectedFilter == LBB_FILE_FILTER ))
+    else if( selectedFilter == LBB_FILE_FILTER )
     {
-        livre::TransferFunction1D lut( filename.toStdString( ));
-        _lut = lut;
-        _onTransferFunction();
-        return;
+        if( !filename.endsWith( ".lbb" ))
+            filename.append( ".lbb" );
+
+        lunchbox::loadBinary( colorMap, filename.toStdString( ));
     }
+
+    _colorMap = colorMap;
+    _onTransferFunction();
+    _onColorsChanged();
 }
 
 void TransferFunctionEditor::_save()
@@ -305,119 +229,25 @@ void TransferFunctionEditor::_save()
     QString filename = QFileDialog::getSaveFileName( this, "Save transfer function",
                                                            QString(),
                                                            TF_FILTERS, &selectedFilter );
-    if( selectedFilter == TF_FILE_FILTER )
-    {
-        if( !filename.endsWith( ".tf" ))
-            filename.append( ".tf" );
 
-        QFile file( filename );
-        file.open( QIODevice::WriteOnly );
-        QDataStream out( &file );
-        out.setVersion( QDataStream::Qt_5_0 );
-
-        out << TF_FILE_HEADER << TF_FILE_VERSION;
-
-        for( size_t i = 0; i < ColorMapWidget::SHADE_COUNT; ++i )
-            out << _colorWidgets[ i ]->getPoints();
-    }
-    else if( selectedFilter == DT_FILE_FILTER )
-    {
-        if( !filename.endsWith( ".1dt" ))
-            filename.append( ".1dt" );
-
-        std::ofstream file;
-        file.open( filename.toStdString( ));
-        size_t tfSize = _lut.getLutSize() / ColorMapWidget::SHADE_COUNT;
-        file << tfSize << " uint8" << std::endl;
-
-        for( size_t i = 0; i < tfSize; ++i )
-        {
-            for( const auto& widget: _colorWidgets )
-                file << (uint32_t)widget->getCurve()[ i ] << " ";
-            file << std::endl;
-        }
-
-    }
-    else if( selectedFilter == LBA_FILE_FILTER )
+    if( selectedFilter == LBA_FILE_FILTER )
     {
         if( !filename.endsWith( ".lba" ))
             filename.append( ".lba" );
 
-        lunchbox::saveAscii( _lut, filename.toStdString( ));
+        lunchbox::saveAscii( _colorMap, filename.toStdString( ));
     }
     else if( selectedFilter == LBB_FILE_FILTER )
     {
         if( !filename.endsWith( ".lbb" ))
             filename.append( ".lbb" );
 
-        lunchbox::saveBinary( _lut, filename.toStdString( ));
+        lunchbox::saveBinary( _colorMap, filename.toStdString( ));
     }
-}
-
-namespace
-{
-QPolygon _filterPoints( const QPolygon& points )
-{
-    QPolygon filteredPoints;
-    float prevSlope = 0;
-    QPoint prevPoint = points.first();
-    for( int i = 1; i < points.size() - 1; ++i )
-    {
-        const QPoint& currentPoint = points[i];
-        const QLine currentLine( prevPoint, currentPoint );
-        const float currentSlope = float(currentLine.dy()) / float(currentLine.dx());
-
-        bool change = std::abs(prevSlope - currentSlope) > std::numeric_limits<float>::epsilon();
-        if( change )
-        {
-            const QLine nextLine( currentPoint, points[ i + 1 ] );
-            const float nextSlope = float(nextLine.dy()) / float(nextLine.dx());
-            if( std::abs(prevSlope - nextSlope) <= std::numeric_limits<float>::epsilon( ))
-                change = false;
-        }
-
-        if( change || i == 1 )
-        {
-            prevSlope = currentSlope;
-            filteredPoints << prevPoint;
-        }
-        prevPoint = points[i];
-    }
-    filteredPoints << points.last();
-    return filteredPoints;
-}
-
-QPolygonF _convertPoints( const QPolygon& points, const int width, const int height )
-{
-    QPolygonF convertedPoints;
-    for( int32_t i = 0; i < points.size(); ++i )
-    {
-        const int position = points.at( i ).x();
-        const int value = points.at( i ).y();
-
-        convertedPoints << QPointF( (position/255.f) * width,
-                             height - value * height / 255 );
-    }
-    return convertedPoints;
-}
 }
 
 void TransferFunctionEditor::_onTransferFunctionChanged()
 {
-
-    const uint8_t* lut = _lut.getLut();
-    for( size_t i = 0; i < ColorMapWidget::SHADE_COUNT; ++i )
-    {
-        QPolygon points;
-        const float h = _colorWidgets[ i ]->height();
-        const float w = _colorWidgets[ i ]->width();
-        for( size_t j = 0; j < _lut.getLutSize() / ColorMapWidget::SHADE_COUNT; ++j )
-            points << QPoint( j, lut[ j * ColorMapWidget::SHADE_COUNT + i ] );
-
-        QPolygonF fPoints = _convertPoints( _filterPoints( points ), w, h );
-        _colorWidgets[ i ]->setPoints( fPoints );
-    }
-
     _setHistogram();
     _widgetsUpdated();
     _publishTransferFunction();

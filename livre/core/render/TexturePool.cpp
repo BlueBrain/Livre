@@ -31,7 +31,7 @@ namespace livre
 
 #define glewGetContext() GLContext::glewGetContext()
 
-TexturePool::TexturePool( const DataSource& dataSource )
+TexturePool::TexturePool( const DataSource& dataSource, const size_t gpuCacheSize )
     : _maxBlockSize( dataSource.getVolumeInfo().maximumBlockSize )
     , _internalTextureFormat( 0 )
     , _format( 0 )
@@ -82,6 +82,17 @@ TexturePool::TexturePool( const DataSource& dataSource )
        LBTHROW( std::runtime_error( "Undefined data type" ));
     break;
     }
+
+    const size_t blockMemSize = _maxBlockSize.product() *
+                                dataSource.getVolumeInfo().getBytesPerVoxel() *
+                                dataSource.getVolumeInfo().compCount;
+
+    const size_t nBlockCount = gpuCacheSize / blockMemSize;
+
+    std::vector< std::unique_ptr <TextureState > > states;
+    for( size_t i = 0; i < nBlockCount; ++i )
+        states.emplace_back( new TextureState( *this ));
+    states.clear();
 }
 
 TexturePool::~TexturePool()

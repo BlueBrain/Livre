@@ -31,7 +31,6 @@ set(LIVRECORE_HEADERS
   events/EventHandlerFactory.h
   events/EventInfo.h
   events/EventMapper.h
-  maths/Quantizer.h
   pipeline/Executable.h
   pipeline/Filter.h
   pipeline/FutureMap.h
@@ -51,7 +50,6 @@ set(LIVRECORE_HEADERS
   render/SelectVisibles.h
   render/TexturePool.h
   render/TextureState.h
-  render/TransferFunction1D.h
   util/FrameUtils.h
   util/ThreadClock.h
   visitor/DFSTraversal.h
@@ -93,7 +91,6 @@ set(LIVRECORE_SOURCES
   render/SelectVisibles.cpp
   render/TexturePool.cpp
   render/TextureState.cpp
-  render/TransferFunction1D.cpp
   util/FrameUtils.cpp
   util/ThreadClock.cpp
   util/Utilities.cpp

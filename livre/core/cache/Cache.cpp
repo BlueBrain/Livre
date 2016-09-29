@@ -161,7 +161,7 @@ struct Cache::Impl
         return true;
     }
 
-    ConstCacheObjectPtr getFromMap( const CacheId& cacheId ) const
+    ConstCacheObjectPtr get( const CacheId& cacheId ) const
     {
         ReadLock readLock( _mutex );
         ConstCacheMap::const_iterator it = _cacheMap.find( cacheId );
@@ -175,11 +175,6 @@ struct Cache::Impl
     {
         WriteLock lock( _mutex );
         return unloadFromCache( cacheId );
-    }
-
-    ConstCacheObjectPtr get( const CacheId& cacheId ) const
-    {
-        return getFromMap( cacheId );
     }
 
     size_t getCount() const

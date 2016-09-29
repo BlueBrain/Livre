@@ -26,8 +26,8 @@ bool Parameters::initialize( const std::string& filename )
 {
     try
     {
-        configuration_.parseConfigFile( filename );
-        initialize_( );
+        _configuration.parseConfigFile( filename );
+        _initialize( );
         return true;
     }
     catch( const boost::program_options::error& exception )
@@ -42,8 +42,8 @@ bool Parameters::initialize( const int32_t argc, const char **argv )
 {
     try
     {
-        configuration_.parseCommandLine( argc, argv );
-        initialize_( );
+        _configuration.parseCommandLine( argc, argv );
+        _initialize( );
         return true;
     }
     catch( const boost::program_options::error& exception )
@@ -61,7 +61,7 @@ const std::string& Parameters::getParameterName() const
 
 const Configuration &Parameters::getConfiguration() const
 {
-    return configuration_;
+    return _configuration;
 }
 
 Parameters::~Parameters( )
