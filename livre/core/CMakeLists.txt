@@ -1,4 +1,5 @@
-# Copyright (c) 2011-2015, EPFL/Blue Brain Project
+
+# Copyright (c) 2011-2016, EPFL/Blue Brain Project
 #                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
 #                          Stefan.Eilemann@epfl.ch
 #
@@ -16,7 +17,6 @@ set(LIVRECORE_PUBLIC_HEADERS
   render/GLSLShaders.h
   util/Utilities.h
   lunchboxTypes.h
-  mathTypes.h
   types.h
 )
 
@@ -27,10 +27,6 @@ set(LIVRECORE_HEADERS
   configuration/Configuration.h
   configuration/Parameters.h
   data/DataSource.h
-  events/EventHandler.h
-  events/EventHandlerFactory.h
-  events/EventInfo.h
-  events/EventMapper.h
   maths/Quantizer.h
   pipeline/Executable.h
   pipeline/Filter.h
@@ -73,7 +69,6 @@ set(LIVRECORE_SOURCES
   data/DataSource.cpp
   data/DataSourcePlugin.cpp
   data/VolumeInformation.cpp
-  events/EventMapper.cpp
   pipeline/Executable.cpp
   pipeline/FutureMap.cpp
   pipeline/InputPort.cpp

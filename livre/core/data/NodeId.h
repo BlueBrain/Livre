@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -23,17 +23,13 @@
 #include <livre/core/api.h>
 #include <livre/core/defines.h>
 #include <livre/core/types.h>
-#include <livre/core/mathTypes.h>
 
 #include <functional>
 
 namespace livre
 {
 
-
-/**
- * Identifier for the octee LOD nodes
- */
+/** Identifier for octree LOD nodes */
 class NodeId
 {
     /* 64 bit node id encoding */

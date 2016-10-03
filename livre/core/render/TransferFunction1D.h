@@ -21,19 +21,15 @@
 #ifndef _TransferFunction1D_h_
 #define _TransferFunction1D_h_
 
-#include <co/dataIStream.h>
-#include <co/dataOStream.h>
-
 #include <livre/core/api.h>
 #include <livre/core/types.h>
-#include <livre/core/mathTypes.h>
 
 #include <lexis/render/lookupTable1D.h>
 
 namespace livre
 {
 
-/** Color and transparency for an RGBA 1 dimensional Transfer Function ( TF ). */
+/** Color and transparency for an RGBA 1 dimensional Transfer Function. */
 class TransferFunction1D : public ::lexis::render::LookupTable1D
 {
     static const size_t NCHANNELS = 4;

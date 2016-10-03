@@ -1,5 +1,5 @@
 /**
- * Copyright (c) BBP/EPFL 2005-2015 Ahmet.Bilgili@epfl.ch
+ * Copyright (c) BBP/EPFL 2005-2016 Ahmet.Bilgili@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -17,12 +17,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _coSerialization_h_
-#define _coSerialization_h_
+#ifndef _serialization_h_
+#define _serialization_h_
 
+#include <livre/core/data/VolumeInformation.h>
 #include <co/dataIStream.h>
 #include <co/dataOStream.h>
-#include <livre/core/data/VolumeInformation.h>
 #include <lunchbox/bitOperation.h>
 
 
@@ -30,9 +30,9 @@ namespace livre
 {
 
 inline co::DataOStream& operator << ( co::DataOStream& os,
-                               const VolumeInformation& info )
+                                      const VolumeInformation& info )
 {
-    os << info.isBigEndian << info.compCount << info.dataType << info.overlap
+    os << info.bigEndian << info.compCount << info.dataType << info.overlap
        << info.maximumBlockSize << info.voxels << info.worldSize
        << info.dataToLivreTransform << info.resolution
        << info.worldSpacePerVoxel << info.meterToDataUnitRatio
@@ -46,7 +46,7 @@ inline co::DataIStream& operator >> ( co::DataIStream& is,
 {
     uint32_t depth;
     Vector3ui blockSize;
-    is >> info.isBigEndian >> info.compCount >> info.dataType >> info.overlap
+    is >> info.bigEndian >> info.compCount >> info.dataType >> info.overlap
        >> info.maximumBlockSize >> info.voxels >> info.worldSize
        >> info.dataToLivreTransform >> info.resolution
        >> info.worldSpacePerVoxel >> info.meterToDataUnitRatio >> depth
@@ -74,4 +74,4 @@ template<> inline void byteswap( livre::DataType& value )
 
 }
 
-#endif // _coSerialization_h_
+#endif // _serialization_h_

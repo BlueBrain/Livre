@@ -21,10 +21,9 @@
 #define _Histogram_h_
 
 #include <livre/core/api.h>
-#include <livre/core/mathTypes.h>
+#include <livre/core/types.h>
 #include <co/distributable.h> // base class
-
-#include <lexis/render/histogram.h> // base class
+#include <lexis/render/histogram.h> // CRTP base class
 
 
 namespace livre

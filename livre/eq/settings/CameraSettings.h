@@ -22,15 +22,13 @@
 #ifndef _CameraSettings_h_
 #define _CameraSettings_h_
 
-#include <livre/core/mathTypes.h>
+#include <livre/core/types.h>
 #include <eq/fabric/vmmlib.h>
 #include <co/serializable.h> // base class
 
 namespace livre
 {
-/**
- * The CameraSettings class is the information sent from app node to the clients for camera operations
- */
+/** Global scene camera matrix and convenience methods. */
 class CameraSettings : public co::Serializable
 {
 public:

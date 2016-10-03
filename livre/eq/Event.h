@@ -1,6 +1,7 @@
 
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
- *                          Stefan Eilemann <Stefan.Eilemann@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          bbp-open-source@googlegroups.com
+ *                          Stefan.Eilemann@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -28,7 +29,7 @@ namespace livre
 
 enum ConfigEventType
 {
-    GRAB_IMAGE = eq::Event::USER,
+    GRAB_IMAGE = eq::EVENT_USER,
     VOLUME_INFO,
     REDRAW,
     HISTOGRAM_DATA

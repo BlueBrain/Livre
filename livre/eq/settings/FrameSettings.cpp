@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2006-2015, Stefan Eilemann <eile@equalizergraphics.com>
+/* Copyright (c) 2006-2016, Stefan Eilemann <eile@equalizergraphics.com>
  *                          Maxim Makhinya  <maxmah@gmail.com>
  *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
  *
@@ -36,7 +36,6 @@ void FrameSettings::reset()
 {
     currentViewId_ = lunchbox::uint128_t( 0 );
     frameNumber_ = INVALID_TIMESTEP;
-    screenShot_ = 0;
     statistics_ = false;
     info_ = false;
     grabFrame_= false;
@@ -46,15 +45,13 @@ void FrameSettings::reset()
 void FrameSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
 {
     co::Serializable::serialize( os, dirtyBits );
-    os << currentViewId_ << frameNumber_ << screenShot_ << statistics_ << info_
-       << grabFrame_;
+    os << currentViewId_ << frameNumber_ << statistics_ << info_ << grabFrame_;
 }
 
 void FrameSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits )
 {
     co::Serializable::deserialize( is, dirtyBits );
-    is >> currentViewId_ >> frameNumber_ >> screenShot_ >> statistics_ >> info_
-       >> grabFrame_;
+    is >> currentViewId_ >> frameNumber_ >> statistics_ >> info_ >> grabFrame_;
 }
 
 void FrameSettings::setFrameNumber( uint32_t frame )
@@ -63,12 +60,6 @@ void FrameSettings::setFrameNumber( uint32_t frame )
         return;
 
     frameNumber_ = frame;
-    setDirty( DIRTY_ALL );
-}
-
-void FrameSettings::makeScreenshot()
-{
-    screenShot_++;
     setDirty( DIRTY_ALL );
 }
 
@@ -92,11 +83,6 @@ bool FrameSettings::getShowInfo() const
 bool FrameSettings::getStatistics() const
 {
     return statistics_;
-}
-
-uint32_t FrameSettings::getScreenshotNumber() const
-{
-    return screenShot_;
 }
 
 void FrameSettings::setCurrentViewId( const eq::uint128_t &id )

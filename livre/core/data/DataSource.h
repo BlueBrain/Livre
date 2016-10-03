@@ -23,7 +23,6 @@
 #include <lunchbox/clock.h>
 
 #include <livre/core/api.h>
-#include <livre/core/mathTypes.h>
 #include <livre/core/defines.h>
 #include <livre/core/data/MemoryUnit.h>
 #include <livre/core/data/VolumeInformation.h>

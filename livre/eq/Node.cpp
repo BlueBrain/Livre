@@ -22,15 +22,15 @@
 
 #include <livre/eq/Node.h>
 
-#include <livre/eq/Config.h>
 #include <livre/eq/Client.h>
+#include <livre/eq/Config.h>
 #include <livre/eq/Error.h>
+#include <livre/eq/Event.h>
 #include <livre/eq/FrameData.h>
 #include <livre/eq/Pipe.h>
-#include <livre/eq/Event.h>
-#include <livre/eq/coSerialization.h>
-
+#include <livre/eq/serialization.h>
 #include <livre/eq/settings/VolumeSettings.h>
+
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/lib/cache/DataObject.h>
 #include <livre/lib/cache/HistogramObject.h>
@@ -47,8 +47,8 @@ struct Node::Impl
 {
 public:
     explicit Impl( livre::Node* node )
-       : _node( node )
-       , _config( static_cast< livre::Config* >( node->getConfig( )))
+        : _node( node )
+        , _config( static_cast< livre::Config* >( node->getConfig( )))
     {}
 
     void initializeCache()

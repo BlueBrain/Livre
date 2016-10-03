@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2006-2015, Stefan Eilemann <eile@equalizergraphics.com>
+/* Copyright (c) 2006-2016, Stefan Eilemann <eile@equalizergraphics.com>
  *                          Maxim Makhinya  <maxmah@gmail.com>
  *                          David Steiner   <steiner@ifi.uzh.ch>
  *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
@@ -23,17 +23,15 @@
 #ifndef _Config_h_
 #define _Config_h_
 
-#include <livre/core/mathTypes.h>
 #include <livre/eq/api.h>
 #include <livre/eq/types.h>
-#include <eq/config.h> // base class
+#include <livre/eq/EventHandler.h> // base class
+#include <eq/config.h> // CRTP base class
 
 namespace livre
 {
-/**
- * Config class Runtime user events handling for the main application.
- */
-class Config : public eq::Config
+/** Drives a configuration, aka the main application loop. */
+class Config : public EventHandler< eq::Config >
 {
 public:
     /**
@@ -86,31 +84,14 @@ public:
      */
     bool frame();
 
-    /**
-     * @return the number of frames that the data source provides.
-     */
-    uint32_t getDataFrameCount() const;
+    /** Schedule a redraw */
+    void postRedraw();
 
     /** @return true if an event required a redraw. */
     bool needRedraw();
 
-    /**
-     * switchCanvas_ Switches to next canvas.
-     * @return True if operations succeeds.
-     */
-    bool switchCanvas();
-
-    /**
-     * Switches to next view.
-     * @return True if operations succeeds.
-     */
-    bool switchView();
-
-    /**
-     * Switches to view canvas.
-     * @return True if operations succeeds.
-     */
-    bool switchToViewCanvas( const eq::uint128_t& viewID );
+    /** Publish a serializable object */
+    bool publish( const servus::Serializable& serializable );
 
     /**
      * Switches the layout.
@@ -118,21 +99,16 @@ public:
      */
     void switchLayout( const int32_t increment );
 
-    bool handleEvent( eq::EventICommand command ) final;
-
     void handleNetworkEvents();
 
     std::string renderJPEG();
 
     const VolumeInformation& getVolumeInformation() const;
+    VolumeInformation& getVolumeInformation();
 
 private:
     LIVREEQ_API virtual ~Config();
-    bool handleEvent( const eq::ConfigEvent* event ) final;
 
-    bool _registerFrameData();
-    bool _deregisterFrameData();
-    void _initEvents();
     bool _keepCurrentFrame( uint32_t fps ) const;
 
     class Impl;

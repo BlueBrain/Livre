@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2006-2015, Stefan Eilemann <eile@equalizergraphics.com>
+/* Copyright (c) 2006-2016, Stefan Eilemann <eile@equalizergraphics.com>
  *                          Maxim Makhinya  <maxmah@gmail.com>
  *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
  *
@@ -22,20 +22,13 @@
 #ifndef _FrameSettings_h_
 #define _FrameSettings_h_
 
-#include <co/serializable.h>
-
-#include <livre/lib/types.h>
-#include <livre/core/mathTypes.h>
-
-#include <livre/eq/Client.h>
+#include <livre/eq/types.h>
+#include <co/serializable.h> // base class
 
 namespace livre
 {
 
-/**
- * The FrameSettings class enables/disables info, statistics. Changes view and also toogles the
- * screen shot.
- */
+/** Enables/disables help, statistics, changes view. */
 class FrameSettings : public co::Serializable
 {
 public:
@@ -65,16 +58,6 @@ public:
 
     /** @return the current frame number to render. */
     uint32_t getFrameNumber() const { return frameNumber_; }
-
-    /**
-     * Screen shots the current frame.
-     */
-    void makeScreenshot();
-
-    /**
-     * @return Returns the screen shot number.
-     */
-    uint32_t getScreenshotNumber() const;
 
     /**
      * Set the current view id.
@@ -115,7 +98,6 @@ private:
 
     eq::uint128_t currentViewId_;
     uint32_t frameNumber_;
-    uint32_t screenShot_;
     bool statistics_;
     bool info_;
     bool grabFrame_;

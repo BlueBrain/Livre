@@ -1,7 +1,7 @@
 
-/* Copyright (c) 2011, Maxim Makhinya <maxmah@gmail.com>
- *               2012, David Steiner  <steiner@ifi.uzh.ch>
- *               2013, Ahmet Bilgili  <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2016, Maxim Makhinya <maxmah@gmail.com>
+ *                          David Steiner  <steiner@ifi.uzh.ch>
+ *                          Ahmet Bilgili  <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -23,15 +23,12 @@
 #define _VolumeSettings_h_
 
 #include <livre/lib/types.h>
-#include <livre/core/mathTypes.h>
 #include <co/serializable.h>
 
 namespace livre
 {
 
-/**
- * @brief The VolumeSettings class, keeps basic information about the volume data.
- */
+/** Basic information about the volume data. */
 class VolumeSettings : public co::Serializable
 {
 public:
@@ -61,9 +58,8 @@ public:
     const Vector2f& getDataSourceRange() const;
 
 private:
-
-    virtual void serialize(   co::DataOStream& os, const uint64_t dirtyBits );
-    virtual void deserialize( co::DataIStream& is, const uint64_t dirtyBits );
+    void serialize(   co::DataOStream& os, const uint64_t dirtyBits ) override;
+    void deserialize( co::DataIStream& is, const uint64_t dirtyBits ) override;
 
     std::string _uri;
     Vector2f _dataSourceRange;

@@ -1,4 +1,5 @@
 /* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          bbp-open-source@googlegroups.com
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -20,6 +21,9 @@
 #ifndef _coreTypes_h_
 #define _coreTypes_h_
 
+#include <vmmlib/aabb.hpp>
+#include <vmmlib/matrix.hpp>
+#include <vmmlib/vector.hpp>
 #include <lunchbox/debug.h>
 #include <lunchbox/log.h>
 #include <lunchbox/uri.h>
@@ -55,10 +59,6 @@ class CacheObject;
 class CacheStatistics;
 class ClipPlanes;
 class Configuration;
-class EventHandler;
-class EventHandlerFactory;
-class EventInfo;
-class EventMapper;
 class Frustum;
 class GLContext;
 class GLSLShaders;
@@ -76,9 +76,7 @@ class DataSource;
 class DataSourcePlugin;
 class DataSourcePluginData;
 
-/**
- * Pipeline
- */
+/** Pipeline */
 class AsyncData;
 class Executor;
 class Executable;
@@ -109,10 +107,7 @@ typedef uint64_t Identifier;
 typedef Identifier CacheId;
 typedef std::array< float, 2 > Range;
 
-/**
- * SmartPtr definitions
- */
-
+/** SmartPtr definitions */
 typedef std::shared_ptr< AllocMemoryUnit > AllocMemoryUnitPtr;
 typedef std::shared_ptr< GLContext > GLContextPtr;
 typedef std::shared_ptr< const GLContext > ConstGLContextPtr;
@@ -120,8 +115,6 @@ typedef std::shared_ptr< TextureState > TextureStatePtr;
 typedef std::shared_ptr< const TextureState > ConstTextureStatePtr;
 typedef std::shared_ptr< DataSource > DataSourcePtr;
 typedef std::shared_ptr< const DataSource > ConstDataSourcePtr;
-typedef std::shared_ptr< EventHandler > EventHandlerPtr;
-typedef std::shared_ptr< EventHandlerFactory > EventHandlerFactoryPtr;
 typedef std::shared_ptr< MemoryUnit > MemoryUnitPtr;
 typedef std::shared_ptr< const MemoryUnit > ConstMemoryUnitPtr;
 typedef std::shared_ptr< CacheObject > CacheObjectPtr;
@@ -133,30 +126,23 @@ typedef std::shared_ptr< Executable > ExecutablePtr;
 
 typedef std::unique_ptr< Filter > FilterPtr;
 
-/**
- * Helper classes for shared_ptr objects
- */
-template<typename T>
-struct DeleteArray
+/** Helper classes for shared_ptr objects */
+template<typename T> struct DeleteArray
 {
   void operator()(const T* t) const { delete[] t; }
 };
 
-template<typename T>
-struct DeleteObject
+template<typename T> struct DeleteObject
 {
   void operator()(const T* t) const { delete t; }
 };
 
-template<typename T>
-struct DontDeleteObject
+template<typename T> struct DontDeleteObject
 {
   void operator()(const T*) const { }
 };
 
-/**
- * Vector definitions basic types
- */
+/** Vector definitions basic types */
 typedef std::vector< float > Floats;
 typedef std::vector< double > Doubles;
 
@@ -175,29 +161,21 @@ typedef std::vector< uint64_t > UInt64s;
 typedef std::vector< NodeId > NodeIds;
 typedef std::vector< CacheId > CacheIds;
 
-/**
- * Vector definitions for complex types
- */
+/** Vector definitions for complex types */
 typedef std::vector< CacheObjectPtr > CacheObjects;
 typedef std::vector< ConstCacheObjectPtr > ConstCacheObjects;
 
-/**
- * List definitions for complex types
- */
+/** List definitions for complex types */
 typedef std::list< Executable* > Executables;
 typedef std::list< Future > Futures;
 typedef std::list< Promise > Promises;
 
-/**
- * Map definitions
- */
+/** Map definitions */
 typedef std::unordered_map< CacheId, CacheObjectPtr > CacheMap;
 typedef std::unordered_map< CacheId, ConstCacheObjectPtr > ConstCacheMap;
 typedef std::unordered_map< uint32_t, bool > BoolMap;
-typedef std::unordered_map< uint32_t, EventHandlerPtr > EventHandlerMap;
 
-template < class T >
-inline std::type_index getType()
+template < class T > inline std::type_index getType()
 {
     typedef typename std::remove_const<T>::type UnconstT;
     return std::type_index( typeid( UnconstT ));
@@ -206,15 +184,11 @@ inline std::type_index getType()
 typedef std::map< std::string, std::type_index > DataInfos;
 typedef DataInfos::value_type DataInfo;
 
-/**
- * Set definitions
- */
+/** Set definitions */
 typedef std::set< CacheId > CacheIdSet;
 typedef std::set< NodeId > NodeIdSet;
 
-/**
- * Locking object definitions
- */
+/** Locking object definitions */
 typedef boost::shared_mutex ReadWriteMutex;
 typedef boost::shared_lock< ReadWriteMutex > ReadLock;
 typedef boost::unique_lock< ReadWriteMutex > WriteLock;
@@ -244,7 +218,6 @@ const uint32_t INVALID_TIMESTEP = ( 1u << NODEID_TIMESTEP_BITS ) - 1; //!< Inval
 const uint32_t INVALID_FRAMEID = -1;
 const uint32_t LATEST_FRAME = INT_MAX; //!< Maximum frame number
 
-
 // Program Options
 typedef boost::program_options::variables_map ProgramOptionsMap;
 typedef boost::program_options::options_description ProgramOptionsDescription;
@@ -254,6 +227,50 @@ typedef std::map< std::string,
 // Const definitions
 static const std::string HIDDEN_PROGRAMDESCRIPTION_STR("_HIDDEN_");
 static const std::string NO_PREFIX = "";
+
+/** AABB definitions */
+typedef vmml::AABBf Boxf; //!< float AABB box.
+typedef vmml::AABB< int32_t > Boxi; //!< integer AABB box.
+typedef vmml::AABB< uint32_t > Boxui; //!< integer AABB box.
+
+/** Matrix definitions */
+using vmml::Matrix3f; //!< A 3x3 float matrix.
+using vmml::Matrix4f; //!< A 4x4 float matrix.
+
+using vmml::Matrix3d; //!< A 3x3 double matrix.
+using vmml::Matrix4d; //!< A 4x4 double matrix.
+
+/** Vector definitions */
+using vmml::Vector2i; //!< A two-component integer vector.
+using vmml::Vector3i; //!< A three-component integer vector.
+using vmml::Vector4i; //!< A four-component integer vector.
+
+using vmml::Vector2ui; //!< A two-component integer vector.
+using vmml::Vector3ui; //!< A three-component integer vector.
+using vmml::Vector4ui; //!< A four-component integer vector.
+
+using vmml::Vector2f; //!< A two-component float vector.
+using vmml::Vector3f; //!< A three-component float vector.
+using vmml::Vector3d; //!< A three-component double vector.
+using vmml::Vector4d; //!< A four-component double vector.
+using vmml::Vector4f; //!< A four-component float vector.
+using vmml::Frustumf; //!< Float frustum.
+using vmml::FrustumCullerf; //!< Float frustum culler.
+typedef Vector4f Plane;
+
+/** Quaternion definitions */
+using vmml::Quaternionf; //!< Float quaternion.
+
+/** Viewport definitions */
+typedef vmml::Vector4i PixelViewport;
+typedef vmml::Vector4f Viewport;
+
+/** Definitions */
+const Vector2ui INVALID_FRAME_RANGE( INVALID_TIMESTEP );
+const Vector2ui FULL_FRAME_RANGE( 0, INVALID_TIMESTEP );
+
+/** Vector definitions */
+typedef std::vector< Vector3f > Vector3fs;
 
 }
 
