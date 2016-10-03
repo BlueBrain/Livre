@@ -22,8 +22,6 @@
 
 #include <livre/core/api.h>
 #include <livre/core/data/NodeId.h>
-#include <livre/core/mathTypes.h>
-#include <vmmlib/aabb.hpp> // member
 
 namespace livre
 {

@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -20,7 +20,7 @@
 #ifndef _CameraPath_h_
 #define _CameraPath_h_
 
-#include <livre/core/mathTypes.h>
+#include <livre/core/types.h>
 
 namespace livre
 {
@@ -30,10 +30,7 @@ namespace livre
 struct Step
 {
     Step();
-
-    Step( const int32_t fr,
-          const Vector3f& pos,
-          const Vector3f& rot  );
+    Step( int32_t fr, const Vector3f& pos, const Vector3f& rot );
 
     int32_t frame;
     Vector3f position;

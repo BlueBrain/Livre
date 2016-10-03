@@ -20,10 +20,7 @@
 #define BOOST_TEST_MODULE ClipPlanes
 
 #include <livre/core/render/ClipPlanes.h>
-#include <livre/core/mathTypes.h>
-
 #include <vmmlib/aabb.hpp>
-
 #include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_CASE( testClipping )

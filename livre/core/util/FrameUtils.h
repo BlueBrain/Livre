@@ -1,5 +1,5 @@
-/* Copyright (c) 2015, EPFL/Blue Brain Project
- *                     Jafet Villafranca Diaz <jafet.villafrancadiaz@epfl.ch>
+/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+ *                          Jafet.VillafrancaDiaz@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -21,7 +21,7 @@
 #define _FrameUtils_h_
 
 #include <livre/core/api.h>
-#include <livre/core/mathTypes.h>
+#include <livre/core/types.h>
 
 namespace livre
 {

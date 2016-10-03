@@ -1,5 +1,5 @@
 /* Copyright (c) 2011-2016, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -23,7 +23,6 @@
 #include <livre/lib/api.h>
 #include <livre/lib/types.h>
 
-#include <livre/core/mathTypes.h>
 #include <livre/core/cache/CacheObject.h> // base class
 
 namespace livre

@@ -43,8 +43,6 @@ class Client;
 class CommandConnection;
 class CommandNode;
 class Config;
-class EqEventHandler;
-class EqEventHandlerFactory;
 class FrameData;
 class FrameSettings;
 class GuiConnectionDefs;
@@ -58,7 +56,6 @@ class ScreenGrabber;
 class SerializableMap;
 class VolumeSettings;
 class Window;
-struct EqEventInfo;
 
 /**
  * SmartPtr definitions

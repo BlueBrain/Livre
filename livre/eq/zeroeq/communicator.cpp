@@ -133,9 +133,9 @@ public:
         _getFrameData().getCameraSettings().setModelViewMatrix( livreModelView );
     }
 
-    bool publishHistogram( const Histogram& histogram )
+    bool publish( const servus::Serializable& serializable )
     {
-        return _publisher.publish( histogram );
+        return _publisher.publish( serializable );
     }
 
     bool frameDirty()
@@ -158,7 +158,7 @@ public:
 
     void updateFrame()
     {
-        if( _config.getDataFrameCount() == 0 )
+        if( _config.getVolumeInformation().frameRange == INVALID_FRAME_RANGE )
             return;
 
         auto& frameSettings = _config.getFrameData().getFrameSettings();
@@ -206,7 +206,7 @@ private:
         _requests[ _frame.getTypeIdentifier() ] = [&]{ return publishFrame(); };
         _requests[ _getFrameData().getVRParameters().getTypeIdentifier( )] = [&]
             { return _publisher.publish( _getFrameData().getVRParameters( )); };
-        _requests[ ::lexis::render::LookOut::ZEROBUF_TYPE_IDENTIFIER()] = [&]
+        _requests[ ::lexis::render::LookOut::ZEROBUF_TYPE_IDENTIFIER( )] = [&]
             { return publishCamera( _getFrameData().getCameraSettings().getModelViewMatrix( )); };
         _requests[ _getRenderSettings().getTransferFunction().getTypeIdentifier( )] = [&]
             { return _publisher.publish( _getRenderSettings().getTransferFunction( )); };
@@ -292,9 +292,9 @@ void Communicator::publishFrame()
         _impl->publishFrame();
 }
 
-bool Communicator::publishHistogram( const Histogram& histogram )
+bool Communicator::publish( const servus::Serializable& serializable )
 {
-    return _impl->publishHistogram( histogram );
+    return _impl->publish( serializable );
 }
 
 void Communicator::publishCamera( const Matrix4f& modelview )

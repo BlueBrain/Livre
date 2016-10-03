@@ -204,7 +204,7 @@ struct RawDataSource::Impl
         _volInfo.voxels[ 0 ] = vec[ 0 ];
         _volInfo.voxels[ 1 ] = vec[ 1 ];
         _volInfo.voxels[ 2 ] = vec[ 2 ];
-        _volInfo.isBigEndian = dataInfo[ "endian" ] == "big";
+        _volInfo.bigEndian = dataInfo[ "endian" ] == "big";
     }
 
     VolumeInformation& _volInfo;

@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                          Stefan.Eilemann@epfl.ch
  *
@@ -26,7 +26,6 @@
 #include <livre/core/data/LODNode.h>
 #include <livre/core/data/MemoryUnit.h>
 #include <livre/core/data/VolumeInformation.h>
-#include <livre/core/mathTypes.h>
 
 namespace
 {

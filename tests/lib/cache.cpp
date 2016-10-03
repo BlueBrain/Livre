@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                          Stefan.Eilemann@epfl.ch
  *
@@ -29,7 +29,6 @@
 #include <livre/core/data/LODNode.h>
 #include <livre/core/data/MemoryUnit.h>
 #include <livre/core/data/VolumeInformation.h>
-#include <livre/core/mathTypes.h>
 
 #define BOOST_TEST_MODULE Cache
 #include <boost/test/unit_test.hpp>
@@ -51,7 +50,7 @@ BOOST_AUTO_TEST_CASE( testCache )
     const livre::VolumeInformation& info = source.getVolumeInfo();
 
     const uint32_t level = 0;
-    const livre::Vector3f position( 0, 0, 0);
+    const livre::Vector3f position( 0, 0, 0 );
     const uint32_t frame = 0;
     const livre::NodeId parentNodeId( level, position, frame );
     const livre::NodeId firstChildNodeId =

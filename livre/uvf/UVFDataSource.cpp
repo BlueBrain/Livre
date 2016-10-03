@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -82,7 +82,7 @@ public:
                                                 tuvokBricksInRootLod[1],
                                                 tuvokBricksInRootLod[2] ));
 
-            _volumeInfo.isBigEndian =
+            _volumeInfo.bigEndian =
                     _uvfDataSetPtr->GetUVFFile()->GetGlobalHeader().bIsBigEndian;
             _volumeInfo.compCount = _uvfDataSetPtr->GetComponentCount();
 
@@ -176,15 +176,14 @@ public:
         filePtr->SeekPos( _offset );
 
         std::uint64_t temp;
-
-        filePtr->ReadData( temp, _volumeInfo.isBigEndian );
+        filePtr->ReadData( temp, _volumeInfo.bigEndian );
 
         std::string strBlockId;
         filePtr->ReadData( strBlockId, temp );
 
-        filePtr->ReadData( temp, _volumeInfo.isBigEndian );
-        filePtr->ReadData( temp, _volumeInfo.isBigEndian );
-        filePtr->ReadData( temp, _volumeInfo.isBigEndian );
+        filePtr->ReadData( temp, _volumeInfo.bigEndian );
+        filePtr->ReadData( temp, _volumeInfo.bigEndian );
+        filePtr->ReadData( temp, _volumeInfo.bigEndian );
 
         _offset = filePtr->GetPos();
 

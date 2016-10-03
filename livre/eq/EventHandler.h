@@ -1,5 +1,6 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2016, Blue Brain Project / EPFL
+ *                     bbp-open-source@googlegroups.com
+ *                     Stefan.Eilemann@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -20,27 +21,28 @@
 #ifndef _EventHandler_h_
 #define _EventHandler_h_
 
-#include <livre/core/types.h>
+#include <livre/eq/types.h>
 
 namespace livre
 {
-
-/**
- * The EventHandler class is the abstract class for event handling.
- */
-class EventHandler
+/** Handles application events for a Config. */
+template< class C > class EventHandler : public C
 {
 public:
+    template< class... ARGS > EventHandler( Config& config, ARGS... args );
+    ~EventHandler();
 
-    /**
-     * Executes the event function.
-     * @param eventInfo The needed information for the event. \see livre::EventInfo
-     */
-    virtual bool operator()( EventInfo& eventInfo ) = 0;
+    void init();
 
-    virtual ~EventHandler() {}
+    bool handleEvent( eq::EventICommand command ) override;
+    bool handleEvent( eq::EventType type, const eq::KeyEvent& ) override;
+    bool handleEvent( eq::EventType type, const eq::PointerEvent& ) override;
+
+private:
+    class Impl;
+    std::unique_ptr< Impl > _impl;
 };
 
 }
 
-#endif //_EventHandler_h_
+#endif // _EventHandler_h_

@@ -1,6 +1,7 @@
 
-/* Copyright (c) 2011, Maxim Makhinya <maxmah@gmail.com>
- *               2012, David Steiner  <steiner@ifi.uzh.ch>
+/* Copyright (c) 2011-2016, Maxim Makhinya <maxmah@gmail.com>
+ *                          David Steiner  <steiner@ifi.uzh.ch>
+ *                          Stefan.Eilemann@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -19,6 +20,8 @@
  */
 
 #include <livre/eq/settings/RenderSettings.h>
+#include <co/dataIStream.h>
+#include <co/dataOStream.h>
 
 namespace livre
 {
@@ -78,17 +81,6 @@ void RenderSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits 
         is >> _clipPlanes;
 
     co::Serializable::deserialize( is, dirtyBits );
-}
-
-void RenderSettings::setMaxTreeDepth( const uint8_t depth )
-{
-    _depth = depth;
-    setDirty( DIRTY_DEPTH );
-}
-
-uint8_t RenderSettings::getMaxTreeDepth( ) const
-{
-    return _depth;
 }
 
 }

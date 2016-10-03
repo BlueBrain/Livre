@@ -1,7 +1,7 @@
 
-/* Copyright (c) 2011, Maxim Makhinya <maxmah@gmail.com>
- *               2012, David Steiner  <steiner@ifi.uzh.ch>
- *               2013, Ahmet Bilgili  <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2016, Maxim Makhinya <maxmah@gmail.com>
+ *                          David Steiner  <steiner@ifi.uzh.ch>
+ *                          Ahmet Bilgili  <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -34,14 +34,6 @@ namespace livre
 
 class RenderSettings : public co::Serializable
 {
-    /** The changed parts of the data since the last pack( ). */
-    enum DirtyBits
-    {
-        DIRTY_TF = co::Serializable::DIRTY_CUSTOM << 0u,
-        DIRTY_DEPTH = co::Serializable::DIRTY_CUSTOM << 1u,
-        DIRTY_CLIPPLANES = co::Serializable::DIRTY_CUSTOM << 2u
-    };
-
 public:
 
     /**
@@ -80,16 +72,6 @@ public:
     const ClipPlanes& getClipPlanes( ) const { return _clipPlanes; }
 
     /**
-     * @param depth Sets the maximum rendering depth.
-     */
-    void setMaxTreeDepth( const uint8_t depth );
-
-    /**
-     * @return Returns the maximum rendering depth.
-     */
-    uint8_t getMaxTreeDepth( ) const;
-
-    /**
      * @brief adjustQuality Adjusts the quality.
      * @param delta The adjustment factor.
      */
@@ -106,13 +88,20 @@ public:
     void decreaseError( );
 
 private:
-
     virtual void serialize(   co::DataOStream& os, const uint64_t dirtyBits );
     virtual void deserialize( co::DataIStream& is, const uint64_t dirtyBits );
 
     TransferFunction1D _transferFunction;
     ClipPlanes _clipPlanes;
     uint8_t _depth;
+
+    /** The changed parts of the data since the last pack(). */
+    enum DirtyBits
+    {
+        DIRTY_TF = co::Serializable::DIRTY_CUSTOM << 0u,
+        DIRTY_DEPTH = co::Serializable::DIRTY_CUSTOM << 1u,
+        DIRTY_CLIPPLANES = co::Serializable::DIRTY_CUSTOM << 2u
+    };
 };
 
 }

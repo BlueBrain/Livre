@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -25,7 +25,6 @@
 
 #include <livre/core/render/ClipPlanes.h>
 #include <livre/core/render/FrameInfo.h>
-#include <livre/core/mathTypes.h>
 
 namespace livre
 {
@@ -94,4 +93,3 @@ private:
 }
 
 #endif
-

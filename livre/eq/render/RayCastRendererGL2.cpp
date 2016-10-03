@@ -47,7 +47,7 @@ struct DistanceOperator
     explicit DistanceOperator( const DataSource& dataSource, const Frustum& frustum )
         : _frustum( frustum )
         , _dataSource( dataSource )
-    { }
+    {}
 
     bool operator()( const NodeId& rb1,
                      const NodeId& rb2 )

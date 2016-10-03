@@ -1,4 +1,4 @@
-/* Copyright (c) 2006-2015, Daniel.Nachbaur@epfl.ch
+/* Copyright (c) 2006-2016, Daniel.Nachbaur@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -16,7 +16,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/core/mathTypes.h>
 #include <livre/eq/types.h>
 
 #include <memory>
@@ -54,8 +53,8 @@ public:
      */
     void publishCamera( const Matrix4f& modelview );
 
-    /** Publish Histogram */
-    bool publishHistogram( const Histogram& histogram );
+    /** Publish a serializable object */
+    bool publish( const servus::Serializable& serializable );
 
     /** Non-blocking receive & handle of all pending events. */
     void handleEvents();

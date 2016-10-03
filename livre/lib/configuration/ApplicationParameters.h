@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                          Stefan.Eilemann@epfl.ch
  *
@@ -21,9 +21,8 @@
 #ifndef _ApplicationParameters_h_
 #define _ApplicationParameters_h_
 
-#include <livre/core/configuration/Parameters.h>
 #include <livre/lib/api.h>
-#include <livre/core/mathTypes.h>
+#include <livre/core/configuration/Parameters.h> // base class
 
 namespace livre
 {
