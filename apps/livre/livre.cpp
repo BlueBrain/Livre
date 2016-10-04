@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -83,7 +83,7 @@ int main( const int argc, char** argv )
     }
 
     // Run local client node
-    livre::ClientPtr client = new livre::Client();
+    lunchbox::RefPtr< livre::Client > client = new livre::Client();
     const int32_t ret = client->run( argc, argv );
 
     LBASSERTINFO( client->getRefCount() == 1, "Client still referenced by " <<

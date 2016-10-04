@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2012-2015, Stefan Eilemann <eile@equalizergraphics.com>
+/* Copyright (c) 2012-2016, Stefan Eilemann <eile@equalizergraphics.com>
  *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
  *                          Maxim Makhinya  <maxmah@gmail.com>
  *                          David Steiner   <steiner@ifi.uzh.ch>
@@ -32,28 +32,27 @@ struct Pipe::Impl
 public:
     explicit Impl( livre::Pipe* pipe )
         : _pipe( pipe )
-        , _frameDataPtr( new FrameData( ))
     {}
 
     bool mapFrameData( const eq::uint128_t& initId )
     {
         livre::Config* config = static_cast< livre::Config* >( _pipe->getConfig( ));
-        _frameDataPtr->initialize( config );
-        if( !_frameDataPtr->map( config, initId ))
+        _frameData.initialize( config );
+        if( !_frameData.map( config, initId ))
             return false;
-        _frameDataPtr->mapObjects();
+        _frameData.mapObjects();
         return true;
     }
 
     void unmapFrameData()
     {
-        _frameDataPtr->unmapObjects();
-        _frameDataPtr->unmap( static_cast< livre::Config* >( _pipe->getConfig( )));
+        _frameData.unmapObjects();
+        _frameData.unmap( static_cast< livre::Config* >( _pipe->getConfig( )));
     }
 
     void frameStart( const eq::uint128_t& frameId )
     {
-        _frameDataPtr->sync( frameId );
+        _frameData.sync( frameId );
     }
 
     bool configInit( const eq::uint128_t& initId )
@@ -67,7 +66,7 @@ public:
     }
 
     livre::Pipe* const _pipe;
-    FrameDataPtr _frameDataPtr;
+    FrameData _frameData;
 };
 
 Pipe::Pipe( eq::Node* parent )
@@ -100,9 +99,9 @@ bool Pipe::configExit()
     return eq::Pipe::configExit();
 }
 
-ConstFrameDataPtr Pipe::getFrameData() const
+const FrameData& Pipe::getFrameData() const
 {
-    return _impl->_frameDataPtr;
+    return _impl->_frameData;
 }
 
 }

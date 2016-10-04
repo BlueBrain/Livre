@@ -1,5 +1,5 @@
 /**
- * Copyright (c) BBP/EPFL 2005-2015 Ahmet.Bilgili@epfl.ch
+ * Copyright (c) BBP/EPFL 2005-2016 Ahmet.Bilgili@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -40,45 +40,16 @@ namespace livre
 class CameraSettings;
 class Channel;
 class Client;
-class CommandConnection;
-class CommandNode;
 class Config;
 class FrameData;
 class FrameSettings;
-class GuiConnectionDefs;
-class GuiPackets;
 class LocalInitData;
 class Node;
 class Pipe;
 class RayCastRenderer;
 class RenderSettings;
-class ScreenGrabber;
-class SerializableMap;
 class VolumeSettings;
 class Window;
-
-/**
- * SmartPtr definitions
- */
-typedef lunchbox::RefPtr< CommandNode > CommandNodePtr;
-typedef lunchbox::RefPtr< Client > ClientPtr;
-
-typedef std::shared_ptr< Config > ConfigPtr;
-typedef std::shared_ptr< const Config > ConstConfigPtr;
-typedef std::shared_ptr< SerializableMap > SerializableMapPtr;
-typedef std::shared_ptr< const SerializableMap > ConstSerializableMapPtr;
-typedef std::shared_ptr< FrameData > FrameDataPtr;
-typedef std::shared_ptr< LocalInitData > LocalInitDataPtr;
-typedef std::shared_ptr< const FrameData > ConstFrameDataPtr;
-typedef std::shared_ptr< const LocalInitData > ConstLocalInitDataPtr;
-typedef std::shared_ptr< VolumeSettings > VolumeSettingsPtr;
-typedef std::shared_ptr< FrameSettings > FrameSettingsPtr;
-typedef std::shared_ptr< const FrameSettings > ConstFrameSettingsPtr;
-typedef std::shared_ptr< CameraSettings > CameraSettingsPtr;
-typedef std::shared_ptr< const CameraSettings > ConstCameraSettingsPtr;
-typedef std::shared_ptr< RenderSettings > RenderSettingsPtr;
-typedef std::shared_ptr< const RenderSettings > ConstRenderSettingsPtr;
-typedef std::shared_ptr< RayCastRenderer > RayCastRendererPtr;
 
 }
 

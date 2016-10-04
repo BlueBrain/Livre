@@ -1,8 +1,8 @@
 
-/* Copyright (c) 2006-2011, Stefan Eilemann <eile@equalizergraphics.com>
- *                    2011, Maxim Makhinya  <maxmah@gmail.com>
- *                    2012, David Steiner   <steiner@ifi.uzh.ch>
- *                    2013, Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2006-2016, Stefan Eilemann <eile@equalizergraphics.com>
+ *                          Maxim Makhinya  <maxmah@gmail.com>
+ *                          David Steiner   <steiner@ifi.uzh.ch>
+ *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
  */
 
 #ifndef _Pipe_h_
@@ -26,10 +26,8 @@ public:
     LIVREEQ_API Pipe( eq::Node* parent );
     LIVREEQ_API ~Pipe();
 
-    /**
-     * @return The frame data.
-     */
-    ConstFrameDataPtr getFrameData( ) const;
+    /** @return The frame data. */
+    const FrameData& getFrameData() const;
 
 private:
 
@@ -45,5 +43,3 @@ private:
 }
 
 #endif //_Pipe_h_
-
-
