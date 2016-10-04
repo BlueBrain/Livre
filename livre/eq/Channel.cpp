@@ -167,7 +167,7 @@ public:
         _frame.setName( std::string( "self." ) + _channel->getName( ));
     }
 
-    ConstFrameDataPtr getFrameData() const
+    const FrameData& getFrameData() const
     {
         const livre::Pipe* pipe = static_cast< const livre::Pipe* >( _channel->getPipe( ));
         return pipe->getFrameData();
@@ -175,8 +175,8 @@ public:
 
     void initializeRenderer()
     {
-        const uint32_t nSamplesPerRay = getFrameData()->getVRParameters().getSamplesPerRay();
-        const uint32_t nSamplesPerPixel = getFrameData()->getVRParameters().getSamplesPerPixel();
+        const uint32_t nSamplesPerRay = getFrameData().getVRParameters().getSamplesPerRay();
+        const uint32_t nSamplesPerPixel = getFrameData().getVRParameters().getSamplesPerPixel();
 
         const Window* window = static_cast< const Window* >( _channel->getWindow( ));
         const Node* node = static_cast< const Node* >( _channel->getNode( ));
@@ -198,7 +198,7 @@ public:
     Matrix4f computeModelView() const
     {
         const CameraSettings& cameraSettings =
-            getFrameData()->getCameraSettings();
+            getFrameData().getCameraSettings();
         return _channel->getHeadTransform() * cameraSettings.getModelViewMatrix();
     }
 
@@ -270,16 +270,15 @@ public:
 
     void frameDraw()
     {
-        const Pipe* pipe = static_cast< Pipe* >( _channel->getPipe( ));
         const uint32_t frame =
-                pipe->getFrameData()->getFrameSettings().getFrameNumber();
+                getFrameData().getFrameSettings().getFrameNumber();
 
         if( frame >= INVALID_TIMESTEP )
             return;
 
         applyCamera();
         const Frustum& frustum = setupFrustum();
-        _frameInfo = FrameInfo( frustum, frame, pipe->getCurrentFrame( ));
+        _frameInfo = FrameInfo( frustum, frame, _channel->getPipe()->getCurrentFrame( ));
 
         const eq::PixelViewport& pixVp = _channel->getPixelViewport();
         _drawRange = _channel->getRange();
@@ -290,14 +289,14 @@ public:
         const livre::Window* window = static_cast< const livre::Window* >( _channel->getWindow( ));
         const RenderPipeline& renderPipeline = window->getRenderPipeline();
 
-        _renderer->update( *pipe->getFrameData( ));
-        renderPipeline.render( { pipe->getFrameData()->getVRParameters(),
+        _renderer->update( getFrameData( ));
+        renderPipeline.render( { getFrameData().getVRParameters(),
                                  _frameInfo,
                                  {{ _drawRange.start, _drawRange.end }},
-                                 pipe->getFrameData()->getVolumeSettings().getDataSourceRange(),
+                                 getFrameData().getVolumeSettings().getDataSourceRange(),
                                  PixelViewport( pixVp.x, pixVp.y, pixVp.w, pixVp.h ),
                                  Viewport( vp.x, vp.y, vp.w, vp.h ),
-                                 pipe->getFrameData()->getRenderSettings().getClipPlanes(),
+                                 getFrameData().getRenderSettings().getClipPlanes(),
                                },
                                PipeFilterT< RedrawFilter >( "RedrawFilter", _channel ),
                                PipeFilterT< SendHistogramFilter >( "SendHistogramFilter", _channel ),
@@ -307,7 +306,7 @@ public:
 
     void applyCamera()
     {
-        const CameraSettings& cameraSettings = getFrameData()->getCameraSettings();
+        const CameraSettings& cameraSettings = getFrameData().getCameraSettings();
         glMultMatrixf( cameraSettings.getModelViewMatrix().array );
     }
 
@@ -324,13 +323,13 @@ public:
 
     void addImageListener()
     {
-        if( getFrameData()->getFrameSettings().getGrabFrame( ))
+        if( getFrameData().getFrameSettings().getGrabFrame( ))
             _channel->addResultImageListener( &_frameGrabber );
     }
 
     void removeImageListener()
     {
-        if( getFrameData()->getFrameSettings().getGrabFrame() )
+        if( getFrameData().getFrameSettings().getGrabFrame() )
             _channel->removeResultImageListener( &_frameGrabber );
     }
 
@@ -338,7 +337,7 @@ public:
     {
         _channel->applyOverlayState();
 
-        const FrameSettings& frameSettings = getFrameData()->getFrameSettings();
+        const FrameSettings& frameSettings = getFrameData().getFrameSettings();
         if( frameSettings.getStatistics( ))
         {
             _channel->drawStatistics();

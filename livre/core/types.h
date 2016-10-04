@@ -139,24 +139,13 @@ template<typename T> struct DeleteObject
 
 template<typename T> struct DontDeleteObject
 {
-  void operator()(const T*) const { }
+  void operator()(const T*) const {}
 };
 
 /** Vector definitions basic types */
 typedef std::vector< float > Floats;
-typedef std::vector< double > Doubles;
-
-typedef std::vector< int8_t > Int8s;
 typedef std::vector< uint8_t > UInt8s;
-
-typedef std::vector< int16_t > Int16s;
-typedef std::vector< uint16_t > UInt16s;
-
-typedef std::vector< int32_t > Int32s;
 typedef std::vector< uint32_t > UInt32s;
-
-typedef std::vector< int64_t > Int64s;
-typedef std::vector< uint64_t > UInt64s;
 
 typedef std::vector< NodeId > NodeIds;
 typedef std::vector< CacheId > CacheIds;

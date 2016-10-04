@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2010-2011, Stefan Eilemann <eile@eyescale.ch>
- *               2013,      Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
+ * Copyright (c) 2010-2016, Stefan Eilemann <eile@eyescale.ch>
+ *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -35,8 +35,6 @@ enum Error
     ERROR_LIVRE_ARB_SHADER_OBJECTS_MISSING = eq::ERROR_CUSTOM, //!< GL_ARB_shader_objects extension missing.
     ERROR_LIVRE_EXT_BLEND_FUNC_SEPARATE_MISSING, //!< GL_EXT_blend_func_separate extension missing.
     ERROR_LIVRE_ARB_MULTITEXTURE_MISSING, //!< GL_ARB_multitexture extension missing.
-    ERROR_LIVRE_MAP_CONFIG_OBJECT_FAILED, //!< Mapping of config data from application process failed.
-    ERROR_LIVRE_MAP_VOLUME_INFO_OBJECT_FAILED //!< Mapping of volume info data from application process failed.
 };
 
 /**
