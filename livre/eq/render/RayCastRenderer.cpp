@@ -40,12 +40,14 @@
 #include <eq/eq.h>
 #include <eq/gl.h>
 
-#define SH_UINT 0
-#define SH_INT 1
-#define SH_FLOAT 2
-
 namespace livre
 {
+namespace
+{
+const uint32_t SH_UINT  = 0u;
+const uint32_t SH_INT   = 1u;
+const uint32_t SH_FLOAT = 2u;
+}
 
 // Sort helper function for sorting the textures with their distances to viewpoint
 struct DistanceOperator

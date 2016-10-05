@@ -9,6 +9,12 @@
 #
 #
 
+if(APPLE)
+  option(LIVRE_USE_GL2 "Use OpenGL 2.0 renderer" ON)
+else()
+  option(LIVRE_USE_GL2 "Use OpenGL 2.0 renderer" OFF)
+endif()
+
 set(LIVREEQ_HEADERS
   Channel.h
   Client.h
@@ -50,16 +56,18 @@ set(LIVREEQ_SOURCES
   )
 
 include(StringifyShaders)
-set(LIVREEQ_SHADERS render/shaders/vertRayCast.glsl
-                    render/shaders/vertTexCopy.glsl
-                    render/shaders/fragTexCopy.glsl )
+set(LIVREEQ_SHADERS
+  render/shaders/fragRayCast.glsl
+  render/shaders/fragRayCastGL2.glsl
+  render/shaders/fragTexCopy.glsl
+  render/shaders/vertRayCast.glsl
+  render/shaders/vertRayCastGL2.glsl
+  render/shaders/vertTexCopy.glsl)
 
-if(APPLE)
-    list(APPEND LIVREEQ_SHADERS render/shaders/fragRayCastGL2.glsl)
-    list(APPEND LIVREEQ_SOURCES render/RayCastRendererGL2.cpp)
+if(LIVRE_USE_GL2)
+  list(APPEND LIVREEQ_SOURCES render/RayCastRendererGL2.cpp)
 else()
-    list(APPEND LIVREEQ_SHADERS render/shaders/fragRayCast.glsl)
-    list(APPEND LIVREEQ_SOURCES render/RayCastRenderer.cpp)
+  list(APPEND LIVREEQ_SOURCES render/RayCastRenderer.cpp)
 endif()
 
 stringify_shaders(${LIVREEQ_SHADERS})

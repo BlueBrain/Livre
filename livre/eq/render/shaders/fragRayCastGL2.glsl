@@ -1,16 +1,27 @@
 /*
- * Copyright (c) 2007-2011, Maxim Makhinya  <maxmah@gmail.com>
-                 2013     , Ahmet Bilgili <ahmet.bilgili@epfl.ch>  Modified for single-pass raycasting
-                 2014     , Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
+ * Copyright (c) 2007-2016, Maxim Makhinya  <maxmah@gmail.com>
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  */
 
 // input variables to function
+#version 120
 #extension GL_ARB_texture_rectangle : enable
+#extension GL_EXT_gpu_shader4 : enable
 
 #define EARLY_EXIT 0.999
 #define EPSILON 0.0000000001f
+#define SH_UINT 0
+#define SH_INT 1
+#define SH_FLOAT 2
 
-uniform sampler3D volumeTex; //gx, gy, gz, v
+uniform int datatype;
+uniform sampler3D volumeTexFloat;
+uniform usampler3D volumeTexUint;
+uniform isampler3D volumeTexInt;
+
+uniform vec2 dataSourceRange;
+
 uniform sampler1D transferFnTex;
 uniform sampler2DRect frameBufferTex;
 
@@ -35,6 +46,9 @@ uniform int maxSamplesPerRay;
 uniform int nSamplesPerPixel;
 uniform float shininess;
 uniform int refLevel;
+
+uniform int nClipPlanes;
+uniform vec4 clipPlanes[6];
 
 struct Ray
 {
@@ -153,6 +167,23 @@ void main( void )
         if( tnear > tfar )
             discard;
 
+        for( int i = 0; i < nClipPlanes; i++ )
+        {
+            vec3 planeNormal = clipPlanes[ i ].xyz;
+            float rn = dot( rayDirection, planeNormal );
+            if( rn == 0 )
+                rn = EPSILON;
+            float d = clipPlanes[ i ].w;
+            float t = -( dot( planeNormal, worldEyePosition ) + d ) / rn;
+            if( rn > 0.0 ) // opposite direction plane
+                tnear = max( tnear, t );
+            else
+                tfar = min( tfar, t );
+        }
+
+        if( tnear > tfar )
+            discard;
+
         vec3 rayStart = eye.Origin + eye.Dir * tnear;
         vec3 rayStop = eye.Origin + eye.Dir * tfar;
 
@@ -162,11 +193,24 @@ void main( void )
         vec3 pos = rayStart;
         vec3 step = normalize( rayStop - rayStart ) * stepSize;
 
+        //Used later for MAD optimization in the raymarching loop
+        float multiplyer = 1 / ( dataSourceRange.g - dataSourceRange.r );
+        float addedValue = -dataSourceRange.r / ( dataSourceRange.g - dataSourceRange.r );
+
         // Front-to-back absorption-emission integrator
         for ( float travel = distance( rayStop, rayStart ); travel > 0.0; pos += step, travel -= stepSize )
         {
+
             vec3 texPos = calcTexturePositionFromAABBPos( pos );
-            float density = texture3D( volumeTex, texPos ).r;
+
+            float density = 0;
+            if( datatype == SH_UINT )
+                density = float(texture3D( volumeTexUint, texPos ).r) * multiplyer  + addedValue;
+            else if( datatype == SH_INT )
+                density = float(texture3D( volumeTexInt, texPos ).r) * multiplyer + addedValue;
+            else if( datatype == SH_FLOAT )
+                density = texture3D( volumeTexFloat, texPos ).r * multiplyer + addedValue;
+
             vec4 transferFn  = texture1D( transferFnTex, density );
             localResult = composite( transferFn, localResult, alphaCorrection );
 
