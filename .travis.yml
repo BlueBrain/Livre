@@ -2,32 +2,59 @@ notifications:
   email:
     on_success: never
 language: cpp
-sudo: false
-cache:
-  ccache: true
-  pip: true
-  directories:
-  - /usr/local
-before_cache:
-  - brew cleanup
-os:
-  - osx
+sudo: required
+dist: trusty
 env:
   global:
     - NINJA_STATUS="[%p %u/%t@%o %r]"
     - PROJECT_NAME=${PWD##*/}
-    - CMAKE_PREFIX_PATH=/usr/local/opt/qt5:$CMAKE_PREFIX_PATH
   matrix:
   - BUILD_TYPE=Debug
   - BUILD_TYPE=Release
 before_install:
-  - brew update
-  - brew outdated cmake || brew upgrade cmake
-  - brew install cppcheck doxygen ninja
-  - brew install zeromq python qt5
-  - pip install pyparsing
+   - sudo apt-get update -qq
+   - sudo apt-get install -qq autoconf || /bin/true
+   - sudo apt-get install -qq automake || /bin/true
+   - sudo apt-get install -qq avahi-daemon || /bin/true
+   - sudo apt-get install -qq bison || /bin/true
+   - sudo apt-get install -qq cmake || /bin/true
+   - sudo apt-get install -qq cppcheck || /bin/true
+   - sudo apt-get install -qq doxygen || /bin/true
+   - sudo apt-get install -qq flex || /bin/true
+   - sudo apt-get install -qq freeglut3-dev || /bin/true
+   - sudo apt-get install -qq git || /bin/true
+   - sudo apt-get install -qq lcov || /bin/true
+   - sudo apt-get install -qq libavahi-client-dev || /bin/true
+   - sudo apt-get install -qq libbluetooth-dev || /bin/true
+   - sudo apt-get install -qq libboost-date-time-dev || /bin/true
+   - sudo apt-get install -qq libboost-filesystem-dev || /bin/true
+   - sudo apt-get install -qq libboost-program-options-dev || /bin/true
+   - sudo apt-get install -qq libboost-regex-dev || /bin/true
+   - sudo apt-get install -qq libboost-system-dev || /bin/true
+   - sudo apt-get install -qq libboost-test-dev || /bin/true
+   - sudo apt-get install -qq libboost-thread-dev || /bin/true
+   - sudo apt-get install -qq libgl1-mesa-dev || /bin/true
+   - sudo apt-get install -qq libglewmx1.6-dev || /bin/true
+   - sudo apt-get install -qq libhwloc-dev || /bin/true
+   - sudo apt-get install -qq libjpeg-turbo8-dev || /bin/true
+   - sudo apt-get install -qq libleveldb-dev || /bin/true
+   - sudo apt-get install -qq libopenmpi-dev || /bin/true
+   - sudo apt-get install -qq libopenscenegraph-dev || /bin/true
+   - sudo apt-get install -qq libqt5opengl5-dev || /bin/true
+   - sudo apt-get install -qq libturbojpeg || /bin/true
+   - sudo apt-get install -qq libudt-dev || /bin/true
+   - sudo apt-get install -qq libx11-dev || /bin/true
+   - sudo apt-get install -qq libzmq3-dev || /bin/true
+   - sudo apt-get install -qq ninja-build || /bin/true
+   - sudo apt-get install -qq openmpi-bin || /bin/true
+   - sudo apt-get install -qq pkg-config || /bin/true
+   - sudo apt-get install -qq qtbase5-dev || /bin/true
+   - sudo apt-get install -qq python2.7 || /bin/true
+   - sudo apt-get install -qq python-pyparsing || /bin/true
+   - sudo apt-get install -qq libxmu-dev libxi-dev || /bin/true
 script:
-  - mkdir $BUILD_TYPE
-  - cd $BUILD_TYPE
-  - cmake -GNinja -DCMAKE_INSTALL_PREFIX=$PWD/install -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
-  - ninja all && ninja $PROJECT_NAME-tests && ninja install
+   - export PATH=/usr/bin:$PATH
+   - mkdir $BUILD_TYPE
+   - cd $BUILD_TYPE
+   - cmake -GNinja -DCMAKE_INSTALL_PREFIX=$PWD/install -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
+   - ninja all && ninja $PROJECT_NAME-tests && ninja install
