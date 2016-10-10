@@ -61,13 +61,8 @@ set(LIVREEQ_SHADERS render/shaders/vertRayCast.glsl
                     render/shaders/vertTexCopy.glsl
                     render/shaders/fragTexCopy.glsl )
 
-if(APPLE)
-    list(APPEND LIVREEQ_SHADERS render/shaders/fragRayCastGL2.glsl)
-    list(APPEND LIVREEQ_SOURCES render/RayCastRendererGL2.cpp)
-else()
-    list(APPEND LIVREEQ_SHADERS render/shaders/fragRayCast.glsl)
-    list(APPEND LIVREEQ_SOURCES render/RayCastRenderer.cpp)
-endif()
+list(APPEND LIVREEQ_SHADERS render/shaders/fragRayCast.glsl)
+list(APPEND LIVREEQ_SOURCES render/RayCastRenderer.cpp)
 
 stringify_shaders(${LIVREEQ_SHADERS})
 list(APPEND LIVREEQ_SOURCES ${SHADER_SOURCES})

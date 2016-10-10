@@ -47,17 +47,20 @@ struct NodeAvailability
     LIVRECORE_API NodeAvailability()
      : nAvailable( 0 )
      , nNotAvailable( 0 )
+     , nRenderAvailable( 0 )
     {}
 
     LIVRECORE_API NodeAvailability& operator+=( const NodeAvailability& na )
     {
         nAvailable += na.nAvailable;
         nNotAvailable += na.nNotAvailable;
+        nRenderAvailable += na.nRenderAvailable;
         return *this;
     }
 
     size_t nAvailable; //!< Number of available nodes
     size_t nNotAvailable; //!< Number of not available nodes
+    size_t nRenderAvailable; //!< Number of render nodes
 };
 
 }
