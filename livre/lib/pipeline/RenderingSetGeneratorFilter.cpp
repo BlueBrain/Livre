@@ -103,7 +103,7 @@ struct RenderingSetGenerator
         {
             cacheObjects.push_back( it->second );
         }
-
+        availability.nRenderAvailable = cacheObjects.size();
         return cacheObjects;
     }
 

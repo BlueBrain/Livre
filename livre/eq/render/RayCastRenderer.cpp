@@ -503,8 +503,6 @@ struct RayCastRenderer::Impl
         tParamNameGL = glGetUniformLocation( program, "refLevel" );
         glUniform1i( tParamNameGL, refLevel );
 
-        _usedTextures[1].push_back( texState.textureId );
-
         renderBrickVBO( index, posVBO, false /* draw front */, true /* cull back */ );
         glMemoryBarrier( GL_SHADER_IMAGE_ACCESS_BARRIER_BIT );
 
@@ -535,19 +533,6 @@ struct RayCastRenderer::Impl
 
     void onFrameEnd()
     {
-        std::sort( _usedTextures[1].begin(), _usedTextures[1].end( ));
-#ifdef LIVRE_DEBUG_RENDERING
-        if( _usedTextures[0] != _usedTextures[1] )
-        {
-            std::cout << "Rendered ";
-            std::copy( _usedTextures[1].begin(), _usedTextures[1].end(),
-                       std::ostream_iterator< uint32_t >( std::cout, " " ));
-            std::cout << " in " << (void*)this << std::endl;
-        }
-#endif
-        _usedTextures[0].swap( _usedTextures[1] );
-        _usedTextures[1].clear();
-
         glDrawBuffer( _drawBuffer );
         copyTexToFrameBufAndClear();
     }
@@ -559,7 +544,6 @@ struct RayCastRenderer::Impl
     uint32_t _nSamplesPerPixel;
     uint32_t _computedSamplesPerRay;
     uint32_t _colorMapTexture;
-    std::vector< uint32_t > _usedTextures[2]; // last, current frame
     const Cache& _textureCache;
     const DataSource& _dataSource;
     const VolumeInformation& _volInfo;
@@ -612,11 +596,6 @@ void RayCastRenderer::_onFrameEnd( const Frustum&,
                                    const NodeIds& )
 {
     _impl->onFrameEnd();
-}
-
-size_t RayCastRenderer::getNumBricksUsed() const
-{
-    return _impl->_usedTextures[0].size();
 }
 
 }

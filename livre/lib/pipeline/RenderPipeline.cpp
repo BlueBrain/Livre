@@ -148,6 +148,7 @@ struct RenderPipeline::Impl
         const UniqueFutureMap futures( visibleSetGenerator.getPostconditions( ));
         availability.nAvailable = futures.get< NodeIds >( "VisibleNodes" ).size();
         availability.nNotAvailable = 0;
+        availability.nRenderAvailable = availability.nAvailable;
     }
 
     void renderAsync( const RenderParams& renderParams,

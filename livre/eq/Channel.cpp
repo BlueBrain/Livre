@@ -345,7 +345,7 @@ public:
             drawCacheStatistics();
         }
         if( frameSettings.getShowInfo( ))
-            drawVolumeInfo();
+            drawVolumeInfo( _availability.nRenderAvailable );
 
 #ifdef LIVRE_USE_ZEROEQ
         const size_t all = _availability.nAvailable + _availability.nNotAvailable;
@@ -359,13 +359,12 @@ public:
         _channel->resetOverlayState();
     }
 
-    void drawVolumeInfo()
+    void drawVolumeInfo( const size_t nBricks )
     {
         livre::Node* node = static_cast< livre::Node* >( _channel->getNode( ));
         const VolumeInformation& info = node->getDataSource().getVolumeInfo();
 
         std::ostringstream os;
-        const size_t nBricks = _renderer->getNumBricksUsed();
         const float mbBricks =
             float( info.maximumBlockSize.product( )) /
             1024.f / 1024.f * float( nBricks );
