@@ -22,8 +22,8 @@
 #include <livre/eq/Config.h>
 #include <livre/eq/events/EqEventInfo.h>
 #include <livre/eq/events/handlers/ChannelPointerHandler.h>
-#include <livre/eq/settings/CameraSettings.h>
-#include <livre/eq/settings/FrameSettings.h>
+#include <livre/eq/settings/EqCameraSettings.h>
+#include <livre/eq/settings/EqFrameSettings.h>
 #include <livre/eq/FrameData.h>
 
 #include <eq/fabric/pointerEvent.h>

@@ -1,6 +1,6 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
- *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
- *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+
+/* Copyright (c) 2011, Maxim Makhinya <maxmah@gmail.com>
+ *               2012, David Steiner  <steiner@ifi.uzh.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -18,27 +18,35 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _livreTypes_h_
-#define _livreTypes_h_
-
-#include <livre/core/types.h>
+#include <livre/core/settings/VolumeSettings.h>
 
 namespace livre
 {
 
-class DataObject;
-class HistogramObject;
-class RenderPipeline;
-class RenderSettings;
-class TextureObject;
-class VolumeRendererParameters;
+VolumeSettings::VolumeSettings()
+    : _uri( "" )
+    , _dataSourceRange( Vector2f( std::numeric_limits< float >::infinity(),
+                                 -std::numeric_limits< float >::infinity( )))
+{}
 
-struct ApplicationParameters;
 
-typedef std::shared_ptr< const DataObject > ConstDataObjectPtr;
-typedef std::shared_ptr< const TextureObject > ConstTextureObjectPtr;
-typedef std::shared_ptr< const HistogramObject > ConstHistogramObjectPtr;
-
+void VolumeSettings::setURI( const std::string& uri )
+{
+    _uri = uri;
 }
 
-#endif // _types_h_
+std::string VolumeSettings::getURI() const
+{
+    return _uri.get();
+}
+
+void VolumeSettings::setDataSourceRange( const Vector2f& range )
+{
+    _dataSourceRange = range;
+}
+
+Vector2f VolumeSettings::getDataSourceRange() const
+{
+    return _dataSourceRange.get();
+}
+}

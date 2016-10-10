@@ -18,6 +18,8 @@ set(LIVRELIB_PUBLIC_HEADERS
   cache/DataObject.h
   cache/HistogramObject.h
   cache/TextureObject.h
+  data/MemoryDataSource.h
+  data/RawDataSource.h
   configuration/ApplicationParameters.h
   configuration/VolumeRendererParameters.h
   pipeline/DataUploadFilter.h
@@ -26,8 +28,8 @@ set(LIVRELIB_PUBLIC_HEADERS
   pipeline/RenderingSetGeneratorFilter.h
   pipeline/RenderPipeline.h
   pipeline/VisibleSetGeneratorFilter.h
-  data/MemoryDataSource.h
-  data/RawDataSource.h)
+  render/RayCastRenderer.h
+  )
 
 set(LIVRELIB_SOURCES
   ${ZEROBUF_GENERATED_SOURCES}
@@ -35,6 +37,8 @@ set(LIVRELIB_SOURCES
   cache/DataObject.cpp
   cache/HistogramObject.cpp
   cache/TextureObject.cpp
+  data/MemoryDataSource.cpp
+  data/RawDataSource.cpp
   configuration/ApplicationParameters.cpp
   configuration/VolumeRendererParameters.cpp
   pipeline/DataUploadFilter.cpp
@@ -43,8 +47,22 @@ set(LIVRELIB_SOURCES
   pipeline/RenderingSetGeneratorFilter.cpp
   pipeline/RenderPipeline.cpp
   pipeline/VisibleSetGeneratorFilter.cpp
-  data/MemoryDataSource.cpp
-  data/RawDataSource.cpp)
+  render/RayCastRenderer.cpp)
+
+install(DIRECTORY render/shaders
+        DESTINATION share/Livre
+        FILES_MATCHING PATTERN "*.glsl")
+
+set(LIVRE_SHADERS render/shaders/fragRayCast.glsl
+                  render/shaders/fragTexCopy.glsl
+                  render/shaders/vertRayCast.glsl
+                  render/shaders/vertTexCopy.glsl)
+
+set(SHADER_DIR "${CMAKE_BINARY_DIR}/Livre/share/shaders")
+
+foreach(SHADER ${LIVRE_SHADERS})
+  file(COPY ${SHADER} DESTINATION ${SHADER_DIR})
+endforeach()
 
 set(LIVRELIB_LINK_LIBRARIES PUBLIC LivreCore
                             PRIVATE Equalizer ${VTUNE_LIBRARIES})

@@ -21,57 +21,30 @@
 #include <eq/eq.h>
 
 #include <livre/eq/types.h>
-#include <livre/eq/settings/VolumeSettings.h>
+#include <livre/eq/settings/EqVolumeSettings.h>
 
 namespace livre
 {
 
-VolumeSettings::VolumeSettings()
+EqVolumeSettings::EqVolumeSettings()
 {
-    reset();
+    _uri =  SignalledVariable< std::string >( _uri.get(),
+                                [this](const std::string&){ setDirty( DIRTY_ALL ); } );
+
+    _dataSourceRange = SignalledVariable< Vector2f >( _dataSourceRange.get(),
+                                    [this](const Vector2f&){ setDirty( DIRTY_ALL ); } );
 }
 
-void VolumeSettings::reset()
-{
-    _uri = "";
-    _dataSourceRange = Vector2f( std::numeric_limits< float >::infinity(),
-                                 -std::numeric_limits< float >::infinity( ));
-    setDirty( DIRTY_ALL );
-}
-
-
-void VolumeSettings::setURI( const std::string& uri )
-{
-    _uri = uri;
-    setDirty( DIRTY_ALL );
-}
-
-const std::string& VolumeSettings::getURI() const
-{
-    return _uri;
-}
-
-void VolumeSettings::setDataSourceRange( const Vector2f& range )
-{
-    _dataSourceRange = range;
-    setDirty( DIRTY_ALL );
-}
-
-const vmml::Vector2f& VolumeSettings::getDataSourceRange() const
-{
-    return _dataSourceRange;
-}
-
-void VolumeSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
+void EqVolumeSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
 {
     co::Serializable::serialize( os, dirtyBits );
-    os  << _uri << _dataSourceRange;
+    os  << _uri.get() << _dataSourceRange.get();
 }
 
-void VolumeSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits )
+void EqVolumeSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits )
 {
     co::Serializable::deserialize( is, dirtyBits );
-    is >> _uri >> _dataSourceRange;
+    is >> _uri.get() >> _dataSourceRange.get();
 }
 
 }

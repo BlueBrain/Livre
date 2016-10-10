@@ -29,7 +29,7 @@
 #include <livre/eq/Node.h>
 #include <livre/eq/Pipe.h>
 #include <livre/eq/render/EqContext.h>
-#include <livre/eq/settings/FrameSettings.h>
+#include <livre/eq/settings/EqFrameSettings.h>
 
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/lib/pipeline/RenderPipeline.h>

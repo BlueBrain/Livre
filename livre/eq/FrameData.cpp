@@ -19,10 +19,11 @@
  */
 
 #include <livre/eq/FrameData.h>
-#include <livre/eq/settings/FrameSettings.h>
-#include <livre/eq/settings/RenderSettings.h>
-#include <livre/eq/settings/CameraSettings.h>
-#include <livre/eq/settings/VolumeSettings.h>
+#include <livre/eq/settings/EqFrameSettings.h>
+#include <livre/eq/settings/EqRenderSettings.h>
+#include <livre/eq/settings/EqCameraSettings.h>
+#include <livre/eq/settings/EqVolumeSettings.h>
+#include <livre/eq/settings/EqApplicationSettings.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 
 #include <eq/eq.h>
@@ -41,14 +42,16 @@ public:
         renderSettings.setID( servus::make_uint128( "eq::RenderSettings" ));
         cameraSettings.setID( servus::make_uint128( "eq::CameraSettings" ));
         volumeSettings.setID( servus::make_uint128( "eq::VolumeSettings" ));
+        applicationSettings.setID( servus::make_uint128( "eq::ApplicationSettings" ));
         vrParameters.setID(
             servus::make_uint128( "eq::VolumeRendererParameters" ));
     }
 
-    FrameSettings frameSettings;
-    RenderSettings renderSettings;
-    CameraSettings cameraSettings;
-    VolumeSettings volumeSettings;
+    EqFrameSettings frameSettings;
+    EqRenderSettings renderSettings;
+    EqCameraSettings cameraSettings;
+    EqVolumeSettings volumeSettings;
+    EqApplicationSettings applicationSettings;
     VolumeRendererParameters vrParameters;
 };
 
@@ -61,6 +64,7 @@ void FrameData::registerObjects()
     LBCHECK( _impl->register_( &_impl->renderSettings, seq::OBJECTTYPE_CUSTOM));
     LBCHECK( _impl->register_( &_impl->cameraSettings, seq::OBJECTTYPE_CUSTOM));
     LBCHECK( _impl->register_( &_impl->volumeSettings, seq::OBJECTTYPE_CUSTOM));
+    LBCHECK( _impl->register_( &_impl->applicationSettings, seq::OBJECTTYPE_CUSTOM));
     LBCHECK( _impl->register_( &_impl->vrParameters, seq::OBJECTTYPE_CUSTOM ));
 }
 
@@ -70,18 +74,17 @@ void FrameData::deregisterObjects()
     LBCHECK( _impl->deregister( &_impl->renderSettings ));
     LBCHECK( _impl->deregister( &_impl->cameraSettings ));
     LBCHECK( _impl->deregister( &_impl->volumeSettings ));
+    LBCHECK( _impl->deregister( &_impl->applicationSettings ));
     LBCHECK( _impl->deregister( &_impl->vrParameters ));
 }
 
 void FrameData::mapObjects()
 {
     LBCHECK( _impl->map( _impl->frameSettings.getID(), &_impl->frameSettings ));
-    LBCHECK( _impl->map( _impl->renderSettings.getID(),
-                         &_impl->renderSettings ));
-    LBCHECK( _impl->map( _impl->cameraSettings.getID(),
-                         &_impl->cameraSettings ));
-    LBCHECK( _impl->map( _impl->volumeSettings.getID(),
-                         &_impl->volumeSettings ));
+    LBCHECK( _impl->map( _impl->renderSettings.getID(), &_impl->renderSettings ));
+    LBCHECK( _impl->map( _impl->cameraSettings.getID(), &_impl->cameraSettings ));
+    LBCHECK( _impl->map( _impl->volumeSettings.getID(), &_impl->volumeSettings ));
+    LBCHECK( _impl->map( _impl->applicationSettings.getID(), &_impl->applicationSettings ));
     LBCHECK( _impl->map( _impl->vrParameters.getID(), &_impl->vrParameters ));
 }
 
@@ -94,6 +97,7 @@ void FrameData::unmapObjects()
     LBCHECK( _impl->unmap( &_impl->renderSettings ));
     LBCHECK( _impl->unmap( &_impl->cameraSettings ));
     LBCHECK( _impl->unmap( &_impl->volumeSettings ));
+    LBCHECK( _impl->unmap( &_impl->applicationSettings ));
     LBCHECK( _impl->unmap( &_impl->vrParameters ));
     _impl->clear();
 }
@@ -147,6 +151,16 @@ VolumeSettings& FrameData::getVolumeSettings()
 const VolumeSettings& FrameData::getVolumeSettings() const
 {
     return _impl->volumeSettings;
+}
+
+ApplicationSettings& FrameData::getApplicationSettings()
+{
+    return _impl->applicationSettings;
+}
+
+const ApplicationSettings& FrameData::getApplicationSettings() const
+{
+    return _impl->applicationSettings;
 }
 
 const VolumeRendererParameters& FrameData::getVRParameters() const

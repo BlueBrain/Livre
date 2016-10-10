@@ -23,13 +23,15 @@
 
 namespace livre
 {
+namespace
+{
 void dontCleanup( livre::GLContext* )
 {}
 
 boost::thread_specific_ptr< livre::GLContext > perThreadContext_( dontCleanup );
+}
 
-GLContext::GLContext( const GLEWContext* glewContext )
-    : _glewContext( glewContext )
+GLContext::GLContext()
 {
     perThreadContext_.reset( this );
 }
@@ -51,10 +53,4 @@ const GLContext* GLContext::getCurrent()
 {
     return perThreadContext_.get();
 }
-
-const GLEWContext* GLContext::glewGetContext() const
-{
-    return _glewContext;
-}
-
 }

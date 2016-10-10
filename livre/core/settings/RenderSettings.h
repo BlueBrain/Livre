@@ -22,31 +22,19 @@
 #ifndef _RenderSettings_h_
 #define _RenderSettings_h_
 
-#include <livre/lib/types.h>
+#include <livre/core/types.h>
+#include <livre/core/data/SignalledVariable.h>
 #include <livre/core/render/ClipPlanes.h>
-
 #include <lexis/render/ColorMap.h>
-
-#include <co/serializable.h>
 
 namespace livre
 {
 
-class RenderSettings : public co::Serializable
-{
-    /** The changed parts of the data since the last pack( ). */
-    enum DirtyBits
-    {
-        DIRTY_COLORMAP = co::Serializable::DIRTY_CUSTOM << 0u,
-        DIRTY_DEPTH = co::Serializable::DIRTY_CUSTOM << 1u,
-        DIRTY_CLIPPLANES = co::Serializable::DIRTY_CUSTOM << 2u
-    };
-
+class RenderSettings
+{   
 public:
 
-    /**
-     * @brief RenderSettings constructor.
-     */
+    /** constructor. */
     RenderSettings();
 
     /**
@@ -59,9 +47,8 @@ public:
     void resetColorMap();
 
     /** @returns the color map. */
-    lexis::render::ColorMap& getColorMap() { return _colorMap; }
-    const lexis::render::ColorMap& getColorMap() const
-        { return _colorMap; }
+    lexis::render::ColorMap& getColorMap() { return _colorMap.get(); }
+    const lexis::render::ColorMap& getColorMap() const { return _colorMap.get(); }
 
     /**
      * @brief Sets the clip planes.
@@ -72,45 +59,33 @@ public:
     /**
      * @return Returns the clip planes.
      */
-    ClipPlanes& getClipPlanes() { return _clipPlanes; }
-    const ClipPlanes& getClipPlanes( ) const { return _clipPlanes; }
+    ClipPlanes& getClipPlanes() { return _clipPlanes.get(); }
+    const ClipPlanes& getClipPlanes() const { return _clipPlanes.get(); }
 
-    /**
-     * @param depth Sets the maximum rendering depth.
-     */
+    /** @param depth Sets the maximum rendering depth. */
     void setMaxTreeDepth( const uint8_t depth );
 
-    /**
-     * @return Returns the maximum rendering depth.
-     */
+    /** @return Returns the maximum rendering depth. */
     uint8_t getMaxTreeDepth( ) const;
 
     /**
-     * @brief adjustQuality Adjusts the quality.
+     * Adjusts the quality.
      * @param delta The adjustment factor.
      */
     void adjustQuality( float delta );
 
-    /**
-     * @brief increaseError Increases the error.
-     */
-    void increaseError( );
+    /** Increases the error. */
+    void increaseError();
 
-    /**
-     * @brief decreaseError Decreases the error.
-     */
-    void decreaseError( );
+    /** Decreases the error. */
+    void decreaseError();
 
-private:
+protected:
 
-    virtual void serialize(   co::DataOStream& os, const uint64_t dirtyBits );
-    virtual void deserialize( co::DataIStream& is, const uint64_t dirtyBits );
-
-    lexis::render::ColorMap _colorMap;
-    ClipPlanes _clipPlanes;
-    uint8_t _depth;
+    SignalledVariable< lexis::render::ColorMap > _colorMap;
+    SignalledVariable< ClipPlanes >_clipPlanes;
+    SignalledVariable< uint8_t > _depth;
 };
 
 }
-
-#endif // _RenderInfo_h_
+#endif // _RenderSettings_h_

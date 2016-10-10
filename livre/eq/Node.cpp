@@ -30,7 +30,7 @@
 #include <livre/eq/Event.h>
 #include <livre/eq/serialization.h>
 
-#include <livre/eq/settings/VolumeSettings.h>
+#include <livre/eq/settings/EqVolumeSettings.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/lib/cache/DataObject.h>
 #include <livre/lib/cache/HistogramObject.h>

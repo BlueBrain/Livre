@@ -37,6 +37,7 @@ class ImageJPEG;
 namespace livre
 {
 
+class ApplicationSettings;
 class CameraSettings;
 class Channel;
 class Client;

@@ -29,8 +29,6 @@
 namespace livre
 {
 
-#define glewGetContext() GLContext::glewGetContext()
-
 TexturePool::TexturePool( const DataSource& dataSource, const size_t gpuCacheSize )
     : _maxBlockSize( dataSource.getVolumeInfo().maximumBlockSize )
     , _internalTextureFormat( 0 )

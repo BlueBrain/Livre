@@ -29,8 +29,8 @@
 namespace livre
 {
 
-inline co::DataOStream& operator << ( co::DataOStream& os,
-                               const VolumeInformation& info )
+inline co::DataOStream& operator<<( co::DataOStream& os,
+                                    const VolumeInformation& info )
 {
     os << info.bigEndian << info.compCount << info.dataType << info.overlap
        << info.maximumBlockSize << info.voxels << info.worldSize
@@ -41,8 +41,8 @@ inline co::DataOStream& operator << ( co::DataOStream& os,
     return os;
 }
 
-inline co::DataIStream& operator >> ( co::DataIStream& is,
-                                      VolumeInformation& info )
+inline co::DataIStream& operator>>( co::DataIStream& is,
+                                    VolumeInformation& info )
 {
     uint32_t depth;
     Vector3ui blockSize;
@@ -71,7 +71,6 @@ template<> inline void byteswap( livre::DataType& value )
 {
     byteswap( reinterpret_cast< uint32_t& >( value ));
 }
-
 }
 
 #endif // _serialization_h_

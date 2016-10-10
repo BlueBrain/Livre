@@ -27,10 +27,11 @@
 #include <livre/eq/events/Events.h>
 #include <livre/eq/FrameData.h>
 #include <livre/eq/serialization.h>
-#include <livre/eq/settings/CameraSettings.h>
-#include <livre/eq/settings/FrameSettings.h>
-#include <livre/eq/settings/RenderSettings.h>
-#include <livre/eq/settings/VolumeSettings.h>
+#include <livre/eq/settings/EqCameraSettings.h>
+#include <livre/eq/settings/EqFrameSettings.h>
+#include <livre/eq/settings/EqRenderSettings.h>
+#include <livre/eq/settings/EqVolumeSettings.h>
+
 #include <livre/lib/configuration/ApplicationParameters.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 
@@ -285,9 +286,10 @@ bool Config::init( const int argc LB_UNUSED, char** argv LB_UNUSED )
 #ifdef LIVRE_USE_ZEROEQ
     _impl->communicator.reset( new zeroeq::Communicator( *this, argc, argv ));
 
-    _impl->framedata.getCameraSettings().registerNotifyChanged(
-                std::bind( &zeroeq::Communicator::publishCamera,
-                           _impl->communicator.get(), std::placeholders::_1 ));
+    EqCameraSettings& cameraSettings =
+            static_cast< EqCameraSettings& >( _impl->framedata.getCameraSettings( ));
+    cameraSettings.registerNotifyChanged( std::bind( &zeroeq::Communicator::publishCamera,
+                                          _impl->communicator.get(), std::placeholders::_1 ));
 #endif
 
     resetCamera();
@@ -395,7 +397,8 @@ bool Config::switchCanvas()
     if( canvases.empty( ))
         return true;
 
-    FrameSettings& frameSettings = _impl->framedata.getFrameSettings();
+    EqFrameSettings& frameSettings =
+            static_cast< EqFrameSettings& >( _impl->framedata.getFrameSettings( ));
     frameSettings.setCurrentViewId( lunchbox::uint128_t( 0 ) );
 
     if( !_impl->currentCanvas )
@@ -431,7 +434,8 @@ bool Config::switchView()
     if( !layout )
         return true;
 
-    FrameSettings& frameSettings = _impl->framedata.getFrameSettings();
+    EqFrameSettings& frameSettings =
+            static_cast< EqFrameSettings& >( _impl->framedata.getFrameSettings( ));
     const eq::View* current = find< eq::View >( frameSettings.getCurrentViewId( ));
 
     const eq::Views& views = layout->getViews();
@@ -458,7 +462,8 @@ bool Config::switchView()
 
 bool Config::switchToViewCanvas( const eq::uint128_t& viewID )
 {
-    FrameSettings& frameSettings = _impl->framedata.getFrameSettings();
+    EqFrameSettings& frameSettings =
+            static_cast< EqFrameSettings& >( _impl->framedata.getFrameSettings( ));
     frameSettings.setCurrentViewId( viewID );
 
     if( viewID == 0 )
@@ -603,7 +608,9 @@ void Config::switchLayout( const int32_t increment )
     if( !_impl->currentCanvas )
         return;
 
-    _impl->framedata.getFrameSettings().setCurrentViewId( lunchbox::uint128_t(0));
+    EqFrameSettings& frameSettings =
+            static_cast< EqFrameSettings& >( _impl->framedata.getFrameSettings( ));
+    frameSettings.setCurrentViewId( lunchbox::uint128_t(0));
 
     size_t index = _impl->currentCanvas->getActiveLayoutIndex() + increment;
     const eq::Layouts& layouts = _impl->currentCanvas->getLayouts();
