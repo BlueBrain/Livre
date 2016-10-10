@@ -28,25 +28,10 @@
 
 namespace livre
 {
-#define glewGetContext() GLContext::getCurrent()->glewGetContext()
-
-GLSLShaders::GLSLShaders()
-    : _program( 0 )
-{}
-
-
-GLSLShaders::~GLSLShaders()
+namespace
 {
-    if( _program )
-        glDeleteProgram( _program );
-}
 
-GLSLShaders::Handle GLSLShaders::getProgram() const
-{
-    return _program;
-}
-
-void GLSLShaders::_printShaderLog( const Handle shader )
+void printShaderLog( const Handle shader )
 {
     GLint length = 0;
     glGetShaderiv( shader, GL_INFO_LOG_LENGTH, &length );
@@ -62,7 +47,7 @@ void GLSLShaders::_printShaderLog( const Handle shader )
     LBERROR << "Shader error: " << log << std::endl;
 }
 
-void GLSLShaders::_printProgramLog( const Handle program )
+void printProgramLog( const Handle program )
 {
     GLint length = 0;
     glGetProgramiv( program, GL_INFO_LOG_LENGTH, &length );
@@ -78,10 +63,18 @@ void GLSLShaders::_printProgramLog( const Handle program )
     LBERROR << "Program error: " << log << std::endl;
 }
 
-int GLSLShaders::_load( GLSLShaders::Handle& handle, const std::string& shader,
-                        const Strings& paths,
-                        const Strings& glslCodes LB_UNUSED,
-                        const unsigned shaderType )
+
+void deleteShader( const GLSLShaders::Handle shader )
+{
+    if( shader )
+        glDeleteShader( shader );
+}
+
+int load( GLSLShaders::Handle& handle,
+          const std::string& shader,
+          const Strings& paths,
+          const Strings& glslCodes LB_UNUSED,
+          const unsigned shaderType )
 {
     handle = glCreateShader( shaderType );
     if( !handle )
@@ -97,23 +90,15 @@ int GLSLShaders::_load( GLSLShaders::Handle& handle, const std::string& shader,
         glCompileShader( handle );
     else
     {
-#ifdef GL3_PROTOTYPES
-        if( checkOpenGLExtension( "GL_ARB_shading_language_include" ) )
+        std::vector< const char* > pathsChar( paths.size( ));
+        for( size_t i = 0; i < paths.size() ; i++ )
         {
-            std::vector< const char* > pathsChar( paths.size() );
-            for( size_t i = 0; i < paths.size() ; i++ )
-            {
-                glNamedStringARB( GL_SHADER_INCLUDE_ARB, -1, paths[i].c_str(),
-                                 -1, glslCodes[i].c_str() );
-                pathsChar[i] = paths[i].c_str();
-            }
-            glCompileShaderIncludeARB( (GLuint)handle, GLsizei(paths.size()),
-                                       &pathsChar[0], 0 );
+            glNamedStringARB( GL_SHADER_INCLUDE_ARB, -1, paths[i].c_str(),
+                             -1, glslCodes[i].c_str() );
+            pathsChar[i] = paths[i].c_str();
         }
-        else
-#endif
-            LBERROR << "GL_ARB_shading_language_include not supported"
-                    << std::endl;
+        glCompileShaderIncludeARB( (GLuint)handle, GLsizei(paths.size()),
+                                   &pathsChar[0], 0 );
     }
     const int ret = glGetError();
 
@@ -121,62 +106,38 @@ int GLSLShaders::_load( GLSLShaders::Handle& handle, const std::string& shader,
     glGetShaderiv( handle, GL_COMPILE_STATUS, &status );
     if( status == GL_FALSE )
     {
-        _printShaderLog( handle );
+        printShaderLog( handle );
         glDeleteShader( handle );
         handle = 0;
     }
 
-#ifdef GL3_PROTOTYPES
     for( size_t i = 0; i < paths.size(); i++ )
         glDeleteNamedStringARB( -1, paths[i].c_str( ));
-#endif
 
     return ret;
 }
 
-std::string GLSLShaders::readShaderFile_( const std::string &shaderFile ) const
+int loadShaders( const ShaderData& shaderData )
 {
-    std::ifstream shader( shaderFile.c_str() );
-    std::stringstream shaderStr;
-    shaderStr << shader.rdbuf();
-    shader.close();
-    return shaderStr.str();
-}
-
-namespace
-{
-int _glError( const int error = glGetError( ))
-{
-    if( error == GL_NO_ERROR )
-        return EQ_UNKNOWN_GL_ERROR;
-    return error;
-}
-}
-
-int GLSLShaders::loadShaders( const ShaderData& shaderData )
-{
-    if( _program )
-        return GL_NO_ERROR;
-
     glGetError(); // reset
     LBASSERT( glCreateProgram );
     const Handle program = glCreateProgram();
     if( program == 0 )
     {
         LBDEBUG << "glCreateProgram failed" << std::endl;
-        return _glError();
+        return error();
     }
 
     Handle vertexShader = 0;
-    if( !shaderData.vShader.empty() )
+    if( !shaderData.vShader.empty( ))
     {
-        const int error = _load( vertexShader, shaderData.vShader,
-                                 shaderData.paths, shaderData.glslCodes,
-                                 GL_VERTEX_SHADER );
+        const int error = load( vertexShader, shaderData.vShader,
+                                shaderData.paths, shaderData.glslCodes,
+                                GL_VERTEX_SHADER );
         if( !vertexShader )
         {
             glDeleteProgram( program );
-            return _glError( error );
+            return error;
         }
         glAttachShader( program, vertexShader );
     }
@@ -184,35 +145,34 @@ int GLSLShaders::loadShaders( const ShaderData& shaderData )
     Handle fragmentShader = 0;
     if(!shaderData.fShader.empty())
     {
-        const int error = _load( fragmentShader, shaderData.fShader,
-                                 shaderData.paths, shaderData.glslCodes,
-                                 GL_FRAGMENT_SHADER );
+        const int error = load( fragmentShader, shaderData.fShader,
+                                shaderData.paths, shaderData.glslCodes,
+                                GL_FRAGMENT_SHADER );
         if( !fragmentShader )
         {
-            _deleteShader( vertexShader );
+            deleteShader( vertexShader );
             glDeleteProgram( program );
-            return _glError( error );
+            return error;
         }
         glAttachShader( program, fragmentShader );
     }
 
     Handle geometryShader = 0;
-#ifdef GL3_PROTOTYPES
+
     if(!shaderData.gShader.empty())
     {
-        const int error = _load( geometryShader, shaderData.gShader,
-                                 shaderData.paths, shaderData.glslCodes,
-                                 GL_GEOMETRY_SHADER );
+        const int error = load( geometryShader, shaderData.gShader,
+                                   shaderData.paths, shaderData.glslCodes,
+                                   GL_GEOMETRY_SHADER );
         if( !geometryShader )
         {
-            _deleteShader( fragmentShader );
-            _deleteShader( vertexShader );
+            deleteShader( fragmentShader );
+            deleteShader( vertexShader );
             glDeleteProgram( program );
-            return _glError( error );
+            return error;
         }
         glAttachShader( program, geometryShader );
     }
-#endif
 
     glLinkProgram( program );
     const int error = glGetError();
@@ -221,42 +181,30 @@ int GLSLShaders::loadShaders( const ShaderData& shaderData )
     glGetProgramiv( program, GL_LINK_STATUS, &status );
     if( status == GL_FALSE )
     {
-        _printProgramLog( program );
-        _deleteShader( geometryShader );
-        _deleteShader( fragmentShader );
-        _deleteShader( vertexShader );
+        printProgramLog( program );
+        deleteShader( geometryShader );
+        deleteShader( fragmentShader );
+        deleteShader( vertexShader );
         glDeleteProgram( program );
-        return _glError( error );
+        return error;
     }
 
-    _program = program;
-    return GL_NO_ERROR;
+    return program;
+}
 }
 
-bool GLSLShaders::checkOpenGLExtension( const std::string& extensionName
-                                        LB_UNUSED )
+GLSLShaders::GLSLShaders( const ShaderData& shaderData )
+    : _program( loadShaders( shaderData ))
 {
-#ifdef GL3_PROTOTYPES
-    std::string nameInList;
-    GLint end;
-    glGetIntegerv(GL_NUM_EXTENSIONS,&end);
-
-    for ( GLint i = 0; i < end; ++i )
-    {
-        const GLubyte* namePtr= glGetStringi(GL_EXTENSIONS,i);
-        nameInList = reinterpret_cast<const char*>(namePtr);
-        if(extensionName==nameInList)
-            return true;
-    }
-#endif
-    return false;
 }
 
-// cppcheck-suppress passedByValue
-void GLSLShaders::_deleteShader( const GLSLShaders::Handle shader )
+GLSLShaders::~GLSLShaders()
 {
-    if( shader )
-        glDeleteShader( shader );
+    glDeleteProgram( _program );
 }
 
+GLSLShaders::Handle GLSLShaders::getProgram() const
+{
+    return _program;
+}
 }

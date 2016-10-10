@@ -41,9 +41,11 @@ struct ShaderData
     Strings paths;
     Strings glslCodes;
 
-    ShaderData( std::string shaderV = "", std::string shaderF = "",
-                std::string shaderG = "", Strings glslPaths = Strings(),
-                Strings codesGlsl = Strings( ))
+    ShaderData( std::string shaderV = "",
+                std::string shaderF = "",
+                std::string shaderG = "",
+                ,
+                Strings codesGlsl = Strings())
         : vShader(shaderV)
         , fShader(shaderF)
         , gShader(shaderG)
@@ -59,44 +61,25 @@ struct ShaderData
 class GLSLShaders
 {
 public:
-    LIVRECORE_API GLSLShaders();
-    LIVRECORE_API ~GLSLShaders();
-
-    /**
-     * Load shaders from strings with glsl's include directive support.
-     * @param shaderData The data needed to compile the shader.
-     * @return The OpenGL error, or GL_NO_ERROR on success
-     */
-    LIVRECORE_API int loadShaders(const ShaderData& shaderData);
 
     typedef unsigned Handle;
+
+   /**
+    * Constructor
+    * @param shaderData The data needed to compile the shader.
+    * @throw std::runtime_error when shader can not be loaded
+    */
+    LIVRECORE_API GLSLShaders( const ShaderData& shaderData );
+
+    LIVRECORE_API GLSLShaders( Strings glslPaths = Strings() );
+    LIVRECORE_API ~GLSLShaders();
 
     /** @return The OpenGL handle of the shaders. */
     LIVRECORE_API Handle getProgram() const;
 
-    /**
-     * Check if an OpenGL extension is available.
-     * @param extensionName The name of the extension to be checked.
-     * @return True or false.
-     */
-    LIVRECORE_API bool checkOpenGLExtension( const std::string& extensionName );
-
 private:
+
     Handle _program;
-
-    int _load( GLSLShaders::Handle& handle, const std::string& shader,
-               const Strings& paths, const Strings& glslCodes,
-               unsigned shaderType );
-
-    void _printShaderLog( Handle shader );
-    void _printProgramLog( Handle program );
-
-    int cleanupOnError_( Handle shader1, Handle shader2 = 0,
-                         Handle shader3 = 0 );
-
-    void _deleteShader( GLSLShaders::Handle shader );
-
-    std::string readShaderFile_( const std::string &shaderFile ) const;
 };
 
 }

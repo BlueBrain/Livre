@@ -47,6 +47,13 @@
 
 namespace livre
 {
+namespace
+{
+const std::string vertRayCastFile = "./shaders/vertRayCast.glsl";
+const std::string fragRayCastFile = "./shaders/fragRayCast.glsl";
+const std::string vertTexCopyFile = "./shaders/vertTexCopy.glsl";
+const std::string fragRayCastFile = "./shaders/vertTexCopy.glsl";
+}
 
 // Sort helper function for sorting the textures with their distances to viewpoint
 struct DistanceOperator
@@ -71,9 +78,6 @@ struct DistanceOperator
     const Frustum& _frustum;
     const DataSource& _dataSource;
 };
-
-
-#define glewGetContext() GLContext::getCurrent()->glewGetContext()
 
 namespace
 {

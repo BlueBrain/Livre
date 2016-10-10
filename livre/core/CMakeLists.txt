@@ -105,7 +105,3 @@ set(LIVRECORE_LINK_LIBRARIES
 set(LIVRECORE_INCLUDE_NAME livre/core)
 set(LIVRECORE_NAMESPACE livrecore)
 common_library(LivreCore)
-
-if(CMAKE_COMPILER_IS_GCC)
-  target_compile_definitions(LivreCore PRIVATE GL3_PROTOTYPES=1)
-endif()
