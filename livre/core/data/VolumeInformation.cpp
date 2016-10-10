@@ -23,7 +23,7 @@ namespace livre
 {
 
 VolumeInformation::VolumeInformation()
-    : isBigEndian( false )
+    : bigEndian( false )
     , compCount( 1u )
     , dataType( DT_UINT8 )
     , overlap( 0u )

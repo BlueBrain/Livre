@@ -27,12 +27,12 @@ set(LIVREEQ_HEADERS
       Pipe.h
       render/EqContext.h
       render/RayCastRenderer.h
+      serialization.h
       settings/CameraSettings.h
       settings/FrameSettings.h
       settings/RenderSettings.h
       settings/VolumeSettings.h
       Window.h
-      coSerialization.h
       types.h)
 
 set( LIVREEQ_SOURCES

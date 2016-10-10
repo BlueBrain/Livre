@@ -26,6 +26,8 @@
 #include <livre/eq/settings/FrameSettings.h>
 #include <livre/eq/FrameData.h>
 
+#include <eq/fabric/pointerEvent.h>
+
 #define SPINX_START 5
 #define SPINY_START 5
 #define ADVANCE_START 0
@@ -45,77 +47,62 @@ ChannelPointerHandler::ChannelPointerHandler( )
 
 bool ChannelPointerHandler::operator ()( EqEventInfo& eqEventInfo )
 {
-    const eq::ConfigEvent* event = eqEventInfo.configEvent;
+    const eq::PointerEvent& event =
+            static_cast< const eq::PointerEvent& >( eqEventInfo.event );
     Config* config = eqEventInfo.config;
 
-    CameraSettings& cameraSettings = config->getFrameData().getCameraSettings();
+    CameraSettings& cameraSettings =
+            config->getFrameData().getCameraSettings();
 
-    switch( event->data.type )
+    switch( eqEventInfo.type )
     {
-        case eq::Event::CHANNEL_POINTER_BUTTON_PRESS:
+        case eq::EVENT_CHANNEL_POINTER_BUTTON_PRESS:
         {
-            const eq::uint128_t& viewID = event->data.context.view.identifier;
+            const eq::uint128_t& viewID = event.context.view.identifier;
             return config->switchToViewCanvas( viewID );
         }
 
-        case eq::Event::CHANNEL_POINTER_BUTTON_RELEASE:
+        case eq::EVENT_CHANNEL_POINTER_MOTION:
         {
-            const eq::PointerEvent& releaseEvent = event->data.pointerButtonRelease;
-            if( releaseEvent.buttons == eq::PTR_BUTTON_NONE)
-            {
-                if( releaseEvent.button == eq::PTR_BUTTON1 )
-                {
-                    spinX_ = releaseEvent.dy;
-                    spinY_ = releaseEvent.dx;
-                    return true;
-                }
-                if( releaseEvent.button == eq::PTR_BUTTON2 )
-                {
-                    advance_ = -releaseEvent.dy;
-                    return true;
-                }
-            }
-            break;
-        }
-
-        case eq::Event::CHANNEL_POINTER_MOTION:
-        {
-            switch( event->data.pointerMotion.buttons )
+            switch( event.buttons )
             {
               case eq::PTR_BUTTON1:
                   spinX_ = 0;
                   spinY_ = 0;
 
                   cameraSettings.spinModel(
-                      -ROTATE_AND_ZOOM_SPEED * event->data.pointerMotion.dy,
-                      -ROTATE_AND_ZOOM_SPEED * event->data.pointerMotion.dx );
+                      -ROTATE_AND_ZOOM_SPEED * event.dy,
+                      -ROTATE_AND_ZOOM_SPEED * event.dx );
                   return true;
 
               case eq::PTR_BUTTON2:
-                  advance_ = -event->data.pointerMotion.dy;
+                  advance_ = -event.dy;
                   cameraSettings.moveCamera( 0.f, 0.f,
                                               ROTATE_AND_ZOOM_SPEED * advance_ );
                   return true;
 
               case eq::PTR_BUTTON3:
-                  cameraSettings.moveCamera( PAN_SPEED * event->data.pointerMotion.dx,
-                                             -PAN_SPEED * event->data.pointerMotion.dy,
+                  cameraSettings.moveCamera( PAN_SPEED * event.dx,
+                                             -PAN_SPEED * event.dy,
                                              0.f );
                   return true;
             }
             break;
         }
 
-        case eq::Event::CHANNEL_POINTER_WHEEL:
+        case eq::EVENT_CHANNEL_POINTER_WHEEL:
         {
-            cameraSettings.moveCamera( -ADVANCE_SPEED * event->data.pointerWheel.xAxis,
+            cameraSettings.moveCamera( -ADVANCE_SPEED * event.xAxis,
                                        0.f,
-                                       ADVANCE_SPEED * event->data.pointerWheel.yAxis );
-            break;
+                                       ADVANCE_SPEED * event.yAxis );
+            return true;
         }
+        default:
+            return false;
+
     }
 
-    return true;
+    return false;
 }
 
 }

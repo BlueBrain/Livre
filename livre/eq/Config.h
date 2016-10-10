@@ -118,17 +118,24 @@ public:
      */
     void switchLayout( const int32_t increment );
 
-    bool handleEvent( eq::EventICommand command ) final;
-
+    /** Handles the network events */
     void handleNetworkEvents();
 
     std::string renderJPEG();
 
     const VolumeInformation& getVolumeInformation() const;
 
+    /** @copydoc eq::Config::handleEvent(eq::EventICommand) */
+    bool handleEvent( eq::EventICommand command ) final;
+
+    /** @copydoc eq::Config::handleEvent(eq::EventType, eq::KeyEvent&) */
+    bool handleEvent( eq::EventType type, const eq::KeyEvent& ) final;
+
+    /** @copydoc eq::Config::handleEvent(eq::EventType, eq::PointerEvent&) */
+    bool handleEvent( eq::EventType type, const eq::PointerEvent& ) final;
+
 private:
     LIVREEQ_API virtual ~Config();
-    bool handleEvent( const eq::ConfigEvent* event ) final;
 
     bool _registerFrameData();
     bool _deregisterFrameData();

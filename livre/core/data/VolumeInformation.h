@@ -47,7 +47,7 @@ struct VolumeInformation
     /**
      * The endianness of the data.
      */
-    bool isBigEndian;
+    bool bigEndian;
 
     /**
      * The component count of voxel.

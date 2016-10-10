@@ -28,7 +28,7 @@ namespace livre
 
 enum ConfigEventType
 {
-    GRAB_IMAGE = eq::Event::USER,
+    GRAB_IMAGE = eq::EVENT_USER,
     VOLUME_INFO,
     REDRAW,
     HISTOGRAM_DATA

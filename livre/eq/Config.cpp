@@ -26,7 +26,7 @@
 #include <livre/eq/events/EqEventInfo.h>
 #include <livre/eq/events/Events.h>
 #include <livre/eq/FrameData.h>
-#include <livre/eq/coSerialization.h>
+#include <livre/eq/serialization.h>
 #include <livre/eq/settings/CameraSettings.h>
 #include <livre/eq/settings/FrameSettings.h>
 #include <livre/eq/settings/RenderSettings.h>
@@ -492,46 +492,6 @@ void Config::handleNetworkEvents()
 #endif
 }
 
-bool Config::handleEvent( const eq::ConfigEvent* event )
-{
-#ifdef LIVRE_USE_ZEROEQ
-    CameraSettings cameraSettings = _impl->framedata.getCameraSettings();
-#endif
-
-    EqEventInfo eventInfo( this, event );
-    bool hasEvent = false;
-
-    switch( event->data.type )
-    {
-    case eq::Event::KEY_PRESS:
-    {
-        if( _impl->eventMapper.handleEvent( EVENT_KEYBOARD, eventInfo ))
-            hasEvent = true;
-        break;
-    }
-    case eq::Event::CHANNEL_POINTER_BUTTON_PRESS:
-    case eq::Event::CHANNEL_POINTER_BUTTON_RELEASE:
-    case eq::Event::CHANNEL_POINTER_MOTION:
-    case eq::Event::CHANNEL_POINTER_WHEEL:
-    {
-        if( _impl->eventMapper.handleEvent( EVENT_CHANNEL_POINTER, eventInfo ))
-            hasEvent = true;
-        break;
-    }
-    default:
-        break;
-    }
-
-    if( hasEvent )
-    {
-        _impl->redraw = true;
-        return true;
-    }
-
-    _impl->redraw |= eq::Config::handleEvent( event );
-    return _impl->redraw;
-}
-
 bool Config::handleEvent( eq::EventICommand command )
 {
     switch( command.getEventType( ))
@@ -556,8 +516,54 @@ bool Config::handleEvent( eq::EventICommand command )
         return true;
     }
 
-    _impl->redraw |= eq::Config::handleEvent( command );
-    return _impl->redraw;
+    if( !eq::Config::handleEvent( command ))
+        return false;
+
+    _impl->redraw = true;
+    return true;
+}
+
+bool Config::handleEvent( eq::EventType type, const eq::fabric::KeyEvent& event )
+{
+    EqEventInfo eventInfo( this, type, event );
+
+    bool ret = false;
+    switch( type )
+    {
+    case eq::EVENT_KEY_PRESS:
+        ret = _impl->eventMapper.handleEvent( EVENT_KEYBOARD, eventInfo );
+        break;
+    default:
+        return eq::Config::handleEvent( type, event );
+    }
+
+    if( !ret )
+        return eq::Config::handleEvent( type, event );
+
+    return ret;
+}
+
+bool Config::handleEvent( eq::EventType type, const eq::fabric::PointerEvent& event )
+{
+    EqEventInfo eventInfo( this, type, event );
+
+    bool ret = false;
+    switch( type )
+    {
+    case eq::EVENT_CHANNEL_POINTER_BUTTON_PRESS:
+    case eq::EVENT_CHANNEL_POINTER_BUTTON_RELEASE:
+    case eq::EVENT_CHANNEL_POINTER_MOTION:
+    case eq::EVENT_CHANNEL_POINTER_WHEEL:
+        ret = _impl->eventMapper.handleEvent( EVENT_CHANNEL_POINTER, eventInfo );
+        break;
+    default:
+        return eq::Config::handleEvent( type, event );
+    }
+
+    if( !ret )
+        return eq::Config::handleEvent( type, event );
+
+    return ret;
 }
 
 bool Config::_keepCurrentFrame( const uint32_t fps ) const

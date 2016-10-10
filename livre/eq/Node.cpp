@@ -28,7 +28,7 @@
 #include <livre/eq/FrameData.h>
 #include <livre/eq/Pipe.h>
 #include <livre/eq/Event.h>
-#include <livre/eq/coSerialization.h>
+#include <livre/eq/serialization.h>
 
 #include <livre/eq/settings/VolumeSettings.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>

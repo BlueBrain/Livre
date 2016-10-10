@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE( defaultVolumeInformation )
 {
     livre::VolumeInformation volume;
 
-    BOOST_CHECK_EQUAL( volume.isBigEndian, false );
+    BOOST_CHECK_EQUAL( volume.bigEndian, false );
     BOOST_CHECK_EQUAL( volume.compCount, 1u );
     BOOST_CHECK_EQUAL( volume.dataType, livre::DT_UINT8 );
     BOOST_CHECK_EQUAL( volume.overlap, livre::Vector3ui( 0u ));

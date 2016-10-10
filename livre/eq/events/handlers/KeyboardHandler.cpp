@@ -25,7 +25,7 @@
 #include <livre/eq/events/EqEventInfo.h>
 #include <livre/eq/events/handlers/KeyboardHandler.h>
 
-#include <eq/configEvent.h>
+#include <eq/fabric/keyEvent.h>
 
 namespace livre
 {
@@ -38,7 +38,8 @@ KeyboardHandler::KeyboardHandler( )
 bool KeyboardHandler::operator ()( EqEventInfo& eqEventInfo )
 {
     Config* config = eqEventInfo.config;
-    const eq::KeyEvent& event = eqEventInfo.configEvent->data.keyPress;
+    const eq::KeyEvent& event =
+            static_cast< const eq::KeyEvent& >( eqEventInfo.event );
 
     RenderSettings& renderSettings = config->getFrameData().getRenderSettings();
     FrameSettings& frameSettings = config->getFrameData().getFrameSettings();
