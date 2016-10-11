@@ -27,7 +27,6 @@ layout( rgba32f ) uniform image2DRect renderTexture;
 
 uniform mat4 invProjectionMatrix;
 uniform mat4 invModelViewMatrix;
-uniform ivec4 viewport;
 uniform float nearPlaneDist;
 
 uniform vec3 globalAABBMin;
@@ -41,8 +40,6 @@ uniform vec3 worldEyePosition;
 uniform bool firstPass;
 uniform bool lastPass;
 
-uniform vec2 depthRange;
-
 uniform int nSamplesPerRay;
 uniform int maxSamplesPerRay;
 uniform int nSamplesPerPixel;
@@ -51,6 +48,8 @@ uniform int refLevel;
 
 uniform int nClipPlanes;
 uniform vec4 clipPlanes[6];
+
+in vec3 eyePos;
 
 struct Ray
 {
@@ -67,19 +66,6 @@ struct AABB
 float rand(vec2 co)
 {
   return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
-}
-
-// http://www.opengl.org/wiki/Compute_eye_space_from_window_space.
-vec4 calcPositionInEyeSpaceFromWindowSpace( vec4 windowSpace )
-{
-    vec4 ndcPos;
-    ndcPos.xy = 2.0 * ( windowSpace.xy - viewport.xy - ( viewport.zw / 2.0 ) ) / viewport.zw;
-    ndcPos.z = 2.0 * ( windowSpace.z - ( ( depthRange.x + depthRange.y ) / 2.0 ) ) / ( depthRange.y - depthRange.x );
-    ndcPos.w = 1.0;
-
-    vec4 clipSpacePos = ndcPos / windowSpace.w;
-    vec4 eyeSpacePos = invProjectionMatrix * clipSpacePos;
-    return eyeSpacePos / eyeSpacePos.w;
 }
 
 // Compute texture position.
@@ -137,8 +123,7 @@ void main( void )
         vec4 localResult = result;
 
         vec4 subPixelCoord = gl_FragCoord + vec4( xPixelDelta, yPixelDelta, 0.0f, 0.0f );
-        vec4 pixelEyeSpacePos = calcPositionInEyeSpaceFromWindowSpace( subPixelCoord );
-        vec3 pixelWorldSpacePos = vec3(( invModelViewMatrix * pixelEyeSpacePos ).xyz );
+        vec3 pixelWorldSpacePos = vec3( invModelViewMatrix * vec4( eyePos, 1.0 ));
 
         vec3 rayDirection = normalize( pixelWorldSpacePos - worldEyePosition );
         Ray eye = Ray( worldEyePosition, rayDirection );
@@ -154,7 +139,7 @@ void main( void )
 
         vec3 nearPlaneNormal = vec3( 0.0f, 0.0f, 1.0f );
         float tNearPlane = dot( nearPlaneNormal, vec3( 0.0, 0.0, -nearPlaneDist ))
-                           / dot( nearPlaneNormal, normalize( pixelEyeSpacePos.xyz ));
+                           / dot( nearPlaneNormal, normalize( eyePos ));
 
         if( tnear < tNearPlane )
             tnear = tNearPlane;

@@ -58,6 +58,11 @@ struct Frustum::Impl
         return _projMatrix * _mvMatrix;
     }
 
+    Matrix4f getNormalMatrix() const
+    {
+        return vmml::transpose( _mvMatrix.inverse( ));
+    }
+
     bool operator==( const Frustum::Impl& rhs ) const
     {
         return _mvMatrix.equals( rhs._mvMatrix,
@@ -120,6 +125,11 @@ const Matrix4f& Frustum::getInvProjMatrix() const
 Matrix4f Frustum::getMVPMatrix() const
 {
     return _impl->getMVPMatrix();
+}
+
+Matrix4f Frustum::getNormalMatrix() const
+{
+    return _impl->getNormalMatrix();
 }
 
 const Vector3f& Frustum::getEyePos() const

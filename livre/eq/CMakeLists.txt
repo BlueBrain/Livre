@@ -57,9 +57,11 @@ set(LIVREEQ_SOURCES
 
 include(StringifyShaders)
 set(LIVREEQ_SHADERS
+  render/shaders/fragAxis.glsl
   render/shaders/fragRayCast.glsl
   render/shaders/fragRayCastGL2.glsl
   render/shaders/fragTexCopy.glsl
+  render/shaders/vertAxis.glsl
   render/shaders/vertRayCast.glsl
   render/shaders/vertRayCastGL2.glsl
   render/shaders/vertTexCopy.glsl)

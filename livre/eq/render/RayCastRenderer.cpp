@@ -23,10 +23,13 @@
 #include <livre/eq/render/shaders/vertRayCast.glsl.h>
 #include <livre/eq/render/shaders/fragTexCopy.glsl.h>
 #include <livre/eq/render/shaders/vertTexCopy.glsl.h>
+#include <livre/eq/render/shaders/fragAxis.glsl.h>
+#include <livre/eq/render/shaders/vertAxis.glsl.h>
 #include <livre/eq/settings/RenderSettings.h>
 
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/lib/cache/TextureObject.h>
+#include <livre/lib/data/BoundingAxis.h>
 
 #include <livre/core/cache/Cache.h>
 #include <livre/core/data/DataSource.h>
@@ -110,6 +113,8 @@ struct RayCastRenderer::Impl
         , _textureCache( textureCache )
         , _dataSource( dataSource )
         , _volInfo( _dataSource.getVolumeInfo( ))
+        , _axis( _dataSource.getVolumeInfo( ))
+        , _drawAxis( false )
     {
         TransferFunction1D transferFunction;
         initTransferFunction( transferFunction );
@@ -125,6 +130,13 @@ struct RayCastRenderer::Impl
         error = _texCopyShaders.loadShaders( ShaderData( vertTexCopy_glsl,
                                                          fragTexCopy_glsl ));
 
+        if( error != GL_NO_ERROR )
+            LBTHROW( std::runtime_error( "Can't load glsl shaders: " +
+                                         eq::glError( error ) +
+                                         where( __FILE__, __LINE__ )));
+
+        error = _axisShaders.loadShaders( ShaderData( vertAxis_glsl,
+                                                      fragAxis_glsl ));
         if( error != GL_NO_ERROR )
             LBTHROW( std::runtime_error( "Can't load glsl shaders: " +
                                          eq::glError( error ) +
@@ -156,6 +168,7 @@ struct RayCastRenderer::Impl
         _nSamplesPerRay = frameData.getVRParameters().getSamplesPerRay();
         _computedSamplesPerRay = _nSamplesPerRay;
         _nSamplesPerPixel = frameData.getVRParameters().getSamplesPerPixel();
+        _drawAxis = frameData.getRenderSettings().getDrawAxis( );
     }
 
     void initTransferFunction( const TransferFunction1D& transferFunction )
@@ -257,6 +270,9 @@ struct RayCastRenderer::Impl
         tParamNameGL = glGetUniformLocation( program, "invProjectionMatrix" );
         glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getInvProjMatrix( ).array );
 
+        tParamNameGL = glGetUniformLocation( program, "modelView" );
+        glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getMVMatrix().array );
+
         tParamNameGL = glGetUniformLocation( program, "invModelViewMatrix" );
         glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getInvMVMatrix( ).array );
 
@@ -275,14 +291,6 @@ struct RayCastRenderer::Impl
 
         Vector4i viewport;
         glGetIntegerv( GL_VIEWPORT, viewport.array );
-        tParamNameGL = glGetUniformLocation( program, "viewport" );
-        glUniform4iv( tParamNameGL, 1, viewport.array );
-
-        tParamNameGL = glGetUniformLocation( program, "depthRange" );
-
-        Vector2f depthRange;
-        glGetFloatv( GL_DEPTH_RANGE, depthRange.array );
-        glUniform2fv( tParamNameGL, 1, depthRange.array );
 
         tParamNameGL = glGetUniformLocation( program, "worldEyePosition" );
         glUniform3fv( tParamNameGL, 1, frustum.getEyePos( ).array );
@@ -457,6 +465,8 @@ struct RayCastRenderer::Impl
 
 
         glDrawArrays( GL_TRIANGLES, index * nVerticesRenderBrick, nVerticesRenderBrick );
+
+        glDisableVertexAttribArray( 0 );
     }
 
     void renderBrick( const NodeId& rb, const size_t index, const GLuint posVBO )
@@ -522,9 +532,6 @@ struct RayCastRenderer::Impl
         LBASSERT( program );
 
         glUseProgram( program );
-        glBindImageTexture( 0, _renderTexture.getName(),
-                            0, GL_FALSE, 0, GL_READ_WRITE,
-                            _renderTexture.getInternalFormat( ));
         GLint tParamNameGL = glGetUniformLocation( program, "renderTexture" );
         glUniform1i( tParamNameGL, 0 );
 
@@ -538,8 +545,37 @@ struct RayCastRenderer::Impl
         glUseProgram( 0 );
     }
 
-    void onFrameEnd()
+    void renderAxis( const Frustum& frustum )
     {
+        GLSLShaders::Handle program = _axisShaders.getProgram( );
+        LBASSERT( program );
+        glUseProgram( program );
+
+        GLint tParamNameGL = glGetUniformLocation( program, "renderTexture" );
+        glUniform1i( tParamNameGL, 0 );
+
+        tParamNameGL = glGetUniformLocation( program, "modelViewProjectionMatrix" );
+        glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getMVPMatrix( ).array );
+
+        tParamNameGL = glGetUniformLocation( program, "modelView" );
+        glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getMVMatrix().array );
+
+        tParamNameGL = glGetUniformLocation( program, "normalMatrix" );
+        glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getNormalMatrix( ).array );
+
+        tParamNameGL = glGetUniformLocation( program, "invProjectionMatrix" );
+        glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getInvProjMatrix( ).array );
+
+        _axis.draw();
+
+        glUseProgram( 0 );
+    }
+
+    void onFrameEnd( const Frustum& frustum )
+    {
+        if( _drawAxis )
+            renderAxis( frustum );
+
         std::sort( _usedTextures[1].begin(), _usedTextures[1].end( ));
 #ifdef LIVRE_DEBUG_RENDERING
         if( _usedTextures[0] != _usedTextures[1] )
@@ -560,6 +596,7 @@ struct RayCastRenderer::Impl
     eq::util::Texture _renderTexture;
     GLSLShaders _rayCastShaders;
     GLSLShaders _texCopyShaders;
+    GLSLShaders _axisShaders;
     uint32_t _nSamplesPerRay;
     uint32_t _nSamplesPerPixel;
     uint32_t _computedSamplesPerRay;
@@ -569,7 +606,9 @@ struct RayCastRenderer::Impl
     const DataSource& _dataSource;
     const VolumeInformation& _volInfo;
     GLuint _quadVBO;
+    BoundingAxis _axis;
     GLint _drawBuffer;
+    bool _drawAxis;
 };
 
 RayCastRenderer::RayCastRenderer( const DataSource& dataSource,
@@ -610,12 +649,12 @@ void RayCastRenderer::_onFrameRender( const Frustum&,
     _impl->onFrameRender( orderedBricks );
 }
 
-void RayCastRenderer::_onFrameEnd( const Frustum&,
+void RayCastRenderer::_onFrameEnd( const Frustum& frustum,
                                    const ClipPlanes&,
                                    const PixelViewport&,
                                    const NodeIds& )
 {
-    _impl->onFrameEnd();
+    _impl->onFrameEnd( frustum );
 }
 
 size_t RayCastRenderer::getNumBricksUsed() const

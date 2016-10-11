@@ -294,6 +294,11 @@ bool EventHandler< C >::handleEvent( const eq::EventType type,
         frameSettings.toggleStatistics();
         return true;
 
+    case 'a':
+    case 'A':
+        _impl->config.getFrameData().getRenderSettings().toggleDrawAxis();
+        return true;
+
     case 'i':
     case 'I':
         frameSettings.toggleInfo();
