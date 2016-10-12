@@ -37,6 +37,9 @@
 
 #include <lexis/lexis.h>
 #include <zeroeq/zeroeq.h>
+#ifdef ZEROEQ_USE_HTTPXX
+#  include <zeroeq/http/server.h>
+#endif
 #include <lunchbox/clock.h>
 
 #include <functional>
@@ -222,13 +225,16 @@ private:
         if( !_httpServer )
             return;
 
-        _httpServer->subscribe( ::lexis::render::Exit::ZEROBUF_TYPE_NAME(),
+        _httpServer->handlePUT( ::lexis::render::Exit::ZEROBUF_TYPE_NAME(),
+                                ::lexis::render::Exit::ZEROBUF_SCHEMA(),
                                 [&] { return requestExit(); } );
 
-        _httpServer->register_( ::lexis::render::ImageJPEG::ZEROBUF_TYPE_NAME(),
-                                [&](){ return _config.renderJPEG(); });
+        _httpServer->handleGET( ::lexis::render::ImageJPEG::ZEROBUF_TYPE_NAME(),
+                                ::lexis::render::ImageJPEG::ZEROBUF_SCHEMA(),
+                                [&] { return _config.renderJPEG(); });
 
-        _httpServer->subscribe( ::lexis::render::LookOut::ZEROBUF_TYPE_NAME(),
+        _httpServer->handlePUT( ::lexis::render::LookOut::ZEROBUF_TYPE_NAME(),
+                                ::lexis::render::LookOut::ZEROBUF_SCHEMA(),
                                 [&]( const std::string& json )
                                 {
                                     ::lexis::render::LookOut lookOut;
@@ -239,13 +245,14 @@ private:
                                     return true;
                                 });
 
-        _httpServer->register_( ::lexis::render::LookOut::ZEROBUF_TYPE_NAME(),
-                                [&](){ return _getLookOut( _getFrameData().getCameraSettings().getModelViewMatrix( )).toJSON(); });
+        _httpServer->handleGET( ::lexis::render::LookOut::ZEROBUF_TYPE_NAME(),
+                                ::lexis::render::LookOut::ZEROBUF_SCHEMA(),
+                                [&] { return _getLookOut( _getFrameData().getCameraSettings().getModelViewMatrix( )).toJSON(); });
 
-        _httpServer->add( _frame );
-        _httpServer->add( _getFrameData().getVRParameters( ));
-        _httpServer->add( _getRenderSettings().getTransferFunction( ));
-        _httpServer->add( _getRenderSettings().getClipPlanes( ));
+        _httpServer->handle( _frame );
+        _httpServer->handle( _getFrameData().getVRParameters( ));
+        _httpServer->handle( _getRenderSettings().getTransferFunction( ));
+        _httpServer->handle( _getRenderSettings().getClipPlanes( ));
 #endif
     }
 
