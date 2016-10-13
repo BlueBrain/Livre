@@ -68,11 +68,14 @@ struct SimpleExecutor::Impl
 
     void schedule()
     {
-        std::set< Future > inputConditions = { _unlockPromise.getFuture() };
+        std::set< Future > inputConditions;
         std::list< ExecutablePtr > executables;
         while( true )
         {
-            waitForAny( Futures( inputConditions.begin(), inputConditions.end( )));
+            Futures futures = { Future( _unlockPromise ) };
+            futures.insert( futures.end(),
+                            inputConditions.begin(), inputConditions.end( ));
+            waitForAny( futures );
             {
                 ScopedLock lock( _promiseReset );
                 if( _unlockPromise.getFuture().isReady( ))
