@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -61,7 +61,7 @@ public:
     LIVRECORE_API DataSourcePlugin();
 
     /** Needed by the PluginRegisterer. */
-    typedef DataSourcePlugin PluginT;
+    typedef DataSourcePlugin InterfaceT;
 
     /** Needed by the PluginRegisterer. */
     typedef DataSourcePluginData InitDataT;
