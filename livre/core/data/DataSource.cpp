@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
@@ -36,9 +36,7 @@ namespace
 struct DataSource::Impl
 {
 public:
-    typedef lunchbox::PluginFactory< DataSourcePlugin,
-                                     DataSourcePluginData >
-                PluginFactory;
+    typedef lunchbox::PluginFactory< DataSourcePlugin > PluginFactory;
 
     Impl( const lunchbox::URI& uri,
           const AccessMode accessMode )
