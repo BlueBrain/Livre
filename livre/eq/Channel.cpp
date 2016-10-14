@@ -29,13 +29,14 @@
 #include <livre/eq/Node.h>
 #include <livre/eq/Pipe.h>
 #include <livre/eq/render/EqContext.h>
-#include <livre/eq/render/RayCastRenderer.h>
-#include <livre/eq/settings/CameraSettings.h>
-#include <livre/eq/settings/FrameSettings.h>
-#include <livre/eq/settings/RenderSettings.h>
-#include <livre/eq/settings/VolumeSettings.h>
+
+#include <livre/eq/settings/EqCameraSettings.h>
+#include <livre/eq/settings/EqFrameSettings.h>
+#include <livre/eq/settings/EqRenderSettings.h>
+#include <livre/eq/settings/EqVolumeSettings.h>
 #include <livre/eq/Window.h>
 
+#include <livre/lib/render/RayCastRenderer.h>
 #include <livre/lib/cache/TextureObject.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/lib/pipeline/RenderPipeline.h>
@@ -46,6 +47,7 @@
 #include <livre/core/data/Histogram.h>
 #include <livre/core/render/FrameInfo.h>
 #include <livre/core/render/Frustum.h>
+#include <livre/core/settings/ApplicationSettings.h>
 #include <livre/core/visitor/DFSTraversal.h>
 
 #include <livre/core/pipeline/PipeFilter.h>
@@ -132,11 +134,16 @@ struct SendHistogramFilter : public Filter
 struct EqRaycastRenderer : public RayCastRenderer
 {
     EqRaycastRenderer( Channel::Impl& channel,
+                       const Strings& resourceFolders,
                        const DataSource& dataSource,
                        const Cache& textureCache,
                        uint32_t samplesPerRay,
                        uint32_t samplesPerPixel )
-        : RayCastRenderer( dataSource, textureCache, samplesPerRay, samplesPerPixel )
+        : RayCastRenderer( resourceFolders,
+                           dataSource,
+                           textureCache,
+                           samplesPerRay,
+                           samplesPerPixel )
         , _channel( channel )
     {}
 
@@ -180,7 +187,11 @@ public:
 
         const Window* window = static_cast< const Window* >( _channel->getWindow( ));
         const Node* node = static_cast< const Node* >( _channel->getNode( ));
+        const Strings& resourceFolders =
+                getFrameData()->getApplicationSettings().getResourceFolders();
+
         _renderer.reset( new EqRaycastRenderer( *this,
+                                                resourceFolders,
                                                 node->getDataSource(),
                                                 window->getTextureCache(),
                                                 nSamplesPerRay,
@@ -290,14 +301,15 @@ public:
         const livre::Window* window = static_cast< const livre::Window* >( _channel->getWindow( ));
         const RenderPipeline& renderPipeline = window->getRenderPipeline();
 
-        _renderer->update( *pipe->getFrameData( ));
-        renderPipeline.render( { pipe->getFrameData()->getVRParameters(),
+        const FrameData& frameData = *pipe->getFrameData();
+        _renderer->update( frameData.getRenderSettings(), frameData.getVRParameters( ));
+        renderPipeline.render( { frameData.getVRParameters(),
                                  _frameInfo,
                                  {{ _drawRange.start, _drawRange.end }},
                                  pipe->getFrameData()->getVolumeSettings().getDataSourceRange(),
                                  PixelViewport( pixVp.x, pixVp.y, pixVp.w, pixVp.h ),
                                  Viewport( vp.x, vp.y, vp.w, vp.h ),
-                                 pipe->getFrameData()->getRenderSettings().getClipPlanes(),
+                                 frameData.getRenderSettings().getClipPlanes(),
                                },
                                PipeFilterT< RedrawFilter >( "RedrawFilter", _channel ),
                                PipeFilterT< SendHistogramFilter >( "SendHistogramFilter", _channel ),

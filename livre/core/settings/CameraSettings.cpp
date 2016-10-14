@@ -21,9 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/eq/settings/CameraSettings.h>
-
-#include <co/co.h>
+#include <livre/core/settings/CameraSettings.h>
 
 #include <algorithm>
 
@@ -31,76 +29,62 @@ namespace livre
 {
 
 CameraSettings::CameraSettings()
-    : _notifyChangedFunc([&]( const Matrix4f& ){})
+    : _modelview( Matrix4f( ))
 {}
-
-void CameraSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
-{
-    co::Serializable::serialize( os, dirtyBits );
-    os << _modelview;
-}
-void CameraSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits )
-{
-    co::Serializable::deserialize( is, dirtyBits );
-    is >> _modelview;
-}
 
 void CameraSettings::spinModel( const float x, const float y )
 {
     if( x == 0.f && y == 0.f )
         return;
 
+    Matrix4f modelView = _modelview.get();
+
     float translation[3];
-    translation[0] = _modelview(0,3);
-    translation[1] = _modelview(1,3);
-    translation[2] = _modelview(2,3);
+    translation[0] = modelView(0,3);
+    translation[1] = modelView(1,3);
+    translation[2] = modelView(2,3);
 
-    _modelview(0,3) = 0.0;
-    _modelview(1,3) = 0.0;
-    _modelview(2,3) = 0.0;
+    modelView(0,3) = 0.0;
+    modelView(1,3) = 0.0;
+    modelView(2,3) = 0.0;
 
-    _modelview.pre_rotate_x( x );
-    _modelview.pre_rotate_y( y );
+    modelView.pre_rotate_x( x );
+    modelView.pre_rotate_y( y );
 
-    _modelview(0,3) = translation[0];
-    _modelview(1,3) = translation[1];
-    _modelview(2,3) = translation[2];
+    modelView(0,3) = translation[0];
+    modelView(1,3) = translation[1];
+    modelView(2,3) = translation[2];
 
-    setDirty( DIRTY_ALL );
-    _notifyChangedFunc( _modelview );
+    _modelview = modelView;
 }
 
 void CameraSettings::moveCamera( const float x, const float y, const float z )
 {
-    _modelview(0,3) += x;
-    _modelview(1,3) += y;
-    _modelview(2,3) += z;
+    auto modelView = _modelview.get();
 
-    setDirty( DIRTY_ALL );
-    _notifyChangedFunc( _modelview );
+    modelView(0,3) += x;
+    modelView(1,3) += y;
+    modelView(2,3) += z;
+
+    _modelview = modelView;
 }
 
 void CameraSettings::setCameraPosition( const Vector3f& pos )
 {
-    _modelview(0,3) = pos.x();
-    _modelview(1,3) = pos.y();
-    _modelview(2,3) = pos.z();
+    auto modelView = _modelview.get();
 
-    setDirty( DIRTY_ALL );
-    _notifyChangedFunc( _modelview );
-}
+    modelView(0,3) = pos.x();
+    modelView(1,3) = pos.y();
+    modelView(2,3) = pos.z();
 
-void CameraSettings::registerNotifyChanged( const std::function< void( const Matrix4f& )>&
-                                            notifyChangedFunc )
-{
-     _notifyChangedFunc = notifyChangedFunc;
+    _modelview = modelView;
 }
 
 void CameraSettings::setCameraLookAt( const Vector3f& lookAt )
 {
-    const Vector3f eye( _modelview(0,3),
-                        _modelview(1,3),
-                        _modelview(2,3));
+    const Vector3f eye( _modelview.get()(0,3),
+                        _modelview.get()(1,3),
+                        _modelview.get()(2,3));
     const Vector3f zAxis = vmml::normalize( eye - lookAt );
 
     // Avoid Gimbal lock effect when looking upwards/downwards
@@ -116,19 +100,15 @@ void CameraSettings::setCameraLookAt( const Vector3f& lookAt )
     }
 
     _modelview = Matrix4f( eye, lookAt, up );
-
-    setDirty( DIRTY_ALL );
-    _notifyChangedFunc( _modelview );
 }
 
 void CameraSettings::setModelViewMatrix( const Matrix4f& modelview )
 {
     _modelview = modelview;
-     setDirty( DIRTY_ALL );
 }
 
 Matrix4f CameraSettings::getModelViewMatrix() const
 {
-    return _modelview;
+    return _modelview.get();
 }
 }

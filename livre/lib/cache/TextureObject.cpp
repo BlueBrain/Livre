@@ -40,8 +40,6 @@ size_t getTextureSize( const DataSource& dataSource )
 }
 }
 
-#define glewGetContext() GLContext::glewGetContext()
-
 /**
  * The TextureObject class holds the informarmation for the data which is on the GPU.
   */

@@ -1,8 +1,7 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
- *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
- *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
+/*
+ * Copyright (c) 2016, ahmetbilgili@gmail.com
  *
- * This file is part of Livre <https://github.com/BlueBrain/Livre>
+ * This file is part of Livre <https://github.com/bilgili/Livre>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -18,27 +17,37 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _livreTypes_h_
-#define _livreTypes_h_
+#ifndef _ApplicationSettings_h_
+#define _ApplicationSettings_h_
 
 #include <livre/core/types.h>
+#include <livre/core/data/SignalledVariable.h>
 
 namespace livre
 {
 
-class DataObject;
-class HistogramObject;
-class RenderPipeline;
-class RenderSettings;
-class TextureObject;
-class VolumeRendererParameters;
+class ApplicationSettings
+{
 
-struct ApplicationParameters;
+public:
 
-typedef std::shared_ptr< const DataObject > ConstDataObjectPtr;
-typedef std::shared_ptr< const TextureObject > ConstTextureObjectPtr;
-typedef std::shared_ptr< const HistogramObject > ConstHistogramObjectPtr;
+    /** ApplicationSettings constructor. */
+    ApplicationSettings();
+
+    /**
+     * Adds resource folder.
+     * @param cm is the color map
+     */
+    void addResourceFolder( const std::string& folder );
+
+    /** @return the resource folder. */
+    Strings getResourceFolders() const;
+
+protected:
+
+    SignalledVariable< Strings > _resourceFolders;
+};
 
 }
 
-#endif // _types_h_
+#endif // _ApplicationSettings_h_

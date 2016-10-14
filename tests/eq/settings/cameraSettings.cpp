@@ -20,7 +20,7 @@
 #define BOOST_TEST_MODULE LibEq
 
 #include <boost/test/unit_test.hpp>
-#include <livre/eq/settings/CameraSettings.h>
+#include <livre/eq/settings/EqCameraSettings.h>
 
 #define TOLERANCE 0.001f
 

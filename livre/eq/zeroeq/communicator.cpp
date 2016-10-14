@@ -23,10 +23,10 @@
 #include <livre/eq/Config.h>
 #include <livre/eq/Event.h>
 #include <livre/eq/FrameData.h>
-#include <livre/eq/settings/CameraSettings.h>
-#include <livre/eq/settings/FrameSettings.h>
-#include <livre/eq/settings/RenderSettings.h>
-#include <livre/eq/settings/VolumeSettings.h>
+#include <livre/eq/settings/EqCameraSettings.h>
+#include <livre/eq/settings/EqFrameSettings.h>
+#include <livre/eq/settings/EqRenderSettings.h>
+#include <livre/eq/settings/EqVolumeSettings.h>
 
 #include <livre/lib/configuration/ApplicationParameters.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>

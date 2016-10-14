@@ -33,7 +33,7 @@ namespace livre
 class GLContext
 {
 public:
-    LIVRECORE_API GLContext( const GLEWContext* glewContext );
+    LIVRECORE_API GLContext();
     LIVRECORE_API virtual ~GLContext();
 
     /**
@@ -61,12 +61,6 @@ public:
      * Gets the current context
      */
     LIVRECORE_API static const GLContext* getCurrent();
-
-    /** @return the global glew context, @see glewSetContext */
-    LIVRECORE_API const GLEWContext* glewGetContext() const;
-
-private:
-    const GLEWContext* _glewContext;
 };
 
 }

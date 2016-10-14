@@ -27,6 +27,7 @@ set(LIVRECORE_HEADERS
   configuration/Configuration.h
   configuration/Parameters.h
   data/DataSource.h
+  data/SignalledVariable.h
   events/EventHandler.h
   events/EventHandlerFactory.h
   events/EventInfo.h
@@ -50,6 +51,11 @@ set(LIVRECORE_HEADERS
   render/SelectVisibles.h
   render/TexturePool.h
   render/TextureState.h
+  settings/ApplicationSettings.h
+  settings/CameraSettings.h
+  settings/FrameSettings.h
+  settings/RenderSettings.h
+  settings/VolumeSettings.h
   util/FrameUtils.h
   util/ThreadClock.h
   visitor/DFSTraversal.h
@@ -91,6 +97,11 @@ set(LIVRECORE_SOURCES
   render/SelectVisibles.cpp
   render/TexturePool.cpp
   render/TextureState.cpp
+  settings/ApplicationSettings.cpp
+  settings/CameraSettings.cpp
+  settings/FrameSettings.cpp
+  settings/RenderSettings.cpp
+  settings/VolumeSettings.cpp
   util/FrameUtils.cpp
   util/ThreadClock.cpp
   util/Utilities.cpp
@@ -105,7 +116,3 @@ set(LIVRECORE_LINK_LIBRARIES
 set(LIVRECORE_INCLUDE_NAME livre/core)
 set(LIVRECORE_NAMESPACE livrecore)
 common_library(LivreCore)
-
-if(CMAKE_COMPILER_IS_GCC)
-  target_compile_definitions(LivreCore PRIVATE GL3_PROTOTYPES=1)
-endif()

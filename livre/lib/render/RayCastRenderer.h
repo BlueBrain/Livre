@@ -20,7 +20,7 @@
 #ifndef _RayCastRenderer_h_
 #define _RayCastRenderer_h_
 
-#include <livre/eq/types.h>
+#include <livre/lib/types.h>
 #include <livre/core/render/Renderer.h>
 
 namespace livre
@@ -35,12 +35,14 @@ public:
 
     /**
      * Constructor
+     * @param resourceFolders folders for livre resources
      * @param dataSource the data source
      * @param textureCache the source for cached textures
      * @param samplesPerRay Number of samples per ray.
      * @param samplesPerPixel Number of samples per pixel.
      */
-    RayCastRenderer( const DataSource& dataSource,
+    RayCastRenderer( const Strings& resourceFolders,
+                     const DataSource& dataSource,
                      const Cache& textureCache,
                      uint32_t samplesPerRay,
                      uint32_t samplesPerPixel );
@@ -49,9 +51,11 @@ public:
     /**
      * Updates the renderer state with new values wrt samples per ray & pixel
      * and color map.
-     * @param frameData the current frame data containing new values
+     * @param renderSettings the current render settings
+     * @param renderParams the current render params
      */
-    void update( const FrameData& frameData );
+    void update( const RenderSettings& renderSettings,
+                 const VolumeRendererParameters& renderParams );
 
     /** @internal @return number of bricks rendered in the last render() pass */
     size_t getNumBricksUsed() const;

@@ -32,7 +32,7 @@ boost::mutex glContextMutex;
 }
 
 EqContext::EqContext( Window* const window )
-    : GLContext( window->glewGetContext( ))
+    : GLContext()
     , _window( window )
     , _systemWindow( 0 )
 {}

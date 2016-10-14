@@ -114,33 +114,27 @@ public:
      */
     bool deregisterFromConfig( eq::Config *config );
 
-    /**
-     * @return The frame settings.
-     */
+    /** @return The frame settings. */
     FrameSettings& getFrameSettings();
     const FrameSettings& getFrameSettings() const;
 
-    /**
-     * @return The render settings.
-     */
+    /** @return The render settings. */
     RenderSettings& getRenderSettings();
     const RenderSettings& getRenderSettings() const;
 
-    /**
-     * @return The camera settings.
-     */
+    /** @return The camera settings. */
     CameraSettings& getCameraSettings();
     const CameraSettings& getCameraSettings() const;
 
-    /**
-     * @return The volume settings.
-     */
+    /** @return The volume settings. */
     VolumeSettings& getVolumeSettings();
     const VolumeSettings& getVolumeSettings() const;
 
-    /**
-     * @return The volume rendering parameters.
-     */
+    /** @return The application settings. */
+    ApplicationSettings& getApplicationSettings();
+    const ApplicationSettings& getApplicationSettings() const;
+
+    /** @return The volume rendering parameters. */
     VolumeRendererParameters& getVRParameters();
     const VolumeRendererParameters& getVRParameters() const;
 

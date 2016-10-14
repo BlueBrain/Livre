@@ -19,62 +19,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _FrameSettings_h_
-#define _FrameSettings_h_
-
-#include <co/serializable.h>
+#ifndef _EqFrameSettings_h_
+#define _EqFrameSettings_h_
 
 #include <livre/lib/types.h>
+#include <livre/core/settings/FrameSettings.h>
+
 #include <livre/core/mathTypes.h>
 
-#include <livre/eq/Client.h>
+#include <eq/types.h>
+#include <co/serializable.h>
 
 namespace livre
 {
-
 /**
  * The FrameSettings class enables/disables info, statistics. Changes view and also toogles the
  * screen shot.
  */
-class FrameSettings : public co::Serializable
+class EqFrameSettings : public co::Serializable,
+                        public FrameSettings
 {
 public:
 
-    /**
-     * FrameSettings constructor.
-     */
-    FrameSettings();
-
-    /**
-     * Resets the variables.
-     */
-    void reset();
-
-    /**
-     * Toggles the volume information.
-     */
-    void toggleInfo();
-
-    /**
-     * Toggles the statictics.
-     */
-    void toggleStatistics();
-
-    /** Set the frame number of the current frame. */
-    void setFrameNumber( uint32_t frame );
-
-    /** @return the current frame number to render. */
-    uint32_t getFrameNumber() const { return frameNumber_; }
-
-    /**
-     * Screen shots the current frame.
-     */
-    void makeScreenshot();
-
-    /**
-     * @return Returns the screen shot number.
-     */
-    uint32_t getScreenshotNumber() const;
+    /** Constructor. */
+    EqFrameSettings();
 
     /**
      * Set the current view id.
@@ -83,45 +51,17 @@ public:
     void setCurrentViewId( const eq::uint128_t& id );
 
     /**
-     * @return Returns true if volume info is set.
-     */
-    bool getShowInfo() const;
-
-    /**
-     * @return Returns true if statistics is set.
-     */
-    bool getStatistics() const;
-
-    /**
      * @return Returns the current view id.
      */
     eq::uint128_t getCurrentViewId() const;
 
-    /**
-     * Enable/disable the frame grabbing for the current frame.
-     * @param setValue the bolean value for enabling/disabling frame grabbing.
-     */
-    void setGrabFrame( const bool setValue );
-
-    /**
-     * @return true if frame grabbing is enabled for the current frame.
-     */
-    bool getGrabFrame() const;
-
 private:
+
+    SignalledVariable< eq::uint128_t > _currentViewId;
 
     void serialize( co::DataOStream& os, const uint64_t dirtyBits ) final;
     void deserialize( co::DataIStream& is, const uint64_t dirtyBits ) final;
-
-    eq::uint128_t currentViewId_;
-    uint32_t frameNumber_;
-    uint32_t screenShot_;
-    bool statistics_;
-    bool info_;
-    bool grabFrame_;
 };
-
-
 }
 
-#endif // _FrameInfo_h_
+#endif // _EqFrameSettings_h_

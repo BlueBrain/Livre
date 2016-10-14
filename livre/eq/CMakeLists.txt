@@ -26,12 +26,11 @@ set(LIVREEQ_HEADERS
       Node.h
       Pipe.h
       render/EqContext.h
-      render/RayCastRenderer.h
-      serialization.h
-      settings/CameraSettings.h
-      settings/FrameSettings.h
-      settings/RenderSettings.h
-      settings/VolumeSettings.h
+      settings/EqApplicationSettings.h
+      settings/EqCameraSettings.h
+      settings/EqFrameSettings.h
+      settings/EqRenderSettings.h
+      settings/EqVolumeSettings.h
       Window.h
       types.h)
 
@@ -49,24 +48,13 @@ set( LIVREEQ_SOURCES
       Node.cpp
       Pipe.cpp
       render/EqContext.cpp
-      settings/CameraSettings.cpp
-      settings/FrameSettings.cpp
-      settings/RenderSettings.cpp
-      settings/VolumeSettings.cpp
+      settings/EqApplicationSettings.cpp
+      settings/EqCameraSettings.cpp
+      settings/EqFrameSettings.cpp
+      settings/EqRenderSettings.cpp
+      settings/EqVolumeSettings.cpp
       Window.cpp
       )
-
-include(StringifyShaders)
-set(LIVREEQ_SHADERS render/shaders/vertRayCast.glsl
-                    render/shaders/vertTexCopy.glsl
-                    render/shaders/fragTexCopy.glsl )
-
-list(APPEND LIVREEQ_SHADERS render/shaders/fragRayCast.glsl)
-list(APPEND LIVREEQ_SOURCES render/RayCastRenderer.cpp)
-
-stringify_shaders(${LIVREEQ_SHADERS})
-list(APPEND LIVREEQ_SOURCES ${SHADER_SOURCES})
-include_directories(${PROJECT_BINARY_DIR})
 
 set(LIVREEQ_LINK_LIBRARIES PUBLIC Lexis LivreLib Equalizer)
 

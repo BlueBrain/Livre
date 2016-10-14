@@ -19,56 +19,31 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _VolumeSettings_h_
-#define _VolumeSettings_h_
+#ifndef _EqVolumeSettings_h_
+#define _EqVolumeSettings_h_
 
 #include <livre/lib/types.h>
 #include <livre/core/mathTypes.h>
+#include <livre/core/settings/VolumeSettings.h>
+
 #include <co/serializable.h>
 
 namespace livre
 {
-
-/**
- * @brief The VolumeSettings class, keeps basic information about the volume data.
- */
-class VolumeSettings : public co::Serializable
+/** The VolumeSettings class, keeps basic information about the volume data. */
+class EqVolumeSettings : public co::Serializable, public livre::VolumeSettings
 {
 public:
 
-    /** VolumeSettings constructor. */
-    VolumeSettings();
-
-    /** reset Resets the information. */
-    void reset();
-
-    /**
-     * Sets the models source uri.
-     * @param uri The uri of the source data.
-     */
-    void setURI( const std::string& uri );
-
-    /** @return Returns the uri of the source data. */
-    const std::string& getURI( ) const;
-
-    /**
-     * Sets the accumulated data range for the volume.
-     * @param range of the data source.
-     */
-    void setDataSourceRange( const Vector2f& range );
-
-    /** @return Returns the accumulated data range for the volume. */
-    const Vector2f& getDataSourceRange() const;
+    /** Constructor */
+    EqVolumeSettings();
 
 private:
 
-    virtual void serialize(   co::DataOStream& os, const uint64_t dirtyBits );
-    virtual void deserialize( co::DataIStream& is, const uint64_t dirtyBits );
-
-    std::string _uri;
-    Vector2f _dataSourceRange;
+    void serialize( co::DataOStream& os, const uint64_t dirtyBits ) final;
+    void deserialize( co::DataIStream& is, const uint64_t dirtyBits ) final;
 };
 
 }
 
-#endif // _VolumeInfo_h_
+#endif // _EqVolumeSettings_h_

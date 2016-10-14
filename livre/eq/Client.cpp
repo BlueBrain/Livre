@@ -30,8 +30,11 @@
 #include <livre/eq/Client.h>
 #include <livre/eq/Config.h>
 #include <livre/eq/FrameData.h>
-#include <livre/eq/settings/VolumeSettings.h>
-#include <livre/eq/settings/CameraSettings.h>
+#include <livre/eq/settings/EqApplicationSettings.h>
+#include <livre/eq/settings/EqVolumeSettings.h>
+#include <livre/eq/settings/EqCameraSettings.h>
+
+#include <boost/filesystem.hpp>
 
 namespace livre
 {
@@ -173,6 +176,15 @@ int Client::run( const int argc, char** argv )
     frameData.setup( _impl->_rendererParameters );
     frameData.getVolumeSettings().setURI(
         _impl->_applicationParameters.dataFileName );
+
+    ApplicationSettings& appSettings = config->getFrameData().getApplicationSettings();
+
+    const std::string execFolder =
+            boost::filesystem::system_complete( argv[ 0 ]).remove_filename().string();
+
+    appSettings.addResourceFolder( execFolder );
+    appSettings.addResourceFolder( execFolder + "/../share/Livre/" );
+    appSettings.addResourceFolder( execFolder + "/../Livre/share/" );
 
     // 3. init config
     lunchbox::Clock clock;

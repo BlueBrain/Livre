@@ -23,15 +23,14 @@
 #define _CameraSettings_h_
 
 #include <livre/core/mathTypes.h>
-#include <eq/fabric/vmmlib.h>
-#include <co/serializable.h> // base class
+#include <livre/core/data/SignalledVariable.h>
 
 namespace livre
 {
 /**
  * The CameraSettings class is the information sent from app node to the clients for camera operations
  */
-class CameraSettings : public co::Serializable
+class CameraSettings
 {
 public:
     /**
@@ -82,13 +81,9 @@ public:
     /** @return the camera transformation */
     Matrix4f getModelViewMatrix() const;
 
-private:
+protected:
 
-    virtual void serialize( co::DataOStream& os, const uint64_t dirtyBits );
-    virtual void deserialize( co::DataIStream& is, const uint64_t dirtyBits );
-
-    Matrix4f _modelview;
-    std::function< void( const Matrix4f& )> _notifyChangedFunc;
+    SignalledVariable< Matrix4f > _modelview;
 };
 
 }

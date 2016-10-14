@@ -17,13 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/eq/FrameData.h>
-#include <livre/eq/render/RayCastRenderer.h>
-#include <livre/eq/render/shaders/fragRayCast.glsl.h>
-#include <livre/eq/render/shaders/vertRayCast.glsl.h>
-#include <livre/eq/render/shaders/fragTexCopy.glsl.h>
-#include <livre/eq/render/shaders/vertTexCopy.glsl.h>
-#include <livre/eq/settings/RenderSettings.h>
+#include <livre/lib/render/RayCastRenderer.h>
+#include <livre/core/settings/RenderSettings.h>
 
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/lib/cache/TextureObject.h>
@@ -47,6 +42,13 @@
 
 namespace livre
 {
+namespace
+{
+const std::string vertRayCastFile = "shaders/vertRayCast.glsl";
+const std::string fragRayCastFile = "shaders/fragRayCast.glsl";
+const std::string vertTexCopyFile = "shaders/vertTexCopy.glsl";
+const std::string fragTexCopyFile = "shaders/fragTexCopy.glsl";
+}
 
 // Sort helper function for sorting the textures with their distances to viewpoint
 struct DistanceOperator
@@ -56,8 +58,7 @@ struct DistanceOperator
         , _dataSource( dataSource )
     { }
 
-    bool operator()( const NodeId& rb1,
-                     const NodeId& rb2 )
+    bool operator()( const NodeId& rb1, const NodeId& rb2 )
     {
         const LODNode& lodNode1 = _dataSource.getNode( rb1 );
         const LODNode& lodNode2 = _dataSource.getNode( rb2 );
@@ -72,17 +73,8 @@ struct DistanceOperator
     const DataSource& _dataSource;
 };
 
-
-#define glewGetContext() GLContext::getCurrent()->glewGetContext()
-
 namespace
 {
-std::string where( const char* file, const int line )
-{
-    return std::string( " in " ) + std::string( file ) + ":" +
-           boost::lexical_cast< std::string >( line );
-}
-
 const uint32_t maxSamplesPerRay = 32;
 const uint32_t minSamplesPerRay = 512;
 const size_t nVerticesRenderBrick = 36;
@@ -92,51 +84,89 @@ const GLfloat fullScreenQuad[] = { -1.0f, -1.0f, 0.0f,
                                    -1.0f,  1.0f, 0.0f,
                                     1.0f, -1.0f, 0.0f,
                                     1.0f,  1.0f, 0.0f };
-
 }
+
+struct RenderTexture
+{
+    RenderTexture()
+        : texture( -1u )
+        , width( 0 )
+        , height( 0 )
+        , target(GL_TEXTURE_RECTANGLE_ARB )
+        , internalFormat( GL_RGBA32F )
+        , format( GL_RGBA )
+        , type( GL_FLOAT )
+    {
+    }
+
+    ~RenderTexture()
+    {
+        if( texture != -1u )
+            glDeleteTextures( 1, &texture );
+    }
+
+    void resize( const size_t width_, const size_t height_ )
+    {
+        if( width_ == width && height_ == height )
+            return;
+
+        width = width_;
+        height = height_;
+
+        if( texture != -1u )
+            glDeleteTextures( 1, &texture );
+
+        glGenTextures( 1, &texture );
+        glBindTexture( target, texture );
+        glTexImage2D( target, 0, internalFormat, width, height, 0, format, type, 0 );
+
+        const Floats emptyBuffer( width * height * 4, 0.0 );
+        glTexSubImage2D( target, 0, 0, 0, width, height,
+                         format, type, emptyBuffer.data( ));
+
+
+        const int ret = glGetError();
+        if( ret != GL_NO_ERROR )
+            LBTHROW( std::runtime_error( "Error resizing render texture" ));
+    }
+
+    GLuint texture;
+    size_t width;
+    size_t height;
+    const GLenum target;
+    GLuint internalFormat;
+    GLuint format;
+    GLuint type;
+
+};
 
 struct RayCastRenderer::Impl
 {
-    Impl( const DataSource& dataSource,
+    Impl( const Strings& resourceFolders,
+          const DataSource& dataSource,
           const Cache& textureCache,
           const uint32_t samplesPerRay,
           const uint32_t samplesPerPixel )
-        : _renderTexture( GL_TEXTURE_RECTANGLE_ARB, glewGetContext( ))
-        , _nSamplesPerRay( samplesPerRay )
+        : _nSamplesPerRay( samplesPerRay )
         , _nSamplesPerPixel( samplesPerPixel )
         , _computedSamplesPerRay( samplesPerRay )
         , _colorMapTexture( 0 )
         , _textureCache( textureCache )
         , _dataSource( dataSource )
         , _volInfo( _dataSource.getVolumeInfo( ))
+        , _rayCastShaders( ShaderFiles( resourceFolders, vertRayCastFile, fragRayCastFile, "" ))
+        , _texCopyShaders( ShaderFiles( resourceFolders, vertTexCopyFile, fragTexCopyFile, "" ))
     {
-        initColorMap( lexis::render::ColorMap::getDefaultColorMap( 0.0f, 256.0f ));
-
-        int error = _rayCastShaders.loadShaders( ShaderData( vertRayCast_glsl,
-                                                             fragRayCast_glsl ));
-
-        if( error != GL_NO_ERROR )
-            LBTHROW( std::runtime_error( "Can't load glsl shaders: " +
-                                         eq::glError( error ) +
-                                         where( __FILE__, __LINE__ )));
-
-        error = _texCopyShaders.loadShaders( ShaderData( vertTexCopy_glsl,
-                                                         fragTexCopy_glsl ));
-
-        if( error != GL_NO_ERROR )
-            LBTHROW( std::runtime_error( "Can't load glsl shaders: " +
-                                         eq::glError( error ) +
-                                         where( __FILE__, __LINE__ )));
-
         // Create QUAD VBO
         glGenBuffers( 1, &_quadVBO );
         glBindBuffer( GL_ARRAY_BUFFER, _quadVBO );
         glBufferData( GL_ARRAY_BUFFER, sizeof( fullScreenQuad ), fullScreenQuad, GL_STATIC_DRAW );
+
+        initColorMap( lexis::render::ColorMap::getDefaultColorMap( 0.0f, 256.0f ));
     }
 
     ~Impl()
     {
-        _renderTexture.flush();
         glDeleteBuffers( 1, &_quadVBO );
     }
 
@@ -148,12 +178,13 @@ struct RayCastRenderer::Impl
         return rbs;
     }
 
-    void update( const FrameData& frameData )
+    void update( const RenderSettings& renderSettings,
+                 const VolumeRendererParameters& renderParams )
     {
-        initColorMap( frameData.getRenderSettings().getColorMap( ));
-        _nSamplesPerRay = frameData.getVRParameters().getSamplesPerRay();
+        initColorMap( renderSettings.getColorMap( ));
+        _nSamplesPerRay = renderParams.getSamplesPerRay();
         _computedSamplesPerRay = _nSamplesPerRay;
-        _nSamplesPerPixel = frameData.getVRParameters().getSamplesPerPixel();
+        _nSamplesPerPixel = renderParams.getSamplesPerPixel();
     }
 
     void initColorMap( const lexis::render::ColorMap colorMap )
@@ -176,21 +207,11 @@ struct RayCastRenderer::Impl
                        reinterpret_cast< uint8_t* >( _colors.data( )));
     }
 
-    void createAndInitializeRenderTexture( const Viewport& viewport )
+    void resizeRenderTexture( const Viewport& viewport )
     {
-        const int width = viewport[ 2 ] - viewport[ 0 ];
-        const int height = viewport[ 3 ] - viewport[ 1 ];
-
-        if( _renderTexture.getWidth() == width && _renderTexture.getHeight() == height )
-            return;
-
-        _renderTexture.flush();
-        _renderTexture.init( GL_RGBA32F, width, height );
-        const Floats emptyBuffer( _renderTexture.getWidth() * _renderTexture.getHeight() * 4,
-                                  0.0 );
-        _renderTexture.upload( _renderTexture.getWidth(),
-                               _renderTexture.getHeight(),
-                               emptyBuffer.data( ));
+        const size_t width = viewport[ 2 ] - viewport[ 0 ];
+        const size_t height = viewport[ 3 ] - viewport[ 1 ];
+        _renderTexture.resize( width, height );
     }
 
     uint32_t getShaderDataType() const
@@ -325,11 +346,11 @@ struct RayCastRenderer::Impl
             glUniform4fv( tParamNameGL, nPlanes, planesData.data( ));
         }
 
-        createAndInitializeRenderTexture( viewport );
+        resizeRenderTexture( viewport );
 
-        glBindImageTexture( 0, _renderTexture.getName(),
+        glBindImageTexture( 0, _renderTexture.texture,
                             0, GL_FALSE, 0, GL_READ_WRITE,
-                            _renderTexture.getInternalFormat( ));
+                            _renderTexture.internalFormat );
 
         tParamNameGL = glGetUniformLocation( program, "renderTexture" );
         glUniform1i( tParamNameGL, 0 );
@@ -515,9 +536,9 @@ struct RayCastRenderer::Impl
         LBASSERT( program );
 
         glUseProgram( program );
-        glBindImageTexture( 0, _renderTexture.getName(),
+        glBindImageTexture( 0, _renderTexture.texture,
                             0, GL_FALSE, 0, GL_READ_WRITE,
-                            _renderTexture.getInternalFormat( ));
+                            _renderTexture.internalFormat );
         GLint tParamNameGL = glGetUniformLocation( program, "renderTexture" );
         glUniform1i( tParamNameGL, 0 );
 
@@ -537,9 +558,7 @@ struct RayCastRenderer::Impl
         copyTexToFrameBufAndClear();
     }
 
-    eq::util::Texture _renderTexture;
-    GLSLShaders _rayCastShaders;
-    GLSLShaders _texCopyShaders;
+    RenderTexture _renderTexture;
     uint32_t _nSamplesPerRay;
     uint32_t _nSamplesPerPixel;
     uint32_t _computedSamplesPerRay;
@@ -550,21 +569,30 @@ struct RayCastRenderer::Impl
     GLuint _quadVBO;
     GLint _drawBuffer;
     lexis::render::Colors< uint8_t > _colors;
+    GLSLShaders _rayCastShaders;
+    GLSLShaders _texCopyShaders;
+
 };
 
-RayCastRenderer::RayCastRenderer( const DataSource& dataSource,
+RayCastRenderer::RayCastRenderer( const Strings& resourceFolders,
+                                  const DataSource& dataSource,
                                   const Cache& textureCache,
                                   const uint32_t samplesPerRay,
                                   const uint32_t samplesPerPixel )
-    : _impl( new RayCastRenderer::Impl( dataSource, textureCache, samplesPerRay, samplesPerPixel ))
+    : _impl( new RayCastRenderer::Impl( resourceFolders,
+                                        dataSource,
+                                        textureCache,
+                                        samplesPerRay,
+                                        samplesPerPixel ))
 {}
 
 RayCastRenderer::~RayCastRenderer()
 {}
 
-void RayCastRenderer::update( const FrameData& frameData )
+void RayCastRenderer::update( const RenderSettings& renderSettings,
+                              const VolumeRendererParameters& renderParams )
 {
-    _impl->update( frameData );
+    _impl->update( renderSettings, renderParams );
 }
 
 
