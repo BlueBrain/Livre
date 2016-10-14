@@ -18,7 +18,7 @@
  */
 
 #include <livre/core/util/Utilities.h>
-#include <eq/gl.h>
+#include <GL/glew.h>
 
 namespace livre
 {

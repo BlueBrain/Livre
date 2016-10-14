@@ -24,7 +24,7 @@
 
 #include <livre/core/data/DataSource.h>
 
-#include <eq/gl.h>
+#include <GL/glew.h>
 
 namespace livre
 {

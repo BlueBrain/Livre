@@ -22,7 +22,6 @@
 #include "GLSLShaders.h"
 
 #include <livre/core/render/GLContext.h>
-#include <eq/gl.h>
 #include <lunchbox/debug.h>
 #include <fstream>
 
@@ -31,7 +30,7 @@ namespace livre
 namespace
 {
 
-void printShaderLog( const GLSLShaders::Handle shader )
+void printShaderLog( const GLuint shader )
 {
     GLint length = 0;
     glGetShaderiv( shader, GL_INFO_LOG_LENGTH, &length );
@@ -47,7 +46,7 @@ void printShaderLog( const GLSLShaders::Handle shader )
     LBERROR << "Shader error: " << log << std::endl;
 }
 
-void printProgramLog( const GLSLShaders::Handle program )
+void printProgramLog( const GLuint program )
 {
     GLint length = 0;
     glGetProgramiv( program, GL_INFO_LOG_LENGTH, &length );
@@ -64,13 +63,13 @@ void printProgramLog( const GLSLShaders::Handle program )
 }
 
 
-void deleteShader( const GLSLShaders::Handle shader )
+void deleteShader( const GLuint shader )
 {
     if( shader )
         glDeleteShader( shader );
 }
 
-int load( GLSLShaders::Handle& handle,
+int load( GLuint& handle,
           const std::string& shader,
           const ShaderIncludes& shaderIncludes,
           const unsigned shaderType )
@@ -101,7 +100,7 @@ int load( GLSLShaders::Handle& handle,
                               includes[ i ].c_str( ));
             pathsChar[i] = paths[i].c_str();
         }
-        glCompileShaderIncludeARB( (GLuint)handle,
+        glCompileShaderIncludeARB( handle,
                                    GLsizei( paths.size( )),
                                    &pathsChar[0], 0 );
     }
@@ -131,14 +130,14 @@ int loadShaders( const Shaders& shaders,
 {
     glGetError(); // reset
     LBASSERT( glCreateProgram );
-    const GLSLShaders::Handle program = glCreateProgram();
+    const GLuint program = glCreateProgram();
     if( program == 0 )
     {
         LBDEBUG << "glCreateProgram failed" << std::endl;
         return glGetError();
     }
 
-    GLSLShaders::Handle vertexShader = 0;
+    GLuint vertexShader = 0;
     if( !shaders.vShader.empty( ))
     {
         const int error = load( vertexShader,
@@ -153,7 +152,7 @@ int loadShaders( const Shaders& shaders,
         glAttachShader( program, vertexShader );
     }
 
-    GLSLShaders::Handle fragmentShader = 0;
+    GLuint fragmentShader = 0;
     if( !shaders.fShader.empty( ))
     {
         const int error = load( fragmentShader,
@@ -169,7 +168,7 @@ int loadShaders( const Shaders& shaders,
         glAttachShader( program, fragmentShader );
     }
 
-    GLSLShaders::Handle geometryShader = 0;
+    GLuint geometryShader = 0;
     if( !shaders.gShader.empty( ))
     {
         const int error = load( geometryShader,
@@ -234,7 +233,7 @@ GLSLShaders::~GLSLShaders()
     glDeleteProgram( _program );
 }
 
-GLSLShaders::Handle GLSLShaders::getProgram() const
+GLuint GLSLShaders::getProgram() const
 {
     return _program;
 }

@@ -20,9 +20,8 @@
 #include "TextureState.h"
 
 #include <livre/core/render/TexturePool.h>
-
 #include <livre/core/defines.h>
-#include <eq/gl.h>
+
 
 namespace livre
 {

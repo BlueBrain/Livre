@@ -37,8 +37,7 @@ struct DataSource::Impl
 {
 public:
     typedef lunchbox::PluginFactory< DataSourcePlugin,
-                                     DataSourcePluginData >
-                PluginFactory;
+                                     DataSourcePluginData > PluginFactory;
 
     Impl( const lunchbox::URI& uri,
           const AccessMode accessMode )
