@@ -14,7 +14,6 @@ set(LIVRECORE_PUBLIC_HEADERS
   data/VolumeInformation.h
   render/GLContext.h
   render/GLSLShaders.h
-  util/Utilities.h
   lunchboxTypes.h
   mathTypes.h
   types.h
@@ -57,7 +56,6 @@ set(LIVRECORE_HEADERS
   settings/RenderSettings.h
   settings/VolumeSettings.h
   util/FrameUtils.h
-  util/ThreadClock.h
   visitor/DFSTraversal.h
   visitor/NodeVisitor.h
   visitor/DataSourceVisitor.h
@@ -103,8 +101,6 @@ set(LIVRECORE_SOURCES
   settings/RenderSettings.cpp
   settings/VolumeSettings.cpp
   util/FrameUtils.cpp
-  util/ThreadClock.cpp
-  util/Utilities.cpp
   visitor/DataSourceVisitor.cpp
   visitor/DFSTraversal.cpp
   visitor/VisitState.cpp)

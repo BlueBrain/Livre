@@ -20,7 +20,6 @@
 
 #include <livre/core/cache/CacheStatistics.h>
 #include <livre/core/cache/CacheObject.h>
-#include <livre/core/util/ThreadClock.h>
 
 namespace livre
 {
