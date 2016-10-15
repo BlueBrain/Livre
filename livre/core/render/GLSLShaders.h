@@ -25,6 +25,8 @@
 #include <livre/core/api.h>
 #include <livre/core/types.h>
 
+#include <GL/glew.h>
+
 namespace livre
 {
 
@@ -61,8 +63,6 @@ class GLSLShaders
 {
 public:
 
-    typedef unsigned Handle;
-
    /**
     * Constructor
     * @param shaders The data needed to compile the shader.
@@ -75,11 +75,11 @@ public:
      LIVRECORE_API ~GLSLShaders();
 
     /** @return The OpenGL handle of the shaders. */
-    LIVRECORE_API Handle getProgram() const;
+    LIVRECORE_API GLuint getProgram() const;
 
 private:
 
-    Handle _program;
+    GLuint _program;
 };
 
 }

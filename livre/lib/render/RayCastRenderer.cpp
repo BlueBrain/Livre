@@ -33,8 +33,7 @@
 
 #include <lexis/render/ColorMap.h>
 
-#include <eq/eq.h>
-#include <eq/gl.h>
+#include <GL/glew.h>
 
 #define SH_UINT 0
 #define SH_INT 1
@@ -263,11 +262,10 @@ struct RayCastRenderer::Impl
         glGetIntegerv( GL_DRAW_BUFFER, &_drawBuffer );
         glDrawBuffer( GL_NONE );
 
-        GLSLShaders::Handle program = _rayCastShaders.getProgram( );
-        LBASSERT( program );
+        const GLuint program = _rayCastShaders.getProgram();
 
         // Enable shaders
-        glUseProgram( program );
+        glUseProgram( _rayCastShaders.getProgram( ));
         GLint tParamNameGL;
 
         tParamNameGL = glGetUniformLocation( program, "invProjectionMatrix" );
@@ -477,7 +475,7 @@ struct RayCastRenderer::Impl
 
     void renderBrick( const NodeId& rb, const size_t index, const GLuint posVBO )
     {
-        GLSLShaders::Handle program = _rayCastShaders.getProgram( );
+        const GLuint program = _rayCastShaders.getProgram( );
         LBASSERT( program );
 
         // Enable shaders
@@ -532,8 +530,7 @@ struct RayCastRenderer::Impl
 
     void copyTexToFrameBufAndClear()
     {
-        GLSLShaders::Handle program = _texCopyShaders.getProgram( );
-        LBASSERT( program );
+        const GLuint program = _texCopyShaders.getProgram();
 
         glUseProgram( program );
         glBindImageTexture( 0, _renderTexture.texture,

@@ -26,7 +26,7 @@
 #include <livre/core/data/NodeId.h>
 #include <livre/core/cache/Cache.h>
 
-#include <eq/gl.h>
+#include <GL/glew.h>
 
 namespace livre
 {

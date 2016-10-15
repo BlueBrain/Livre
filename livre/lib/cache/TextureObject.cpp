@@ -27,7 +27,7 @@
 #include <livre/core/render/Renderer.h>
 #include <livre/core/render/TexturePool.h>
 
-#include <eq/gl.h>
+#include <GL/glew.h>
 
 namespace livre
 {

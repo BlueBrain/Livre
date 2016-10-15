@@ -26,8 +26,6 @@
 #include <livre/core/data/Histogram.h>
 #include <livre/core/data/DataSource.h>
 
-#include <eq/gl.h>
-
 namespace livre
 {
 namespace

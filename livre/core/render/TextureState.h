@@ -24,6 +24,8 @@
 #include <livre/core/types.h>
 #include <livre/core/mathTypes.h>
 
+#include <GL/glew.h>
+
 namespace livre
 {
 
@@ -50,7 +52,7 @@ public:
     Vector3f textureCoordsMin; //!< Minimum texture coordinates in the maximum texture block.
     Vector3f textureCoordsMax; //!< Maximum texture coordinates in the maximum texture block.
     Vector3f textureSize; //!< The texture size.
-    uint32_t textureId; //!< The OpenGL texture id.
+    GLuint textureId; //!< The OpenGL texture id.
 
 private:
 
