@@ -38,17 +38,10 @@ uniform vec3 textureMin;
 uniform vec3 textureMax;
 uniform vec3 voxelSpacePerWorldSpace;
 uniform vec3 worldEyePosition;
-uniform bool firstPass;
-uniform bool lastPass;
-
-uniform vec2 depthRange;
 
 uniform int nSamplesPerRay;
 uniform int maxSamplesPerRay;
 uniform int nSamplesPerPixel;
-uniform float shininess;
-uniform int refLevel;
-
 uniform int nClipPlanes;
 uniform vec4 clipPlanes[6];
 
@@ -72,13 +65,9 @@ float rand(vec2 co)
 // http://www.opengl.org/wiki/Compute_eye_space_from_window_space.
 vec4 calcPositionInEyeSpaceFromWindowSpace( vec4 windowSpace )
 {
-    vec4 ndcPos;
+    vec4 ndcPos = vec4( 1.0f );
     ndcPos.xy = 2.0 * ( windowSpace.xy - viewport.xy - ( viewport.zw / 2.0 ) ) / viewport.zw;
-    ndcPos.z = 2.0 * ( windowSpace.z - ( ( depthRange.x + depthRange.y ) / 2.0 ) ) / ( depthRange.y - depthRange.x );
-    ndcPos.w = 1.0;
-
-    vec4 clipSpacePos = ndcPos / windowSpace.w;
-    vec4 eyeSpacePos = invProjectionMatrix * clipSpacePos;
+    vec4 eyeSpacePos = invProjectionMatrix * ndcPos;
     return eyeSpacePos / eyeSpacePos.w;
 }
 
@@ -146,11 +135,13 @@ void main( void )
         AABB aabb = AABB( aabbMin, aabbMax );
         AABB globalAABB = AABB( globalAABBMin, globalAABBMax );
 
-        float tnear, tfar;
-        intersectBox( eye, aabb, tnear, tfar );
-
         float tnearGlobal, tfarGlobal;
-        intersectBox( eye, globalAABB, tnearGlobal, tfarGlobal );
+        if( !intersectBox( eye, globalAABB, tnearGlobal, tfarGlobal ))
+            discard;
+
+        float tnear, tfar;
+        if( !intersectBox( eye, aabb, tnear, tfar ))
+            discard;
 
         vec3 nearPlaneNormal = vec3( 0.0f, 0.0f, 1.0f );
         float tNearPlane = dot( nearPlaneNormal, vec3( 0.0, 0.0, -nearPlaneDist ))

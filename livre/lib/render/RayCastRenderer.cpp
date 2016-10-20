@@ -292,12 +292,6 @@ struct RayCastRenderer::Impl
         tParamNameGL = glGetUniformLocation( program, "viewport" );
         glUniform4iv( tParamNameGL, 1, viewport.array );
 
-        tParamNameGL = glGetUniformLocation( program, "depthRange" );
-
-        Vector2f depthRange;
-        glGetFloatv( GL_DEPTH_RANGE, depthRange.array );
-        glUniform2fv( tParamNameGL, 1, depthRange.array );
-
         tParamNameGL = glGetUniformLocation( program, "worldEyePosition" );
         glUniform3fv( tParamNameGL, 1, frustum.getEyePos( ).array );
 
