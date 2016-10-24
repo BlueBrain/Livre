@@ -35,17 +35,10 @@
 
 namespace livre
 {
-
 struct Client::Impl
 {
-    Impl()
-    {
-    }
-
-    ~Impl()
-    {
-        DataSource::unloadPlugins();
-    }
+    Impl() {}
+    ~Impl() {}
 
     bool parseArguments( const int32_t argc, const char** argv )
     {

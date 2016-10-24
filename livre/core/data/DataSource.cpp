@@ -28,11 +28,6 @@
 namespace livre
 {
 
-namespace
-{
-    lunchbox::DSOs _plugins;
-}
-
 struct DataSource::Impl
 {
 public:
@@ -70,15 +65,8 @@ DataSource::DataSource( const lunchbox::URI& uri,
 
 void DataSource::loadPlugins()
 {
-    unloadPlugins();
-    _plugins = DataSource::Impl::PluginFactory::getInstance().load(
+    DataSource::Impl::PluginFactory::getInstance().load(
         LIVRECORE_VERSION_ABI, lunchbox::getLibraryPaths(), "Livre.*Source" );
-}
-
-void DataSource::unloadPlugins()
-{
-    for( lunchbox::DSO* plugin: _plugins )
-        DataSource::Impl::PluginFactory::getInstance().unload( plugin );
 }
 
 LODNode DataSource::getNode( const NodeId& nodeId ) const

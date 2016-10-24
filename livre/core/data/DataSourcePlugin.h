@@ -126,22 +126,21 @@ LIVRECORE_API bool fillRegularVolumeInfo( VolumeInformation& info );
 
 }
 
-#include <lunchbox/pluginFactory.h>
 
-namespace boost
+namespace std
 {
-template<> inline
-std::string lexical_cast( const livre::DataSourcePluginData& data )
+inline string to_string( const livre::DataSourcePluginData& data )
 {
-    return lexical_cast< std::string >( data.getURI( ));
+    return to_string( data.getURI( ));
 }
 }
 
 // http://stackoverflow.com/questions/1566963/singleton-in-a-dll
 #ifdef _MSC_VER
-   template class LIVRECORE_API
-   lunchbox::PluginFactory< livre::DataSourcePlugin,
-                            livre::DataSourcePluginData >;
+#  include <lunchbox/pluginFactory.h>
+    template class LIVRECORE_API
+    lunchbox::PluginFactory< livre::DataSourcePlugin,
+                             livre::DataSourcePluginData >;
 #endif
 
 #endif // _DataSourcePlugin_h_
