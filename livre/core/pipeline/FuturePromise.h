@@ -160,7 +160,7 @@ public:
     const servus::uint128_t& getId() const;
 
     /**
-     * Promise construction is needed when reset() on the promise
+     * Promise based construction is needed when reset() on the promise
      * affects the future directly.
      * Further copies from the future is not effected by reset()
      * on the promise.

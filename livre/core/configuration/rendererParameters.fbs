@@ -1,7 +1,7 @@
 
 namespace livre.zerobuf;
 
-table VolumeRendererParameters {
+table RendererParameters {
   maxLOD:uint32_t = 9; // (NODEID_LEVEL_BITS << 1) + 1
   minLOD:uint32_t = 0;
   SSE:float = 4.0;
@@ -12,4 +12,4 @@ table VolumeRendererParameters {
   maxCPUCacheMemoryMB:uint64_t = 8192;
 }
 
-root_type VolumeRendererParameters;
+root_type RendererParameters;

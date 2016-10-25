@@ -32,13 +32,6 @@ const uint32_t VOXEL_SIZE_X = 75;
 const uint32_t VOXEL_SIZE_Y = 75;
 const uint32_t VOXEL_SIZE_Z = 138;
 
-#include <lunchbox/pluginRegisterer.h>
-#include <livre/uvf/UVFDataSource.h>
-
-// Explicit registration required because the folder of the data source plugin is not
-// in the LD_LIBRARY_PATH of the test executable.
-lunchbox::PluginRegisterer< livre::UVFDataSource > registerer;
-
 BOOST_AUTO_TEST_CASE( UVFDataSource )
 {
     std::cout << "uvf://" UVF_DATA_FILE << std::endl;

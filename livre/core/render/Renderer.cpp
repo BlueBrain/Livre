@@ -18,35 +18,55 @@
  */
 
 #include "Renderer.h"
+#include "RendererPlugin.h"
+#include "RenderPipeline.h"
 
 #include <livre/core/render/Frustum.h>
 #include <livre/core/data/LODNode.h>
-#include <livre/core/data/DataSource.h>
+
+#include <lunchbox/pluginFactory.h>
 
 namespace livre
 {
 
+struct Renderer::Impl
+{
+public:
+    typedef lunchbox::PluginFactory< RendererPlugin, std::string > PluginFactory;
+
+    Impl( const std::string& name )
+        : plugin( PluginFactory::getInstance().create( name ))
+    {}
+
+    void render( const RenderInputs& renderInputs,
+                 const ConstCacheObjects& renderData,
+                 const uint32_t renderStages /*= RENDER_ALL*/ )
+    {
+       if( renderStages & RENDER_BEGIN )
+           plugin->preRender( renderInputs, renderData );
+
+       if( renderStages & RENDER_FRAME )
+           plugin->render( renderInputs, renderData );
+
+       if( renderStages & RENDER_END )
+           plugin->postRender( renderInputs, renderData );
+    }
+
+    std::unique_ptr< RendererPlugin > plugin;
+};
+
+Renderer::Renderer( const std::string& name )
+    : _impl( new Renderer::Impl( name ))
+{}
+
 Renderer::~Renderer()
+{}
+
+void Renderer::render( const RenderInputs& renderInputs,
+                       const ConstCacheObjects& renderData,
+                       const uint32_t renderStages /*= RENDER_ALL*/ )
 {
-}
-
-
-void Renderer::render( const Frustum& frustum,
-                       const ClipPlanes& planes,
-                       const PixelViewport& view,
-                       const NodeIds& bricks,
-                       const uint32_t renderStages )
-{
-    const NodeIds& ordered = order( bricks, frustum );
-
-    if( renderStages & RENDER_BEGIN )
-        _onFrameStart( frustum, planes, view, ordered );
-
-    if( renderStages & RENDER_FRAME )
-        _onFrameRender( frustum, planes, view, ordered );
-
-    if( renderStages & RENDER_END )
-        _onFrameEnd( frustum, planes, view, ordered );
+    _impl->render( renderInputs, renderData, renderStages );
 }
 
 }

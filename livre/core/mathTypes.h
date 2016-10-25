@@ -22,7 +22,6 @@
 #ifndef _mathTypes_h_
 #define _mathTypes_h_
 
-#include <livre/core/types.h>
 #include <vmmlib/types.hpp>
 #include <vmmlib/matrix.hpp>
 #include <vmmlib/vector.hpp> // inline constants
@@ -80,6 +79,8 @@ typedef vmml::Vector4f Viewport;
 /**
   * Definitions
   */
+const uint32_t NODEID_TIMESTEP_BITS = 18; //>! see NodeId
+const uint32_t INVALID_TIMESTEP = ( 1u << NODEID_TIMESTEP_BITS ) - 1u; //!< Invalid time step. 18 bits is on
 const Vector2ui INVALID_FRAME_RANGE( INVALID_TIMESTEP );
 const Vector2ui FULL_FRAME_RANGE( 0, INVALID_TIMESTEP );
 

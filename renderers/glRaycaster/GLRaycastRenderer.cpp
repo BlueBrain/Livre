@@ -17,10 +17,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/lib/render/RayCastRenderer.h>
+#include "GLRaycastRenderer.h"
+#include <livre/core/render/RenderInputs.h>
+#include <livre/core/settings/ApplicationSettings.h>
 #include <livre/core/settings/RenderSettings.h>
 
-#include <livre/lib/configuration/VolumeRendererParameters.h>
+#include <livre/core/configuration/RendererParameters.h>
 #include <livre/lib/cache/TextureObject.h>
 
 #include <livre/core/cache/Cache.h>
@@ -28,25 +30,22 @@
 #include <livre/core/data/VolumeInformation.h>
 #include <livre/core/render/GLSLShaders.h>
 #include <livre/core/render/Frustum.h>
-#include <livre/core/data/LODNode.h>
 #include <livre/core/render/GLContext.h>
+#include <livre/core/render/FrameInfo.h>
+#include <livre/core/render/TextureState.h>
+#include <livre/core/data/LODNode.h>
+
 
 #include <lexis/render/ColorMap.h>
 
+#include <lunchbox/pluginRegisterer.h>
 #include <GL/glew.h>
-
-#define SH_UINT 0
-#define SH_INT 1
-#define SH_FLOAT 2
 
 namespace livre
 {
 namespace
 {
-const std::string vertRayCastFile = "shaders/vertRayCast.glsl";
-const std::string fragRayCastFile = "shaders/fragRayCast.glsl";
-const std::string vertTexCopyFile = "shaders/vertTexCopy.glsl";
-const std::string fragTexCopyFile = "shaders/fragTexCopy.glsl";
+lunchbox::PluginRegisterer< GLRaycastRenderer > registerer;
 }
 
 // Sort helper function for sorting the textures with their distances to viewpoint
@@ -57,10 +56,10 @@ struct DistanceOperator
         , _dataSource( dataSource )
     { }
 
-    bool operator()( const NodeId& rb1, const NodeId& rb2 )
+    bool operator()( const ConstCacheObjectPtr& rb1, const ConstCacheObjectPtr& rb2 )
     {
-        const LODNode& lodNode1 = _dataSource.getNode( rb1 );
-        const LODNode& lodNode2 = _dataSource.getNode( rb2 );
+        const LODNode& lodNode1 = _dataSource.getNode( NodeId( rb1->getId( )));
+        const LODNode& lodNode2 = _dataSource.getNode( NodeId( rb2->getId( )));
 
         const float distance1 = ( _frustum.getMVMatrix() *
                                   lodNode1.getWorldBox().getCenter() ).length();
@@ -74,6 +73,11 @@ struct DistanceOperator
 
 namespace
 {
+const std::string vertRayCastFile = "shaders/vertRaycast.glsl";
+const std::string fragRayCastFile = "shaders/fragRaycast.glsl";
+const std::string vertTexCopyFile = "shaders/vertTexCopy.glsl";
+const std::string fragTexCopyFile = "shaders/fragTexCopy.glsl";
+
 const uint32_t maxSamplesPerRay = 32;
 const uint32_t minSamplesPerRay = 512;
 const size_t nVerticesRenderBrick = 36;
@@ -83,6 +87,9 @@ const GLfloat fullScreenQuad[] = { -1.0f, -1.0f, 0.0f,
                                    -1.0f,  1.0f, 0.0f,
                                     1.0f, -1.0f, 0.0f,
                                     1.0f,  1.0f, 0.0f };
+const uint32_t SH_UINT = 0u;
+const uint32_t SH_INT = 1u;
+const uint32_t SH_FLOAT = 2u;
 }
 
 struct RenderTexture
@@ -139,22 +146,10 @@ struct RenderTexture
 
 };
 
-struct RayCastRenderer::Impl
+struct GLRaycastRenderer::Impl
 {
-    Impl( const Strings& resourceFolders,
-          const DataSource& dataSource,
-          const Cache& textureCache,
-          const uint32_t samplesPerRay,
-          const uint32_t samplesPerPixel )
-        : _nSamplesPerRay( samplesPerRay )
-        , _nSamplesPerPixel( samplesPerPixel )
-        , _computedSamplesPerRay( samplesPerRay )
-        , _colorMapTexture( 0 )
-        , _textureCache( textureCache )
-        , _dataSource( dataSource )
-        , _volInfo( _dataSource.getVolumeInfo( ))
-        , _rayCastShaders( ShaderFiles( resourceFolders, vertRayCastFile, fragRayCastFile, "" ))
-        , _texCopyShaders( ShaderFiles( resourceFolders, vertTexCopyFile, fragTexCopyFile, "" ))
+    Impl()
+        : _colorMapTexture( 0 )
     {
         // Create QUAD VBO
         glGenBuffers( 1, &_quadVBO );
@@ -167,23 +162,19 @@ struct RayCastRenderer::Impl
     ~Impl()
     {
         glDeleteBuffers( 1, &_quadVBO );
+        glDeleteTextures( 1, &_colorMapTexture );
     }
 
-    NodeIds order( const NodeIds& bricks, const Frustum& frustum ) const
+    void initShaders( const RenderInputs& renderInputs )
     {
-        NodeIds rbs = bricks;
-        DistanceOperator distanceOp( _dataSource, frustum );
-        std::sort( rbs.begin(), rbs.end(), distanceOp );
-        return rbs;
-    }
+        if( _rayCastShaders )
+            return;
 
-    void update( const RenderSettings& renderSettings,
-                 const VolumeRendererParameters& renderParams )
-    {
-        initColorMap( renderSettings.getColorMap( ));
-        _nSamplesPerRay = renderParams.getSamplesPerRay();
-        _computedSamplesPerRay = _nSamplesPerRay;
-        _nSamplesPerPixel = renderParams.getSamplesPerPixel();
+        const auto& resourceFolders = renderInputs.appSettings.getResourceFolders();
+        _rayCastShaders.reset( new GLSLShaders(
+                      ShaderFiles( resourceFolders, vertRayCastFile, fragRayCastFile, "" )));
+        _texCopyShaders.reset( new GLSLShaders(
+                      ShaderFiles( resourceFolders, vertTexCopyFile, fragTexCopyFile, "" )));
     }
 
     void initColorMap( const lexis::render::ColorMap colorMap )
@@ -213,9 +204,9 @@ struct RayCastRenderer::Impl
         _renderTexture.resize( width, height );
     }
 
-    uint32_t getShaderDataType() const
+    uint32_t getShaderDataType( const VolumeInformation& volInfo ) const
     {
-        switch( _dataSource.getVolumeInfo().dataType )
+        switch( volInfo.dataType )
         {
             case DT_UINT8:
             case DT_UINT16:
@@ -233,24 +224,30 @@ struct RayCastRenderer::Impl
         }
     }
 
-    void onFrameStart( const Frustum& frustum,
-                       const ClipPlanes& planes,
-                       const NodeIds& renderBricks )
+    void preRender( const RenderInputs& renderInputs, const ConstCacheObjects& renderData )
     {
-        if( _nSamplesPerRay == 0 ) // Find sampling rate
+        initColorMap( renderInputs.renderSettings.getColorMap( ));
+        initShaders( renderInputs );
+        _computedSamplesPerRay = renderInputs.vrParameters.getSamplesPerRay();
+
+        const DataSource& dataSource = renderInputs.dataSource;
+        const VolumeInformation& volInfo = dataSource.getVolumeInfo();
+        const Frustum& frustum = renderInputs.frameInfo.frustum;
+
+        if( renderInputs.vrParameters.getSamplesPerRay() == 0 ) // Find sampling rate
         {
             uint32_t maxLOD = 0;
-            for( const NodeId& rb : renderBricks )
+            for( const ConstCacheObjectPtr& rd : renderData )
             {
-                const LODNode& lodNode = _dataSource.getNode( rb );
+                const LODNode& lodNode = dataSource.getNode( NodeId( rd->getId( )));
                 const uint32_t level = lodNode.getRefLevel();
                 if( level > maxLOD )
                     maxLOD = level;
             }
 
-            const float maxVoxelDim = _volInfo.voxels.find_max();
+            const float maxVoxelDim = volInfo.voxels.find_max();
             const float maxVoxelsAtLOD = maxVoxelDim /
-                    (float)( 1u << ( _volInfo.rootNode.getDepth() - maxLOD - 1 ));
+                    (float)( 1u << ( volInfo.rootNode.getDepth() - maxLOD - 1 ));
             // Nyquist limited nb of samples according to voxel size
             _computedSamplesPerRay = std::max( maxVoxelsAtLOD, (float)minSamplesPerRay );
         }
@@ -262,24 +259,24 @@ struct RayCastRenderer::Impl
         glGetIntegerv( GL_DRAW_BUFFER, &_drawBuffer );
         glDrawBuffer( GL_NONE );
 
-        const GLuint program = _rayCastShaders.getProgram();
+        const GLuint program = _rayCastShaders->getProgram();
 
         // Enable shaders
-        glUseProgram( _rayCastShaders.getProgram( ));
+        glUseProgram( _rayCastShaders->getProgram( ));
         GLint tParamNameGL;
 
         tParamNameGL = glGetUniformLocation( program, "invProjectionMatrix" );
-        glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getInvProjMatrix( ).array );
+        glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getInvProjMatrix().array );
 
         tParamNameGL = glGetUniformLocation( program, "invModelViewMatrix" );
-        glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getInvMVMatrix( ).array );
+        glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getInvMVMatrix().array );
 
         tParamNameGL = glGetUniformLocation( program, "modelViewProjectionMatrix" );
-        glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getMVPMatrix( ).array );
+        glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getMVPMatrix().array );
 
-        // Because the volume is centered to the origin we can compute the volume AABB by using
+          // Because the volume is centered to the origin we can compute the volume AABB by using
         // the volume total size.
-        const Vector3f halfWorldSize = _volInfo.worldSize / 2.0;
+        const Vector3f halfWorldSize = volInfo.worldSize / 2.0;
 
         tParamNameGL = glGetUniformLocation( program, "globalAABBMin" );
         glUniform3fv( tParamNameGL, 1, ( -halfWorldSize ).array );
@@ -302,23 +299,22 @@ struct RayCastRenderer::Impl
         glUniform1i( tParamNameGL, maxSamplesPerRay );
 
         tParamNameGL = glGetUniformLocation( program, "nSamplesPerPixel" );
-        glUniform1i( tParamNameGL, _nSamplesPerPixel );
+        glUniform1i( tParamNameGL, renderInputs.vrParameters.getSamplesPerPixel( ));
 
         tParamNameGL = glGetUniformLocation( program, "nearPlaneDist" );
         glUniform1f( tParamNameGL, frustum.nearPlane( ));
 
-        const auto& clipPlanes = planes.getPlanes();
+        const auto& clipPlanes = renderInputs.renderSettings.getClipPlanes().getPlanes();
         const size_t nPlanes = clipPlanes.size();
         tParamNameGL = glGetUniformLocation( program, "nClipPlanes" );
         glUniform1i( tParamNameGL, nPlanes );
 
         tParamNameGL = glGetUniformLocation( program, "datatype" );
-        glUniform1ui( tParamNameGL, getShaderDataType( ));
+        glUniform1ui( tParamNameGL, getShaderDataType( volInfo ));
 
         // This is temporary. In the future it will be given by the gui.
-        Vector2f dataSourceRange( 0.0f, 255.0f );
         tParamNameGL = glGetUniformLocation( program, "dataSourceRange" );
-        glUniform2fv( tParamNameGL, 1, dataSourceRange.array );
+        glUniform2fv( tParamNameGL, 1, renderInputs.dataSourceRange.array );
 
         if( nPlanes > 0 )
         {
@@ -356,13 +352,14 @@ struct RayCastRenderer::Impl
         glUseProgram( 0 );
     }
 
-    GLuint createAndFillVertexBuffer( const NodeIds& renderBricks ) const
+    GLuint createAndFillVertexBuffer( const DataSource& dataSource,
+                                      const ConstCacheObjects& renderBricks ) const
     {
         Vector3fs positions;
         positions.reserve( nVerticesRenderBrick * renderBricks.size( ));
-        for( const NodeId& rb: renderBricks )
+        for( const auto& rb: renderBricks )
         {
-            const LODNode& lodNode = _dataSource.getNode( rb );
+            const LODNode& lodNode = dataSource.getNode( NodeId( rb->getId( )));
             createBrick( lodNode, positions );
         }
 
@@ -436,13 +433,17 @@ struct RayCastRenderer::Impl
         positions.emplace_back( maxPos[0], maxPos[1], minPos[2] );
     }
 
-    void onFrameRender( const NodeIds& bricks )
+    void render( const RenderInputs& renderInputs, const ConstCacheObjects& renderData )
     {
-        const GLuint posVBO = createAndFillVertexBuffer( bricks );
+        auto renderDataCopy = renderData;
+        DistanceOperator distanceOp( renderInputs.dataSource, renderInputs.frameInfo.frustum );
+        std::sort( renderDataCopy.begin(), renderDataCopy.end(), distanceOp );
+
+        const GLuint posVBO = createAndFillVertexBuffer( renderInputs.dataSource, renderDataCopy );
 
         size_t index = 0;
-        for( const NodeId& brick: bricks )
-            renderBrick( brick, index++, posVBO );
+        for( const auto& brick: renderDataCopy )
+            renderBrick( renderInputs.dataSource, brick, index++, posVBO );
 
         glDeleteBuffers( 1, &posVBO );
 
@@ -467,18 +468,20 @@ struct RayCastRenderer::Impl
         glDrawArrays( GL_TRIANGLES, index * nVerticesRenderBrick, nVerticesRenderBrick );
     }
 
-    void renderBrick( const NodeId& rb, const size_t index, const GLuint posVBO )
+    void renderBrick( const DataSource& dataSource,
+                      const ConstCacheObjectPtr& rb,
+                      const size_t index,
+                      const GLuint posVBO )
     {
-        const GLuint program = _rayCastShaders.getProgram( );
-        LBASSERT( program );
+        const GLuint program = _rayCastShaders->getProgram( );
 
         // Enable shaders
         glUseProgram( program );
 
         const ConstTextureObjectPtr textureObj =
-                std::static_pointer_cast< const TextureObject >( _textureCache.get( rb.getId( )));
+                std::static_pointer_cast< const TextureObject >( rb );
         const TextureState& texState = textureObj->getTextureState();
-        const LODNode& lodNode = _dataSource.getNode( rb );
+        const LODNode& lodNode = dataSource.getNode( NodeId( rb ->getId( )));
 
         if( texState.textureId == INVALID_TEXTURE_ID )
         {
@@ -498,10 +501,6 @@ struct RayCastRenderer::Impl
 
         tParamNameGL = glGetUniformLocation( program, "textureMax" );
         glUniform3fv( tParamNameGL, 1, texState.textureCoordsMax.array );
-
-        const Vector3f& voxSize = texState.textureSize / lodNode.getWorldBox().getSize();
-        tParamNameGL = glGetUniformLocation( program, "voxelSpacePerWorldSpace" );
-        glUniform3fv( tParamNameGL, 1, voxSize.array );
 
         glActiveTexture( GL_TEXTURE0 );
         texState.bind();
@@ -524,7 +523,7 @@ struct RayCastRenderer::Impl
 
     void copyTexToFrameBufAndClear()
     {
-        const GLuint program = _texCopyShaders.getProgram();
+        const GLuint program = _texCopyShaders->getProgram();
 
         glUseProgram( program );
         glBindImageTexture( 0, _renderTexture.texture,
@@ -543,78 +542,47 @@ struct RayCastRenderer::Impl
         glUseProgram( 0 );
     }
 
-    void onFrameEnd()
+    void postRender()
     {
         glDrawBuffer( _drawBuffer );
         copyTexToFrameBufAndClear();
     }
 
     RenderTexture _renderTexture;
-    uint32_t _nSamplesPerRay;
-    uint32_t _nSamplesPerPixel;
     uint32_t _computedSamplesPerRay;
     uint32_t _colorMapTexture;
-    const Cache& _textureCache;
-    const DataSource& _dataSource;
-    const VolumeInformation& _volInfo;
     GLuint _quadVBO;
     GLint _drawBuffer;
     lexis::render::Colors< uint8_t > _colors;
-    GLSLShaders _rayCastShaders;
-    GLSLShaders _texCopyShaders;
+    std::unique_ptr< GLSLShaders > _rayCastShaders;
+    std::unique_ptr< GLSLShaders > _texCopyShaders;
 
 };
 
-RayCastRenderer::RayCastRenderer( const Strings& resourceFolders,
-                                  const DataSource& dataSource,
-                                  const Cache& textureCache,
-                                  const uint32_t samplesPerRay,
-                                  const uint32_t samplesPerPixel )
-    : _impl( new RayCastRenderer::Impl( resourceFolders,
-                                        dataSource,
-                                        textureCache,
-                                        samplesPerRay,
-                                        samplesPerPixel ))
+GLRaycastRenderer::GLRaycastRenderer( const std::string& name )
+    : RendererPlugin( name )
+    , _impl( new GLRaycastRenderer::Impl( ))
 {}
 
-RayCastRenderer::~RayCastRenderer()
+GLRaycastRenderer::~GLRaycastRenderer()
 {}
 
-void RayCastRenderer::update( const RenderSettings& renderSettings,
-                              const VolumeRendererParameters& renderParams )
+void GLRaycastRenderer::preRender( const RenderInputs& renderInputs,
+                                   const ConstCacheObjects& renderData )
 {
-    _impl->update( renderSettings, renderParams );
+    _impl->preRender( renderInputs, renderData );
 }
 
-
-NodeIds RayCastRenderer::order( const NodeIds& bricks,
-                                const Frustum& frustum ) const
+void GLRaycastRenderer::render( const RenderInputs& renderInputs,
+                                const ConstCacheObjects& renderData )
 {
-    return _impl->order( bricks, frustum );
+    _impl->render( renderInputs, renderData );
 }
 
-void RayCastRenderer::_onFrameStart( const Frustum& frustum,
-                                     const ClipPlanes& planes,
-                                     const PixelViewport&,
-                                     const NodeIds& renderBricks )
+void GLRaycastRenderer::postRender( const RenderInputs&,
+                                    const ConstCacheObjects& )
 {
-    _impl->onFrameStart( frustum, planes, renderBricks );
-}
-
-void RayCastRenderer::_onFrameRender( const Frustum&,
-                                      const ClipPlanes&,
-                                      const PixelViewport&,
-                                      const NodeIds& orderedBricks )
-{
-    _impl->onFrameRender( orderedBricks );
-}
-
-void RayCastRenderer::_onFrameEnd( const Frustum&,
-                                   const ClipPlanes&,
-                                   const PixelViewport&,
-                                   const NodeIds& )
-{
-    _impl->onFrameEnd();
+    _impl->postRender();
 }
 
 }

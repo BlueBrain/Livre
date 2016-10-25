@@ -31,7 +31,7 @@
 #include <livre/eq/serialization.h>
 
 #include <livre/eq/settings/EqVolumeSettings.h>
-#include <livre/lib/configuration/VolumeRendererParameters.h>
+#include <livre/core/configuration/RendererParameters.h>
 #include <livre/lib/cache/DataObject.h>
 #include <livre/lib/cache/HistogramObject.h>
 
@@ -53,7 +53,7 @@ public:
 
     void initializeCache()
     {
-        const VolumeRendererParameters& vrRenderParameters =
+        const RendererParameters& vrRenderParameters =
                 _config->getFrameData().getVRParameters();
 
         const size_t maxMemBytes = vrRenderParameters.getMaxCPUCacheMemoryMB() * LB_1MB;

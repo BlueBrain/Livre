@@ -18,11 +18,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "RawDataSource.h"
 
 #include <livre/core/data/LODNode.h>
 #include <livre/core/data/MemoryUnit.h>
+#include <livre/core/version.h>
 
-#include <livre/lib/data/RawDataSource.h>
 #include <lunchbox/pluginRegisterer.h>
 
 #include "nrrd/nrrd.hxx"
@@ -34,6 +35,12 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+
+extern "C"
+int LunchboxPluginGetVersion() { return LIVRECORE_VERSION_ABI; }
+
+extern "C"
+bool LunchboxPluginRegister() { return true; }
 
 namespace livre
 {

@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "VolumeRendererParameters.h"
+#include "RendererParameters.h"
 
 namespace livre
 {
@@ -32,15 +32,9 @@ const std::string MAXLOD_PARAM = "max-lod";
 const std::string SAMPLESPERRAY_PARAM = "samples-per-ray";
 const std::string SAMPLESPERPIXEL_PARAM = "samples-per-pixel";
 
-VolumeRendererParameters::VolumeRendererParameters()
+RendererParameters::RendererParameters()
     : Parameters( "Volume Renderer Parameters" )
 {
-#ifdef __i386__
-    setSSE( 8.0f );
-    setMaxGPUCacheMemoryMB( 384u );
-    setMaxCPUCacheMemoryMB( 768u );
-#endif
-
     _configuration.addDescription( configGroupName_, GPUCACHEMEM_PARAM,
                                    "Maximum GPU cache memory (MB) - "
                                    "caches the texture data in GPU memory",
@@ -65,7 +59,7 @@ VolumeRendererParameters::VolumeRendererParameters()
                                    "Number of samples per pixel", getSamplesPerPixel( ));
 }
 
-void VolumeRendererParameters::_initialize()
+void RendererParameters::_initialize()
 {
     setSynchronousMode( _configuration.getValue( SYNCHRONOUSMODE_PARAM,
                                                  getSynchronousMode( )));

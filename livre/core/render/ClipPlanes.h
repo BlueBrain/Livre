@@ -21,6 +21,7 @@
 #define _ClipPlanes_h_
 
 #include <livre/core/api.h>
+#include <livre/core/types.h>
 #include <livre/core/mathTypes.h>
 #include <co/distributable.h> // base class
 #include <lexis/render/clipPlanes.h> // CRTP base class

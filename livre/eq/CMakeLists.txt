@@ -8,7 +8,7 @@
 #       Main Authors: Ahmet Bilgili
 #
 #
-
+include(EqGLLibraries)
 set(LIVREEQ_HEADERS
       Channel.h
       Client.h

@@ -19,6 +19,7 @@
  */
 
 #include <livre/core/settings/RenderSettings.h>
+#include <lexis/render/ColorMap.h>
 
 namespace livre
 {

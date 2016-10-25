@@ -51,14 +51,10 @@ public:
 
     LIVRECORE_API virtual ~SimpleExecutor();
 
-    /**
-     * @copydoc Executor::schedule
-     */
+    /** @copydoc Executor::schedule */
     LIVRECORE_API void schedule( ExecutablePtr executable ) final;
 
-    /**
-     * @copydoc Executor::clear
-     */
+    /** @copydoc Executor::clear */
     LIVRECORE_API void clear() final;
 
 private:

@@ -53,6 +53,8 @@ before_install:
    - sudo apt-get install -qq python-pyparsing || /bin/true
    - sudo apt-get install -qq libxmu-dev libxi-dev || /bin/true
 script:
+   - export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
+   - export PATH=$CUDA_HOME/bin:$PATH
    - export PATH=/usr/bin:$PATH
    - mkdir $BUILD_TYPE
    - cd $BUILD_TYPE

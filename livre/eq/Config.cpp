@@ -33,7 +33,7 @@
 #include <livre/eq/settings/EqVolumeSettings.h>
 
 #include <livre/lib/configuration/ApplicationParameters.h>
-#include <livre/lib/configuration/VolumeRendererParameters.h>
+#include <livre/core/configuration/RendererParameters.h>
 
 #include <livre/core/events/EventMapper.h>
 #include <livre/core/data/Histogram.h>
@@ -308,7 +308,7 @@ bool Config::init( const int argc LB_UNUSED, char** argv LB_UNUSED )
     if( !_registerFrameData( ))
         return false;
 
-    const VolumeRendererParameters& vrParameters = framedata.getVRParameters();
+    const RendererParameters& vrParameters = framedata.getVRParameters();
     if( vrParameters.getSynchronousMode( ))
         setLatency( 0 );
 

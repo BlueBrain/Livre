@@ -38,25 +38,33 @@ public:
 
     /**
      * Constructor
-     * @param textureCache the texture cache
+     * @param cache the cache that holds the rendering objects
      */
-    explicit RenderingSetGeneratorFilter( const Cache& textureCache );
+    explicit RenderingSetGeneratorFilter( const Cache& cache );
     ~RenderingSetGeneratorFilter();
 
-    /**
-     * @copydoc Filter::execute
-     */
+    /** @copydoc Filter::execute */
     void execute( const FutureMap& input, PromiseMap& output ) const final;
 
-    /**
-     * @copydoc Filter::getInputDataInfos
-     */
-    DataInfos getInputDataInfos() const final;
+    /** @copydoc Filter::getInputDataInfos */
+    DataInfos getInputDataInfos() const final
+    {
+        return
+        {
+            { "VisibleNodes", getType< NodeIds >() }
+        };
+    }
 
-    /**
-     * @copydoc Filter::getOutputDataInfos
-     */
-    DataInfos getOutputDataInfos() const final;
+    /** @copydoc Filter::getOutputDataInfos */
+    DataInfos getOutputDataInfos() const final
+    {
+        return
+        {
+            { "CacheObjects", getType< ConstCacheObjects >() },
+            { "RenderingDone", getType< bool >() },
+            { "RenderStatistics", getType< RenderStatistics >() },
+        };
+    }
 
 private:
 

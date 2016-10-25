@@ -21,7 +21,7 @@
 
 #include <livreGUI/Controller.h>
 #include <livreGUI/ui_RenderParametersController.h>
-#include <livreGUI/volumeRendererParameters.h>
+#include <livreGUI/rendererParameters.h>
 
 namespace livre
 {
@@ -51,17 +51,17 @@ struct RenderParametersController::Impl
                  static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
                  [&]( int value ) { _params.setSamplesPerRay( value ); publish(); });
 
-        parent->connect( &_params, &zerobuf::VolumeRendererParameters::maxLODChanged,
+        parent->connect( &_params, &zerobuf::RendererParameters::maxLODChanged,
                  [&]( uint32_t value ) { _ui.maxLODSpinBox->setValue( value ); });
-        parent->connect( &_params, &zerobuf::VolumeRendererParameters::minLODChanged,
+        parent->connect( &_params, &zerobuf::RendererParameters::minLODChanged,
                  [&]( uint32_t value ) { _ui.minLODSpinBox->setValue( value ); });
-        parent->connect( &_params, &zerobuf::VolumeRendererParameters::SSEChanged,
+        parent->connect( &_params, &zerobuf::RendererParameters::SSEChanged,
                  [&]( float value ) { _ui.screenSpaceErrorDoubleSpinBox->setValue( value ); });
-        parent->connect( &_params, &zerobuf::VolumeRendererParameters::synchronousModeChanged,
+        parent->connect( &_params, &zerobuf::RendererParameters::synchronousModeChanged,
                  [&]( bool value ) { _ui.synchronousCheckBox->setChecked( value ); });
-        parent->connect( &_params, &zerobuf::VolumeRendererParameters::samplesPerPixelChanged,
+        parent->connect( &_params, &zerobuf::RendererParameters::samplesPerPixelChanged,
                  [&]( uint32_t value ) { _ui.samplesPerPixelSpinBox->setValue( value ); });
-        parent->connect( &_params, &zerobuf::VolumeRendererParameters::samplesPerRayChanged,
+        parent->connect( &_params, &zerobuf::RendererParameters::samplesPerRayChanged,
                  [&]( uint32_t value ) { _ui.samplesPerRaySpinBox->setValue( value ); });
 
         _controller.subscribe( _params );
@@ -80,7 +80,7 @@ struct RenderParametersController::Impl
     Ui::renderParametersController _ui;
     RenderParametersController* _parent;
     Controller& _controller;
-    zerobuf::VolumeRendererParameters _params;
+    zerobuf::RendererParameters _params;
 };
 
 RenderParametersController::RenderParametersController( Controller& controller,

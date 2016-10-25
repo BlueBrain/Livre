@@ -20,6 +20,7 @@
 #ifndef _CameraPath_h_
 #define _CameraPath_h_
 
+#include <livre/core/types.h>
 #include <livre/core/mathTypes.h>
 
 namespace livre

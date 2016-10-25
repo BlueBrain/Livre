@@ -19,14 +19,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
+#include "MemoryDataSource.h"
 
 #include <livre/core/data/LODNode.h>
 #include <livre/core/data/MemoryUnit.h>
+#include <livre/core/version.h>
 
-#include <livre/lib/data/MemoryDataSource.h>
 #include <lunchbox/pluginRegisterer.h>
+
+#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
+
+extern "C"
+int LunchboxPluginGetVersion() { return LIVRECORE_VERSION_ABI; }
+
+extern "C"
+bool LunchboxPluginRegister() { return true; }
 
 namespace livre
 {

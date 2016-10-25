@@ -50,11 +50,15 @@ namespace livre
 {
 
 class AllocMemoryUnit;
+class ApplicationSettings;
 class Cache;
 class CacheObject;
 class CacheStatistics;
 class ClipPlanes;
 class Configuration;
+class DataSource;
+class DataSourcePlugin;
+class DataSourcePluginData;
 class EventHandler;
 class EventHandlerFactory;
 class EventInfo;
@@ -69,12 +73,14 @@ class NodeId;
 class NodeVisitor;
 class Parameter;
 class Renderer;
+class RendererPlugin;
+class RenderPipeline;
+class RenderSettings;
 class RootNode;
 class TexturePool;
 class VisitState;
-class DataSource;
-class DataSourcePlugin;
-class DataSourcePluginData;
+class RendererParameters;
+
 
 /**
  * Pipeline
@@ -98,7 +104,8 @@ class PipeFilter;
 class Workers;
 
 struct FrameInfo;
-struct NodeAvailability;
+struct RenderStatistics;
+struct RenderInputs;
 struct TextureState;
 struct VolumeInformation;
 
@@ -181,6 +188,7 @@ typedef std::vector< CacheId > CacheIds;
 typedef std::vector< CacheObjectPtr > CacheObjects;
 typedef std::vector< ConstCacheObjectPtr > ConstCacheObjects;
 
+
 /**
  * List definitions for complex types
  */
@@ -193,7 +201,6 @@ typedef std::list< Promise > Promises;
  */
 typedef std::unordered_map< CacheId, CacheObjectPtr > CacheMap;
 typedef std::unordered_map< CacheId, ConstCacheObjectPtr > ConstCacheMap;
-typedef std::unordered_map< uint32_t, bool > BoolMap;
 typedef std::unordered_map< uint32_t, EventHandlerPtr > EventHandlerMap;
 
 template < class T >
@@ -204,6 +211,7 @@ inline std::type_index getType()
 }
 
 typedef std::map< std::string, std::type_index > DataInfos;
+typedef std::map< std::string, PipeFilter > PipeFilterMap;
 typedef DataInfos::value_type DataInfo;
 
 /**
@@ -229,19 +237,17 @@ enum AccessMode
 };
 
 // Constants
-const uint32_t INVALID_TEXTURE_ID = -1; //!< Invalid OpenGL texture id.
-const Identifier INVALID_CACHE_ID = -1; //!< Invalid cache id.
-const Identifier INVALID_NODE_ID = -1; //!< Invalid node ID.
+const uint32_t INVALID_TEXTURE_ID = -1u; //!< Invalid OpenGL texture id.
+const Identifier INVALID_CACHE_ID = -1u; //!< Invalid cache id.
+const Identifier INVALID_NODE_ID = -1u; //!< Invalid node ID.
 
 const uint32_t MAX_CHILDREN_BITS = 4; //!< Maximum number of children is 16
 const uint32_t NODEID_LEVEL_BITS = 4; //>! see NodeId
 const uint32_t NODEID_BLOCK_BITS = 14; //>! see NodeId
-const uint32_t NODEID_TIMESTEP_BITS = 18; //>! see NodeId
 
-const uint32_t INVALID_POSITION = ( 1u << NODEID_BLOCK_BITS ) - 1; //!< Invalid node ID.
-const uint32_t INVALID_LEVEL = ( 1u << NODEID_LEVEL_BITS ) - 1; //!< Invalid tree level.4 bits is on
-const uint32_t INVALID_TIMESTEP = ( 1u << NODEID_TIMESTEP_BITS ) - 1; //!< Invalid time step. 18 bits is on
-const uint32_t INVALID_FRAMEID = -1;
+const uint32_t INVALID_POSITION = ( 1u << NODEID_BLOCK_BITS ) - 1u; //!< Invalid node ID.
+const uint32_t INVALID_LEVEL = ( 1u << NODEID_LEVEL_BITS ) - 1u; //!< Invalid tree level.4 bits is on
+const uint32_t INVALID_FRAMEID = -1u;
 const uint32_t LATEST_FRAME = INT_MAX; //!< Maximum frame number
 
 

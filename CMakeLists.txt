@@ -10,8 +10,8 @@
 
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-project(Livre VERSION 0.7.0)
-set(Livre_VERSION_ABI 5)
+project(Livre VERSION 1.0.0)
+set(Livre_VERSION_ABI 100)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
                               ${CMAKE_SOURCE_DIR}/CMake/common)
@@ -28,22 +28,20 @@ set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)
 
 include(Common)
 
-if(APPLE) # WAR otherwise MacPorts X11 (/opt/local) is preferred
-  list(REMOVE_ITEM CMAKE_SYSTEM_LIBRARY_PATH /opt/local/lib /usr/local/lib)
-  list(REMOVE_ITEM CMAKE_SYSTEM_PREFIX_PATH /opt/local /usr/local)
-  link_directories(/opt/X11/lib /usr/X11R6/lib)
-  include_directories(SYSTEM /opt/X11/include /usr/X11R6/include)
-endif()
-
-if(APPLE OR CMAKE_SYSTEM_NAME MATCHES "Linux")
+if(CMAKE_SYSTEM_NAME MATCHES "Linux")
   git_subproject(Tuvok https://github.com/BlueBrain/Tuvok.git bbp)
 endif()
 
+
 common_find_package(BBPTestData)
-common_find_package(Boost REQUIRED COMPONENTS filesystem program_options thread
-                                         system regex unit_test_framework)
+common_find_package(Boost REQUIRED COMPONENTS filesystem
+                                              program_options
+                                              thread
+                                              system
+                                              unit_test_framework)
 common_find_package(Collage REQUIRED)
 common_find_package(Equalizer REQUIRED)
+common_find_package(GLEW REQUIRED)
 common_find_package(Lexis REQUIRED)
 common_find_package(LibJpegTurbo)
 common_find_package(Lunchbox REQUIRED)
@@ -60,13 +58,14 @@ common_find_package(ZeroEQ)
 common_find_package(ZeroBuf REQUIRED)
 common_find_package_post()
 
-include(EqGLLibraries)
 set(LIVRE_DEPENDENT_LIBRARIES vmmlib Lunchbox Equalizer ZeroBuf)
 
 add_definitions(-DBOOST_PROGRAM_OPTIONS_DYN_LINK) # Fix for windows and shared boost.
 add_subdirectory(livre)
 add_subdirectory(apps)
 add_subdirectory(tests)
+add_subdirectory(datasources)
+add_subdirectory(renderers)
 
 include(CPackConfig)
 

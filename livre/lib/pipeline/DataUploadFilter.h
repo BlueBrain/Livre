@@ -22,51 +22,44 @@
 
 #include <livre/lib/types.h>
 #include <livre/core/pipeline/Filter.h>
+#include <livre/core/render/RenderInputs.h>
 
 namespace livre
 {
 
 
 /**
- * DataUploadFilter class implements the parallel data loading for raw volume data and
- * textures. A group of uploaders is executed in rendering pipeline and each uploader
- * has an id in the group.
+ * DataUploadFilter class implements the data loading for raw volume data
  */
 class DataUploadFilter : public Filter
 {
 public:
 
-    /**
-     * Constructor
-     * @param id of the data uploader ( in a group of other uploaders )
-     * @param nbUploaders total number of uploders
-     * @param dataCache data cache
-     * @param textureCache texture cache
-     * @param dataSource data source
-     * @param texturePool the pool for 3D textures
-     */
-    DataUploadFilter( const size_t id,
-                      const size_t nbUploaders,
-                      Cache& dataCache,
-                      Cache& textureCache,
-                      DataSource& dataSource,
-                      TexturePool& texturePool );
+    /** Constructor */
+    DataUploadFilter();
     ~DataUploadFilter();
 
-    /**
-     * @copydoc Filter::execute
-     */
+    /** @copydoc Filter::execute */
     void execute( const FutureMap& input, PromiseMap& output ) const final;
 
-    /**
-     * @copydoc Filter::getInputDataInfos
-     */
-    DataInfos getInputDataInfos() const final;
+    /** @copydoc Filter::getInputDataInfos */
+    DataInfos getInputDataInfos() const final
+    {
+        return
+        {
+            { "RenderInputs", getType< RenderInputs >() },
+            { "NodeIds", getType< NodeIds >() },
+        };
+    }
 
-    /**
-     * @copydoc Filter::getOutputDataInfos
-     */
-    DataInfos getOutputDataInfos() const final;
+    /** @copydoc Filter::getOutputDataInfos */
+    DataInfos getOutputDataInfos() const final
+    {
+        return
+        {
+            { "DataCacheObjects", getType< ConstCacheObjects >() },
+        };
+    }
 
 private:
 

@@ -24,7 +24,7 @@
 #include <livre/eq/settings/EqCameraSettings.h>
 #include <livre/eq/settings/EqVolumeSettings.h>
 #include <livre/eq/settings/EqApplicationSettings.h>
-#include <livre/lib/configuration/VolumeRendererParameters.h>
+#include <livre/core/configuration/RendererParameters.h>
 
 #include <eq/eq.h>
 #include <seq/objectType.h>
@@ -44,7 +44,7 @@ public:
         volumeSettings.setID( servus::make_uint128( "eq::VolumeSettings" ));
         applicationSettings.setID( servus::make_uint128( "eq::ApplicationSettings" ));
         vrParameters.setID(
-            servus::make_uint128( "eq::VolumeRendererParameters" ));
+            servus::make_uint128( "eq::RendererParameters" ));
     }
 
     EqFrameSettings frameSettings;
@@ -52,7 +52,7 @@ public:
     EqCameraSettings cameraSettings;
     EqVolumeSettings volumeSettings;
     EqApplicationSettings applicationSettings;
-    VolumeRendererParameters vrParameters;
+    RendererParameters vrParameters;
 };
 
 FrameData::FrameData()
@@ -108,7 +108,7 @@ void FrameData::initialize( eq::Config* eqConfig )
     _impl.reset( new Impl( *eqConfig, _factory ));
 }
 
-void FrameData::setup( const VolumeRendererParameters& rendererParams )
+void FrameData::setup( const RendererParameters& rendererParams )
 {
     _impl->vrParameters = rendererParams;
 }
@@ -163,12 +163,12 @@ const ApplicationSettings& FrameData::getApplicationSettings() const
     return _impl->applicationSettings;
 }
 
-const VolumeRendererParameters& FrameData::getVRParameters() const
+const RendererParameters& FrameData::getVRParameters() const
 {
     return _impl->vrParameters;
 }
 
-VolumeRendererParameters& FrameData::getVRParameters()
+RendererParameters& FrameData::getVRParameters()
 {
     return _impl->vrParameters;
 }

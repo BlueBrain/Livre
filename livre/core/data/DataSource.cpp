@@ -36,13 +36,10 @@ namespace
 struct DataSource::Impl
 {
 public:
-    typedef lunchbox::PluginFactory< DataSourcePlugin,
-                                     DataSourcePluginData > PluginFactory;
+    typedef lunchbox::PluginFactory< DataSourcePlugin, DataSourcePluginData > PluginFactory;
 
-    Impl( const lunchbox::URI& uri,
-          const AccessMode accessMode )
-        : plugin( PluginFactory::getInstance().create(
-                      DataSourcePluginData( uri, accessMode )))
+    Impl( const lunchbox::URI& uri, const AccessMode accessMode )
+        : plugin( PluginFactory::getInstance().create( DataSourcePluginData( uri, accessMode )))
     {}
 
     LODNode getNode( const NodeId& nodeId ) const
@@ -63,8 +60,7 @@ public:
     std::unique_ptr< DataSourcePlugin > plugin;
 };
 
-DataSource::DataSource( const lunchbox::URI& uri,
-                        const AccessMode accessMode )
+DataSource::DataSource( const lunchbox::URI& uri, const AccessMode accessMode )
     : _impl( new Impl( uri, accessMode ) )
 {
 }

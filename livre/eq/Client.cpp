@@ -22,10 +22,11 @@
 #include <eq/eq.h>
 
 #include <livre/core/version.h>
+#include <livre/core/render/RenderPipeline.h>
 #include <livre/core/data/DataSource.h>
+#include <livre/core/configuration/RendererParameters.h>
 
 #include <livre/lib/configuration/ApplicationParameters.h>
-#include <livre/lib/configuration/VolumeRendererParameters.h>
 
 #include <livre/eq/Client.h>
 #include <livre/eq/Config.h>
@@ -67,7 +68,7 @@ struct Client::Impl
 
     static std::string getHelp()
     {
-        VolumeRendererParameters vrParameters;
+        RendererParameters vrParameters;
         ApplicationParameters applicationParameters;
 
         Configuration conf;
@@ -91,13 +92,14 @@ struct Client::Impl
         if( !parseArguments( argc, const_cast< const char** >( argv )))
             return false;
 
-        DataSource::loadPlugins(); //initLocal on render clients never returns
+        DataSource::loadPlugins();
+        RenderPipeline::loadPlugins(); //initLocal on render clients never returns
         return true;
     }
 
     IdleFunc _idleFunc;
     ApplicationParameters _applicationParameters;
-    VolumeRendererParameters _rendererParameters;
+    RendererParameters _rendererParameters;
 };
 
 Client::Client()

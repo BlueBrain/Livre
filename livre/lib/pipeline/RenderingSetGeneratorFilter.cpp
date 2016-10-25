@@ -32,8 +32,8 @@ namespace livre
 
 struct RenderingSetGenerator
 {
-    explicit RenderingSetGenerator( const Cache& textureCache )
-        : _textureCache( textureCache )
+    explicit RenderingSetGenerator( const Cache& cache )
+        : _cache( cache )
     {}
 
     bool hasParentInMap( const NodeId& childRenderNode,
@@ -48,17 +48,17 @@ struct RenderingSetGenerator
         return false;
     }
 
-    void collectLoadedTextures( const NodeId& nodeId,
+    void collectLoadedData( const NodeId& nodeId,
                                 ConstCacheMap& cacheMap ) const
     {
         NodeId current = nodeId;
         while( current.isValid( ))
         {
             const NodeId& currentNodeId = current;
-            const ConstCacheObjectPtr texture = _textureCache.get( currentNodeId.getId( ));
-            if( texture )
+            const ConstCacheObjectPtr data = _cache.get( currentNodeId.getId( ));
+            if( data )
             {
-                cacheMap[ currentNodeId.getId() ] = texture;
+                cacheMap[ currentNodeId.getId() ] = data;
                 break;
             }
 
@@ -68,12 +68,12 @@ struct RenderingSetGenerator
     }
 
     ConstCacheObjects generateRenderingSet( const NodeIds& visibles,
-                                            NodeAvailability& availability ) const
+                                            RenderStatistics& availability ) const
     {
         ConstCacheMap cacheMap;
         for( const NodeId& nodeId : visibles )
         {
-            collectLoadedTextures( nodeId, cacheMap );
+            collectLoadedData( nodeId, cacheMap );
             cacheMap.count( nodeId.getId( )) > 0 ?
                         ++availability.nAvailable : ++availability.nNotAvailable;
         }
@@ -107,7 +107,7 @@ struct RenderingSetGenerator
         return cacheObjects;
     }
 
-    const Cache& _textureCache;
+    const Cache& _cache;
 };
 
 struct RenderingSetGeneratorFilter::Impl
@@ -116,17 +116,16 @@ struct RenderingSetGeneratorFilter::Impl
         : _cache( cache )
     {}
 
-    void execute( const FutureMap& input,
-                  PromiseMap& output ) const
+    void execute( const FutureMap& input, PromiseMap& output ) const
     {
         RenderingSetGenerator renderSetGenerator( _cache );
 
         ConstCacheObjects cacheObjects;
         size_t nVisible = 0;
-        NodeAvailability cumulativeAvailability;
+        RenderStatistics cumulativeAvailability;
         for( const auto& visibles: input.get< NodeIds >( "VisibleNodes" ))
         {
-            NodeAvailability avaliability;
+            RenderStatistics avaliability;
             const ConstCacheObjects& objs = renderSetGenerator.generateRenderingSet( visibles,
                                                                                      avaliability );
             cacheObjects.insert( cacheObjects.end(), objs.begin(), objs.end( ));
@@ -136,25 +135,7 @@ struct RenderingSetGeneratorFilter::Impl
 
         output.set( "CacheObjects", cacheObjects );
         output.set( "RenderingDone", cacheObjects.size() == nVisible );
-        output.set( "NodeAvailability", cumulativeAvailability );
-    }
-
-    DataInfos getInputDataInfos() const
-    {
-        return
-        {
-            { "VisibleNodes", getType< NodeIds >( )}
-        };
-    }
-
-    DataInfos getOutputDataInfos() const
-    {
-        return
-        {
-            { "CacheObjects", getType< ConstCacheObjects >( )},
-            { "RenderingDone", getType< bool >() },
-            { "NodeAvailability", getType< NodeAvailability >() },
-        };
+        output.set( "RenderStatistics", cumulativeAvailability );
     }
 
     const Cache& _cache;
@@ -174,16 +155,4 @@ void RenderingSetGeneratorFilter::execute( const FutureMap& input,
 {
     _impl->execute( input, output );
 }
-
-DataInfos RenderingSetGeneratorFilter::getInputDataInfos() const
-{
-    return _impl->getInputDataInfos();
-}
-
-DataInfos RenderingSetGeneratorFilter::getOutputDataInfos() const
-{
-    return _impl->getOutputDataInfos();
-}
-
-
 }

@@ -29,7 +29,7 @@
 #include <livre/eq/settings/EqVolumeSettings.h>
 
 #include <livre/lib/configuration/ApplicationParameters.h>
-#include <livre/lib/configuration/VolumeRendererParameters.h>
+#include <livre/core/configuration/RendererParameters.h>
 
 #include <livre/core/data/VolumeInformation.h>
 #include <livre/core/data/Histogram.h>

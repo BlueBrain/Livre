@@ -42,15 +42,15 @@ struct FrameInfo
 
 
 /** Keeps the number information of avalibility of the nodes in cache */
-struct NodeAvailability
+struct RenderStatistics
 {
-    LIVRECORE_API NodeAvailability()
+    LIVRECORE_API RenderStatistics()
      : nAvailable( 0 )
      , nNotAvailable( 0 )
      , nRenderAvailable( 0 )
     {}
 
-    LIVRECORE_API NodeAvailability& operator+=( const NodeAvailability& na )
+    LIVRECORE_API RenderStatistics& operator+=( const RenderStatistics& na )
     {
         nAvailable += na.nAvailable;
         nNotAvailable += na.nNotAvailable;

@@ -31,8 +31,8 @@
 #include <livre/eq/render/EqContext.h>
 #include <livre/eq/settings/EqFrameSettings.h>
 
-#include <livre/lib/configuration/VolumeRendererParameters.h>
-#include <livre/lib/pipeline/RenderPipeline.h>
+#include <livre/core/configuration/RendererParameters.h>
+#include <livre/core/render/RenderPipeline.h>
 #include <livre/lib/cache/TextureObject.h>
 
 #include <livre/core/cache/Cache.h>
@@ -66,19 +66,7 @@ public:
     void configInit()
     {
         shareGLContexts();
-
-        Node* node = static_cast< Node* >( _window->getNode( ));
-        Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
-        const size_t maxGpuMemory =
-                        pipe->getFrameData()->getVRParameters().getMaxGPUCacheMemoryMB();
-
-        _texturePool.reset( new TexturePool( node->getDataSource( ), maxGpuMemory * LB_1MB ));
-        _textureCache.reset( new CacheT< TextureObject >( "TextureCache", maxGpuMemory * LB_1MB ));
-        Caches caches = { node->getDataCache(), *_textureCache, node->getHistogramCache() };
-        _renderPipeline.reset( new RenderPipeline( node->getDataSource(),
-                                                   caches,
-                                                   *_texturePool,
-                                                   _glContext ));
+        _renderPipeline.reset( new RenderPipeline( "gl" ));
     }
 
     void shareGLContexts()
@@ -162,7 +150,7 @@ const Cache& Window::getTextureCache() const
     return *_impl->_textureCache;
 }
 
-const RenderPipeline& Window::getRenderPipeline() const
+RenderPipeline& Window::getRenderPipeline() const
 {
     return *_impl->_renderPipeline;
 }

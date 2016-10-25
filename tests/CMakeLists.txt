@@ -5,19 +5,18 @@
 include(InstallFiles)
 
 # Libraries to link the tests executables with
-set(TEST_LIBRARIES LivreCore LivreLib LivreEq ${Boost_LIBRARIES})
-set(LIVRE_OPTIONAL_LIBRARIES LivreUVF)
-foreach(LIVRE_OPTIONAL_LIBRARY ${LIVRE_OPTIONAL_LIBRARIES})
-  if(TARGET ${LIVRE_OPTIONAL_LIBRARY})
-    list(APPEND TEST_LIBRARIES ${LIVRE_OPTIONAL_LIBRARY})
-  endif()
-endforeach()
+set(TEST_LIBRARIES LivreCore LivreLib LivreEq LivreMemoryDataSource
+                   LivreRAWDataSource ${Boost_LIBRARIES})
 
-set(UVF_DATA_DIR "${CMAKE_CURRENT_BINARY_DIR}")
-set(UVF_DATA_FILE "${UVF_DATA_DIR}/mouse_reduced.uvf")
-file(COPY "uvf/mouse_reduced.uvf" DESTINATION ${UVF_DATA_DIR})
-
-add_definitions(-DUVF_DATA_FILE=\"${UVF_DATA_FILE}\")
+if(TUVOK_FOUND)
+  list(APPEND TEST_LIBRARIES LivreUVFDataSource)
+  set(UVF_DATA_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+  set(UVF_DATA_FILE "${UVF_DATA_DIR}/mouse_reduced.uvf")
+  file(COPY "uvf/mouse_reduced.uvf" DESTINATION ${UVF_DATA_DIR})
+  add_definitions(-DUVF_DATA_FILE=\"${UVF_DATA_FILE}\")
+else()
+  set(EXCLUDE_FROM_TESTS uvf/uvf.cpp)
+endif()
 
 set(RAW_DATA_DIR "${CMAKE_CURRENT_BINARY_DIR}")
 set(RAW_DATA_FILE "${RAW_DATA_DIR}/nucleon.raw")

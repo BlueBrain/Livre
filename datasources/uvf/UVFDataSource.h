@@ -20,7 +20,6 @@
 #ifndef _UVFDataSource_h_
 #define _UVFDataSource_h_
 
-#include <livre/uvf/tuvokTypes.h>
 #include <livre/core/data/DataSourcePlugin.h>
 
 namespace livre

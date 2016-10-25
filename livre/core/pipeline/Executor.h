@@ -49,9 +49,7 @@ public:
 
 protected:
 
-    /**
-     * Clears the executor ( i.e : Implementation can empty the work queue )
-     */
+    /** Clears the executor ( i.e : Implementation can empty the work queue ) */
     LIVRECORE_API virtual void clear() {}
 
 };

@@ -22,8 +22,6 @@
 
 #include <livre/core/data/DataSourcePlugin.h>
 
-#include <livre/lib/types.h>
-
 namespace livre
 {
 

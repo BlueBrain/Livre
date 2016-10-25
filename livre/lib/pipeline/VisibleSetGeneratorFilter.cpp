@@ -18,7 +18,7 @@
  */
 
 #include <livre/lib/pipeline/VisibleSetGeneratorFilter.h>
-#include <livre/lib/configuration/VolumeRendererParameters.h>
+#include <livre/core/configuration/RendererParameters.h>
 
 #include <livre/core/cache/Cache.h>
 #include <livre/core/pipeline/InputPort.h>
@@ -46,7 +46,7 @@ struct VisibleSetGeneratorFilter::Impl
         const auto& frustum = uniqueInputs.get< Frustum >( "Frustum" );
         const auto& frame =  uniqueInputs.get< uint32_t >( "Frame" );
         const auto& range = uniqueInputs.get< Range >( "DataRange" );
-        const auto& params = uniqueInputs.get< VolumeRendererParameters >( "Params" );
+        const auto& params = uniqueInputs.get< RendererParameters >( "Params" );
         const auto& vp = uniqueInputs.get< PixelViewport >( "Viewport" );
         const auto& clipPlanes = uniqueInputs.get< ClipPlanes >( "ClipPlanes" );
 
@@ -73,56 +73,18 @@ struct VisibleSetGeneratorFilter::Impl
         output.set( "Params", params );
     }
 
-    DataInfos getInputDataInfos() const
-    {
-        return {
-            { "Frustum", getType< Frustum >() },
-            { "Frame", getType< uint32_t >() },
-            { "DataRange", getType< Range >() },
-            { "Params", getType< VolumeRendererParameters >() },
-            { "Viewport", getType< PixelViewport >() },
-            { "ClipPlanes", getType< ClipPlanes >() }
-        };
-    }
-
-    DataInfos getOutputDataInfos() const
-    {
-        return
-        {
-            { "VisibleNodes", getType< NodeIds >( )},
-            { "Params", getType< VolumeRendererParameters >() }
-        };
-    }
-
     const DataSource& _dataSource;
 };
 
 VisibleSetGeneratorFilter::VisibleSetGeneratorFilter( const DataSource& dataSource )
     : _impl( new VisibleSetGeneratorFilter::Impl( dataSource ))
-{
-}
+{}
 
 VisibleSetGeneratorFilter::~VisibleSetGeneratorFilter()
-{
+{}
 
-}
-
-void VisibleSetGeneratorFilter::execute( const FutureMap& input,
-                                         PromiseMap& output ) const
+void VisibleSetGeneratorFilter::execute( const FutureMap& input, PromiseMap& output ) const
 {
     _impl->execute( input, output );
 }
-
-DataInfos VisibleSetGeneratorFilter::getInputDataInfos() const
-{
-    return _impl->getInputDataInfos();
-}
-
-DataInfos VisibleSetGeneratorFilter::getOutputDataInfos() const
-{
-    return _impl->getOutputDataInfos();
-}
-
-
-
 }

@@ -22,6 +22,7 @@
 #ifndef _CameraSettings_h_
 #define _CameraSettings_h_
 
+#include <livre/core/types.h>
 #include <livre/core/mathTypes.h>
 #include <livre/core/data/SignalledVariable.h>
 

@@ -21,6 +21,7 @@
 #define _FrameUtils_h_
 
 #include <livre/core/api.h>
+#include <livre/core/types.h>
 #include <livre/core/mathTypes.h>
 
 namespace livre

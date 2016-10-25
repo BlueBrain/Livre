@@ -29,13 +29,6 @@ const uint32_t VOXEL_SIZE_X = 41;
 const uint32_t VOXEL_SIZE_Y = 41;
 const uint32_t VOXEL_SIZE_Z = 41;
 
-#include <lunchbox/pluginRegisterer.h>
-#include <livre/lib/data/RawDataSource.h>
-
-// Explicit registration required because the folder of the data source plugin is not
-// in the LD_LIBRARY_PATH of the test executable.
-lunchbox::PluginRegisterer< livre::RawDataSource > registerer;
-
 void createAndCheckDataSource( const lunchbox::URI& uri)
 {
     livre::DataSource source( uri );

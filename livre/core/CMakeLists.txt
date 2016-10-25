@@ -5,6 +5,13 @@
 # This file is part of Livre <https://github.com/BlueBrain/Livre>
 #
 
+list(APPEND CPPCHECK_EXTRA_ARGS
+  --suppress=*:${CMAKE_CURRENT_BINARY_DIR}/*_generated.h)
+
+include(zerobufGenerateCxx)
+zerobuf_generate_cxx(ZEROBUF_GENERATED
+  ${PROJECT_BINARY_DIR}/include/livre/core/configuration  configuration/rendererParameters.fbs)
+
 set(LIVRECORE_PUBLIC_HEADERS
   data/LODNode.h
   data/Histogram.h
@@ -12,6 +19,10 @@ set(LIVRECORE_PUBLIC_HEADERS
   data/MemoryUnit.h
   data/DataSourcePlugin.h
   data/VolumeInformation.h
+  render/Renderer.h
+  render/RendererPlugin.h
+  render/RenderPipeline.h
+  render/RenderPipelinePlugin.h
   render/GLContext.h
   render/GLSLShaders.h
   lunchboxTypes.h
@@ -20,11 +31,13 @@ set(LIVRECORE_PUBLIC_HEADERS
 )
 
 set(LIVRECORE_HEADERS
+  ${ZEROBUF_GENERATED_HEADERS}
   cache/Cache.h
   cache/CacheObject.h
   cache/CacheStatistics.h
   configuration/Configuration.h
   configuration/Parameters.h
+  configuration/RendererParameters.h
   data/DataSource.h
   data/SignalledVariable.h
   events/EventHandler.h
@@ -46,7 +59,6 @@ set(LIVRECORE_HEADERS
   render/ClipPlanes.cpp
   render/FrameInfo.h
   render/Frustum.h
-  render/Renderer.h
   render/SelectVisibles.h
   render/TexturePool.h
   render/TextureState.h
@@ -63,11 +75,13 @@ set(LIVRECORE_HEADERS
   visitor/VisitState.h)
 
 set(LIVRECORE_SOURCES
+  ${ZEROBUF_GENERATED_SOURCES}
   cache/Cache.cpp
   cache/CacheObject.cpp
   cache/CacheStatistics.cpp
   configuration/Configuration.cpp
   configuration/Parameters.cpp
+  configuration/RendererParameters.cpp
   data/LODNode.cpp
   data/Histogram.cpp
   data/MemoryUnit.cpp
@@ -92,6 +106,7 @@ set(LIVRECORE_SOURCES
   render/GLContext.cpp
   render/GLSLShaders.cpp
   render/Renderer.cpp
+  render/RenderPipeline.cpp
   render/SelectVisibles.cpp
   render/TexturePool.cpp
   render/TextureState.cpp
@@ -106,8 +121,7 @@ set(LIVRECORE_SOURCES
   visitor/VisitState.cpp)
 
 set(LIVRECORE_LINK_LIBRARIES
-  PUBLIC ${Boost_LIBRARIES} Collage Lexis Lunchbox vmmlib ZeroBuf
-  PRIVATE Equalizer ${GLEW_MX_LIBRARIES})
+  PUBLIC ${Boost_LIBRARIES} Collage Lexis Lunchbox vmmlib ZeroBuf ${GLEW_LIBRARIES})
 
 set(LIVRECORE_INCLUDE_NAME livre/core)
 set(LIVRECORE_NAMESPACE livrecore)

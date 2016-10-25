@@ -17,14 +17,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define BOOST_TEST_MODULE VolumeRendererParameters
+#define BOOST_TEST_MODULE RendererParameters
 #include <boost/test/unit_test.hpp>
 
-#include <livre/lib/configuration/VolumeRendererParameters.h>
+#include <livre/core/configuration/RendererParameters.h>
 
 BOOST_AUTO_TEST_CASE(defaultValues)
 {
-    const livre::VolumeRendererParameters params;
+    const livre::RendererParameters params;
 
     BOOST_CHECK_EQUAL( params.getMaxLOD(), (livre::NODEID_LEVEL_BITS << 1) + 1);
     BOOST_CHECK_EQUAL( params.getMinLOD(), 0 );
@@ -45,14 +45,14 @@ BOOST_AUTO_TEST_CASE(defaultValues)
 
 BOOST_AUTO_TEST_CASE(copy)
 {
-    livre::VolumeRendererParameters params;
+    livre::RendererParameters params;
     params.setMaxLOD( 42 );
 
-    const livre::VolumeRendererParameters paramsCopy( params );
+    const livre::RendererParameters paramsCopy( params );
     BOOST_CHECK_EQUAL( paramsCopy.getMaxLOD(), params.getMaxLOD( ));
     BOOST_CHECK( paramsCopy == params );
 
-    livre::VolumeRendererParameters paramsAssigned;
+    livre::RendererParameters paramsAssigned;
     paramsAssigned = params;
     BOOST_CHECK_EQUAL( paramsAssigned.getMaxLOD(), paramsAssigned.getMaxLOD( ));
     BOOST_CHECK( paramsAssigned == params );
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(initFromArgv)
                            "--samples-per-pixel", "4" };
     const int argc = sizeof(argv)/sizeof(char*);
 
-    livre::VolumeRendererParameters params;
+    livre::RendererParameters params;
     params.initialize( argc, argv );
 
     BOOST_CHECK_EQUAL( params.getMaxLOD(), 6 );

@@ -41,7 +41,7 @@ public:
     void initialize( eq::Config* eqConfig );
 
     /** Set up the parameters. */
-    void setup( const VolumeRendererParameters& rendererParams );
+    void setup( const RendererParameters& rendererParams );
 
     /**
      * Registers objects to the internal \see co::ObjectMap.
@@ -135,8 +135,8 @@ public:
     const ApplicationSettings& getApplicationSettings() const;
 
     /** @return The volume rendering parameters. */
-    VolumeRendererParameters& getVRParameters();
-    const VolumeRendererParameters& getVRParameters() const;
+    RendererParameters& getVRParameters();
+    const RendererParameters& getVRParameters() const;
 
     virtual ~FrameData();
 

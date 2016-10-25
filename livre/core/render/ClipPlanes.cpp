@@ -19,7 +19,7 @@
 
 #include <livre/core/render/ClipPlanes.h>
 #include <livre/core/data/VolumeInformation.h>
-
+#include <livre/core/mathTypes.h>
 #include <vmmlib/aabb.hpp>
 
 namespace livre

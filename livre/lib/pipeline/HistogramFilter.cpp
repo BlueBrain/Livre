@@ -22,7 +22,6 @@
 
 #include <livre/core/cache/Cache.h>
 #include <livre/core/data/DataSource.h>
-#include <livre/core/data/Histogram.h>
 #include <livre/core/render/Frustum.h>
 
 namespace livre
@@ -136,25 +135,6 @@ struct HistogramFilter::Impl
         output.set( "Histogram", histogramAccumulated );
     }
 
-    DataInfos getInputDataInfos() const
-    {
-        return
-        {
-            { "Frustum", getType< Frustum >() },
-            { "RelativeViewport", getType< Viewport >() },
-            { "CacheObjects", getType< ConstCacheObjects >() },
-            { "DataSourceRange", getType< Vector2f >() },
-        };
-    }
-
-    DataInfos getOutputDataInfos() const
-    {
-        return
-        {
-            { "Histogram", getType< Histogram >() },
-        };
-    }
-
     Cache& _histogramCache;
     const Cache& _dataCache;
     const DataSource& _dataSource;
@@ -177,15 +157,4 @@ void HistogramFilter::execute( const FutureMap& input, PromiseMap& output ) cons
 {
     _impl->execute( input, output );
 }
-
-DataInfos HistogramFilter::getInputDataInfos() const
-{
-    return _impl->getInputDataInfos();
-}
-
-DataInfos HistogramFilter::getOutputDataInfos() const
-{
-    return _impl->getOutputDataInfos();
-}
-
 }

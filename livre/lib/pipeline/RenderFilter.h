@@ -44,15 +44,19 @@ public:
                   Renderer& renderer );
     ~RenderFilter();
 
-    /**
-     * @copydoc Filter::execute
-     */
+    /** @copydoc Filter::execute */
     void execute( const FutureMap& input, PromiseMap& output ) const final;
 
-    /**
-     * @copydoc Filter::getInputDataInfos
-     */
-    DataInfos getInputDataInfos() const final;
+    /** @copydoc Filter::getInputDataInfos */
+    DataInfos getInputDataInfos() const final
+    {
+        return
+        {
+            { "CacheObjects", getType< ConstCacheObjects >() },
+            { "RenderInputs", getType< RenderInputs >() },
+            { "RenderStages", getType< uint32_t >() },
+        };
+    }
 
 private:
 

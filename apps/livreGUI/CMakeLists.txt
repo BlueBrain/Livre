@@ -18,7 +18,7 @@ endif()
 
 include(zerobufGenerateCxx)
 zerobuf_generate_qobject(ZEROBUF_GENERATED ${CMAKE_CURRENT_BINARY_DIR}
-  ${PROJECT_SOURCE_DIR}/livre/lib/zeroeq/volumeRendererParameters.fbs)
+  ${PROJECT_SOURCE_DIR}/livre/core/configuration/rendererParameters.fbs)
 
 set(LIVREGUI_HEADERS
   ${ZEROBUF_GENERATED_HEADERS}

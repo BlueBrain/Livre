@@ -44,21 +44,32 @@ public:
     explicit VisibleSetGeneratorFilter( const DataSource& dataSource );
     ~VisibleSetGeneratorFilter();
 
-    /**
-     * @copydoc Filter::execute
-     */
+    /** @copydoc Filter::execute */
     void execute( const FutureMap& input, PromiseMap& output ) const final;
 
-    /**
-     * @copydoc Filter::getInputDataInfos
-     */
-    DataInfos getInputDataInfos() const final;
+    /** @copydoc Filter::getInputDataInfos */
+    DataInfos getInputDataInfos() const final
+    {
+        return
+        {
+            { "Frustum", getType< Frustum >() },
+            { "Frame", getType< uint32_t >() },
+            { "DataRange", getType< Range >() },
+            { "Params", getType< RendererParameters >() },
+            { "Viewport", getType< PixelViewport >() },
+            { "ClipPlanes", getType< ClipPlanes >() }
+        };
+    }
 
-    /**
-     * @copydoc Filter::getOutputDataInfos
-     *
-     */
-    DataInfos getOutputDataInfos() const final;
+    /** @copydoc Filter::getOutputDataInfos */
+    DataInfos getOutputDataInfos() const final
+    {
+        return
+        {
+            { "VisibleNodes", getType< NodeIds >() },
+            { "Params", getType< RendererParameters >() }
+        };
+    }
 
 private:
 

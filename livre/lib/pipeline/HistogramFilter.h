@@ -22,7 +22,10 @@
 
 #include <livre/lib/types.h>
 
+#include <livre/core/mathTypes.h>
 #include <livre/core/pipeline/Filter.h>
+
+#include <livre/core/data/Histogram.h>
 
 namespace livre
 {
@@ -48,20 +51,29 @@ public:
                      const DataSource& dataSource );
     ~HistogramFilter();
 
-    /**
-     * @copydoc Filter::execute
-     */
+    /** @copydoc Filter::execute */
     void execute( const FutureMap& input, PromiseMap& output ) const final;
 
-    /**
-     * @copydoc Filter::getInputDataInfos
-     */
-    DataInfos getInputDataInfos() const final;
+    /** @copydoc Filter::getInputDataInfos */
+    DataInfos getInputDataInfos() const final
+    {
+        return
+        {
+            { "Frustum", getType< Frustum >() },
+            { "RelativeViewport", getType< Viewport >() },
+            { "CacheObjects", getType< ConstCacheObjects >() },
+            { "DataSourceRange", getType< Vector2f >() },
+        };
+    }
 
-    /**
-     * @copydoc Filter::getOutputDataInfos
-     */
-    DataInfos getOutputDataInfos() const final;
+    /** @copydoc Filter::getOutputDataInfos */
+    DataInfos getOutputDataInfos() const final
+    {
+        return
+        {
+            { "Histogram", getType< Histogram >() },
+        };
+    }
 
 private:
 

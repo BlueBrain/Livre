@@ -47,7 +47,7 @@ public:
     const Cache& getTextureCache() const;
 
     /** @return The rendering pipeline. */
-    const RenderPipeline& getRenderPipeline() const;
+    RenderPipeline& getRenderPipeline() const;
 
 private:
 

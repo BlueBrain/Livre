@@ -42,8 +42,8 @@ public:
      * @param dataSource the data source cache object is created from
      * @throws CacheLoadException when the data cache does not have the data for cache id
      */
-    LIVRE_API DataObject( const CacheId& cacheId,
-                          DataSource& dataSource );
+    LIVRE_API DataObject( const CacheId& cacheId, DataSource& dataSource );
+
     LIVRE_API ~DataObject();
 
     /** @return A pointer to the data or 0 if no data is loaded. */

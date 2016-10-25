@@ -36,7 +36,6 @@ uniform vec3 aabbMin;
 uniform vec3 aabbMax;
 uniform vec3 textureMin;
 uniform vec3 textureMax;
-uniform vec3 voxelSpacePerWorldSpace;
 uniform vec3 worldEyePosition;
 
 uniform int nSamplesPerRay;

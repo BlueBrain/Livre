@@ -29,7 +29,6 @@
 
 namespace livre
 {
-
 class RenderSettings
 {   
 public:

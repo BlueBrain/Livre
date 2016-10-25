@@ -31,8 +31,7 @@ struct DataObject::Impl
 {
 public:
 
-    Impl( const CacheId& cacheId,
-          DataSource& dataSource )
+    Impl( const CacheId& cacheId, DataSource& dataSource )
     {
         if( !load( cacheId, dataSource ))
             LBTHROW( CacheLoadException( cacheId, "Unable to construct data cache object" ));
@@ -62,8 +61,7 @@ public:
     ConstMemoryUnitPtr _data;
 };
 
-DataObject::DataObject( const CacheId& cacheId,
-                        DataSource& dataSource )
+DataObject::DataObject( const CacheId& cacheId, DataSource& dataSource )
     : CacheObject( cacheId )
     , _impl( new Impl( cacheId, dataSource ))
 {}
@@ -74,6 +72,11 @@ DataObject::~DataObject()
 size_t DataObject::getSize() const
 {
     return _impl->_data->getAllocSize();
+}
+
+DataObject::DataOrdering DataObject::getDataOrdering() const
+{
+    return _impl->_order;
 }
 
 const void* DataObject::getDataPtr() const

@@ -19,21 +19,13 @@
 
 #define BOOST_TEST_MODULE LodSelection
 
-#include <livre/lib/data/MemoryDataSource.h>
-
 #include <livre/core/data/DataSource.h>
 #include <livre/core/render/SelectVisibles.h>
 #include <livre/core/visitor/DFSTraversal.h>
 #include <livre/core/render/Frustum.h>
 #include <livre/core/render/ClipPlanes.h>
 
-#include <lunchbox/pluginRegisterer.h>
-
 #include <boost/test/unit_test.hpp>
-
-// Explicit registration required because the folder of the data source plugin is not
-// in the LD_LIBRARY_PATH of the test executable.
-lunchbox::PluginRegisterer< livre::MemoryDataSource > registerer;
 
 typedef std::vector< livre::Identifier > Identifiers;
 
