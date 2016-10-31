@@ -37,9 +37,6 @@ namespace livre
 {
 struct Client::Impl
 {
-    Impl() {}
-    ~Impl() {}
-
     bool parseArguments( const int32_t argc, const char** argv )
     {
         if( !_applicationParameters.initialize( argc, argv ) ||
