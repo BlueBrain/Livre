@@ -42,15 +42,13 @@ void FrameSettings::reset()
     setDirty( DIRTY_ALL );
 }
 
-void FrameSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
+void FrameSettings::serialize( co::DataOStream& os, uint64_t )
 {
-    co::Serializable::serialize( os, dirtyBits );
     os << currentViewId_ << frameNumber_ << statistics_ << info_ << grabFrame_;
 }
 
-void FrameSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits )
+void FrameSettings::deserialize( co::DataIStream& is, uint64_t )
 {
-    co::Serializable::deserialize( is, dirtyBits );
     is >> currentViewId_ >> frameNumber_ >> statistics_ >> info_ >> grabFrame_;
 }
 

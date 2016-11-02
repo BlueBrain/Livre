@@ -65,8 +65,6 @@ void RenderSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
 
     if( dirtyBits & DIRTY_CLIPPLANES )
         os << _clipPlanes;
-
-    co::Serializable::serialize( os, dirtyBits );
 }
 
 void RenderSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits )
@@ -79,8 +77,6 @@ void RenderSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits 
 
     if( dirtyBits & DIRTY_CLIPPLANES )
         is >> _clipPlanes;
-
-    co::Serializable::deserialize( is, dirtyBits );
 }
 
 }

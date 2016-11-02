@@ -34,14 +34,13 @@ CameraSettings::CameraSettings()
     : _notifyChangedFunc([&]( const Matrix4f& ){})
 {}
 
-void CameraSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
+void CameraSettings::serialize( co::DataOStream& os, uint64_t )
 {
-    co::Serializable::serialize( os, dirtyBits );
     os << _modelview;
 }
-void CameraSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits )
+
+void CameraSettings::deserialize( co::DataIStream& is, uint64_t )
 {
-    co::Serializable::deserialize( is, dirtyBits );
     is >> _modelview;
 }
 

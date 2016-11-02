@@ -62,15 +62,13 @@ const vmml::Vector2f& VolumeSettings::getDataSourceRange() const
     return _dataSourceRange;
 }
 
-void VolumeSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
+void VolumeSettings::serialize( co::DataOStream& os, uint64_t )
 {
-    co::Serializable::serialize( os, dirtyBits );
     os  << _uri << _dataSourceRange;
 }
 
-void VolumeSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits )
+void VolumeSettings::deserialize( co::DataIStream& is, uint64_t )
 {
-    co::Serializable::deserialize( is, dirtyBits );
     is >> _uri >> _dataSourceRange;
 }
 
