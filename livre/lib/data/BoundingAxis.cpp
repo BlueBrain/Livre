@@ -23,6 +23,26 @@
 
 #include <eq/gl.h>
 
+namespace
+{
+
+void append3dVector( std::vector< float >& container, const livre::Vector3f& vector )
+{
+    container.push_back( vector.x( ));
+    container.push_back( vector.y( ));
+    container.push_back( vector.z( ));
+}
+
+void append4dVector( std::vector< float >& container, const livre::Vector4f& vector )
+{
+    container.push_back( vector.x( ));
+    container.push_back( vector.y( ));
+    container.push_back( vector.z( ));
+    container.push_back( vector.w( ));
+}
+
+}
+
 namespace livre
 {
 
@@ -88,14 +108,12 @@ BoundingAxis::BoundingAxis( const VolumeInformation& volInfo )
         }
     }
 
-    // There is a possible optimization here, it is possible to append directly
-    // in the code lines [ 50 - 89 ].
     for( size_t i = 0; i < vertices.size(); ++i )
     {
-        _append3dVector( bbAxisData.vertices, vertices[i] );
-        _append3dVector( bbAxisData.normals, normals[i] );
-        _append3dVector( bbAxisData.normals2, normals[i] );
-        _append4dVector( bbAxisData.colors, color );
+        append3dVector( bbAxisData.vertices, vertices[i] );
+        append3dVector( bbAxisData.normals, normals[i] );
+        append3dVector( bbAxisData.normals2, normals[i] );
+        append4dVector( bbAxisData.colors, color );
         bbAxisData.types.push_back( BBOX );
 
         ++_nVertices;
@@ -171,8 +189,8 @@ void BoundingAxis::_createTicks( BoundingAxisData& bbAxisData )
     const Vector2f range = _computeRange( bbAxisData.volInfo, longestBBAxis );
 
     const uint32_t maxTickNumber = 50;
-    const float tickSizes[4] = { 1, 2, 5, 10 };
-    bbAxisData.tickSize = 0;
+    const float tickDistances[4] = { 1, 2, 5, 10 };
+    bbAxisData.tickDistance = 0;
 
     const float rangeLength = range.y() - range.x();
     const float tickDistanceHint = rangeLength / maxTickNumber;
@@ -183,9 +201,9 @@ void BoundingAxis::_createTicks( BoundingAxisData& bbAxisData )
 
     for( uint32_t i = 0; i < 4; ++i )
     {
-        if( normalizedTickDistance <= tickSizes[i] )
+        if( normalizedTickDistance <= tickDistances[i] )
         {
-            bbAxisData.tickSize = tickSizes[i] * bbAxisData.factor;
+            bbAxisData.tickDistance = tickDistances[i] * bbAxisData.factor;
             break;
         }
     }
@@ -287,15 +305,16 @@ void BoundingAxis::_createAxisTicks( const Vector3f& start, const Vector3f& end,
         currentAxis = Vector3f( end - start ).find_min_index();
 
     const Vector2f range = _computeRange( bbAxisData.volInfo, currentAxis );
-    const float rangeLenght = range.y() - range.x();
+    const float rangeLength = range.y() - range.x();
 
-    const float worldSpaceLenght = start.distance( end );
-    const float dataToWorldScale = worldSpaceLenght / rangeLenght;
-    const float startTickValue = bbAxisData.tickSize * std::ceil( range.x() / bbAxisData.tickSize );
+    const float worldSpaceLength = start.distance( end );
+    const float dataToWorldScale = worldSpaceLength / rangeLength;
+    const float startTickValue = bbAxisData.tickDistance *
+                                 std::ceil( range.x() / bbAxisData.tickDistance );
     const float worldSpaceOffset = ( startTickValue - range.x( )) * dataToWorldScale;
-    const float worldSpaceTickSize = bbAxisData.tickSize * dataToWorldScale;
+    const float worldSpaceTickDistance = bbAxisData.tickDistance * dataToWorldScale;
 
-    const int32_t numberOfTick = ( range.y() - startTickValue ) / bbAxisData.tickSize + 1;
+    const int32_t numberOfTick = ( range.y() - startTickValue ) / bbAxisData.tickDistance + 1;
     const Vector3f axisDir = vmml::normalize( end - start );
 
     Vector3f cross =  vmml::normalize( vmml::cross( axisDir, normal ));
@@ -310,30 +329,28 @@ void BoundingAxis::_createAxisTicks( const Vector3f& start, const Vector3f& end,
         float tickHeight = 0.014f;
         Vector4f color( 1.0, 0.69, 0.69, 1.0 );
         const int32_t startTickValueInteger = std::round( startTickValue / bbAxisData.factor);
-        const int32_t tickSizeInteger = std::round( bbAxisData.tickSize / bbAxisData.factor );
+        const int32_t tickDistanceInteger = std::round( bbAxisData.tickDistance / bbAxisData.factor );
 
-        if((( startTickValueInteger + tickSizeInteger * i ) % ( tickSizeInteger * 5 )) == 0 )
+        if((( startTickValueInteger + tickDistanceInteger * i ) % ( tickDistanceInteger * 5 )) == 0 )
         {
             tickHeight *= 1.5;
             color = Vector4f( 1.0, 1.0, 0.69, 1.0 );
         }
 
-        int sign;
+        int sign = ( 0.0f < cross[ tickAxis ]) - ( cross[ tickAxis ] < 0.0f );
         if( flipTick )
-            sign = -(( 0.0f < cross[ tickAxis ]) - ( cross[ tickAxis ] < 0.0f ));
-        else
-            sign = ( 0.0f < cross[ tickAxis ]) - ( cross[ tickAxis ] < 0.0f );
+            sign = -sign;
 
-        Vector3f posOnAxis = start + axisDir * ( worldSpaceOffset + worldSpaceTickSize * i );
-        _append3dVector( bbAxisData.vertices, posOnAxis );
+        Vector3f posOnAxis = start + axisDir * ( worldSpaceOffset + worldSpaceTickDistance * i );
+        append3dVector( bbAxisData.vertices, posOnAxis );
         posOnAxis[ tickAxis ] = posOnAxis[ tickAxis ] + sign * tickHeight;
-        _append3dVector( bbAxisData.vertices, posOnAxis );
+        append3dVector( bbAxisData.vertices, posOnAxis );
 
         for( uint32_t j = 0; j < 2; ++j )
         {
-            _append3dVector( bbAxisData.normals, normal );
-            _append3dVector( bbAxisData.normals2, normal2 );
-            _append4dVector( bbAxisData.colors, color );
+            append3dVector( bbAxisData.normals, normal );
+            append3dVector( bbAxisData.normals2, normal2 );
+            append4dVector( bbAxisData.colors, color );
             bbAxisData.types.push_back( AXIS );
         }
 
@@ -348,21 +365,6 @@ const Vector2f BoundingAxis::_computeRange( const VolumeInformation& volInfo,
         return Vector2f( 0.0f, volInfo.worldSize[ axis ]);
     else
         return Vector2f( 0.0f, volInfo.voxels[ axis ] * volInfo.resolution[ axis ]);
-}
-
-void BoundingAxis::_append3dVector( std::vector< float >& container, const Vector3f& vector )
-{
-    container.push_back( vector.x( ));
-    container.push_back( vector.y( ));
-    container.push_back( vector.z( ));
-}
-
-void BoundingAxis::_append4dVector( std::vector< float >& container, const Vector4f& vector )
-{
-    container.push_back( vector.x( ));
-    container.push_back( vector.y( ));
-    container.push_back( vector.z( ));
-    container.push_back( vector.w( ));
 }
 
 }

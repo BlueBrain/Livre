@@ -39,7 +39,7 @@ struct BoundingAxisData
     Floats normals2;
     Floats colors;
     UInt8s types;
-    float tickSize;
+    float tickDistance;
     float factor;
 };
 
@@ -61,9 +61,6 @@ private:
                            const Vector3f& normal2, bool flipTick, BoundingAxisData& bbAxisData );
 
     void _sendDataToGPU( const BoundingAxisData& bbAxisData );
-
-    void _append3dVector( std::vector< float >& container, const Vector3f& vector );
-    void _append4dVector( std::vector< float >& container, const Vector4f& vector );
 
     const Vector2f _computeRange( const VolumeInformation& volInfo, const size_t axis ) const;
 

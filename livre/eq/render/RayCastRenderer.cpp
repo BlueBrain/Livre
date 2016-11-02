@@ -563,9 +563,6 @@ struct RayCastRenderer::Impl
         tParamNameGL = glGetUniformLocation( program, "normalMatrix" );
         glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getNormalMatrix( ).array );
 
-        tParamNameGL = glGetUniformLocation( program, "invProjectionMatrix" );
-        glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getInvProjMatrix( ).array );
-
         _axis.draw();
 
         glUseProgram( 0 );

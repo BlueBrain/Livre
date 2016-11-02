@@ -4,8 +4,6 @@
 
 layout( rgba32f ) uniform image2DRect renderTexture;
 
-uniform mat4 invProjectionMatrix;
-
 flat in vec3 normal;
 flat in vec3 normal2;
 flat in vec3 eyePos;
