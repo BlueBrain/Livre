@@ -26,6 +26,7 @@ set(LIVRELIB_PUBLIC_HEADERS
   pipeline/RenderingSetGeneratorFilter.h
   pipeline/RenderPipeline.h
   pipeline/VisibleSetGeneratorFilter.h
+  data/BoundingAxis.h
   data/MemoryDataSource.h
   data/RawDataSource.h)
 
@@ -43,6 +44,7 @@ set(LIVRELIB_SOURCES
   pipeline/RenderingSetGeneratorFilter.cpp
   pipeline/RenderPipeline.cpp
   pipeline/VisibleSetGeneratorFilter.cpp
+  data/BoundingAxis.cpp
   data/MemoryDataSource.cpp
   data/RawDataSource.cpp)
 

@@ -80,6 +80,11 @@ public:
     LIVRECORE_API Matrix4f getMVPMatrix() const;
 
     /**
+     * @return The inverse transposed model-view matrix.
+     */
+    LIVRECORE_API Matrix4f getNormalMatrix() const;
+
+    /**
      * @return The eye coordinates in world space.
      */
     LIVRECORE_API const Vector3f& getEyePos() const;
