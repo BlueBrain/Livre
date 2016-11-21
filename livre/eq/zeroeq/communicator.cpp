@@ -37,7 +37,7 @@
 
 #include <lexis/lexis.h>
 #include <zeroeq/zeroeq.h>
-#ifdef ZEROEQ_USE_HTTPXX
+#ifdef ZEROEQ_USE_CPPNETLIB
 #  include <zeroeq/http/server.h>
 #endif
 #include <lunchbox/clock.h>
@@ -198,7 +198,7 @@ private:
     typedef std::function< bool() > RequestFunc;
     typedef std::map< ::zeroeq::uint128_t, RequestFunc > RequestFuncs;
     RequestFuncs _requests;
-#ifdef ZEROEQ_USE_HTTPXX
+#ifdef ZEROEQ_USE_CPPNETLIB
     std::unique_ptr< ::zeroeq::http::Server > _httpServer;
 #endif
     ::lexis::render::Frame _frame;
@@ -219,7 +219,7 @@ private:
 
     void _setupHTTPServer( const int argc LB_UNUSED, char** argv LB_UNUSED )
     {
-#ifdef ZEROEQ_USE_HTTPXX
+#ifdef ZEROEQ_USE_CPPNETLIB
         _httpServer = ::zeroeq::http::Server::parse( argc, argv, _subscriber );
 
         if( !_httpServer )
@@ -270,6 +270,17 @@ private:
                 onCamera( *::lexis::render::LookOut::create( data, size ));
             });
 
+        _frame.registerSerializeCallback( [&]
+        {
+            const auto& frameSettings = _getFrameData().getFrameSettings();
+            const auto& params = _config.getApplicationParameters();
+
+            _frame.setStart( params.frames[0] );
+            _frame.setCurrent( frameSettings.getFrameNumber( ));
+            _frame.setEnd( params.frames[1] );
+            _frame.setDelta( params.animation );
+            return true;
+        });
         _frame.registerDeserializedCallback( [&] { updateFrame(); });
         _subscriber.subscribe( _frame );
 
