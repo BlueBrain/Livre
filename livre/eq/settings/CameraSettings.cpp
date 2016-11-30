@@ -97,19 +97,17 @@ void CameraSettings::registerNotifyChanged( const std::function< void( const Mat
 
 void CameraSettings::setCameraLookAt( const Vector3f& lookAt )
 {
-    const Vector3f eye( _modelview(0,3),
-                        _modelview(1,3),
-                        _modelview(2,3));
+    const Vector3f eye( _modelview(0,3), _modelview(1,3), _modelview(2,3));
     const Vector3f zAxis = vmml::normalize( eye - lookAt );
 
     // Avoid Gimbal lock effect when looking upwards/downwards
-    Vector3f up( Vector3f::UP );
+    Vector3f up( Vector3f::up( ));
     const float angle = zAxis.dot( up );
     if( 1.f - std::abs( angle ) < 0.0001f )
     {
-        Vector3f right( Vector3f::RIGHT );
+        Vector3f right = Vector3f::right();
         if( angle > 0 ) // Looking downwards
-            right = Vector3f::LEFT;
+            right = Vector3f::left();
         up = up.rotate( 0.01f, right );
         up.normalize();
     }
