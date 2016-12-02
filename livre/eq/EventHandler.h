@@ -35,6 +35,7 @@ public:
     void init();
 
     bool handleEvent( eq::EventICommand command ) override;
+    bool handleEvent( eq::EventType type, const eq::Event& event ) override;
     bool handleEvent( eq::EventType type, const eq::KeyEvent& ) override;
     bool handleEvent( eq::EventType type, const eq::PointerEvent& ) override;
 

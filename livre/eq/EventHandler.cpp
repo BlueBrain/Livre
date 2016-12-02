@@ -275,6 +275,21 @@ template< class C > void EventHandler< C >::init()
 
 template< class C >
 bool EventHandler< C >::handleEvent( const eq::EventType type,
+                                     const eq::Event& event )
+{
+    switch( type )
+    {
+    case eq::EVENT_WINDOW_EXPOSE:
+    case eq::EVENT_EXIT:
+        _impl->config.postRedraw();
+        return true;
+    default:
+        return eq::Config::handleEvent( type, event );
+    }
+}
+
+template< class C >
+bool EventHandler< C >::handleEvent( const eq::EventType type,
                                      const eq::KeyEvent& event )
 {
     if( type != eq::EVENT_KEY_PRESS )
