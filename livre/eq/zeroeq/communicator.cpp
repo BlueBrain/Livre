@@ -279,7 +279,6 @@ private:
             _frame.setCurrent( frameSettings.getFrameNumber( ));
             _frame.setEnd( params.frames[1] );
             _frame.setDelta( params.animation );
-            return true;
         });
         _frame.registerDeserializedCallback( [&] { updateFrame(); });
         _subscriber.subscribe( _frame );
