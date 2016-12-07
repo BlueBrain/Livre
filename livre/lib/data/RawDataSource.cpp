@@ -1,6 +1,7 @@
 
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
- *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2016, EPFL/Blue Brain Project
+ *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                     Stefan.Eilemann@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -21,8 +22,9 @@
 
 #include <livre/core/data/LODNode.h>
 #include <livre/core/data/MemoryUnit.h>
-
 #include <livre/lib/data/RawDataSource.h>
+
+#include <lunchbox/memoryMap.h>
 #include <lunchbox/pluginRegisterer.h>
 
 #include "nrrd/nrrd.hxx"
@@ -37,20 +39,17 @@
 
 namespace livre
 {
-
 namespace
 {
    lunchbox::PluginRegisterer< RawDataSource > registerer;
 }
 
+using boost::lexical_cast;
+
 struct RawDataSource::Impl
 {
     Impl( const DataSourcePluginData& initData, VolumeInformation& volInfo )
-        : _volInfo( volInfo )
-        , _mmapPtr( nullptr )
-        , _fd( -1 )
-        , _rawDataSize( 0 )
-        , _headerSize( 0 )
+        : _headerSize( 0 )
     {
         const servus::URI& uri = initData.getURI();
         const std::string& path = uri.getPath();
@@ -63,93 +62,60 @@ struct RawDataSource::Impl
             LBTHROW( std::runtime_error( "Volume extension does not include raw or nrrd" ));
 
         if( isExtensionRaw )
-            parseRawData( uri.getPath(), uri.getFragment( ));
+            parseRawData( uri.getPath(), volInfo, uri.getFragment( ));
         else if( isExtensionNrrd )
-            parseNRRDData( uri.getPath( ));
+            parseNRRDData( uri.getPath(), volInfo );
 
-        _volInfo.frameRange = Vector2ui( 0u, 1u );
-        _volInfo.compCount = 1;
-        _volInfo.worldSpacePerVoxel = 1.0f / float( _volInfo.voxels.find_max( ));
-        _volInfo.worldSize = Vector3f( _volInfo.voxels[0],
-                                       _volInfo.voxels[1],
-                                       _volInfo.voxels[2] ) * _volInfo.worldSpacePerVoxel;
+        volInfo.frameRange = Vector2ui( 0u, 1u );
+        volInfo.compCount = 1;
+        volInfo.worldSpacePerVoxel = 1.0f / float( volInfo.voxels.find_max( ));
+        volInfo.worldSize =
+            Vector3f( volInfo.voxels[0], volInfo.voxels[1], volInfo.voxels[2] )*
+            volInfo.worldSpacePerVoxel;
 
-        _volInfo.overlap = Vector3ui( 0u );
-        _volInfo.rootNode = RootNode( 1, Vector3ui( 1 ));
-        _volInfo.maximumBlockSize =  _volInfo.voxels;
+        volInfo.overlap = Vector3ui( 0u );
+        volInfo.rootNode = RootNode( 1, Vector3ui( 1 ));
+        volInfo.maximumBlockSize = volInfo.voxels;
     }
 
-    ~Impl()
-    {
-        if( _mmapPtr != nullptr )
-            ::munmap((void *)_mmapPtr, _rawDataSize + _headerSize );
-
-        if( _fd != -1 )
-            close( _fd );
-    }
-
-    bool memoryMap( const std::string& filename, const size_t headerSize = 0 )
-    {
-        _fd = open( filename.c_str(), O_RDONLY );
-        if( _fd == -1 )
-            return false;
-
-        struct stat sb;
-        if( ::fstat( _fd, &sb ) == -1 )
-            return false;
-
-        _rawDataSize = sb.st_size - headerSize;
-
-        _mmapPtr = mmap( 0, sb.st_size, PROT_READ, MAP_PRIVATE, _fd, 0 );
-        if( _mmapPtr == MAP_FAILED )
-        {
-            ::close( _fd );
-            _fd = -1;
-            _mmapPtr = nullptr;
-            return false;
-        }
-
-        return true;
-    }
+    ~Impl() {}
 
     MemoryUnitPtr getData( const LODNode& node )
     {
         const size_t dataSize = node.getBlockSize().product();
-        MemoryUnitPtr memUnitPtr( new ConstMemoryUnit( (const uint8_t*)_mmapPtr + _headerSize,
-                                                       dataSize ));
-        return memUnitPtr;
+        return MemoryUnitPtr(
+            new ConstMemoryUnit( _mmap.getAddress< uint8_t >() + _headerSize,
+                                 dataSize ));
     }
 
-    void setDataType( const std::string& dataType )
+    DataType getDataType( const std::string& dataType )
     {
         if( dataType == "char" || dataType == "int8" )
-            _volInfo.dataType = DT_INT8;
-        else if( dataType == "unsigned char" || dataType == "uint8" )
-            _volInfo.dataType = DT_UINT8;
-        else if( dataType == "short" || dataType == "int16" )
-            _volInfo.dataType = DT_INT16;
-        else if( dataType == "unsigned short" || dataType == "uint16" )
-            _volInfo.dataType = DT_UINT16;
-        else if( dataType == "int" || dataType == "int32" )
-            _volInfo.dataType = DT_INT32;
-        else if( dataType == "unsigned int" || dataType == "uint32" )
-            _volInfo.dataType = DT_UINT32;
-        else if( dataType == "float" )
-            _volInfo.dataType = DT_FLOAT;
-        else
-            LBTHROW( std::runtime_error( "Not supported data format" ));
+            return DT_INT8;
+        if( dataType == "unsigned char" || dataType == "uint8" )
+            return DT_UINT8;
+         if( dataType == "short" || dataType == "int16" )
+             return DT_INT16;
+         if( dataType == "unsigned short" || dataType == "uint16" )
+             return DT_UINT16;
+         if( dataType == "int" || dataType == "int32" )
+             return DT_INT32;
+         if( dataType == "unsigned int" || dataType == "uint32" )
+             return DT_UINT32;
+         if( dataType == "float" )
+             return DT_FLOAT;
+         LBTHROW( std::runtime_error( "Not supported data format" ));
     }
 
-    void parseRawData( const std::string& filename,
-                       const std::string& fragment )
+    void parseRawData( const std::string& filename, VolumeInformation& volInfo,
+                       const std::string& fragment)
     {
-        if( !memoryMap( filename ))
+        if( !_mmap.map( filename ))
             LBTHROW( std::runtime_error( "Cannot mmap file" ));
 
         std::vector< std::string > parameters;
         boost::algorithm::split( parameters, fragment, boost::is_any_of( "," ));
 
-        using boost::lexical_cast;
         if( parameters.size() < 4 ) // use defaults
         {
             LBTHROW( std::runtime_error( "Not enough parameters for the raw file" ));
@@ -158,10 +124,10 @@ struct RawDataSource::Impl
         {
             try
             {
-                _volInfo.voxels[ 0 ] = boost::lexical_cast< uint32_t >( parameters[0] );
-                _volInfo.voxels[ 1 ] = boost::lexical_cast< uint32_t >( parameters[1] );
-                _volInfo.voxels[ 2 ] = boost::lexical_cast< uint32_t >( parameters[2] );
-                setDataType( parameters[ 3 ] );
+                volInfo.voxels[ 0 ] = lexical_cast< uint32_t >( parameters[0] );
+                volInfo.voxels[ 1 ] = lexical_cast< uint32_t >( parameters[1] );
+                volInfo.voxels[ 2 ] = lexical_cast< uint32_t >( parameters[2] );
+                volInfo.dataType = getDataType( parameters[ 3 ] );
             }
             catch( boost::bad_lexical_cast& except )
             {
@@ -170,7 +136,8 @@ struct RawDataSource::Impl
         }
    }
 
-    void parseNRRDData( const std::string& filename )
+    void parseNRRDData( const std::string& filename,
+                        VolumeInformation& volInfo )
     {
         std::map< std::string, std::string > dataInfo;
         _headerSize = ::NRRD::parseHeader( filename, dataInfo );
@@ -185,14 +152,14 @@ struct RawDataSource::Impl
             dataFile = dataFilePath.string();
         }
 
-        if( !memoryMap( dataFile, _headerSize ))
+        if( !_mmap.map( dataFile ))
             LBTHROW( std::runtime_error( "Cannot mmap file" ));
 
-        setDataType( dataInfo["type"] );
+        volInfo.dataType = getDataType( dataInfo["type"] );
 
         try
         {
-            if( boost::lexical_cast< size_t >( dataInfo[ "dimension" ] ) != 3u )
+            if( lexical_cast< size_t >( dataInfo[ "dimension" ] ) != 3u )
                 LBTHROW( std::runtime_error( std::runtime_error( "NRRD is not 3D data" )))
         }
         catch( boost::bad_lexical_cast& except )
@@ -201,16 +168,13 @@ struct RawDataSource::Impl
         }
 
         const auto& vec = stringToVector< int >( dataInfo[ "sizes" ] );
-        _volInfo.voxels[ 0 ] = vec[ 0 ];
-        _volInfo.voxels[ 1 ] = vec[ 1 ];
-        _volInfo.voxels[ 2 ] = vec[ 2 ];
-        _volInfo.bigEndian = dataInfo[ "endian" ] == "big";
+        volInfo.voxels[ 0 ] = vec[ 0 ];
+        volInfo.voxels[ 1 ] = vec[ 1 ];
+        volInfo.voxels[ 2 ] = vec[ 2 ];
+        volInfo.bigEndian = dataInfo[ "endian" ] == "big";
     }
 
-    VolumeInformation& _volInfo;
-    void* _mmapPtr;
-    int32_t _fd;
-    size_t _rawDataSize;
+    lunchbox::MemoryMap _mmap;
     size_t _headerSize;
 };
 
@@ -228,7 +192,16 @@ MemoryUnitPtr RawDataSource::getData( const LODNode& node )
 
 bool RawDataSource::handles( const DataSourcePluginData& initData )
 {
-    return initData.getURI().getScheme() == "raw";
+    const servus::URI& uri = initData.getURI();
+    if( uri.getScheme() == "raw" )
+        return true;
+
+    if( !uri.getScheme().empty( ))
+        return false;
+
+    return boost::algorithm::ends_with( uri.getPath(), ".raw" ) ||
+           boost::algorithm::ends_with( uri.getPath(), ".img" ) ||
+           boost::algorithm::ends_with( uri.getPath(), ".nrrd" );
 }
 
 }

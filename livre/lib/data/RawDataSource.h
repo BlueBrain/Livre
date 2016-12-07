@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2016, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -17,9 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _RawDataSource_h_
-#define _RawDataSource_h_
-
+#pragma once
 #include <livre/core/data/DataSourcePlugin.h>
 
 #include <livre/lib/types.h>
@@ -28,18 +26,21 @@ namespace livre
 {
 
 /**
- * Provides a data source for *.[raw|img] data with given details or nrrd volume .
- * The limitation is, the volumes should fit into the GPU memory. If the data does not
+ * Data source for *.[raw|img] data with given details or nrrd volume
+ *
+ * Volumes need to fit into the GPU memory. If the data does not
  * fit GPU memory, texture upload will fail with OpenGL error number 1281.
  *
- * Parses URIs in the form: raw://filename.[raw|img]#1024,1024,1024,uint8 or
+ * Parses URIs in the form: raw://filename.[raw|img]#1024,1024,1024,format or
  *                          raw://filename.nrrd
  *
+ * with format being one of: char, int8, unsigned char, uint8, short, int16,
+ *                           unsigned short, uint16, int, int32, unsigned int,
+ *                           uint32, float
  */
 class RawDataSource : public DataSourcePlugin
 {
 public:
-
     RawDataSource( const DataSourcePluginData& initData );
     ~RawDataSource();
 
@@ -49,14 +50,11 @@ public:
      * @return The block data for the node.
      */
     MemoryUnitPtr getData( const LODNode& node ) final;
-
     static bool handles( const DataSourcePluginData& initData );
-private:
 
+private:
     struct Impl;
     std::unique_ptr< Impl > _impl;
 };
 
 }
-
-#endif // _RawDataSource_h_
