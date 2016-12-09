@@ -1,29 +1,32 @@
 Changelog {#Changelog}
 =========
 
-# master {#master}
+# Release 0.7 (09-12-2016)
+* [#353](https://github.com/BlueBrain/Livre/pull/353):
+  Allow specification of raw volumes without schema
 * [#352](https://github.com/BlueBrain/Livre/pull/352):
-  Fix missing redraw after expose
-* [#331](https://github.com/BlueBrain/Livre/pull/331):
-  Multiple pass mode added for high quality images for data that does not fit into GPU cache
+  Fix missing redraw after expose.
+  * Fix the %300 CPU usage.
+* [#346](https://github.com/BlueBrain/Livre/pull/346):
+  Implement axis and legend for full volume bounding box.
 * [#333](https://github.com/BlueBrain/Livre/pull/333):
-  Add animation-fps parameter to limit the animation frame rate
+  Add animation-fps parameter to limit the animation frame rate.
+* [#331](https://github.com/BlueBrain/Livre/pull/331):
+  Added support for rendering high-resolution volumes at full resolution.
+* [#320](https://github.com/BlueBrain/Livre/pull/3):
+  Added support for floating point volumes.
 * [#318](https://github.com/BlueBrain/Livre/pull/318):
-  * Added support for NRRD and Raw volumes
+  Added support for NRRD and Raw volumes.
 * [#317](https://github.com/BlueBrain/Livre/pull/317):
-  * Added purge support for cache
-  * The cache objects now uses RAII for allocation of data
-  * Rename TextureDataCache to DataCache, TextureDataObject to DataObject
+  Added purge support for cache.
 * [#313](https://github.com/BlueBrain/Livre/pull/313):
   Fixed the camera synchronization between applications.
   Replaced the data bounding box by the data to Livre spaces
   transform matrix computed by the datasource for camera
   synchronization.
-* Added meterToDataUnitRatio parameter
-  computed by the datasource.
-* Fixed resolution printing.
+  * Fixed resolution printing.
 
-# Release 0.6 (2016-06-30)
+# Release 0.6 (30-06-2016)
 
 * [#315](https://github.com/BlueBrain/Livre/pull/315):
   Clip planes support added. User can adjust the region
@@ -50,7 +53,7 @@ Changelog {#Changelog}
 * [#279](https://github.com/BlueBrain/Livre/pull/279):
   Adapt to the renaming of zeq to ZeroEQ
 
-# Release 0.5 (2016-04-06)
+# Release 0.5 (06-04-2016)
 
 * [#270](https://github.com/BlueBrain/Livre/pull/270):
   Fix #113. SSE selection algorithm is simplified
@@ -69,7 +72,7 @@ Changelog {#Changelog}
 * [#219](https://github.com/BlueBrain/Livre/pull/219):
   LivreGUI: Editable frame range in animation panel
 
-# Release 0.4 (2015-11-09)
+# Release 0.4 (09-11-2015)
 
 * [#213](https://github.com/BlueBrain/Livre/pull/213):
   Fix [#207](https://github.com/BlueBrain/Livre/issues/207).
@@ -119,7 +122,7 @@ Changelog {#Changelog}
   Fix [LIV-157](https://bbpteam.epfl.ch/project/issues/browse/LIV-157)
   rendering of overlapping LOD nodes from different levels
 
-# Release 0.3 (2015-07-07)
+# Release 0.3 (07-07-2015)
 
 * [#37](https://github.com/BlueBrain/Livre/pull/37):
   New command line option to enable synchronous mode (wait until every block has
@@ -132,21 +135,21 @@ Changelog {#Changelog}
 * [#57](https://github.com/BlueBrain/Livre/pull/57):
   New command line parameter to set the camera lookAt vector to define its
   orientation
-* New command line parameter to set camera position
+  * New command line parameter to set camera position
 * [#17](https://github.com/BlueBrain/Livre/pull/17):
   New command line parameters for RESTBridge (hostname, port, ZeroEQ schema)
 * [#53](https://github.com/BlueBrain/Livre/pull/53):
   New command line parameters to specify the minimum and maximum levels of
   detail to render
-* New heartbeat messaging mechanism
+  * New heartbeat messaging mechanism
 * [#43](https://github.com/BlueBrain/Livre/pull/43):
   New livre_batch.py script for offline image series rendering
-* New remote data source
+  * New remote data source
 * [#67](https://github.com/BlueBrain/Livre/pull/67):
   Frames can now be written to disk as PNG files
-* Add perf unit test for remote data source
-* Add response to Vocabulary requests
-* Add support to publish frames through ZeroEQ
+  * Add perf unit test for remote data source
+  * Add response to Vocabulary requests
+  * Add support to publish frames through ZeroEQ
 * [#44](https://github.com/BlueBrain/Livre/pull/44):
   Add time support, implementing a new animation mode that triggers a new frame
   after the rendering of the previous one is finished
@@ -154,8 +157,8 @@ Changelog {#Changelog}
   Fix: do not setup ZeroEQ subscribers for REST if not requested
 * [#56](https://github.com/BlueBrain/Livre/pull/56):
   Fix a problem that made the texture cache not to unload unused elements
-* Fix broken memory mapped reading in UVF
-* Fix GLEW_MX linking
+  * Fix broken memory mapped reading in UVF
+  * Fix GLEW_MX linking
 * [#45](https://github.com/BlueBrain/Livre/pull/45):
   Fix the "Empty servus implementation" exception that was raised when zeroconf
   was not available
@@ -165,14 +168,14 @@ Changelog {#Changelog}
   General cleanup of command line parameters
 * [#22](https://github.com/BlueBrain/Livre/pull/22):
   Graceful exit when ZeroEQ EXIT event is received
-* Improve glslshader/raycastrenderer error handling and API
+  * Improve glslshader/raycastrenderer error handling and API
 * [#28](https://github.com/BlueBrain/Livre/pull/28):
   Improve performance and memory usage through a new implicit, flat octree
   implementation
 * [#48](https://github.com/BlueBrain/Livre/pull/48):
   Improve rendering performance through frustum culling
-* Optimization: use lunchbox::Buffer instead of std::vector in MemoryUnit and
-  MemoryDataSource (+35% speed in remote datasource test)
+  * Optimization: use lunchbox::Buffer instead of std::vector in MemoryUnit and
+    MemoryDataSource (+35% speed in remote datasource test)
 * [#34](https://github.com/BlueBrain/Livre/pull/34):
   Refactor the code to setup the data and texture UploadProcessors, removing
   race conditions and fixing crashes (at exit and with multiple local GPUs) in
@@ -184,11 +187,11 @@ Changelog {#Changelog}
   Upgrade to Qt5 for the transfer function editor
 * [#70](https://github.com/BlueBrain/Livre/pull/70):
   Use one GPU by default
-* Use ZeroEQ for the transfer function editor GUI
+  * Use ZeroEQ for the transfer function editor GUI
 * [#70](https://github.com/BlueBrain/Livre/pull/70):
   Window title has been improved to show the application name and its version
   number
 
-# Release 0.2 (2014-10-15)
+# Release 0.2 (15-10-2014)
 
 * BBP internal release
