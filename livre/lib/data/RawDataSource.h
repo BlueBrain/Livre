@@ -31,12 +31,13 @@ namespace livre
  * Volumes need to fit into the GPU memory. If the data does not
  * fit GPU memory, texture upload will fail with OpenGL error number 1281.
  *
- * Parses URIs in the form: raw://filename.[raw|img]#1024,1024,1024,format or
- *                          raw://filename.nrrd
+ * Parses URIs in the form:
+ * - raw://filename.[raw|img]?output=format#1024,1024,1024(,inputFormat)
+ * - raw://filename.nrrd
  *
- * with format being one of: char, int8, unsigned char, uint8, short, int16,
- *                           unsigned short, uint16, int, int32, unsigned int,
- *                           uint32, float
+ * with formats being one of: char, int8, unsigned char, uint8, short, int16,
+ *                            unsigned short, uint16, int, int32, unsigned int,
+ *                            uint32, float
  */
 class RawDataSource : public DataSourcePlugin
 {

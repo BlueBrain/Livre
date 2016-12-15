@@ -112,7 +112,6 @@ public:
     LIVRECORE_API const Vector3ui& getBlockSize() const { return _blockSize; }
 
 private:
-
     NodeId _nodeId; //!< Node id.
     Vector3ui _blockSize; //!< Number of voxels in each dimension without paddings.
     Boxui _localVoxelBox; //!< Voxelwise position and dimension in reflevel resolution in model space.

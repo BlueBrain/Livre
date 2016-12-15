@@ -41,7 +41,30 @@ namespace livre
 {
 namespace
 {
-   lunchbox::PluginRegisterer< RawDataSource > registerer;
+lunchbox::PluginRegisterer< RawDataSource > registerer;
+
+template< class O, class I >
+void _scale( const I* in, O* out, const ssize_t nElems,
+             typename std::enable_if< (sizeof(I) > sizeof(O)),
+                                      void >::type* = nullptr )
+{
+    constexpr size_t shift = (sizeof( I ) - sizeof( O )) * 8;
+#pragma omp parallel for
+    for( ssize_t i = 0; i < nElems; ++i )
+        out[i] = in[i] >> shift;
+}
+
+template< class O, class I >
+MemoryUnitPtr _scale( const uint8_t* ptr, const size_t size )
+{
+    const ssize_t nElems = size / sizeof( O );
+    auto memory = MemoryUnitPtr( new AllocMemoryUnit( size ));
+    const I* in = reinterpret_cast< const I* >( ptr );
+    O* out = memory->getData< O >();
+
+    _scale( in, out, nElems );
+    return memory;
+}
 }
 
 using boost::lexical_cast;
@@ -50,6 +73,8 @@ struct RawDataSource::Impl
 {
     Impl( const DataSourcePluginData& initData, VolumeInformation& volInfo )
         : _headerSize( 0 )
+        , _inputType( DT_UINT8 )
+        , _outputType( DT_UINT8 )
     {
         const servus::URI& uri = initData.getURI();
         const std::string& path = uri.getPath();
@@ -76,16 +101,36 @@ struct RawDataSource::Impl
         volInfo.overlap = Vector3ui( 0u );
         volInfo.rootNode = RootNode( 1, Vector3ui( 1 ));
         volInfo.maximumBlockSize = volInfo.voxels;
+
+        _inputType = volInfo.dataType;
+        const auto output = uri.findQuery( "output" );
+        if( output == uri.queryEnd( ))
+            _outputType = _inputType;
+        else
+        {
+            _outputType = getDataType( output->second );
+            volInfo.dataType = _outputType;
+        }
     }
 
     ~Impl() {}
 
     MemoryUnitPtr getData( const LODNode& node )
     {
-        const size_t dataSize = node.getBlockSize().product();
-        return MemoryUnitPtr(
-            new ConstMemoryUnit( _mmap.getAddress< uint8_t >() + _headerSize,
-                                 dataSize ));
+        const size_t size = node.getBlockSize().product();
+        const uint8_t* ptr = _mmap.getAddress< uint8_t >() + _headerSize;
+        if( _inputType == _outputType )
+            return  MemoryUnitPtr( new ConstMemoryUnit( ptr, size ));
+
+        // only unsigned integer conversions are supported!
+        if( _inputType == DT_UINT16 && _outputType == DT_UINT8 )
+            return _scale< uint8_t, uint16_t >( ptr, size );
+        if( _inputType == DT_UINT32 && _outputType == DT_UINT8 )
+            return _scale< uint8_t, uint32_t >( ptr, size );
+        if( _inputType == DT_UINT32 && _outputType == DT_UINT16 )
+            return _scale< uint16_t, uint32_t >( ptr, size );
+
+        LBTHROW( std::runtime_error( "Unsupported data conversion" ));
     }
 
     DataType getDataType( const std::string& dataType )
@@ -104,7 +149,7 @@ struct RawDataSource::Impl
              return DT_UINT32;
          if( dataType == "float" )
              return DT_FLOAT;
-         LBTHROW( std::runtime_error( "Not supported data format" ));
+         LBTHROW( std::runtime_error( "Unsupported data format " + dataType ));
     }
 
     void parseRawData( const std::string& filename, VolumeInformation& volInfo,
@@ -127,7 +172,10 @@ struct RawDataSource::Impl
                 volInfo.voxels[ 0 ] = lexical_cast< uint32_t >( parameters[0] );
                 volInfo.voxels[ 1 ] = lexical_cast< uint32_t >( parameters[1] );
                 volInfo.voxels[ 2 ] = lexical_cast< uint32_t >( parameters[2] );
-                volInfo.dataType = getDataType( parameters[ 3 ] );
+                if( parameters.size() > 3 )
+                    volInfo.dataType = getDataType( parameters[ 3 ]);
+                else
+                    volInfo.dataType = DT_UINT8;
             }
             catch( boost::bad_lexical_cast& except )
             {
@@ -176,6 +224,8 @@ struct RawDataSource::Impl
 
     lunchbox::MemoryMap _mmap;
     size_t _headerSize;
+    DataType _inputType;
+    DataType _outputType;
 };
 
 RawDataSource::RawDataSource( const DataSourcePluginData& initData )
