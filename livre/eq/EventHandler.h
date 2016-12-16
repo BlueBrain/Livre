@@ -1,6 +1,6 @@
-/* Copyright (c) 2016, Blue Brain Project / EPFL
- *                     bbp-open-source@googlegroups.com
- *                     Stefan.Eilemann@epfl.ch
+/* Copyright (c) 2016-2017, Blue Brain Project / EPFL
+ *                          bbp-open-source@googlegroups.com
+ *                          Stefan.Eilemann@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -31,8 +31,6 @@ template< class C > class EventHandler : public C
 public:
     template< class... ARGS > EventHandler( Config& config, ARGS... args );
     ~EventHandler();
-
-    void init();
 
     bool handleEvent( eq::EventICommand command ) override;
     bool handleEvent( eq::EventType type, const eq::Event& event ) override;

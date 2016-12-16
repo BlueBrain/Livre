@@ -1,6 +1,6 @@
-/* Copyright (c) 2016, Blue Brain Project / EPFL
- *                     bbp-open-source@googlegroups.com
- *                     Stefan.Eilemann@epfl.ch
+/* Copyright (c) 2016-2017, Blue Brain Project / EPFL
+ *                          bbp-open-source@googlegroups.com
+ *                          Stefan.Eilemann@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -78,121 +78,7 @@ public:
     Impl( Config& c )
         : config( c )
         , volumeBBox( Boxf::makeUnitBox( ))
-        , _currentCanvas( nullptr )
     {}
-
-    void init()
-    {
-        const eq::Canvases& canvases = config.getCanvases();
-        _currentCanvas = canvases.empty() ? nullptr : canvases.front();
-    }
-
-    bool switchCanvas()
-    {
-        const eq::Canvases& canvases = config.getCanvases();
-        if( canvases.empty( ))
-            return true;
-
-        FrameSettings& frameSettings = config.getFrameData().getFrameSettings();
-        frameSettings.setCurrentViewId( lunchbox::uint128_t( 0 ) );
-
-        if( !_currentCanvas )
-        {
-            _currentCanvas = canvases.front();
-            return true;
-        }
-
-        auto i = std::find( canvases.begin(), canvases.end(), _currentCanvas );
-        LBASSERT( i != canvases.end( ));
-
-        ++i;
-        if( i == canvases.end( ))
-            _currentCanvas = canvases.front();
-        else
-            _currentCanvas = *i;
-
-        return true;
-    }
-
-    bool switchView()
-    {
-        const eq::Canvases& canvases = config.getCanvases();
-        if( !_currentCanvas && !canvases.empty( ))
-            _currentCanvas = canvases.front();
-
-        if( !_currentCanvas )
-            return true;
-
-        const eq::Layout* layout = _currentCanvas->getActiveLayout();
-        if( !layout )
-            return true;
-
-        FrameSettings& frameSettings = config.getFrameData().getFrameSettings();
-        const eq::View* current =
-            config.find< eq::View >( frameSettings.getCurrentViewId( ));
-
-        const eq::Views& views = layout->getViews();
-        LBASSERT( !views.empty( ));
-
-        if( !current )
-        {
-            frameSettings.setCurrentViewId( views.front()->getID( ));
-            return true;
-        }
-
-        auto i = std::find( views.begin(), views.end(), current );
-        LBASSERT( i != views.end( ));
-
-        ++i;
-        if( i == views.end( ))
-            frameSettings.setCurrentViewId( lunchbox::uint128_t( 0 ) );
-        else
-            frameSettings.setCurrentViewId( (*i)->getID( ));
-
-        return true;
-    }
-
-    bool switchToViewCanvas( const eq::uint128_t& viewID )
-    {
-        FrameSettings& frameSettings = config.getFrameData().getFrameSettings();
-        frameSettings.setCurrentViewId( viewID );
-
-        if( viewID == 0 )
-        {
-            _currentCanvas = 0;
-            return false;
-        }
-
-        const eq::View* view = config.find< eq::View >( viewID );
-        const eq::Layout* layout = view->getLayout();
-        const eq::Canvases& canvases = config.getCanvases();
-        for( eq::Canvas* canvas : canvases )
-        {
-            const eq::Layout* canvasLayout = canvas->getActiveLayout();
-            if( canvasLayout == layout )
-            {
-                _currentCanvas = canvas;
-                return true;
-            }
-        }
-        return true;
-    }
-
-    void switchLayout( const int32_t increment )
-    {
-        if( !_currentCanvas )
-            return;
-
-        config.getFrameData().getFrameSettings().setCurrentViewId(
-            lunchbox::uint128_t( 0 ));
-
-        size_t index = _currentCanvas->getActiveLayoutIndex() + increment;
-        const eq::Layouts& layouts = _currentCanvas->getLayouts();
-        LBASSERT( !layouts.empty( ));
-
-        index = ( index % layouts.size( ));
-        _currentCanvas->useLayout( uint32_t( index ));
-    }
 
     void gatherHistogram( const Histogram& histogram, const float area,
                           const uint32_t currentId )
@@ -240,6 +126,7 @@ public:
 
         if( viewHistogram.isComplete( ))
         {
+            config.setHistogram( viewHistogram.histogram );
 #ifdef LIVRE_USE_ZEROEQ
             config.publish( viewHistogram.histogram );
 #endif
@@ -250,13 +137,9 @@ public:
             histogramQueue.pop_back();
     }
 
-
     Config& config;
     Boxf volumeBBox;
     ViewHistogramQueue histogramQueue;
-
-private:
-    eq::Canvas* _currentCanvas;
 };
 
 template< class C > template< class... ARGS >
@@ -267,11 +150,6 @@ EventHandler< C >::EventHandler( Config& config, ARGS... args )
 
 template< class C > EventHandler< C >::~EventHandler()
 {}
-
-template< class C > void EventHandler< C >::init()
-{
-    _impl->init();
-}
 
 template< class C >
 bool EventHandler< C >::handleEvent( const eq::EventType type,
@@ -320,20 +198,12 @@ bool EventHandler< C >::handleEvent( const eq::EventType type,
         return true;
 
     case 'l':
-        _impl->switchLayout( 1 );
+        _impl->config.switchLayout( 1 );
         return true;
 
     case 'L':
-        _impl->switchLayout( -1 );
+        _impl->config.switchLayout( -1 );
         return true;
-
-    case 'c':
-    case 'C':
-        return _impl->switchCanvas();
-
-    case 'v':
-    case 'V':
-        return _impl->switchView();
 
     default:
         return eq::Config::handleEvent( type, event );
@@ -348,9 +218,6 @@ bool EventHandler< C >::handleEvent( const eq::EventType type,
 
     switch( type )
     {
-    case eq::EVENT_CHANNEL_POINTER_BUTTON_PRESS:
-        return _impl->switchToViewCanvas( event.context.view.identifier );
-
     case eq::EVENT_CHANNEL_POINTER_MOTION:
         switch( event.buttons )
         {

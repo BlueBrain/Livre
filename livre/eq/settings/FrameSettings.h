@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2006-2016, Stefan Eilemann <eile@equalizergraphics.com>
+/* Copyright (c) 2006-2017, Stefan Eilemann <eile@equalizergraphics.com>
  *                          Maxim Makhinya  <maxmah@gmail.com>
  *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
  *
@@ -60,12 +60,6 @@ public:
     uint32_t getFrameNumber() const { return frameNumber_; }
 
     /**
-     * Set the current view id.
-     * @param id The view id.
-     */
-    void setCurrentViewId( const eq::uint128_t& id );
-
-    /**
      * @return Returns true if volume info is set.
      */
     bool getShowInfo() const;
@@ -74,11 +68,6 @@ public:
      * @return Returns true if statistics is set.
      */
     bool getStatistics() const;
-
-    /**
-     * @return Returns the current view id.
-     */
-    eq::uint128_t getCurrentViewId() const;
 
     /**
      * Enable/disable the frame grabbing for the current frame.
@@ -96,7 +85,6 @@ private:
     void serialize( co::DataOStream& os, const uint64_t dirtyBits ) final;
     void deserialize( co::DataIStream& is, const uint64_t dirtyBits ) final;
 
-    eq::uint128_t currentViewId_;
     uint32_t frameNumber_;
     bool statistics_;
     bool info_;

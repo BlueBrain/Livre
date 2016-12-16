@@ -1,5 +1,5 @@
 
-# Copyright (c) 2011-2016, EPFL/Blue Brain Project
+# Copyright (c) 2011-2017, EPFL/Blue Brain Project
 #                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
 #                          Stefan.Eilemann@epfl.ch
 #
@@ -7,25 +7,27 @@
 #
 
 set(LIVRECORE_PUBLIC_HEADERS
-  data/LODNode.h
-  data/Histogram.h
-  data/NodeId.h
-  data/MemoryUnit.h
+  configuration/Configuration.h
+  configuration/Parameters.h
   data/DataSourcePlugin.h
+  data/Histogram.h
+  data/LODNode.h
+  data/MemoryUnit.h
+  data/NodeId.h
   data/VolumeInformation.h
+  lunchboxTypes.h
+  render/ClipPlanes.h
   render/GLContext.h
   render/GLSLShaders.h
-  util/Utilities.h
-  lunchboxTypes.h
+  render/TransferFunction1D.h
   types.h
+  util/Utilities.h
 )
 
 set(LIVRECORE_HEADERS
   cache/Cache.h
   cache/CacheObject.h
   cache/CacheStatistics.h
-  configuration/Configuration.h
-  configuration/Parameters.h
   data/DataSource.h
   maths/Quantizer.h
   pipeline/Executable.h
@@ -40,14 +42,12 @@ set(LIVRECORE_HEADERS
   pipeline/PromiseMap.h
   pipeline/SimpleExecutor.h
   pipeline/Workers.h
-  render/ClipPlanes.cpp
   render/FrameInfo.h
   render/Frustum.h
   render/Renderer.h
   render/SelectVisibles.h
   render/TexturePool.h
   render/TextureState.h
-  render/TransferFunction1D.h
   util/FrameUtils.h
   util/ThreadClock.h
   visitor/DFSTraversal.h

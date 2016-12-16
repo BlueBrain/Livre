@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2006-2016, Stefan Eilemann <eile@equalizergraphics.com>
+/* Copyright (c) 2006-2017, Stefan Eilemann <eile@equalizergraphics.com>
  *                          Maxim Makhinya  <maxmah@gmail.com>
  *                          David Steiner   <steiner@ifi.uzh.ch>
  *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
@@ -45,12 +45,6 @@ public:
     /** @return The per-frame data. */
     const FrameData& getFrameData() const;
 
-    /** @return the application configuration parameters */
-    const ApplicationParameters& getApplicationParameters() const;
-
-    /** @return the application configuration parameters */
-    ApplicationParameters& getApplicationParameters();
-
     /**
      * mapFrameData Maps the init data.
      */
@@ -70,7 +64,13 @@ public:
      * Initializes the config.
      * @return True if initalization is successful.
      */
-    bool init( int argc, char** argv );
+    bool init();
+
+    /**
+     * Initialize ZeroEQ communication, i.e. setup publisher, subscriber and
+     * HTTP server (if set in argv).
+     */
+    void initCommunicator( int argc, char** argv );
 
     /**
      * Exits the config.
@@ -99,12 +99,22 @@ public:
      */
     void switchLayout( const int32_t increment );
 
+    /** @return the active layout. */
+    eq::Layout* getActiveLayout();
+
     void handleNetworkEvents();
 
     std::string renderJPEG();
 
+    /** @return the current volume information. */
     const VolumeInformation& getVolumeInformation() const;
     VolumeInformation& getVolumeInformation();
+
+    /** @return the current histogram. */
+    const Histogram& getHistogram() const;
+
+    /** @internal */
+    void setHistogram( const Histogram& histogram );
 
 private:
     LIVREEQ_API virtual ~Config();

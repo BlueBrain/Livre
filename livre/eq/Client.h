@@ -1,4 +1,4 @@
-/* Copyright (c) 2006-2015, Stefan Eilemann <eile@equalizergraphics.com>
+/* Copyright (c) 2006-2017, Stefan Eilemann <eile@equalizergraphics.com>
  *                          Maxim Makhinya  <maxmah@gmail.com>
  *                          David Steiner   <steiner@ifi.uzh.ch>
  *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
@@ -23,17 +23,13 @@
 #define _Client_h_
 
 #include <eq/client.h>
+#include <eq/view.h>
 
 #include <livre/eq/api.h>
 #include <livre/eq/types.h>
 
 namespace livre
 {
-
-enum LogTopics
-{
-    LOG_STATS = lunchbox::LOG_CUSTOM      // 65536
-};
 
 typedef std::function<void()> IdleFunc;
 
@@ -43,44 +39,30 @@ typedef std::function<void()> IdleFunc;
 class Client : public eq::Client
 {
 public:
-    LIVREEQ_API Client();
+    LIVREEQ_API Client( int argc, char** argv, bool isResident );
     LIVREEQ_API ~Client();
 
-    /**
-     * @return Help string
-     */
-    LIVREEQ_API static std::string getHelp();
+    /** @return the new chosen config if successful, nullptr otherwise. */
+    LIVREEQ_API Config* chooseConfig();
+
+    /** Release the config from chooseConfig(). */
+    LIVREEQ_API void releaseConfig( Config* config );
 
     /**
-     * @return Version string
+     * @param idleFunc function which is called every frame, e.g. for updating
+     *                 information like frame ranges in data sources
      */
-    LIVREEQ_API static std::string getVersion();
+    LIVREEQ_API void setIdleFunction( const IdleFunc& idleFunc );
+
+    /** @return the currently set idle function. */
+    LIVREEQ_API const IdleFunc& getIdleFunction() const;
 
     /**
-     * Initalize, start and run the client main loop.
-     * @param argc Argument count.
-     * @param argv Argument list.
-     * @return The exit code.
+     * Process all pending commands.
+     *
+     * @return true if there were commands to process, false otherwise
      */
-    LIVREEQ_API int32_t run( int argc, char* argv[] );
-
-    /**
-     * Sets the idle function which is called
-     * every 100ms for updating information ( i.e.
-     * frame ranges in data sources )
-     * @param idleFunc
-     */
-    LIVREEQ_API  void setIdleFunction( const IdleFunc& idleFunc );
-
-    /**
-     * @return Application parameters
-     */
-    const ApplicationParameters& getApplicationParameters() const;
-
-    /**
-     * @return Application parameters
-     */
-    ApplicationParameters& getApplicationParameters();
+    LIVREEQ_API bool processCommands();
 
 protected:
 

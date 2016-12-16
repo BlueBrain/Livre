@@ -151,6 +151,8 @@ bool Node::configInit( const eq::uint128_t& initId )
 
 bool Node::configExit()
 {
+    livre::Client* client = static_cast<livre::Client*>( getClient( ).get());
+    client->setIdleFunction( IdleFunc( ));
     if( !isApplicationNode( ))
     {
         Config *config = static_cast< Config *>( getConfig() );

@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2015-2016, Daniel.Nachbaur@epfl.ch
+/* Copyright (c) 2015-2017, Daniel.Nachbaur@epfl.ch
  *                          Stefan.Eilemann@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -32,7 +32,6 @@
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 
 #include <livre/core/data/VolumeInformation.h>
-#include <livre/core/data/Histogram.h>
 #include <livre/core/data/DataSource.h>
 
 #include <lexis/lexis.h>
@@ -67,7 +66,7 @@ public:
     bool publishFrame()
     {
         const auto& frameSettings = _getFrameData().getFrameSettings();
-        const auto& params = _config.getApplicationParameters();
+        const auto& params = _getFrameData().getApplicationParameters();
 
         _frame.setStart( params.frames[0] );
         _frame.setCurrent( frameSettings.getFrameNumber( ));
@@ -144,7 +143,7 @@ public:
     bool frameDirty()
     {
         const auto& frameSettings = _getFrameData().getFrameSettings();
-        const auto& params = _config.getApplicationParameters();
+        const auto& params = _getFrameData().getApplicationParameters();
         return _frame.getCurrent() != frameSettings.getFrameNumber() ||
                _frame.getDelta() != params.animation ||
                _frame.getStart() != params.frames.x() ||
@@ -165,7 +164,7 @@ public:
             return;
 
         auto& frameSettings = _config.getFrameData().getFrameSettings();
-        auto& params = _config.getApplicationParameters();
+        auto& params = _getFrameData().getApplicationParameters();
 
         if( _frame.getCurrent() == frameSettings.getFrameNumber() &&
             _frame.getDelta() == params.animation &&
@@ -273,7 +272,7 @@ private:
         _frame.registerSerializeCallback( [&]
         {
             const auto& frameSettings = _getFrameData().getFrameSettings();
-            const auto& params = _config.getApplicationParameters();
+            const auto& params = _getFrameData().getApplicationParameters();
 
             _frame.setStart( params.frames[0] );
             _frame.setCurrent( frameSettings.getFrameNumber( ));

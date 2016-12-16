@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -39,7 +39,7 @@ public:
      * @param uri Initialization URI. The volume data source is generated accordingly
      * @param accessMode The access mode.
      */
-    LIVRECORE_API DataSource( const lunchbox::URI& uri,
+    LIVRECORE_API DataSource( const servus::URI& uri,
                               const AccessMode accessMode = MODE_READ );
 
     LIVRECORE_API ~DataSource();
@@ -55,7 +55,7 @@ public:
     /**
      * @return The volume information.
      */
-    LIVRECORE_API static VolumeInformation getVolumeInfo( const lunchbox::URI& uri );
+    LIVRECORE_API static VolumeInformation getVolumeInfo( const servus::URI& uri );
 
     /** Initializes the GL specific functions. */
     LIVRECORE_API bool initializeGL();
