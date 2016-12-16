@@ -1,5 +1,5 @@
 /**
- * Copyright (c) BBP/EPFL 2005-2016 Ahmet.Bilgili@epfl.ch
+ * Copyright (c) BBP/EPFL 2005-2017 Ahmet.Bilgili@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -41,6 +41,7 @@ class CameraSettings;
 class Channel;
 class Client;
 class Config;
+class Engine;
 class FrameData;
 class FrameSettings;
 class LocalInitData;

@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # git master
 
+* [#365](https://github.com/BlueBrain/Livre/pull/365):
+  Introduce livre::Engine to allow integration into Brayns
 * [#364](https://github.com/BlueBrain/Livre/pull/364):
   Fix multi-node setups
 * [#359](https://github.com/BlueBrain/Livre/pull/359):

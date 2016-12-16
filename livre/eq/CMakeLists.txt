@@ -3,7 +3,7 @@
 #       Ecole Polytechnique Federale de Lausanne
 #       Brain Mind Institute,
 #       Blue Brain Project
-#       (c) 2005-2016. All rights reserved.
+#       (c) 2005-2017. All rights reserved.
 #
 #       Main Authors: Ahmet Bilgili
 #
@@ -15,6 +15,16 @@ else()
   option(LIVRE_USE_GL2 "Use OpenGL 2.0 renderer" OFF)
 endif()
 
+set(LIVREEQ_PUBLIC_HEADERS
+  Engine.h
+  FrameData.h
+  types.h
+  settings/CameraSettings.h
+  settings/FrameSettings.h
+  settings/RenderSettings.h
+  settings/VolumeSettings.h
+)
+
 set(LIVREEQ_HEADERS
   Channel.h
   Client.h
@@ -22,7 +32,6 @@ set(LIVREEQ_HEADERS
   ConnectionDefinitions.h
   Error.h
   EventHandler.h
-  FrameData.h
   FrameGrabber.h
   Node.h
   Pipe.h
@@ -30,17 +39,13 @@ set(LIVREEQ_HEADERS
   render/EqContext.h
   render/RayCastRenderer.h
   serialization.h
-  settings/CameraSettings.h
-  settings/FrameSettings.h
-  settings/RenderSettings.h
-  settings/VolumeSettings.h
-  types.h
-  )
+)
 
 set(LIVREEQ_SOURCES
   Channel.cpp
   Client.cpp
   Config.cpp
+  Engine.cpp
   Error.cpp
   EventHandler.cpp
   FrameData.cpp
@@ -53,7 +58,7 @@ set(LIVREEQ_SOURCES
   settings/RenderSettings.cpp
   settings/VolumeSettings.cpp
   Window.cpp
-  )
+)
 
 include(StringifyShaders)
 set(LIVREEQ_SHADERS

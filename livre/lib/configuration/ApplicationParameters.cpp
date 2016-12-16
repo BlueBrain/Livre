@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                          Stefan.Eilemann@epfl.ch
  *
@@ -72,8 +72,9 @@ ApplicationParameters::ApplicationParameters()
                                    "Camera position", cameraPosition );
     configuration_.addDescription( configGroupName_, CAMERALOOKAT_PARAM,
                                    "Camera orientation", cameraLookAt );
-    configuration_.addDescription( configGroupName_, DATAFILE_PARAM,
-                                   "URI of volume data source", dataFileName );
+    configuration_.addDescription< std::string >( configGroupName_,
+                                                  DATAFILE_PARAM,
+                                                  "URI of volume data source" );
     configuration_.addDescription( configGroupName_, TRANSFERFUNCTION_PARAM,
                                 ".1dt transfer function file (from ImageVis3D)",
                                    transferFunction );

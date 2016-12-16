@@ -1,4 +1,4 @@
-/* Copyright (c) 2006-2016, Stefan Eilemann <eile@equalizergraphics.com>
+/* Copyright (c) 2006-2017, Stefan Eilemann <eile@equalizergraphics.com>
  *                          Maxim Makhinya  <maxmah@gmail.com>
  *                          David Steiner   <steiner@ifi.uzh.ch>
  *
@@ -43,145 +43,45 @@
 
 #include <eq/eq.h>
 
-#include <deque>
-#include <functional>
-
 namespace livre
 {
 
 class Config::Impl
 {
 public:
-
-    typedef std::vector< Histogram > Histograms;
-
-    struct ViewHistogram
-    {
-        ViewHistogram( const Histogram& histogram_,
-                       const float area_,
-                       const uint32_t id_ )
-            : histogram( histogram_ )
-            , area( area_ )
-            , id( id_ )
-
-        {}
-
-        ViewHistogram& operator+=( const ViewHistogram& hist )
-        {
-            histogram += hist.histogram;
-            area += hist.area;
-            return *this;
-        }
-
-        bool isComplete() const
-        {
-            const float eps = 0.0001f;
-            return std::abs( 1.0f - area ) <= eps;
-        }
-
-        Histogram histogram;
-        float area;
-        uint32_t id;
-
-    };
-
-    typedef std::deque< ViewHistogram > ViewHistogramQueue;
-
     explicit Impl( Config* config_ )
         : config( config_ )
-        , latency( 0 )
-        , redraw( true )
-        , dataSourceRange( 0.0f, 255.0f ) // Default range for uint8 data sources
         , frameStart( config->getTime( ))
     {}
 
-    void gatherHistogram( const Histogram& histogram, const float area, const uint32_t currentId )
+    void switchLayout( const int32_t increment )
     {
-        // If we get a very old frame skip it.
-        if( !histogramQueue.empty() && currentId < histogramQueue.back().id )
+        const eq::Canvases& canvases = config->getCanvases();
+        if( canvases.empty( ))
             return;
 
-        // Extend the global histogram range if needed.
-        if( histogram.getMin() < dataSourceRange[ 0 ] )
-            dataSourceRange[ 0 ] = histogram.getMin();
+        auto currentCanvas = canvases.front();
+        size_t index = currentCanvas->getActiveLayoutIndex() + increment;
+        const eq::Layouts& layouts = currentCanvas->getLayouts();
+        LBASSERT( !layouts.empty( ));
 
-        if( histogram.getMax() > dataSourceRange[ 1 ] )
-            dataSourceRange[ 1 ] = histogram.getMax();
-
-        // Updating the range that clients must use to set their histogram range
-        config->getFrameData().getVolumeSettings().setDataSourceRange( dataSourceRange );
-
-        const ViewHistogram viewHistogram( histogram, area, currentId );
-        for( auto it = histogramQueue.begin(); it != histogramQueue.end(); )
-        {
-            bool dataMerged = false;
-
-            if( currentId == it->id )
-            {
-                try
-                {
-                    *it += viewHistogram;
-                    dataMerged = true;
-                }
-                catch( std::runtime_error& )
-                {
-                    // Only compatible histograms can be added.( i.e same data
-                    // range and number of bins.) Until data range converges to
-                    // the full data range combined from all rendering clients,
-                    // the histograms are thrown away
-                    histogramQueue.erase( it, histogramQueue.end( ));
-                    return;
-                }
-            }
-            else if( currentId > it->id )
-            {
-                dataMerged = true;
-                it = histogramQueue.emplace( it, viewHistogram );
-            }
-
-            if( it->isComplete( )) // Send histogram & remove all old ones
-            {
-#ifdef LIVRE_USE_ZEROEQ
-                communicator->publish( it->histogram );
-#endif
-                histogramQueue.erase( it, histogramQueue.end( ));
-                return;
-            }
-
-            if( dataMerged )
-                break;
-            ++it;
-        }
-
-        if( histogramQueue.empty() && !viewHistogram.isComplete( ))
-        {
-            histogramQueue.push_back( viewHistogram );
-            return;
-        }
-
-        if( viewHistogram.isComplete( ))
-        {
-#ifdef LIVRE_USE_ZEROEQ
-            communicator->publish( viewHistogram.histogram );
-#endif
-            return;
-        }
-
-        if( histogramQueue.size() > latency + 1 )
-            histogramQueue.pop_back();
+        index = ( index % layouts.size( ));
+        currentCanvas->useLayout( uint32_t( index ));
+        activeLayout = currentCanvas->getActiveLayout();
     }
 
     Config* config;
-    uint32_t latency;
+    uint32_t latency = 0;
     FrameData framedata;
 #ifdef LIVRE_USE_ZEROEQ
     std::unique_ptr< zeroeq::Communicator > communicator;
 #endif
-    bool redraw;
+    bool redraw = true;
     VolumeInformation volumeInfo;
-    ViewHistogramQueue histogramQueue;
-    Vector2f dataSourceRange;
     int64_t frameStart;
+
+    eq::Layout* activeLayout = nullptr;
+    Histogram _histogram;
 };
 
 Config::Config( eq::ServerPtr parent )
@@ -232,6 +132,16 @@ std::string Config::renderJPEG()
     return "";
 }
 
+void Config::setHistogram( const Histogram& histogram )
+{
+    _impl->_histogram = histogram;
+}
+
+const Histogram& Config::getHistogram() const
+{
+    return _impl->_histogram;
+}
+
 const VolumeInformation& Config::getVolumeInformation() const
 {
     return _impl->volumeInfo;
@@ -240,16 +150,6 @@ const VolumeInformation& Config::getVolumeInformation() const
 VolumeInformation& Config::getVolumeInformation()
 {
     return _impl->volumeInfo;
-}
-
-const ApplicationParameters& Config::getApplicationParameters() const
-{
-    return static_cast<const Client&>( *getClient()).getApplicationParameters();
-}
-
-ApplicationParameters& Config::getApplicationParameters()
-{
-    return static_cast< Client& >( *getClient()).getApplicationParameters();
 }
 
 void Config::mapFrameData( const eq::uint128_t& initId )
@@ -267,25 +167,17 @@ void Config::unmapFrameData()
 void Config::resetCamera()
 {
     _impl->framedata.getCameraSettings().setCameraPosition(
-        getApplicationParameters().cameraPosition );
+        _impl->framedata.getApplicationParameters().cameraPosition );
     _impl->framedata.getCameraSettings().setCameraLookAt(
-        getApplicationParameters().cameraLookAt );
+        _impl->framedata.getApplicationParameters().cameraLookAt );
 }
 
-bool Config::init( const int argc LB_UNUSED, char** argv LB_UNUSED )
+bool Config::init()
 {
-#ifdef LIVRE_USE_ZEROEQ
-    _impl->communicator.reset( new zeroeq::Communicator( *this, argc, argv ));
-
-    _impl->framedata.getCameraSettings().registerNotifyChanged(
-                std::bind( &zeroeq::Communicator::publishCamera,
-                           _impl->communicator.get(), std::placeholders::_1 ));
-#endif
-
     resetCamera();
     FrameData& framedata = _impl->framedata;
     FrameSettings& frameSettings = framedata.getFrameSettings();
-    const ApplicationParameters& params = getApplicationParameters();
+    const ApplicationParameters& params = framedata.getApplicationParameters();
     frameSettings.setFrameNumber( params.frames.x( ));
 
     RenderSettings& renderSettings = framedata.getRenderSettings();
@@ -304,9 +196,20 @@ bool Config::init( const int argc LB_UNUSED, char** argv LB_UNUSED )
         return false;
     }
 
-    EventHandler< eq::Config >::init();
+    _impl->switchLayout( 0 ); // update active layout
     _impl->latency = getLatency();
     return true;
+}
+
+void Config::initCommunicator( const int argc LB_UNUSED, char** argv LB_UNUSED )
+{
+#ifdef LIVRE_USE_ZEROEQ
+    _impl->communicator.reset( new zeroeq::Communicator( *this, argc, argv ));
+
+    _impl->framedata.getCameraSettings().registerNotifyChanged(
+                std::bind( &zeroeq::Communicator::publishCamera,
+                           _impl->communicator.get(), std::placeholders::_1 ));
+#endif
 }
 
 bool Config::frame()
@@ -314,7 +217,7 @@ bool Config::frame()
     if( _impl->volumeInfo.frameRange == INVALID_FRAME_RANGE )
         return false;
 
-    ApplicationParameters& params = getApplicationParameters();
+    ApplicationParameters& params = _impl->framedata.getApplicationParameters();
     FrameSettings& frameSettings = _impl->framedata.getFrameSettings();
 
     const FrameUtils frameUtils( params.frames, _impl->volumeInfo.frameRange );
@@ -346,7 +249,8 @@ bool Config::frame()
     _impl->redraw = false;
 
 #ifdef LIVRE_USE_ZEROEQ
-    _impl->communicator->publishFrame();
+    if( _impl->communicator )
+        _impl->communicator->publishFrame();
 #endif
 
     eq::Config::startFrame( version );
@@ -361,16 +265,27 @@ void Config::postRedraw()
 
 bool Config::needRedraw()
 {
-    return _impl->redraw || getApplicationParameters().animation != 0;
+    return _impl->redraw || _impl->framedata.getApplicationParameters().animation != 0;
 }
 
 bool Config::publish( const servus::Serializable& serializable )
 {
 #ifdef LIVRE_USE_ZEROEQ
-    return _impl->communicator->publish( serializable );
-#else
-    return false;
+    if( _impl->communicator )
+        return _impl->communicator->publish( serializable );
 #endif
+    return false;
+}
+
+
+void Config::switchLayout( const int32_t increment )
+{
+    return _impl->switchLayout( increment );
+}
+
+eq::Layout* Config::getActiveLayout()
+{
+    return _impl->activeLayout;
 }
 
 bool Config::exit()
@@ -385,7 +300,8 @@ bool Config::exit()
 void Config::handleNetworkEvents()
 {
 #ifdef LIVRE_USE_ZEROEQ
-    _impl->communicator->handleEvents();
+    if( _impl->communicator )
+        _impl->communicator->handleEvents();
 #endif
 }
 

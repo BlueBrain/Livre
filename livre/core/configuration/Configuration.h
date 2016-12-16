@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -33,21 +33,6 @@ class Configuration
 {
 public:
     LIVRECORE_API Configuration();
-
-    /**
-     * Adds description for a dictionary item.
-     * @param groupName The item group.
-     * @param shortDesc Short description.
-     * @param longDesc Long description.
-     * @warning Before file parsing and/or command line parsing descriptions should be added
-     */
-    LIVRECORE_API void addDescription( const std::string& groupName,
-                                       const std::string& shortDesc,
-                                       const std::string& longDesc )
-    {
-        getGroup_( groupName ).add_options()( shortDesc.c_str(),
-                                              longDesc.c_str( ));
-    }
 
     /**
      * Adds description for a dictionary item.

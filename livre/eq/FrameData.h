@@ -1,6 +1,6 @@
 /**
- * Copyright (c) BBP/EPFL 2005-2016 Ahmet.Bilgili@epfl.ch
- *                                  Stefan.Eilemann@epfl.ch
+ * Copyright (c) BBP/EPFL 2005-2017, Ahmet.Bilgili@epfl.ch
+ *                                   Stefan.Eilemann@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -41,7 +41,8 @@ public:
     void initialize( eq::Config* eqConfig );
 
     /** Set up the parameters. */
-    void setup( const VolumeRendererParameters& rendererParams );
+    void setup( const ApplicationParameters& appParams,
+                const VolumeRendererParameters& rendererParams );
 
     /**
      * Registers objects to the internal \see co::ObjectMap.
@@ -143,6 +144,12 @@ public:
      */
     VolumeRendererParameters& getVRParameters();
     const VolumeRendererParameters& getVRParameters() const;
+
+    /**
+     * @return The application parameters.
+     */
+    ApplicationParameters& getApplicationParameters();
+    const ApplicationParameters& getApplicationParameters() const;
 
     virtual ~FrameData();
 

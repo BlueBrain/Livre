@@ -23,6 +23,7 @@
 #include <livre/eq/settings/RenderSettings.h>
 #include <livre/eq/settings/CameraSettings.h>
 #include <livre/eq/settings/VolumeSettings.h>
+#include <livre/lib/configuration/ApplicationParameters.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 
 #include <eq/eq.h>
@@ -48,6 +49,7 @@ public:
     CameraSettings cameraSettings;
     VolumeSettings volumeSettings;
     VolumeRendererParameters vrParameters;
+    ApplicationParameters applicationParameters;
 };
 
 FrameData::FrameData()
@@ -102,9 +104,12 @@ void FrameData::initialize( eq::Config* eqConfig )
     _impl.reset( new Impl( *eqConfig, _factory ));
 }
 
-void FrameData::setup( const VolumeRendererParameters& rendererParams )
+void FrameData::setup( const ApplicationParameters& appParams,
+                       const VolumeRendererParameters& rendererParams )
 {
+    _impl->applicationParameters = appParams;
     _impl->vrParameters = rendererParams;
+    getVolumeSettings().setURI( _impl->applicationParameters.dataFileName );
 }
 
 FrameSettings& FrameData::getFrameSettings()
@@ -155,6 +160,16 @@ const VolumeRendererParameters& FrameData::getVRParameters() const
 VolumeRendererParameters& FrameData::getVRParameters()
 {
     return _impl->vrParameters;
+}
+
+const ApplicationParameters& FrameData::getApplicationParameters() const
+{
+    return _impl->applicationParameters;
+}
+
+ApplicationParameters& FrameData::getApplicationParameters()
+{
+    return _impl->applicationParameters;
 }
 
 const eq::uint128_t& FrameData::getID() const

@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2011-2016, Maxim Makhinya <maxmah@gmail.com>
+/* Copyright (c) 2011-2017, Maxim Makhinya <maxmah@gmail.com>
  *                          David Steiner  <steiner@ifi.uzh.ch>
  *                          Ahmet Bilgili  <ahmet.bilgili@epfl.ch>
  *                          Stefan.Eilemann@epfl.ch
@@ -56,7 +56,8 @@ public:
     /**
      * @return Returns the transfer function.
      */
-    TransferFunction1D& getTransferFunction() { return _transferFunction; }
+    TransferFunction1D& getTransferFunction()
+        { setDirty( DIRTY_TF ); return _transferFunction; }
     const TransferFunction1D& getTransferFunction() const
         { return _transferFunction; }
 

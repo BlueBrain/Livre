@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
@@ -33,7 +33,7 @@ struct DataSource::Impl
 public:
     typedef lunchbox::PluginFactory< DataSourcePlugin > PluginFactory;
 
-    Impl( const lunchbox::URI& uri,
+    Impl( const servus::URI& uri,
           const AccessMode accessMode )
         : plugin( PluginFactory::getInstance().create(
                       DataSourcePluginData( uri, accessMode )))
@@ -57,7 +57,7 @@ public:
     std::unique_ptr< DataSourcePlugin > plugin;
 };
 
-DataSource::DataSource( const lunchbox::URI& uri,
+DataSource::DataSource( const servus::URI& uri,
                         const AccessMode accessMode )
     : _impl( new Impl( uri, accessMode ) )
 {
@@ -113,7 +113,7 @@ ConstMemoryUnitPtr DataSource::getData( const NodeId& nodeId ) const
     return _impl->plugin->getData( lodNode );
 }
 
-VolumeInformation DataSource::getVolumeInfo( const lunchbox::URI& uri )
+VolumeInformation DataSource::getVolumeInfo( const servus::URI& uri )
 {
     const DataSource source( uri );
     return source.getVolumeInfo();
