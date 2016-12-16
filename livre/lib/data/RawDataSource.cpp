@@ -43,7 +43,7 @@ namespace
 {
 lunchbox::PluginRegisterer< RawDataSource > registerer;
 
-template< class O, class I >
+template< class I, class O >
 void _scale( const I* in, O* out, const ssize_t nElems,
              typename std::enable_if< (sizeof(I) > sizeof(O)),
                                       void >::type* = nullptr )
@@ -54,7 +54,7 @@ void _scale( const I* in, O* out, const ssize_t nElems,
         out[i] = in[i] >> shift;
 }
 
-template< class O, class I >
+template< class I, class O >
 MemoryUnitPtr _scale( const uint8_t* ptr, const size_t size )
 {
     const ssize_t nElems = size / sizeof( O );
@@ -124,11 +124,11 @@ struct RawDataSource::Impl
 
         // only unsigned integer conversions are supported!
         if( _inputType == DT_UINT16 && _outputType == DT_UINT8 )
-            return _scale< uint8_t, uint16_t >( ptr, size );
+            return _scale< uint16_t, uint8_t >( ptr, size );
         if( _inputType == DT_UINT32 && _outputType == DT_UINT8 )
-            return _scale< uint8_t, uint32_t >( ptr, size );
+            return _scale< uint32_t, uint8_t >( ptr, size );
         if( _inputType == DT_UINT32 && _outputType == DT_UINT16 )
-            return _scale< uint16_t, uint32_t >( ptr, size );
+            return _scale< uint32_t, uint16_t >( ptr, size );
 
         LBTHROW( std::runtime_error( "Unsupported data conversion" ));
     }
