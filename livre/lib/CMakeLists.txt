@@ -48,8 +48,6 @@ set(LIVRELIB_SOURCES
   data/MemoryDataSource.cpp
   data/RawDataSource.cpp)
 
-set(LIVRELIB_LINK_LIBRARIES PUBLIC LivreCore
-                            PRIVATE Equalizer ${VTUNE_LIBRARIES})
-
+set(LIVRELIB_LINK_LIBRARIES PUBLIC LivreCore PRIVATE Equalizer)
 set(LIVRELIB_INCLUDE_NAME livre/lib)
 common_library(LivreLib)
