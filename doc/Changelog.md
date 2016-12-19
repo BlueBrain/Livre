@@ -1,7 +1,13 @@
 Changelog {#Changelog}
 =========
 
+# git master
+
+* [#356](https://github.com/BlueBrain/Livre/pull/356):
+  Implement element downscaling of raw data volumes
+
 # Release 0.7 (09-12-2016)
+
 * [#353](https://github.com/BlueBrain/Livre/pull/353):
   Allow specification of raw volumes without schema
 * [#352](https://github.com/BlueBrain/Livre/pull/352):

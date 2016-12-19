@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2011-2015, EPFL/Blue Brain Project
+# Copyright (c) 2011-2016, EPFL/Blue Brain Project
 #                          David Steiner <steiner@ifi.uzh.ch>
 #                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
 #                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
@@ -10,8 +10,8 @@
 
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-project(Livre VERSION 0.7.0)
-set(Livre_VERSION_ABI 6)
+project(Livre VERSION 0.8.0)
+set(Livre_VERSION_ABI 7)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
                               ${CMAKE_SOURCE_DIR}/CMake/common)
