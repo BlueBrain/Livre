@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # git master
 
+* [#359](https://github.com/BlueBrain/Livre/pull/359):
+  Fix exit crash
 * [#356](https://github.com/BlueBrain/Livre/pull/356):
   Implement element downscaling of raw data volumes
 
