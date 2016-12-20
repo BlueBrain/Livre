@@ -5,6 +5,8 @@ Changelog {#Changelog}
 
 * [#359](https://github.com/BlueBrain/Livre/pull/359):
   Fix exit crash
+* [#358](https://github.com/BlueBrain/Livre/pull/358):
+  Fix bugs occuring with 16-bits and anisotropic raw volumes.
 * [#356](https://github.com/BlueBrain/Livre/pull/356):
   Implement element downscaling of raw data volumes
 

@@ -28,24 +28,14 @@ MemoryUnit::MemoryUnit()
 MemoryUnit::~MemoryUnit()
 {}
 
-ConstMemoryUnit::ConstMemoryUnit( const uint8_t* ptr, const size_t size )
-    : ptr_( ptr ), size_( size )
+ConstMemoryUnit::ConstMemoryUnit( const uint8_t* ptr )
+    : ptr_( ptr )
 {
-}
-
-size_t ConstMemoryUnit::getMemSize() const
-{
-    return size_;
 }
 
 const uint8_t* ConstMemoryUnit::_getData() const
 {
     return ptr_;
-}
-
-size_t AllocMemoryUnit::getMemSize() const
-{
-    return _rawData.getSize();
 }
 
 size_t AllocMemoryUnit::getAllocSize() const

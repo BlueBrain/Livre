@@ -45,11 +45,6 @@ public:
     template< class T > T* getData()
         { return reinterpret_cast< T* >( _getData( )); }
 
-    /**
-     * @return The size of the memory accessed.
-     */
-    virtual size_t getMemSize() const = 0;
-
     /** @return The allocated heap size. */
     virtual size_t getAllocSize() const = 0;
 
@@ -66,7 +61,6 @@ class NoMemoryUnit : public MemoryUnit
 {
 public:
     ~NoMemoryUnit() {}
-    size_t getMemSize() const final { return 0; }
     size_t getAllocSize() const final { return 0; }
 
 private:
@@ -81,15 +75,13 @@ private:
 class ConstMemoryUnit : public MemoryUnit
 {
 public:
-    ConstMemoryUnit( const uint8_t* ptr, const size_t size );
+    explicit ConstMemoryUnit( const uint8_t* ptr );
     ~ConstMemoryUnit() {}
 protected:
-    size_t getMemSize() const final;
     size_t getAllocSize() const final { return 0; }
     const uint8_t* _getData() const final;
     uint8_t* _getData() final { LBDONTCALL; return 0; }
     const uint8_t* const ptr_;
-    const size_t size_;
 };
 
 /**
@@ -137,7 +129,6 @@ public:
     }
 
     LIVRECORE_API ~AllocMemoryUnit();
-    LIVRECORE_API size_t getMemSize() const final;
     LIVRECORE_API size_t getAllocSize() const final;
 
 private:

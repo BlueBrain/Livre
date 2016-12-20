@@ -211,26 +211,6 @@ struct RayCastRenderer::Impl
                                emptyBuffer.data( ));
     }
 
-    uint32_t getShaderDataType() const
-    {
-        switch( _dataSource.getVolumeInfo().dataType )
-        {
-            case DT_UINT8:
-            case DT_UINT16:
-            case DT_UINT32:
-                return SH_UINT;
-            case DT_FLOAT:
-                return SH_FLOAT;
-            case DT_INT8:
-            case DT_INT16:
-            case DT_INT32:
-                return SH_INT;
-            case DT_UNDEFINED:
-            default:
-                LBTHROW( std::runtime_error( "Unsupported type in the shader." ));
-        }
-    }
-
     void onFrameStart( const Frustum& frustum,
                        const ClipPlanes& planes,
                        const NodeIds& renderBricks )
@@ -251,6 +231,50 @@ struct RayCastRenderer::Impl
                     (float)( 1u << ( _volInfo.rootNode.getDepth() - maxLOD - 1 ));
             // Nyquist limited nb of samples according to voxel size
             _computedSamplesPerRay = std::max( maxVoxelsAtLOD, (float)minSamplesPerRay );
+        }
+
+        Vector2f dataSourceRange;
+        uint32_t shaderDataType;
+        switch( _dataSource.getVolumeInfo().dataType )
+        {
+            case DT_UINT8:
+                dataSourceRange = Vector2f( std::numeric_limits< uint8_t >::min(),
+                                            std::numeric_limits< uint8_t >::max( ));
+                shaderDataType = SH_UINT;
+                break;
+            case DT_UINT16:
+                dataSourceRange = Vector2f( std::numeric_limits< uint16_t >::min(),
+                                            std::numeric_limits< uint16_t >::max( ));
+                shaderDataType = SH_UINT;
+                break;
+            case DT_UINT32:
+                dataSourceRange = Vector2f( std::numeric_limits< uint32_t >::min(),
+                                            std::numeric_limits< uint32_t >::max( ));
+                shaderDataType = SH_UINT;
+                break;
+            case DT_FLOAT:
+                dataSourceRange = Vector2f( std::numeric_limits< float >::min(),
+                                            std::numeric_limits< float >::max( ));
+                shaderDataType = SH_FLOAT;
+                break;
+            case DT_INT8:
+                dataSourceRange = Vector2f( std::numeric_limits< int8_t >::min(),
+                                            std::numeric_limits< int8_t >::max( ));
+                shaderDataType = SH_INT;
+                break;
+            case DT_INT16:
+                dataSourceRange = Vector2f( std::numeric_limits< int16_t >::min(),
+                                            std::numeric_limits< int16_t >::max( ));
+                shaderDataType = SH_INT;
+                break;
+            case DT_INT32:
+                dataSourceRange = Vector2f( std::numeric_limits< int32_t >::min(),
+                                            std::numeric_limits< int32_t >::max( ));
+                shaderDataType = SH_INT;
+                break;
+            case DT_UNDEFINED:
+            default:
+                LBTHROW( std::runtime_error( "Unsupported type in the shader." ));
         }
 
         glDisable( GL_LIGHTING );
@@ -313,10 +337,8 @@ struct RayCastRenderer::Impl
         glUniform1i( tParamNameGL, nPlanes );
 
         tParamNameGL = glGetUniformLocation( program, "datatype" );
-        glUniform1ui( tParamNameGL, getShaderDataType( ));
+        glUniform1ui( tParamNameGL, shaderDataType );
 
-        // This is temporary. In the future it will be given by the gui.
-        Vector2f dataSourceRange( 0.0f, 255.0f );
         tParamNameGL = glGetUniformLocation( program, "dataSourceRange" );
         glUniform2fv( tParamNameGL, 1, dataSourceRange.array );
 

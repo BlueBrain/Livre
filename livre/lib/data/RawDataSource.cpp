@@ -120,7 +120,7 @@ struct RawDataSource::Impl
         const size_t size = node.getBlockSize().product();
         const uint8_t* ptr = _mmap.getAddress< uint8_t >() + _headerSize;
         if( _inputType == _outputType )
-            return  MemoryUnitPtr( new ConstMemoryUnit( ptr, size ));
+            return  MemoryUnitPtr( new ConstMemoryUnit( ptr ));
 
         // only unsigned integer conversions are supported!
         if( _inputType == DT_UINT16 && _outputType == DT_UINT8 )
