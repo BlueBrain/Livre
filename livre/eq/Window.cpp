@@ -53,18 +53,7 @@ public:
     void configInitGL()
     {
         _glContext.reset( new EqContext( _window ));
-    }
 
-    bool configExitGL()
-    {
-        _glContext->doneCurrent();
-        _glContext.reset();
-        _textureCache->purge();
-        return true;
-    }
-
-    void configInit()
-    {
         shareGLContexts();
 
         Node* node = static_cast< Node* >( _window->getNode( ));
@@ -79,6 +68,16 @@ public:
                                                    caches,
                                                    *_texturePool,
                                                    _glContext ));
+    }
+
+    bool configExitGL()
+    {
+        _renderPipeline.reset();
+        _textureCache.reset();
+        _texturePool.reset();
+        _glContext->doneCurrent();
+        _glContext.reset();
+        return true;
     }
 
     void shareGLContexts()
@@ -114,11 +113,8 @@ bool Window::configInit( const eq::uint128_t& initId )
 
     // Enforce alpha channel, since we need one for rendering
     setIAttribute( eq::WindowSettings::IATTR_PLANES_ALPHA, 8 );
-    if( !eq::Window::configInit( initId ))
-        return false;
-
-    _impl->configInit();
-    return true;
+    setIAttribute( eq::WindowSettings::IATTR_PLANES_DEPTH, 0 );
+    return eq::Window::configInit( initId );
 }
 
 bool Window::configInitGL( const eq::uint128_t& initId )
