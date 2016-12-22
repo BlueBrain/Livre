@@ -74,10 +74,11 @@ LODNode DataSourcePlugin::internalNodeToLODNode( const NodeId& internalNode ) co
            << " lBoxCoordMax " << boxCoordMax << std::endl
            << " volume world size " << _volumeInfo.worldSize << std::endl
            << std::endl;
+
     return LODNode( internalNode,
                     _volumeInfo.maximumBlockSize - _volumeInfo.overlap * 2,
-                    Boxf( boxCoordMin - _volumeInfo.worldSize * 0.5f,
-                          boxCoordMax - _volumeInfo.worldSize * 0.5f ));
+                    Boxf( boxCoordMin * _volumeInfo.worldSize - _volumeInfo.worldSize * 0.5f,
+                          boxCoordMax * _volumeInfo.worldSize - _volumeInfo.worldSize * 0.5f ));
 }
 
 bool fillRegularVolumeInfo( VolumeInformation& info )

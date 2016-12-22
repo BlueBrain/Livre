@@ -70,12 +70,6 @@ BOOST_AUTO_TEST_CASE( UVFDataSource )
     const livre::Vector3ui& blockSize = lodNode.getBlockSize() +
                                        livre::Vector3ui( info.overlap ) * 2;
     BOOST_CHECK( blockSize == info.maximumBlockSize );
-
-    livre::MemoryUnitPtr memUnit = source.getData( firstChildNodeId );
-    const size_t allocSize = blockSize.product() *
-                             info.compCount * info.getBytesPerVoxel();
-
-    BOOST_CHECK_EQUAL( memUnit->getMemSize(), allocSize );
 }
 #else
 BOOST_AUTO_TEST_CASE( UVFDataSource ) {}
