@@ -85,8 +85,8 @@ uint8_t* FrameGrabber::_encodeJpeg( const uint32_t width LB_UNUSED,
 void FrameGrabber::notifyNewImage( eq::Channel& channel,
                                    const eq::Image& image )
 {
-    const uint64_t size = image.getPixelDataSize( eq::Frame::BUFFER_COLOR );
-    const uint8_t* data = image.getPixelPointer( eq::Frame::BUFFER_COLOR );
+    const uint64_t size = image.getPixelDataSize( eq::Frame::Buffer::color );
+    const uint8_t* data = image.getPixelPointer( eq::Frame::Buffer::color );
     const eq::PixelViewport& pvp = image.getPixelViewport();
 
     unsigned long jpegSize = size;

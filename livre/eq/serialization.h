@@ -57,21 +57,4 @@ inline co::DataIStream& operator >> ( co::DataIStream& is,
 
 }
 
-namespace lunchbox
-{
-
-template<> inline void byteswap( vmml::vector< 3, unsigned int >& value )
-{
-    byteswap( value.x( ));
-    byteswap( value.y( ));
-    byteswap( value.z( ));
-}
-
-template<> inline void byteswap( livre::DataType& value )
-{
-    byteswap( reinterpret_cast< uint32_t& >( value ));
-}
-
-}
-
 #endif // _serialization_h_
