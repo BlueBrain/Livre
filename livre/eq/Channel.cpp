@@ -162,7 +162,7 @@ public:
         _channel->setNearFar( nearPlane, farPlane );
 
         eq::FrameDataPtr frameData = new eq::FrameData();
-        frameData->setBuffers( eq::Frame::BUFFER_COLOR );
+        frameData->setBuffers( eq::Frame::Buffer::color );
         _frame.setFrameData( frameData );
         _frame.setName( std::string( "self." ) + _channel->getName( ));
     }
@@ -439,7 +439,7 @@ public:
     void frameReadback( const eq::Frames& frames ) const
     {
         for( eq::Frame* frame: frames ) // Drop depth buffer from output frames
-            frame->disableBuffer( eq::Frame::BUFFER_DEPTH );
+            frame->disableBuffer( eq::Frame::Buffer::depth );
     }
 
     void frameAssemble( const eq::Frames& frames )
