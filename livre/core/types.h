@@ -214,7 +214,6 @@ typedef std::map< std::string,
                   ProgramOptionsDescription > ProgramOptionsDescriptionMap;
 
 // Const definitions
-static const std::string HIDDEN_PROGRAMDESCRIPTION_STR("_HIDDEN_");
 static const std::string NO_PREFIX = "";
 
 /** AABB definitions */

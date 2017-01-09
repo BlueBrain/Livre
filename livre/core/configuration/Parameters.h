@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -36,12 +36,6 @@ class Parameters
 public:
     LIVRECORE_API virtual ~Parameters( );
 
-    /**
-     * Initializes parameters from a filename.
-     * @param filename The config file name.
-     * @return True if file can be parsed.
-     */
-    LIVRECORE_API bool initialize( const std::string& filename );
 
     /**
      * Initializes parameters from arguments.

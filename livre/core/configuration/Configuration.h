@@ -115,12 +115,6 @@ public:
     LIVRECORE_API void parseCommandLine( int32_t argc, const char **argv );
 
     /**
-     * Parses a config file.
-     * @param configFile Config file name.
-     */
-    LIVRECORE_API void parseConfigFile( const std::string& configFile );
-
-    /**
      * Gets the value of a key from the dictionary.
      * @param key Key to the value in the dictionary.
      * @param defaultValue The default value to use if key not in dictionary
@@ -175,8 +169,7 @@ private:
     ProgramOptionsDescriptionMap _descriptions;
 
     LIVRECORE_API ProgramOptionsDescription& getGroup_( const std::string& groupName );
-    void processDescriptionMap_( ProgramOptionsDescription& description ,
-                                 bool doNotProcessHidden = false ) const;
+    void processDescriptionMap_( ProgramOptionsDescription& description ) const;
 };
 
 

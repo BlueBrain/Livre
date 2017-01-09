@@ -144,6 +144,8 @@ std::string Engine::getHelp()
     VolumeRendererParameters vrParameters;
     ApplicationParameters applicationParameters;
 
+    DataSource::loadPlugins(); // needed to complete --volume
+
     Configuration conf;
     conf.addDescription( vrParameters.getConfiguration( ));
     conf.addDescription( applicationParameters.getConfiguration( ));

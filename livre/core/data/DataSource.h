@@ -47,6 +47,8 @@ public:
     /** Load all plugin DSOs. */
     LIVRECORE_API static void loadPlugins();
 
+    static std::string getDescriptions();
+
     /**
      * @return The volume information.
      */

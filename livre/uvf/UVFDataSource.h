@@ -34,6 +34,7 @@ public:
     virtual ~UVFDataSource();
 
     static bool handles( const DataSourcePluginData& initData );
+    static std::string getDescription();
 
 private:
 
