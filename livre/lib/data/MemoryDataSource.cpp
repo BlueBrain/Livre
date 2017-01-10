@@ -164,7 +164,7 @@ std::string MemoryDataSource::getDescription()
     sparsity=<float>
     datatype=(u)int(8,16,32), float
   and optional fragment:
-    #<width>,<height>,<depth>,<blocksize>)";
+    <width>,<height>,<depth>,<blocksize>)";
 }
 
 }

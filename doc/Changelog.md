@@ -3,6 +3,9 @@ Changelog {#Changelog}
 
 # git master
 
+* [#363](https://github.com/BlueBrain/Livre/pull/363):
+  Add detailed information on the volume URIs to help, wrap help to
+  current terminal size, remove config file support
 * [#365](https://github.com/BlueBrain/Livre/pull/365):
   Introduce livre::Engine to allow integration into Brayns
 * [#364](https://github.com/BlueBrain/Livre/pull/364):

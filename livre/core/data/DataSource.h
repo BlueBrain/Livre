@@ -47,6 +47,7 @@ public:
     /** Load all plugin DSOs. */
     LIVRECORE_API static void loadPlugins();
 
+    /** @return information on all loaded plugins. */
     static std::string getDescriptions();
 
     /**
