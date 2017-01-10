@@ -1,5 +1,5 @@
 /**
- * Copyright (c) BBP/EPFL 2011-2016 Ahmet.Bilgili@epfl.ch
+ * Copyright (c) BBP/EPFL 2011-2017 Ahmet.Bilgili@epfl.ch
  *                                  Stefan.Eilemann@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -26,8 +26,6 @@
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 
 #include <eq/eq.h>
-#include <seq/objectType.h>
-
 
 namespace livre
 {
@@ -37,12 +35,12 @@ public:
     Impl( co::ObjectHandler& handler, co::ObjectFactory& factory )
         : co::ObjectMap( handler, factory )
     {
-        frameSettings.setID( servus::make_uint128( "eq::FrameSettings" ));
-        renderSettings.setID( servus::make_uint128( "eq::RenderSettings" ));
-        cameraSettings.setID( servus::make_uint128( "eq::CameraSettings" ));
-        volumeSettings.setID( servus::make_uint128( "eq::VolumeSettings" ));
+        frameSettings.setID( servus::make_uint128( "livre::FrameSettings" ));
+        renderSettings.setID( servus::make_uint128( "livre::RenderSettings" ));
+        cameraSettings.setID( servus::make_uint128( "livre::CameraSettings" ));
+        volumeSettings.setID( servus::make_uint128( "livre::VolumeSettings" ));
         vrParameters.setID(
-            servus::make_uint128( "eq::VolumeRendererParameters" ));
+            servus::make_uint128( "livre::VolumeRendererParameters" ));
     }
 
     FrameSettings frameSettings;
@@ -57,11 +55,11 @@ FrameData::FrameData()
 
 void FrameData::registerObjects()
 {
-    LBCHECK( _impl->register_( &_impl->frameSettings, seq::OBJECTTYPE_CUSTOM ));
-    LBCHECK( _impl->register_( &_impl->renderSettings, seq::OBJECTTYPE_CUSTOM));
-    LBCHECK( _impl->register_( &_impl->cameraSettings, seq::OBJECTTYPE_CUSTOM));
-    LBCHECK( _impl->register_( &_impl->volumeSettings, seq::OBJECTTYPE_CUSTOM));
-    LBCHECK( _impl->register_( &_impl->vrParameters, seq::OBJECTTYPE_CUSTOM ));
+    LBCHECK( _impl->register_( &_impl->frameSettings, co::OBJECTTYPE_CUSTOM ));
+    LBCHECK( _impl->register_( &_impl->renderSettings, co::OBJECTTYPE_CUSTOM));
+    LBCHECK( _impl->register_( &_impl->cameraSettings, co::OBJECTTYPE_CUSTOM));
+    LBCHECK( _impl->register_( &_impl->volumeSettings, co::OBJECTTYPE_CUSTOM));
+    LBCHECK( _impl->register_( &_impl->vrParameters, co::OBJECTTYPE_CUSTOM ));
 }
 
 void FrameData::deregisterObjects()
