@@ -134,17 +134,17 @@ bool Node::configInit( const eq::uint128_t& initId )
     if( !eq::Node::configInit( initId ))
         return false;
 
+    if( !isApplicationNode( ))
+    {
+        Config *config = static_cast< Config *>( getConfig() );
+        config->mapFrameData( initId ); // _impl->configInit needs FrameData
+    }
+
     if( !_impl->configInit( ))
         return false;
 
     livre::Client* client = static_cast<livre::Client*>( getClient( ).get());
     client->setIdleFunction( std::bind( &Impl::updateDataSource, _impl.get( )));
-
-    if( !isApplicationNode( ))
-    {
-        Config *config = static_cast< Config *>( getConfig() );
-        config->mapFrameData( initId );
-    }
 
     return true;
 }

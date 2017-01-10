@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # git master
 
+* [#364](https://github.com/BlueBrain/Livre/pull/364):
+  Fix multi-node setups
 * [#359](https://github.com/BlueBrain/Livre/pull/359):
   Fix exit crash
 * [#358](https://github.com/BlueBrain/Livre/pull/358):
