@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -17,26 +17,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/core/configuration/Parameters.h>
+#include "Parameters.h"
 
 namespace livre
 {
 
-bool Parameters::initialize( const std::string& filename )
-{
-    try
-    {
-        configuration_.parseConfigFile( filename );
-        initialize_( );
-        return true;
-    }
-    catch( const boost::program_options::error& exception )
-    {
-        LBINFO << "Error parsing : " << exception.what() << std::endl;
-    }
-
-    return false;
-}
 
 bool Parameters::initialize( const int32_t argc, const char **argv )
 {
@@ -53,7 +38,6 @@ bool Parameters::initialize( const int32_t argc, const char **argv )
 
     return false;
 }
-
 const std::string& Parameters::getParameterName() const
 {
     return configGroupName_;

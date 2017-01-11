@@ -51,10 +51,9 @@ namespace
 struct UVFDataSource::Impl
 {
 public:
-    Impl( VolumeInformation& volumeInfo,
-          const DataSourcePluginData& initData )
-        : _uvfTOCBlock( 0 ),
-          _volumeInfo( volumeInfo )
+    Impl( VolumeInformation& volumeInfo, const DataSourcePluginData& initData )
+        : _uvfTOCBlock( 0 )
+        , _volumeInfo( volumeInfo )
     {
         try
         {
@@ -397,6 +396,11 @@ bool UVFDataSource::handles( const DataSourcePluginData& initData )
     return uri.getScheme() == "uvf" ||
         ( uri.getScheme().empty() &&
           boost::algorithm::ends_with( uri.getPath(), ".uvf" ));
+}
+
+std::string UVFDataSource::getDescription()
+{
+    return "Tuvok/UVF volume: [uvf://]/path/to/volume.uvf";
 }
 
 MemoryUnitPtr UVFDataSource::getData( const LODNode& node )

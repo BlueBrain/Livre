@@ -18,7 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/lib/configuration/ApplicationParameters.h>
+#include "ApplicationParameters.h"
+
+#include <livre/core/data/DataSource.h>
 
 namespace vmml
 {
@@ -74,7 +76,7 @@ ApplicationParameters::ApplicationParameters()
                                    "Camera orientation", cameraLookAt );
     configuration_.addDescription< std::string >( configGroupName_,
                                                   DATAFILE_PARAM,
-                                                  "URI of volume data source" );
+                                                DataSource::getDescriptions( ));
     configuration_.addDescription( configGroupName_, TRANSFERFUNCTION_PARAM,
                                 ".1dt transfer function file (from ImageVis3D)",
                                    transferFunction );

@@ -254,4 +254,12 @@ bool RawDataSource::handles( const DataSourcePluginData& initData )
            boost::algorithm::ends_with( uri.getPath(), ".nrrd" );
 }
 
+std::string RawDataSource::getDescription()
+{
+    return R"(Raw volume: [raw://]/filename.[raw|img|nrrd](?output=format)#1024,1024,1024(,input format)
+  with formats being one of: char, int8, unsigned char, uint8, short, int16, unsigned short, uint16, int, int32, unsigned int, uint32, float
+  The default input format is uint8, the default output format is the input
+  format.)";
+}
+
 }

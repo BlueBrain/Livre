@@ -69,6 +69,11 @@ void DataSource::loadPlugins()
         LIVRECORE_VERSION_ABI, lunchbox::getLibraryPaths(), "Livre.*Source" );
 }
 
+std::string DataSource::getDescriptions()
+{
+    return DataSource::Impl::PluginFactory::getInstance().getDescriptions();
+}
+
 LODNode DataSource::getNode( const NodeId& nodeId ) const
 {
     return _impl->getNode( nodeId );

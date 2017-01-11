@@ -157,4 +157,14 @@ bool MemoryDataSource::handles( const DataSourcePluginData& initData )
     return initData.getURI().getScheme() == "mem";
 }
 
+std::string MemoryDataSource::getDescription()
+{
+    return R"(Memory dummy volume: mem://[?query parameters][#fragment]
+  with optional query parameters:
+    sparsity=<float>
+    datatype=(u)int(8,16,32), float
+  and optional fragment:
+    <width>,<height>,<depth>,<blocksize>)";
+}
+
 }
