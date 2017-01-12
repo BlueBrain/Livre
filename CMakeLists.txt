@@ -11,7 +11,7 @@
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 project(Livre VERSION 0.8.0)
-set(Livre_VERSION_ABI 7)
+set(Livre_VERSION_ABI 8)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
                               ${CMAKE_SOURCE_DIR}/CMake/common)

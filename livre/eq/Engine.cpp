@@ -141,10 +141,10 @@ Engine::~Engine()
 
 std::string Engine::getHelp()
 {
+    DataSource::loadPlugins(); // needed to complete --volume
+
     VolumeRendererParameters vrParameters;
     ApplicationParameters applicationParameters;
-
-    DataSource::loadPlugins(); // needed to complete --volume
 
     Configuration conf;
     conf.addDescription( vrParameters.getConfiguration( ));
