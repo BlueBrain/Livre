@@ -63,6 +63,9 @@ public:
     /** Initializes the GL specific functions. */
     LIVRECORE_API bool initializeGL();
 
+    /** @copydoc DataSourcePlugin::finishGL() */
+    LIVRECORE_API void finishGL();
+
     /**
      * Read the data for a given node.
      * @param nodeId NodeId to be read.

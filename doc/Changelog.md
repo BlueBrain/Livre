@@ -3,6 +3,9 @@ Changelog {#Changelog}
 
 # git master
 
+* [#367](https://github.com/BlueBrain/Livre/pull/367):
+  Add DataSourcePlugin::finishGL() to release OpenGL resources that are held
+  by the plugin, e.g. Cubist
 * [#363](https://github.com/BlueBrain/Livre/pull/363):
   Add detailed information on the volume URIs to help, wrap help to
   current terminal size, remove config file support
