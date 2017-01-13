@@ -94,6 +94,11 @@ bool DataSource::initializeGL()
     return _impl->plugin->initializeGL();
 }
 
+void DataSource::finishGL()
+{
+    _impl->plugin->finishGL();
+}
+
 MemoryUnitPtr DataSource::getData( const NodeId& nodeId )
 {
     if( !nodeId.isValid( ))

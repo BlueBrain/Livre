@@ -1,4 +1,4 @@
-/* Copyright (c) 2007-2016, Stefan Eilemann <eile@equalizergraphics.com>
+/* Copyright (c) 2007-2017, Stefan Eilemann <eile@equalizergraphics.com>
  *                          Maxim Makhinya  <maxmah@gmail.com>
  *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
@@ -36,6 +36,7 @@
 #include <livre/lib/cache/TextureObject.h>
 
 #include <livre/core/cache/Cache.h>
+#include <livre/core/data/DataSource.h>
 #include <livre/core/render/TexturePool.h>
 
 #include <eq/gl.h>
@@ -75,6 +76,13 @@ public:
         _renderPipeline.reset();
         _textureCache.reset();
         _texturePool.reset();
+
+        if( _glContext.use_count() == 1 )
+        {
+            Node* node = static_cast< Node* >( _window->getNode( ));
+            node->getDataSource().finishGL();
+        }
+
         _glContext->doneCurrent();
         _glContext.reset();
         return true;

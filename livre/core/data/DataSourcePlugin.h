@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -73,10 +73,11 @@ public:
      */
     const VolumeInformation& getVolumeInfo() const;
 
-    /**
-     * Initializes the GL specific functions.
-     */
+    /** Initializes the GL specific functions. */
     virtual bool initializeGL() { return true; }
+
+    /** Last call with a valid and active GL context to clear GL objects. */
+    virtual void finishGL() {}
 
     /**
      * Read the data for a given node.
