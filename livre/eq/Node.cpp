@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2011-2016, Maxim Makhinya <maxmah@gmail.com>
+/* Copyright (c) 2011-2017, Maxim Makhinya <maxmah@gmail.com>
  *                          David Steiner <steiner@ifi.uzh.ch>
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
@@ -56,7 +56,7 @@ public:
         const VolumeRendererParameters& vrRenderParameters =
                 _config->getFrameData().getVRParameters();
 
-        const size_t maxMemBytes = vrRenderParameters.getMaxCPUCacheMemoryMB() * LB_1MB;
+        const size_t maxMemBytes = vrRenderParameters.getMaxCpuCacheMemory() * LB_1MB;
         _dataCache.reset( new CacheT< DataObject >( "DataCache", maxMemBytes ));
 
         const size_t histCacheSize =

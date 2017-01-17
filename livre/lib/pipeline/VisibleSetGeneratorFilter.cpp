@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -51,9 +51,9 @@ struct VisibleSetGeneratorFilter::Impl
         const auto& clipPlanes = uniqueInputs.get< ClipPlanes >( "ClipPlanes" );
 
         const uint32_t windowHeight = vp[ 3 ];
-        const float sse = params.getSSE();
-        const uint32_t minLOD = params.getMinLOD();
-        const uint32_t maxLOD = params.getMaxLOD();
+        const float sse = params.getScreenSpaceError();
+        const uint32_t minLOD = params.getMinLod();
+        const uint32_t maxLOD = params.getMaxLod();
 
         SelectVisibles visitor( _dataSource,
                                 frustum,

@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # git master
 
+* [#368](https://github.com/BlueBrain/Livre/pull/368):
+  Make "Show axes" available in livreGUI and python API
 * [#367](https://github.com/BlueBrain/Livre/pull/367):
   Add DataSourcePlugin::finishGL() to release OpenGL resources that are held
   by the plugin, e.g. Cubist

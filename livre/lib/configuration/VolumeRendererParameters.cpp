@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
@@ -44,19 +44,19 @@ VolumeRendererParameters::VolumeRendererParameters()
     configuration_.addDescription( configGroupName_, GPUCACHEMEM_PARAM,
                                    "Maximum GPU cache memory (MB) - "
                                    "caches the texture data in GPU memory",
-                                   getMaxGPUCacheMemoryMB( ));
+                                   getMaxGpuCacheMemory( ));
     configuration_.addDescription( configGroupName_, CPUCACHEMEM_PARAM,
                                    "Maximum CPU cache memory (MB) - "
                                    "caches the volume data in CPU memory",
-                                   getMaxCPUCacheMemoryMB( ));
+                                   getMaxCpuCacheMemory( ));
     configuration_.addDescription( configGroupName_, SCREENSPACEERROR_PARAM,
-                                   "Screen space error", getSSE( ));
+                                   "Screen space error", getScreenSpaceError( ));
     configuration_.addDescription( configGroupName_, SYNCHRONOUSMODE_PARAM,
                                    "Enable synchronous mode", getSynchronousMode( ));
     configuration_.addDescription( configGroupName_, MINLOD_PARAM,
-                                   "Minimum level of detail", getMinLOD( ));
+                                   "Minimum level of detail", getMinLod( ));
     configuration_.addDescription( configGroupName_, MAXLOD_PARAM,
-                                   "Maximum level of detail", getMaxLOD( ));
+                                   "Maximum level of detail", getMaxLod( ));
     configuration_.addDescription( configGroupName_, SAMPLESPERRAY_PARAM,
                                    "Number of samples per ray. The value of 0 (default) sets"
                                    " the number of samples automatically, based on the volume size",
@@ -69,13 +69,14 @@ void VolumeRendererParameters::initialize_()
 {
     setSynchronousMode( configuration_.getValue( SYNCHRONOUSMODE_PARAM,
                                                  getSynchronousMode( )));
-    setSSE( configuration_.getValue( SCREENSPACEERROR_PARAM, getSSE( )));
-    setMaxGPUCacheMemoryMB( configuration_.getValue( GPUCACHEMEM_PARAM,
-                                                     getMaxGPUCacheMemoryMB( )));
-    setMaxCPUCacheMemoryMB( configuration_.getValue( CPUCACHEMEM_PARAM,
-                                                     getMaxCPUCacheMemoryMB( )));
-    setMinLOD( configuration_.getValue( MINLOD_PARAM, getMinLOD( )));
-    setMaxLOD( configuration_.getValue( MAXLOD_PARAM, getMaxLOD( )));
+    setScreenSpaceError( configuration_.getValue( SCREENSPACEERROR_PARAM,
+                                                  getScreenSpaceError( )));
+    setMaxGpuCacheMemory( configuration_.getValue( GPUCACHEMEM_PARAM,
+                                                     getMaxGpuCacheMemory( )));
+    setMaxCpuCacheMemory( configuration_.getValue( CPUCACHEMEM_PARAM,
+                                                     getMaxCpuCacheMemory( )));
+    setMinLod( configuration_.getValue( MINLOD_PARAM, getMinLod( )));
+    setMaxLod( configuration_.getValue( MAXLOD_PARAM, getMaxLod( )));
     setSamplesPerRay( configuration_.getValue( SAMPLESPERRAY_PARAM,
                                                getSamplesPerRay( )));
     setSamplesPerPixel( configuration_.getValue( SAMPLESPERPIXEL_PARAM,

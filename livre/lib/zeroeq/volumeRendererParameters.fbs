@@ -1,15 +1,14 @@
 
-namespace livre.zerobuf;
+namespace livre.v1;
 
 table VolumeRendererParameters {
-  maxLOD:uint32_t = 9; // (NODEID_LEVEL_BITS << 1) + 1
-  minLOD:uint32_t = 0;
-  SSE:float = 4.0;
-  synchronousMode:bool = false;
-  samplesPerRay:uint32_t = 0;
-  samplesPerPixel:uint32_t = 1;
-  maxGPUCacheMemoryMB:uint64_t = 3072;
-  maxCPUCacheMemoryMB:uint64_t = 8192;
+  max_lod:uint32_t = 9; // (NODEID_LEVEL_BITS << 1) + 1
+  min_lod:uint32_t = 0;
+  screen_space_error:float = 4.0;
+  synchronous_mode:bool = false;
+  samples_per_ray:uint32_t = 0;
+  samples_per_pixel:uint32_t = 1;
+  max_gpu_cache_memory:uint64_t = 3072;
+  max_cpu_cache_memory:uint64_t = 8192;
+  show_axes:bool = false;
 }
-
-root_type VolumeRendererParameters;

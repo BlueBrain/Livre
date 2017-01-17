@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -106,7 +106,7 @@ struct RenderPipeline::Impl
                                     volInfo.compCount;
 
         const uint32_t maxNodesPerPass =
-                renderParams.vrParams.getMaxGPUCacheMemoryMB() * LB_1MB / blockMemSize;
+                renderParams.vrParams.getMaxGpuCacheMemory() * LB_1MB / blockMemSize;
 
         const uint32_t numberOfPasses = std::ceil( (float)nodeIds.size() / (float)maxNodesPerPass );
 
