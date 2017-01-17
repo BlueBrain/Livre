@@ -1,5 +1,5 @@
-/* Copyright (c) 2015, EPFL/Blue Brain Project
- *                     Daniel.Nachbaur@epfl.ch
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+ *                          Daniel.Nachbaur@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -26,35 +26,36 @@ BOOST_AUTO_TEST_CASE(defaultValues)
 {
     const livre::VolumeRendererParameters params;
 
-    BOOST_CHECK_EQUAL( params.getMaxLOD(), (livre::NODEID_LEVEL_BITS << 1) + 1);
-    BOOST_CHECK_EQUAL( params.getMinLOD(), 0 );
+    BOOST_CHECK_EQUAL( params.getMaxLod(), (livre::NODEID_LEVEL_BITS << 1) + 1);
+    BOOST_CHECK_EQUAL( params.getMinLod(), 0 );
     BOOST_CHECK( !params.getSynchronousMode( ));
     BOOST_CHECK_EQUAL( params.getSamplesPerRay(), 0 );
     BOOST_CHECK_EQUAL( params.getSamplesPerPixel(), 1 );
+    BOOST_CHECK( !params.getShowAxes( ));
 
 #ifdef __i386__
-    BOOST_CHECK_EQUAL( params.getSSE(), 8.0f );
-    BOOST_CHECK_EQUAL( params.getMaxGPUCacheMemoryMB(), 384u );
-    BOOST_CHECK_EQUAL( params.getMaxCPUCacheMemoryMB(), 768u );
+    BOOST_CHECK_EQUAL( params.getScreenSpaceError(), 8.0f );
+    BOOST_CHECK_EQUAL( params.getMaxGpuCacheMemory(), 384u );
+    BOOST_CHECK_EQUAL( params.getMaxCpuCacheMemory(), 768u );
 #else
-    BOOST_CHECK_EQUAL( params.getSSE(), 4.0f );
-    BOOST_CHECK_EQUAL( params.getMaxGPUCacheMemoryMB(), 3072u );
-    BOOST_CHECK_EQUAL( params.getMaxCPUCacheMemoryMB(), 8192u );
+    BOOST_CHECK_EQUAL( params.getScreenSpaceError(), 4.0f );
+    BOOST_CHECK_EQUAL( params.getMaxGpuCacheMemory(), 3072u );
+    BOOST_CHECK_EQUAL( params.getMaxCpuCacheMemory(), 8192u );
 #endif
 }
 
 BOOST_AUTO_TEST_CASE(copy)
 {
     livre::VolumeRendererParameters params;
-    params.setMaxLOD( 42 );
+    params.setMaxLod( 42 );
 
     const livre::VolumeRendererParameters paramsCopy( params );
-    BOOST_CHECK_EQUAL( paramsCopy.getMaxLOD(), params.getMaxLOD( ));
+    BOOST_CHECK_EQUAL( paramsCopy.getMaxLod(), params.getMaxLod( ));
     BOOST_CHECK( paramsCopy == params );
 
     livre::VolumeRendererParameters paramsAssigned;
     paramsAssigned = params;
-    BOOST_CHECK_EQUAL( paramsAssigned.getMaxLOD(), paramsAssigned.getMaxLOD( ));
+    BOOST_CHECK_EQUAL( paramsAssigned.getMaxLod(), paramsAssigned.getMaxLod( ));
     BOOST_CHECK( paramsAssigned == params );
 }
 
@@ -72,12 +73,12 @@ BOOST_AUTO_TEST_CASE(initFromArgv)
     livre::VolumeRendererParameters params;
     params.initialize( argc, argv );
 
-    BOOST_CHECK_EQUAL( params.getMaxLOD(), 6 );
-    BOOST_CHECK_EQUAL( params.getMinLOD(), 2 );
+    BOOST_CHECK_EQUAL( params.getMaxLod(), 6 );
+    BOOST_CHECK_EQUAL( params.getMinLod(), 2 );
     BOOST_CHECK( params.getSynchronousMode( ));
     BOOST_CHECK_EQUAL( params.getSamplesPerRay(), 42 );
     BOOST_CHECK_EQUAL( params.getSamplesPerPixel(), 4 );
-    BOOST_CHECK_EQUAL( params.getSSE(), 1.4f );
-    BOOST_CHECK_EQUAL( params.getMaxGPUCacheMemoryMB(), 12345u );
-    BOOST_CHECK_EQUAL( params.getMaxCPUCacheMemoryMB(), 54321u );
+    BOOST_CHECK_EQUAL( params.getScreenSpaceError(), 1.4f );
+    BOOST_CHECK_EQUAL( params.getMaxGpuCacheMemory(), 12345u );
+    BOOST_CHECK_EQUAL( params.getMaxCpuCacheMemory(), 54321u );
 }

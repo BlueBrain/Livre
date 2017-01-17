@@ -74,16 +74,6 @@ public:
     const ClipPlanes& getClipPlanes( ) const { return _clipPlanes; }
 
     /**
-     * @param Enable/Disable axis drawing bolean.
-     */
-    void toggleDrawAxis();
-
-    /**
-     * @return Enable/Disable axis drawing bolean.
-     */
-    bool getDrawAxis() const;
-
-    /**
      * @brief adjustQuality Adjusts the quality.
      * @param delta The adjustment factor.
      */
@@ -106,15 +96,13 @@ private:
     TransferFunction1D _transferFunction;
     ClipPlanes _clipPlanes;
     uint8_t _depth;
-    bool _drawAxis;
 
     /** The changed parts of the data since the last pack(). */
     enum DirtyBits
     {
         DIRTY_TF = co::Serializable::DIRTY_CUSTOM << 0u,
         DIRTY_DEPTH = co::Serializable::DIRTY_CUSTOM << 1u,
-        DIRTY_CLIPPLANES = co::Serializable::DIRTY_CUSTOM << 2u,
-        DIRTY_DRAWAXIS = co::Serializable::DIRTY_CUSTOM << 3u
+        DIRTY_CLIPPLANES = co::Serializable::DIRTY_CUSTOM << 2u
     };
 };
 

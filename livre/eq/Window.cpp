@@ -60,7 +60,7 @@ public:
         Node* node = static_cast< Node* >( _window->getNode( ));
         Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
         const size_t maxGpuMemory =
-                        pipe->getFrameData().getVRParameters().getMaxGPUCacheMemoryMB();
+                        pipe->getFrameData().getVRParameters().getMaxGpuCacheMemory();
 
         _texturePool.reset( new TexturePool( node->getDataSource( )));
         _textureCache.reset( new CacheT< TextureObject >( "TextureCache", maxGpuMemory * LB_1MB ));

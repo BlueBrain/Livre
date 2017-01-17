@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  *                          Daniel.Nachbaur@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -35,13 +35,13 @@ struct RenderParametersController::Impl
 
         parent->connect( _ui.maxLODSpinBox,
                  static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-                 [&]( int value ) { _params.setMaxLOD( value ); publish(); });
+                 [&]( int value ) { _params.setMaxLod( value ); publish(); });
         parent->connect( _ui.minLODSpinBox,
                  static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-                 [&]( int value ) { _params.setMinLOD( value ); publish(); });
+                 [&]( int value ) { _params.setMinLod( value ); publish(); });
         parent->connect( _ui.screenSpaceErrorDoubleSpinBox,
                  static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-                 [&]( double value ) { _params.setSSE( value ); publish(); });
+                 [&]( double value ) { _params.setScreenSpaceError( value ); publish(); });
         parent->connect( _ui.synchronousCheckBox, &QCheckBox::stateChanged,
                  [&]( int value ) { _params.setSynchronousMode( value != 0 ); publish(); });
         parent->connect( _ui.samplesPerPixelSpinBox,
@@ -50,19 +50,23 @@ struct RenderParametersController::Impl
         parent->connect( _ui.samplesPerRaySpinBox,
                  static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
                  [&]( int value ) { _params.setSamplesPerRay( value ); publish(); });
+        parent->connect( _ui.showAxesCheckBox, &QCheckBox::stateChanged,
+                 [&]( int value ) { _params.setShowAxes( value != 0 ); publish(); });
 
-        parent->connect( &_params, &zerobuf::VolumeRendererParameters::maxLODChanged,
+        parent->connect( &_params, &v1::VolumeRendererParameters::maxLodChanged,
                  [&]( uint32_t value ) { _ui.maxLODSpinBox->setValue( value ); });
-        parent->connect( &_params, &zerobuf::VolumeRendererParameters::minLODChanged,
+        parent->connect( &_params, &v1::VolumeRendererParameters::minLodChanged,
                  [&]( uint32_t value ) { _ui.minLODSpinBox->setValue( value ); });
-        parent->connect( &_params, &zerobuf::VolumeRendererParameters::SSEChanged,
+        parent->connect( &_params, &v1::VolumeRendererParameters::screenSpaceErrorChanged,
                  [&]( float value ) { _ui.screenSpaceErrorDoubleSpinBox->setValue( value ); });
-        parent->connect( &_params, &zerobuf::VolumeRendererParameters::synchronousModeChanged,
+        parent->connect( &_params, &v1::VolumeRendererParameters::synchronousModeChanged,
                  [&]( bool value ) { _ui.synchronousCheckBox->setChecked( value ); });
-        parent->connect( &_params, &zerobuf::VolumeRendererParameters::samplesPerPixelChanged,
+        parent->connect( &_params, &v1::VolumeRendererParameters::samplesPerPixelChanged,
                  [&]( uint32_t value ) { _ui.samplesPerPixelSpinBox->setValue( value ); });
-        parent->connect( &_params, &zerobuf::VolumeRendererParameters::samplesPerRayChanged,
+        parent->connect( &_params, &v1::VolumeRendererParameters::samplesPerRayChanged,
                  [&]( uint32_t value ) { _ui.samplesPerRaySpinBox->setValue( value ); });
+        parent->connect( &_params, &v1::VolumeRendererParameters::showAxesChanged,
+                 [&]( bool value ) { _ui.showAxesCheckBox->setChecked( value ); });
 
         _controller.subscribe( _params );
     }
@@ -80,7 +84,7 @@ struct RenderParametersController::Impl
     Ui::renderParametersController _ui;
     RenderParametersController* _parent;
     Controller& _controller;
-    zerobuf::VolumeRendererParameters _params;
+    v1::VolumeRendererParameters _params;
 };
 
 RenderParametersController::RenderParametersController( Controller& controller,

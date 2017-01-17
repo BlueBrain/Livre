@@ -31,7 +31,7 @@
      <x>0</x>
      <y>0</y>
      <width>216</width>
-     <height>208</height>
+     <height>225</height>
     </rect>
    </property>
    <layout class="QFormLayout" name="formLayout">
@@ -173,6 +173,20 @@
       </property>
       <property name="maximum">
        <number>64</number>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0">
+     <widget class="QLabel" name="showAxesLabel">
+      <property name="text">
+       <string>Show axes</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="1">
+     <widget class="QCheckBox" name="showAxesCheckBox">
+      <property name="tristate">
+       <bool>false</bool>
       </property>
      </widget>
     </item>

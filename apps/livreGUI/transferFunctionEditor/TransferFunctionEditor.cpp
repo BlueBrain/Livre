@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  *                          Marwan Abdellah <marwan.abdellah@epfl.ch>
  *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *                          Stefan.Eilemann@epfl.ch
@@ -69,10 +69,10 @@ TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
     connect( _ui->saveButton, SIGNAL( clicked()), this, SLOT( _save()));
 
     connect( this, &TransferFunctionEditor::transferFunctionChanged,
-             this, &TransferFunctionEditor::_onTransferFunctionChanged );
+             this, &TransferFunctionEditor::_onTransferFunctionChanged, Qt::QueuedConnection );
 
     connect( this, &TransferFunctionEditor::histogramChanged,
-             this, &TransferFunctionEditor::_onHistogramChanged );
+             this, &TransferFunctionEditor::_onHistogramChanged, Qt::QueuedConnection );
 
     QTimer::singleShot( 50, this, SLOT( _setDefault()));
 

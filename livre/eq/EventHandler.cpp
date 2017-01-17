@@ -26,9 +26,9 @@
 #include <livre/eq/serialization.h>
 #include <livre/eq/settings/CameraSettings.h>
 #include <livre/eq/settings/FrameSettings.h>
-#include <livre/eq/settings/RenderSettings.h>
 #include <livre/core/data/Histogram.h>
 #include <livre/core/data/VolumeInformation.h>
+#include <livre/lib/configuration/VolumeRendererParameters.h>
 
 namespace livre
 {
@@ -189,8 +189,12 @@ bool EventHandler< C >::handleEvent( const eq::EventType type,
 
     case 'a':
     case 'A':
-        _impl->config.getFrameData().getRenderSettings().toggleDrawAxis();
+    {
+        auto& vrParams = _impl->config.getFrameData().getVRParameters();
+        vrParams.setShowAxes( !vrParams.getShowAxes( ));
+        _impl->config.publish( vrParams );
         return true;
+    }
 
     case 'i':
     case 'I':

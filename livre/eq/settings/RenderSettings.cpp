@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2011-2016, Maxim Makhinya <maxmah@gmail.com>
+/* Copyright (c) 2011-2017, Maxim Makhinya <maxmah@gmail.com>
  *                          David Steiner  <steiner@ifi.uzh.ch>
  *                          Ahmet Bilgili  <ahmet.bilgili@epfl.ch>
  *                          Stefan.Eilemann@epfl.ch
@@ -29,7 +29,6 @@ namespace livre
 
 RenderSettings::RenderSettings()
     :  _depth( 0 )
-    ,  _drawAxis( false )
 {
     _transferFunction.registerDeserializedCallback( [this]
         { setDirty( DIRTY_TF ); });
@@ -57,23 +56,6 @@ void RenderSettings::setClipPlanes( const ClipPlanes& clipPlanes )
     setDirty( DIRTY_CLIPPLANES );
 }
 
-/**
- * @param Enable/Disable axis drawing bolean.
- */
-void RenderSettings::toggleDrawAxis()
-{
-    _drawAxis = !_drawAxis;
-    setDirty( DIRTY_DRAWAXIS );
-}
-
-/**
- * @return Enable/Disable axis drawing bolean.
- */
-bool RenderSettings::getDrawAxis() const
-{
-    return _drawAxis;
-}
-
 void RenderSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
 {
     if( dirtyBits & DIRTY_TF )
@@ -84,9 +66,6 @@ void RenderSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
 
     if( dirtyBits & DIRTY_CLIPPLANES )
         os << _clipPlanes;
-
-    if( dirtyBits & DIRTY_DRAWAXIS )
-        os << _drawAxis;
 }
 
 void RenderSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits )
@@ -99,9 +78,6 @@ void RenderSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits 
 
     if( dirtyBits & DIRTY_CLIPPLANES )
         is >> _clipPlanes;
-
-    if( dirtyBits & DIRTY_DRAWAXIS )
-        is >> _drawAxis;
 }
 
 }

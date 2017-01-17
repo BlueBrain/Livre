@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
@@ -34,7 +34,7 @@ namespace livre
  * initialization from config file and/or commandline parameters.
  */
 class VolumeRendererParameters
-        : public co::Distributable< zerobuf::VolumeRendererParameters >,
+        : public co::Distributable< v1::VolumeRendererParameters >,
           public Parameters
 {
 public:
