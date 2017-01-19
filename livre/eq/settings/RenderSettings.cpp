@@ -28,18 +28,10 @@ namespace livre
 {
 
 RenderSettings::RenderSettings()
-    :  _depth( 0 )
 {
-    _transferFunction.registerDeserializedCallback( [this]
-        { setDirty( DIRTY_TF ); });
-
-    _clipPlanes.registerDeserializedCallback( [this]
-        { setDirty( DIRTY_CLIPPLANES ); });
-
-    _clipPlanes.clear();
 }
 
-void RenderSettings::resetTransferFunction( )
+void RenderSettings::resetTransferFunction()
 {
     setTransferFunction( TransferFunction1D( ));
 }
@@ -47,37 +39,11 @@ void RenderSettings::resetTransferFunction( )
 void RenderSettings::setTransferFunction( const TransferFunction1D& tf )
 {
     _transferFunction = tf;
-    setDirty( DIRTY_TF );
 }
 
 void RenderSettings::setClipPlanes( const ClipPlanes& clipPlanes )
 {
     _clipPlanes = clipPlanes;
-    setDirty( DIRTY_CLIPPLANES );
-}
-
-void RenderSettings::serialize( co::DataOStream& os, const uint64_t dirtyBits )
-{
-    if( dirtyBits & DIRTY_TF )
-        os << _transferFunction;
-
-    if( dirtyBits & DIRTY_DEPTH )
-        os << _depth;
-
-    if( dirtyBits & DIRTY_CLIPPLANES )
-        os << _clipPlanes;
-}
-
-void RenderSettings::deserialize( co::DataIStream& is, const uint64_t dirtyBits )
-{
-    if( dirtyBits & DIRTY_TF )
-        is >> _transferFunction;
-
-    if( dirtyBits & DIRTY_DEPTH )
-        is >> _depth;
-
-    if( dirtyBits & DIRTY_CLIPPLANES )
-        is >> _clipPlanes;
 }
 
 }
