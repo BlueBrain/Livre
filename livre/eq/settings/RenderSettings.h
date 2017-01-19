@@ -28,12 +28,10 @@
 #include <livre/core/render/TransferFunction1D.h>
 #include <livre/core/render/ClipPlanes.h>
 
-#include <co/serializable.h>
-
 namespace livre
 {
 
-class RenderSettings : public co::Serializable
+class RenderSettings
 {
 public:
 
@@ -57,7 +55,7 @@ public:
      * @return Returns the transfer function.
      */
     TransferFunction1D& getTransferFunction()
-        { setDirty( DIRTY_TF ); return _transferFunction; }
+        { _transferFunction.notifyChanged(); return _transferFunction; }
     const TransferFunction1D& getTransferFunction() const
         { return _transferFunction; }
 
@@ -70,40 +68,13 @@ public:
     /**
      * @return Returns the clip planes.
      */
-    ClipPlanes& getClipPlanes() { return _clipPlanes; }
+    ClipPlanes& getClipPlanes()
+        { _clipPlanes.notifyChanged(); return _clipPlanes; }
     const ClipPlanes& getClipPlanes( ) const { return _clipPlanes; }
 
-    /**
-     * @brief adjustQuality Adjusts the quality.
-     * @param delta The adjustment factor.
-     */
-    void adjustQuality( float delta );
-
-    /**
-     * @brief increaseError Increases the error.
-     */
-    void increaseError( );
-
-    /**
-     * @brief decreaseError Decreases the error.
-     */
-    void decreaseError( );
-
 private:
-    virtual void serialize(   co::DataOStream& os, const uint64_t dirtyBits );
-    virtual void deserialize( co::DataIStream& is, const uint64_t dirtyBits );
-
     TransferFunction1D _transferFunction;
     ClipPlanes _clipPlanes;
-    uint8_t _depth;
-
-    /** The changed parts of the data since the last pack(). */
-    enum DirtyBits
-    {
-        DIRTY_TF = co::Serializable::DIRTY_CUSTOM << 0u,
-        DIRTY_DEPTH = co::Serializable::DIRTY_CUSTOM << 1u,
-        DIRTY_CLIPPLANES = co::Serializable::DIRTY_CUSTOM << 2u
-    };
 };
 
 }

@@ -37,11 +37,12 @@ public:
         : co::ObjectMap( handler, factory )
     {
         frameSettings.setID( servus::make_uint128( "livre::FrameSettings" ));
-        renderSettings.setID( servus::make_uint128( "livre::RenderSettings" ));
         cameraSettings.setID( servus::make_uint128( "livre::CameraSettings" ));
         volumeSettings.setID( servus::make_uint128( "livre::VolumeSettings" ));
         vrParameters.setID(
             servus::make_uint128( "livre::VolumeRendererParameters" ));
+        renderSettings.getClipPlanes().setID( servus::make_uint128( "livre::ClipPlanes" ));
+        renderSettings.getTransferFunction().setID( servus::make_uint128( "livre::TransferFunction" ));
     }
 
     FrameSettings frameSettings;
@@ -58,31 +59,35 @@ FrameData::FrameData()
 void FrameData::registerObjects()
 {
     LBCHECK( _impl->register_( &_impl->frameSettings, co::OBJECTTYPE_CUSTOM ));
-    LBCHECK( _impl->register_( &_impl->renderSettings, co::OBJECTTYPE_CUSTOM));
     LBCHECK( _impl->register_( &_impl->cameraSettings, co::OBJECTTYPE_CUSTOM));
     LBCHECK( _impl->register_( &_impl->volumeSettings, co::OBJECTTYPE_CUSTOM));
     LBCHECK( _impl->register_( &_impl->vrParameters, co::OBJECTTYPE_CUSTOM ));
+    LBCHECK( _impl->register_( &_impl->renderSettings.getClipPlanes(), co::OBJECTTYPE_CUSTOM));
+    LBCHECK( _impl->register_( &_impl->renderSettings.getTransferFunction(), co::OBJECTTYPE_CUSTOM));
 }
 
 void FrameData::deregisterObjects()
 {
     LBCHECK( _impl->deregister( &_impl->frameSettings ));
-    LBCHECK( _impl->deregister( &_impl->renderSettings ));
     LBCHECK( _impl->deregister( &_impl->cameraSettings ));
     LBCHECK( _impl->deregister( &_impl->volumeSettings ));
     LBCHECK( _impl->deregister( &_impl->vrParameters ));
+    LBCHECK( _impl->deregister( &_impl->renderSettings.getClipPlanes( )));
+    LBCHECK( _impl->deregister( &_impl->renderSettings.getTransferFunction( )));
 }
 
 void FrameData::mapObjects()
 {
     LBCHECK( _impl->map( _impl->frameSettings.getID(), &_impl->frameSettings ));
-    LBCHECK( _impl->map( _impl->renderSettings.getID(),
-                         &_impl->renderSettings ));
     LBCHECK( _impl->map( _impl->cameraSettings.getID(),
                          &_impl->cameraSettings ));
     LBCHECK( _impl->map( _impl->volumeSettings.getID(),
                          &_impl->volumeSettings ));
     LBCHECK( _impl->map( _impl->vrParameters.getID(), &_impl->vrParameters ));
+    LBCHECK( _impl->map( _impl->renderSettings.getClipPlanes().getID(),
+                         &_impl->renderSettings.getClipPlanes( )));
+    LBCHECK( _impl->map( _impl->renderSettings.getTransferFunction().getID(),
+                         &_impl->renderSettings.getTransferFunction( )));
 }
 
 void FrameData::unmapObjects()
@@ -91,10 +96,11 @@ void FrameData::unmapObjects()
         return;
 
     LBCHECK( _impl->unmap( &_impl->frameSettings ));
-    LBCHECK( _impl->unmap( &_impl->renderSettings ));
     LBCHECK( _impl->unmap( &_impl->cameraSettings ));
     LBCHECK( _impl->unmap( &_impl->volumeSettings ));
     LBCHECK( _impl->unmap( &_impl->vrParameters ));
+    LBCHECK( _impl->unmap( &_impl->renderSettings.getClipPlanes( )));
+    LBCHECK( _impl->unmap( &_impl->renderSettings.getTransferFunction( )));
     _impl->clear();
 }
 
