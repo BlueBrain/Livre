@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Maxim Makhinya
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
@@ -126,11 +126,6 @@ int GLSLShaders::_load( GLSLShaders::Handle& handle, const std::string& shader,
         handle = 0;
     }
 
-#ifdef GL3_PROTOTYPES
-    for( size_t i = 0; i < paths.size(); i++ )
-        glDeleteNamedStringARB( -1, paths[i].c_str( ));
-#endif
-
     return ret;
 }
 
@@ -213,9 +208,13 @@ int GLSLShaders::loadShaders( const ShaderData& shaderData )
         glAttachShader( program, geometryShader );
     }
 #endif
-
     glLinkProgram( program );
     const int error = glGetError();
+
+#ifdef GL3_PROTOTYPES
+    for( size_t i = 0; i < shaderData.paths.size(); i++ )
+        glDeleteNamedStringARB( -1, shaderData.paths[i].c_str( ));
+#endif
 
     GLint status;
     glGetProgramiv( program, GL_LINK_STATUS, &status );
