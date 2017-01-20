@@ -23,7 +23,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Clip Planes</string>
+   <string>Clip planes</string>
   </property>
   <widget class="QWidget" name="clipPlanesWidget" native="true">
    <property name="geometry">
@@ -34,7 +34,13 @@
      <height>211</height>
     </rect>
    </property>
-   <widget class="QWidget" name="layoutWidget">
+   <property name="minimumSize">
+    <size>
+     <width>250</width>
+     <height>0</height>
+    </size>
+   </property>
+   <widget class="QWidget" name="layoutSliderWidget">
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -351,12 +357,12 @@
     </property>
    </widget>
   </widget>
-  <widget class="QWidget" name="layoutWidget">
+  <widget class="QWidget" name="layoutButtonWidget">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>10</y>
-     <width>130</width>
+     <width>133</width>
      <height>17</height>
     </rect>
    </property>

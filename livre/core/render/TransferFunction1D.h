@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                          Stefan.Eilemann@epfl.ch
  *
@@ -25,12 +25,14 @@
 #include <livre/core/types.h>
 
 #include <lexis/render/lookupTable1D.h>
+#include <co/distributable.h>
 
 namespace livre
 {
 
 /** Color and transparency for an RGBA 1 dimensional Transfer Function. */
-class TransferFunction1D : public ::lexis::render::LookupTable1D
+class TransferFunction1D :
+        public co::Distributable< ::lexis::render::LookupTable1D >
 {
     static const size_t NCHANNELS = 4;
 
@@ -61,14 +63,7 @@ public:
      * @param tf The transfer function to be copied.
      */
     explicit TransferFunction1D( const TransferFunction1D& tf )
-        : ::lexis::render::LookupTable1D( tf ) {}
-
-    /**
-     * Create a transfer function.
-     * @param rgba A std::vector with samples of the transfer function.
-     */
-    explicit TransferFunction1D( const std::vector< uint8_t >& rgba )
-        : ::lexis::render::LookupTable1D( rgba ) {}
+        : co::Distributable< ::lexis::render::LookupTable1D >( tf ) {}
 
     TransferFunction1D& operator=( const TransferFunction1D& rhs )
     {

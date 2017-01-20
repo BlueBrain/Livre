@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  *                          ahmet.bilgili@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -27,7 +27,7 @@
 namespace livre
 {
 
-struct ClipPlanesController::Impl
+struct ClipPlanesController::Impl : public QObject
 {
     Impl( ClipPlanesController* parent, Controller& controller )
         : _parent( parent )
@@ -39,7 +39,8 @@ struct ClipPlanesController::Impl
         _clipPlanes.clear();
 
         parent->connect( parent, &ClipPlanesController::clipPlanesReceived,
-                         [&](){ clipPlanesReceived( );});
+                         this, &ClipPlanesController::Impl::clipPlanesReceived,
+                         Qt::QueuedConnection );
 
         slidersWidget->connect( _ui.clipPlanesCheckBox, &QCheckBox::stateChanged,
                  [&]( int value )
@@ -99,7 +100,6 @@ struct ClipPlanesController::Impl
         _clipPlanes.registerDeserializedCallback(
                     [&]{
                           emit _parent->clipPlanesReceived();
-                          _clipPlanes.registerDeserializedCallback( nullptr );
                        });
     }
 

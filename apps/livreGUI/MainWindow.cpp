@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
  *                          Raphael Dumusc <raphael.dumusc@epfl.ch>
  *
@@ -42,12 +42,6 @@ struct MainWindow::Impl
 
         parent->setCentralWidget( new TransferFunctionEditor( controller ));
 
-#ifdef LIVRE_USE_MONSTEER
-        _ui.simulationDockWidget->setWidget( new monsteer::qt::SteeringWidget );
-#else
-        _ui.simulationDockWidget->setHidden( true );
-#endif
-
         _ui.animationDockWidget->setWidget(
             new AnimationController( controller ));
 
@@ -56,11 +50,20 @@ struct MainWindow::Impl
 
         _ui.renderParametersDockWidget->setWidget( new RenderParametersController( controller ));
 
-        if( !_ui.simulationDockWidget->isHidden( ))
-            parent->tabifyDockWidget( _ui.simulationDockWidget,
-                                      _ui.renderParametersDockWidget);
-
         _ui.clipPlanesDockWidget->setWidget( new ClipPlanesController( controller ));
+        parent->tabifyDockWidget( _ui.renderParametersDockWidget,
+                                  _ui.clipPlanesDockWidget );
+
+#ifdef LIVRE_USE_MONSTEER
+        _ui.simulationDockWidget->setWidget( new monsteer::qt::SteeringWidget );
+#else
+        _ui.simulationDockWidget->setHidden( true );
+#endif
+        if( !_ui.simulationDockWidget->isHidden( ))
+            parent->tabifyDockWidget( _ui.clipPlanesDockWidget,
+                                      _ui.simulationDockWidget );
+
+        _ui.renderParametersDockWidget->raise();
     }
 
     ~Impl(){}
