@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Maxim Makhinya
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
