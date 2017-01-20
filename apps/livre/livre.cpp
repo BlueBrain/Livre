@@ -19,6 +19,8 @@
 
 #include <livre/eq/Engine.h>
 
+#include <eq/client.h>
+#include <eq/init.h>
 #include <stdlib.h>
 
 int main( const int argc, char** argv )
@@ -27,7 +29,8 @@ int main( const int argc, char** argv )
     {
         if( std::string( "--help" ) == argv[i] )
         {
-            std::cout << livre::Engine::getHelp() << std::endl;
+            std::cout << livre::Engine::getHelp() << eq::getHelp()
+                      << eq::Client::getHelp() << std::endl;
             return EXIT_SUCCESS;
         }
         if( std::string( "--version" ) == argv[i] )
