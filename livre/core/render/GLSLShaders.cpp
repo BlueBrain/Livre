@@ -126,11 +126,6 @@ int GLSLShaders::_load( GLSLShaders::Handle& handle, const std::string& shader,
         handle = 0;
     }
 
-#ifdef GL3_PROTOTYPES
-    for( size_t i = 0; i < paths.size(); i++ )
-        glDeleteNamedStringARB( -1, paths[i].c_str( ));
-#endif
-
     return ret;
 }
 
@@ -213,9 +208,13 @@ int GLSLShaders::loadShaders( const ShaderData& shaderData )
         glAttachShader( program, geometryShader );
     }
 #endif
-
     glLinkProgram( program );
     const int error = glGetError();
+
+#ifdef GL3_PROTOTYPES
+    for( size_t i = 0; i < shaderData.paths.size(); i++ )
+        glDeleteNamedStringARB( -1, shaderData.paths[i].c_str( ));
+#endif
 
     GLint status;
     glGetProgramiv( program, GL_LINK_STATUS, &status );
