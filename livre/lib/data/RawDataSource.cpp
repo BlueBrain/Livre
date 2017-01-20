@@ -161,7 +161,7 @@ struct RawDataSource::Impl
         std::vector< std::string > parameters;
         boost::algorithm::split( parameters, fragment, boost::is_any_of( "," ));
 
-        if( parameters.size() < 4 ) // use defaults
+        if( parameters.size() < 3 ) // use defaults
         {
             LBTHROW( std::runtime_error( "Not enough parameters for the raw file" ));
         }
