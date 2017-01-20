@@ -1,4 +1,4 @@
-# Copyright (c) 2011-2016, EPFL/Blue Brain Project
+# Copyright (c) 2011-2017, EPFL/Blue Brain Project
 #                          David Steiner <steiner@ifi.uzh.ch>
 #                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
 #                          Marwan Abdellah <marwan.abdellah@epfl.ch>
@@ -66,4 +66,4 @@ endif()
 
 add_definitions(${QT_DEFINITIONS} "-DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED" )
 
-common_application(livreGUI GUI)
+common_application(livreGUI GUI NOHELP)
