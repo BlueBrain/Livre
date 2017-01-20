@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # git master
 
+* [#372](https://github.com/BlueBrain/Livre/pull/372):
+  Fix crash with histogram not being ready in synchronous mode while moving clip planes
 * [#368](https://github.com/BlueBrain/Livre/pull/368):
   Make "Show axes" available in livreGUI and python API
 * [#367](https://github.com/BlueBrain/Livre/pull/367):
