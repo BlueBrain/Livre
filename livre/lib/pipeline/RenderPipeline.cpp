@@ -143,7 +143,6 @@ struct RenderPipeline::Impl
             if( numberOfPasses > 1 )
                 ++(*showProgress);
         }
-        sendHistogramFilter.schedule( _computeExecutor );
 
         const UniqueFutureMap futures( visibleSetGenerator.getPostconditions( ));
         availability.nAvailable = futures.get< NodeIds >( "VisibleNodes" ).size();
@@ -257,6 +256,7 @@ struct RenderPipeline::Impl
 
         renderPipeline.schedule( _renderExecutor );
         uploadPipeline.schedule( _uploadExecutor );
+        sendHistogramFilter.schedule( _computeExecutor );
         histogramFilter.schedule( _computeExecutor );
         renderFilter.execute();
     }
