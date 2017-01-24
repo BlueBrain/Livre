@@ -3,8 +3,12 @@ Changelog {#Changelog}
 
 # git master
 
+* [#373](https://github.com/BlueBrain/Livre/pull/373):
+  Fix concurrent send & receive from livreGUI, which lead to crashes on GUI
+  and/or connected clients
 * [#372](https://github.com/BlueBrain/Livre/pull/372):
-  Fix crash with histogram not being ready in synchronous mode while moving clip planes
+  Fix crash with histogram not being ready in synchronous mode while moving clip
+  planes
 * [#368](https://github.com/BlueBrain/Livre/pull/368):
   Make "Show axes" available in livreGUI and python API
 * [#367](https://github.com/BlueBrain/Livre/pull/367):

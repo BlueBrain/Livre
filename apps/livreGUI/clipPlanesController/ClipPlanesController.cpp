@@ -168,7 +168,12 @@ struct ClipPlanesController::Impl : public QObject
 
     void clipPlanesReceived()
     {
+        for( QSlider* slider: _clipPlaneSliders )
+            slider->blockSignals( true );
         updateClipPlanesUi( _clipPlanes );
+
+        for( QSlider* slider: _clipPlaneSliders )
+            slider->blockSignals( false );
     }
 
     void updateClipPlanesUi( ClipPlanes& clipPlanes )
