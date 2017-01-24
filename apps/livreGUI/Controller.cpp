@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                          Maxim Makhinya <maxmah@gmail.com>
  *                          David Steiner  <steiner@ifi.uzh.ch>
@@ -30,6 +30,8 @@
 #include <algorithm>
 #include <thread>
 
+#include <QTimer>
+
 namespace livre
 {
 
@@ -39,15 +41,14 @@ public:
     Impl()
         : _subscriber()
         , _replySubscriber( (::zeroeq::Receiver&)_subscriber )
-        , _subscriberPoll( std::bind( &Impl::pollSubscriber, this ))
-        , _continuePolling( true )
     {
-    }
-
-    ~Impl()
-    {
-        _continuePolling = false;
-        _subscriberPoll.join();
+        _timer.connect( &_timer, &QTimer::timeout, [this]
+        {
+            for( const auto& request : _requests )
+                _publisher.publish( ::lexis::Request( request ));
+            _subscriber.receive( 0 );
+        });
+        _timer.start( 100 );
     }
 
     void onReply( const ::zeroeq::uint128_t& event )
@@ -92,22 +93,11 @@ public:
     }
 
 private:
-    void pollSubscriber()
-    {
-        while( _continuePolling )
-        {
-            for( const auto& request : _requests )
-                _publisher.publish( ::lexis::Request( request ));
-            _subscriber.receive( 100 );
-        }
-    }
-
     zeroeq::Publisher _publisher;
     zeroeq::Subscriber _subscriber;
     zeroeq::Subscriber _replySubscriber;
 
-    std::thread _subscriberPoll;
-    bool _continuePolling;
+    QTimer _timer;
 
     std::vector< ::zeroeq::uint128_t > _requests;
 };
