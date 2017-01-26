@@ -48,7 +48,10 @@ public:
     LIVRECORE_API static void loadPlugins();
 
     /** @return information on all loaded plugins. */
-    static std::string getDescriptions();
+    LIVRECORE_API static std::string getDescriptions();
+
+    /** @return true if a datasource plugin for the given URI is available. */
+    LIVRECORE_API static bool handles( const servus::URI& uri );
 
     /**
      * @return The volume information.

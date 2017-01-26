@@ -74,6 +74,11 @@ std::string DataSource::getDescriptions()
     return DataSource::Impl::PluginFactory::getInstance().getDescriptions();
 }
 
+bool DataSource::handles( const servus::URI& uri )
+{
+    return DataSource::Impl::PluginFactory::getInstance().handles( DataSourcePluginData{ uri } );
+}
+
 LODNode DataSource::getNode( const NodeId& nodeId ) const
 {
     return _impl->getNode( nodeId );

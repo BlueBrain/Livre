@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # git master
 
+* [#375](https://github.com/BlueBrain/Livre/pull/375):
+  Add livre::DataSource::handles()
 * [#373](https://github.com/BlueBrain/Livre/pull/373):
   Fix concurrent send & receive from livreGUI, which lead to crashes on GUI
   and/or connected clients
