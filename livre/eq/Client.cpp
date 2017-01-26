@@ -58,16 +58,6 @@ Client::Client( const int argc, char** argv, const bool isResident )
 
 Client::~Client()
 {
-    if( _impl->server ) // not set for render clients
-    {
-        if( !disconnectServer( _impl->server ))
-            LBERROR << "Client::disconnectServer failed" << std::endl;
-        _impl->server = 0;
-        exitLocal();
-
-        LBASSERTINFO( getRefCount() == 1, "Client still referenced by " <<
-                      getRefCount() - 1 );
-    }
 }
 
 Config* Client::chooseConfig()
@@ -81,6 +71,13 @@ Config* Client::chooseConfig()
 void Client::releaseConfig( Config* config )
 {
     _impl->server->releaseConfig( config );
+    if( !disconnectServer( _impl->server ))
+        LBERROR << "Client::disconnectServer failed" << std::endl;
+    _impl->server = 0;
+    exitLocal();
+
+    LBASSERTINFO( getRefCount() == 1, "Client still referenced by " <<
+                  getRefCount() - 1 );
 }
 
 void Client::setIdleFunction( const IdleFunc& idleFunc )
@@ -107,7 +104,6 @@ bool Client::initLocal( const int argc, char** argv )
     addActiveLayout( "Simple" ); // prefer single GPU layout by default
     return eq::Client::initLocal( argc, argv );
 }
-
 
 void Client::clientLoop()
 {
