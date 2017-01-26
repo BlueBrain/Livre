@@ -9,6 +9,7 @@
 set(LIVRECORE_PUBLIC_HEADERS
   configuration/Configuration.h
   configuration/Parameters.h
+  data/DataSource.h
   data/DataSourcePlugin.h
   data/Histogram.h
   data/LODNode.h
@@ -28,7 +29,6 @@ set(LIVRECORE_HEADERS
   cache/Cache.h
   cache/CacheObject.h
   cache/CacheStatistics.h
-  data/DataSource.h
   maths/Quantizer.h
   pipeline/Executable.h
   pipeline/Filter.h
