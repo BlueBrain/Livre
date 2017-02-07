@@ -1,6 +1,6 @@
-/* Copyright (c) 2015, EPFL/Blue Brain Project
- *                     Marwan Abdellah <marwan.abdellah@epfl.ch>
- *                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+ *                          Marwan Abdellah <marwan.abdellah@epfl.ch>
+ *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -21,9 +21,12 @@
 #ifndef _ColorMapWidget_h_
 #define _ColorMapWidget_h_
 
-#include <livreGUI/transferFunctionEditor/TFWidget.h> // base class
 #include <livre/core/data/Histogram.h>
 #include <livre/core/types.h>
+
+#include <QImage>
+#include <QLinearGradient>
+#include <QWidget>
 
 namespace livre
 {
@@ -34,35 +37,23 @@ class HoverPoints;
  * This class is used to create color curves with controls points. Each instance of
  * this class should be responsible for one of the RGBA component.
  */
-class ColorMapWidget : public TFWidget
+class ColorMapWidget : public QWidget
 {
     Q_OBJECT
 
 public:
 
-    /**
-     * The ShadeType enum
-     */
-    enum ShadeType
+    enum class Channel
     {
-        RED_SHADE   = 0,
-        GREEN_SHADE = 1,
-        BLUE_SHADE  = 2,
-        ALPHA_SHADE = 3,
-        SHADE_COUNT = 4
+        red,
+        green,
+        blue,
+        alpha
     };
 
-    /**
-     * Constructor of ColorMapWidget.
-     * @param type  Type of shade used to choose the color of the curve (RGBA).
-     * @param parent Parent widget.
-     */
-    ColorMapWidget( const ShadeType type, QWidget* parent );
+    ColorMapWidget( QWidget* parent, Channel channel );
 
-    /**
-     * @return the shade type
-     */
-    ShadeType getShadeType() const { return _shadeType; }
+    Channel getChannel() const { return _channel; }
 
     /**
      * Set the gradient stops.
@@ -78,40 +69,23 @@ public:
     void setHistogram( const Histogram& histogram, bool isLogScale );
 
     /**
-     * paintEvent
+     * Set the 2d positions of control points.
+     * @param controlPoints QPolygonF with the control points.
      */
-    void paintEvent( QPaintEvent* ) final;
-
-    /**
-     * sizeHint
-     * @return Return the size.
-     */
-    QSize sizeHint() const final;
+    void setControlPoints( const QPolygonF& controlPoints );
 
     /**
      * Get the 2d positions of control points.
      * @return QPolygonF with the control points.
      */
-    QPolygonF getPoints() const;
-
-    /**
-     * Set the 2d positions of control points.
-     * @param points QPolygonF with the control points.
-     */
-    void setPoints( const QPolygonF& getPoints );
-
-    /**
-     * getHoverPoints Get the hoverpoints.
-     * @return The hoverpoints.
-     */
-    HoverPoints* getHoverPoints() const;
+    QPolygonF getControlPoints() const;
 
     /**
      * Get the color at given control point.
      * @param xPosition Position of the mouse cursor on the x-axis.
      * @return An uint containing RGBA 8-bits values.
      */
-    uint32_t getColorAtPoint( int32_t xPosition );
+    uint32_t getColorAtPoint( float xPosition ) const;
 
     /**
      * Return curve's values.
@@ -132,17 +106,22 @@ signals:
     void histIndexChanged( size_t index, double ratio );
 
 private:
-
-    void mouseMoveEvent( QMouseEvent* event );
-    void leaveEvent( QEvent* event );
+    void paintEvent( QPaintEvent* ) final;
+    QSize sizeHint() const final { return { 255, 255 }; }
+    void resizeEvent( QResizeEvent* ) final;
+    void mouseMoveEvent( QMouseEvent* event ) final;
+    void leaveEvent( QEvent* event ) final;
 
     void _generateBackground();
     void _drawHistogram();
+    void _createCheckersBackground();
 
-    ShadeType _shadeType;
-    HoverPoints* _hoverPoints;
+    Channel _channel;
+    HoverPoints* _hoverPoints { nullptr };
     Histogram _histogram;
-    bool _isLogScale;
+    bool _isLogScale { false };
+    QImage _background;
+    QLinearGradient _gradient { 0, 0, 0, 0 };
 };
 
 }

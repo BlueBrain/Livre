@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  *                          Marwan Abdellah <marwan.abdellah@epfl.ch>
  *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *                          Stefan.Eilemann@epfl.ch
@@ -23,12 +23,10 @@
 #define _TransferFunctionEditor_h_
 
 #include <livreGUI/types.h>
-#include <livre/core/render/TransferFunction1D.h>
 #include <livre/core/data/Histogram.h>
-#include <lunchbox/monitor.h> // member
-#include <QWidget>
 
 #include <array>
+#include <QWidget>
 
 namespace Ui { class TransferFunctionEditor; }
 
@@ -53,31 +51,23 @@ public:
     ~TransferFunctionEditor();
 
 signals:
-    void gradientStopsChanged( const QGradientStops& stops );
     void transferFunctionChanged();
-    void histogramChanged();
+    void histogramChanged( bool logScale );
 
 private Q_SLOTS:
-
     void _clear();
     void _load();
     void _save();
     void _setDefault();
-    void _onColorsChanged();
     void _onHistIndexChanged( size_t index, double value);
-    void _onHistogramChanged();
+    void _onHistogramChanged( bool logScale );
     void _onTransferFunctionChanged();
-    void _onScaleChanged( int state );
 
 private:
-
     void _publishTransferFunction();
-    void _onTransferFunction();
     void _setGradientStops();
     void _setHistogram();
-    void _widgetsUpdated();
 
-    livre::TransferFunction1D _lut;
     livre::Histogram _histogram;
     livre::Controller& _controller;
     Ui::TransferFunctionEditor* _ui;

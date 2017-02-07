@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -20,26 +20,22 @@
 #ifndef _GuiTypes_h_
 #define _GuiTypes_h_
 
-#include <QVariant>
+#include <QPointF>
 
 #include <livre/core/types.h>
-#include <zeroeq/types.h>
 
 namespace livre
 {
-/**
- * Class definitions
- */
+
 class Controller;
-class MainWindow;
 
-/**
- * SmartPtr definitions
- */
-typedef std::vector< std::string > Strings;
-typedef std::pair< std::string, QVariant > Property;
-typedef std::vector< Property > PropertyList;
+const size_t COLORSAMPLES = 256;
 
+inline bool compareControlPoints( const QPointF& p1, const QPointF& p2 )
+    { return p1.x() < p2.x(); };
+
+using ControlPoints =
+    std::set< QPointF, bool(*)( const QPointF& p1, const QPointF& p2 ) >;
 }
 
 #endif // _GuiTypes_h_
