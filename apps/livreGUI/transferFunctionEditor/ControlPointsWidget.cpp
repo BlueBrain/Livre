@@ -18,11 +18,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "HoverPoints.h"
+#include "ControlPointsWidget.h"
 
-#include <QApplication>
 #include <QMouseEvent>
-#include <QPainter>
+#include <QQuickItem>
 
 namespace livre
 {
@@ -31,35 +30,109 @@ namespace
 {
 const float controlPointSize = 8.0f;
 const QPointF emptyPoint( -1.0f, -1.0f );
-const QPen pointPen( QColor( 255, 255, 255, 191 ), 1 );
-const QPen connectionPen( QPen( QColor( 255, 255, 255, 127 ), 2 ));
-QBrush pointBrush( QColor( 191, 191, 191, 127 ));
 }
 
-HoverPoints::HoverPoints( QWidget* widget )
-    : QObject( widget )
-    , _colorMapWidget( widget )
+ControlPointsWidget::ControlPointsWidget( QWidget* parent_,
+                                          const Channel channel )
+    : QQuickWidget( parent_ )
+    , _channel( channel )
     , _selectedPoint( emptyPoint )
 {
-    widget->installEventFilter( this );
-    widget->setAttribute( Qt::WA_AcceptTouchEvents );
-    connect( this, SIGNAL( pointsChanged()), _colorMapWidget, SLOT( update()));
+    setAttribute( Qt::WA_AcceptTouchEvents );
+    setResizeMode( QQuickWidget::SizeRootObjectToView );
 }
 
-bool HoverPoints::eventFilter( QObject* object, QEvent* hoverEvent )
-{
-    if( object != _colorMapWidget )
-        return false;
+ControlPointsWidget::~ControlPointsWidget()
+{}
 
-    const float w = _colorMapWidget->width();
-    const float h = _colorMapWidget->height();
+bool ControlPointsWidget::event( QEvent* event )
+{
+    QMouseEvent* mouseEvent = dynamic_cast< QMouseEvent* >( event );
+    if( mouseEvent )
+    {
+        if( _handleMouseEvent( mouseEvent ))
+        {
+            emit colorsChanged();
+            _updateControlPoints();
+        }
+    }
+    return QQuickWidget::event( event );
+}
+
+uint32_t ControlPointsWidget::getColorAtPoint( const float xPosition ) const
+{
+    const auto& controlPoints = getControlPoints();
+    for( int i = 1; i < controlPoints.size(); ++i )
+    {
+        auto p1 = controlPoints.at(i - 1);
+        auto p2 = controlPoints.at(i);
+
+        if( p1.x() > xPosition || p2.x() < xPosition )
+            continue;
+
+        // transform normalized to onscreen absolute size for background pixel lookup
+        p1.setX( p1.x() * width() );
+        p1.setY( (1.f-p1.y()) * height());
+        p2.setX( p2.x() * width() );
+        p2.setY( (1.f-p2.y()) * height());
+
+        QLineF line( p1, p2 );
+        line.setLength(( (xPosition*width()) - line.x1( )) / line.dx() * line.length( ));
+
+        if( _channel == Channel::alpha )
+        {
+            const float alpha = std::min( 1.f,
+                                          float( line.y2( )) /
+                                          float( height() - 1 ));
+            const uint32_t pixel =
+                _background.pixel( qRound( qMin( line.x2(),
+                                            qreal( width() - 1 ))), 0 );
+            return ( pixel & 0xffffffu ) |
+                ( qMin( unsigned( (1.f - alpha) * 255 ), 255u ) << 24u );
+        }
+
+        return _background.pixel( qRound( qMin( line.x2(),
+                                           qreal( width() - 1 ))),
+                             qRound( qMin( line.y2(),
+                                           qreal( height() - 1 ))));
+    }
+    return 0u;
+}
+
+UInt8s ControlPointsWidget::getCurve() const
+{
+    size_t currentHPointIndex = 0;
+
+    const auto& controlPoints = getControlPoints();
+    UInt8s curve;
+    curve.reserve( COLORSAMPLES );
+    for( size_t i = 0; i < COLORSAMPLES; ++i )
+    {
+        float normX = i / float(COLORSAMPLES-1);
+        if( controlPoints.at( currentHPointIndex + 1 ).x() < normX )
+            currentHPointIndex++;
+
+        const QLineF currentLine( controlPoints.at( currentHPointIndex ),
+                                  controlPoints.at( currentHPointIndex + 1 ));
+        const float slope = currentLine.dy() / currentLine.dx();
+        const float normY = ( normX - currentLine.p1().x()) * slope + currentLine.p1().y();
+
+        const uint8_t currentCurveValue = 255u * normY;
+        curve.push_back( currentCurveValue );
+    }
+    return curve;
+}
+
+bool ControlPointsWidget::_handleMouseEvent( QMouseEvent* mouseEvent )
+{
+    const float w = width();
+    const float h = height();
 
     // Detect the event type.
-    switch ( hoverEvent->type())
+    switch ( mouseEvent->type())
     {
     case QEvent::MouseButtonPress:
     {
-        QMouseEvent* mouseEvent = (QMouseEvent*)hoverEvent;
         QPointF clickPosition = mouseEvent->pos();
         QPointF selectedPoint = emptyPoint;
         for( const auto& cp : _controlPoints )
@@ -95,19 +168,18 @@ bool HoverPoints::eventFilter( QObject* object, QEvent* hoverEvent )
 
                 _controlPoints.insert( _selectedPoint );
 
-                // Update the system.
-                emit pointsChanged();
+                return true;
             }
-            else // If there is a specific point that is clicked, get it.
-                _selectedPoint = selectedPoint;
 
-            // We have created or selected a point.
-            return true;
+            // If there is a specific point that is clicked, get it.
+             _selectedPoint = selectedPoint;
 
+            return false;
         }
+
         // If the Qt::RightButton is selcted where there is a point, then
         // delete this point and update the system.
-        else if( mouseEvent->button() == Qt::RightButton )
+        if( mouseEvent->button() == Qt::RightButton )
         {
             // If there is a specified point that is selected based on
             // the index and the widget is editible.
@@ -119,15 +191,11 @@ bool HoverPoints::eventFilter( QObject* object, QEvent* hoverEvent )
                 if( selectedX == _controlPoints.begin()->x() ||
                     selectedX == _controlPoints.rbegin()->x( ))
                 {
-                    return true;
+                    return false;
                 }
 
                 _controlPoints.erase( selectedPoint );
 
-                // Update the system.
-                emit pointsChanged();
-
-                // We have deleted a point.
                 return true;
             }
         }
@@ -143,7 +211,7 @@ bool HoverPoints::eventFilter( QObject* object, QEvent* hoverEvent )
         if( _selectedPoint == emptyPoint )
             return false;
 
-        const auto& pos = ((QMouseEvent*)hoverEvent )->pos();
+        const auto& pos = mouseEvent->pos();
         const float y = std::max( std::min( 1.0f, 1.0f - pos.y() / h ), 0.0f );
         const float selectedX = _selectedPoint.x();
 
@@ -155,7 +223,6 @@ bool HoverPoints::eventFilter( QObject* object, QEvent* hoverEvent )
             _controlPoints.erase( p );
             p.setY( y );
             _controlPoints.insert( p );
-            emit pointsChanged();
             return true;
         }
         if( selectedX == _controlPoints.rbegin()->x())
@@ -165,7 +232,6 @@ bool HoverPoints::eventFilter( QObject* object, QEvent* hoverEvent )
             _controlPoints.erase( p );
             p.setY( y );
             _controlPoints.insert( p );
-            emit pointsChanged();
             return true;
         }
 
@@ -175,80 +241,36 @@ bool HoverPoints::eventFilter( QObject* object, QEvent* hoverEvent )
         if( x <= _controlPoints.begin()->x()
             || x >= _controlPoints.rbegin()->x())
         {
-            return true;
+            return false;
         }
 
         // If there is previously a control point in the position
         for( const auto& cp : _controlPoints )
         {
             if( cp.x() == x && _selectedPoint.x() != x )
-                return true;
+                return false;
         }
 
         _controlPoints.erase( _selectedPoint );
         _selectedPoint = { x, y };
         _controlPoints.insert( _selectedPoint );
 
-        // Update the system.
-        emit pointsChanged();
         return true;
-
     } break;
 
-    case QEvent::Paint: // Render the points on the widget.
-    {
-        QWidget* tfWidget = _colorMapWidget;
-        _colorMapWidget = 0;
-
-        QApplication::sendEvent( object, hoverEvent );
-        _colorMapWidget = tfWidget;
-
-        // Painting all the points on the widget.
-        _paintPoints();
-        return true;
-    }
     default: break;
     }
 
-    // No event is selected.
     return false;
 }
 
-void HoverPoints::_paintPoints()
-{
-    QPainter qPainter;
-    qPainter.begin( _colorMapWidget );
-
-    // Set anti-aliasing.
-    qPainter.setRenderHint( QPainter::Antialiasing );
-
-    QPolygonF polygon;
-
-    const float w = _colorMapWidget->width();
-    const float h = _colorMapWidget->height();
-
-    for( const auto& point : _controlPoints )
-        polygon << QPointF( point.x() * w, (1.0f - point.y()) * h );
-
-    qPainter.setPen( connectionPen );
-    qPainter.drawPolyline( polygon );
-
-    // Set the style.
-    qPainter.setPen( pointPen );
-    qPainter.setBrush( pointBrush );
-
-    // After drawing the lines between the points, draw the points' shapes.
-    for( const auto& pnt: polygon )
-        qPainter.drawEllipse( pnt, controlPointSize, controlPointSize );
-}
-
-QPolygonF HoverPoints::getControlPoints() const
+QPolygonF ControlPointsWidget::getControlPoints() const
 {
     return QPolygonF::fromStdVector( { _controlPoints.begin(),
                                        _controlPoints.end() } );
 }
 
-void HoverPoints::setControlPoints( const QPolygonF& controlPoints )
+void ControlPointsWidget::setControlPoints( const QPolygonF& controlPoints )
 {
     _controlPoints.clear();
 
@@ -261,6 +283,16 @@ void HoverPoints::setControlPoints( const QPolygonF& controlPoints )
                                            std::min(qreal(1), point.y( )))
                                });
     }
+
+    _updateControlPoints();
+}
+
+void ControlPointsWidget::_updateControlPoints()
+{
+    QList< QVariant > controlPointList;
+    for( const auto& point : getControlPoints( ))
+        controlPointList.push_back( QVariant::fromValue( point ));
+    rootObject()->setProperty( "controlpoints", QVariant( controlPointList ));
 }
 
 }

@@ -22,39 +22,47 @@ zerobuf_generate_qobject(ZEROBUF_GENERATED ${CMAKE_CURRENT_BINARY_DIR}
 
 set(LIVREGUI_HEADERS
   ${ZEROBUF_GENERATED_HEADERS}
+  animationController/AnimationController.h
   AppSettings.h
+  clipPlanesController/ClipPlanesController.h
   Controller.h
   MainWindow.h
-  animationController/AnimationController.h
-  clipPlanesController/ClipPlanesController.h
   progress/Progress.h
   renderParametersController/RenderParametersController.h
-  transferFunctionEditor/ColorMapWidget.h
-  transferFunctionEditor/HoverPoints.h
+  transferFunctionEditor/AlphaWidget.h
+  transferFunctionEditor/ColorWidget.h
+  transferFunctionEditor/ControlPointsWidget.h
+  transferFunctionEditor/RangeWidget.h
   transferFunctionEditor/TransferFunctionEditor.h
-  types.h)
+  transferFunctionEditor/Utils.h
+  types.h
+)
 
 set(LIVREGUI_SOURCES
   ${ZEROBUF_GENERATED_SOURCES}
-  Controller.cpp
-  MainWindow.cpp
-  MainWindow.ui
   animationController/AnimationController.cpp
   animationController/AnimationController.ui
   clipPlanesController/ClipPlanesController.cpp
   clipPlanesController/ClipPlanesController.ui
+  Controller.cpp
   livreGUI.cpp
+  MainWindow.cpp
+  MainWindow.ui
   progress/Progress.cpp
   progress/Progress.ui
   renderParametersController/RenderParametersController.cpp
   renderParametersController/RenderParametersController.ui
-  resources/resources.qrc
-  transferFunctionEditor/ColorMapWidget.cpp
-  transferFunctionEditor/HoverPoints.cpp
+  transferFunctionEditor/AlphaWidget.cpp
+  transferFunctionEditor/ColorWidget.cpp
+  transferFunctionEditor/ControlPointsWidget.cpp
+  transferFunctionEditor/RangeWidget.cpp
+  transferFunctionEditor/RangeWidget.ui
+  transferFunctionEditor/resources.qrc
   transferFunctionEditor/TransferFunctionEditor.cpp
-  transferFunctionEditor/TransferFunctionEditor.ui)
+  transferFunctionEditor/TransferFunctionEditor.ui
+)
 
-set(LIVREGUI_LINK_LIBRARIES Lexis Qt5::Widgets ZeroEQ)
+set(LIVREGUI_LINK_LIBRARIES Lexis Qt5::Widgets Qt5::QuickWidgets ZeroEQ)
 
 if(TARGET MonsteerQt)
   list(APPEND LIVREGUI_LINK_LIBRARIES MonsteerQt)

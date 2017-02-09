@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/qml">
+        <file>AlphaWidget.qml</file>
+        <file>Checkerboard.qml</file>
+        <file>Histogram.qml</file>
+        <file>RangeIndicator.qml</file>
+        <file>RangeWidget.qml</file>
+        <file>ColorWidget.qml</file>
+        <file>ControlPoints.qml</file>
+        <file>style.js</file>
+    </qresource>
+</RCC>
