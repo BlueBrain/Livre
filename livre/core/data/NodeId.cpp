@@ -94,6 +94,7 @@ NodeIds NodeId::getChildren() const
         return NodeIds();
 
     NodeIds nodeIds;
+    nodeIds.reserve( 8 );
     const Vector3ui childPos = getPosition() * 2;
     for( uint32_t x = 0; x < 2; ++x )
     {
@@ -104,7 +105,7 @@ NodeIds NodeId::getChildren() const
                 const Vector3ui pos( childPos[ 0 ] + x,
                                      childPos[ 1 ] + y,
                                      childPos[ 2 ] + z );
-                nodeIds.push_back( NodeId( _level + 1, pos, _timeStep ) );
+                nodeIds.emplace_back( NodeId( _level + 1, pos, _timeStep ) );
             }
         }
     }

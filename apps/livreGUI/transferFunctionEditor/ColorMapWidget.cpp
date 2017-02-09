@@ -1,6 +1,6 @@
-﻿/* Copyright (c) 2015, EPFL/Blue Brain Project
- *                     Marwan Abdellah <marwan.abdellah@epfl.ch>
- *                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
+﻿/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+ *                          Marwan Abdellah <marwan.abdellah@epfl.ch>
+ *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -18,69 +18,68 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livreGUI/transferFunctionEditor/ColorMapWidget.h>
-#include <livreGUI/transferFunctionEditor/HoverPoints.h>
+#include "ColorMapWidget.h"
+#include "HoverPoints.h"
+
+#include <QMouseEvent>
+#include <QPainter>
 
 namespace livre
 {
 
-ColorMapWidget::ColorMapWidget( const ShadeType type, QWidget* parent_ )
-    : TFWidget( parent_ )
-    , _shadeType( type )
-    , _isLogScale( false )
+ColorMapWidget::ColorMapWidget( QWidget* parent_, const Channel channel )
+    : QWidget( parent_ )
+    , _channel( channel )
 {
     setMouseTracking( true );
 
-    if( _shadeType == ALPHA_SHADE )
+    if( _channel == Channel::alpha )
         _createCheckersBackground();
     else
         setAttribute( Qt::WA_NoBackground );
 
-    QPolygonF points;
-    points << QPointF( 0, sizeHint().height())
-           << QPointF( sizeHint().width(), 0 );
-
-    _hoverPoints = new HoverPoints( this, HoverPoints::CIRCLE_POINT );
-    _hoverPoints->setPoints( points );
-    _hoverPoints->setConnectionType( HoverPoints::LINE_CONNECTION );
-    _hoverPoints->setPointLock( 0, HoverPoints::LOCK_TO_LEFT );
-    _hoverPoints->setPointLock( 1, HoverPoints::LOCK_TO_RIGHT );
-    _hoverPoints->setSortType( HoverPoints::X_SORT );
-
-    connect( _hoverPoints, SIGNAL( pointsChanged( QPolygonF )),
+    _hoverPoints = new HoverPoints( this );
+    connect( _hoverPoints, SIGNAL( pointsChanged( )),
              this, SIGNAL( colorsChanged()));
 }
 
-QPolygonF ColorMapWidget::getPoints() const
+QPolygonF ColorMapWidget::getControlPoints() const
 {
-    return _hoverPoints->points();
+    return _hoverPoints->getControlPoints();
 }
 
-uint32_t ColorMapWidget::getColorAtPoint( const int32_t xPosition )
+uint32_t ColorMapWidget::getColorAtPoint( const float xPosition ) const
 {
-    _generateBackground();
-
-    const QPolygonF& hoverPoints = _hoverPoints->points();
-    for( int i = 1; i < hoverPoints.size(); ++i )
+    const auto& controlPoints = _hoverPoints->getControlPoints();
+    for( int i = 1; i < controlPoints.size(); ++i )
     {
-        if( hoverPoints.at(i - 1).x() > xPosition || hoverPoints.at(i).x() < xPosition )
+        auto p1 = controlPoints.at(i - 1);
+        auto p2 = controlPoints.at(i);
+
+        if( p1.x() > xPosition || p2.x() < xPosition )
             continue;
 
-        QLineF line( hoverPoints.at( i-1 ), hoverPoints.at( i ) );
-        line.setLength(( xPosition - line.x1( )) / line.dx() * line.length( ));
+        // transform normalized to onscreen absolute size for background pixel lookup
+        p1.setX( p1.x() * width() );
+        p1.setY( (1.f-p1.y()) * height());
+        p2.setX( p2.x() * width() );
+        p2.setY( (1.f-p2.y()) * height());
 
-        if( _shadeType != ALPHA_SHADE )
+        QLineF line( p1, p2 );
+        line.setLength(( (xPosition*width()) - line.x1( )) / line.dx() * line.length( ));
+
+        if( _channel != Channel::alpha )
             return _background.pixel( qRound( qMin( line.x2(),
-                                               qreal( _background.width() - 1 ))),
+                                               qreal( width() - 1 ))),
                                  qRound( qMin( line.y2(),
-                                               qreal( _background.height() - 1 ))));
+                                               qreal( height() - 1 ))));
 
         const float alpha = std::min( 1.f,
                                       float( line.y2( )) /
-                                      float( _background.height() - 1 ));
+                                      float( height() - 1 ));
         const uint32_t pixel =
             _background.pixel( qRound( qMin( line.x2(),
-                                        qreal( _background.width() - 1 ))), 0 );
+                                        qreal( width() - 1 ))), 0 );
         return ( pixel & 0xffffffu ) |
             ( qMin( unsigned( (1.f - alpha) * 255 ), 255u ) << 24u );
     }
@@ -89,24 +88,23 @@ uint32_t ColorMapWidget::getColorAtPoint( const int32_t xPosition )
 
 UInt8s ColorMapWidget::getCurve() const
 {
+    size_t currentHPointIndex = 0;
+
+    const auto& controlPoints = _hoverPoints->getControlPoints();
     UInt8s curve;
-
-    int32_t currentHPointIndex = 0;
-    const size_t tfSize = 256u;
-    const float scale = float( width()) / 255.0f;
-
-    for( size_t i = 0; i < tfSize; ++i )
+    curve.reserve( COLORSAMPLES );
+    for( size_t i = 0; i < COLORSAMPLES; ++i )
     {
-        const float realX = i * scale;
-        if( _hoverPoints->points().at( currentHPointIndex + 1 ).x() < realX )
+        float normX = i / float(COLORSAMPLES-1);
+        if( controlPoints.at( currentHPointIndex + 1 ).x() < normX )
             currentHPointIndex++;
 
-        const QLineF currentLine( _hoverPoints->points().at( currentHPointIndex ),
-                                  _hoverPoints->points().at( currentHPointIndex + 1 ));
+        const QLineF currentLine( controlPoints.at( currentHPointIndex ),
+                                  controlPoints.at( currentHPointIndex + 1 ));
         const float slope = currentLine.dy() / currentLine.dx();
-        const float realY = ( realX - currentLine.p1().x()) * slope + currentLine.p1().y();
+        const float normY = ( normX - currentLine.p1().x()) * slope + currentLine.p1().y();
 
-        const uint8_t currentCurveValue = 255u * ( 1.0f - realY / height());
+        const uint8_t currentCurveValue = 255u * normY;
         curve.push_back( currentCurveValue );
     }
     return curve;
@@ -114,7 +112,7 @@ UInt8s ColorMapWidget::getCurve() const
 
 void ColorMapWidget::mouseMoveEvent( QMouseEvent* mouseEvent )
 {
-    if( _shadeType != ALPHA_SHADE || _histogram.isEmpty( ))
+    if( _channel != Channel::alpha || _histogram.isEmpty( ))
         return;
 
     const size_t index = (float)_histogram.getBins().size() *
@@ -124,7 +122,7 @@ void ColorMapWidget::mouseMoveEvent( QMouseEvent* mouseEvent )
 
 void ColorMapWidget::leaveEvent( QEvent* )
 {
-    if( _shadeType != ALPHA_SHADE )
+    if( _channel != Channel::alpha )
         return;
 
     emit histIndexChanged( -1u, 0.0f );
@@ -132,7 +130,7 @@ void ColorMapWidget::leaveEvent( QEvent* )
 
 void ColorMapWidget::setGradientStops( const QGradientStops& stops )
 {
-    if( _shadeType != ALPHA_SHADE )
+    if( _channel != Channel::alpha )
         return;
 
     _gradient = QLinearGradient( 0.0f, 0.0f, width(), 0.0f );
@@ -140,24 +138,23 @@ void ColorMapWidget::setGradientStops( const QGradientStops& stops )
     for( int i = 0; i < stops.size(); ++i )
         _gradient.setColorAt( stops.at( i ).first, stops.at( i ).second );
 
-    _background = QImage();
     _generateBackground();
+    update();
 }
 
 void ColorMapWidget::setHistogram( const Histogram& histogram, const bool isLogScale )
 {
-    if( _shadeType != ALPHA_SHADE )
+    if( _channel != Channel::alpha )
         return;
 
     _histogram = histogram;
     _isLogScale = isLogScale;
+    _generateBackground();
+    update();
 }
 
 void ColorMapWidget::paintEvent( QPaintEvent* )
 {
-    _generateBackground();
-    _drawHistogram();
-
     QPainter painter( this );
     painter.drawImage( 0, 0, _background );
 
@@ -165,30 +162,43 @@ void ColorMapWidget::paintEvent( QPaintEvent* )
     painter.drawRect( 0, 0, width(), height());
 }
 
+void ColorMapWidget::resizeEvent( QResizeEvent* ev )
+{
+    QWidget::resizeEvent( ev );
+
+    if( _background.isNull() || _background.size() != ev->size( ))
+        _generateBackground();
+}
+
 void ColorMapWidget::_generateBackground()
 {
-    if( !_background.isNull() && _background.size() == size( ))
-        return;
-
-    _background = QImage( size(), _shadeType == ALPHA_SHADE
+    _background = QImage( size(), _channel == Channel::alpha
                              ? QImage::Format_ARGB32_Premultiplied
                              : QImage::Format_RGB32 );
 
     // Alpha widget
-    if( _shadeType == ALPHA_SHADE )
+    if( _channel == Channel::alpha )
     {
+        _gradient.setFinalStop( width(), 0 );
         _background.fill( 0 );
-        QPainter painter( &_background );
-        painter.fillRect( _background.rect(), _gradient );
+
+        {
+            QPainter painter( &_background );
+            painter.fillRect( _background.rect(), _gradient );
+        }
+
+        if( !_histogram.isEmpty( ))
+            _drawHistogram();
+
         return;
     }
 
     QLinearGradient gradient( 0, 0, 0, height( ));
     gradient.setColorAt( 1, Qt::black );
 
-    if( _shadeType == RED_SHADE )
+    if( _channel == Channel::red )
         gradient.setColorAt( 0, Qt::red );
-    else if ( _shadeType == GREEN_SHADE )
+    else if ( _channel == Channel::green )
         gradient.setColorAt( 0, Qt::green );
     else
         gradient.setColorAt( 0, Qt::blue );
@@ -199,9 +209,6 @@ void ColorMapWidget::_generateBackground()
 
 void ColorMapWidget::_drawHistogram()
 {
-    if( _shadeType != ALPHA_SHADE || _background.isNull() || _histogram.isEmpty( ))
-        return;
-
     const QRect viewPort = rect();
     const int xLeft = viewPort.left();
     const int xRight = viewPort.right();
@@ -224,6 +231,7 @@ void ColorMapWidget::_drawHistogram()
     pen.setColor( Qt::black );
     pen.setWidth( 2 );
     QPainter painter( &_background );
+    painter.setRenderHint( QPainter::Antialiasing );
     painter.setPen( pen );
     pen.setStyle( Qt::SolidLine );
     path.moveTo( QPoint( float( xLeft ) + 0.5f, yBottom ));
@@ -239,21 +247,24 @@ void ColorMapWidget::_drawHistogram()
     painter.drawPath( path );
 }
 
-HoverPoints* ColorMapWidget::getHoverPoints() const
+void ColorMapWidget::_createCheckersBackground()
 {
-    return _hoverPoints;
+    QPixmap pixmap( 20, 20 );
+    QPainter pixmapPainter( &pixmap );
+    pixmapPainter.fillRect( 0, 0, 10, 10, Qt::lightGray );
+    pixmapPainter.fillRect( 10, 10, 10, 10, Qt::lightGray );
+    pixmapPainter.fillRect( 0, 10, 10, 10, Qt::darkGray );
+    pixmapPainter.fillRect( 10, 0, 10, 10, Qt::darkGray );
+    pixmapPainter.end();
+    QPalette colorPalette = palette();
+    colorPalette.setBrush( backgroundRole(), QBrush( pixmap ));
+    setAutoFillBackground( true );
+    setPalette( colorPalette );
 }
 
-QSize ColorMapWidget::sizeHint() const
+void ColorMapWidget::setControlPoints( const QPolygonF& controlPoints )
 {
-    return QSize( 255, 255 );
-}
-
-void ColorMapWidget::setPoints( const QPolygonF &points )
-{
-    _hoverPoints->setPoints( points );
-    _hoverPoints->setPointLock( 0, HoverPoints::LOCK_TO_LEFT );
-    _hoverPoints->setPointLock( points.size() - 1, HoverPoints::LOCK_TO_RIGHT );
+    _hoverPoints->setControlPoints( controlPoints );
     update();
 }
 
