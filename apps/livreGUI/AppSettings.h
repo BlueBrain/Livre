@@ -23,8 +23,6 @@
 
 #include <QtCore/QCoreApplication>
 
-#include <lunchbox/lunchbox.h>
-
 namespace livre
 {
 
@@ -32,7 +30,7 @@ namespace livre
  * settings for QSettings initialization, company and product names.
  */
 
-LB_UNUSED static void setCoreSettingsNames()
+inline void setCoreSettingsNames()
 {
     QCoreApplication::setOrganizationName( "Blue Brain Project" );
     QCoreApplication::setApplicationName( "Livre Controller" );

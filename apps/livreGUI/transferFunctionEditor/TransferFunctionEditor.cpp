@@ -25,10 +25,11 @@
 #include <livreGUI/ui_TransferFunctionEditor.h>
 #include <livreGUI/Controller.h>
 
-#include <livre/core/render/TransferFunction1D.h>
+#include <lexis/render/lookupTable1D.h>
 
 #include <QFileDialog>
 
+#include <cmath>
 #include <fstream>
 
 namespace livre
@@ -171,7 +172,7 @@ void TransferFunctionEditor::_onHistIndexChanged( size_t index, const double rat
 
 void TransferFunctionEditor::_publishTransferFunction()
 {
-    livre::TransferFunction1D lut;
+    lexis::render::LookupTable1D lut;
 
     size_t i = 0;
     for( const auto& widget: _colorWidgets )
@@ -196,7 +197,7 @@ void TransferFunctionEditor::_clear()
     for( const auto& channel: channels )
         _colorWidgets[ (size_t)channel ]->setControlPoints( points );
 
-    _colorWidgets[ (size_t)ColorMapWidget::Channel::alpha ]->setHistogram( Histogram(), false );
+    _colorWidgets[ (size_t)ColorMapWidget::Channel::alpha ]->setHistogram( lexis::render::Histogram(), false );
     emit transferFunctionChanged();
 }
 
@@ -215,7 +216,7 @@ QPolygonF _filterPoints( const QPolygonF& points )
     QPolygonF filteredPoints;
     float prevSlope = 0;
     QPointF prevPoint = points.first();
-    const float epsilon = 0.001;
+    const float epsilon = 0.001f;
     for( int i = 1; i < points.size() - 1; ++i )
     {
         const auto& currentPoint = points[i];

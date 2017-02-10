@@ -24,6 +24,8 @@
 #include <QMouseEvent>
 #include <QPainter>
 
+#include <cmath>
+
 namespace livre
 {
 
@@ -142,7 +144,8 @@ void ColorMapWidget::setGradientStops( const QGradientStops& stops )
     update();
 }
 
-void ColorMapWidget::setHistogram( const Histogram& histogram, const bool isLogScale )
+void ColorMapWidget::setHistogram( const lexis::render::Histogram& histogram,
+                                   const bool isLogScale )
 {
     if( _channel != Channel::alpha )
         return;

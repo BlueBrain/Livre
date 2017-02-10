@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Raphael Dumusc <raphael.dumusc@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -22,7 +22,7 @@
 
 #include <QMainWindow>
 
-#include "types.h"
+#include <livreGUI/types.h>
 
 namespace Ui
 {

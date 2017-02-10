@@ -22,7 +22,7 @@
 #include <livreGUI/Controller.h>
 #include <livreGUI/ui_ClipPlanesController.h>
 
-#include <livre/core/render/ClipPlanes.h>
+#include <lexis/render/ClipPlanes.h>
 
 namespace livre
 {
@@ -48,7 +48,7 @@ struct ClipPlanesController::Impl : public QObject
                     _ui.clipPlanesWidget->setEnabled( value != 0 );
                     if( value == 0 )
                     {
-                        ClipPlanes planes;
+                        lexis::render::ClipPlanes planes;
                         planes.clear();
                         _controller.publish( planes );
                     }
@@ -64,9 +64,8 @@ struct ClipPlanesController::Impl : public QObject
                  [&](bool)
                  {
                     _clipPlanes.reset();
-                    ClipPlanes planes;
-                    updateClipPlanesUi( planes );
-                    _controller.publish( planes );
+                    updateClipPlanesUi();
+                    _controller.publish( _clipPlanes );
                  });
 
         _clipPlaneSliders.push_back( _ui.posXSlider );
@@ -170,22 +169,22 @@ struct ClipPlanesController::Impl : public QObject
     {
         for( QSlider* slider: _clipPlaneSliders )
             slider->blockSignals( true );
-        updateClipPlanesUi( _clipPlanes );
+        updateClipPlanesUi();
 
         for( QSlider* slider: _clipPlaneSliders )
             slider->blockSignals( false );
     }
 
-    void updateClipPlanesUi( ClipPlanes& clipPlanes )
+    void updateClipPlanesUi()
     {
         size_t i = 0;
-        auto& planes = clipPlanes.getPlanes();
+        auto& planes = _clipPlanes.getPlanes();
         for( QDoubleSpinBox* spinBox: _clipPlaneSpinBoxes )
         {
             if( i == planes.size())
                 break;
 
-            ::lexis::render::Plane& plane = planes[ i ];
+            const auto& plane = planes[ i ];
             spinBox->setValue(( i % 2 ) == 0  ? plane.getD() : -plane.getD( ));
             ++i;
         }
@@ -194,7 +193,7 @@ struct ClipPlanesController::Impl : public QObject
     Ui::clipPlanesController _ui;
     ClipPlanesController* _parent;
     Controller& _controller;
-    ClipPlanes _clipPlanes;
+    lexis::render::ClipPlanes _clipPlanes;
 
     typedef std::vector< QSlider* > Sliders;
     typedef std::vector< QDoubleSpinBox* > SpinBoxes;

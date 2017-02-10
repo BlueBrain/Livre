@@ -21,8 +21,8 @@
 #ifndef _ColorMapWidget_h_
 #define _ColorMapWidget_h_
 
-#include <livre/core/data/Histogram.h>
-#include <livre/core/types.h>
+#include <livreGUI/types.h>
+#include <lexis/render/Histogram.h>
 
 #include <QImage>
 #include <QLinearGradient>
@@ -66,7 +66,7 @@ public:
      * @param histogram the histogram.
      * @param isLogScale if true the histogram is visualised as log scale.
      */
-    void setHistogram( const Histogram& histogram, bool isLogScale );
+    void setHistogram( const lexis::render::Histogram& histogram, bool isLogScale );
 
     /**
      * Set the 2d positions of control points.
@@ -118,7 +118,7 @@ private:
 
     Channel _channel;
     HoverPoints* _hoverPoints { nullptr };
-    Histogram _histogram;
+    lexis::render::Histogram _histogram;
     bool _isLogScale { false };
     QImage _background;
     QLinearGradient _gradient { 0, 0, 0, 0 };

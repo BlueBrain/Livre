@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          bbp-open-source@googlegroups.com
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
@@ -29,6 +29,10 @@
 #include <lunchbox/uri.h>
 #include <servus/uint128_t.h>
 
+#include <co/distributable.h>
+#include <lexis/render/ClipPlanes.h>
+#include <lexis/render/Histogram.h>
+
 #include <boost/program_options.hpp>
 #include <boost/program_options/options_description.hpp>
 
@@ -57,12 +61,12 @@ class AllocMemoryUnit;
 class Cache;
 class CacheObject;
 class CacheStatistics;
-class ClipPlanes;
+using ClipPlanes = co::Distributable< ::lexis::render::ClipPlanes >;
 class Configuration;
 class Frustum;
 class GLContext;
 class GLSLShaders;
-class Histogram;
+using Histogram = co::Distributable< ::lexis::render::Histogram >;
 class LODNode;
 class MemoryUnit;
 class NodeId;

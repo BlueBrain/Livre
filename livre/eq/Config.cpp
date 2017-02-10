@@ -31,7 +31,6 @@
 #include <livre/lib/configuration/ApplicationParameters.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 
-#include <livre/core/data/Histogram.h>
 #include <livre/core/data/VolumeInformation.h>
 #include <livre/core/util/FrameUtils.h>
 

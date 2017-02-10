@@ -22,7 +22,10 @@
 
 #include <QPointF>
 
-#include <livre/core/types.h>
+#include <limits.h>
+#include <memory>
+#include <set>
+#include <vector>
 
 namespace livre
 {
@@ -30,12 +33,15 @@ namespace livre
 class Controller;
 
 const size_t COLORSAMPLES = 256;
+const uint32_t LATEST_FRAME = INT_MAX; //!< Maximum frame number
 
 inline bool compareControlPoints( const QPointF& p1, const QPointF& p2 )
     { return p1.x() < p2.x(); };
 
 using ControlPoints =
     std::set< QPointF, bool(*)( const QPointF& p1, const QPointF& p2 ) >;
+
+using UInt8s = std::vector< uint8_t >;
 }
 
 #endif // _GuiTypes_h_

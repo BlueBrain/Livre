@@ -348,7 +348,7 @@ struct RayCastRenderer::Impl
             planesData.reserve( 4 * nPlanes );
             for( size_t i = 0; i < nPlanes; ++i )
             {
-                const ::lexis::render::Plane& plane = clipPlanes[ i ];
+                const auto& plane = clipPlanes[ i ];
                 const float* normal = plane.getNormal();
                 planesData.push_back( normal[ 0 ]);
                 planesData.push_back( normal[ 1 ]);

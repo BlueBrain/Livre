@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -22,7 +22,6 @@
 #include <livre/core/types.h>
 #include <livre/core/data/LODNode.h>
 #include <livre/core/visitor/VisitState.h>
-#include <livre/core/render/ClipPlanes.h>
 
 //#define LIVRE_STATIC_DECOMPOSITION
 
@@ -70,7 +69,7 @@ struct SelectVisibles::Impl
     void visit( const LODNode& lodNode, VisitState& state )
     {
         const Boxf& worldBox = lodNode.getWorldBox();
-        if( !_frustum.isInFrustum( worldBox ) || _clipPlanes.isClipped( worldBox ))
+        if( !_frustum.isInFrustum( worldBox ) || _clipPlanes.isOutside( worldBox ))
         {
            state.setVisitChild( false );
            return;

@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, EPFL/Blue Brain Project
+/* Copyright (c) 2016-2017, EPFL/Blue Brain Project
  *                     ahmet.bilgili@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -25,7 +25,6 @@
 #include <livre/core/render/SelectVisibles.h>
 #include <livre/core/visitor/DFSTraversal.h>
 #include <livre/core/render/Frustum.h>
-#include <livre/core/render/ClipPlanes.h>
 
 #include <lunchbox/pluginRegisterer.h>
 

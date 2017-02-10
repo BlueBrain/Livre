@@ -26,7 +26,6 @@
 #include <livre/eq/serialization.h>
 #include <livre/eq/settings/CameraSettings.h>
 #include <livre/eq/settings/FrameSettings.h>
-#include <livre/core/data/Histogram.h>
 #include <livre/core/data/VolumeInformation.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 
