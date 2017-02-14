@@ -22,7 +22,6 @@
 
 #include <livre/core/api.h>
 #include <livre/core/types.h>
-#include <livre/core/lunchboxTypes.h>
 #include <livre/core/configuration/Configuration.h>
 
 namespace livre

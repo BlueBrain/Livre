@@ -16,7 +16,6 @@ set(LIVRECORE_PUBLIC_HEADERS
   data/MemoryUnit.h
   data/NodeId.h
   data/VolumeInformation.h
-  lunchboxTypes.h
   render/ClipPlanes.h
   render/GLContext.h
   render/GLSLShaders.h

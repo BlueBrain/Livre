@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -22,7 +22,6 @@
 
 #include <livre/core/api.h>
 #include <livre/core/types.h>
-#include <livre/core/lunchboxTypes.h>
 
 namespace livre
 {

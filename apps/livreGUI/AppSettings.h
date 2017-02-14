@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                          Maxim Makhinya <maxmah@gmail.com>
  *
@@ -23,7 +23,7 @@
 
 #include <QtCore/QCoreApplication>
 
-#include <livre/core/lunchboxTypes.h>
+#include <lunchbox/lunchbox.h>
 
 namespace livre
 {
