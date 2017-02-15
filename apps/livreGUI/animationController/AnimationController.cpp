@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                          Grigori Chevtchenko <grigori.chevtchenko>
  *
@@ -21,9 +21,10 @@
 #include "AnimationController.h"
 #include "../Controller.h"
 #include <livreGUI/ui_AnimationController.h>
-#include <livre/core/types.h>
 
 #include <lexis/render/frame.h>
+
+#include <iostream>
 
 namespace livre
 {
@@ -62,7 +63,7 @@ struct AnimationController::Impl
         }
         catch( const std::exception& error )
         {
-            LBERROR << "Error:" << error.what() << std::endl;
+            std::cerr << "Error:" << error.what() << std::endl;
             _connected = false;
         }
         resetControls();
@@ -140,10 +141,7 @@ struct AnimationController::Impl
         _ui.chbxFollow->setChecked( _frame.getDelta() == LATEST_FRAME );
         _ui.chbxReverse->setChecked( _frame.getDelta() < 0 );
 
-        if( endFrame - startFrame <= 1 )
-            _animationController->setDisabled( true );
-        else
-            _animationController->setEnabled( true );
+        _animationController->setEnabled( endFrame - startFrame > 1 );
     }
 
     void publishFrame()

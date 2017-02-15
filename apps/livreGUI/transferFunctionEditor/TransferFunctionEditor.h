@@ -23,7 +23,7 @@
 #define _TransferFunctionEditor_h_
 
 #include <livreGUI/types.h>
-#include <livre/core/data/Histogram.h>
+#include <lexis/render/Histogram.h>
 
 #include <array>
 #include <QWidget>
@@ -68,8 +68,8 @@ private:
     void _setGradientStops();
     void _setHistogram();
 
-    livre::Histogram _histogram;
-    livre::Controller& _controller;
+    lexis::render::Histogram _histogram;
+    Controller& _controller;
     Ui::TransferFunctionEditor* _ui;
 
     typedef std::array< ColorMapWidget*, 4 > ColorWidgets;

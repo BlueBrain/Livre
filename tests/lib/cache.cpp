@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                          Stefan.Eilemann@epfl.ch
  *
@@ -25,7 +25,6 @@
 #include <livre/core/cache/CacheStatistics.h>
 #include <livre/core/data/DataSource.h>
 #include <livre/core/data/NodeId.h>
-#include <livre/core/data/Histogram.h>
 #include <livre/core/data/LODNode.h>
 #include <livre/core/data/MemoryUnit.h>
 #include <livre/core/data/VolumeInformation.h>

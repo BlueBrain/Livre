@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -23,7 +23,6 @@
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/lib/types.h>
 
-#include <livre/core/render/ClipPlanes.h>
 #include <livre/core/render/FrameInfo.h>
 
 namespace livre

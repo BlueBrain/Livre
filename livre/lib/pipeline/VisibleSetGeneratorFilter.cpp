@@ -25,7 +25,6 @@
 #include <livre/core/pipeline/Workers.h>
 #include <livre/core/pipeline/PortData.h>
 #include <livre/core/render/SelectVisibles.h>
-#include <livre/core/render/ClipPlanes.h>
 #include <livre/core/data/DataSource.h>
 #include <livre/core/visitor/DFSTraversal.h>
 

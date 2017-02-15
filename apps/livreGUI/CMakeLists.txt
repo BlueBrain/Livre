@@ -54,8 +54,7 @@ set(LIVREGUI_SOURCES
   transferFunctionEditor/TransferFunctionEditor.cpp
   transferFunctionEditor/TransferFunctionEditor.ui)
 
-set(LIVREGUI_LINK_LIBRARIES
-  Lexis LivreCore LivreLib Qt5::Widgets ZeroEQ ZeroBuf)
+set(LIVREGUI_LINK_LIBRARIES Lexis Qt5::Widgets ZeroEQ)
 
 if(TARGET MonsteerQt)
   list(APPEND LIVREGUI_LINK_LIBRARIES MonsteerQt)

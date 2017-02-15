@@ -26,7 +26,6 @@
 #include <livre/lib/types.h>
 
 #include <livre/core/render/TransferFunction1D.h>
-#include <livre/core/render/ClipPlanes.h>
 
 namespace livre
 {

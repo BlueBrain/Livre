@@ -11,12 +11,10 @@ set(LIVRECORE_PUBLIC_HEADERS
   configuration/Parameters.h
   data/DataSource.h
   data/DataSourcePlugin.h
-  data/Histogram.h
   data/LODNode.h
   data/MemoryUnit.h
   data/NodeId.h
   data/VolumeInformation.h
-  render/ClipPlanes.h
   render/GLContext.h
   render/GLSLShaders.h
   render/TransferFunction1D.h
@@ -62,7 +60,6 @@ set(LIVRECORE_SOURCES
   configuration/Configuration.cpp
   configuration/Parameters.cpp
   data/LODNode.cpp
-  data/Histogram.cpp
   data/MemoryUnit.cpp
   data/NodeId.cpp
   data/DataSource.cpp
@@ -78,7 +75,6 @@ set(LIVRECORE_SOURCES
   pipeline/PromiseMap.cpp
   pipeline/SimpleExecutor.cpp
   pipeline/Workers.cpp
-  render/ClipPlanes.cpp
   render/FrameInfo.cpp
   render/Frustum.cpp
   render/GLContext.cpp
