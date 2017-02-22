@@ -105,9 +105,13 @@ public:
 
             if( data.isComplete( )) // Send histogram & remove all old ones
             {
+                if( config.getHistogram() != data.histogram )
+                {
+                    config.setHistogram( data.histogram );
 #ifdef LIVRE_USE_ZEROEQ
-                config.publish( data.histogram );
+                    config.publish( data.histogram );
 #endif
+                }
                 histogramQueue.erase( it, histogramQueue.end( ));
                 return;
             }
@@ -125,6 +129,8 @@ public:
 
         if( viewHistogram.isComplete( ))
         {
+            if( config.getHistogram() == viewHistogram.histogram )
+                return;
             config.setHistogram( viewHistogram.histogram );
 #ifdef LIVRE_USE_ZEROEQ
             config.publish( viewHistogram.histogram );

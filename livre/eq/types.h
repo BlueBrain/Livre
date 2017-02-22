@@ -24,16 +24,6 @@
 
 #include <eq/types.h>
 
-#include <lunchbox/refPtr.h>
-
-namespace lexis
-{
-namespace render
-{
-class ImageJPEG;
-}
-}
-
 namespace livre
 {
 
@@ -44,7 +34,6 @@ class Config;
 class Engine;
 class FrameData;
 class FrameSettings;
-class LocalInitData;
 class Node;
 class Pipe;
 class RayCastRenderer;

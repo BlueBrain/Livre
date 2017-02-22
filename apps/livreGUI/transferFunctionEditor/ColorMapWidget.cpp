@@ -132,9 +132,6 @@ void ColorMapWidget::leaveEvent( QEvent* )
 
 void ColorMapWidget::setGradientStops( const QGradientStops& stops )
 {
-    if( _channel != Channel::alpha )
-        return;
-
     _gradient = QLinearGradient( 0.0f, 0.0f, width(), 0.0f );
 
     for( int i = 0; i < stops.size(); ++i )
@@ -147,9 +144,6 @@ void ColorMapWidget::setGradientStops( const QGradientStops& stops )
 void ColorMapWidget::setHistogram( const lexis::render::Histogram& histogram,
                                    const bool isLogScale )
 {
-    if( _channel != Channel::alpha )
-        return;
-
     _histogram = histogram;
     _isLogScale = isLogScale;
     _generateBackground();
@@ -179,7 +173,6 @@ void ColorMapWidget::_generateBackground()
                              ? QImage::Format_ARGB32_Premultiplied
                              : QImage::Format_RGB32 );
 
-    // Alpha widget
     if( _channel == Channel::alpha )
     {
         _gradient.setFinalStop( width(), 0 );

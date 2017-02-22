@@ -214,6 +214,8 @@ private:
             { return _publisher.publish( _getRenderSettings().getTransferFunction( )); };
         _requests[ _getRenderSettings().getClipPlanes().getTypeIdentifier( )] = [&]
             { return _publisher.publish( _getRenderSettings().getClipPlanes( )); };
+        _requests[ _config.getHistogram().getTypeIdentifier( )] = [&]
+            { return _publisher.publish( _config.getHistogram( )); };
     }
 
     void _setupHTTPServer( const int argc LB_UNUSED, char** argv LB_UNUSED )

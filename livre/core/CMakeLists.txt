@@ -26,7 +26,6 @@ set(LIVRECORE_HEADERS
   cache/Cache.h
   cache/CacheObject.h
   cache/CacheStatistics.h
-  maths/Quantizer.h
   pipeline/Executable.h
   pipeline/Filter.h
   pipeline/FutureMap.h

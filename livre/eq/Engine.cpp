@@ -35,8 +35,6 @@
 #include <livre/eq/FrameData.h>
 #include <livre/eq/Node.h>
 #include <livre/eq/Pipe.h>
-#include <livre/eq/settings/CameraSettings.h>
-#include <livre/eq/settings/VolumeSettings.h>
 #include <livre/eq/Window.h>
 
 namespace

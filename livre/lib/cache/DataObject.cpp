@@ -24,7 +24,6 @@
 #include <livre/core/data/LODNode.h>
 #include <livre/core/data/MemoryUnit.h>
 #include <livre/core/data/DataSource.h>
-#include <livre/core/maths/Quantizer.h>
 
 #include <eq/gl.h>
 
