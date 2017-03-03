@@ -18,66 +18,38 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _TransferFunction1D_h_
-#define _TransferFunction1D_h_
+#pragma once
 
 #include <livre/core/api.h>
 #include <livre/core/types.h>
 
 #include <co/distributable.h>
-#include <lexis/render/lookupTable1D.h>
+#include <lexis/render/materialLUT.h>
 
 namespace livre
 {
 /** Color and transparency for an RGBA 1 dimensional Transfer Function. */
 class TransferFunction1D
-    : public co::Distributable<::lexis::render::LookupTable1D>
+    : public co::Distributable<::lexis::render::MaterialLUT>
 {
-    static const size_t NCHANNELS = 4;
-
 public:
     /** Create the transfer function with default parameters. */
     LIVRECORE_API TransferFunction1D();
 
     /**
-     * Load transfer function.
-     *
-     * Supported are ASCII "1dt", as well as ascii and binary files of
-     * servus::Serializable (.lba, .lbb).
+     * Load transfer function from 1dt (ImageVis3D) file.
      *
      * The content of the ASCII file consists of a first line with the number of
-     * sample points in the transfer function and their format, and then all the
-     * values in 'R G B A' format.  Currently both float [0.0f, 1.0f] and 8-bit
-     * unsigned integers [0, 255] values are supported. If the format is
+     * sample points in the transfer function and then all the
+     * values in 'R G B A' format from [0.0f, 1.0f]. If the format is
      * unspecified, float is used.  If the file extension or format is not
      * supported or the file could not be opened, a default transfer function is
      * generated.
      * @param file Path to the transfer function file.
      */
-    explicit TransferFunction1D(const std::string& file)
-        : TransferFunction1D()
-    {
-        _createTfFromFile(file);
-    }
+    LIVRECORE_API explicit TransferFunction1D(const std::string& file);
 
-    /**
-     * Copy a transfer function.
-     * @param tf The transfer function to be copied.
-     */
-    explicit TransferFunction1D(const TransferFunction1D& tf)
-        : co::Distributable<::lexis::render::LookupTable1D>(tf)
-    {
-    }
-
-    TransferFunction1D& operator=(const TransferFunction1D& rhs)
-    {
-        ::lexis::render::LookupTable1D::operator=(rhs);
-        return *this;
-    }
-
-    static uint32_t getNumChannels() { return NCHANNELS; }
-private:
-    LIVRECORE_API void _createTfFromFile(const std::string& file);
+    /** @return RGBA lookup table for direct in use in GL texture. */
+    LIVRECORE_API std::vector<Vector4ub> getLUT() const;
 };
 }
-#endif // _TransferFunction1D_h_
