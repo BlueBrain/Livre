@@ -168,12 +168,14 @@ struct RayCastRenderer::Impl
         _computedSamplesPerRay = _nSamplesPerRay;
         _nSamplesPerPixel = frameData.getVRParameters().getSamplesPerPixel();
         _drawAxis = frameData.getVRParameters().getShowAxes();
+
+        const auto& range =
+            frameData.getRenderSettings().getTransferFunction().getRange();
+        _dataSourceRange = {float(range[0]), float(range[1])};
     }
 
     void initTransferFunction(const TransferFunction1D& transferFunction)
     {
-        assert(transferFunction.getNumChannels() == 4u);
-
         if (_transferFunctionTexture == 0)
         {
             GLuint tfTexture = 0;
@@ -187,10 +189,9 @@ struct RayCastRenderer::Impl
         }
         glBindTexture(GL_TEXTURE_1D, _transferFunctionTexture);
 
-        const uint8_t* transferFunctionData = transferFunction.getLut();
-        glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA,
-                     GLsizei(transferFunction.getLutSize() / 4u), 0, GL_RGBA,
-                     GL_UNSIGNED_BYTE, transferFunctionData);
+        const auto& lut = transferFunction.getLUT();
+        glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, lut.size(), 0, GL_RGBA,
+                     GL_UNSIGNED_BYTE, lut.data());
     }
 
     void createAndInitializeRenderTexture(const Viewport& viewport)
@@ -276,6 +277,13 @@ struct RayCastRenderer::Impl
         case DT_UNDEFINED:
         default:
             LBTHROW(std::runtime_error("Unsupported type in the shader."));
+        }
+
+        // use materialLUT data range only if valid, otherwise full data range
+        if (_dataSourceRange[1] > 0 &&
+            _dataSourceRange[1] - _dataSourceRange[0] > 0)
+        {
+            dataSourceRange = _dataSourceRange;
         }
 
         glDisable(GL_LIGHTING);
@@ -640,6 +648,7 @@ struct RayCastRenderer::Impl
     BoundingAxis _axis;
     GLint _drawBuffer;
     bool _drawAxis;
+    Vector2f _dataSourceRange;
 };
 
 RayCastRenderer::RayCastRenderer(const DataSource& dataSource,

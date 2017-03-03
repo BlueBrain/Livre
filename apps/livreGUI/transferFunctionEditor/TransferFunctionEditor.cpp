@@ -27,7 +27,6 @@
 #include <livreGUI/Controller.h>
 #include <livreGUI/ui_TransferFunctionEditor.h>
 
-#include <lexis/render/lookupTable1D.h>
 #include <lexis/render/materialLUT.h>
 #include <lexis/request.h>
 
@@ -182,25 +181,6 @@ void TransferFunctionEditor::_onHistIndexChanged(size_t index,
         index == -1u ? "" : QString("%1").arg(ratio * 100.0, 4, 'f', 3);
     _ui->histogramValLabel->setText(valText);
     _ui->histogramIndexLabel->setText(indexText);
-}
-
-void TransferFunctionEditor::_publishTransferFunction()
-{
-    lexis::render::LookupTable1D lut;
-
-    size_t i = 0;
-    for (const auto& widget : _controlPointsWidgets)
-    {
-        const UInt8s& curve = widget->getCurve();
-        if (curve.empty() || curve.size() * 4 != lut.getLutSize())
-            return;
-
-        for (uint32_t j = 0; j < lut.getLutSize() / 4; ++j)
-            lut.getLut()[4 * j + i] = curve[j];
-        ++i;
-    }
-
-    _controller.publish(lut);
 }
 
 void TransferFunctionEditor::_publishMaterialLUT()
@@ -406,14 +386,12 @@ void TransferFunctionEditor::_save()
 void TransferFunctionEditor::_onTransferFunctionChanged()
 {
     _setGradientStops();
-    _publishTransferFunction();
     _publishMaterialLUT();
 }
 
 void TransferFunctionEditor::_onRangeChanged(const vmml::Vector2f range)
 {
     _alphaWidget->setRange(range);
-    _publishTransferFunction();
     _publishMaterialLUT();
 }
 

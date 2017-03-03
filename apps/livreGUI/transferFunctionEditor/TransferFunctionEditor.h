@@ -59,7 +59,6 @@ private Q_SLOTS:
     void _onRangeChanged(vmml::Vector2f range);
 
 private:
-    void _publishTransferFunction();
     void _publishMaterialLUT();
     void _setGradientStops();
 

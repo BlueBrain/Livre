@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                          Stefan.Eilemann@epfl.ch
  *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
@@ -21,13 +21,38 @@
 
 #include "TransferFunction1D.h"
 
-#include <lunchbox/file.h>
-
 #include <fstream>
-#include <iterator>
 
 namespace livre
 {
+TransferFunction1D::TransferFunction1D(const std::string& file)
+    : TransferFunction1D()
+{
+    if (file.empty())
+        return;
+
+    std::ifstream ifs(file);
+    if (file.substr(file.find_last_of(".") + 1) != "1dt" || !ifs.is_open())
+    {
+        LBWARN << "Transfer function file " << file << " could not be opened."
+               << std::endl;
+        return;
+    }
+
+    uint32_t samples;
+    ifs >> samples;
+
+    getDiffuse().resize(samples);
+    getAlpha().resize(samples);
+    for (size_t i = 0; i < samples; ++i)
+    {
+        Vector4f rgba;
+        ifs >> rgba[0] >> rgba[1] >> rgba[2] >> rgba[3];
+        getDiffuse()[i] = {rgba[0], rgba[1], rgba[2]};
+        getAlpha()[i] = rgba[3];
+    }
+}
+
 TransferFunction1D::TransferFunction1D()
 {
     const Vector3f color1(0.0f, 1.0f, 1.0f);
@@ -39,9 +64,9 @@ TransferFunction1D::TransferFunction1D()
     const Vector3f colorDiff = color2 - color1;
     const float alphaDiff = alpha2 - alpha1;
 
-    uint8_t* data = getLut();
-
-    for (uint32_t i = 0; i < getLutSize(); i += NCHANNELS)
+    getDiffuse().resize(256);
+    getAlpha().resize(getDiffuse().size());
+    for (size_t i = 0; i < getDiffuse().size(); ++i)
     {
         Vector4f rgba;
         if (i > 0 && i <= density1)
@@ -59,57 +84,25 @@ TransferFunction1D::TransferFunction1D()
                       alpha1;
         }
 
-        float maxUint8 = std::numeric_limits<uint8_t>::max();
-        data[i + 0] = rgba[0] * maxUint8;
-        data[i + 1] = rgba[1] * maxUint8;
-        data[i + 2] = rgba[2] * maxUint8;
-        data[i + 3] = rgba[3] * maxUint8;
+        getDiffuse()[i] = {rgba[0], rgba[1], rgba[2]};
+        getAlpha()[i] = rgba[3];
     }
 }
 
-void TransferFunction1D::_createTfFromFile(const std::string& file)
+std::vector<Vector4ub> TransferFunction1D::getLUT() const
 {
-    if (file.empty())
-        return;
-
-    if (file.substr(file.find_last_of(".") + 1) == "lbb")
+    std::vector<Vector4ub> lut;
+    lut.reserve(getDiffuse().size());
+    for (size_t i = 0; i < getDiffuse().size(); ++i)
     {
-        lunchbox::loadBinary(*this, file);
-        return;
-    }
-    if (file.substr(file.find_last_of(".") + 1) == "lba")
-    {
-        lunchbox::loadAscii(*this, file);
-        return;
+        const auto& diffuse = getDiffuse()[i];
+        const auto alpha = getAlpha()[i];
+        lut.push_back({uint8_t(diffuse.getRed() * 255.f),
+                       uint8_t(diffuse.getGreen() * 255.f),
+                       uint8_t(diffuse.getBlue() * 255.f),
+                       uint8_t(alpha * 255.f)});
     }
 
-    std::ifstream ifs(file);
-    if (!ifs.is_open())
-    {
-        LBWARN << "Transfer function file " << file << " could not be opened."
-               << std::endl;
-        return;
-    }
-
-    std::string line, val;
-    std::getline(ifs, line);
-    const std::string& formatStr = line.substr(line.find(' ') + 1);
-    const size_t numValues = atoi(line.c_str()) * NCHANNELS;
-    if (!numValues || numValues != getLutSize())
-    {
-        LBWARN << "Wrong format in transfer function file: " << file << ", got "
-               << numValues << " entries, expect " << getLutSize() << std::endl;
-        return;
-    }
-
-    size_t i = 0;
-    uint8_t* data = getLut();
-    const bool hasBytes = (formatStr == "uint8");
-    while (ifs >> val && i < numValues)
-    {
-        data[i++] = hasBytes
-                        ? std::stoi(val)
-                        : std::stof(val) * std::numeric_limits<uint8_t>::max();
-    }
+    return lut;
 }
 }

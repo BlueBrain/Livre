@@ -1,5 +1,5 @@
-/* Copyright (c) 2015, EPFL/Blue Brain Project
- *                     Jafet.VillafrancaDiaz@epfl.ch
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
+ *                          Jafet.VillafrancaDiaz@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define BOOST_TEST_MODULE LibCore
+#define BOOST_TEST_MODULE TransferFunction1D
 
 #include <livre/core/render/TransferFunction1D.h>
 
@@ -28,60 +28,45 @@
 
 const std::string& tfDir = lunchbox::getRootPath() + "/share/Livre/examples/";
 
-BOOST_AUTO_TEST_CASE(transferFunction)
+std::vector<livre::Vector4ub> readFile(const std::string& file)
 {
-    const size_t nChannels = livre::TransferFunction1D::getNumChannels();
-    const size_t defaultSize = nChannels * 256;
-    livre::TransferFunction1D tf_default;
-    BOOST_CHECK_EQUAL(tf_default.getLutSize(), defaultSize);
-}
-
-std::vector<uint8_t> readFile(const std::string& file)
-{
-    std::vector<uint8_t> values;
+    std::vector<livre::Vector4ub> values;
     std::ifstream ifs(file);
 
-    std::string line, val;
-    std::getline(ifs, line);
+    size_t numValues;
+    ifs >> numValues;
 
-    while (ifs >> val)
-        values.push_back(std::stoi(val));
+    values.resize(numValues);
+    for (size_t i = 0; i < numValues; ++i)
+    {
+        for (size_t j = 0; j < 4; ++j)
+        {
+            float value;
+            ifs >> value;
+            values[i][j] = value * 255.f;
+        }
+    }
 
     return values;
 }
 
 BOOST_AUTO_TEST_CASE(loadTransferFunctionFile)
 {
-    std::vector<uint8_t> values = readFile(tfDir + "tf_f.1dt");
+    const auto& values = readFile(tfDir + "tf_f.1dt");
     livre::TransferFunction1D tfFile(tfDir + "tf_f.1dt");
-    BOOST_CHECK_EQUAL(values.size(), tfFile.getLutSize());
-
-    values = readFile(tfDir + "tf_c.1dt");
-    tfFile = livre::TransferFunction1D(tfDir + "tf_c.1dt");
-    BOOST_CHECK_EQUAL(values.size(), tfFile.getLutSize());
-    BOOST_CHECK_EQUAL_COLLECTIONS(values.begin(), values.end(), tfFile.getLut(),
-                                  tfFile.getLut() + tfFile.getLutSize());
-}
-
-BOOST_AUTO_TEST_CASE(serialization)
-{
-    livre::TransferFunction1D tfFile(tfDir + "tf_c.1dt");
-    lunchbox::saveBinary(tfFile, "tf.lbb");
-    lunchbox::saveAscii(tfFile, "tf.lba");
-
-    livre::TransferFunction1D tfFilea("tf.lbb");
-    BOOST_CHECK_EQUAL(tfFile, tfFilea);
-
-    livre::TransferFunction1D tfFileb("tf.lba");
-    BOOST_CHECK_EQUAL(tfFile, tfFileb);
+    const auto& lut = tfFile.getLUT();
+    BOOST_CHECK_EQUAL(values.size(), lut.size());
+    BOOST_CHECK_EQUAL_COLLECTIONS(values.begin(), values.end(), lut.begin(),
+                                  lut.end());
 }
 
 BOOST_AUTO_TEST_CASE(loadWrongTransferFunctionFile)
 {
     livre::TransferFunction1D defaultTf;
     livre::TransferFunction1D tfFile(tfDir + "inexistent_file.1dt");
-    BOOST_CHECK_EQUAL_COLLECTIONS(defaultTf.getLut(),
-                                  defaultTf.getLut() + defaultTf.getLutSize(),
-                                  tfFile.getLut(),
-                                  tfFile.getLut() + tfFile.getLutSize());
+
+    const auto& defaultLUT = defaultTf.getLUT();
+    const auto& tfLUT = tfFile.getLUT();
+    BOOST_CHECK_EQUAL_COLLECTIONS(defaultLUT.begin(), defaultLUT.end(),
+                                  tfLUT.begin(), tfLUT.end());
 }
