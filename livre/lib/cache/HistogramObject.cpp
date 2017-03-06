@@ -158,9 +158,6 @@ public:
 
         const uint64_t scaleFactor = scaleFactor1d * scaleFactor1d * scaleFactor1d;
 
-        _histogram.setMin( dataSourceRange[ 0 ] );
-        _histogram.setMax( dataSourceRange[ 1 ] );
-
         const DataType dataType = volumeInfo.dataType;
         switch( dataType )
         {
@@ -172,11 +169,15 @@ public:
                          _histogram, voxelBox, padding, scaleFactor );
                 break;
            case DT_UINT16:
+                _histogram.setMin( std::numeric_limits< uint16_t >::max( ));
+                _histogram.setMax( std::numeric_limits< uint16_t >::min( ));
                 _histogram.resize( 1024 );
                 binData( static_cast< const uint16_t* >( rawData ),
                          _histogram, voxelBox, padding, scaleFactor );
                 break;
            case DT_UINT32:
+                _histogram.setMin( std::numeric_limits< uint32_t >::max( ));
+                _histogram.setMax( std::numeric_limits< uint32_t >::min( ));
                 _histogram.resize( 4096 );
                 binDataSlow( static_cast< const uint32_t* >( rawData ),
                              _histogram, voxelBox, padding, scaleFactor );
@@ -189,16 +190,22 @@ public:
                          _histogram, voxelBox, padding, scaleFactor );
                 break;
            case DT_INT16:
+                _histogram.setMin( std::numeric_limits< int16_t >::max( ));
+                _histogram.setMax( std::numeric_limits< int16_t >::min( ));
                 _histogram.resize( 1024 );
                 binData( static_cast< const int16_t* >( rawData ),
                          _histogram, voxelBox, padding, scaleFactor );
                 break;
            case DT_INT32:
+                _histogram.setMin( std::numeric_limits< int32_t >::max( ));
+                _histogram.setMax( std::numeric_limits< int32_t >::min( ));
                 _histogram.resize( 4096 );
                 binDataSlow( static_cast< const int32_t* >( rawData ),
                              _histogram, voxelBox, padding, scaleFactor );
                 break;
            case DT_FLOAT:
+                _histogram.setMin( dataSourceRange[ 0 ] );
+                _histogram.setMax( dataSourceRange[ 1 ] );
                 _histogram.resize( 256 );
                 binDataSlow( static_cast< const float* >( rawData ),
                              _histogram, voxelBox, padding, scaleFactor );

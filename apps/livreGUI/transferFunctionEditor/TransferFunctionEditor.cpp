@@ -20,12 +20,18 @@
  */
 
 #include "TransferFunctionEditor.h"
-#include "ColorMapWidget.h"
+#include "AlphaWidget.h"
+#include "ColorWidget.h"
+#include "RangeWidget.h"
 
 #include <livreGUI/ui_TransferFunctionEditor.h>
 #include <livreGUI/Controller.h>
 
 #include <lexis/render/lookupTable1D.h>
+#include <lexis/render/materialLUT.h>
+#include <lexis/request.h>
+
+#include <vmmlib/vector.hpp>
 
 #include <QFileDialog>
 
@@ -36,43 +42,48 @@ namespace livre
 {
 namespace
 {
-const ColorMapWidget::Channel channels[] =
-                            { ColorMapWidget::Channel::red,
-                              ColorMapWidget::Channel::green,
-                              ColorMapWidget::Channel::blue,
-                              ColorMapWidget::Channel::alpha };
+const ColorWidget::Channel channels[] =
+                            { ColorWidget::Channel::red,
+                              ColorWidget::Channel::green,
+                              ColorWidget::Channel::blue,
+                              ColorWidget::Channel::alpha };
 
 }
 
-TransferFunctionEditor::TransferFunctionEditor( livre::Controller& controller,
-                                                QWidget* tfParentWidget )
-    : QWidget( tfParentWidget )
+TransferFunctionEditor::TransferFunctionEditor( Controller& controller,
+                                                QWidget* parent_ )
+    : QWidget( parent_ )
     , _controller( controller )
     , _ui( new Ui::TransferFunctionEditor )
 {
     _ui->setupUi( this );
 
+    _rangeWidget = new RangeWidget( this );
+    connect( _rangeWidget, SIGNAL( histIndexChanged(size_t,double)),
+             this, SLOT( _onHistIndexChanged(size_t,double)));
+    connect( _rangeWidget, SIGNAL( rangeChanged( vmml::Vector2f )),
+            this, SLOT( _onRangeChanged( vmml::Vector2f )));
+    _ui->widgetsLayout->addWidget( _rangeWidget );
+
+    _alphaWidget = new AlphaWidget( this );
+    connect( _alphaWidget, SIGNAL( colorsChanged( )),
+             this, SIGNAL( transferFunctionChanged( )));
+    connect( _alphaWidget, SIGNAL( histIndexChanged(size_t,double)),
+             this, SLOT( _onHistIndexChanged(size_t,double)));
+    _ui->widgetsLayout->addWidget( _alphaWidget );
+    _controlPointsWidgets[3] = _alphaWidget;
+
     for( const auto& channel: channels )
     {
-        _colorWidgets[ (size_t)channel ] = new ColorMapWidget( this, channel  );
-        connect( _colorWidgets[ (size_t)channel  ], SIGNAL( colorsChanged( )),
+        if( channel == ColorWidget::Channel::alpha )
+            break;
+
+        auto widget = new ColorWidget( this, channel );
+        _ui->widgetsLayout->addWidget( widget );
+        _controlPointsWidgets[ (size_t)channel ] = widget;
+        connect( widget, SIGNAL( colorsChanged( )),
                 this, SIGNAL( transferFunctionChanged( )));
     }
-
-    connect( _colorWidgets[ (size_t)ColorMapWidget::Channel::alpha ],
-             SIGNAL( histIndexChanged(size_t,double)),
-             this, SLOT( _onHistIndexChanged(size_t,double)));
-
-    // Add the widgets to the layouts to match the exact positions on the
-    // TransferFunctionEditor
-    _ui->redLayout->addWidget(
-                _colorWidgets[ (size_t)ColorMapWidget::Channel::red ]);
-    _ui->greenLayout->addWidget(
-                _colorWidgets[ (size_t)ColorMapWidget::Channel::green ]);
-    _ui->blueLayout->addWidget(
-                _colorWidgets[ (size_t)ColorMapWidget::Channel::blue ]);
-    _ui->rgbaLayout->addWidget(
-                _colorWidgets[ (size_t)ColorMapWidget::Channel::alpha ]);
 
     connect( _ui->histogramScaleCheckBox, SIGNAL( clicked( bool )), this,
              SLOT( _onHistogramChanged( bool )));
@@ -104,7 +115,7 @@ TransferFunctionEditor::~TransferFunctionEditor()
 void TransferFunctionEditor::_setGradientStops()
 {
     ControlPoints allControlPoints( compareControlPoints );
-    for( auto& widget: _colorWidgets )
+    for( auto& widget: _controlPointsWidgets )
     {
         const auto& controlPoints = widget->getControlPoints();
         allControlPoints.insert( controlPoints.begin(), controlPoints.end());
@@ -116,7 +127,7 @@ void TransferFunctionEditor::_setGradientStops()
     {
         int colors[ nChannels ] = { 0 };
         for( size_t j = 0; j < nChannels; ++j )
-            colors[ j ] = _colorWidgets[ j ]->getColorAtPoint( point.x() );
+            colors[ j ] = _controlPointsWidgets[ j ]->getColorAtPoint( point.x() );
 
         QColor color((0x00ff0000 & colors[ 0 ]) >> 16,  // R (16)
                      (0x0000ff00 & colors[ 1 ]) >> 8,   // G (8)
@@ -126,31 +137,31 @@ void TransferFunctionEditor::_setGradientStops()
         stops << QGradientStop( point.x(), color );
     }
 
-    _colorWidgets[ (size_t)ColorMapWidget::Channel::alpha ]->setGradientStops( stops );
+    _alphaWidget->setGradientStops( stops );
 }
 
 void TransferFunctionEditor::_setDefault()
 {
-    for( auto& widget: _colorWidgets )
+    for( auto& widget: _controlPointsWidgets )
     {
         QPolygonF points;
         switch( widget->getChannel())
         {
-        case ColorMapWidget::Channel::red:
-        case ColorMapWidget::Channel::green:
+        case ColorWidget::Channel::red:
+        case ColorWidget::Channel::green:
             points << QPointF( 0.0, 0.0 );
             points << QPointF( 0.4, 0.0 );
             points << QPointF( 0.6, 1.0 );
             points << QPointF( 1.0, 1.0 );
             break;
-        case ColorMapWidget::Channel::blue:
+        case ColorWidget::Channel::blue:
             points << QPointF( 0.0, 0.0 );
             points << QPointF( 0.2, 1.0 );
             points << QPointF( 0.6, 1.0 );
             points << QPointF( 0.8, 0.0 );
             points << QPointF( 1.0, 0.0 );
             break;
-        case ColorMapWidget::Channel::alpha:
+        case ColorWidget::Channel::alpha:
             points << QPointF( 0.0, 0.0 );
             points << QPointF( 0.1, 0.2 );
             points << QPointF( 1.0, 0.8 );
@@ -175,7 +186,7 @@ void TransferFunctionEditor::_publishTransferFunction()
     lexis::render::LookupTable1D lut;
 
     size_t i = 0;
-    for( const auto& widget: _colorWidgets )
+    for( const auto& widget: _controlPointsWidgets )
     {
         const UInt8s& curve = widget->getCurve();
         if( curve.empty() || curve.size() * 4 != lut.getLutSize( ))
@@ -189,15 +200,45 @@ void TransferFunctionEditor::_publishTransferFunction()
     _controller.publish( lut );
 }
 
+void TransferFunctionEditor::_publishMaterialLUT()
+{
+    lexis::render::MaterialLUT lut;
+
+    lut.getDiffuse().resize( COLORSAMPLES );
+    lut.getAlpha().resize( COLORSAMPLES );
+    lut.getContribution().resize( COLORSAMPLES );
+
+    const auto& reds = _controlPointsWidgets[0]->getCurve();
+    const auto& greens = _controlPointsWidgets[1]->getCurve();
+    const auto& blues = _controlPointsWidgets[2]->getCurve();
+    const auto& alphas = _controlPointsWidgets[3]->getCurve();
+
+    for( size_t i = 0; i < COLORSAMPLES; ++i )
+    {
+        lut.getDiffuse()[i] = lexis::render::Color( reds[i] / 255.f,
+                                                    greens[i] / 255.f,
+                                                    blues[i] / 255.f );
+        lut.getAlpha()[i] = alphas[i] / 255.f;
+        lut.getContribution()[i] = 1.0f;
+    }
+
+    if( !_histogram.isEmpty( ))
+        lut.setRange( _rangeWidget->fromNormalizedRange().array );
+
+    _controller.publish( lut );
+}
+
 void TransferFunctionEditor::_clear()
 {
     QPolygonF points;
     points.push_back( { 0, 0 } );
     points.push_back( { 1, 1 } );
     for( const auto& channel: channels )
-        _colorWidgets[ (size_t)channel ]->setControlPoints( points );
+        _controlPointsWidgets[ (size_t)channel ]->setControlPoints( points );
 
-    _colorWidgets[ (size_t)ColorMapWidget::Channel::alpha ]->setHistogram( lexis::render::Histogram(), false );
+    _histogram = lexis::render::Histogram();
+    _controller.publish( ::lexis::Request( _histogram.getTypeIdentifier( )));
+    emit histogramChanged( _ui->histogramScaleCheckBox->checkState() == Qt::Checked );
     emit transferFunctionChanged();
 }
 
@@ -269,7 +310,7 @@ void TransferFunctionEditor::_load()
         if( version != TF_FILE_VERSION_1 && version != TF_FILE_VERSION_2 )
             return;
 
-        for( auto& widget: _colorWidgets )
+        for( auto& widget: _controlPointsWidgets )
         {
             QPolygonF points;
             in >> points;
@@ -307,7 +348,7 @@ void TransferFunctionEditor::_load()
         }
 
         for( size_t i = 0; i < nChannels; ++i )
-            _colorWidgets[i]->setControlPoints( _filterPoints( points[i] ));
+            _controlPointsWidgets[i]->setControlPoints( _filterPoints( points[i] ));
     }
     else
         return;
@@ -333,7 +374,7 @@ void TransferFunctionEditor::_save()
 
         out << TF_FILE_HEADER << TF_FILE_VERSION_2;
 
-        for( const auto& widget : _colorWidgets )
+        for( const auto& widget : _controlPointsWidgets )
             out << widget->getControlPoints();
     }
     else if( selectedFilter == DT_FILE_FILTER )
@@ -345,10 +386,10 @@ void TransferFunctionEditor::_save()
         file.open( filename.toStdString( ));
         file << COLORSAMPLES << std::endl;
 
-        const auto& reds = _colorWidgets[0]->getCurve();
-        const auto& greens = _colorWidgets[1]->getCurve();
-        const auto& blues = _colorWidgets[2]->getCurve();
-        const auto& alphas = _colorWidgets[3]->getCurve();
+        const auto& reds = _controlPointsWidgets[0]->getCurve();
+        const auto& greens = _controlPointsWidgets[1]->getCurve();
+        const auto& blues = _controlPointsWidgets[2]->getCurve();
+        const auto& alphas = _controlPointsWidgets[3]->getCurve();
 
         for( size_t i = 0; i < COLORSAMPLES; ++i )
             file << reds[i] / 255.f << " " << greens[i] / 255.f << " "
@@ -360,11 +401,20 @@ void TransferFunctionEditor::_onTransferFunctionChanged()
 {
     _setGradientStops();
     _publishTransferFunction();
+    _publishMaterialLUT();
+}
+
+void TransferFunctionEditor::_onRangeChanged( const vmml::Vector2f range )
+{
+    _alphaWidget->setRange( range );
+    _publishTransferFunction();
+    _publishMaterialLUT();
 }
 
 void TransferFunctionEditor::_onHistogramChanged( const bool logScale )
 {
-    _colorWidgets[ (size_t)ColorMapWidget::Channel::alpha  ]->setHistogram( _histogram, logScale );
+    _alphaWidget->setHistogram( _histogram, logScale );
+    _rangeWidget->setHistogram( _histogram, logScale );
 }
 
 }

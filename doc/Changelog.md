@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # git master
 
+* [#382](https://github.com/BlueBrain/Livre/pull/382):
+  Support data range selection in livreGUI
 * [#375](https://github.com/BlueBrain/Livre/pull/375):
   Add livre::DataSource::handles()
 * [#373](https://github.com/BlueBrain/Livre/pull/373):

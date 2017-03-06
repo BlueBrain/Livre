@@ -1,5 +1,5 @@
-/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
- *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+﻿/* Copyright (c) 2017, EPFL/Blue Brain Project
+ *                     Daniel.Nachbaur@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -17,35 +17,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _GuiTypes_h_
-#define _GuiTypes_h_
+#pragma once
 
-#include <QPointF>
+#include <QList>
+#include <QVariant>
+#include <QVector2D>
 
-#include <limits.h>
-#include <memory>
-#include <set>
-#include <vector>
+#include <lexis/render/Histogram.h>
+#include <vmmlib/vector.hpp>
+#include <vmmlib/types.hpp>
 
 namespace livre
 {
 
-class AlphaWidget;
-class ColorWidget;
-class Controller;
-class ControlPointsWidget;
-class RangeWidget;
-
-const size_t COLORSAMPLES = 256;
-const uint32_t LATEST_FRAME = INT_MAX; //!< Maximum frame number
-
-inline bool compareControlPoints( const QPointF& p1, const QPointF& p2 )
-    { return p1.x() < p2.x(); };
-
-using ControlPoints =
-    std::set< QPointF, bool(*)( const QPointF& p1, const QPointF& p2 ) >;
-
-using UInt8s = std::vector< uint8_t >;
+inline QVariant sampleHistogram( const lexis::render::Histogram& histogram,
+                                 const bool logScale,
+                                 const vmml::Vector2f& range = {0, 1} )
+{
+    QList< QVariant > points;
+    const auto& samples = histogram.sampleCurve( logScale, range );
+    for( const auto& sample : samples )
+        points.push_back( QVector2D{ sample.x(), sample.y()});
+    return points;
 }
 
-#endif // _GuiTypes_h_
+}

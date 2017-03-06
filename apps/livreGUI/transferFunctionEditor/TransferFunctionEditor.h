@@ -19,10 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _TransferFunctionEditor_h_
-#define _TransferFunctionEditor_h_
+#pragma once
 
 #include <livreGUI/types.h>
+
 #include <lexis/render/Histogram.h>
 
 #include <array>
@@ -32,7 +32,6 @@ namespace Ui { class TransferFunctionEditor; }
 
 namespace livre
 {
-class ColorMapWidget;
 
 /** This contains all the widget for the transfer function editor. */
 class TransferFunctionEditor: public QWidget
@@ -40,14 +39,7 @@ class TransferFunctionEditor: public QWidget
     Q_OBJECT
 
 public:
-
-    /**
-     * Constructor of TransferFunctionEditor.
-     * @param controller The ZeroEQ publish/receive controller
-     * @param tfParentWidget The parent GUI widget
-     */
-    TransferFunctionEditor( livre::Controller& controller,
-                            QWidget* tfParentWidget = 0 );
+    TransferFunctionEditor( Controller& controller, QWidget* parent );
     ~TransferFunctionEditor();
 
 signals:
@@ -62,20 +54,21 @@ private Q_SLOTS:
     void _onHistIndexChanged( size_t index, double value);
     void _onHistogramChanged( bool logScale );
     void _onTransferFunctionChanged();
+    void _onRangeChanged( vmml::Vector2f range );
 
 private:
     void _publishTransferFunction();
+    void _publishMaterialLUT();
     void _setGradientStops();
-    void _setHistogram();
 
     lexis::render::Histogram _histogram;
     Controller& _controller;
     Ui::TransferFunctionEditor* _ui;
 
-    typedef std::array< ColorMapWidget*, 4 > ColorWidgets;
-    ColorWidgets _colorWidgets;
+    typedef std::array< ControlPointsWidget*, 4 > ControlPointsWidgets;
+    ControlPointsWidgets _controlPointsWidgets;
+    AlphaWidget* _alphaWidget { nullptr };
+    RangeWidget* _rangeWidget { nullptr };
 };
 
 }
-
-#endif // _TransferFunctionEditor_h_

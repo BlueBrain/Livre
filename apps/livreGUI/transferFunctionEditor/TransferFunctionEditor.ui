@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>518</width>
-    <height>444</height>
+    <height>538</height>
    </rect>
   </property>
   <layout class="QGridLayout" name="gridLayout">
@@ -17,15 +17,6 @@
       <string>Color Map</string>
      </property>
     </widget>
-   </item>
-   <item row="3" column="0">
-    <layout class="QVBoxLayout" name="rgbaLayout"/>
-   </item>
-   <item row="5" column="0">
-    <layout class="QVBoxLayout" name="greenLayout"/>
-   </item>
-   <item row="6" column="0">
-    <layout class="QVBoxLayout" name="blueLayout"/>
    </item>
    <item row="1" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -58,9 +49,6 @@
       </widget>
      </item>
     </layout>
-   </item>
-   <item row="4" column="0">
-    <layout class="QVBoxLayout" name="redLayout"/>
    </item>
    <item row="2" column="0">
     <widget class="QFrame" name="frame">
@@ -99,6 +87,9 @@
       </property>
       <property name="text">
        <string>Log scale</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
       </property>
      </widget>
      <widget class="QLabel" name="histogramValLabel">
@@ -202,6 +193,9 @@
       </property>
      </widget>
     </widget>
+   </item>
+   <item row="3" column="0">
+    <layout class="QVBoxLayout" name="widgetsLayout"/>
    </item>
   </layout>
  </widget>

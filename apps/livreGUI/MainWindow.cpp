@@ -40,7 +40,7 @@ struct MainWindow::Impl
     {
         _ui.setupUi( parent );
 
-        parent->setCentralWidget( new TransferFunctionEditor( controller ));
+        parent->setCentralWidget( new TransferFunctionEditor( controller, parent ));
 
         _ui.animationDockWidget->setWidget(
             new AnimationController( controller ));
