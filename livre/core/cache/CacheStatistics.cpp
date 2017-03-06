@@ -18,30 +18,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/core/cache/CacheStatistics.h>
 #include <livre/core/cache/CacheObject.h>
+#include <livre/core/cache/CacheStatistics.h>
 #include <livre/core/util/ThreadClock.h>
 
 namespace livre
 {
-
-CacheStatistics::CacheStatistics( const std::string& name, const size_t maxMemBytes )
-    : _name( name )
-    , _usedMemBytes( 0 )
-    , _maxMemBytes( maxMemBytes )
-    , _objCount( 0 )
-    , _cacheHit( 0 )
-    , _cacheMiss( 0 )
+CacheStatistics::CacheStatistics(const std::string& name,
+                                 const size_t maxMemBytes)
+    : _name(name)
+    , _usedMemBytes(0)
+    , _maxMemBytes(maxMemBytes)
+    , _objCount(0)
+    , _cacheHit(0)
+    , _cacheMiss(0)
 {
 }
 
-void CacheStatistics::notifyLoaded( const CacheObject& cacheObject )
+void CacheStatistics::notifyLoaded(const CacheObject& cacheObject)
 {
-   ++_objCount;
-   _usedMemBytes += cacheObject.getSize();
+    ++_objCount;
+    _usedMemBytes += cacheObject.getSize();
 }
 
-void CacheStatistics::notifyUnloaded( const CacheObject& cacheObject )
+void CacheStatistics::notifyUnloaded(const CacheObject& cacheObject)
 {
     --_objCount;
     _usedMemBytes -= cacheObject.getSize();
@@ -55,27 +55,25 @@ void CacheStatistics::clear()
     _cacheMiss = 0;
 }
 
-std::ostream& operator<<( std::ostream& stream, const CacheStatistics& statistics )
+std::ostream& operator<<(std::ostream& stream,
+                         const CacheStatistics& statistics)
 {
-    const int hits = int(
-        100.f * float( statistics._cacheHit ) /
-        float( statistics._cacheHit + statistics._cacheMiss ));
+    const int hits = int(100.f * float(statistics._cacheHit) /
+                         float(statistics._cacheHit + statistics._cacheMiss));
     stream << statistics._name << std::endl;
     stream << "  Used Memory: "
            << (statistics._usedMemBytes + LB_1MB - 1) / LB_1MB << "/"
            << (statistics._maxMemBytes + LB_1MB - 1) / LB_1MB << "MB"
            << std::endl;
-    stream << "  Block Count: "
-           << statistics._objCount << std::endl;
-    stream << "  Cache hits: "
-           << statistics._cacheHit << " (" << hits << "%)" << std::endl;
-    stream << "  Cache misses: "
-           << statistics._cacheMiss << std::endl;
+    stream << "  Block Count: " << statistics._objCount << std::endl;
+    stream << "  Cache hits: " << statistics._cacheHit << " (" << hits << "%)"
+           << std::endl;
+    stream << "  Cache misses: " << statistics._cacheMiss << std::endl;
 
     return stream;
 }
 
 CacheStatistics::~CacheStatistics()
-{}
-
+{
+}
 }

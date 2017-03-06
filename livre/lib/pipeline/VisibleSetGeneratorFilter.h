@@ -27,27 +27,24 @@
 
 namespace livre
 {
-
 /**
  * Collects all the visibles for given inputs ( Frustums, Frames, Data Ranges,
  * Rendering params and Viewports )
  */
 class VisibleSetGeneratorFilter : public Filter
 {
-
 public:
-
     /**
      * Constructor
      * @param dataSource the data source
      */
-    explicit VisibleSetGeneratorFilter( const DataSource& dataSource );
+    explicit VisibleSetGeneratorFilter(const DataSource& dataSource);
     ~VisibleSetGeneratorFilter();
 
     /**
      * @copydoc Filter::execute
      */
-    void execute( const FutureMap& input, PromiseMap& output ) const final;
+    void execute(const FutureMap& input, PromiseMap& output) const final;
 
     /**
      * @copydoc Filter::getInputDataInfos
@@ -61,11 +58,9 @@ public:
     DataInfos getOutputDataInfos() const final;
 
 private:
-
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };
-
 }
 
 #endif

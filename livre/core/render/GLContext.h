@@ -25,21 +25,20 @@
 
 namespace livre
 {
-
 /**
  * The GLContext class is the warpper for different kinds of OpenGL contexts
  */
 class GLContext
 {
 public:
-    LIVRECORE_API GLContext( const GLEWContext* glewContext );
+    LIVRECORE_API GLContext(const GLEWContext* glewContext);
     LIVRECORE_API virtual ~GLContext();
 
     /**
      * Shares the context with the source context.
      * @param src is the source context to share the context with
      */
-    virtual void share( const GLContext& src ) = 0;
+    virtual void share(const GLContext& src) = 0;
 
     /**
      * @return a clone of the context.
@@ -67,7 +66,6 @@ public:
 private:
     const GLEWContext* _glewContext;
 };
-
 }
 
 #endif // _GLContext_h_

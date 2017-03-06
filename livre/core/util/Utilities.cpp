@@ -17,12 +17,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/core/util/Utilities.h>
 #include <eq/gl.h>
+#include <livre/core/util/Utilities.h>
 
 namespace livre
 {
-
 bool hasOpenGL42Support()
 {
 #ifdef GL_MAJOR_VERSION
@@ -30,10 +29,9 @@ bool hasOpenGL42Support()
     glGetIntegerv(GL_MAJOR_VERSION, &major);
     glGetIntegerv(GL_MINOR_VERSION, &minor);
 
-    return ( major >= 5 ) || (( major == 4 ) && ( minor >= 2 ));
+    return (major >= 5) || ((major == 4) && (minor >= 2));
 #else
     return false;
 #endif
 }
-
 }

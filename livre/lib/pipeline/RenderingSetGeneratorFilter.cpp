@@ -20,88 +20,88 @@
 #include <livre/lib/pipeline/RenderingSetGeneratorFilter.h>
 
 #include <livre/core/cache/Cache.h>
-#include <livre/core/pipeline/PipeFilter.h>
 #include <livre/core/pipeline/InputPort.h>
-#include <livre/core/pipeline/Workers.h>
+#include <livre/core/pipeline/PipeFilter.h>
 #include <livre/core/pipeline/PortData.h>
+#include <livre/core/pipeline/Workers.h>
 
 #include <livre/core/render/FrameInfo.h>
 
 namespace livre
 {
-
 struct RenderingSetGenerator
 {
-    explicit RenderingSetGenerator( const Cache& textureCache )
-        : _textureCache( textureCache )
-    {}
+    explicit RenderingSetGenerator(const Cache& textureCache)
+        : _textureCache(textureCache)
+    {
+    }
 
-    bool hasParentInMap( const NodeId& childRenderNode,
-                         const ConstCacheMap& cacheMap ) const
+    bool hasParentInMap(const NodeId& childRenderNode,
+                        const ConstCacheMap& cacheMap) const
     {
         const NodeIds& parentNodeIds = childRenderNode.getParents();
 
-        for( const NodeId& parentId : parentNodeIds )
-            if( cacheMap.find( parentId.getId( )) != cacheMap.end() )
+        for (const NodeId& parentId : parentNodeIds)
+            if (cacheMap.find(parentId.getId()) != cacheMap.end())
                 return true;
 
         return false;
     }
 
-    void collectLoadedTextures( const NodeId& nodeId,
-                                ConstCacheMap& cacheMap ) const
+    void collectLoadedTextures(const NodeId& nodeId,
+                               ConstCacheMap& cacheMap) const
     {
         NodeId current = nodeId;
-        while( current.isValid( ))
+        while (current.isValid())
         {
             const NodeId& currentNodeId = current;
-            const ConstCacheObjectPtr texture = _textureCache.get( currentNodeId.getId( ));
-            if( texture )
+            const ConstCacheObjectPtr texture =
+                _textureCache.get(currentNodeId.getId());
+            if (texture)
             {
-                cacheMap[ currentNodeId.getId() ] = texture;
+                cacheMap[currentNodeId.getId()] = texture;
                 break;
             }
 
-            current = currentNodeId.isRoot() ? NodeId() :
-                                               currentNodeId.getParent();
+            current =
+                currentNodeId.isRoot() ? NodeId() : currentNodeId.getParent();
         }
     }
 
-    ConstCacheObjects generateRenderingSet( const NodeIds& visibles,
-                                            NodeAvailability& availability ) const
+    ConstCacheObjects generateRenderingSet(const NodeIds& visibles,
+                                           NodeAvailability& availability) const
     {
         ConstCacheMap cacheMap;
-        for( const NodeId& nodeId : visibles )
+        for (const NodeId& nodeId : visibles)
         {
-            collectLoadedTextures( nodeId, cacheMap );
-            cacheMap.count( nodeId.getId( )) > 0 ?
-                        ++availability.nAvailable : ++availability.nNotAvailable;
+            collectLoadedTextures(nodeId, cacheMap);
+            cacheMap.count(nodeId.getId()) > 0 ? ++availability.nAvailable
+                                               : ++availability.nNotAvailable;
         }
 
-        if( visibles.size() != cacheMap.size( ))
+        if (visibles.size() != cacheMap.size())
         {
             ConstCacheMap::const_iterator it = cacheMap.begin();
             size_t previousSize = 0;
             do
             {
                 previousSize = cacheMap.size();
-                while( it != cacheMap.end( ))
+                while (it != cacheMap.end())
                 {
-                    if( hasParentInMap( NodeId( it->first ), cacheMap ))
-                        it = cacheMap.erase( it );
+                    if (hasParentInMap(NodeId(it->first), cacheMap))
+                        it = cacheMap.erase(it);
                     else
                         ++it;
                 }
-            }
-            while( previousSize != cacheMap.size( ));
+            } while (previousSize != cacheMap.size());
         }
 
         ConstCacheObjects cacheObjects;
-        cacheObjects.reserve( cacheMap.size( ));
-        for( ConstCacheMap::const_iterator it = cacheMap.begin();
-             it != cacheMap.end(); ++it )
+        cacheObjects.reserve(cacheMap.size());
+        for (ConstCacheMap::const_iterator it = cacheMap.begin();
+             it != cacheMap.end(); ++it)
         {
-            cacheObjects.push_back( it->second );
+            cacheObjects.push_back(it->second);
         }
 
         return cacheObjects;
@@ -112,56 +112,52 @@ struct RenderingSetGenerator
 
 struct RenderingSetGeneratorFilter::Impl
 {
-    explicit Impl( const Cache& cache )
-        : _cache( cache )
-    {}
-
-    void execute( const FutureMap& input,
-                  PromiseMap& output ) const
+    explicit Impl(const Cache& cache)
+        : _cache(cache)
     {
-        RenderingSetGenerator renderSetGenerator( _cache );
+    }
+
+    void execute(const FutureMap& input, PromiseMap& output) const
+    {
+        RenderingSetGenerator renderSetGenerator(_cache);
 
         ConstCacheObjects cacheObjects;
         size_t nVisible = 0;
         NodeAvailability cumulativeAvailability;
-        for( const auto& visibles: input.get< NodeIds >( "VisibleNodes" ))
+        for (const auto& visibles : input.get<NodeIds>("VisibleNodes"))
         {
             NodeAvailability avaliability;
-            const ConstCacheObjects& objs = renderSetGenerator.generateRenderingSet( visibles,
-                                                                                     avaliability );
-            cacheObjects.insert( cacheObjects.end(), objs.begin(), objs.end( ));
+            const ConstCacheObjects& objs =
+                renderSetGenerator.generateRenderingSet(visibles, avaliability);
+            cacheObjects.insert(cacheObjects.end(), objs.begin(), objs.end());
             nVisible += visibles.size();
             cumulativeAvailability += avaliability;
         }
 
-        output.set( "CacheObjects", cacheObjects );
-        output.set( "RenderingDone", cacheObjects.size() == nVisible );
-        output.set( "NodeAvailability", cumulativeAvailability );
+        output.set("CacheObjects", cacheObjects);
+        output.set("RenderingDone", cacheObjects.size() == nVisible);
+        output.set("NodeAvailability", cumulativeAvailability);
     }
 
     DataInfos getInputDataInfos() const
     {
-        return
-        {
-            { "VisibleNodes", getType< NodeIds >( )}
-        };
+        return {{"VisibleNodes", getType<NodeIds>()}};
     }
 
     DataInfos getOutputDataInfos() const
     {
-        return
-        {
-            { "CacheObjects", getType< ConstCacheObjects >( )},
-            { "RenderingDone", getType< bool >() },
-            { "NodeAvailability", getType< NodeAvailability >() },
+        return {
+            {"CacheObjects", getType<ConstCacheObjects>()},
+            {"RenderingDone", getType<bool>()},
+            {"NodeAvailability", getType<NodeAvailability>()},
         };
     }
 
     const Cache& _cache;
 };
 
-RenderingSetGeneratorFilter::RenderingSetGeneratorFilter( const Cache& cache )
-    : _impl( new RenderingSetGeneratorFilter::Impl( cache ))
+RenderingSetGeneratorFilter::RenderingSetGeneratorFilter(const Cache& cache)
+    : _impl(new RenderingSetGeneratorFilter::Impl(cache))
 {
 }
 
@@ -169,10 +165,10 @@ RenderingSetGeneratorFilter::~RenderingSetGeneratorFilter()
 {
 }
 
-void RenderingSetGeneratorFilter::execute( const FutureMap& input,
-                                           PromiseMap& output ) const
+void RenderingSetGeneratorFilter::execute(const FutureMap& input,
+                                          PromiseMap& output) const
 {
-    _impl->execute( input, output );
+    _impl->execute(input, output);
 }
 
 DataInfos RenderingSetGeneratorFilter::getInputDataInfos() const
@@ -184,6 +180,4 @@ DataInfos RenderingSetGeneratorFilter::getOutputDataInfos() const
 {
     return _impl->getOutputDataInfos();
 }
-
-
 }

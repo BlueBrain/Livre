@@ -17,99 +17,87 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/lib/pipeline/VisibleSetGeneratorFilter.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
+#include <livre/lib/pipeline/VisibleSetGeneratorFilter.h>
 
 #include <livre/core/cache/Cache.h>
-#include <livre/core/pipeline/InputPort.h>
-#include <livre/core/pipeline/Workers.h>
-#include <livre/core/pipeline/PortData.h>
-#include <livre/core/render/SelectVisibles.h>
 #include <livre/core/data/DataSource.h>
+#include <livre/core/pipeline/InputPort.h>
+#include <livre/core/pipeline/PortData.h>
+#include <livre/core/pipeline/Workers.h>
+#include <livre/core/render/SelectVisibles.h>
 #include <livre/core/visitor/DFSTraversal.h>
 
 namespace livre
 {
-
 struct VisibleSetGeneratorFilter::Impl
 {
-    explicit Impl( const DataSource& dataSource )
-        : _dataSource( dataSource )
-    {}
-
-    void execute( const FutureMap& input,
-                  PromiseMap& output ) const
+    explicit Impl(const DataSource& dataSource)
+        : _dataSource(dataSource)
     {
-        const UniqueFutureMap uniqueInputs( input.getFutures( ));
+    }
 
-        const auto& frustum = uniqueInputs.get< Frustum >( "Frustum" );
-        const auto& frame =  uniqueInputs.get< uint32_t >( "Frame" );
-        const auto& range = uniqueInputs.get< Range >( "DataRange" );
-        const auto& params = uniqueInputs.get< VolumeRendererParameters >( "Params" );
-        const auto& vp = uniqueInputs.get< PixelViewport >( "Viewport" );
-        const auto& clipPlanes = uniqueInputs.get< ClipPlanes >( "ClipPlanes" );
+    void execute(const FutureMap& input, PromiseMap& output) const
+    {
+        const UniqueFutureMap uniqueInputs(input.getFutures());
 
-        const uint32_t windowHeight = vp[ 3 ];
+        const auto& frustum = uniqueInputs.get<Frustum>("Frustum");
+        const auto& frame = uniqueInputs.get<uint32_t>("Frame");
+        const auto& range = uniqueInputs.get<Range>("DataRange");
+        const auto& params =
+            uniqueInputs.get<VolumeRendererParameters>("Params");
+        const auto& vp = uniqueInputs.get<PixelViewport>("Viewport");
+        const auto& clipPlanes = uniqueInputs.get<ClipPlanes>("ClipPlanes");
+
+        const uint32_t windowHeight = vp[3];
         const float sse = params.getScreenSpaceError();
         const uint32_t minLOD = params.getMinLod();
         const uint32_t maxLOD = params.getMaxLod();
 
-        SelectVisibles visitor( _dataSource,
-                                frustum,
-                                windowHeight,
-                                sse,
-                                minLOD,
-                                maxLOD,
-                                range,
-                                clipPlanes );
+        SelectVisibles visitor(_dataSource, frustum, windowHeight, sse, minLOD,
+                               maxLOD, range, clipPlanes);
 
         DFSTraversal traverser;
-        traverser.traverse( _dataSource.getVolumeInfo().rootNode,
-                            visitor,
-                            frame );
+        traverser.traverse(_dataSource.getVolumeInfo().rootNode, visitor,
+                           frame);
 
-        output.set( "VisibleNodes", visitor.getVisibles( ));
-        output.set( "Params", params );
+        output.set("VisibleNodes", visitor.getVisibles());
+        output.set("Params", params);
     }
 
     DataInfos getInputDataInfos() const
     {
-        return {
-            { "Frustum", getType< Frustum >() },
-            { "Frame", getType< uint32_t >() },
-            { "DataRange", getType< Range >() },
-            { "Params", getType< VolumeRendererParameters >() },
-            { "Viewport", getType< PixelViewport >() },
-            { "ClipPlanes", getType< ClipPlanes >() }
-        };
+        return {{"Frustum", getType<Frustum>()},
+                {"Frame", getType<uint32_t>()},
+                {"DataRange", getType<Range>()},
+                {"Params", getType<VolumeRendererParameters>()},
+                {"Viewport", getType<PixelViewport>()},
+                {"ClipPlanes", getType<ClipPlanes>()}};
     }
 
     DataInfos getOutputDataInfos() const
     {
-        return
-        {
-            { "VisibleNodes", getType< NodeIds >( )},
-            { "Params", getType< VolumeRendererParameters >() }
-        };
+        return {{"VisibleNodes", getType<NodeIds>()},
+                {"Params", getType<VolumeRendererParameters>()}};
     }
 
     const DataSource& _dataSource;
 };
 
-VisibleSetGeneratorFilter::VisibleSetGeneratorFilter( const DataSource& dataSource )
-    : _impl( new VisibleSetGeneratorFilter::Impl( dataSource ))
+VisibleSetGeneratorFilter::VisibleSetGeneratorFilter(
+    const DataSource& dataSource)
+    : _impl(new VisibleSetGeneratorFilter::Impl(dataSource))
 {
 }
 
 VisibleSetGeneratorFilter::~VisibleSetGeneratorFilter()
 {
-
 }
 
-void VisibleSetGeneratorFilter::execute( const FutureMap& input,
-                                         PromiseMap& output ) const
+void VisibleSetGeneratorFilter::execute(const FutureMap& input,
+                                        PromiseMap& output) const
 {
-    _impl->execute( input, output );
+    _impl->execute(input, output);
 }
 
 DataInfos VisibleSetGeneratorFilter::getInputDataInfos() const
@@ -121,7 +109,4 @@ DataInfos VisibleSetGeneratorFilter::getOutputDataInfos() const
 {
     return _impl->getOutputDataInfos();
 }
-
-
-
 }

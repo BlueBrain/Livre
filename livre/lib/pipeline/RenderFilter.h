@@ -26,28 +26,24 @@
 
 namespace livre
 {
-
 /**
  * RenderFilter implements the rendering of loaded textures given the renderer.
  */
 class RenderFilter : public Filter
 {
-
 public:
-
     /**
      * Constructor
      * @param dataSource the data source
      * @param renderer the renderer ( RayCaster, etc )
      */
-    RenderFilter( const DataSource& dataSource,
-                  Renderer& renderer );
+    RenderFilter(const DataSource& dataSource, Renderer& renderer);
     ~RenderFilter();
 
     /**
      * @copydoc Filter::execute
      */
-    void execute( const FutureMap& input, PromiseMap& output ) const final;
+    void execute(const FutureMap& input, PromiseMap& output) const final;
 
     /**
      * @copydoc Filter::getInputDataInfos
@@ -55,12 +51,9 @@ public:
     DataInfos getInputDataInfos() const final;
 
 private:
-
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };
-
 }
 
 #endif
-

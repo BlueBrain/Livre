@@ -22,27 +22,27 @@
 
 #include <livre/core/api.h>
 #include <livre/core/types.h>
-#include <vmmlib/frustum.hpp> // base class
+#include <vmmlib/frustum.hpp>       // base class
 #include <vmmlib/frustumCuller.hpp> // member
 
 namespace livre
 {
-
 /**
- * The Frustum class holds the information about the viewing frustum in world, eye and projection spaces.
+ * The Frustum class holds the information about the viewing frustum in world,
+ * eye and projection spaces.
  * All information is kept in OpenGL default coordinate systems.
  */
 class Frustum : public Frustumf
 {
 public:
-
     /**
-     * Initializes the Frustum parameters from the modelview and projection matrices.
+     * Initializes the Frustum parameters from the modelview and projection
+     * matrices.
      * @param modelViewMatrix 4x4 modelview matrix.
      * @param projectionMatrix 4x4 projection matrix,
      */
-    LIVRECORE_API Frustum( const Matrix4f& modelViewMatrix,
-                           const Matrix4f& projectionMatrix );
+    LIVRECORE_API Frustum(const Matrix4f& modelViewMatrix,
+                          const Matrix4f& projectionMatrix);
     LIVRECORE_API ~Frustum();
 
     /** @return The frustum plane information in world coordinates. */
@@ -52,7 +52,7 @@ public:
      * @param worldBox AABB box.
      * @return True if box is intersecting or in the frustum.
      */
-    LIVRECORE_API bool isInFrustum( const Boxf& worldBox ) const;
+    LIVRECORE_API bool isInFrustum(const Boxf& worldBox) const;
 
     /**
      * @return The modelview matrix.
@@ -95,18 +95,18 @@ public:
     LIVRECORE_API const Vector3f& getViewDir() const;
 
     /** @return True if the two frustums are the same. */
-    LIVRECORE_API bool operator == ( const Frustum& rhs ) const;
+    LIVRECORE_API bool operator==(const Frustum& rhs) const;
 
     /** @return True if the two frustums are not the same. */
-    LIVRECORE_API bool operator != ( const Frustum& rhs ) const
-        { return !(*this == rhs); }
+    LIVRECORE_API bool operator!=(const Frustum& rhs) const
+    {
+        return !(*this == rhs);
+    }
 
 private:
-
     struct Impl;
     std::shared_ptr<Impl> _impl;
 };
-
 }
 
 #endif // _Frustum_h_

@@ -31,9 +31,9 @@
 #include <livre/eq/render/EqContext.h>
 #include <livre/eq/settings/FrameSettings.h>
 
+#include <livre/lib/cache/TextureObject.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/lib/pipeline/RenderPipeline.h>
-#include <livre/lib/cache/TextureObject.h>
 
 #include <livre/core/cache/Cache.h>
 #include <livre/core/data/DataSource.h>
@@ -43,32 +43,32 @@
 
 namespace livre
 {
-
 struct Window::Impl
 {
 public:
-    explicit Impl( Window* window )
-        : _window( window )
-    {}
+    explicit Impl(Window* window)
+        : _window(window)
+    {
+    }
 
     void configInitGL()
     {
-        _glContext.reset( new EqContext( _window ));
+        _glContext.reset(new EqContext(_window));
 
         shareGLContexts();
 
-        Node* node = static_cast< Node* >( _window->getNode( ));
-        Pipe* pipe = static_cast< Pipe* >( _window->getPipe( ));
+        Node* node = static_cast<Node*>(_window->getNode());
+        Pipe* pipe = static_cast<Pipe*>(_window->getPipe());
         const size_t maxGpuMemory =
-                        pipe->getFrameData().getVRParameters().getMaxGpuCacheMemory();
+            pipe->getFrameData().getVRParameters().getMaxGpuCacheMemory();
 
-        _texturePool.reset( new TexturePool( node->getDataSource( )));
-        _textureCache.reset( new CacheT< TextureObject >( "TextureCache", maxGpuMemory * LB_1MB ));
-        Caches caches = { node->getDataCache(), *_textureCache, node->getHistogramCache() };
-        _renderPipeline.reset( new RenderPipeline( node->getDataSource(),
-                                                   caches,
-                                                   *_texturePool,
-                                                   _glContext ));
+        _texturePool.reset(new TexturePool(node->getDataSource()));
+        _textureCache.reset(
+            new CacheT<TextureObject>("TextureCache", maxGpuMemory * LB_1MB));
+        Caches caches = {node->getDataCache(), *_textureCache,
+                         node->getHistogramCache()};
+        _renderPipeline.reset(new RenderPipeline(node->getDataSource(), caches,
+                                                 *_texturePool, _glContext));
     }
 
     bool configExitGL()
@@ -77,9 +77,9 @@ public:
         _textureCache.reset();
         _texturePool.reset();
 
-        if( _glContext.use_count() == 1 )
+        if (_glContext.use_count() == 1)
         {
-            Node* node = static_cast< Node* >( _window->getNode( ));
+            Node* node = static_cast<Node*>(_window->getNode());
             node->getDataSource().finishGL();
         }
 
@@ -90,10 +90,10 @@ public:
 
     void shareGLContexts()
     {
-        const Window* sharedWindow = static_cast< const Window* >(
-                                         _window->getSharedContextWindow( ));
+        const Window* sharedWindow =
+            static_cast<const Window*>(_window->getSharedContextWindow());
 
-        if( sharedWindow && sharedWindow != _window )
+        if (sharedWindow && sharedWindow != _window)
         {
             _glContext = sharedWindow->_impl->_glContext;
             return;
@@ -102,50 +102,50 @@ public:
 
     Window* const _window;
     GLContextPtr _glContext;
-    std::unique_ptr< TexturePool > _texturePool;
-    std::unique_ptr< Cache > _textureCache;
-    std::unique_ptr< RenderPipeline > _renderPipeline;
+    std::unique_ptr<TexturePool> _texturePool;
+    std::unique_ptr<Cache> _textureCache;
+    std::unique_ptr<RenderPipeline> _renderPipeline;
 };
 
-Window::Window( eq::Pipe *parent )
-    : eq::Window( parent )
-    , _impl( new Window::Impl( this ))
+Window::Window(eq::Pipe* parent)
+    : eq::Window(parent)
+    , _impl(new Window::Impl(this))
 {
 }
 
-bool Window::configInit( const eq::uint128_t& initId )
+bool Window::configInit(const eq::uint128_t& initId)
 {
     std::stringstream windowTitle;
     windowTitle << "Livre " << livrecore::Version::getString();
-    setName( windowTitle.str( ));
+    setName(windowTitle.str());
 
     // Enforce alpha channel, since we need one for rendering
-    setIAttribute( eq::WindowSettings::IATTR_PLANES_ALPHA, 8 );
-    setIAttribute( eq::WindowSettings::IATTR_PLANES_DEPTH, 0 );
-    return eq::Window::configInit( initId );
+    setIAttribute(eq::WindowSettings::IATTR_PLANES_ALPHA, 8);
+    setIAttribute(eq::WindowSettings::IATTR_PLANES_DEPTH, 0);
+    return eq::Window::configInit(initId);
 }
 
-bool Window::configInitGL( const eq::uint128_t& initId )
+bool Window::configInitGL(const eq::uint128_t& initId)
 {
-    if( !GLEW_ARB_shader_objects )
+    if (!GLEW_ARB_shader_objects)
     {
-        sendError( ERROR_LIVRE_ARB_SHADER_OBJECTS_MISSING );
+        sendError(ERROR_LIVRE_ARB_SHADER_OBJECTS_MISSING);
         return false;
     }
-    if( !GLEW_EXT_blend_func_separate )
+    if (!GLEW_EXT_blend_func_separate)
     {
-        sendError( ERROR_LIVRE_EXT_BLEND_FUNC_SEPARATE_MISSING );
+        sendError(ERROR_LIVRE_EXT_BLEND_FUNC_SEPARATE_MISSING);
         return false;
     }
-    if( !GLEW_ARB_multitexture )
+    if (!GLEW_ARB_multitexture)
     {
-        sendError( ERROR_LIVRE_ARB_MULTITEXTURE_MISSING );
+        sendError(ERROR_LIVRE_ARB_MULTITEXTURE_MISSING);
         return false;
     }
 
-    glDisable( GL_DEPTH_TEST );
+    glDisable(GL_DEPTH_TEST);
 
-    if( !eq::Window::configInitGL( initId ))
+    if (!eq::Window::configInitGL(initId))
         return false;
     _impl->configInitGL();
     return true;
@@ -170,5 +170,4 @@ const RenderPipeline& Window::getRenderPipeline() const
 {
     return *_impl->_renderPipeline;
 }
-
 }

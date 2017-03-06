@@ -19,7 +19,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #include <livre/core/data/LODNode.h>
 #include <livre/core/data/MemoryUnit.h>
 #include <livre/lib/data/RawDataSource.h>
@@ -29,40 +28,40 @@
 
 #include "nrrd/nrrd.hxx"
 
-#include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/lexical_cast.hpp>
 
+#include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 
 namespace livre
 {
 namespace
 {
-lunchbox::PluginRegisterer< RawDataSource > registerer;
+lunchbox::PluginRegisterer<RawDataSource> registerer;
 
-template< class I, class O >
-void _scale( const I* in, O* out, const ssize_t nElems,
-             typename std::enable_if< (sizeof(I) > sizeof(O)),
-                                      void >::type* = nullptr )
+template <class I, class O>
+void _scale(
+    const I* in, O* out, const ssize_t nElems,
+    typename std::enable_if<(sizeof(I) > sizeof(O)), void>::type* = nullptr)
 {
-    constexpr size_t shift = (sizeof( I ) - sizeof( O )) * 8;
+    constexpr size_t shift = (sizeof(I) - sizeof(O)) * 8;
 #pragma omp parallel for
-    for( ssize_t i = 0; i < nElems; ++i )
+    for (ssize_t i = 0; i < nElems; ++i)
         out[i] = in[i] >> shift;
 }
 
-template< class I, class O >
-MemoryUnitPtr _scale( const uint8_t* ptr, const size_t size )
+template <class I, class O>
+MemoryUnitPtr _scale(const uint8_t* ptr, const size_t size)
 {
-    const ssize_t nElems = size / sizeof( O );
-    auto memory = MemoryUnitPtr( new AllocMemoryUnit( size ));
-    const I* in = reinterpret_cast< const I* >( ptr );
-    O* out = memory->getData< O >();
+    const ssize_t nElems = size / sizeof(O);
+    auto memory = MemoryUnitPtr(new AllocMemoryUnit(size));
+    const I* in = reinterpret_cast<const I*>(ptr);
+    O* out = memory->getData<O>();
 
-    _scale( in, out, nElems );
+    _scale(in, out, nElems);
     return memory;
 }
 }
@@ -71,155 +70,156 @@ using boost::lexical_cast;
 
 struct RawDataSource::Impl
 {
-    Impl( const DataSourcePluginData& initData, VolumeInformation& volInfo )
-        : _headerSize( 0 )
-        , _inputType( DT_UINT8 )
-        , _outputType( DT_UINT8 )
+    Impl(const DataSourcePluginData& initData, VolumeInformation& volInfo)
+        : _headerSize(0)
+        , _inputType(DT_UINT8)
+        , _outputType(DT_UINT8)
     {
         const servus::URI& uri = initData.getURI();
         const std::string& path = uri.getPath();
-        const bool isExtensionRaw =
-                boost::algorithm::ends_with( path, ".raw" ) ||
-                boost::algorithm::ends_with( path, ".img" );
-        const bool isExtensionNrrd = boost::algorithm::ends_with( path, ".nrrd" );
+        const bool isExtensionRaw = boost::algorithm::ends_with(path, ".raw") ||
+                                    boost::algorithm::ends_with(path, ".img");
+        const bool isExtensionNrrd = boost::algorithm::ends_with(path, ".nrrd");
 
-        if( !isExtensionRaw && !isExtensionNrrd )
-            LBTHROW( std::runtime_error( "Volume extension does not include raw or nrrd" ));
+        if (!isExtensionRaw && !isExtensionNrrd)
+            LBTHROW(std::runtime_error(
+                "Volume extension does not include raw or nrrd"));
 
-        if( isExtensionRaw )
-            parseRawData( uri.getPath(), volInfo, uri.getFragment( ));
-        else if( isExtensionNrrd )
-            parseNRRDData( uri.getPath(), volInfo );
+        if (isExtensionRaw)
+            parseRawData(uri.getPath(), volInfo, uri.getFragment());
+        else if (isExtensionNrrd)
+            parseNRRDData(uri.getPath(), volInfo);
 
-        volInfo.frameRange = Vector2ui( 0u, 1u );
+        volInfo.frameRange = Vector2ui(0u, 1u);
         volInfo.compCount = 1;
-        volInfo.worldSpacePerVoxel = 1.0f / float( volInfo.voxels.find_max( ));
+        volInfo.worldSpacePerVoxel = 1.0f / float(volInfo.voxels.find_max());
         volInfo.worldSize =
-            Vector3f( volInfo.voxels[0], volInfo.voxels[1], volInfo.voxels[2] )*
+            Vector3f(volInfo.voxels[0], volInfo.voxels[1], volInfo.voxels[2]) *
             volInfo.worldSpacePerVoxel;
 
-        volInfo.overlap = Vector3ui( 0u );
-        volInfo.rootNode = RootNode( 1, Vector3ui( 1 ));
+        volInfo.overlap = Vector3ui(0u);
+        volInfo.rootNode = RootNode(1, Vector3ui(1));
         volInfo.maximumBlockSize = volInfo.voxels;
 
         _inputType = volInfo.dataType;
-        const auto output = uri.findQuery( "output" );
-        if( output == uri.queryEnd( ))
+        const auto output = uri.findQuery("output");
+        if (output == uri.queryEnd())
             _outputType = _inputType;
         else
         {
-            _outputType = getDataType( output->second );
+            _outputType = getDataType(output->second);
             volInfo.dataType = _outputType;
         }
     }
 
     ~Impl() {}
-
-    MemoryUnitPtr getData( const LODNode& node )
+    MemoryUnitPtr getData(const LODNode& node)
     {
         const size_t size = node.getBlockSize().product();
-        const uint8_t* ptr = _mmap.getAddress< uint8_t >() + _headerSize;
-        if( _inputType == _outputType )
-            return  MemoryUnitPtr( new ConstMemoryUnit( ptr ));
+        const uint8_t* ptr = _mmap.getAddress<uint8_t>() + _headerSize;
+        if (_inputType == _outputType)
+            return MemoryUnitPtr(new ConstMemoryUnit(ptr));
 
         // only unsigned integer conversions are supported!
-        if( _inputType == DT_UINT16 && _outputType == DT_UINT8 )
-            return _scale< uint16_t, uint8_t >( ptr, size );
-        if( _inputType == DT_UINT32 && _outputType == DT_UINT8 )
-            return _scale< uint32_t, uint8_t >( ptr, size );
-        if( _inputType == DT_UINT32 && _outputType == DT_UINT16 )
-            return _scale< uint32_t, uint16_t >( ptr, size );
+        if (_inputType == DT_UINT16 && _outputType == DT_UINT8)
+            return _scale<uint16_t, uint8_t>(ptr, size);
+        if (_inputType == DT_UINT32 && _outputType == DT_UINT8)
+            return _scale<uint32_t, uint8_t>(ptr, size);
+        if (_inputType == DT_UINT32 && _outputType == DT_UINT16)
+            return _scale<uint32_t, uint16_t>(ptr, size);
 
-        LBTHROW( std::runtime_error( "Unsupported data conversion" ));
+        LBTHROW(std::runtime_error("Unsupported data conversion"));
     }
 
-    DataType getDataType( const std::string& dataType )
+    DataType getDataType(const std::string& dataType)
     {
-        if( dataType == "char" || dataType == "int8" )
+        if (dataType == "char" || dataType == "int8")
             return DT_INT8;
-        if( dataType == "unsigned char" || dataType == "uint8" )
+        if (dataType == "unsigned char" || dataType == "uint8")
             return DT_UINT8;
-         if( dataType == "short" || dataType == "int16" )
-             return DT_INT16;
-         if( dataType == "unsigned short" || dataType == "uint16" )
-             return DT_UINT16;
-         if( dataType == "int" || dataType == "int32" )
-             return DT_INT32;
-         if( dataType == "unsigned int" || dataType == "uint32" )
-             return DT_UINT32;
-         if( dataType == "float" )
-             return DT_FLOAT;
-         LBTHROW( std::runtime_error( "Unsupported data format " + dataType ));
+        if (dataType == "short" || dataType == "int16")
+            return DT_INT16;
+        if (dataType == "unsigned short" || dataType == "uint16")
+            return DT_UINT16;
+        if (dataType == "int" || dataType == "int32")
+            return DT_INT32;
+        if (dataType == "unsigned int" || dataType == "uint32")
+            return DT_UINT32;
+        if (dataType == "float")
+            return DT_FLOAT;
+        LBTHROW(std::runtime_error("Unsupported data format " + dataType));
     }
 
-    void parseRawData( const std::string& filename, VolumeInformation& volInfo,
-                       const std::string& fragment)
+    void parseRawData(const std::string& filename, VolumeInformation& volInfo,
+                      const std::string& fragment)
     {
-        if( !_mmap.map( filename ))
-            LBTHROW( std::runtime_error( "Cannot mmap file" ));
+        if (!_mmap.map(filename))
+            LBTHROW(std::runtime_error("Cannot mmap file"));
 
-        std::vector< std::string > parameters;
-        boost::algorithm::split( parameters, fragment, boost::is_any_of( "," ));
+        std::vector<std::string> parameters;
+        boost::algorithm::split(parameters, fragment, boost::is_any_of(","));
 
-        if( parameters.size() < 3 ) // use defaults
+        if (parameters.size() < 3) // use defaults
         {
-            LBTHROW( std::runtime_error( "Not enough parameters for the raw file" ));
+            LBTHROW(
+                std::runtime_error("Not enough parameters for the raw file"));
         }
         else
         {
             try
             {
-                volInfo.voxels[ 0 ] = lexical_cast< uint32_t >( parameters[0] );
-                volInfo.voxels[ 1 ] = lexical_cast< uint32_t >( parameters[1] );
-                volInfo.voxels[ 2 ] = lexical_cast< uint32_t >( parameters[2] );
-                if( parameters.size() > 3 )
-                    volInfo.dataType = getDataType( parameters[ 3 ]);
+                volInfo.voxels[0] = lexical_cast<uint32_t>(parameters[0]);
+                volInfo.voxels[1] = lexical_cast<uint32_t>(parameters[1]);
+                volInfo.voxels[2] = lexical_cast<uint32_t>(parameters[2]);
+                if (parameters.size() > 3)
+                    volInfo.dataType = getDataType(parameters[3]);
                 else
                     volInfo.dataType = DT_UINT8;
             }
-            catch( boost::bad_lexical_cast& except )
+            catch (boost::bad_lexical_cast& except)
             {
-                LBTHROW( std::runtime_error( except.what() ));
+                LBTHROW(std::runtime_error(except.what()));
             }
         }
-   }
+    }
 
-    void parseNRRDData( const std::string& filename,
-                        VolumeInformation& volInfo )
+    void parseNRRDData(const std::string& filename, VolumeInformation& volInfo)
     {
-        std::map< std::string, std::string > dataInfo;
-        _headerSize = ::NRRD::parseHeader( filename, dataInfo );
-        if( _headerSize == 0 )
-            LBTHROW( std::runtime_error( "Cannot parse nrrd file" ));
+        std::map<std::string, std::string> dataInfo;
+        _headerSize = ::NRRD::parseHeader(filename, dataInfo);
+        if (_headerSize == 0)
+            LBTHROW(std::runtime_error("Cannot parse nrrd file"));
 
         std::string dataFile = filename;
-        if( dataInfo.count( "datafile" ) > 0 )
+        if (dataInfo.count("datafile") > 0)
         {
-            boost::filesystem::path dataFilePath = boost::filesystem::path( filename ).parent_path();
-            dataFilePath /= dataInfo[ "datafile" ];
+            boost::filesystem::path dataFilePath =
+                boost::filesystem::path(filename).parent_path();
+            dataFilePath /= dataInfo["datafile"];
             dataFile = dataFilePath.string();
         }
 
-        if( !_mmap.map( dataFile ))
-            LBTHROW( std::runtime_error( "Cannot mmap file" ));
+        if (!_mmap.map(dataFile))
+            LBTHROW(std::runtime_error("Cannot mmap file"));
 
-        volInfo.dataType = getDataType( dataInfo["type"] );
+        volInfo.dataType = getDataType(dataInfo["type"]);
 
         try
         {
-            if( lexical_cast< size_t >( dataInfo[ "dimension" ] ) != 3u )
-                LBTHROW( std::runtime_error( std::runtime_error( "NRRD is not 3D data" )))
+            if (lexical_cast<size_t>(dataInfo["dimension"]) != 3u)
+                LBTHROW(std::runtime_error(
+                    std::runtime_error("NRRD is not 3D data")))
         }
-        catch( boost::bad_lexical_cast& except )
+        catch (boost::bad_lexical_cast& except)
         {
-            LBTHROW( std::runtime_error( except.what() ));
+            LBTHROW(std::runtime_error(except.what()));
         }
 
-        const auto& vec = stringToVector< int >( dataInfo[ "sizes" ] );
-        volInfo.voxels[ 0 ] = vec[ 0 ];
-        volInfo.voxels[ 1 ] = vec[ 1 ];
-        volInfo.voxels[ 2 ] = vec[ 2 ];
-        volInfo.bigEndian = dataInfo[ "endian" ] == "big";
+        const auto& vec = stringToVector<int>(dataInfo["sizes"]);
+        volInfo.voxels[0] = vec[0];
+        volInfo.voxels[1] = vec[1];
+        volInfo.voxels[2] = vec[2];
+        volInfo.bigEndian = dataInfo["endian"] == "big";
     }
 
     lunchbox::MemoryMap _mmap;
@@ -228,30 +228,32 @@ struct RawDataSource::Impl
     DataType _outputType;
 };
 
-RawDataSource::RawDataSource( const DataSourcePluginData& initData )
-    : _impl( new RawDataSource::Impl( initData, _volumeInfo ))
-{}
-
-RawDataSource::~RawDataSource()
-{}
-
-MemoryUnitPtr RawDataSource::getData( const LODNode& node )
+RawDataSource::RawDataSource(const DataSourcePluginData& initData)
+    : _impl(new RawDataSource::Impl(initData, _volumeInfo))
 {
-    return _impl->getData( node );
 }
 
-bool RawDataSource::handles( const DataSourcePluginData& initData )
+RawDataSource::~RawDataSource()
+{
+}
+
+MemoryUnitPtr RawDataSource::getData(const LODNode& node)
+{
+    return _impl->getData(node);
+}
+
+bool RawDataSource::handles(const DataSourcePluginData& initData)
 {
     const servus::URI& uri = initData.getURI();
-    if( uri.getScheme() == "raw" )
+    if (uri.getScheme() == "raw")
         return true;
 
-    if( !uri.getScheme().empty( ))
+    if (!uri.getScheme().empty())
         return false;
 
-    return boost::algorithm::ends_with( uri.getPath(), ".raw" ) ||
-           boost::algorithm::ends_with( uri.getPath(), ".img" ) ||
-           boost::algorithm::ends_with( uri.getPath(), ".nrrd" );
+    return boost::algorithm::ends_with(uri.getPath(), ".raw") ||
+           boost::algorithm::ends_with(uri.getPath(), ".img") ||
+           boost::algorithm::ends_with(uri.getPath(), ".nrrd");
 }
 
 std::string RawDataSource::getDescription()
@@ -261,5 +263,4 @@ std::string RawDataSource::getDescription()
   The default input format is uint8, the default output format is the input
   format.)";
 }
-
 }

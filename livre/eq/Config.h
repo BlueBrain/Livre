@@ -23,21 +23,21 @@
 #ifndef _Config_h_
 #define _Config_h_
 
+#include <eq/config.h>             // CRTP base class
+#include <livre/eq/EventHandler.h> // base class
 #include <livre/eq/api.h>
 #include <livre/eq/types.h>
-#include <livre/eq/EventHandler.h> // base class
-#include <eq/config.h> // CRTP base class
 
 namespace livre
 {
 /** Drives a configuration, aka the main application loop. */
-class Config : public EventHandler< eq::Config >
+class Config : public EventHandler<eq::Config>
 {
 public:
     /**
      * @param parent Parent server object.
      */
-    LIVREEQ_API Config( eq::ServerPtr parent );
+    LIVREEQ_API Config(eq::ServerPtr parent);
 
     /** @return The per-frame data. */
     FrameData& getFrameData();
@@ -48,7 +48,7 @@ public:
     /**
      * mapFrameData Maps the init data.
      */
-    void mapFrameData( const eq::uint128_t& initId );
+    void mapFrameData(const eq::uint128_t& initId);
 
     /**
      * Unmaps the init data.
@@ -70,7 +70,7 @@ public:
      * Initialize ZeroEQ communication, i.e. setup publisher, subscriber and
      * HTTP server (if set in argv).
      */
-    void initCommunicator( int argc, char** argv );
+    void initCommunicator(int argc, char** argv);
 
     /**
      * Exits the config.
@@ -91,13 +91,13 @@ public:
     bool needRedraw();
 
     /** Publish a serializable object */
-    bool publish( const servus::Serializable& serializable );
+    bool publish(const servus::Serializable& serializable);
 
     /**
      * Switches the layout.
      * @param increment Increments the layout value.
      */
-    void switchLayout( const int32_t increment );
+    void switchLayout(const int32_t increment);
 
     /** @return the active layout. */
     eq::Layout* getActiveLayout();
@@ -114,17 +114,16 @@ public:
     const Histogram& getHistogram() const;
 
     /** @internal */
-    void setHistogram( const Histogram& histogram );
+    void setHistogram(const Histogram& histogram);
 
 private:
     LIVREEQ_API virtual ~Config();
 
-    bool _keepCurrentFrame( uint32_t fps ) const;
+    bool _keepCurrentFrame(uint32_t fps) const;
 
     class Impl;
-    std::unique_ptr< Impl > _impl;
+    std::unique_ptr<Impl> _impl;
 };
-
 }
 
 #endif // _Config_h_

@@ -26,7 +26,6 @@
 
 namespace livre
 {
-
 /**
  * Provides a very basic implementation for the Executor
  * class. It has a thread pool for executing multiple executables
@@ -38,21 +37,21 @@ namespace livre
 class SimpleExecutor : public Executor
 {
 public:
-
     /**
      * @param threadCount is number of worker threads
-     * @param glContext if a gl context is provided, a new context will be created and
+     * @param glContext if a gl context is provided, a new context will be
+     * created and
      * the worker threads will share the context with the given context
      */
-    LIVRECORE_API SimpleExecutor( size_t threadCount,
-                                  ConstGLContextPtr glContext = ConstGLContextPtr( ));
+    LIVRECORE_API SimpleExecutor(
+        size_t threadCount, ConstGLContextPtr glContext = ConstGLContextPtr());
 
     LIVRECORE_API virtual ~SimpleExecutor();
 
     /**
      * @copydoc Executor::schedule
      */
-    LIVRECORE_API void schedule( ExecutablePtr executable ) final;
+    LIVRECORE_API void schedule(ExecutablePtr executable) final;
 
     /**
      * @copydoc Executor::clear
@@ -60,11 +59,9 @@ public:
     LIVRECORE_API void clear() final;
 
 private:
-
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };
-
 }
 
 #endif // _SimpleExecutor_h_

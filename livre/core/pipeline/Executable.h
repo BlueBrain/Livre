@@ -21,13 +21,12 @@
 #define _Executable_h_
 
 #include <livre/core/api.h>
-#include <livre/core/types.h>
-#include <livre/core/pipeline/FuturePromise.h>
 #include <livre/core/pipeline/Executor.h>
+#include <livre/core/pipeline/FuturePromise.h>
+#include <livre/core/types.h>
 
 namespace livre
 {
-
 /**
  * Is the base class for execution. It provides methods for execution,
  * preconditions and postconditions for decision on scheduling.
@@ -35,38 +34,40 @@ namespace livre
 class Executable
 {
 public:
-
     /**
      * Executes the executable
      */
-    virtual void execute() =  0;
+    virtual void execute() = 0;
 
     /**
      * Schedules the executable through an Executor
      * @param executor schedules the executable
      * @return the post conditions
      */
-    LIVRECORE_API Futures schedule( Executor& executor );
+    LIVRECORE_API Futures schedule(Executor& executor);
 
     /**
-     * @return the output conditions for getting the outputs of the executable. The post
-     * conditions has to be fullfilled by the execute() implementation ( at the end of
+     * @return the output conditions for getting the outputs of the executable.
+     * The post
+     * conditions has to be fullfilled by the execute() implementation ( at the
+     * end of
      * execution all futures should be ready )
      */
     virtual Futures getPostconditions() const = 0;
 
     /**
-     * @return the input conditions which the executable can be queried for the state or
+     * @return the input conditions which the executable can be queried for the
+     * state or
      * data retrieval.
      */
     virtual Futures getPreconditions() const = 0;
 
     /**
-     * Resets the executable by setting all pre and post conditions to an clean state
+     * Resets the executable by setting all pre and post conditions to an clean
+     * state
      * ( The futures are not ready )
      */
     LIVRECORE_API virtual void reset() {}
-
     /**
      * @return returns a copy
      */
@@ -75,14 +76,11 @@ public:
     virtual ~Executable();
 
 protected:
-
     /**
      * @copydoc Executable::schedule
      */
-    virtual void _schedule( Executor& executor );
+    virtual void _schedule(Executor& executor);
 };
-
 }
 
 #endif // _Executable_h_
-

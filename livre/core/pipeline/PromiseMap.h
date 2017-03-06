@@ -26,24 +26,22 @@
 
 namespace livre
 {
-
 /**
- * Wrapper class for applying operations on map of @Promise objects. i.e a promise with
+ * Wrapper class for applying operations on map of @Promise objects. i.e a
+ * promise with
  * the name can be set.
  */
 class PromiseMap
 {
-
 public:
-
-    LIVRECORE_API explicit PromiseMap( const Promises& promises );
+    LIVRECORE_API explicit PromiseMap(const Promises& promises);
     LIVRECORE_API ~PromiseMap();
 
     /**
      * @param name of the promise
      * @return the promise related to the port name.
      */
-    LIVRECORE_API Promise getPromise( const std::string& name ) const;
+    LIVRECORE_API Promise getPromise(const std::string& name) const;
 
     /**
      * Sets the port with the value.
@@ -54,10 +52,10 @@ public:
      * @throw std::runtime_error when the port data is not exact
      * type T
      */
-    template< class T >
-    void set( const std::string& name, const T& value ) const
+    template <class T>
+    void set(const std::string& name, const T& value) const
     {
-        getPromise( name ).set( value );
+        getPromise(name).set(value);
     }
 
     /**
@@ -66,7 +64,7 @@ public:
      * @throw std::logic_error when there is no promise associated with the
      * given name
      */
-    LIVRECORE_API void flush( const std::string& name ) const;
+    LIVRECORE_API void flush(const std::string& name) const;
 
     /**
      * Writes empty values to promises which are not set already.
@@ -81,7 +79,7 @@ public:
      * @throw std::logic_error when there is no promise associated with the
      * given name
      */
-    LIVRECORE_API void reset( const std::string& name ) const;
+    LIVRECORE_API void reset(const std::string& name) const;
 
     /**
      * Resets the promises after they are done.
@@ -91,11 +89,9 @@ public:
     LIVRECORE_API void reset() const;
 
 private:
-
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };
-
 }
 
 #endif // _PromiseMap_h_

@@ -21,16 +21,14 @@
 
 namespace livre
 {
-
-FrameUtils::FrameUtils( const Vector2ui& frameRange,
-                        const Vector2ui& boundaries )
-    : _frameRange( INVALID_FRAME_RANGE )
+FrameUtils::FrameUtils(const Vector2ui& frameRange, const Vector2ui& boundaries)
+    : _frameRange(INVALID_FRAME_RANGE)
 {
     // frame range is outside the boundaries
-    if( frameRange[1] <= boundaries[0] || frameRange[0] >= boundaries[1] )
+    if (frameRange[1] <= boundaries[0] || frameRange[0] >= boundaries[1])
         return;
 
-    _frameRange = _clampToRange( frameRange, boundaries );
+    _frameRange = _clampToRange(frameRange, boundaries);
 }
 
 const Vector2ui& FrameUtils::getFrameRange() const
@@ -38,47 +36,48 @@ const Vector2ui& FrameUtils::getFrameRange() const
     return _frameRange;
 }
 
-uint32_t FrameUtils::getCurrent( const uint32_t frameNumber,
-                                 const bool latestAlways ) const
+uint32_t FrameUtils::getCurrent(const uint32_t frameNumber,
+                                const bool latestAlways) const
 {
-    if( _frameRange == INVALID_FRAME_RANGE )
+    if (_frameRange == INVALID_FRAME_RANGE)
         return INVALID_TIMESTEP;
 
-    const uint32_t lastFrame =  _frameRange[1] - 1;
-    if( latestAlways )
+    const uint32_t lastFrame = _frameRange[1] - 1;
+    if (latestAlways)
         return lastFrame;
 
-    const uint32_t currentFrame = frameNumber == INVALID_TIMESTEP ? 0 : frameNumber;
+    const uint32_t currentFrame =
+        frameNumber == INVALID_TIMESTEP ? 0 : frameNumber;
 
-    return std::min( std::max( _frameRange[0], currentFrame ), lastFrame );
+    return std::min(std::max(_frameRange[0], currentFrame), lastFrame);
 }
 
-uint32_t FrameUtils::getNext( uint32_t current, const int32_t delta ) const
+uint32_t FrameUtils::getNext(uint32_t current, const int32_t delta) const
 {
-    if( _frameRange == INVALID_FRAME_RANGE )
+    if (_frameRange == INVALID_FRAME_RANGE)
         return INVALID_TIMESTEP;
 
     const uint32_t interval = _frameRange[1] - _frameRange[0];
 
     // If current is at the beginning and animation is reverse,
     // set current to the end
-    if(( current == _frameRange[0] ) && ( delta < 0 ))
+    if ((current == _frameRange[0]) && (delta < 0))
         current = _frameRange[1];
 
-    return ( current - _frameRange[0] + delta ) % interval + _frameRange[0];
+    return (current - _frameRange[0] + delta) % interval + _frameRange[0];
 }
 
-Vector2ui FrameUtils::_clampToRange( const Vector2ui& frameRange,
-                                     const Vector2ui& boundaries )
+Vector2ui FrameUtils::_clampToRange(const Vector2ui& frameRange,
+                                    const Vector2ui& boundaries)
 {
-    const uint32_t frameMin = std::max( frameRange[0], boundaries[0] );
-    const uint32_t frameMax = std::min( frameRange[1], boundaries[1] );
+    const uint32_t frameMin = std::max(frameRange[0], boundaries[0]);
+    const uint32_t frameMax = std::min(frameRange[1], boundaries[1]);
 
-    if( frameRange[0] < boundaries[0] || frameRange[1] > boundaries[1] )
+    if (frameRange[0] < boundaries[0] || frameRange[1] > boundaries[1])
         LBINFO << "Clamping the requested frame range to the boundaries. "
                << "Frame range used: [ " << frameMin << ", " << frameMax << " )"
                << std::endl;
 
-    return Vector2ui( frameMin, frameMax );
+    return Vector2ui(frameMin, frameMax);
 }
 }

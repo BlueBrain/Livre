@@ -25,36 +25,38 @@
 
 #include <lexis/render/Histogram.h>
 
-#include <array>
 #include <QWidget>
+#include <array>
 
-namespace Ui { class TransferFunctionEditor; }
+namespace Ui
+{
+class TransferFunctionEditor;
+}
 
 namespace livre
 {
-
 /** This contains all the widget for the transfer function editor. */
-class TransferFunctionEditor: public QWidget
+class TransferFunctionEditor : public QWidget
 {
     Q_OBJECT
 
 public:
-    TransferFunctionEditor( Controller& controller, QWidget* parent );
+    TransferFunctionEditor(Controller& controller, QWidget* parent);
     ~TransferFunctionEditor();
 
 signals:
     void transferFunctionChanged();
-    void histogramChanged( bool logScale );
+    void histogramChanged(bool logScale);
 
 private Q_SLOTS:
     void _clear();
     void _load();
     void _save();
     void _setDefault();
-    void _onHistIndexChanged( size_t index, double value);
-    void _onHistogramChanged( bool logScale );
+    void _onHistIndexChanged(size_t index, double value);
+    void _onHistogramChanged(bool logScale);
     void _onTransferFunctionChanged();
-    void _onRangeChanged( vmml::Vector2f range );
+    void _onRangeChanged(vmml::Vector2f range);
 
 private:
     void _publishTransferFunction();
@@ -65,10 +67,9 @@ private:
     Controller& _controller;
     Ui::TransferFunctionEditor* _ui;
 
-    typedef std::array< ControlPointsWidget*, 4 > ControlPointsWidgets;
+    typedef std::array<ControlPointsWidget*, 4> ControlPointsWidgets;
     ControlPointsWidgets _controlPointsWidgets;
-    AlphaWidget* _alphaWidget { nullptr };
-    RangeWidget* _rangeWidget { nullptr };
+    AlphaWidget* _alphaWidget{nullptr};
+    RangeWidget* _rangeWidget{nullptr};
 };
-
 }

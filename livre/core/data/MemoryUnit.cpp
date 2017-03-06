@@ -21,15 +21,16 @@
 
 namespace livre
 {
-
 MemoryUnit::MemoryUnit()
-{}
+{
+}
 
 MemoryUnit::~MemoryUnit()
-{}
+{
+}
 
-ConstMemoryUnit::ConstMemoryUnit( const uint8_t* ptr )
-    : ptr_( ptr )
+ConstMemoryUnit::ConstMemoryUnit(const uint8_t* ptr)
+    : ptr_(ptr)
 {
 }
 
@@ -48,10 +49,10 @@ AllocMemoryUnit::~AllocMemoryUnit()
     _rawData.clear();
 }
 
-void AllocMemoryUnit::_alloc( const size_t nBytes )
+void AllocMemoryUnit::_alloc(const size_t nBytes)
 {
-    LB_TS_THREAD( thread_ );
-    _rawData.reset( nBytes );
+    LB_TS_THREAD(thread_);
+    _rawData.reset(nBytes);
 }
 
 const uint8_t* AllocMemoryUnit::_getData() const
@@ -63,5 +64,4 @@ uint8_t* AllocMemoryUnit::_getData()
 {
     return _rawData.getData();
 }
-
 }

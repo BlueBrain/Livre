@@ -31,12 +31,12 @@
 #include <livre/eq/serialization.h>
 #include <livre/eq/settings/VolumeSettings.h>
 
-#include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/lib/cache/DataObject.h>
 #include <livre/lib/cache/HistogramObject.h>
+#include <livre/lib/configuration/VolumeRendererParameters.h>
 
-#include <livre/core/data/DataSource.h>
 #include <livre/core/cache/Cache.h>
+#include <livre/core/data/DataSource.h>
 
 #include <eq/eq.h>
 #include <eq/gl.h>
@@ -46,36 +46,40 @@ namespace livre
 struct Node::Impl
 {
 public:
-    explicit Impl( livre::Node* node )
-        : _node( node )
-        , _config( static_cast< livre::Config* >( node->getConfig( )))
-    {}
+    explicit Impl(livre::Node* node)
+        : _node(node)
+        , _config(static_cast<livre::Config*>(node->getConfig()))
+    {
+    }
 
     void initializeCache()
     {
         const VolumeRendererParameters& vrRenderParameters =
-                _config->getFrameData().getVRParameters();
+            _config->getFrameData().getVRParameters();
 
-        const size_t maxMemBytes = vrRenderParameters.getMaxCpuCacheMemory() * LB_1MB;
-        _dataCache.reset( new CacheT< DataObject >( "DataCache", maxMemBytes ));
+        const size_t maxMemBytes =
+            vrRenderParameters.getMaxCpuCacheMemory() * LB_1MB;
+        _dataCache.reset(new CacheT<DataObject>("DataCache", maxMemBytes));
 
         const size_t histCacheSize =
-                32 * LB_1MB; // Histogram cache is 32 MB. Can hold approx 16k hists
-        _histogramCache.reset( new CacheT< HistogramObject >( "HistogramCache", histCacheSize ));
+            32 * LB_1MB; // Histogram cache is 32 MB. Can hold approx 16k hists
+        _histogramCache.reset(
+            new CacheT<HistogramObject>("HistogramCache", histCacheSize));
     }
 
     bool initializeVolume()
     {
         try
         {
-            const VolumeSettings& volumeSettings = _config->getFrameData().getVolumeSettings();
-            const lunchbox::URI& uri = lunchbox::URI( volumeSettings.getURI( ));
-            _dataSource.reset( new livre::DataSource( uri ));
+            const VolumeSettings& volumeSettings =
+                _config->getFrameData().getVolumeSettings();
+            const lunchbox::URI& uri = lunchbox::URI(volumeSettings.getURI());
+            _dataSource.reset(new livre::DataSource(uri));
         }
-        catch( const std::runtime_error& err )
+        catch (const std::runtime_error& err)
         {
-            LBWARN << "Data source initialization failed: "
-                   << err.what() << std::endl;
+            LBWARN << "Data source initialization failed: " << err.what()
+                   << std::endl;
             return false;
         }
 
@@ -84,40 +88,40 @@ public:
 
     bool configInit()
     {
-        if( !initializeVolume( ))
+        if (!initializeVolume())
             return false;
 
-        auto event = _config->sendEvent( VOLUME_INFO );
+        auto event = _config->sendEvent(VOLUME_INFO);
         event << _dataSource->getVolumeInfo();
         initializeCache();
         return true;
     }
 
-    void frameStart( const eq::uint128_t &frameId )
+    void frameStart(const eq::uint128_t& frameId)
     {
-        if( !_node->isApplicationNode( ))
-            _config->getFrameData().sync( frameId );
+        if (!_node->isApplicationNode())
+            _config->getFrameData().sync(frameId);
     }
 
     void updateDataSource()
     {
-        if( !_dataSource->update( ))
+        if (!_dataSource->update())
             return;
 
-        auto event = _config->sendEvent( VOLUME_INFO );
+        auto event = _config->sendEvent(VOLUME_INFO);
         event << _dataSource->getVolumeInfo();
     }
 
     livre::Node* const _node;
     livre::Config* const _config;
-    std::unique_ptr< DataSource > _dataSource;
-    std::unique_ptr< Cache > _dataCache;
-    std::unique_ptr< Cache > _histogramCache;
+    std::unique_ptr<DataSource> _dataSource;
+    std::unique_ptr<Cache> _dataCache;
+    std::unique_ptr<Cache> _histogramCache;
 };
 
-Node::Node( eq::Config* parent )
-    : eq::Node( parent )
-    , _impl( new Impl( this ))
+Node::Node(eq::Config* parent)
+    : eq::Node(parent)
+    , _impl(new Impl(this))
 {
 }
 
@@ -125,37 +129,37 @@ Node::~Node()
 {
 }
 
-bool Node::configInit( const eq::uint128_t& initId )
+bool Node::configInit(const eq::uint128_t& initId)
 {
     // All render data is static or multi-buffered, we can run asynchronously
-    if( getIAttribute( IATTR_THREAD_MODEL ) == eq::UNDEFINED )
-        setIAttribute( IATTR_THREAD_MODEL, eq::ASYNC );
+    if (getIAttribute(IATTR_THREAD_MODEL) == eq::UNDEFINED)
+        setIAttribute(IATTR_THREAD_MODEL, eq::ASYNC);
 
-    if( !eq::Node::configInit( initId ))
+    if (!eq::Node::configInit(initId))
         return false;
 
-    if( !isApplicationNode( ))
+    if (!isApplicationNode())
     {
-        Config *config = static_cast< Config *>( getConfig() );
-        config->mapFrameData( initId ); // _impl->configInit needs FrameData
+        Config* config = static_cast<Config*>(getConfig());
+        config->mapFrameData(initId); // _impl->configInit needs FrameData
     }
 
-    if( !_impl->configInit( ))
+    if (!_impl->configInit())
         return false;
 
-    livre::Client* client = static_cast<livre::Client*>( getClient( ).get());
-    client->setIdleFunction( std::bind( &Impl::updateDataSource, _impl.get( )));
+    livre::Client* client = static_cast<livre::Client*>(getClient().get());
+    client->setIdleFunction(std::bind(&Impl::updateDataSource, _impl.get()));
 
     return true;
 }
 
 bool Node::configExit()
 {
-    livre::Client* client = static_cast<livre::Client*>( getClient( ).get());
-    client->setIdleFunction( IdleFunc( ));
-    if( !isApplicationNode( ))
+    livre::Client* client = static_cast<livre::Client*>(getClient().get());
+    client->setIdleFunction(IdleFunc());
+    if (!isApplicationNode())
     {
-        Config *config = static_cast< Config *>( getConfig() );
+        Config* config = static_cast<Config*>(getConfig());
         config->unmapFrameData();
     }
 
@@ -182,11 +186,9 @@ livre::Cache& livre::Node::getHistogramCache()
     return *_impl->_histogramCache;
 }
 
-void Node::frameStart( const eq::uint128_t &frameId,
-                       const uint32_t frameNumber)
+void Node::frameStart(const eq::uint128_t& frameId, const uint32_t frameNumber)
 {
-    _impl->frameStart( frameId );
-    eq::Node::frameStart( frameId, frameNumber );
+    _impl->frameStart(frameId);
+    eq::Node::frameStart(frameId, frameNumber);
 }
-
 }

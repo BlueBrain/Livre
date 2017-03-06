@@ -23,23 +23,21 @@ public:
     /**
      * @param parent Parent node that owns the pipe.
      */
-    LIVREEQ_API Pipe( eq::Node* parent );
+    LIVREEQ_API Pipe(eq::Node* parent);
     LIVREEQ_API ~Pipe();
 
     /** @return The frame data. */
     const FrameData& getFrameData() const;
 
 private:
-
-    void frameStart( const eq::uint128_t& frameId,
-                     const uint32_t frameNumber ) final;
-    bool configInit( const eq::uint128_t& initId ) final;
+    void frameStart(const eq::uint128_t& frameId,
+                    const uint32_t frameNumber) final;
+    bool configInit(const eq::uint128_t& initId) final;
     bool configExit() final;
 
     struct Impl;
-    std::unique_ptr< Impl >  _impl;
+    std::unique_ptr<Impl> _impl;
 };
-
 }
 
 #endif //_Pipe_h_

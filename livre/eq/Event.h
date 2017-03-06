@@ -26,7 +26,6 @@
 
 namespace livre
 {
-
 enum ConfigEventType
 {
     GRAB_IMAGE = eq::EVENT_USER,
@@ -34,7 +33,6 @@ enum ConfigEventType
     REDRAW,
     HISTOGRAM_DATA
 };
-
 }
 
 #endif

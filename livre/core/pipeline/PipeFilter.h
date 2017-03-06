@@ -21,12 +21,11 @@
 #define _PipeFilter_h_
 
 #include <livre/core/api.h>
-#include <livre/core/types.h>
 #include <livre/core/pipeline/Executable.h>
+#include <livre/core/types.h>
 
 namespace livre
 {
-
 /**
  * Responsible for execution of the Filter objects by constructing
  * the communication layer ( output ports, input ports ) around the filter.
@@ -36,7 +35,6 @@ namespace livre
 class PipeFilter : public Executable
 {
 public:
-
     LIVRECORE_API ~PipeFilter();
 
     /**
@@ -52,18 +50,19 @@ public:
      * @param dstPortName connection port name.
      * @throw std::runtime_error if connection can not be established
      */
-    LIVRECORE_API void connect( const std::string& srcPortName,
-                  PipeFilter& dst,
-                  const std::string& dstPortName );
+    LIVRECORE_API void connect(const std::string& srcPortName, PipeFilter& dst,
+                               const std::string& dstPortName);
 
     /**
-     * @return promise for the given input port. If there is no connection to the
-     * input port, a new promise is created for the port and no further connections are allowed,
+     * @return promise for the given input port. If there is no connection to
+     * the
+     * input port, a new promise is created for the port and no further
+     * connections are allowed,
      * if there is a connection getting a promise is not allowed.
      * @throw std::logic_error if there is already a connection if there is
      * no input port or it is a notification port.
      */
-    LIVRECORE_API Promise getPromise( const std::string& portName );
+    LIVRECORE_API Promise getPromise(const std::string& portName);
 
     /**
      * @copydoc Executable::execute
@@ -86,44 +85,38 @@ public:
     LIVRECORE_API void reset() final;
 
 protected:
-
     /**
      * Constructs a PipeFilter with a given filter
      * @param name of the pipefilter
      * @param filter the filter object.
      */
-    PipeFilter( const std::string& name,
-                FilterPtr&& filter );
+    PipeFilter(const std::string& name, FilterPtr&& filter);
 
 private:
-
     ExecutablePtr clone() const;
 
     struct Impl;
-    std::shared_ptr< Impl > _impl;
+    std::shared_ptr<Impl> _impl;
 };
 
 /**
  * Creates a PipeFiter class instance with a given filter type
  */
-template< class FilterT >
+template <class FilterT>
 class PipeFilterT : public PipeFilter
 {
 public:
-
     /**
      * Constructs a PipeFilter with a given filter type FilterT
      * @param name of the pipefilter
      * @param args are the arguments for construction of FilterT
      */
-    template< class... Args >
-    PipeFilterT( const std::string& name,
-                 Args&&... args )
-        : PipeFilter( name, FilterPtr( new FilterT( args... )))
-    {}
+    template <class... Args>
+    PipeFilterT(const std::string& name, Args&&... args)
+        : PipeFilter(name, FilterPtr(new FilterT(args...)))
+    {
+    }
 };
-
 }
 
 #endif // _PipeFilter_h_
-

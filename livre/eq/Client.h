@@ -30,7 +30,6 @@
 
 namespace livre
 {
-
 typedef std::function<void()> IdleFunc;
 
 /**
@@ -39,20 +38,20 @@ typedef std::function<void()> IdleFunc;
 class Client : public eq::Client
 {
 public:
-    LIVREEQ_API Client( int argc, char** argv, bool isResident );
+    LIVREEQ_API Client(int argc, char** argv, bool isResident);
     LIVREEQ_API ~Client();
 
     /** @return the new chosen config if successful, nullptr otherwise. */
     LIVREEQ_API Config* chooseConfig();
 
     /** Release the config from chooseConfig(). */
-    LIVREEQ_API void releaseConfig( Config* config );
+    LIVREEQ_API void releaseConfig(Config* config);
 
     /**
      * @param idleFunc function which is called every frame, e.g. for updating
      *                 information like frame ranges in data sources
      */
-    LIVREEQ_API void setIdleFunction( const IdleFunc& idleFunc );
+    LIVREEQ_API void setIdleFunction(const IdleFunc& idleFunc);
 
     /** @return the currently set idle function. */
     LIVREEQ_API const IdleFunc& getIdleFunction() const;
@@ -65,18 +64,15 @@ public:
     LIVREEQ_API bool processCommands();
 
 protected:
-
     /** @override eq::Client::initLocal() */
-    bool initLocal( const int argc, char* argv[] ) final;
+    bool initLocal(const int argc, char* argv[]) final;
 
     /** Infinite loop on remote render client. */
     void clientLoop() final;
 
 private:
-
     struct Impl;
-    std::unique_ptr< Impl > _impl;
+    std::unique_ptr<Impl> _impl;
 };
-
 }
 #endif // _Client_h_

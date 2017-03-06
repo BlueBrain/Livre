@@ -24,29 +24,25 @@
 
 namespace test
 {
-
 const size_t OBJECT_SIZE = 1000;
 
 class ValidCacheObject : public livre::CacheObject
 {
 public:
-
     /**
      * Constructor
      */
-    ValidCacheObject( const livre::CacheId& cacheId )
-        : livre::CacheObject( cacheId )
-    { }
+    ValidCacheObject(const livre::CacheId& cacheId)
+        : livre::CacheObject(cacheId)
+    {
+    }
 
-    size_t getSize( ) const final { return OBJECT_SIZE; }
-
+    size_t getSize() const final { return OBJECT_SIZE; }
 private:
-
 };
 
-typedef std::shared_ptr< ValidCacheObject > ValidCacheObjectPtr;
-typedef std::shared_ptr< const ValidCacheObject > ConstValidCacheObjectPtr;
-
+typedef std::shared_ptr<ValidCacheObject> ValidCacheObjectPtr;
+typedef std::shared_ptr<const ValidCacheObject> ConstValidCacheObjectPtr;
 }
 
 #endif // _ValidCacheObject_h_

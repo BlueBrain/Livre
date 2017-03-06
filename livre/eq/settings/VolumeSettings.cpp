@@ -20,12 +20,11 @@
 
 #include <eq/eq.h>
 
-#include <livre/eq/types.h>
 #include <livre/eq/settings/VolumeSettings.h>
+#include <livre/eq/types.h>
 
 namespace livre
 {
-
 VolumeSettings::VolumeSettings()
 {
     reset();
@@ -34,16 +33,15 @@ VolumeSettings::VolumeSettings()
 void VolumeSettings::reset()
 {
     _uri = "";
-    _dataSourceRange = Vector2f( std::numeric_limits< float >::infinity(),
-                                 -std::numeric_limits< float >::infinity( ));
-    setDirty( DIRTY_ALL );
+    _dataSourceRange = Vector2f(std::numeric_limits<float>::infinity(),
+                                -std::numeric_limits<float>::infinity());
+    setDirty(DIRTY_ALL);
 }
 
-
-void VolumeSettings::setURI( const std::string& uri )
+void VolumeSettings::setURI(const std::string& uri)
 {
     _uri = uri;
-    setDirty( DIRTY_ALL );
+    setDirty(DIRTY_ALL);
 }
 
 const std::string& VolumeSettings::getURI() const
@@ -51,10 +49,10 @@ const std::string& VolumeSettings::getURI() const
     return _uri;
 }
 
-void VolumeSettings::setDataSourceRange( const Vector2f& range )
+void VolumeSettings::setDataSourceRange(const Vector2f& range)
 {
     _dataSourceRange = range;
-    setDirty( DIRTY_ALL );
+    setDirty(DIRTY_ALL);
 }
 
 const vmml::Vector2f& VolumeSettings::getDataSourceRange() const
@@ -62,14 +60,13 @@ const vmml::Vector2f& VolumeSettings::getDataSourceRange() const
     return _dataSourceRange;
 }
 
-void VolumeSettings::serialize( co::DataOStream& os, uint64_t )
+void VolumeSettings::serialize(co::DataOStream& os, uint64_t)
 {
-    os  << _uri << _dataSourceRange;
+    os << _uri << _dataSourceRange;
 }
 
-void VolumeSettings::deserialize( co::DataIStream& is, uint64_t )
+void VolumeSettings::deserialize(co::DataIStream& is, uint64_t)
 {
     is >> _uri >> _dataSourceRange;
 }
-
 }

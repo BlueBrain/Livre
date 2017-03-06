@@ -22,9 +22,7 @@
 
 namespace livre
 {
-
 bool hasOpenGL42Support();
-
 }
 
 #endif // _utility_h_

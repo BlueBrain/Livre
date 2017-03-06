@@ -21,12 +21,11 @@
 
 #include <livre/eq/settings/FrameSettings.h>
 
-#include <co/dataOStream.h>
 #include <co/dataIStream.h>
+#include <co/dataOStream.h>
 
 namespace livre
 {
-
 FrameSettings::FrameSettings()
 {
     reset();
@@ -37,39 +36,39 @@ void FrameSettings::reset()
     frameNumber_ = INVALID_TIMESTEP;
     statistics_ = false;
     info_ = false;
-    grabFrame_= false;
-    setDirty( DIRTY_ALL );
+    grabFrame_ = false;
+    setDirty(DIRTY_ALL);
 }
 
-void FrameSettings::serialize( co::DataOStream& os, uint64_t )
+void FrameSettings::serialize(co::DataOStream& os, uint64_t)
 {
     os << frameNumber_ << statistics_ << info_ << grabFrame_;
 }
 
-void FrameSettings::deserialize( co::DataIStream& is, uint64_t )
+void FrameSettings::deserialize(co::DataIStream& is, uint64_t)
 {
     is >> frameNumber_ >> statistics_ >> info_ >> grabFrame_;
 }
 
-void FrameSettings::setFrameNumber( uint32_t frame )
+void FrameSettings::setFrameNumber(uint32_t frame)
 {
-    if( frameNumber_ == frame )
+    if (frameNumber_ == frame)
         return;
 
     frameNumber_ = frame;
-    setDirty( DIRTY_ALL );
+    setDirty(DIRTY_ALL);
 }
 
 void FrameSettings::toggleStatistics()
 {
     statistics_ = !statistics_;
-    setDirty( DIRTY_ALL );
+    setDirty(DIRTY_ALL);
 }
 
 void FrameSettings::toggleInfo()
 {
     info_ = !info_;
-    setDirty( DIRTY_ALL );
+    setDirty(DIRTY_ALL);
 }
 
 bool FrameSettings::getShowInfo() const
@@ -82,12 +81,12 @@ bool FrameSettings::getStatistics() const
     return statistics_;
 }
 
-void FrameSettings::setGrabFrame( const bool setValue )
+void FrameSettings::setGrabFrame(const bool setValue)
 {
-    if( grabFrame_ != setValue )
+    if (grabFrame_ != setValue)
     {
         grabFrame_ = setValue;
-        setDirty( DIRTY_ALL );
+        setDirty(DIRTY_ALL);
     }
 }
 
@@ -95,5 +94,4 @@ bool FrameSettings::getGrabFrame() const
 {
     return grabFrame_;
 }
-
 }

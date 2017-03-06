@@ -22,38 +22,36 @@
 #ifndef _Channel_h_
 #define _Channel_h_
 
-#include <livre/eq/api.h>
 #include <livre/core/types.h>
+#include <livre/eq/api.h>
 
 #include <eq/channel.h>
 
 namespace livre
 {
-
 /** A view in OpenGL. */
 class Channel : public eq::Channel
 {
 public:
-    LIVREEQ_API Channel( eq::Window* parent );
+    LIVREEQ_API Channel(eq::Window* parent);
     LIVREEQ_API ~Channel();
 
     struct Impl;
 
 private:
-    bool configInit( const eq::uint128_t& initId ) final;
+    bool configInit(const eq::uint128_t& initId) final;
     bool configExit() final;
 
-    void frameStart( const eq::uint128_t&, const uint32_t ) final;
-    void frameDraw( const eq::uint128_t& frameId ) final;
-    void frameViewStart( const eq::uint128_t& frameId ) final;
-    void frameViewFinish( const eq::uint128_t &frameID ) final;
-    void frameAssemble( const eq::uint128_t&, const eq::Frames& ) final;
-    void frameReadback( const eq::uint128_t&, const eq::Frames& ) final;
+    void frameStart(const eq::uint128_t&, const uint32_t) final;
+    void frameDraw(const eq::uint128_t& frameId) final;
+    void frameViewStart(const eq::uint128_t& frameId) final;
+    void frameViewFinish(const eq::uint128_t& frameID) final;
+    void frameAssemble(const eq::uint128_t&, const eq::Frames&) final;
+    void frameReadback(const eq::uint128_t&, const eq::Frames&) final;
     std::string getDumpImageFileName() const final;
 
-    std::unique_ptr< Impl >  _impl;
+    std::unique_ptr<Impl> _impl;
 };
-
 }
 
 #endif //_Channel_h_

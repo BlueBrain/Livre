@@ -21,13 +21,12 @@
 #ifndef _FrameData_h_
 #define _FrameData_h_
 
+#include <co/objectFactory.h> // member
 #include <livre/eq/types.h>
 #include <livre/lib/types.h>
-#include <co/objectFactory.h> // member
 
 namespace livre
 {
-
 /** Handles frame-specific, distributed data. */
 class FrameData
 {
@@ -38,11 +37,11 @@ public:
      * Initializes the FrameData.
      * @param eqConfig equalizer configuration.
      */
-    void initialize( eq::Config* eqConfig );
+    void initialize(eq::Config* eqConfig);
 
     /** Set up the parameters. */
-    void setup( const ApplicationParameters& appParams,
-                const VolumeRendererParameters& rendererParams );
+    void setup(const ApplicationParameters& appParams,
+               const VolumeRendererParameters& rendererParams);
 
     /**
      * Registers objects to the internal \see co::ObjectMap.
@@ -78,14 +77,14 @@ public:
     /**
      * Syncs with the application node object.
      */
-    bool syncToApplicatonNode( const eq::uint128_t& uuid );
+    bool syncToApplicatonNode(const eq::uint128_t& uuid);
 
     /**
      * Syncs changes.
      * @param version Sync version.
      * @return Synced version.
      */
-    eq::uint128_t sync( const eq::uint128_t& version = co::VERSION_HEAD );
+    eq::uint128_t sync(const eq::uint128_t& version = co::VERSION_HEAD);
 
     /**
      * Maps frame data to config.
@@ -93,27 +92,27 @@ public:
      * @param uuid uuid of the data.
      * @return True if mapping is successfull.
      */
-    bool map( eq::Config *config , const eq::uint128_t& uuid );
+    bool map(eq::Config* config, const eq::uint128_t& uuid);
 
     /**
     * Unmaps frame data from config.
     * @param config eq Config.
     */
-    void unmap( eq::Config *config );
+    void unmap(eq::Config* config);
 
     /**
      * Registers frame data to config.
      * @param config eq Config.
      * @return True if registration is successful.
      */
-    bool registerToConfig( eq::Config *config );
+    bool registerToConfig(eq::Config* config);
 
     /**
      * Deregisters frame data from config.
      * @param config eq Config.
      * @return True if deregistration is successful.
      */
-    bool deregisterFromConfig( eq::Config *config );
+    bool deregisterFromConfig(eq::Config* config);
 
     /**
      * @return The frame settings.
@@ -155,10 +154,9 @@ public:
 
 private:
     class Impl;
-    std::unique_ptr< Impl > _impl;
+    std::unique_ptr<Impl> _impl;
     co::ObjectFactory _factory;
 };
-
 }
 
 #endif // _FrameData_h_

@@ -19,14 +19,14 @@
 
 #define BOOST_TEST_MODULE Pipeline
 
-#include <livre/core/pipeline/PipeFilter.h>
 #include <livre/core/pipeline/Filter.h>
+#include <livre/core/pipeline/FutureMap.h>
+#include <livre/core/pipeline/FuturePromise.h>
+#include <livre/core/pipeline/PipeFilter.h>
 #include <livre/core/pipeline/Pipeline.h>
+#include <livre/core/pipeline/PromiseMap.h>
 #include <livre/core/pipeline/SimpleExecutor.h>
 #include <livre/core/pipeline/Workers.h>
-#include <livre/core/pipeline/FutureMap.h>
-#include <livre/core/pipeline/PromiseMap.h>
-#include <livre/core/pipeline/FuturePromise.h>
 
 #include <boost/test/unit_test.hpp>
 
@@ -38,298 +38,327 @@ const uint32_t addMoreFish = 10;
 
 struct InputData
 {
-    explicit InputData( uint32_t value = defaultMeaningOfLife )
-        : meaningOfLife( value )
-    {}
+    explicit InputData(uint32_t value = defaultMeaningOfLife)
+        : meaningOfLife(value)
+    {
+    }
 
     uint32_t meaningOfLife;
 };
 
 struct OutputData
 {
-    explicit OutputData( uint32_t value = defaultThanksForAllTheFish )
-        : thanksForAllTheFish( value )
-    {}
+    explicit OutputData(uint32_t value = defaultThanksForAllTheFish)
+        : thanksForAllTheFish(value)
+    {
+    }
 
     uint32_t thanksForAllTheFish;
 };
 
 class TestFilter : public livre::Filter
 {
-    void execute( const livre::FutureMap& input, livre::PromiseMap& output ) const final
+    void execute(const livre::FutureMap& input,
+                 livre::PromiseMap& output) const final
     {
-        const std::vector< InputData >& results = input.get< InputData >( "TestInputData" );
+        const std::vector<InputData>& results =
+            input.get<InputData>("TestInputData");
         OutputData outputData;
 
-        for( const auto& data: results )
+        for (const auto& data : results)
         {
-             const InputData& inputData = data;
-             outputData.thanksForAllTheFish += inputData.meaningOfLife + addMoreFish;
+            const InputData& inputData = data;
+            outputData.thanksForAllTheFish +=
+                inputData.meaningOfLife + addMoreFish;
         }
 
-        output.set( "TestOutputData", outputData );
+        output.set("TestOutputData", outputData);
     }
 
     livre::DataInfos getInputDataInfos() const final
     {
-        return {{ "TestInputData", livre::getType< InputData >( ) }};
+        return {{"TestInputData", livre::getType<InputData>()}};
     }
 
     livre::DataInfos getOutputDataInfos() const final
     {
-        return {{ "TestOutputData", livre::getType< OutputData >( ) }};
+        return {{"TestOutputData", livre::getType<OutputData>()}};
     }
 };
 
 class ConvertFilter : public livre::Filter
 {
-    void execute( const livre::FutureMap& input, livre::PromiseMap& output ) const final
+    void execute(const livre::FutureMap& input,
+                 livre::PromiseMap& output) const final
     {
-        const std::vector< OutputData >& results = input.get< OutputData >( "ConvertInputData" );
+        const std::vector<OutputData>& results =
+            input.get<OutputData>("ConvertInputData");
 
         InputData inputData;
-        for( const auto& data: results )
+        for (const auto& data : results)
         {
-             inputData.meaningOfLife = data.thanksForAllTheFish + addMoreFish;
+            inputData.meaningOfLife = data.thanksForAllTheFish + addMoreFish;
         }
 
-        output.set( "ConvertOutputData", inputData );
+        output.set("ConvertOutputData", inputData);
     }
 
     livre::DataInfos getInputDataInfos() const final
     {
-        return {{ "ConvertInputData", livre::getType< OutputData >( ) }};
-
+        return {{"ConvertInputData", livre::getType<OutputData>()}};
     }
 
     livre::DataInfos getOutputDataInfos() const final
     {
-        return {{ "ConvertOutputData", livre::getType< InputData >( )}};
+        return {{"ConvertOutputData", livre::getType<InputData>()}};
     }
 };
 
-bool check_error( const std::runtime_error& ) { return true; }
-
-BOOST_AUTO_TEST_CASE( testFilterNoInput )
+bool check_error(const std::runtime_error&)
 {
-    livre::PipeFilterT< TestFilter > pipeFilter( "Producer" );
+    return true;
+}
+
+BOOST_AUTO_TEST_CASE(testFilterNoInput)
+{
+    livre::PipeFilterT<TestFilter> pipeFilter("Producer");
 
     // Execute will fail because there are no inputs where data is retrieved
-    BOOST_CHECK_THROW( pipeFilter.execute(), std::logic_error );
-    const livre::UniqueFutureMap portFutures( pipeFilter.getPostconditions( ));
+    BOOST_CHECK_THROW(pipeFilter.execute(), std::logic_error);
+    const livre::UniqueFutureMap portFutures(pipeFilter.getPostconditions());
 
     // Results of the filter will be empty.
-    BOOST_CHECK_THROW( portFutures.get< OutputData >( "TestOutputData" ), std::runtime_error );
+    BOOST_CHECK_THROW(portFutures.get<OutputData>("TestOutputData"),
+                      std::runtime_error);
 }
 
-BOOST_AUTO_TEST_CASE( testFilterWithInput )
+BOOST_AUTO_TEST_CASE(testFilterWithInput)
 {
-    livre::PipeFilterT< TestFilter > pipeFilter( "Producer" );
+    livre::PipeFilterT<TestFilter> pipeFilter("Producer");
     const uint32_t inputValue = 90;
 
-    pipeFilter.getPromise( "TestInputData" ).set( InputData( inputValue ));
+    pipeFilter.getPromise("TestInputData").set(InputData(inputValue));
     pipeFilter.execute();
 
-    const livre::UniqueFutureMap portFutures( pipeFilter.getPostconditions( ));
+    const livre::UniqueFutureMap portFutures(pipeFilter.getPostconditions());
     const OutputData& outputData =
-            portFutures.get< OutputData >( "TestOutputData" );
-    BOOST_CHECK_EQUAL( outputData.thanksForAllTheFish, 151 );
+        portFutures.get<OutputData>("TestOutputData");
+    BOOST_CHECK_EQUAL(outputData.thanksForAllTheFish, 151);
 }
 
-BOOST_AUTO_TEST_CASE( testSetAndGetWrongParameters )
+BOOST_AUTO_TEST_CASE(testSetAndGetWrongParameters)
 {
     TestFilter filter;
-    livre::PipeFilterT< TestFilter > pipeFilter( "Producer" );
-    pipeFilter.getPromise( "TestInputData" ).set( InputData());
+    livre::PipeFilterT<TestFilter> pipeFilter("Producer");
+    pipeFilter.getPromise("TestInputData").set(InputData());
 
-    BOOST_CHECK_THROW( pipeFilter.getPromise( "InputData" ).set( OutputData( 0 )),
-                       std::runtime_error );
+    BOOST_CHECK_THROW(pipeFilter.getPromise("InputData").set(OutputData(0)),
+                      std::runtime_error);
     pipeFilter.execute();
-    const livre::UniqueFutureMap portFutures( pipeFilter.getPostconditions());
-    BOOST_CHECK_THROW( portFutures.get<InputData>( "TestOutputData" ), std::runtime_error );
+    const livre::UniqueFutureMap portFutures(pipeFilter.getPostconditions());
+    BOOST_CHECK_THROW(portFutures.get<InputData>("TestOutputData"),
+                      std::runtime_error);
 }
 
-BOOST_AUTO_TEST_CASE( testInvalidConnection )
+BOOST_AUTO_TEST_CASE(testInvalidConnection)
 {
-    livre::PipeFilterT< TestFilter > pipeFilter1( "Producer" );
-    livre::PipeFilterT< TestFilter > pipeFilter2( "Consumer" );
+    livre::PipeFilterT<TestFilter> pipeFilter1("Producer");
+    livre::PipeFilterT<TestFilter> pipeFilter2("Consumer");
 
-    BOOST_CHECK_THROW( pipeFilter1.connect( "TestOutputData", pipeFilter2, "NotExistingConnection" ),
-                       std::runtime_error );
+    BOOST_CHECK_THROW(pipeFilter1.connect("TestOutputData", pipeFilter2,
+                                          "NotExistingConnection"),
+                      std::runtime_error);
 }
 
-BOOST_AUTO_TEST_CASE( testConnection )
+BOOST_AUTO_TEST_CASE(testConnection)
 {
-    livre::PipeFilterT< TestFilter > pipeInput( "Producer" );
-    livre::PipeFilterT< TestFilter > pipeOutput( "Consumer" );
+    livre::PipeFilterT<TestFilter> pipeInput("Producer");
+    livre::PipeFilterT<TestFilter> pipeOutput("Consumer");
 
-    livre::PipeFilterT< ConvertFilter > convertPipeFilter( "Converter" );
+    livre::PipeFilterT<ConvertFilter> convertPipeFilter("Converter");
 
-    pipeInput.connect( "TestOutputData", convertPipeFilter, "ConvertInputData" );
-    convertPipeFilter.connect( "ConvertOutputData", pipeOutput, "TestInputData" );
+    pipeInput.connect("TestOutputData", convertPipeFilter, "ConvertInputData");
+    convertPipeFilter.connect("ConvertOutputData", pipeOutput, "TestInputData");
 
     const uint32_t inputValue = 90;
-    pipeInput.getPromise( "TestInputData" ).set( InputData( inputValue ));
+    pipeInput.getPromise("TestInputData").set(InputData(inputValue));
     pipeInput.execute();
     convertPipeFilter.execute();
     pipeOutput.execute();
 
-    const livre::UniqueFutureMap portFutures( pipeOutput.getPostconditions( ));
+    const livre::UniqueFutureMap portFutures(pipeOutput.getPostconditions());
     const OutputData& outputData =
-            portFutures.get< OutputData >( "TestOutputData" );
-    BOOST_CHECK_EQUAL( outputData.thanksForAllTheFish, 222 );
+        portFutures.get<OutputData>("TestOutputData");
+    BOOST_CHECK_EQUAL(outputData.thanksForAllTheFish, 222);
 }
 
-livre::Pipeline createPipeline( const uint32_t inputValue,
-                                size_t nConvertFilter = 1 )
+livre::Pipeline createPipeline(const uint32_t inputValue,
+                               size_t nConvertFilter = 1)
 {
     livre::Pipeline pipeline;
-    livre::PipeFilter pipeInput = pipeline.add< TestFilter >( "Producer" );
-    livre::PipeFilter pipeOutput = pipeline.add< TestFilter >( "Consumer" );
+    livre::PipeFilter pipeInput = pipeline.add<TestFilter>("Producer");
+    livre::PipeFilter pipeOutput = pipeline.add<TestFilter>("Consumer");
 
-    for( size_t i = 0; i < nConvertFilter; ++i )
+    for (size_t i = 0; i < nConvertFilter; ++i)
     {
         std::stringstream name;
         name << "Converter" << i;
         livre::PipeFilter convertPipeFilter =
-                pipeline.add< ConvertFilter >( name.str( ));
-        pipeInput.connect( "TestOutputData", convertPipeFilter, "ConvertInputData" );
-        convertPipeFilter.connect( "ConvertOutputData", pipeOutput, "TestInputData" );
+            pipeline.add<ConvertFilter>(name.str());
+        pipeInput.connect("TestOutputData", convertPipeFilter,
+                          "ConvertInputData");
+        convertPipeFilter.connect("ConvertOutputData", pipeOutput,
+                                  "TestInputData");
     }
 
-    pipeInput.getPromise( "TestInputData" ).set( InputData( inputValue ));
+    pipeInput.getPromise("TestInputData").set(InputData(inputValue));
     return pipeline;
 }
 
-BOOST_AUTO_TEST_CASE( testSynchronousPipeline )
+BOOST_AUTO_TEST_CASE(testSynchronousPipeline)
 {
     const uint32_t inputValue = 90;
 
-    livre::Pipeline pipeline = createPipeline( inputValue, 1 );
+    livre::Pipeline pipeline = createPipeline(inputValue, 1);
     pipeline.execute();
 
-    const livre::Executable& pipeOutput = pipeline.getExecutable( "Consumer" );
-    const livre::UniqueFutureMap portFutures( pipeOutput.getPostconditions( ));
-    const OutputData& outputData = portFutures.get< OutputData >( "TestOutputData" );
-    BOOST_CHECK_EQUAL( outputData.thanksForAllTheFish, 222 );
+    const livre::Executable& pipeOutput = pipeline.getExecutable("Consumer");
+    const livre::UniqueFutureMap portFutures(pipeOutput.getPostconditions());
+    const OutputData& outputData =
+        portFutures.get<OutputData>("TestOutputData");
+    BOOST_CHECK_EQUAL(outputData.thanksForAllTheFish, 222);
 }
 
-BOOST_AUTO_TEST_CASE( testWaitPipeline )
+BOOST_AUTO_TEST_CASE(testWaitPipeline)
 {
     const uint32_t inputValue = 90;
-    livre::Pipeline pipeline = createPipeline( inputValue, 1 );
+    livre::Pipeline pipeline = createPipeline(inputValue, 1);
 
-    livre::SimpleExecutor executor( 2 );
-    const livre::FutureMap pipelineFutures( pipeline.schedule( executor ));
+    livre::SimpleExecutor executor(2);
+    const livre::FutureMap pipelineFutures(pipeline.schedule(executor));
     pipelineFutures.wait();
 
-    const livre::Executable& pipeOutput = pipeline.getExecutable( "Consumer" );
-    const livre::UniqueFutureMap portFutures( pipeOutput.getPostconditions( ));
-    const OutputData& outputData = portFutures.get< OutputData >( "TestOutputData" );
-    BOOST_CHECK_EQUAL( outputData.thanksForAllTheFish, 222 );
+    const livre::Executable& pipeOutput = pipeline.getExecutable("Consumer");
+    const livre::UniqueFutureMap portFutures(pipeOutput.getPostconditions());
+    const OutputData& outputData =
+        portFutures.get<OutputData>("TestOutputData");
+    BOOST_CHECK_EQUAL(outputData.thanksForAllTheFish, 222);
 }
 
-BOOST_AUTO_TEST_CASE( testAsynchronousPipeline )
+BOOST_AUTO_TEST_CASE(testAsynchronousPipeline)
 {
     const uint32_t inputValue = 90;
 
-    livre::Pipeline pipeline = createPipeline( inputValue, 1 );
-    livre::SimpleExecutor executor( 2 );
+    livre::Pipeline pipeline = createPipeline(inputValue, 1);
+    livre::SimpleExecutor executor(2);
 
-    pipeline.schedule( executor );
-    const livre::Executable& pipeOutput = pipeline.getExecutable( "Consumer" );
-    const livre::UniqueFutureMap portFutures( pipeOutput.getPostconditions( ));
-    const OutputData& outputData = portFutures.get< OutputData >( "TestOutputData" );
-    BOOST_CHECK_EQUAL( outputData.thanksForAllTheFish, 222 );
+    pipeline.schedule(executor);
+    const livre::Executable& pipeOutput = pipeline.getExecutable("Consumer");
+    const livre::UniqueFutureMap portFutures(pipeOutput.getPostconditions());
+    const OutputData& outputData =
+        portFutures.get<OutputData>("TestOutputData");
+    BOOST_CHECK_EQUAL(outputData.thanksForAllTheFish, 222);
 }
 
-BOOST_AUTO_TEST_CASE( testOneToManyManyToOnePipeline )
+BOOST_AUTO_TEST_CASE(testOneToManyManyToOnePipeline)
 {
     // Try using 1 execution thread, output result should not change
     {
         const size_t convertFilterCount = 10;
         const uint32_t inputValue = 90;
 
-        livre::Pipeline pipeline = createPipeline( inputValue, convertFilterCount );
+        livre::Pipeline pipeline =
+            createPipeline(inputValue, convertFilterCount);
 
-        livre::SimpleExecutor executor( 2 );
-        pipeline.schedule( executor );
-        const livre::Executable& pipeOutput = pipeline.getExecutable( "Consumer" );
-        const livre::UniqueFutureMap portFutures( pipeOutput.getPostconditions( ));
-        const OutputData& outputData = portFutures.get< OutputData >( "TestOutputData" );
-        BOOST_CHECK_EQUAL( outputData.thanksForAllTheFish, 1761 );
+        livre::SimpleExecutor executor(2);
+        pipeline.schedule(executor);
+        const livre::Executable& pipeOutput =
+            pipeline.getExecutable("Consumer");
+        const livre::UniqueFutureMap portFutures(
+            pipeOutput.getPostconditions());
+        const OutputData& outputData =
+            portFutures.get<OutputData>("TestOutputData");
+        BOOST_CHECK_EQUAL(outputData.thanksForAllTheFish, 1761);
     }
 
     // Try using 8 execution thread, output result should not change
     {
         const size_t convertFilterCount = 10;
         const uint32_t inputValue = 90;
-        livre::Pipeline pipeline = createPipeline( inputValue, convertFilterCount );
+        livre::Pipeline pipeline =
+            createPipeline(inputValue, convertFilterCount);
 
-        livre::SimpleExecutor executor( 8 );
-        const livre::Futures& futures = pipeline.schedule( executor );
-        const livre::Executable& pipeOutput = pipeline.getExecutable( "Consumer" );
-        const livre::UniqueFutureMap portFutures1( pipeOutput.getPostconditions( ));
-        const OutputData& outputData1 = portFutures1.get< OutputData >( "TestOutputData" );
-        BOOST_CHECK_EQUAL( outputData1.thanksForAllTheFish, 1761 );
+        livre::SimpleExecutor executor(8);
+        const livre::Futures& futures = pipeline.schedule(executor);
+        const livre::Executable& pipeOutput =
+            pipeline.getExecutable("Consumer");
+        const livre::UniqueFutureMap portFutures1(
+            pipeOutput.getPostconditions());
+        const OutputData& outputData1 =
+            portFutures1.get<OutputData>("TestOutputData");
+        BOOST_CHECK_EQUAL(outputData1.thanksForAllTheFish, 1761);
 
         // Reset the pipeline but wait pipeline execution before
-        const livre::FutureMap futureMap( futures );
+        const livre::FutureMap futureMap(futures);
         futureMap.wait();
 
         pipeline.reset();
-        pipeline.schedule( executor );
+        pipeline.schedule(executor);
 
-        livre::PipeFilter pipeInput =
-                static_cast< const livre::PipeFilter& >(
-                    pipeline.getExecutable( "Producer" ));
-        pipeInput.getPromise( "TestInputData" ).set( InputData( inputValue ));
+        livre::PipeFilter pipeInput = static_cast<const livre::PipeFilter&>(
+            pipeline.getExecutable("Producer"));
+        pipeInput.getPromise("TestInputData").set(InputData(inputValue));
 
-        const livre::UniqueFutureMap portFutures2( pipeOutput.getPostconditions( ));
-        const OutputData& outputData2 = portFutures2.get< OutputData >( "TestOutputData" );
-        BOOST_CHECK_EQUAL( outputData2.thanksForAllTheFish, 1761 );
+        const livre::UniqueFutureMap portFutures2(
+            pipeOutput.getPostconditions());
+        const OutputData& outputData2 =
+            portFutures2.get<OutputData>("TestOutputData");
+        BOOST_CHECK_EQUAL(outputData2.thanksForAllTheFish, 1761);
     }
 }
 
-BOOST_AUTO_TEST_CASE( testPromiseFuture )
+BOOST_AUTO_TEST_CASE(testPromiseFuture)
 {
-    livre::Promise promise( livre::DataInfo( "Helloworld", livre::getType< uint32_t >( )));
+    livre::Promise promise(
+        livre::DataInfo("Helloworld", livre::getType<uint32_t>()));
     livre::Future future1 = promise.getFuture();
     livre::Future future2 = promise.getFuture();
-    BOOST_CHECK( future1 == future2 );
+    BOOST_CHECK(future1 == future2);
 
     // Promise only be set with the right type
-    BOOST_CHECK_THROW( promise.set( 12.0f ), std::runtime_error );
+    BOOST_CHECK_THROW(promise.set(12.0f), std::runtime_error);
 
-    promise.set( 42u );
-    BOOST_CHECK_EQUAL( future1.get< uint32_t >(), 42u );
-    BOOST_CHECK_EQUAL( future2.get< uint32_t >(), 42u );
+    promise.set(42u);
+    BOOST_CHECK_EQUAL(future1.get<uint32_t>(), 42u);
+    BOOST_CHECK_EQUAL(future2.get<uint32_t>(), 42u);
 
     // Promise only can be set once
-    BOOST_CHECK_THROW( promise.set( 42u ), std::runtime_error );
+    BOOST_CHECK_THROW(promise.set(42u), std::runtime_error);
 
     promise.reset();
     livre::Future future3 = promise.getFuture();
-    BOOST_CHECK( future1 != future3 );
+    BOOST_CHECK(future1 != future3);
 
     // Promise is set with explicit conversion
-    promise.set< uint32_t >( 43.0f );
-    BOOST_CHECK_EQUAL( future1.get< uint32_t >(), 42u );
-    BOOST_CHECK_EQUAL( future3.get< uint32_t >(), 43u );
+    promise.set<uint32_t>(43.0f);
+    BOOST_CHECK_EQUAL(future1.get<uint32_t>(), 42u);
+    BOOST_CHECK_EQUAL(future3.get<uint32_t>(), 43u);
 }
 
-BOOST_AUTO_TEST_CASE( testFutureMaps )
+BOOST_AUTO_TEST_CASE(testFutureMaps)
 {
-    livre::PipeFilterT< TestFilter > pipeFilter( "Producer" );
+    livre::PipeFilterT<TestFilter> pipeFilter("Producer");
     const livre::Futures& uniqueFutures = pipeFilter.getPostconditions();
 
     // The output futures are unique
-    const livre::UniqueFutureMap portFuturesUnique( uniqueFutures );
-    const livre::FutureMap portFutures1( uniqueFutures );
+    const livre::UniqueFutureMap portFuturesUnique(uniqueFutures);
+    const livre::FutureMap portFutures1(uniqueFutures);
 
-    livre::Futures nonUniqueFutures = { uniqueFutures.front(), uniqueFutures.front() };
+    livre::Futures nonUniqueFutures = {uniqueFutures.front(),
+                                       uniqueFutures.front()};
 
-    BOOST_CHECK_THROW( const livre::UniqueFutureMap portFuturesNonUnique( nonUniqueFutures ),
-                       std::logic_error );
-    const livre::FutureMap portFutures2( nonUniqueFutures );
+    BOOST_CHECK_THROW(const livre::UniqueFutureMap portFuturesNonUnique(
+                          nonUniqueFutures),
+                      std::logic_error);
+    const livre::FutureMap portFutures2(nonUniqueFutures);
 }

@@ -21,24 +21,24 @@
 
 namespace livre
 {
-
 VolumeInformation::VolumeInformation()
-    : bigEndian( false )
-    , compCount( 1u )
-    , dataType( DT_UINT8 )
-    , overlap( 0u )
-    , maximumBlockSize( 0u )
-    , voxels( 256u )
-    , worldSize( 0.0f )
-    , resolution( Vector3f( -1.0f, -1.0f, -1.0f ))
-    , worldSpacePerVoxel( 0.0f )
-    , meterToDataUnitRatio( 1.0f )
-    , frameRange( INVALID_FRAME_RANGE )
-{}
+    : bigEndian(false)
+    , compCount(1u)
+    , dataType(DT_UINT8)
+    , overlap(0u)
+    , maximumBlockSize(0u)
+    , voxels(256u)
+    , worldSize(0.0f)
+    , resolution(Vector3f(-1.0f, -1.0f, -1.0f))
+    , worldSpacePerVoxel(0.0f)
+    , meterToDataUnitRatio(1.0f)
+    , frameRange(INVALID_FRAME_RANGE)
+{
+}
 
 size_t VolumeInformation::getBytesPerVoxel() const
 {
-    switch( dataType )
+    switch (dataType)
     {
     case DT_FLOAT:
     case DT_UINT32:
@@ -54,5 +54,4 @@ size_t VolumeInformation::getBytesPerVoxel() const
         return -1;
     }
 }
-
 }

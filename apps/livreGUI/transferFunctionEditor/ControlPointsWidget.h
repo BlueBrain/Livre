@@ -28,7 +28,6 @@
 
 namespace livre
 {
-
 /** A base widget providing a curve to change the associated channel's value. */
 class ControlPointsWidget : public QQuickWidget
 {
@@ -43,13 +42,13 @@ public:
         alpha
     };
 
-    ControlPointsWidget( QWidget* parent, Channel channel );
+    ControlPointsWidget(QWidget* parent, Channel channel);
     virtual ~ControlPointsWidget();
 
     Channel getChannel() const { return _channel; }
     QPolygonF getControlPoints() const;
-    void setControlPoints( const QPolygonF& controlPoints );
-    uint32_t getColorAtPoint( float xPosition ) const;
+    void setControlPoints(const QPolygonF& controlPoints);
+    uint32_t getColorAtPoint(float xPosition) const;
     UInt8s getCurve() const;
 
 signals:
@@ -59,14 +58,13 @@ protected:
     QImage _background;
 
 private:
-    bool event( QEvent* event ) final;
+    bool event(QEvent* event) final;
 
-    bool _handleMouseEvent( QMouseEvent* mouseEvent );
+    bool _handleMouseEvent(QMouseEvent* mouseEvent);
     void _updateControlPoints();
 
     Channel _channel;
-    ControlPoints _controlPoints = ControlPoints( compareControlPoints );
+    ControlPoints _controlPoints = ControlPoints(compareControlPoints);
     QPointF _selectedPoint;
 };
-
 }

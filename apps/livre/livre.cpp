@@ -23,24 +23,24 @@
 #include <eq/init.h>
 #include <stdlib.h>
 
-int main( const int argc, char** argv )
+int main(const int argc, char** argv)
 {
-    for( int i = 1; i < argc; ++i )
+    for (int i = 1; i < argc; ++i)
     {
-        if( std::string( "--help" ) == argv[i] )
+        if (std::string("--help") == argv[i])
         {
             std::cout << livre::Engine::getHelp() << eq::getHelp()
                       << eq::Client::getHelp() << std::endl;
             return EXIT_SUCCESS;
         }
-        if( std::string( "--version" ) == argv[i] )
+        if (std::string("--version") == argv[i])
         {
             std::cout << livre::Engine::getVersion() << std::endl;
             return EXIT_SUCCESS;
         }
     }
 
-    livre::Engine engine( argc, argv );
-    engine.run( argc, argv );
+    livre::Engine engine(argc, argv);
+    engine.run(argc, argv);
     return EXIT_SUCCESS;
 }

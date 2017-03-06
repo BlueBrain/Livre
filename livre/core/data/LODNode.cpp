@@ -17,60 +17,58 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/core/data/LODNode.h>
 #include <livre/core/data/DataSource.h>
+#include <livre/core/data/LODNode.h>
 
 namespace livre
 {
-
-LODNode::LODNode( ) :
-    _blockSize( 0u )
-{}
-
-LODNode::LODNode( const NodeId& nodeId,
-                  const Vector3ui& blockSize,
-                  const Vector3ui& levelTotalBlockDimensions )
-   : _nodeId( nodeId )
-   , _blockSize( blockSize )
+LODNode::LODNode()
+    : _blockSize(0u)
 {
-    _initialize();
-    _computeWorldBox( levelTotalBlockDimensions );
 }
 
-LODNode::LODNode( const NodeId& nodeId,
-                  const Vector3ui& blockSize,
-                  const Boxf& worldBox )
-   : _nodeId( nodeId )
-   , _blockSize( blockSize )
-   , _worldBox( worldBox )
+LODNode::LODNode(const NodeId& nodeId, const Vector3ui& blockSize,
+                 const Vector3ui& levelTotalBlockDimensions)
+    : _nodeId(nodeId)
+    , _blockSize(blockSize)
+{
+    _initialize();
+    _computeWorldBox(levelTotalBlockDimensions);
+}
+
+LODNode::LODNode(const NodeId& nodeId, const Vector3ui& blockSize,
+                 const Boxf& worldBox)
+    : _nodeId(nodeId)
+    , _blockSize(blockSize)
+    , _worldBox(worldBox)
 {
     _initialize();
 }
 
-void LODNode::_computeWorldBox( const Vector3ui& levelTotalBlockDimensions )
+void LODNode::_computeWorldBox(const Vector3ui& levelTotalBlockDimensions)
 {
     Vector3f lBoxCoordMin = getAbsolutePosition();
-    Vector3f lBoxCoordMax( lBoxCoordMin + Vector3ui( 1 ));
+    Vector3f lBoxCoordMax(lBoxCoordMin + Vector3ui(1));
     const size_t index = levelTotalBlockDimensions.find_max_index();
 
     lBoxCoordMin = lBoxCoordMin / levelTotalBlockDimensions[index];
     lBoxCoordMax = lBoxCoordMax / levelTotalBlockDimensions[index];
 
-    _worldBox = Boxf( lBoxCoordMin, lBoxCoordMax );
+    _worldBox = Boxf(lBoxCoordMin, lBoxCoordMax);
 }
 
-void LODNode::_initialize( )
+void LODNode::_initialize()
 {
     const Vector3ui& pntPos = getAbsolutePosition() * _blockSize;
-    _localVoxelBox = Boxui( pntPos, pntPos + _blockSize );
+    _localVoxelBox = Boxui(pntPos, pntPos + _blockSize);
 }
 
 Vector3f LODNode::getRelativePosition() const
 {
-    return Vector3f( getAbsolutePosition( )) / float( 1 << getRefLevel( ));
+    return Vector3f(getAbsolutePosition()) / float(1 << getRefLevel());
 }
 
-std::ostream& operator<<( std::ostream& os, const LODNode& lodNode )
+std::ostream& operator<<(std::ostream& os, const LODNode& lodNode)
 {
     os << "Node Id: " << lodNode.getNodeId()
        << " World coords: " << lodNode.getWorldBox()
@@ -79,5 +77,4 @@ std::ostream& operator<<( std::ostream& os, const LODNode& lodNode )
 
     return os;
 }
-
 }

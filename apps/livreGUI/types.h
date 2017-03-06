@@ -29,7 +29,6 @@
 
 namespace livre
 {
-
 class AlphaWidget;
 class ColorWidget;
 class Controller;
@@ -39,13 +38,15 @@ class RangeWidget;
 const size_t COLORSAMPLES = 256;
 const uint32_t LATEST_FRAME = INT_MAX; //!< Maximum frame number
 
-inline bool compareControlPoints( const QPointF& p1, const QPointF& p2 )
-    { return p1.x() < p2.x(); };
+inline bool compareControlPoints(const QPointF& p1, const QPointF& p2)
+{
+    return p1.x() < p2.x();
+};
 
 using ControlPoints =
-    std::set< QPointF, bool(*)( const QPointF& p1, const QPointF& p2 ) >;
+    std::set<QPointF, bool (*)(const QPointF& p1, const QPointF& p2)>;
 
-using UInt8s = std::vector< uint8_t >;
+using UInt8s = std::vector<uint8_t>;
 }
 
 #endif // _GuiTypes_h_

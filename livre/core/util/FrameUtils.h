@@ -41,7 +41,8 @@ public:
      * @param boundaries the range that will be used as a hard limit to compute
      * the final frame range used within the object
      */
-    LIVRECORE_API FrameUtils( const Vector2ui& frameRange, const Vector2ui& boundaries );
+    LIVRECORE_API FrameUtils(const Vector2ui& frameRange,
+                             const Vector2ui& boundaries);
 
     /**
      * Return the frame range stored in the object and used as a reference to
@@ -62,7 +63,8 @@ public:
      * @return the current frame number. If the active frame range is
      * INVALID_FRAME_RANGE, return INVALID_FRAME
      */
-    LIVRECORE_API uint32_t getCurrent( uint32_t frameNumber, bool latestAlways = false) const;
+    LIVRECORE_API uint32_t getCurrent(uint32_t frameNumber,
+                                      bool latestAlways = false) const;
 
     /**
      * Compute the next frame number, based on the current frame number and the
@@ -77,11 +79,11 @@ public:
      * @return the next frame number. If the active frame range is
      * INVALID_FRAME_RANGE, return INVALID_FRAME
      */
-    LIVRECORE_API uint32_t getNext( uint32_t current, int32_t delta ) const;
+    LIVRECORE_API uint32_t getNext(uint32_t current, int32_t delta) const;
 
 private:
-    Vector2ui _clampToRange( const Vector2ui& frameRange,
-                             const Vector2ui& boundaries );
+    Vector2ui _clampToRange(const Vector2ui& frameRange,
+                            const Vector2ui& boundaries);
 
     Vector2ui _frameRange;
 };

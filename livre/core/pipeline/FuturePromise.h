@@ -26,7 +26,6 @@
 
 namespace livre
 {
-
 /**
  * Is similar to the std::promise classes in functionality and it has additional
  * information for the name and data type. It provides methods to set the data.
@@ -34,11 +33,10 @@ namespace livre
 class Promise
 {
 public:
-
     /**
      * @param dataInfo is the name and type information for the data.
      */
-    LIVRECORE_API Promise( const DataInfo& dataInfo );
+    LIVRECORE_API Promise(const DataInfo& dataInfo);
     LIVRECORE_API ~Promise();
 
     /**
@@ -57,10 +55,10 @@ public:
      * @throw std::runtime_error when the port data is not exact
      * type T or there is no such port name.
      */
-    template< class T >
-    void set( const T& value )
+    template <class T>
+    void set(const T& value)
     {
-        _set( std::make_shared< PortDataT< T >>( value ));
+        _set(std::make_shared<PortDataT<T>>(value));
     }
 
     /**
@@ -86,31 +84,31 @@ public:
     LIVRECORE_API void reset();
 
 private:
-
     friend class Future;
 
-    void _set( PortDataPtr data );
+    void _set(PortDataPtr data);
 
     struct Impl;
     std::shared_ptr<Impl> _impl;
 };
 
 /**
- * The Future class is similar to the std::future classes in functionality and it has additional
- * information for the name and data type. It provides thread safe methods to query and get the
+ * The Future class is similar to the std::future classes in functionality and
+ * it has additional
+ * information for the name and data type. It provides thread safe methods to
+ * query and get the
  * data. Futures are retrieved from the  Promise class.
  */
 class Future
 {
 public:
-
     ~Future();
 
     /**
      * Copy constructor
      * @param future to be copied
      */
-    Future( const Future& future );
+    Future(const Future& future);
 
     /**
      * @return name of the future
@@ -120,7 +118,7 @@ public:
     /**
      * Constructs a shallow copy of the future with the given name
      */
-    Future( const Future& future, const std::string& name );
+    Future(const Future& future, const std::string& name);
 
     /**
      * Gets the value with the given type T. Blocks until data is
@@ -129,8 +127,11 @@ public:
      * @throw std::runtime_error when the data is not exact
      * type T
      */
-    template< class T >
-    const T& get() const { return _get<T>(); }
+    template <class T>
+    const T& get() const
+    {
+        return _get<T>();
+    }
 
     /**
      * Waits until the data is ready.
@@ -146,14 +147,13 @@ public:
      * @param future is the future to be checked with
      * @return true if both futures are belonging to same promise
      */
-    bool operator==( const Future& future ) const;
+    bool operator==(const Future& future) const;
 
     /**
      * @param future is the future to be checked with
      * @return true if both futures are belonging to different promise
      */
-    bool operator!=( const Future& future ) const { return !(*this == future); }
-
+    bool operator!=(const Future& future) const { return !(*this == future); }
     /**
      * @return the unique identifier for the future
      */
@@ -166,38 +166,36 @@ public:
      * on the promise.
      * @param promise that future is retrieved
      */
-    Future( const Promise& promise );
+    Future(const Promise& promise);
 
 private:
-
     friend class Promise;
 
-    friend void waitForAny( const Futures& future );
-    friend bool operator<( const Future& future1, const Future& future2 );
+    friend void waitForAny(const Futures& future);
+    friend bool operator<(const Future& future1, const Future& future2);
 
-    template< class T >
+    template <class T>
     const T& _get() const
     {
         const auto dataPtr =
-                std::static_pointer_cast< const PortDataT< T >>( _getPtr( getType< T >( )));
+            std::static_pointer_cast<const PortDataT<T>>(_getPtr(getType<T>()));
 
         return dataPtr->data;
     }
 
-    PortDataPtr _getPtr( const std::type_index& dataType ) const;
+    PortDataPtr _getPtr(const std::type_index& dataType) const;
 
     struct Impl;
     std::shared_ptr<Impl> _impl;
 };
 
 /**
- * Waits for any futures to be ready. If there are already ready futures, the function returns
+ * Waits for any futures to be ready. If there are already ready futures, the
+ * function returns
  * immediately.
  * @param futures that is waited to be ready
  */
-void waitForAny( const Futures& futures );
-
+void waitForAny(const Futures& futures);
 }
 
 #endif // _Promise_h_
-

@@ -17,53 +17,39 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <livre/core/pipeline/FuturePromise.h>
 #include <livre/core/pipeline/InputPort.h>
 #include <livre/core/pipeline/OutputPort.h>
-#include <livre/core/pipeline/FuturePromise.h>
 
 namespace livre
 {
-
 struct InputPort::Impl
 {
-    Impl( const DataInfo& info )
-        : _info( info )
-    {}
-
-    ~Impl()
-    {}
-
-    std::string getName() const
+    Impl(const DataInfo& info)
+        : _info(info)
     {
-        return _info.first;
     }
 
-    size_t getSize() const
+    ~Impl() {}
+    std::string getName() const { return _info.first; }
+    size_t getSize() const { return _futures.size(); }
+    std::type_index getDataType() const { return _info.second; }
+    void connect(const OutputPort& port)
     {
-        return _futures.size();
+        if (getDataType() != port.getDataType())
+            LBTHROW(
+                std::runtime_error("Data types does not match between ports"));
+
+        _futures.emplace_back(port.getPromise());
     }
 
-    std::type_index getDataType() const
+    bool disconnect(const OutputPort& port)
     {
-        return _info.second;
-    }
+        const auto& it = std::find(_futures.begin(), _futures.end(),
+                                   port.getPromise().getFuture());
 
-    void connect( const OutputPort& port )
-    {
-        if( getDataType() != port.getDataType( ))
-            LBTHROW( std::runtime_error( "Data types does not match between ports"));
-
-        _futures.emplace_back( port.getPromise( ));
-    }
-
-    bool disconnect( const OutputPort& port )
-    {
-        const auto& it = std::find( _futures.begin(),
-                                    _futures.end(),
-                                    port.getPromise().getFuture( ));
-
-        if( it != _futures.end( ))
-            _futures.erase( it );
+        if (it != _futures.end())
+            _futures.erase(it);
 
         return false;
     }
@@ -72,26 +58,28 @@ struct InputPort::Impl
     const DataInfo _info;
 };
 
-InputPort::InputPort( const DataInfo& dataInfo )
-    : _impl( new InputPort::Impl( dataInfo ))
-{}
+InputPort::InputPort(const DataInfo& dataInfo)
+    : _impl(new InputPort::Impl(dataInfo))
+{
+}
 
 InputPort::~InputPort()
-{}
+{
+}
 
 const Futures& InputPort::getFutures() const
 {
     return _impl->_futures;
 }
 
-void InputPort::connect( const OutputPort& port )
+void InputPort::connect(const OutputPort& port)
 {
-    _impl->connect( port );
+    _impl->connect(port);
 }
 
-bool InputPort::disconnect( const OutputPort& port )
+bool InputPort::disconnect(const OutputPort& port)
 {
-    return _impl->disconnect( port );
+    return _impl->disconnect(port);
 }
 
 std::string InputPort::getName() const
@@ -108,6 +96,4 @@ size_t InputPort::getSize() const
 {
     return _impl->getSize();
 }
-
-
 }

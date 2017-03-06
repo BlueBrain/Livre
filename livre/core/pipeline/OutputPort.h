@@ -25,7 +25,6 @@
 
 namespace livre
 {
-
 /**
  * Output connection for the  PipeFilter.
  */
@@ -35,7 +34,7 @@ public:
     /**
      * @param dataInfo is the name and type information for the data.
      */
-    LIVRECORE_API explicit OutputPort( const DataInfo& dataInfo );
+    LIVRECORE_API explicit OutputPort(const DataInfo& dataInfo);
     LIVRECORE_API ~OutputPort();
 
     /**
@@ -57,7 +56,7 @@ public:
      * Connects an output port to input port
      * @param port input port
      */
-    LIVRECORE_API void connect( InputPort& port );
+    LIVRECORE_API void connect(InputPort& port);
 
     /**
      * Resets the promise/future
@@ -65,12 +64,9 @@ public:
     LIVRECORE_API void reset();
 
 private:
-
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };
-
 }
 
 #endif // _OutputPort_h_
-

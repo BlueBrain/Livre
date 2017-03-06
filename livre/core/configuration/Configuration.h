@@ -25,9 +25,9 @@
 
 namespace livre
 {
-
 /**
- * The Configuration class is used to have a dictionary of variadic data types with names.
+ * The Configuration class is used to have a dictionary of variadic data types
+ * with names.
  */
 class Configuration
 {
@@ -39,16 +39,17 @@ public:
      * @param groupName The item group.
      * @param shortDesc Short description.
      * @param longDesc Long description.
-     * @warning Before file parsing and/or command line parsing descriptions should be added
+     * @warning Before file parsing and/or command line parsing descriptions
+     * should be added
      */
-    template< class T >
-    void addDescription( const std::string& groupName,
-                         const std::string& shortDesc,
-                         const std::string& longDesc )
+    template <class T>
+    void addDescription(const std::string& groupName,
+                        const std::string& shortDesc,
+                        const std::string& longDesc)
     {
-        getGroup_( groupName ).add_options() ( shortDesc.c_str(),
-                                           boost::program_options::value< T >(),
-                                               longDesc.c_str() );
+        getGroup_(groupName).add_options()(shortDesc.c_str(),
+                                           boost::program_options::value<T>(),
+                                           longDesc.c_str());
     }
 
     /**
@@ -61,15 +62,15 @@ public:
      * should be added. The bool type specialization is different and in the cpp
      * file.
      */
-    template< class T >
-    void addDescription( const std::string& groupName,
-                         const std::string& shortDesc,
-                         const std::string& longDesc,
-                         T defaultValue )
+    template <class T>
+    void addDescription(const std::string& groupName,
+                        const std::string& shortDesc,
+                        const std::string& longDesc, T defaultValue)
     {
-        getGroup_( groupName ).add_options()( shortDesc.c_str(),
-            boost::program_options::value< T >()->default_value( defaultValue ),
-                                              longDesc.c_str() );
+        getGroup_(groupName).add_options()(
+            shortDesc.c_str(),
+            boost::program_options::value<T>()->default_value(defaultValue),
+            longDesc.c_str());
     }
 
     /**
@@ -83,28 +84,28 @@ public:
      * should be added. The bool type specialization is different and in the cpp
      * file.
      */
-    template< class T >
-    void addDescription( const std::string& groupName,
-                         const std::string& shortDesc,
-                         const std::string& longDesc,
-                         T defaultValue, T implicitValue )
+    template <class T>
+    void addDescription(const std::string& groupName,
+                        const std::string& shortDesc,
+                        const std::string& longDesc, T defaultValue,
+                        T implicitValue)
     {
-        getGroup_( groupName ).add_options()( shortDesc.c_str(),
-                                           boost::program_options::value< T >()
-                                              ->default_value( defaultValue )
-                                              ->implicit_value( implicitValue),
-                                              longDesc.c_str() );
+        getGroup_(groupName).add_options()(shortDesc.c_str(),
+                                           boost::program_options::value<T>()
+                                               ->default_value(defaultValue)
+                                               ->implicit_value(implicitValue),
+                                           longDesc.c_str());
     }
 
     // Specialization for boolean parameters
-    void addDescription( const std::string& groupName,
-                         const std::string& shortDesc,
-                         const std::string& longDesc,
-                         bool defaultValue )
+    void addDescription(const std::string& groupName,
+                        const std::string& shortDesc,
+                        const std::string& longDesc, bool defaultValue)
     {
-        getGroup_( groupName ).add_options()( shortDesc.c_str(),
-           boost::program_options::bool_switch()->default_value( defaultValue ),
-                                              longDesc.c_str() );
+        getGroup_(groupName).add_options()(
+            shortDesc.c_str(),
+            boost::program_options::bool_switch()->default_value(defaultValue),
+            longDesc.c_str());
     }
 
     /**
@@ -112,7 +113,7 @@ public:
      * @param argc Number of arguments.
      * @param argv Arguments array.
      */
-    LIVRECORE_API void parseCommandLine( int32_t argc, const char **argv );
+    LIVRECORE_API void parseCommandLine(int32_t argc, const char** argv);
 
     /**
      * Gets the value of a key from the dictionary.
@@ -120,13 +121,13 @@ public:
      * @param defaultValue The default value to use if key not in dictionary
      * @return The value if found in the dictionary, defaultValue otherwise
      */
-    template< class T >
-    T getValue( const std::string& key, const T& defaultValue ) const
+    template <class T>
+    T getValue(const std::string& key, const T& defaultValue) const
     {
-        if( !_options.count( key ))
+        if (!_options.count(key))
             return defaultValue;
 
-        return _options[ key ].as< T >( );
+        return _options[key].as<T>();
     }
 
     /**
@@ -134,46 +135,44 @@ public:
      * @param key Key to the value in the dictionary.
      * @return True if key is in the dictionary.
      */
-    LIVRECORE_API bool getValue( const std::string& key ) const
+    LIVRECORE_API bool getValue(const std::string& key) const
     {
-        return _options.count( key );
+        return _options.count(key);
     }
 
     /**
      * @return True if dictionary is empty.
      */
     LIVRECORE_API bool empty() const { return _descriptions.empty(); }
-
     /**
      * Adds global parameters ( help, config file ... to global configuration )
      * @param config Configuration that has the description.
      */
-    LIVRECORE_API void addDescription(const Configuration& config );
+    LIVRECORE_API void addDescription(const Configuration& config);
 
     /**
      * @return The description map.
      */
-    LIVRECORE_API const ProgramOptionsDescriptionMap& getDescriptionMap_( ) const;
+    LIVRECORE_API const ProgramOptionsDescriptionMap& getDescriptionMap_()
+        const;
 
     /**
      * Prints description map for parameters.
      * @return the output stream.
      */
-    LIVRECORE_API friend std::ostream& operator<<( std::ostream& ostream,
-                                                   const Configuration& configuration );
+    LIVRECORE_API friend std::ostream& operator<<(
+        std::ostream& ostream, const Configuration& configuration);
 
-    LIVRECORE_API Configuration& operator = ( const Configuration& );
+    LIVRECORE_API Configuration& operator=(const Configuration&);
 
 private:
     ProgramOptionsMap _options;
     ProgramOptionsDescriptionMap _descriptions;
 
-    LIVRECORE_API ProgramOptionsDescription& getGroup_( const std::string& groupName );
-    void processDescriptionMap_( ProgramOptionsDescription& description ) const;
+    LIVRECORE_API ProgramOptionsDescription& getGroup_(
+        const std::string& groupName);
+    void processDescriptionMap_(ProgramOptionsDescription& description) const;
 };
-
-
-
 }
 
 #endif // _Configuration_h_

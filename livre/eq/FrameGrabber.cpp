@@ -24,36 +24,36 @@
 #include <eq/image.h>
 
 #ifdef LIVRE_USE_LIBJPEGTURBO
-#  include <turbojpeg.h>
+#include <turbojpeg.h>
 #endif
 
 namespace livre
 {
-
 FrameGrabber::FrameGrabber()
     : ResultImageListener()
 #ifdef LIVRE_USE_LIBJPEGTURBO
-    , _compressor( tjInitCompress() )
+    , _compressor(tjInitCompress())
 #else
-    , _compressor( nullptr )
+    , _compressor(nullptr)
 #endif
-{}
+{
+}
 
 FrameGrabber::~FrameGrabber()
 {
 #ifdef LIVRE_USE_LIBJPEGTURBO
-    if( _compressor )
+    if (_compressor)
         tjDestroy(_compressor);
 #endif
 }
 
-uint8_t* FrameGrabber::_encodeJpeg( const uint32_t width LB_UNUSED,
-                                    const uint32_t height LB_UNUSED,
-                                    const uint8_t* rawData LB_UNUSED,
-                                    unsigned long& dataSize LB_UNUSED )
+uint8_t* FrameGrabber::_encodeJpeg(const uint32_t width LB_UNUSED,
+                                   const uint32_t height LB_UNUSED,
+                                   const uint8_t* rawData LB_UNUSED,
+                                   unsigned long& dataSize LB_UNUSED)
 {
 #ifdef LIVRE_USE_LIBJPEGTURBO
-    uint8_t* tjSrcBuffer = const_cast< uint8_t* >(rawData);
+    uint8_t* tjSrcBuffer = const_cast<uint8_t*>(rawData);
     const int32_t pixelFormat = TJPF_BGRA;
     const int32_t color_components = 4; // Color Depth
     const int32_t tjPitch = width * color_components;
@@ -65,44 +65,41 @@ uint8_t* FrameGrabber::_encodeJpeg( const uint32_t width LB_UNUSED,
     const int32_t tjFlags = TJXOP_ROT180;
 
     const int32_t success =
-        tjCompress2( _compressor, tjSrcBuffer, width, tjPitch, height,
-                     tjPixelFormat, &tjJpegBuf, &dataSize, tjJpegSubsamp,
-                     tjJpegQual, tjFlags);
+        tjCompress2(_compressor, tjSrcBuffer, width, tjPitch, height,
+                    tjPixelFormat, &tjJpegBuf, &dataSize, tjJpegSubsamp,
+                    tjJpegQual, tjFlags);
 
-    if(success != 0)
+    if (success != 0)
     {
         LBERROR << "libjpeg-turbo image conversion failure" << std::endl;
         return 0;
     }
-    return static_cast<uint8_t *>(tjJpegBuf);
+    return static_cast<uint8_t*>(tjJpegBuf);
 #else
-    if( !_compressor ) // just to silence unused private field warning
+    if (!_compressor) // just to silence unused private field warning
         return nullptr;
     return nullptr;
 #endif
 }
 
-void FrameGrabber::notifyNewImage( eq::Channel& channel,
-                                   const eq::Image& image )
+void FrameGrabber::notifyNewImage(eq::Channel& channel, const eq::Image& image)
 {
-    const uint64_t size = image.getPixelDataSize( eq::Frame::Buffer::color );
-    const uint8_t* data = image.getPixelPointer( eq::Frame::Buffer::color );
+    const uint64_t size = image.getPixelDataSize(eq::Frame::Buffer::color);
+    const uint8_t* data = image.getPixelPointer(eq::Frame::Buffer::color);
     const eq::PixelViewport& pvp = image.getPixelViewport();
 
     unsigned long jpegSize = size;
-    uint8_t* jpegData = _encodeJpeg( pvp.w, pvp.h, data, jpegSize );
+    uint8_t* jpegData = _encodeJpeg(pvp.w, pvp.h, data, jpegSize);
 
-    if( !jpegData )
+    if (!jpegData)
     {
         jpegSize = 0;
         LBERROR << "Returning an empty jpeg image" << std::endl;
     }
-    channel.getConfig()->sendEvent( GRAB_IMAGE )
-        << uint64_t( jpegSize ) << co::Array< const uint8_t >( jpegData,
-                                                               jpegSize );
+    channel.getConfig()->sendEvent(GRAB_IMAGE)
+        << uint64_t(jpegSize) << co::Array<const uint8_t>(jpegData, jpegSize);
 #ifdef LIVRE_USE_LIBJPEGTURBO
     tjFree(jpegData);
 #endif
 }
-
 }

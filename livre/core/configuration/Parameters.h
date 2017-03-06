@@ -21,20 +21,19 @@
 #define _Parameters_h_
 
 #include <livre/core/api.h>
-#include <livre/core/types.h>
 #include <livre/core/configuration/Configuration.h>
+#include <livre/core/types.h>
 
 namespace livre
 {
-
 /**
- * The Parameters class is used to load/initialize parameters from file/arguments.
+ * The Parameters class is used to load/initialize parameters from
+ * file/arguments.
  */
 class Parameters
 {
 public:
-    LIVRECORE_API virtual ~Parameters( );
-
+    LIVRECORE_API virtual ~Parameters();
 
     /**
      * Initializes parameters from arguments.
@@ -42,28 +41,28 @@ public:
      * @param argv Argument list.
      * @return True if arguments can be parsed.
      */
-    LIVRECORE_API bool initialize( const int32_t argc, const char **argv );
+    LIVRECORE_API bool initialize(const int32_t argc, const char** argv);
 
     /**
      * @return The parameter name.
      */
-    LIVRECORE_API const std::string& getParameterName( ) const;
+    LIVRECORE_API const std::string& getParameterName() const;
 
     /**
      * @return The configuration of parameters.
      */
-    LIVRECORE_API const Configuration& getConfiguration( ) const;
+    LIVRECORE_API const Configuration& getConfiguration() const;
 
 protected:
     /**
      * @param configGroupName Configuration group name.
      */
-    LIVRECORE_API Parameters( const std::string& configGroupName );
+    LIVRECORE_API Parameters(const std::string& configGroupName);
 
     /**
      * Initializes member variables from configuration variables.
      */
-    virtual void initialize_( ) = 0;
+    virtual void initialize_() = 0;
 
     /**
      * configuration_ Configuration that keeps variadic data.
@@ -75,6 +74,5 @@ protected:
      */
     std::string configGroupName_;
 };
-
 }
 #endif // _Parameters_h_

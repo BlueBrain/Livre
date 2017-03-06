@@ -25,7 +25,6 @@
 
 namespace livre
 {
-
 /** Voxel data type in a volume */
 enum DataType
 {
@@ -110,7 +109,6 @@ struct VolumeInformation
     /** Optional description for end users. */
     std::string description;
 };
-
 }
 
 #endif // _VolumeInformation_h_

@@ -24,21 +24,19 @@
 #include <QVector2D>
 
 #include <lexis/render/Histogram.h>
-#include <vmmlib/vector.hpp>
 #include <vmmlib/types.hpp>
+#include <vmmlib/vector.hpp>
 
 namespace livre
 {
-
-inline QVariant sampleHistogram( const lexis::render::Histogram& histogram,
-                                 const bool logScale,
-                                 const vmml::Vector2f& range = {0, 1} )
+inline QVariant sampleHistogram(const lexis::render::Histogram& histogram,
+                                const bool logScale,
+                                const vmml::Vector2f& range = {0, 1})
 {
-    QList< QVariant > points;
-    const auto& samples = histogram.sampleCurve( logScale, range );
-    for( const auto& sample : samples )
-        points.push_back( QVector2D{ sample.x(), sample.y()});
+    QList<QVariant> points;
+    const auto& samples = histogram.sampleCurve(logScale, range);
+    for (const auto& sample : samples)
+        points.push_back(QVector2D{sample.x(), sample.y()});
     return points;
 }
-
 }

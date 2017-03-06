@@ -25,7 +25,6 @@
 
 namespace livre
 {
-
 class HistogramObject;
 class RenderPipeline;
 class DataObject;
@@ -34,10 +33,9 @@ class VolumeRendererParameters;
 
 struct ApplicationParameters;
 
-typedef std::shared_ptr< const DataObject > ConstDataObjectPtr;
-typedef std::shared_ptr< const TextureObject > ConstTextureObjectPtr;
-typedef std::shared_ptr< const HistogramObject > ConstHistogramObjectPtr;
-
+typedef std::shared_ptr<const DataObject> ConstDataObjectPtr;
+typedef std::shared_ptr<const TextureObject> ConstTextureObjectPtr;
+typedef std::shared_ptr<const HistogramObject> ConstHistogramObjectPtr;
 }
 
 #endif // _types_h_

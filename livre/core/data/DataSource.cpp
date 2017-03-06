@@ -18,55 +18,49 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/core/defines.h>
 #include <livre/core/data/DataSource.h>
 #include <livre/core/data/DataSourcePlugin.h>
+#include <livre/core/defines.h>
 #include <livre/core/version.h>
 
 #include <lunchbox/pluginFactory.h>
 
 namespace livre
 {
-
 struct DataSource::Impl
 {
 public:
-    typedef lunchbox::PluginFactory< DataSourcePlugin > PluginFactory;
+    typedef lunchbox::PluginFactory<DataSourcePlugin> PluginFactory;
 
-    Impl( const servus::URI& uri,
-          const AccessMode accessMode )
-        : plugin( PluginFactory::getInstance().create(
-                      DataSourcePluginData( uri, accessMode )))
-    {}
-
-    LODNode getNode( const NodeId& nodeId ) const
+    Impl(const servus::URI& uri, const AccessMode accessMode)
+        : plugin(PluginFactory::getInstance().create(
+              DataSourcePluginData(uri, accessMode)))
     {
-        return plugin->getNode( nodeId );
     }
 
-    MemoryUnitPtr getData( const LODNode& node )
+    LODNode getNode(const NodeId& nodeId) const
     {
-        return plugin->getData( node );
+        return plugin->getNode(nodeId);
     }
 
-    ConstMemoryUnitPtr getData( const LODNode& node ) const
+    MemoryUnitPtr getData(const LODNode& node) { return plugin->getData(node); }
+    ConstMemoryUnitPtr getData(const LODNode& node) const
     {
-        return plugin->getData( node );
+        return plugin->getData(node);
     }
 
-    std::unique_ptr< DataSourcePlugin > plugin;
+    std::unique_ptr<DataSourcePlugin> plugin;
 };
 
-DataSource::DataSource( const servus::URI& uri,
-                        const AccessMode accessMode )
-    : _impl( new Impl( uri, accessMode ) )
+DataSource::DataSource(const servus::URI& uri, const AccessMode accessMode)
+    : _impl(new Impl(uri, accessMode))
 {
 }
 
 void DataSource::loadPlugins()
 {
     DataSource::Impl::PluginFactory::getInstance().load(
-        LIVRECORE_VERSION_ABI, lunchbox::getLibraryPaths(), "Livre.*Source" );
+        LIVRECORE_VERSION_ABI, lunchbox::getLibraryPaths(), "Livre.*Source");
 }
 
 std::string DataSource::getDescriptions()
@@ -74,14 +68,15 @@ std::string DataSource::getDescriptions()
     return DataSource::Impl::PluginFactory::getInstance().getDescriptions();
 }
 
-bool DataSource::handles( const servus::URI& uri )
+bool DataSource::handles(const servus::URI& uri)
 {
-    return DataSource::Impl::PluginFactory::getInstance().handles( DataSourcePluginData{ uri } );
+    return DataSource::Impl::PluginFactory::getInstance().handles(
+        DataSourcePluginData{uri});
 }
 
-LODNode DataSource::getNode( const NodeId& nodeId ) const
+LODNode DataSource::getNode(const NodeId& nodeId) const
 {
-    return _impl->getNode( nodeId );
+    return _impl->getNode(nodeId);
 }
 
 bool DataSource::update()
@@ -104,37 +99,37 @@ void DataSource::finishGL()
     _impl->plugin->finishGL();
 }
 
-MemoryUnitPtr DataSource::getData( const NodeId& nodeId )
+MemoryUnitPtr DataSource::getData(const NodeId& nodeId)
 {
-    if( !nodeId.isValid( ))
+    if (!nodeId.isValid())
         return MemoryUnitPtr();
 
-    const LODNode& lodNode = getNode( nodeId );
-    if( !lodNode.isValid( ))
+    const LODNode& lodNode = getNode(nodeId);
+    if (!lodNode.isValid())
         return MemoryUnitPtr();
 
-    return _impl->plugin->getData( lodNode );
+    return _impl->plugin->getData(lodNode);
 }
 
-ConstMemoryUnitPtr DataSource::getData( const NodeId& nodeId ) const
+ConstMemoryUnitPtr DataSource::getData(const NodeId& nodeId) const
 {
-    if( !nodeId.isValid( ))
+    if (!nodeId.isValid())
         return ConstMemoryUnitPtr();
 
-    const LODNode& lodNode = getNode( nodeId );
-    if( !lodNode.isValid( ))
+    const LODNode& lodNode = getNode(nodeId);
+    if (!lodNode.isValid())
         return ConstMemoryUnitPtr();
 
-    return _impl->plugin->getData( lodNode );
+    return _impl->plugin->getData(lodNode);
 }
 
-VolumeInformation DataSource::getVolumeInfo( const servus::URI& uri )
+VolumeInformation DataSource::getVolumeInfo(const servus::URI& uri)
 {
-    const DataSource source( uri );
+    const DataSource source(uri);
     return source.getVolumeInfo();
 }
 
 DataSource::~DataSource()
-{}
-
+{
+}
 }

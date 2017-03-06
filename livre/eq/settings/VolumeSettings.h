@@ -22,17 +22,15 @@
 #ifndef _VolumeSettings_h_
 #define _VolumeSettings_h_
 
-#include <livre/lib/types.h>
 #include <co/serializable.h>
+#include <livre/lib/types.h>
 
 namespace livre
 {
-
 /** Basic information about the volume data. */
 class VolumeSettings : public co::Serializable
 {
 public:
-
     /** VolumeSettings constructor. */
     VolumeSettings();
 
@@ -43,28 +41,27 @@ public:
      * Sets the models source uri.
      * @param uri The uri of the source data.
      */
-    void setURI( const std::string& uri );
+    void setURI(const std::string& uri);
 
     /** @return Returns the uri of the source data. */
-    const std::string& getURI( ) const;
+    const std::string& getURI() const;
 
     /**
      * Sets the accumulated data range for the volume.
      * @param range of the data source.
      */
-    void setDataSourceRange( const Vector2f& range );
+    void setDataSourceRange(const Vector2f& range);
 
     /** @return Returns the accumulated data range for the volume. */
     const Vector2f& getDataSourceRange() const;
 
 private:
-    void serialize(   co::DataOStream& os, const uint64_t dirtyBits ) override;
-    void deserialize( co::DataIStream& is, const uint64_t dirtyBits ) override;
+    void serialize(co::DataOStream& os, const uint64_t dirtyBits) override;
+    void deserialize(co::DataIStream& is, const uint64_t dirtyBits) override;
 
     std::string _uri;
     Vector2f _dataSourceRange;
 };
-
 }
 
 #endif // _VolumeInfo_h_

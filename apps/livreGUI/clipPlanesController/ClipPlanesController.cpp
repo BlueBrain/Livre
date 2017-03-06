@@ -26,166 +26,160 @@
 
 namespace livre
 {
-
 struct ClipPlanesController::Impl : public QObject
 {
-    Impl( ClipPlanesController* parent, Controller& controller )
-        : _parent( parent )
-        , _controller( controller )
+    Impl(ClipPlanesController* parent, Controller& controller)
+        : _parent(parent)
+        , _controller(controller)
     {
-        _ui.setupUi( parent );
-        QWidget *slidersWidget = _ui.clipPlanesWidget;
-        slidersWidget->setEnabled( false);
+        _ui.setupUi(parent);
+        QWidget* slidersWidget = _ui.clipPlanesWidget;
+        slidersWidget->setEnabled(false);
         _clipPlanes.clear();
 
-        parent->connect( parent, &ClipPlanesController::clipPlanesReceived,
-                         this, &ClipPlanesController::Impl::clipPlanesReceived,
-                         Qt::QueuedConnection );
+        parent->connect(parent, &ClipPlanesController::clipPlanesReceived, this,
+                        &ClipPlanesController::Impl::clipPlanesReceived,
+                        Qt::QueuedConnection);
 
-        slidersWidget->connect( _ui.clipPlanesCheckBox, &QCheckBox::stateChanged,
-                 [&]( int value )
-                 {
-                    _ui.clipPlanesWidget->setEnabled( value != 0 );
-                    if( value == 0 )
-                    {
-                        lexis::render::ClipPlanes planes;
-                        planes.clear();
-                        _controller.publish( planes );
-                    }
-                    else
-                    {
-                        if( _clipPlanes.isEmpty( ))
-                            _clipPlanes.reset();
-                        _controller.publish( _clipPlanes );
-                    }
-                 });
+        slidersWidget->connect(_ui.clipPlanesCheckBox, &QCheckBox::stateChanged,
+                               [&](int value) {
+                                   _ui.clipPlanesWidget->setEnabled(value != 0);
+                                   if (value == 0)
+                                   {
+                                       lexis::render::ClipPlanes planes;
+                                       planes.clear();
+                                       _controller.publish(planes);
+                                   }
+                                   else
+                                   {
+                                       if (_clipPlanes.isEmpty())
+                                           _clipPlanes.reset();
+                                       _controller.publish(_clipPlanes);
+                                   }
+                               });
 
-        slidersWidget->connect( _ui.clipPlanesResetButton, &QPushButton::clicked,
-                 [&](bool)
-                 {
-                    _clipPlanes.reset();
-                    updateClipPlanesUi();
-                    _controller.publish( _clipPlanes );
-                 });
+        slidersWidget->connect(_ui.clipPlanesResetButton, &QPushButton::clicked,
+                               [&](bool) {
+                                   _clipPlanes.reset();
+                                   updateClipPlanesUi();
+                                   _controller.publish(_clipPlanes);
+                               });
 
-        _clipPlaneSliders.push_back( _ui.posXSlider );
-        _clipPlaneSliders.push_back( _ui.negXSlider );
-        _clipPlaneSliders.push_back( _ui.posYSlider );
-        _clipPlaneSliders.push_back( _ui.negYSlider );
-        _clipPlaneSliders.push_back( _ui.posZSlider );
-        _clipPlaneSliders.push_back( _ui.negZSlider );
+        _clipPlaneSliders.push_back(_ui.posXSlider);
+        _clipPlaneSliders.push_back(_ui.negXSlider);
+        _clipPlaneSliders.push_back(_ui.posYSlider);
+        _clipPlaneSliders.push_back(_ui.negYSlider);
+        _clipPlaneSliders.push_back(_ui.posZSlider);
+        _clipPlaneSliders.push_back(_ui.negZSlider);
 
-        _clipPlaneSpinBoxes.push_back( _ui.posXSpinBox );
-        _clipPlaneSpinBoxes.push_back( _ui.negXSpinBox );
-        _clipPlaneSpinBoxes.push_back( _ui.posYSpinBox );
-        _clipPlaneSpinBoxes.push_back( _ui.negYSpinBox );
-        _clipPlaneSpinBoxes.push_back( _ui.posZSpinBox );
-        _clipPlaneSpinBoxes.push_back( _ui.negZSpinBox );
+        _clipPlaneSpinBoxes.push_back(_ui.posXSpinBox);
+        _clipPlaneSpinBoxes.push_back(_ui.negXSpinBox);
+        _clipPlaneSpinBoxes.push_back(_ui.posYSpinBox);
+        _clipPlaneSpinBoxes.push_back(_ui.negYSpinBox);
+        _clipPlaneSpinBoxes.push_back(_ui.posZSpinBox);
+        _clipPlaneSpinBoxes.push_back(_ui.negZSpinBox);
 
-        for( QSlider* slider: _clipPlaneSliders )
+        for (QSlider* slider : _clipPlaneSliders)
         {
-            slidersWidget->connect( slider, &QSlider::valueChanged,
-                     [&]( int ) { updateClipPlanesSpinBoxes(); });
+            slidersWidget->connect(slider, &QSlider::valueChanged,
+                                   [&](int) { updateClipPlanesSpinBoxes(); });
         }
 
-        for( QDoubleSpinBox* spinBox: _clipPlaneSpinBoxes )
+        for (QDoubleSpinBox* spinBox : _clipPlaneSpinBoxes)
         {
-            slidersWidget->connect( spinBox,
-                    static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-                     [&]( double ) { updateClipPlanesSliders(); });
+            slidersWidget->connect(
+                spinBox, static_cast<void (QDoubleSpinBox::*)(double)>(
+                             &QDoubleSpinBox::valueChanged),
+                [&](double) { updateClipPlanesSliders(); });
         }
 
-        controller.subscribe( _clipPlanes );
+        controller.subscribe(_clipPlanes);
         _clipPlanes.registerDeserializedCallback(
-                    [&]{
-                          emit _parent->clipPlanesReceived();
-                       });
+            [&] { emit _parent->clipPlanesReceived(); });
     }
 
-    ~Impl()
-    {
-        _controller.unsubscribe( _clipPlanes );
-    }
-
+    ~Impl() { _controller.unsubscribe(_clipPlanes); }
     void updateClipPlanesSliders()
     {
-        if( _clipPlanes.isEmpty( ))
+        if (_clipPlanes.isEmpty())
             return;
 
         SpinBoxes::const_iterator it = _clipPlaneSpinBoxes.begin();
         bool changed = false;
         size_t i = 0;
-        for( QSlider* slider: _clipPlaneSliders )
+        for (QSlider* slider : _clipPlaneSliders)
         {
             const QDoubleSpinBox* spinBox = *it;
             // Map spinbox value between 0 and slider maximum
             const double spinBoxValue = spinBox->value();
             const double range = spinBox->maximum() - spinBox->minimum();
-            const int value = ( spinBoxValue - spinBox->minimum( )) / range * slider->maximum();
-            if( slider->value() != value )
+            const int value =
+                (spinBoxValue - spinBox->minimum()) / range * slider->maximum();
+            if (slider->value() != value)
             {
-                slider->setValue( value );
-                _clipPlanes.getPlanes()[ i ].setD( i % 2 == 0 ? spinBoxValue : -spinBoxValue );
+                slider->setValue(value);
+                _clipPlanes.getPlanes()[i].setD(i % 2 == 0 ? spinBoxValue
+                                                           : -spinBoxValue);
                 changed = true;
             }
             ++it;
             ++i;
         }
 
-        if( changed )
-           _controller.publish( _clipPlanes );
+        if (changed)
+            _controller.publish(_clipPlanes);
     }
 
     void updateClipPlanesSpinBoxes()
     {
-        if( _clipPlanes.isEmpty( ))
+        if (_clipPlanes.isEmpty())
             return;
 
         Sliders::const_iterator it = _clipPlaneSliders.begin();
         bool changed = false;
         size_t i = 0;
-        for( QDoubleSpinBox* spinBox: _clipPlaneSpinBoxes )
+        for (QDoubleSpinBox* spinBox : _clipPlaneSpinBoxes)
         {
             const QSlider* slider = *it;
             const double range = spinBox->maximum() - spinBox->minimum();
             const double value =
-                    ((double)slider->value() / (double)slider->maximum( )) * range +
-                    spinBox->minimum();
-            if( spinBox->value() != value )
+                ((double)slider->value() / (double)slider->maximum()) * range +
+                spinBox->minimum();
+            if (spinBox->value() != value)
             {
-                spinBox->setValue( value );
-                _clipPlanes.getPlanes()[ i ].setD( i % 2 == 0 ? value : -value );
+                spinBox->setValue(value);
+                _clipPlanes.getPlanes()[i].setD(i % 2 == 0 ? value : -value);
                 changed = true;
             }
             ++it;
             ++i;
         }
 
-        if( changed )
-            _controller.publish( _clipPlanes );
+        if (changed)
+            _controller.publish(_clipPlanes);
     }
 
     void clipPlanesReceived()
     {
-        for( QSlider* slider: _clipPlaneSliders )
-            slider->blockSignals( true );
+        for (QSlider* slider : _clipPlaneSliders)
+            slider->blockSignals(true);
         updateClipPlanesUi();
 
-        for( QSlider* slider: _clipPlaneSliders )
-            slider->blockSignals( false );
+        for (QSlider* slider : _clipPlaneSliders)
+            slider->blockSignals(false);
     }
 
     void updateClipPlanesUi()
     {
         size_t i = 0;
         auto& planes = _clipPlanes.getPlanes();
-        for( QDoubleSpinBox* spinBox: _clipPlaneSpinBoxes )
+        for (QDoubleSpinBox* spinBox : _clipPlaneSpinBoxes)
         {
-            if( i == planes.size())
+            if (i == planes.size())
                 break;
 
-            const auto& plane = planes[ i ];
-            spinBox->setValue(( i % 2 ) == 0  ? plane.getD() : -plane.getD( ));
+            const auto& plane = planes[i];
+            spinBox->setValue((i % 2) == 0 ? plane.getD() : -plane.getD());
             ++i;
         }
     }
@@ -195,22 +189,21 @@ struct ClipPlanesController::Impl : public QObject
     Controller& _controller;
     lexis::render::ClipPlanes _clipPlanes;
 
-    typedef std::vector< QSlider* > Sliders;
-    typedef std::vector< QDoubleSpinBox* > SpinBoxes;
+    typedef std::vector<QSlider*> Sliders;
+    typedef std::vector<QDoubleSpinBox*> SpinBoxes;
 
     Sliders _clipPlaneSliders;
     SpinBoxes _clipPlaneSpinBoxes;
 };
 
-ClipPlanesController::ClipPlanesController( Controller& controller,
-                                            QWidget* parentWgt )
-    : QWidget( parentWgt )
-    , _impl( new ClipPlanesController::Impl( this, controller ))
+ClipPlanesController::ClipPlanesController(Controller& controller,
+                                           QWidget* parentWgt)
+    : QWidget(parentWgt)
+    , _impl(new ClipPlanesController::Impl(this, controller))
 {
 }
 
-ClipPlanesController::~ClipPlanesController( )
+ClipPlanesController::~ClipPlanesController()
 {
 }
-
 }

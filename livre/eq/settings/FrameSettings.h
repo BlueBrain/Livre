@@ -22,17 +22,15 @@
 #ifndef _FrameSettings_h_
 #define _FrameSettings_h_
 
-#include <livre/eq/types.h>
 #include <co/serializable.h> // base class
+#include <livre/eq/types.h>
 
 namespace livre
 {
-
 /** Enables/disables help, statistics, changes view. */
 class FrameSettings : public co::Serializable
 {
 public:
-
     /**
      * FrameSettings constructor.
      */
@@ -54,11 +52,10 @@ public:
     void toggleStatistics();
 
     /** Set the frame number of the current frame. */
-    void setFrameNumber( uint32_t frame );
+    void setFrameNumber(uint32_t frame);
 
     /** @return the current frame number to render. */
     uint32_t getFrameNumber() const { return frameNumber_; }
-
     /**
      * @return Returns true if volume info is set.
      */
@@ -73,7 +70,7 @@ public:
      * Enable/disable the frame grabbing for the current frame.
      * @param setValue the bolean value for enabling/disabling frame grabbing.
      */
-    void setGrabFrame( const bool setValue );
+    void setGrabFrame(const bool setValue);
 
     /**
      * @return true if frame grabbing is enabled for the current frame.
@@ -81,17 +78,14 @@ public:
     bool getGrabFrame() const;
 
 private:
-
-    void serialize( co::DataOStream& os, const uint64_t dirtyBits ) final;
-    void deserialize( co::DataIStream& is, const uint64_t dirtyBits ) final;
+    void serialize(co::DataOStream& os, const uint64_t dirtyBits) final;
+    void deserialize(co::DataIStream& is, const uint64_t dirtyBits) final;
 
     uint32_t frameNumber_;
     bool statistics_;
     bool info_;
     bool grabFrame_;
 };
-
-
 }
 
 #endif // _FrameInfo_h_

@@ -27,7 +27,6 @@
 
 namespace livre
 {
-
 /**
  * The MemoryUnit class the base class for carrying memory information.
  */
@@ -38,12 +37,18 @@ public:
     LIVRECORE_API virtual ~MemoryUnit();
 
     /** @return The memory ptr in type T. */
-    template< class T > const T* getData() const
-        { return reinterpret_cast< const T* >( _getData( )); }
+    template <class T>
+    const T* getData() const
+    {
+        return reinterpret_cast<const T*>(_getData());
+    }
 
     /** @return The memory ptr in type T. */
-    template< class T > T* getData()
-        { return reinterpret_cast< T* >( _getData( )); }
+    template <class T>
+    T* getData()
+    {
+        return reinterpret_cast<T*>(_getData());
+    }
 
     /** @return The allocated heap size. */
     virtual size_t getAllocSize() const = 0;
@@ -62,96 +67,103 @@ class NoMemoryUnit : public MemoryUnit
 public:
     ~NoMemoryUnit() {}
     size_t getAllocSize() const final { return 0; }
-
 private:
-    const uint8_t* _getData() const final { LBDONTCALL; return 0; }
-    uint8_t* _getData() final { LBDONTCALL; return 0; }
+    const uint8_t* _getData() const final
+    {
+        LBDONTCALL;
+        return 0;
+    }
+    uint8_t* _getData() final
+    {
+        LBDONTCALL;
+        return 0;
+    }
 };
 
 /**
- * The ConstMemoryUnit class shows a arbitrary memory pointer. No allocation is preformed.
- * i.e: Memory mapped files are managed by the OS and only a handle to the memory is kept.
+ * The ConstMemoryUnit class shows a arbitrary memory pointer. No allocation is
+ * preformed.
+ * i.e: Memory mapped files are managed by the OS and only a handle to the
+ * memory is kept.
  */
 class ConstMemoryUnit : public MemoryUnit
 {
 public:
-    explicit ConstMemoryUnit( const uint8_t* ptr );
+    explicit ConstMemoryUnit(const uint8_t* ptr);
     ~ConstMemoryUnit() {}
 protected:
     size_t getAllocSize() const final { return 0; }
     const uint8_t* _getData() const final;
-    uint8_t* _getData() final { LBDONTCALL; return 0; }
+    uint8_t* _getData() final
+    {
+        LBDONTCALL;
+        return 0;
+    }
     const uint8_t* const ptr_;
 };
 
 /**
- * The AllocMemoryUnit class shows an allocated memory pointer to keep track of memory consumption.
+ * The AllocMemoryUnit class shows an allocated memory pointer to keep track of
+ * memory consumption.
  * Memory is cleaned on destruction.
  */
 class AllocMemoryUnit : public MemoryUnit
 {
 public:
-
     /**
      * Allocate and copy the data from the given source and size
      * @param sourceData Source data ptr.
      * @param size Number of the elements in the source data ptr.
      */
-    template< typename T >
-    AllocMemoryUnit( const T* sourceData, const size_t size )
+    template <typename T>
+    AllocMemoryUnit(const T* sourceData, const size_t size)
     {
-        _allocAndSetData( sourceData, size );
+        _allocAndSetData(sourceData, size);
     }
 
     /** "void" specialization of the constructor */
-    LIVRECORE_API AllocMemoryUnit( const void* sourceData, const size_t size )
+    LIVRECORE_API AllocMemoryUnit(const void* sourceData, const size_t size)
     {
-        _allocAndSetData( static_cast< const uint8_t* >( sourceData ), size );
+        _allocAndSetData(static_cast<const uint8_t*>(sourceData), size);
     }
 
     /**
      * Allocate and copy the data from the given source and size
      * @param sourceData Source data vector.
      */
-    template< typename T >
-    explicit AllocMemoryUnit( const std::vector< T >& sourceData )
+    template <typename T>
+    explicit AllocMemoryUnit(const std::vector<T>& sourceData)
     {
-        _allocAndSetData( &sourceData[ 0 ], sourceData.size( ));
+        _allocAndSetData(&sourceData[0], sourceData.size());
     }
 
     /**
      * Allocates memory in bytes in given size
      * @param size memory size
      */
-    LIVRECORE_API explicit AllocMemoryUnit( const size_t size )
-    {
-        _alloc( size );
-    }
-
+    LIVRECORE_API explicit AllocMemoryUnit(const size_t size) { _alloc(size); }
     LIVRECORE_API ~AllocMemoryUnit();
     LIVRECORE_API size_t getAllocSize() const final;
 
 private:
+    AllocMemoryUnit(const AllocMemoryUnit&) = delete;
+    AllocMemoryUnit& operator=(const AllocMemoryUnit&) = delete;
 
-    AllocMemoryUnit( const AllocMemoryUnit& ) = delete;
-    AllocMemoryUnit& operator=( const AllocMemoryUnit& ) = delete;
-
-    template< class T >
-    void _allocAndSetData( const T* sourceData, const size_t size )
+    template <class T>
+    void _allocAndSetData(const T* sourceData, const size_t size)
     {
-        _alloc( sizeof( T ) * size );
-        ::memcpy( _rawData.getData(), sourceData, size * sizeof( T ) );
+        _alloc(sizeof(T) * size);
+        ::memcpy(_rawData.getData(), sourceData, size * sizeof(T));
     }
 
-    void _alloc( size_t nBytes );
+    void _alloc(size_t nBytes);
 
     const uint8_t* _getData() const final;
     uint8_t* _getData() final;
 
     lunchbox::Bufferb _rawData;
-    LB_TS_VAR( thread_ );
+    LB_TS_VAR(thread_);
 };
-
 }
 
 #endif // _MemoryUnit_h_

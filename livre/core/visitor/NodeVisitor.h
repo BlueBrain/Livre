@@ -24,32 +24,29 @@
 
 namespace livre
 {
-
 /**
- * The NodeVisitor class is base class for invoking traversing events. Some of the events may not be
+ * The NodeVisitor class is base class for invoking traversing events. Some of
+ * the events may not be
  * implemented by the traverser.
   */
 class NodeVisitor
 {
 public:
-
     NodeVisitor() {}
     virtual ~NodeVisitor() {}
-
     /** Called before all traversal. */
-    virtual void visitPre() {};
+    virtual void visitPre(){};
 
     /**
      * Called when the given node is being visited.
      * @param renderNode is the node being visited.
      * @param state Visit state.
      */
-    virtual void visit( const NodeId& nodeId, VisitState& state ) = 0;
+    virtual void visit(const NodeId& nodeId, VisitState& state) = 0;
 
     /** Called after all traversal. */
-    virtual void visitPost() {};
+    virtual void visitPost(){};
 };
-
 }
 
 #endif // _NodeVisitor_h_

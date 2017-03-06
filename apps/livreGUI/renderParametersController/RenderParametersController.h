@@ -17,16 +17,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #ifndef _RenderParametersController_h_
 #define _RenderParametersController_h_
 
-#include <livreGUI/types.h>
 #include <QWidget>
+#include <livreGUI/types.h>
 
 namespace livre
 {
-
 /** A widget which shows and modifies the renderer parameters of Livre. */
 class RenderParametersController : public QWidget
 {
@@ -35,15 +33,14 @@ public:
      * @param controller The GUI connection to ZeroEQ world.
      * @param parentWgt Parent widget.
      */
-    RenderParametersController( Controller& controller,
-                                QWidget *parentWgt = nullptr );
+    RenderParametersController(Controller& controller,
+                               QWidget* parentWgt = nullptr);
     ~RenderParametersController();
 
 private:
     struct Impl;
-    std::unique_ptr< Impl > _impl;
+    std::unique_ptr<Impl> _impl;
 };
-
 }
 
 #endif

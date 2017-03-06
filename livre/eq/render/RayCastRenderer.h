@@ -20,19 +20,17 @@
 #ifndef _RayCastRenderer_h_
 #define _RayCastRenderer_h_
 
-#include <livre/eq/types.h>
 #include <livre/core/render/Renderer.h>
+#include <livre/eq/types.h>
 
 namespace livre
 {
-
 /**
  * The RayCastRenderer class implements a single-pass ray caster.
  */
 class RayCastRenderer : public Renderer
 {
 public:
-
     /**
      * Constructor
      * @param dataSource the data source
@@ -40,10 +38,8 @@ public:
      * @param samplesPerRay Number of samples per ray.
      * @param samplesPerPixel Number of samples per pixel.
      */
-    RayCastRenderer( const DataSource& dataSource,
-                     const Cache& textureCache,
-                     uint32_t samplesPerRay,
-                     uint32_t samplesPerPixel );
+    RayCastRenderer(const DataSource& dataSource, const Cache& textureCache,
+                    uint32_t samplesPerRay, uint32_t samplesPerPixel);
     ~RayCastRenderer();
 
     /**
@@ -51,7 +47,7 @@ public:
      * and transfer function.
      * @param frameData the current frame data containing new values
      */
-    void update( const FrameData& frameData );
+    void update(const FrameData& frameData);
 
     /** @internal @return number of bricks rendered in the last render() pass */
     size_t getNumBricksUsed() const;
@@ -59,29 +55,24 @@ public:
     /**
      * @copydoc Renderer::order
      */
-    NodeIds order( const NodeIds& bricks, const Frustum& frustum ) const override;
+    NodeIds order(const NodeIds& bricks, const Frustum& frustum) const override;
 
 protected:
+    void _onFrameStart(const Frustum& frustum, const ClipPlanes& planes,
+                       const PixelViewport& view,
+                       const NodeIds& renderBricks) override;
 
-    void _onFrameStart( const Frustum& frustum,
-                        const ClipPlanes& planes,
+    void _onFrameRender(const Frustum& frustum, const ClipPlanes& planes,
                         const PixelViewport& view,
-                        const NodeIds& renderBricks ) override;
+                        const NodeIds& orderedBricks) final;
 
-    void _onFrameRender( const Frustum& frustum,
-                         const ClipPlanes& planes,
-                         const PixelViewport& view,
-                         const NodeIds& orderedBricks ) final;
-
-    void _onFrameEnd( const Frustum& frustum,
-                      const ClipPlanes& planes,
-                      const PixelViewport& view,
-                      const NodeIds& renderBricks ) override;
+    void _onFrameEnd(const Frustum& frustum, const ClipPlanes& planes,
+                     const PixelViewport& view,
+                     const NodeIds& renderBricks) override;
 
     struct Impl;
-    std::unique_ptr< Impl > _impl;
+    std::unique_ptr<Impl> _impl;
 };
-
 }
 
 #endif // _RayCastRenderer_h_

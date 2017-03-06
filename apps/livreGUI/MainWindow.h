@@ -31,20 +31,18 @@ class MainWindow;
 
 namespace livre
 {
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow( Controller& controller, QWidget* parent = 0 );
+    MainWindow(Controller& controller, QWidget* parent = 0);
     ~MainWindow();
 
 private:
     struct Impl;
-    std::unique_ptr< Impl > _impl;
+    std::unique_ptr<Impl> _impl;
 };
-
 }
 
 #endif // MAINWINDOW_H

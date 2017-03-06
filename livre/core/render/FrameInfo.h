@@ -22,44 +22,42 @@
 
 #include <livre/core/api.h>
 #include <livre/core/cache/CacheObject.h> // member
-#include <livre/core/data/NodeId.h> // member
-#include <livre/core/render/Frustum.h> // member
+#include <livre/core/data/NodeId.h>       // member
+#include <livre/core/render/Frustum.h>    // member
 
 namespace livre
 {
 /** Keeps the frame information. */
 struct FrameInfo
 {
-    LIVRECORE_API FrameInfo( const Frustum& frustum,
-                             const uint32_t timeStep,
-                             const uint32_t frameId );
+    LIVRECORE_API FrameInfo(const Frustum& frustum, const uint32_t timeStep,
+                            const uint32_t frameId);
     LIVRECORE_API FrameInfo();
 
-    Frustum frustum; //!< The current frustum.
-    uint32_t timeStep ; //!< The current time step for livre data sources.
-    uint32_t frameId; //!< The unique id for each rendered frame
+    Frustum frustum;   //!< The current frustum.
+    uint32_t timeStep; //!< The current time step for livre data sources.
+    uint32_t frameId;  //!< The unique id for each rendered frame
 };
-
 
 /** Keeps the number information of avalibility of the nodes in cache */
 struct NodeAvailability
 {
     LIVRECORE_API NodeAvailability()
-     : nAvailable( 0 )
-     , nNotAvailable( 0 )
-    {}
+        : nAvailable(0)
+        , nNotAvailable(0)
+    {
+    }
 
-    LIVRECORE_API NodeAvailability& operator+=( const NodeAvailability& na )
+    LIVRECORE_API NodeAvailability& operator+=(const NodeAvailability& na)
     {
         nAvailable += na.nAvailable;
         nNotAvailable += na.nNotAvailable;
         return *this;
     }
 
-    size_t nAvailable; //!< Number of available nodes
+    size_t nAvailable;    //!< Number of available nodes
     size_t nNotAvailable; //!< Number of not available nodes
 };
-
 }
 
 #endif

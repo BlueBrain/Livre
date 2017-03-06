@@ -24,7 +24,6 @@
 
 namespace livre
 {
-
 /**
  * Data source for *.[raw|img] data with given details or nrrd volume
  *
@@ -35,7 +34,7 @@ namespace livre
 class RawDataSource : public DataSourcePlugin
 {
 public:
-    RawDataSource( const DataSourcePluginData& initData );
+    RawDataSource(const DataSourcePluginData& initData);
     ~RawDataSource();
 
     /**
@@ -43,13 +42,12 @@ public:
      * @param node LODNode to be read.
      * @return The block data for the node.
      */
-    MemoryUnitPtr getData( const LODNode& node ) final;
-    static bool handles( const DataSourcePluginData& initData );
+    MemoryUnitPtr getData(const LODNode& node) final;
+    static bool handles(const DataSourcePluginData& initData);
     static std::string getDescription();
 
 private:
     struct Impl;
-    std::unique_ptr< Impl > _impl;
+    std::unique_ptr<Impl> _impl;
 };
-
 }

@@ -24,15 +24,14 @@
 #include <livre/core/api.h>
 #include <livre/core/types.h>
 
-#include <lexis/render/lookupTable1D.h>
 #include <co/distributable.h>
+#include <lexis/render/lookupTable1D.h>
 
 namespace livre
 {
-
 /** Color and transparency for an RGBA 1 dimensional Transfer Function. */
-class TransferFunction1D :
-        public co::Distributable< ::lexis::render::LookupTable1D >
+class TransferFunction1D
+    : public co::Distributable<::lexis::render::LookupTable1D>
 {
     static const size_t NCHANNELS = 4;
 
@@ -55,26 +54,30 @@ public:
      * generated.
      * @param file Path to the transfer function file.
      */
-    explicit TransferFunction1D( const std::string& file )
-        : TransferFunction1D() { _createTfFromFile( file ); }
+    explicit TransferFunction1D(const std::string& file)
+        : TransferFunction1D()
+    {
+        _createTfFromFile(file);
+    }
 
     /**
      * Copy a transfer function.
      * @param tf The transfer function to be copied.
      */
-    explicit TransferFunction1D( const TransferFunction1D& tf )
-        : co::Distributable< ::lexis::render::LookupTable1D >( tf ) {}
-
-    TransferFunction1D& operator=( const TransferFunction1D& rhs )
+    explicit TransferFunction1D(const TransferFunction1D& tf)
+        : co::Distributable<::lexis::render::LookupTable1D>(tf)
     {
-        ::lexis::render::LookupTable1D::operator = ( rhs );
+    }
+
+    TransferFunction1D& operator=(const TransferFunction1D& rhs)
+    {
+        ::lexis::render::LookupTable1D::operator=(rhs);
         return *this;
     }
 
     static uint32_t getNumChannels() { return NCHANNELS; }
-
 private:
-    LIVRECORE_API void _createTfFromFile( const std::string& file );
+    LIVRECORE_API void _createTfFromFile(const std::string& file);
 };
 }
 #endif // _TransferFunction1D_h_

@@ -20,9 +20,9 @@
 #ifndef _SelectVisibles_h_
 #define _SelectVisibles_h_
 
+#include <livre/core/render/Frustum.h>
 #include <livre/core/types.h>
 #include <livre/core/visitor/DataSourceVisitor.h>
-#include <livre/core/render/Frustum.h>
 
 namespace livre
 {
@@ -41,14 +41,10 @@ public:
      * @param range range of the data
      * @param ClipPlanes clip planes
      */
-    SelectVisibles( const DataSource& dataSource,
-                    const Frustum& frustum,
-                    const uint32_t windowHeight,
-                    const float screenSpaceError,
-                    const uint32_t minLOD,
-                    const uint32_t maxLOD,
-                    const Range& range,
-                    const ClipPlanes& clipPlanes );
+    SelectVisibles(const DataSource& dataSource, const Frustum& frustum,
+                   const uint32_t windowHeight, const float screenSpaceError,
+                   const uint32_t minLOD, const uint32_t maxLOD,
+                   const Range& range, const ClipPlanes& clipPlanes);
 
     ~SelectVisibles();
 
@@ -58,15 +54,13 @@ public:
     const NodeIds& getVisibles() const;
 
 protected:
-
     void visitPre() final;
-    void visit( const LODNode& lodNode, VisitState& state ) final;
+    void visit(const LODNode& lodNode, VisitState& state) final;
     void visitPost() final;
 
 private:
-
     struct Impl;
-    std::unique_ptr< Impl > _impl;
+    std::unique_ptr<Impl> _impl;
 };
 }
 #endif //_SelectVisibles_h_

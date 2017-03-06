@@ -36,35 +36,35 @@
 #include <lexis/render/imageJPEG.h>
 
 #ifdef LIVRE_USE_ZEROEQ
-#  include <livre/eq/zeroeq/communicator.h>
+#include <livre/eq/zeroeq/communicator.h>
 #endif
 
 #include <eq/eq.h>
 
 namespace livre
 {
-
 class Config::Impl
 {
 public:
-    explicit Impl( Config* config_ )
-        : config( config_ )
-        , frameStart( config->getTime( ))
-    {}
+    explicit Impl(Config* config_)
+        : config(config_)
+        , frameStart(config->getTime())
+    {
+    }
 
-    void switchLayout( const int32_t increment )
+    void switchLayout(const int32_t increment)
     {
         const eq::Canvases& canvases = config->getCanvases();
-        if( canvases.empty( ))
+        if (canvases.empty())
             return;
 
         auto currentCanvas = canvases.front();
         size_t index = currentCanvas->getActiveLayoutIndex() + increment;
         const eq::Layouts& layouts = currentCanvas->getLayouts();
-        LBASSERT( !layouts.empty( ));
+        LBASSERT(!layouts.empty());
 
-        index = ( index % layouts.size( ));
-        currentCanvas->useLayout( uint32_t( index ));
+        index = (index % layouts.size());
+        currentCanvas->useLayout(uint32_t(index));
         activeLayout = currentCanvas->getActiveLayout();
     }
 
@@ -72,7 +72,7 @@ public:
     uint32_t latency = 0;
     FrameData framedata;
 #ifdef LIVRE_USE_ZEROEQ
-    std::unique_ptr< zeroeq::Communicator > communicator;
+    std::unique_ptr<zeroeq::Communicator> communicator;
 #endif
     bool redraw = true;
     VolumeInformation volumeInfo;
@@ -82,11 +82,11 @@ public:
     Histogram _histogram;
 };
 
-Config::Config( eq::ServerPtr parent )
-    : EventHandler< eq::Config >( *this, parent )
-    , _impl( new Impl( this ))
+Config::Config(eq::ServerPtr parent)
+    : EventHandler<eq::Config>(*this, parent)
+    , _impl(new Impl(this))
 {
-    _impl->framedata.initialize( this );
+    _impl->framedata.initialize(this);
 }
 
 Config::~Config()
@@ -105,32 +105,32 @@ const FrameData& Config::getFrameData() const
 
 std::string Config::renderJPEG()
 {
-    getFrameData().getFrameSettings().setGrabFrame( true );
+    getFrameData().getFrameSettings().setGrabFrame(true);
     frame();
 
-    for( ;; )
+    for (;;)
     {
         eq::EventICommand event = getNextEvent();
-        if( !event.isValid( ))
+        if (!event.isValid())
             continue;
 
-        if( event.getEventType() == GRAB_IMAGE )
+        if (event.getEventType() == GRAB_IMAGE)
         {
-            const uint64_t size = event.read< uint64_t >();
-            const uint8_t* data = reinterpret_cast< const uint8_t* >(
-                                      event.getRemainingBuffer( size ));
+            const uint64_t size = event.read<uint64_t>();
+            const uint8_t* data = reinterpret_cast<const uint8_t*>(
+                event.getRemainingBuffer(size));
 
             ::lexis::render::ImageJPEG imageJPEG;
-            imageJPEG.setData( data, size );
+            imageJPEG.setData(data, size);
             return imageJPEG.toJSON();
         }
 
-        handleEvent( event );
+        handleEvent(event);
     }
     return "";
 }
 
-void Config::setHistogram( const Histogram& histogram )
+void Config::setHistogram(const Histogram& histogram)
 {
     _impl->_histogram = histogram;
 }
@@ -150,24 +150,24 @@ VolumeInformation& Config::getVolumeInformation()
     return _impl->volumeInfo;
 }
 
-void Config::mapFrameData( const eq::uint128_t& initId )
+void Config::mapFrameData(const eq::uint128_t& initId)
 {
-    _impl->framedata.map( this, initId );
-    _impl->framedata.mapObjects( );
+    _impl->framedata.map(this, initId);
+    _impl->framedata.mapObjects();
 }
 
 void Config::unmapFrameData()
 {
-    _impl->framedata.unmapObjects( );
-    _impl->framedata.unmap( this );
+    _impl->framedata.unmapObjects();
+    _impl->framedata.unmap(this);
 }
 
 void Config::resetCamera()
 {
     _impl->framedata.getCameraSettings().setCameraPosition(
-        _impl->framedata.getApplicationParameters().cameraPosition );
+        _impl->framedata.getApplicationParameters().cameraPosition);
     _impl->framedata.getCameraSettings().setCameraLookAt(
-        _impl->framedata.getApplicationParameters().cameraLookAt );
+        _impl->framedata.getApplicationParameters().cameraLookAt);
 }
 
 bool Config::init()
@@ -176,82 +176,82 @@ bool Config::init()
     FrameData& framedata = _impl->framedata;
     FrameSettings& frameSettings = framedata.getFrameSettings();
     const ApplicationParameters& params = framedata.getApplicationParameters();
-    frameSettings.setFrameNumber( params.frames.x( ));
+    frameSettings.setFrameNumber(params.frames.x());
 
     RenderSettings& renderSettings = framedata.getRenderSettings();
-    const TransferFunction1D tf( params.transferFunction );
-    renderSettings.setTransferFunction( tf );
+    const TransferFunction1D tf(params.transferFunction);
+    renderSettings.setTransferFunction(tf);
 
     _impl->framedata.registerObjects();
 
-    if( !_impl->framedata.registerToConfig( this ))
+    if (!_impl->framedata.registerToConfig(this))
         return false;
 
-    if( !eq::Config::init( _impl->framedata.getID( )))
+    if (!eq::Config::init(_impl->framedata.getID()))
     {
         _impl->framedata.deregisterObjects();
-        _impl->framedata.deregisterFromConfig( this );
+        _impl->framedata.deregisterFromConfig(this);
         return false;
     }
 
-    _impl->switchLayout( 0 ); // update active layout
+    _impl->switchLayout(0); // update active layout
     _impl->latency = getLatency();
     return true;
 }
 
-void Config::initCommunicator( const int argc LB_UNUSED, char** argv LB_UNUSED )
+void Config::initCommunicator(const int argc LB_UNUSED, char** argv LB_UNUSED)
 {
 #ifdef LIVRE_USE_ZEROEQ
-    _impl->communicator.reset( new zeroeq::Communicator( *this, argc, argv ));
+    _impl->communicator.reset(new zeroeq::Communicator(*this, argc, argv));
 
     _impl->framedata.getCameraSettings().registerNotifyChanged(
-                std::bind( &zeroeq::Communicator::publishCamera,
-                           _impl->communicator.get(), std::placeholders::_1 ));
+        std::bind(&zeroeq::Communicator::publishCamera,
+                  _impl->communicator.get(), std::placeholders::_1));
 #endif
 }
 
 bool Config::frame()
 {
-    if( _impl->volumeInfo.frameRange == INVALID_FRAME_RANGE )
+    if (_impl->volumeInfo.frameRange == INVALID_FRAME_RANGE)
         return false;
 
     ApplicationParameters& params = _impl->framedata.getApplicationParameters();
     FrameSettings& frameSettings = _impl->framedata.getFrameSettings();
 
-    const FrameUtils frameUtils( params.frames, _impl->volumeInfo.frameRange );
+    const FrameUtils frameUtils(params.frames, _impl->volumeInfo.frameRange);
     params.frames = frameUtils.getFrameRange();
 
     // Set current frame (start/end may have changed)
     const bool keepToLatest = params.animation == LATEST_FRAME;
     const uint32_t current =
-        frameUtils.getCurrent( frameSettings.getFrameNumber(), keepToLatest );
+        frameUtils.getCurrent(frameSettings.getFrameNumber(), keepToLatest);
 
-    frameSettings.setFrameNumber( current );
+    frameSettings.setFrameNumber(current);
     const eq::uint128_t& version = _impl->framedata.commit();
 
-    if( _impl->framedata.getVRParameters().getSynchronousMode( ))
-        setLatency( 0 );
+    if (_impl->framedata.getVRParameters().getSynchronousMode())
+        setLatency(0);
     else
-        setLatency( _impl->latency );
+        setLatency(_impl->latency);
 
     // reset data and advance current frame
-    frameSettings.setGrabFrame( false );
+    frameSettings.setGrabFrame(false);
 
-    if( !keepToLatest && !_keepCurrentFrame( params.animationFPS ))
+    if (!keepToLatest && !_keepCurrentFrame(params.animationFPS))
     {
-        frameSettings.setFrameNumber( frameUtils.getNext( current,
-                                                          params.animation ));
+        frameSettings.setFrameNumber(
+            frameUtils.getNext(current, params.animation));
         // reset starting time for new frame
-         _impl->frameStart = getTime();
+        _impl->frameStart = getTime();
     }
     _impl->redraw = false;
 
 #ifdef LIVRE_USE_ZEROEQ
-    if( _impl->communicator )
+    if (_impl->communicator)
         _impl->communicator->publishFrame();
 #endif
 
-    eq::Config::startFrame( version );
+    eq::Config::startFrame(version);
     eq::Config::finishFrame();
     return true;
 }
@@ -263,22 +263,22 @@ void Config::postRedraw()
 
 bool Config::needRedraw()
 {
-    return _impl->redraw || _impl->framedata.getApplicationParameters().animation != 0;
+    return _impl->redraw ||
+           _impl->framedata.getApplicationParameters().animation != 0;
 }
 
-bool Config::publish( const servus::Serializable& serializable )
+bool Config::publish(const servus::Serializable& serializable)
 {
 #ifdef LIVRE_USE_ZEROEQ
-    if( _impl->communicator )
-        return _impl->communicator->publish( serializable );
+    if (_impl->communicator)
+        return _impl->communicator->publish(serializable);
 #endif
     return false;
 }
 
-
-void Config::switchLayout( const int32_t increment )
+void Config::switchLayout(const int32_t increment)
 {
-    return _impl->switchLayout( increment );
+    return _impl->switchLayout(increment);
 }
 
 eq::Layout* Config::getActiveLayout()
@@ -288,9 +288,9 @@ eq::Layout* Config::getActiveLayout()
 
 bool Config::exit()
 {
-    bool ret = eq::Config::exit(); // cppcheck-suppress unreachableCode
+    bool ret = eq::Config::exit();
     _impl->framedata.deregisterObjects();
-    if( !_impl->framedata.deregisterFromConfig( this ))
+    if (!_impl->framedata.deregisterFromConfig(this))
         ret = false;
     return ret;
 }
@@ -298,14 +298,14 @@ bool Config::exit()
 void Config::handleNetworkEvents()
 {
 #ifdef LIVRE_USE_ZEROEQ
-    if( _impl->communicator )
+    if (_impl->communicator)
         _impl->communicator->handleEvents();
 #endif
 }
 
-bool Config::_keepCurrentFrame( const uint32_t fps ) const
+bool Config::_keepCurrentFrame(const uint32_t fps) const
 {
-    if( fps == 0 )
+    if (fps == 0)
         return false;
 
     const double desiredTime = 1.0 / fps;
@@ -315,8 +315,7 @@ bool Config::_keepCurrentFrame( const uint32_t fps ) const
     // current frame should be kept until the duration matches (or exceeds) the
     // expected. Otherwise, the frame number should be normally increased.
     // This means that no frames are artificially skipped due to the fps limit
-    const double frameDuration = ( end - _impl->frameStart ) / 1e3;
+    const double frameDuration = (end - _impl->frameStart) / 1e3;
     return frameDuration < desiredTime;
 }
-
 }

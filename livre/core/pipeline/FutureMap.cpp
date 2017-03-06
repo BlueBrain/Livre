@@ -21,186 +21,182 @@
 
 namespace livre
 {
-
 namespace
 {
-
 const std::string ALL_FUTURES = "ALL_FUTURES";
-
 }
 
-typedef std::multimap< std::string, Future > NameFutureMap;
+typedef std::multimap<std::string, Future> NameFutureMap;
 
 struct FutureMapImpl
 {
 public:
-
-    void throwError( const std::string& name ) const
+    void throwError(const std::string& name) const
     {
-        LBTHROW( std::logic_error( std::string( "Unknown future name: ") + name ));
+        LBTHROW(std::logic_error(std::string("Unknown future name: ") + name));
     }
 
-    bool hasFuture( const std::string& name ) const
+    bool hasFuture(const std::string& name) const
     {
-        return _futureMap.count( name ) > 0;
+        return _futureMap.count(name) > 0;
     }
 
-    Futures getFutures( const std::string& name ) const
+    Futures getFutures(const std::string& name) const
     {
-        if( name == ALL_FUTURES )
+        if (name == ALL_FUTURES)
         {
             Futures futures;
-            for( const auto& nameFuture: _futureMap )
-                futures.push_back( nameFuture.second );
+            for (const auto& nameFuture : _futureMap)
+                futures.push_back(nameFuture.second);
             return futures;
         }
 
-        if( !hasFuture( name ))
-            throwError( name );
+        if (!hasFuture(name))
+            throwError(name);
 
         Futures futures;
-        const auto& itPair = _futureMap.equal_range( name );
+        const auto& itPair = _futureMap.equal_range(name);
 
-        for( auto it = itPair.first; it != itPair.second; ++it )
-            futures.push_back( it->second );
+        for (auto it = itPair.first; it != itPair.second; ++it)
+            futures.push_back(it->second);
 
         return futures;
     }
 
-    bool isReady( const std::string& name ) const
+    bool isReady(const std::string& name) const
     {
-        for( const auto& future: getFutures( name ))
+        for (const auto& future : getFutures(name))
         {
-            if( !future.isReady())
+            if (!future.isReady())
                 return false;
         }
         return true;
     }
 
-    void wait( const std::string& name ) const
+    void wait(const std::string& name) const
     {
-        for( const auto& future: getFutures( name ))
+        for (const auto& future : getFutures(name))
             future.wait();
     }
 
-    void waitForAny( const std::string& name ) const
+    void waitForAny(const std::string& name) const
     {
-        livre::waitForAny( getFutures( name ));
+        livre::waitForAny(getFutures(name));
     }
 
-    void addFuture( const std::string& name, const Future& future )
+    void addFuture(const std::string& name, const Future& future)
     {
-        _futureMap.insert( std::make_pair( name, future ));
+        _futureMap.insert(std::make_pair(name, future));
     }
 
     NameFutureMap _futureMap;
 };
 
-struct UniqueFutureMap::Impl: public FutureMapImpl
+struct UniqueFutureMap::Impl : public FutureMapImpl
 {
 public:
-    Impl( const Futures& futures )
+    Impl(const Futures& futures)
     {
-        for( const auto& future: futures )
+        for (const auto& future : futures)
         {
             const std::string& name = future.getName();
-            if( hasFuture( name ))
-                throwError( name );
-            addFuture( name, future );
+            if (hasFuture(name))
+                throwError(name);
+            addFuture(name, future);
         }
     }
 };
 
-UniqueFutureMap::UniqueFutureMap( const Futures& futures )
-    : _impl( new UniqueFutureMap::Impl( futures ))
-{}
+UniqueFutureMap::UniqueFutureMap(const Futures& futures)
+    : _impl(new UniqueFutureMap::Impl(futures))
+{
+}
 
 Futures UniqueFutureMap::getFutures() const
 {
-    return _impl->getFutures( ALL_FUTURES );
+    return _impl->getFutures(ALL_FUTURES);
 }
 
-Future UniqueFutureMap::getFuture( const std::string& name ) const
+Future UniqueFutureMap::getFuture(const std::string& name) const
 {
-    return _impl->getFutures( name ).front();
+    return _impl->getFutures(name).front();
 }
 
-bool UniqueFutureMap::isReady( const std::string& name ) const
+bool UniqueFutureMap::isReady(const std::string& name) const
 {
-    return _impl->isReady( name );
+    return _impl->isReady(name);
 }
 
-void UniqueFutureMap::wait( const std::string& name ) const
+void UniqueFutureMap::wait(const std::string& name) const
 {
-    _impl->wait( name );
+    _impl->wait(name);
 }
 
 void UniqueFutureMap::waitForAny() const
 {
-    _impl->waitForAny( ALL_FUTURES );
+    _impl->waitForAny(ALL_FUTURES);
 }
 
 UniqueFutureMap::~UniqueFutureMap()
-{}
-
-struct FutureMap::Impl: public FutureMapImpl
-{
-public:
-    Impl( const Futures& futures )
-    {
-        for( const auto& future: futures )
-            addFuture( future.getName(), future );
-    }
-};
-
-FutureMap::FutureMap( const Futures& futures )
-    : _impl( new FutureMap::Impl( futures ))
 {
 }
 
-Futures FutureMap::getFutures( const std::string& name ) const
+struct FutureMap::Impl : public FutureMapImpl
 {
-    return _impl->getFutures( name );
+public:
+    Impl(const Futures& futures)
+    {
+        for (const auto& future : futures)
+            addFuture(future.getName(), future);
+    }
+};
+
+FutureMap::FutureMap(const Futures& futures)
+    : _impl(new FutureMap::Impl(futures))
+{
+}
+
+Futures FutureMap::getFutures(const std::string& name) const
+{
+    return _impl->getFutures(name);
 }
 
 Futures FutureMap::getFutures() const
 {
-    return _impl->getFutures( ALL_FUTURES );
+    return _impl->getFutures(ALL_FUTURES);
 }
 
-bool FutureMap::isReady( const std::string& name ) const
+bool FutureMap::isReady(const std::string& name) const
 {
-    return _impl->isReady( name );
+    return _impl->isReady(name);
 }
 
 bool FutureMap::isReady() const
 {
-    return _impl->isReady( ALL_FUTURES );
+    return _impl->isReady(ALL_FUTURES);
 }
 
-void FutureMap::wait( const std::string& name ) const
+void FutureMap::wait(const std::string& name) const
 {
-    _impl->wait( name );
+    _impl->wait(name);
 }
 
 void FutureMap::wait() const
 {
-    _impl->wait( ALL_FUTURES );
+    _impl->wait(ALL_FUTURES);
 }
 
-void FutureMap::waitForAny( const std::string& name ) const
+void FutureMap::waitForAny(const std::string& name) const
 {
-    _impl->waitForAny( name );
+    _impl->waitForAny(name);
 }
 
 void FutureMap::waitForAny() const
 {
-    _impl->waitForAny( ALL_FUTURES );
+    _impl->waitForAny(ALL_FUTURES);
 }
 
 FutureMap::~FutureMap()
-{}
-
-
-
+{
+}
 }

@@ -20,30 +20,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/eq/settings/RenderSettings.h>
 #include <co/dataIStream.h>
 #include <co/dataOStream.h>
+#include <livre/eq/settings/RenderSettings.h>
 
 namespace livre
 {
-
 RenderSettings::RenderSettings()
 {
 }
 
 void RenderSettings::resetTransferFunction()
 {
-    setTransferFunction( TransferFunction1D( ));
+    setTransferFunction(TransferFunction1D());
 }
 
-void RenderSettings::setTransferFunction( const TransferFunction1D& tf )
+void RenderSettings::setTransferFunction(const TransferFunction1D& tf)
 {
     _transferFunction = tf;
 }
 
-void RenderSettings::setClipPlanes( const ClipPlanes& clipPlanes )
+void RenderSettings::setClipPlanes(const ClipPlanes& clipPlanes)
 {
     _clipPlanes = clipPlanes;
 }
-
 }

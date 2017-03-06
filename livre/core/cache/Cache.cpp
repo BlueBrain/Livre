@@ -17,19 +17,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/core/defines.h>
 #include <livre/core/cache/Cache.h>
 #include <livre/core/cache/CacheObject.h>
 #include <livre/core/cache/CacheStatistics.h>
+#include <livre/core/defines.h>
 
 namespace livre
 {
-
-CacheLoadException::CacheLoadException( const Identifier& id,
-                                        const std::string& message )
-    : _id( id )
-    , _message( message )
-{}
+CacheLoadException::CacheLoadException(const Identifier& id,
+                                       const std::string& message)
+    : _id(id)
+    , _message(message)
+{
+}
 
 const char* CacheLoadException::what() const throw()
 {
@@ -40,39 +40,40 @@ const char* CacheLoadException::what() const throw()
 
 struct LRUCachePolicy
 {
-    typedef std::deque< CacheId > LRUQueue;
+    typedef std::deque<CacheId> LRUQueue;
 
-    LRUCachePolicy( const size_t maxMemBytes )
-        : _maxMemBytes( maxMemBytes )
-        , _cleanUpRatio( 1.0f )
-    {}
+    LRUCachePolicy(const size_t maxMemBytes)
+        : _maxMemBytes(maxMemBytes)
+        , _cleanUpRatio(1.0f)
+    {
+    }
 
-    bool isFull( const Cache& cache ) const
+    bool isFull(const Cache& cache) const
     {
         const size_t usedMemBytes = cache.getStatistics().getUsedMemory();
         return usedMemBytes >= _maxMemBytes;
     }
 
-    bool hasSpace( const Cache& cache ) const
+    bool hasSpace(const Cache& cache) const
     {
         const size_t usedMemBytes = cache.getStatistics().getUsedMemory();
         return usedMemBytes < _cleanUpRatio * _maxMemBytes;
     }
 
-    void insert( const CacheId& cacheId )
+    void insert(const CacheId& cacheId)
     {
-        remove( cacheId );
-        _lruQueue.push_back( cacheId );
+        remove(cacheId);
+        _lruQueue.push_back(cacheId);
     }
 
-    void remove( const CacheId& cacheId )
+    void remove(const CacheId& cacheId)
     {
         typename LRUQueue::iterator it = _lruQueue.begin();
-        while( it != _lruQueue.end( ))
+        while (it != _lruQueue.end())
         {
-            if( *it == cacheId )
+            if (*it == cacheId)
             {
-                _lruQueue.erase( it );
+                _lruQueue.erase(it);
                 return;
             }
             else
@@ -83,16 +84,12 @@ struct LRUCachePolicy
     CacheIds getObjects() const
     {
         CacheIds ids;
-        ids.reserve( _lruQueue.size( ));
-        ids.insert( ids.begin(), _lruQueue.begin(), _lruQueue.end());
+        ids.reserve(_lruQueue.size());
+        ids.insert(ids.begin(), _lruQueue.begin(), _lruQueue.end());
         return ids;
     }
 
-    void clear()
-    {
-        _lruQueue.clear();
-    }
-
+    void clear() { _lruQueue.clear(); }
     const size_t _maxMemBytes;
     const float _cleanUpRatio;
     LRUQueue _lruQueue;
@@ -100,106 +97,103 @@ struct LRUCachePolicy
 
 struct Cache::Impl
 {
-    Impl( Cache& cache,
-          const std::string& name,
-          const size_t maxMemBytes,
-          const std::type_index& cacheObjectType )
-        : _policy( maxMemBytes )
-        , _cache( cache )
-        , _statistics( name, maxMemBytes )
-        , _cacheMap( 128 )
-        , _cacheObjectType( cacheObjectType )
-    {}
+    Impl(Cache& cache, const std::string& name, const size_t maxMemBytes,
+         const std::type_index& cacheObjectType)
+        : _policy(maxMemBytes)
+        , _cache(cache)
+        , _statistics(name, maxMemBytes)
+        , _cacheMap(128)
+        , _cacheObjectType(cacheObjectType)
+    {
+    }
 
-    ~Impl()
-    {}
-
+    ~Impl() {}
     void applyPolicy()
     {
-        if( _cacheMap.empty() || !_policy.isFull( _cache ))
+        if (_cacheMap.empty() || !_policy.isFull(_cache))
             return;
 
         // Objects are returned in delete order
-        for( const CacheId& cacheId: _policy.getObjects( ))
+        for (const CacheId& cacheId : _policy.getObjects())
         {
-            unloadFromCache( cacheId );
-            if( _policy.hasSpace( _cache ))
+            unloadFromCache(cacheId);
+            if (_policy.hasSpace(_cache))
                 return;
         }
     }
 
-    ConstCacheObjectPtr load( ConstCacheObjectPtr obj )
+    ConstCacheObjectPtr load(ConstCacheObjectPtr obj)
     {
-        WriteLock writeLock( _mutex );
+        WriteLock writeLock(_mutex);
         const CacheId& cacheId = obj->getId();
-        ConstCacheMap::const_iterator it = _cacheMap.find( cacheId );
-        if( it != _cacheMap.end( ))
+        ConstCacheMap::const_iterator it = _cacheMap.find(cacheId);
+        if (it != _cacheMap.end())
             return it->second;
 
-        _cacheMap[ cacheId ] = obj;
+        _cacheMap[cacheId] = obj;
         _statistics.notifyMiss();
-        _statistics.notifyLoaded( *obj );
-        _policy.insert( cacheId );
+        _statistics.notifyLoaded(*obj);
+        _policy.insert(cacheId);
         applyPolicy();
         return obj;
     }
 
-    bool unloadFromCache( const CacheId& cacheId )
+    bool unloadFromCache(const CacheId& cacheId)
     {
-        ConstCacheMap::iterator it = _cacheMap.find( cacheId );
-        if( it == _cacheMap.end( ))
+        ConstCacheMap::iterator it = _cacheMap.find(cacheId);
+        if (it == _cacheMap.end())
             return false;
 
         ConstCacheObjectPtr& obj = it->second;
-        if( obj.use_count() > 1 )
+        if (obj.use_count() > 1)
             return false;
 
-        _statistics.notifyUnloaded( *obj );
+        _statistics.notifyUnloaded(*obj);
         obj.reset();
-        _policy.remove( cacheId );
-        _cacheMap.erase( cacheId );
+        _policy.remove(cacheId);
+        _cacheMap.erase(cacheId);
         return true;
     }
 
-    ConstCacheObjectPtr getFromMap( const CacheId& cacheId ) const
+    ConstCacheObjectPtr getFromMap(const CacheId& cacheId) const
     {
-        ReadLock readLock( _mutex );
-        ConstCacheMap::const_iterator it = _cacheMap.find( cacheId );
-        if( it == _cacheMap.end( ))
+        ReadLock readLock(_mutex);
+        ConstCacheMap::const_iterator it = _cacheMap.find(cacheId);
+        if (it == _cacheMap.end())
             return CacheObjectPtr();
 
         return it->second;
     }
 
-    bool unload( const CacheId& cacheId )
+    bool unload(const CacheId& cacheId)
     {
-        WriteLock lock( _mutex );
-        return unloadFromCache( cacheId );
+        WriteLock lock(_mutex);
+        return unloadFromCache(cacheId);
     }
 
-    ConstCacheObjectPtr get( const CacheId& cacheId ) const
+    ConstCacheObjectPtr get(const CacheId& cacheId) const
     {
-        return getFromMap( cacheId );
+        return getFromMap(cacheId);
     }
 
     size_t getCount() const
     {
-        ReadLock lock( _mutex );
+        ReadLock lock(_mutex);
         return _cacheMap.size();
     }
 
     void purge()
     {
-        WriteLock lock( _mutex );
+        WriteLock lock(_mutex);
         _statistics.clear();
         _policy.clear();
         _cacheMap.clear();
     }
 
-    void purge( const CacheId& cacheId )
+    void purge(const CacheId& cacheId)
     {
-        WriteLock lock( _mutex );
-        _cacheMap.erase( cacheId );
+        WriteLock lock(_mutex);
+        _cacheMap.erase(cacheId);
     }
 
     mutable LRUCachePolicy _policy;
@@ -210,35 +204,38 @@ struct Cache::Impl
     const std::type_index _cacheObjectType;
 };
 
-Cache::Cache( const std::string& name, size_t maxMemBytes, const std::type_index& cacheObjectType )
-    : _impl( new Cache::Impl( *this, name, maxMemBytes, cacheObjectType ))
-{}
+Cache::Cache(const std::string& name, size_t maxMemBytes,
+             const std::type_index& cacheObjectType)
+    : _impl(new Cache::Impl(*this, name, maxMemBytes, cacheObjectType))
+{
+}
 
 Cache::~Cache()
-{}
-
-ConstCacheObjectPtr Cache::_load( ConstCacheObjectPtr obj )
 {
-    if( obj->getId() == INVALID_CACHE_ID )
-        return ConstCacheObjectPtr();
-
-    return _impl->load( obj );
 }
 
-bool Cache::unload( const CacheId& cacheId )
+ConstCacheObjectPtr Cache::_load(ConstCacheObjectPtr obj)
 {
-    if( cacheId == INVALID_CACHE_ID )
+    if (obj->getId() == INVALID_CACHE_ID)
+        return ConstCacheObjectPtr();
+
+    return _impl->load(obj);
+}
+
+bool Cache::unload(const CacheId& cacheId)
+{
+    if (cacheId == INVALID_CACHE_ID)
         return false;
 
-    return _impl->unload( cacheId );
+    return _impl->unload(cacheId);
 }
 
-ConstCacheObjectPtr Cache::get( const CacheId& cacheId ) const
+ConstCacheObjectPtr Cache::get(const CacheId& cacheId) const
 {
-    if( cacheId == INVALID_CACHE_ID )
+    if (cacheId == INVALID_CACHE_ID)
         return ConstCacheObjectPtr();
 
-    return _impl->get( cacheId );
+    return _impl->get(cacheId);
 }
 
 const std::type_index& Cache::_getCacheObjectType() const
@@ -261,9 +258,8 @@ void Cache::purge()
     _impl->purge();
 }
 
-void Cache::purge( const CacheId& cacheId )
+void Cache::purge(const CacheId& cacheId)
 {
-    _impl->purge( cacheId );
+    _impl->purge(cacheId);
 }
-
 }

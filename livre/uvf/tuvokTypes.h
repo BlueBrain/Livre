@@ -25,7 +25,7 @@ class LargeFileMMap;
 
 namespace tuvok
 {
-    class UVFDataset;
+class UVFDataset;
 }
 
 #endif // _tuvokTypes_h_

@@ -34,23 +34,26 @@ namespace livre
 {
 struct Client::Impl
 {
-    Impl( const bool isResident_ ) : isResident( isResident_ ) {}
+    Impl(const bool isResident_)
+        : isResident(isResident_)
+    {
+    }
     IdleFunc _idleFunc;
     eq::ServerPtr server;
     bool isResident = false;
 };
 
-Client::Client( const int argc, char** argv, const bool isResident )
-    : _impl( new Client::Impl( isResident ))
+Client::Client(const int argc, char** argv, const bool isResident)
+    : _impl(new Client::Impl(isResident))
 {
-    if( !initLocal( argc, argv ))
-        LBTHROW( std::runtime_error( "Can't init client" ));
+    if (!initLocal(argc, argv))
+        LBTHROW(std::runtime_error("Can't init client"));
 
     _impl->server = new eq::Server;
-    if( !connectServer( _impl->server ))
+    if (!connectServer(_impl->server))
     {
         exitLocal();
-        LBTHROW( std::runtime_error( "Can't open server" ));
+        LBTHROW(std::runtime_error("Can't open server"));
     }
 }
 
@@ -62,23 +65,23 @@ Config* Client::chooseConfig()
 {
     eq::fabric::ConfigParams configParams;
     auto config =
-           static_cast< Config* >( _impl->server->chooseConfig( configParams ));
+        static_cast<Config*>(_impl->server->chooseConfig(configParams));
     return config;
 }
 
-void Client::releaseConfig( Config* config )
+void Client::releaseConfig(Config* config)
 {
-    _impl->server->releaseConfig( config );
-    if( !disconnectServer( _impl->server ))
+    _impl->server->releaseConfig(config);
+    if (!disconnectServer(_impl->server))
         LBERROR << "Client::disconnectServer failed" << std::endl;
     _impl->server = 0;
     exitLocal();
 
-    LBASSERTINFO( getRefCount() == 1, "Client still referenced by " <<
-                  getRefCount() - 1 );
+    LBASSERTINFO(getRefCount() == 1, "Client still referenced by "
+                                         << getRefCount() - 1);
 }
 
-void Client::setIdleFunction( const IdleFunc& idleFunc )
+void Client::setIdleFunction(const IdleFunc& idleFunc)
 {
     _impl->_idleFunc = idleFunc;
 }
@@ -90,17 +93,17 @@ const IdleFunc& Client::getIdleFunction() const
 
 bool Client::processCommands()
 {
-    if( !hasCommands( ))
+    if (!hasCommands())
         return false;
 
     processCommand();
     return true;
 }
 
-bool Client::initLocal( const int argc, char** argv )
+bool Client::initLocal(const int argc, char** argv)
 {
-    addActiveLayout( "Simple" ); // prefer single GPU layout by default
-    return eq::Client::initLocal( argc, argv );
+    addActiveLayout("Simple"); // prefer single GPU layout by default
+    return eq::Client::initLocal(argc, argv);
 }
 
 void Client::clientLoop()
@@ -109,15 +112,13 @@ void Client::clientLoop()
     {
         LBINFO << "Entered client loop" << std::endl;
         const uint32_t timeout = 100; // Run idle function every 100ms
-        while( isRunning( ))
+        while (isRunning())
         {
-            if( _impl->_idleFunc )
+            if (_impl->_idleFunc)
                 _impl->_idleFunc(); // order is important for latency
 
-            processCommand( timeout );
+            processCommand(timeout);
         }
-    }
-    while( _impl->isResident ); // execute at least one config run
+    } while (_impl->isResident); // execute at least one config run
 }
-
 }

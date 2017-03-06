@@ -24,21 +24,19 @@
 
 namespace vmml
 {
-std::istream& operator>>( std::istream& is, Vector3f& vec )
+std::istream& operator>>(std::istream& is, Vector3f& vec)
 {
     return is >> std::skipws >> vec.x() >> vec.y() >> vec.z();
 }
 
-std::istream& operator>>( std::istream& is, Vector2ui& vec )
+std::istream& operator>>(std::istream& is, Vector2ui& vec)
 {
     return is >> std::skipws >> vec.x() >> vec.y();
 }
-
 }
 
 namespace livre
 {
-
 const std::string ANIMATION_PARAM = "animation";
 const std::string ANIMATION_FPS_PARAM = "animation-fps";
 const std::string ANIMATION_FOLLOW_DATA_PARAM = "animation-follow-data";
@@ -51,41 +49,49 @@ const std::string DATAFILE_PARAM = "volume";
 const std::string TRANSFERFUNCTION_PARAM = "transfer-function";
 
 ApplicationParameters::ApplicationParameters()
-    : Parameters( "Application Parameters" )
-    , cameraPosition( 0, 0, 1.5 )
-    , cameraLookAt( 0, 0, 0 )
-    , frames( FULL_FRAME_RANGE )
-    , maxFrames( std::numeric_limits< uint32_t >::max( ))
-    , animation( 0 )
-    , animationFPS( 0 )
-    , isResident( false )
+    : Parameters("Application Parameters")
+    , cameraPosition(0, 0, 1.5)
+    , cameraLookAt(0, 0, 0)
+    , frames(FULL_FRAME_RANGE)
+    , maxFrames(std::numeric_limits<uint32_t>::max())
+    , animation(0)
+    , animationFPS(0)
+    , isResident(false)
 {
-    configuration_.addDescription( configGroupName_, ANIMATION_PARAM,
-                                   "Enable animation mode (optional frame delta for animation speed, use --animation=-<int> for reverse animation)", animation, 1 );
-    configuration_.addDescription( configGroupName_, ANIMATION_FPS_PARAM,
-                                   "Animation frames per second. By default (value of 0), it will request a new frame as soon as the previous one is done", animationFPS );
-    configuration_.addDescription( configGroupName_, ANIMATION_FOLLOW_DATA_PARAM,
-                                   "Enable animation and follow volume data stream (overrides --animation=value)", false );
-    configuration_.addDescription( configGroupName_, FRAMES_PARAM,
-                                   "Frames to render [start end)", frames );
-    configuration_.addDescription( configGroupName_, NUMFRAMES_PARAM,
-                                   "Maximum nuber of frames to render", maxFrames );
-    configuration_.addDescription( configGroupName_, CAMERAPOS_PARAM,
-                                   "Camera position", cameraPosition );
-    configuration_.addDescription( configGroupName_, CAMERALOOKAT_PARAM,
-                                   "Camera orientation", cameraLookAt );
-    configuration_.addDescription< std::string >( configGroupName_,
-                                                  DATAFILE_PARAM,
-                                                DataSource::getDescriptions( ));
-    configuration_.addDescription( configGroupName_, TRANSFERFUNCTION_PARAM,
-                                ".1dt transfer function file (from ImageVis3D)",
-                                   transferFunction );
+    configuration_.addDescription(configGroupName_, ANIMATION_PARAM,
+                                  "Enable animation mode (optional frame delta "
+                                  "for animation speed, use --animation=-<int> "
+                                  "for reverse animation)",
+                                  animation, 1);
+    configuration_.addDescription(configGroupName_, ANIMATION_FPS_PARAM,
+                                  "Animation frames per second. By default "
+                                  "(value of 0), it will request a new frame "
+                                  "as soon as the previous one is done",
+                                  animationFPS);
+    configuration_.addDescription(configGroupName_, ANIMATION_FOLLOW_DATA_PARAM,
+                                  "Enable animation and follow volume data "
+                                  "stream (overrides --animation=value)",
+                                  false);
+    configuration_.addDescription(configGroupName_, FRAMES_PARAM,
+                                  "Frames to render [start end)", frames);
+    configuration_.addDescription(configGroupName_, NUMFRAMES_PARAM,
+                                  "Maximum nuber of frames to render",
+                                  maxFrames);
+    configuration_.addDescription(configGroupName_, CAMERAPOS_PARAM,
+                                  "Camera position", cameraPosition);
+    configuration_.addDescription(configGroupName_, CAMERALOOKAT_PARAM,
+                                  "Camera orientation", cameraLookAt);
+    configuration_.addDescription<std::string>(configGroupName_, DATAFILE_PARAM,
+                                               DataSource::getDescriptions());
+    configuration_.addDescription(
+        configGroupName_, TRANSFERFUNCTION_PARAM,
+        ".1dt transfer function file (from ImageVis3D)", transferFunction);
 }
 
-ApplicationParameters& ApplicationParameters::operator = (
-    const ApplicationParameters& parameters )
+ApplicationParameters& ApplicationParameters::operator=(
+    const ApplicationParameters& parameters)
 {
-    if( this == &parameters )
+    if (this == &parameters)
         return *this;
 
     cameraPosition = parameters.cameraPosition;
@@ -103,20 +109,19 @@ ApplicationParameters& ApplicationParameters::operator = (
 
 void ApplicationParameters::initialize_()
 {
-    animation = configuration_.getValue( ANIMATION_PARAM, animation );
-    animationFPS = configuration_.getValue( ANIMATION_FPS_PARAM, animationFPS );
-    frames = configuration_.getValue( FRAMES_PARAM, frames );
-    maxFrames = configuration_.getValue( NUMFRAMES_PARAM, maxFrames );
-    cameraPosition = configuration_.getValue( CAMERAPOS_PARAM, cameraPosition );
-    cameraLookAt = configuration_.getValue( CAMERALOOKAT_PARAM, cameraLookAt );
-    dataFileName = configuration_.getValue( DATAFILE_PARAM, dataFileName );
-    transferFunction = configuration_.getValue( TRANSFERFUNCTION_PARAM,
-                                                transferFunction );
+    animation = configuration_.getValue(ANIMATION_PARAM, animation);
+    animationFPS = configuration_.getValue(ANIMATION_FPS_PARAM, animationFPS);
+    frames = configuration_.getValue(FRAMES_PARAM, frames);
+    maxFrames = configuration_.getValue(NUMFRAMES_PARAM, maxFrames);
+    cameraPosition = configuration_.getValue(CAMERAPOS_PARAM, cameraPosition);
+    cameraLookAt = configuration_.getValue(CAMERALOOKAT_PARAM, cameraLookAt);
+    dataFileName = configuration_.getValue(DATAFILE_PARAM, dataFileName);
+    transferFunction =
+        configuration_.getValue(TRANSFERFUNCTION_PARAM, transferFunction);
     bool animationFollowData = false;
-    animationFollowData = configuration_.getValue( ANIMATION_FOLLOW_DATA_PARAM,
-                                                   animationFollowData );
-    if( animationFollowData )
+    animationFollowData = configuration_.getValue(ANIMATION_FOLLOW_DATA_PARAM,
+                                                  animationFollowData);
+    if (animationFollowData)
         animation = LATEST_FRAME;
 }
-
 }

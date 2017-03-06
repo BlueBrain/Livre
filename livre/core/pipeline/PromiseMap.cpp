@@ -21,84 +21,75 @@
 
 namespace livre
 {
-
 namespace
 {
-
 const std::string ALL_PROMISES = "ALL_PROMISES";
-
 }
 
-typedef std::map< std::string, Promise > NamePromiseMap;
+typedef std::map<std::string, Promise> NamePromiseMap;
 typedef NamePromiseMap::value_type NamePromisePair;
 
 struct PromiseMap::Impl
 {
-    Impl( const Promises& promises )
+    Impl(const Promises& promises)
     {
-        for( const auto& promise: promises )
-            _promiseMap.insert({ promise.getName(), promise });
+        for (const auto& promise : promises)
+            _promiseMap.insert({promise.getName(), promise});
     }
 
-    void throwError( const std::string& name ) const
+    void throwError(const std::string& name) const
     {
-        LBTHROW( std::logic_error( std::string( "Unknown promise name: ") + name ));
+        LBTHROW(std::logic_error(std::string("Unknown promise name: ") + name));
     }
 
-    bool hasPromise( const std::string& name ) const
+    bool hasPromise(const std::string& name) const
     {
-        return _promiseMap.count( name ) > 0;
+        return _promiseMap.count(name) > 0;
     }
 
-    void flush( const std::string& name ) const
-    {
-        getPromise( name ).flush();
-    }
-
+    void flush(const std::string& name) const { getPromise(name).flush(); }
     void flush() const
     {
-        for( auto& namePromise: _promiseMap )
+        for (auto& namePromise : _promiseMap)
         {
             Promise promise = namePromise.second;
             promise.flush();
         }
     }
 
-    void reset( const std::string& name ) const
-    {
-        getPromise( name ).reset();
-    }
-
+    void reset(const std::string& name) const { getPromise(name).reset(); }
     void reset() const
     {
-        for( auto& namePromise: _promiseMap )
+        for (auto& namePromise : _promiseMap)
         {
             Promise promise = namePromise.second;
             promise.reset();
         }
     }
 
-    Promise getPromise( const std::string& name ) const
+    Promise getPromise(const std::string& name) const
     {
-        if( !hasPromise( name ))
-            throwError( name );
+        if (!hasPromise(name))
+            throwError(name);
 
-        return _promiseMap.find( name )->second;
+        return _promiseMap.find(name)->second;
     }
 
     NamePromiseMap _promiseMap;
 };
 
-PromiseMap::PromiseMap( const Promises& promises )
-    : _impl( new PromiseMap::Impl( promises ))
-{}
+PromiseMap::PromiseMap(const Promises& promises)
+    : _impl(new PromiseMap::Impl(promises))
+{
+}
 
 PromiseMap::~PromiseMap()
-{}
-
-void PromiseMap::flush( const std::string& name ) const
 {
-    _impl->flush( name );
+}
+
+void PromiseMap::flush(const std::string& name) const
+{
+    _impl->flush(name);
 }
 
 void PromiseMap::flush() const
@@ -106,9 +97,9 @@ void PromiseMap::flush() const
     _impl->flush();
 }
 
-void PromiseMap::reset( const std::string& name) const
+void PromiseMap::reset(const std::string& name) const
 {
-    _impl->reset( name );
+    _impl->reset(name);
 }
 
 void PromiseMap::reset() const
@@ -116,9 +107,8 @@ void PromiseMap::reset() const
     _impl->flush();
 }
 
-Promise PromiseMap::getPromise( const std::string& name ) const
+Promise PromiseMap::getPromise(const std::string& name) const
 {
-    return _impl->getPromise( name );
+    return _impl->getPromise(name);
 }
-
 }

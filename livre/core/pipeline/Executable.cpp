@@ -21,19 +21,18 @@
 
 namespace livre
 {
-
-Futures Executable::schedule( Executor& executor )
+Futures Executable::schedule(Executor& executor)
 {
-    _schedule( executor );
+    _schedule(executor);
     return getPostconditions();
 }
 
 Executable::~Executable()
-{}
-
-void Executable::_schedule( Executor& executor )
 {
-    executor.schedule( clone( ));
 }
 
+void Executable::_schedule(Executor& executor)
+{
+    executor.schedule(clone());
+}
 }

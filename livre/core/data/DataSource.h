@@ -23,24 +23,24 @@
 #include <lunchbox/clock.h>
 
 #include <livre/core/api.h>
-#include <livre/core/defines.h>
+#include <livre/core/data/LODNode.h>
 #include <livre/core/data/MemoryUnit.h>
 #include <livre/core/data/VolumeInformation.h>
-#include <livre/core/data/LODNode.h>
+#include <livre/core/defines.h>
 
 namespace livre
 {
-
 class DataSource
 {
 public:
     /**
      * DataSource constructor.
-     * @param uri Initialization URI. The volume data source is generated accordingly
+     * @param uri Initialization URI. The volume data source is generated
+     * accordingly
      * @param accessMode The access mode.
      */
-    LIVRECORE_API DataSource( const servus::URI& uri,
-                              const AccessMode accessMode = MODE_READ );
+    LIVRECORE_API DataSource(const servus::URI& uri,
+                             const AccessMode accessMode = MODE_READ);
 
     LIVRECORE_API ~DataSource();
 
@@ -51,7 +51,7 @@ public:
     LIVRECORE_API static std::string getDescriptions();
 
     /** @return true if a datasource plugin for the given URI is available. */
-    LIVRECORE_API static bool handles( const servus::URI& uri );
+    LIVRECORE_API static bool handles(const servus::URI& uri);
 
     /**
      * @return The volume information.
@@ -61,7 +61,8 @@ public:
     /**
      * @return The volume information.
      */
-    LIVRECORE_API static VolumeInformation getVolumeInfo( const servus::URI& uri );
+    LIVRECORE_API static VolumeInformation getVolumeInfo(
+        const servus::URI& uri);
 
     /** Initializes the GL specific functions. */
     LIVRECORE_API bool initializeGL();
@@ -74,26 +75,24 @@ public:
      * @param nodeId NodeId to be read.
      * @return The memory block containing the data for the node.
      */
-    LIVRECORE_API MemoryUnitPtr getData( const NodeId& nodeId );
+    LIVRECORE_API MemoryUnitPtr getData(const NodeId& nodeId);
 
     /** @copydoc getData( const NodeId& nodeId ) */
-    LIVRECORE_API ConstMemoryUnitPtr getData( const NodeId& nodeId ) const;
+    LIVRECORE_API ConstMemoryUnitPtr getData(const NodeId& nodeId) const;
 
     /**
      * @param nodeId The nodeId to get the node for.
      * @return The LODNode for the ID or an invalid node if not found.
      */
-    LIVRECORE_API LODNode getNode( const NodeId& nodeId ) const;
+    LIVRECORE_API LODNode getNode(const NodeId& nodeId) const;
 
     /** @copydoc DataSourcePlugin::update() */
     LIVRECORE_API bool update();
 
 private:
-
     struct Impl;
-    std::unique_ptr< Impl > _impl;
+    std::unique_ptr<Impl> _impl;
 };
-
 }
 
 #endif // _DataSource_h_
