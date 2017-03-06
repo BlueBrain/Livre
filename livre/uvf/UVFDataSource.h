@@ -20,31 +20,28 @@
 #ifndef _UVFDataSource_h_
 #define _UVFDataSource_h_
 
-#include <livre/uvf/tuvokTypes.h>
 #include <livre/core/data/DataSourcePlugin.h>
+#include <livre/uvf/tuvokTypes.h>
 
 namespace livre
 {
-
 /** Reads Tuvok Volumes and generates hierarchies. */
 class UVFDataSource : public DataSourcePlugin
 {
 public:
-    UVFDataSource( const DataSourcePluginData& initData );
+    UVFDataSource(const DataSourcePluginData& initData);
     virtual ~UVFDataSource();
 
-    static bool handles( const DataSourcePluginData& initData );
+    static bool handles(const DataSourcePluginData& initData);
     static std::string getDescription();
 
 private:
-
-    MemoryUnitPtr getData( const LODNode& node ) final;
-    LODNode internalNodeToLODNode( const NodeId& internalNode ) const final;
+    MemoryUnitPtr getData(const LODNode& node) final;
+    LODNode internalNodeToLODNode(const NodeId& internalNode) const final;
 
     struct Impl;
-    std::unique_ptr< Impl > _impl;
+    std::unique_ptr<Impl> _impl;
 };
-
 }
 
 #endif // _UVFDataSource_h_

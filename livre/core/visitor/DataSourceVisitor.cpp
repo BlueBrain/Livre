@@ -17,47 +17,46 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/core/visitor/DataSourceVisitor.h>
-#include <livre/core/data/LODNode.h>
 #include <livre/core/data/DataSource.h>
+#include <livre/core/data/LODNode.h>
+#include <livre/core/visitor/DataSourceVisitor.h>
 
 namespace livre
 {
-
 class DataSourceVisitor::Impl
 {
 public:
-    explicit Impl( const DataSource& dataSource )
-        : _dataSource( dataSource )
-    {}
-
-    LODNode getNode( const NodeId& nodeId ) const
+    explicit Impl(const DataSource& dataSource)
+        : _dataSource(dataSource)
     {
-        return _dataSource.getNode( nodeId );
+    }
+
+    LODNode getNode(const NodeId& nodeId) const
+    {
+        return _dataSource.getNode(nodeId);
     }
 
     const DataSource& _dataSource;
 };
 
-DataSourceVisitor::DataSourceVisitor( const DataSource& dataSource )
-    : _impl( new DataSourceVisitor::Impl( dataSource ))
-{}
+DataSourceVisitor::DataSourceVisitor(const DataSource& dataSource)
+    : _impl(new DataSourceVisitor::Impl(dataSource))
+{
+}
 
 DataSourceVisitor::~DataSourceVisitor()
-{}
+{
+}
 
 const DataSource& DataSourceVisitor::getDataSource() const
 {
     return _impl->_dataSource;
 }
 
-void DataSourceVisitor::visit( const NodeId& nodeId,
-                               VisitState& state )
+void DataSourceVisitor::visit(const NodeId& nodeId, VisitState& state)
 {
-    const LODNode& node = _impl->getNode( nodeId );
-    if( node.isValid( ))
-        visit( node, state );
+    const LODNode& node = _impl->getNode(nodeId);
+    if (node.isValid())
+        visit(node, state);
 }
-
 }
-

@@ -23,17 +23,17 @@
 #include <livre/eq/render/shaders/vertRayCastGL2.glsl.h>
 #include <livre/eq/settings/RenderSettings.h>
 
-#include <livre/lib/configuration/VolumeRendererParameters.h>
 #include <livre/lib/cache/TextureObject.h>
+#include <livre/lib/configuration/VolumeRendererParameters.h>
 
 #include <livre/core/cache/Cache.h>
 #include <livre/core/data/DataSource.h>
-#include <livre/core/data/VolumeInformation.h>
-#include <livre/core/render/GLSLShaders.h>
-#include <livre/core/render/Frustum.h>
-#include <livre/core/render/TransferFunction1D.h>
 #include <livre/core/data/LODNode.h>
+#include <livre/core/data/VolumeInformation.h>
+#include <livre/core/render/Frustum.h>
 #include <livre/core/render/GLContext.h>
+#include <livre/core/render/GLSLShaders.h>
+#include <livre/core/render/TransferFunction1D.h>
 
 #include <eq/eq.h>
 #include <eq/gl.h>
@@ -42,477 +42,479 @@ namespace livre
 {
 namespace
 {
-const int32_t SH_UINT  = 0;
-const int32_t SH_INT   = 1;
+const int32_t SH_UINT = 0;
+const int32_t SH_INT = 1;
 const int32_t SH_FLOAT = 2;
 }
 
-// Sort helper function for sorting the textures with their distances to viewpoint
+// Sort helper function for sorting the textures with their distances to
+// viewpoint
 struct DistanceOperator
 {
-    explicit DistanceOperator( const DataSource& dataSource, const Frustum& frustum )
-        : _frustum( frustum )
-        , _dataSource( dataSource )
-    {}
-
-    bool operator()( const NodeId& rb1,
-                     const NodeId& rb2 )
+    explicit DistanceOperator(const DataSource& dataSource,
+                              const Frustum& frustum)
+        : _frustum(frustum)
+        , _dataSource(dataSource)
     {
-        const LODNode& lodNode1 = _dataSource.getNode( rb1 );
-        const LODNode& lodNode2 = _dataSource.getNode( rb2 );
+    }
 
-        const float distance1 = ( _frustum.getMVMatrix() *
-                                  lodNode1.getWorldBox().getCenter() ).length();
-        const float distance2 = ( _frustum.getMVMatrix() *
-                                  lodNode2.getWorldBox().getCenter() ).length();
-        return  distance1 < distance2;
+    bool operator()(const NodeId& rb1, const NodeId& rb2)
+    {
+        const LODNode& lodNode1 = _dataSource.getNode(rb1);
+        const LODNode& lodNode2 = _dataSource.getNode(rb2);
+
+        const float distance1 =
+            (_frustum.getMVMatrix() * lodNode1.getWorldBox().getCenter())
+                .length();
+        const float distance2 =
+            (_frustum.getMVMatrix() * lodNode2.getWorldBox().getCenter())
+                .length();
+        return distance1 < distance2;
     }
     const Frustum& _frustum;
     const DataSource& _dataSource;
 };
 
-
 #define glewGetContext() GLContext::getCurrent()->glewGetContext()
 
 namespace
 {
-std::string where( const char* file, const int line )
+std::string where(const char* file, const int line)
 {
-    return std::string( " in " ) + std::string( file ) + ":" +
-           boost::lexical_cast< std::string >( line );
+    return std::string(" in ") + std::string(file) + ":" +
+           boost::lexical_cast<std::string>(line);
 }
 
 const uint32_t maxSamplesPerRay = 32;
 const uint32_t minSamplesPerRay = 512;
-
 }
 
 struct RayCastRenderer::Impl
 {
-    Impl( const DataSource& dataSource,
-          const Cache& textureCache,
-          const uint32_t samplesPerRay,
-          const uint32_t samplesPerPixel )
-        : _framebufferTexture( GL_TEXTURE_RECTANGLE_ARB, glewGetContext( ))
-        , _nSamplesPerRay( samplesPerRay )
-        , _nSamplesPerPixel( samplesPerPixel )
-        , _computedSamplesPerRay( samplesPerRay )
-        , _transferFunctionTexture( 0 )
-        , _textureCache( textureCache )
-        , _dataSource( dataSource )
-        , _volInfo( _dataSource.getVolumeInfo( ))
-        , _posVBO( 0 )
+    Impl(const DataSource& dataSource, const Cache& textureCache,
+         const uint32_t samplesPerRay, const uint32_t samplesPerPixel)
+        : _framebufferTexture(GL_TEXTURE_RECTANGLE_ARB, glewGetContext())
+        , _nSamplesPerRay(samplesPerRay)
+        , _nSamplesPerPixel(samplesPerPixel)
+        , _computedSamplesPerRay(samplesPerRay)
+        , _transferFunctionTexture(0)
+        , _textureCache(textureCache)
+        , _dataSource(dataSource)
+        , _volInfo(_dataSource.getVolumeInfo())
+        , _posVBO(0)
     {
         TransferFunction1D transferFunction;
-        initTransferFunction( transferFunction );
+        initTransferFunction(transferFunction);
 
         const int error = _shaders.loadShaders(
-            ShaderData( vertRayCastGL2_glsl, fragRayCastGL2_glsl ));
-        if( error != GL_NO_ERROR )
-            LBTHROW( std::runtime_error( "Can't load glsl shaders: " +
-                                         eq::glError( error ) +
-                                         where( __FILE__, __LINE__ )));
+            ShaderData(vertRayCastGL2_glsl, fragRayCastGL2_glsl));
+        if (error != GL_NO_ERROR)
+            LBTHROW(std::runtime_error("Can't load glsl shaders: " +
+                                       eq::glError(error) +
+                                       where(__FILE__, __LINE__)));
     }
 
-    ~Impl()
-    {
-        _framebufferTexture.flush();
-    }
-
-    NodeIds order( const NodeIds& bricks,
-                   const Frustum& frustum ) const
+    ~Impl() { _framebufferTexture.flush(); }
+    NodeIds order(const NodeIds& bricks, const Frustum& frustum) const
     {
         NodeIds rbs = bricks;
-        DistanceOperator distanceOp( _dataSource, frustum );
-        std::sort( rbs.begin(), rbs.end(), distanceOp );
+        DistanceOperator distanceOp(_dataSource, frustum);
+        std::sort(rbs.begin(), rbs.end(), distanceOp);
         return rbs;
     }
 
-    void update( const FrameData& frameData )
+    void update(const FrameData& frameData)
     {
-        initTransferFunction( frameData.getRenderSettings().getTransferFunction( ));
+        initTransferFunction(
+            frameData.getRenderSettings().getTransferFunction());
         _nSamplesPerRay = frameData.getVRParameters().getSamplesPerRay();
         _computedSamplesPerRay = _nSamplesPerRay;
         _nSamplesPerPixel = frameData.getVRParameters().getSamplesPerPixel();
     }
 
-    void initTransferFunction( const TransferFunction1D& transferFunction )
+    void initTransferFunction(const TransferFunction1D& transferFunction)
     {
-        assert( transferFunction.getNumChannels() == 4u );
+        assert(transferFunction.getNumChannels() == 4u);
 
-        if( _transferFunctionTexture == 0 )
+        if (_transferFunctionTexture == 0)
         {
             GLuint tfTexture = 0;
-            glGenTextures( 1, &tfTexture );
-            glBindTexture( GL_TEXTURE_1D, tfTexture );
+            glGenTextures(1, &tfTexture);
+            glBindTexture(GL_TEXTURE_1D, tfTexture);
 
-            glTexParameteri( GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-            glTexParameteri( GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-            glTexParameteri( GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-            _transferFunctionTexture  = tfTexture;
+            glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            _transferFunctionTexture = tfTexture;
         }
-        glBindTexture( GL_TEXTURE_1D, _transferFunctionTexture );
+        glBindTexture(GL_TEXTURE_1D, _transferFunctionTexture);
 
         const uint8_t* transferFunctionData = transferFunction.getLut();
-        glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA,
-                       GLsizei( transferFunction.getLutSize() / 4u ), 0,
-                       GL_RGBA, GL_UNSIGNED_BYTE, transferFunctionData );
+        glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA,
+                     GLsizei(transferFunction.getLutSize() / 4u), 0, GL_RGBA,
+                     GL_UNSIGNED_BYTE, transferFunctionData);
     }
 
-    void readFromFrameBuffer( const PixelViewport& viewport )
+    void readFromFrameBuffer(const PixelViewport& viewport)
     {
-        const eq::PixelViewport pvp( 0, 0, viewport[2], viewport[3] );
-        _framebufferTexture.copyFromFrameBuffer( GL_RGBA, pvp );
+        const eq::PixelViewport pvp(0, 0, viewport[2], viewport[3]);
+        _framebufferTexture.copyFromFrameBuffer(GL_RGBA, pvp);
     }
 
-    void onFrameStart( const Frustum& frustum,
-                       const ClipPlanes& planes,
-                       const NodeIds& renderBricks )
+    void onFrameStart(const Frustum& frustum, const ClipPlanes& planes,
+                      const NodeIds& renderBricks)
     {
-        EQ_GL_ERROR( "before Texture::copyFromFrameBuffer" );
-        if( _nSamplesPerRay == 0 ) // Find sampling rate
+        EQ_GL_ERROR("before Texture::copyFromFrameBuffer");
+        if (_nSamplesPerRay == 0) // Find sampling rate
         {
             uint32_t maxLOD = 0;
-            for( const NodeId& rb : renderBricks )
+            for (const NodeId& rb : renderBricks)
             {
-                const LODNode& lodNode = _dataSource.getNode( rb );
+                const LODNode& lodNode = _dataSource.getNode(rb);
                 const uint32_t level = lodNode.getRefLevel();
-                if( level > maxLOD )
+                if (level > maxLOD)
                     maxLOD = level;
             }
 
             const float maxVoxelDim = _volInfo.voxels.find_max();
-            const float maxVoxelsAtLOD = maxVoxelDim /
-                    (float)( 1u << ( _volInfo.rootNode.getDepth() - maxLOD - 1 ));
+            const float maxVoxelsAtLOD =
+                maxVoxelDim /
+                (float)(1u << (_volInfo.rootNode.getDepth() - maxLOD - 1));
             // Nyquist limited nb of samples according to voxel size
-            _computedSamplesPerRay = std::max( maxVoxelsAtLOD, (float)minSamplesPerRay );
+            _computedSamplesPerRay =
+                std::max(maxVoxelsAtLOD, (float)minSamplesPerRay);
         }
 
-        glDisable( GL_LIGHTING );
-        glEnable( GL_CULL_FACE );
-        glDisable( GL_DEPTH_TEST );
-        glDisable( GL_BLEND );
+        glDisable(GL_LIGHTING);
+        glEnable(GL_CULL_FACE);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_BLEND);
 
-        GLSLShaders::Handle program = _shaders.getProgram( );
-        LBASSERT( program );
+        GLSLShaders::Handle program = _shaders.getProgram();
+        LBASSERT(program);
 
         // Enable shaders
-        glUseProgram( program );
+        glUseProgram(program);
         GLint tParamNameGL;
 
-        tParamNameGL = glGetUniformLocation( program, "invProjectionMatrix" );
-        glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getInvProjMatrix( ).array );
+        tParamNameGL = glGetUniformLocation(program, "invProjectionMatrix");
+        glUniformMatrix4fv(tParamNameGL, 1, false,
+                           frustum.getInvProjMatrix().array);
 
-        tParamNameGL = glGetUniformLocation( program, "invModelViewMatrix" );
-        glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getInvMVMatrix( ).array );
+        tParamNameGL = glGetUniformLocation(program, "invModelViewMatrix");
+        glUniformMatrix4fv(tParamNameGL, 1, false,
+                           frustum.getInvMVMatrix().array);
 
-        tParamNameGL = glGetUniformLocation( program, "modelViewProjectionMatrix" );
-        glUniformMatrix4fv( tParamNameGL, 1, false, frustum.getMVPMatrix( ).array );
+        tParamNameGL =
+            glGetUniformLocation(program, "modelViewProjectionMatrix");
+        glUniformMatrix4fv(tParamNameGL, 1, false,
+                           frustum.getMVPMatrix().array);
 
-        // Because the volume is centered to the origin we can compute the volume AABB by using
+        // Because the volume is centered to the origin we can compute the
+        // volume AABB by using
         // the volume total size.
         const Vector3f halfWorldSize = _volInfo.worldSize / 2.0;
 
-        tParamNameGL = glGetUniformLocation( program, "globalAABBMin" );
-        glUniform3fv( tParamNameGL, 1, ( -halfWorldSize ).array );
+        tParamNameGL = glGetUniformLocation(program, "globalAABBMin");
+        glUniform3fv(tParamNameGL, 1, (-halfWorldSize).array);
 
-        tParamNameGL = glGetUniformLocation( program, "globalAABBMax" );
-        glUniform3fv( tParamNameGL, 1, ( halfWorldSize ).array );
+        tParamNameGL = glGetUniformLocation(program, "globalAABBMax");
+        glUniform3fv(tParamNameGL, 1, (halfWorldSize).array);
 
         Vector4i viewport;
-        glGetIntegerv( GL_VIEWPORT, viewport.array );
-        tParamNameGL = glGetUniformLocation( program, "viewport" );
-        glUniform4iv( tParamNameGL, 1, viewport.array );
+        glGetIntegerv(GL_VIEWPORT, viewport.array);
+        tParamNameGL = glGetUniformLocation(program, "viewport");
+        glUniform4iv(tParamNameGL, 1, viewport.array);
 
-        tParamNameGL = glGetUniformLocation( program, "depthRange" );
+        tParamNameGL = glGetUniformLocation(program, "depthRange");
 
         Vector2f depthRange;
-        glGetFloatv( GL_DEPTH_RANGE, depthRange.array );
-        glUniform2fv( tParamNameGL, 1, depthRange.array );
+        glGetFloatv(GL_DEPTH_RANGE, depthRange.array);
+        glUniform2fv(tParamNameGL, 1, depthRange.array);
 
-        tParamNameGL = glGetUniformLocation( program, "worldEyePosition" );
-        glUniform3fv( tParamNameGL, 1, frustum.getEyePos( ).array );
+        tParamNameGL = glGetUniformLocation(program, "worldEyePosition");
+        glUniform3fv(tParamNameGL, 1, frustum.getEyePos().array);
 
-        tParamNameGL = glGetUniformLocation( program, "nSamplesPerRay" );
-        glUniform1i( tParamNameGL, _computedSamplesPerRay );
+        tParamNameGL = glGetUniformLocation(program, "nSamplesPerRay");
+        glUniform1i(tParamNameGL, _computedSamplesPerRay);
 
-        tParamNameGL = glGetUniformLocation( program, "maxSamplesPerRay" );
-        glUniform1i( tParamNameGL, maxSamplesPerRay );
+        tParamNameGL = glGetUniformLocation(program, "maxSamplesPerRay");
+        glUniform1i(tParamNameGL, maxSamplesPerRay);
 
-        tParamNameGL = glGetUniformLocation( program, "nSamplesPerPixel" );
-        glUniform1i( tParamNameGL, _nSamplesPerPixel );
+        tParamNameGL = glGetUniformLocation(program, "nSamplesPerPixel");
+        glUniform1i(tParamNameGL, _nSamplesPerPixel);
 
-        tParamNameGL = glGetUniformLocation( program, "nearPlaneDist" );
-        glUniform1f( tParamNameGL, frustum.nearPlane( ));
+        tParamNameGL = glGetUniformLocation(program, "nearPlaneDist");
+        glUniform1f(tParamNameGL, frustum.nearPlane());
 
         const auto& clipPlanes = planes.getPlanes();
         const size_t nPlanes = clipPlanes.size();
-        tParamNameGL = glGetUniformLocation( program, "nClipPlanes" );
-        glUniform1i( tParamNameGL, nPlanes );
-        EQ_GL_ERROR( "before Texture::copyFromFrameBuffer" );
+        tParamNameGL = glGetUniformLocation(program, "nClipPlanes");
+        glUniform1i(tParamNameGL, nPlanes);
+        EQ_GL_ERROR("before Texture::copyFromFrameBuffer");
 
-        switch( _dataSource.getVolumeInfo().dataType )
+        switch (_dataSource.getVolumeInfo().dataType)
         {
-            case DT_UINT8:
-            case DT_UINT16:
-            case DT_UINT32:
-                tParamNameGL = glGetUniformLocation( program, "datatype" );
-                glUniform1i( tParamNameGL, SH_UINT );
-                break;
-            case DT_FLOAT:
-                tParamNameGL = glGetUniformLocation( program, "datatype" );
-                glUniform1i( tParamNameGL, SH_FLOAT );
-                break;
-            case DT_INT8:
-            case DT_INT16:
-            case DT_INT32:
-                tParamNameGL = glGetUniformLocation( program, "datatype" );
-                glUniform1i( tParamNameGL, SH_INT );
-                break;
-            case DT_UNDEFINED:
-            default:
-                LBTHROW( std::runtime_error( "Unsupported type in the shader." ));
-                break;
+        case DT_UINT8:
+        case DT_UINT16:
+        case DT_UINT32:
+            tParamNameGL = glGetUniformLocation(program, "datatype");
+            glUniform1i(tParamNameGL, SH_UINT);
+            break;
+        case DT_FLOAT:
+            tParamNameGL = glGetUniformLocation(program, "datatype");
+            glUniform1i(tParamNameGL, SH_FLOAT);
+            break;
+        case DT_INT8:
+        case DT_INT16:
+        case DT_INT32:
+            tParamNameGL = glGetUniformLocation(program, "datatype");
+            glUniform1i(tParamNameGL, SH_INT);
+            break;
+        case DT_UNDEFINED:
+        default:
+            LBTHROW(std::runtime_error("Unsupported type in the shader."));
+            break;
         }
 
         // This is temporary. In the future it will be given by the gui.
-        Vector2f dataSourceRange( 0.0f, 255.0f );
-        tParamNameGL = glGetUniformLocation( program, "dataSourceRange" );
-        glUniform2fv( tParamNameGL, 1, dataSourceRange.array );
+        Vector2f dataSourceRange(0.0f, 255.0f);
+        tParamNameGL = glGetUniformLocation(program, "dataSourceRange");
+        glUniform2fv(tParamNameGL, 1, dataSourceRange.array);
 
-        if( nPlanes > 0 )
+        if (nPlanes > 0)
         {
             Floats planesData;
-            planesData.reserve( 4 * nPlanes );
-            for( size_t i = 0; i < nPlanes; ++i )
+            planesData.reserve(4 * nPlanes);
+            for (size_t i = 0; i < nPlanes; ++i)
             {
-                const auto& plane = clipPlanes[ i ];
+                const auto& plane = clipPlanes[i];
                 const float* normal = plane.getNormal();
-                planesData.push_back( normal[ 0 ]);
-                planesData.push_back( normal[ 1 ]);
-                planesData.push_back( normal[ 2 ]);
-                planesData.push_back( plane.getD( ));
+                planesData.push_back(normal[0]);
+                planesData.push_back(normal[1]);
+                planesData.push_back(normal[2]);
+                planesData.push_back(plane.getD());
             }
 
-            tParamNameGL = glGetUniformLocation( program, "clipPlanes" );
-            glUniform4fv( tParamNameGL, nPlanes, planesData.data( ));
+            tParamNameGL = glGetUniformLocation(program, "clipPlanes");
+            glUniform4fv(tParamNameGL, nPlanes, planesData.data());
         }
 
         // Disable shader
-        glUseProgram( 0 );
+        glUseProgram(0);
 
-        createAndFillVertexBuffer( renderBricks );
-        EQ_GL_ERROR( "before Texture::copyFromFrameBuffer" );
+        createAndFillVertexBuffer(renderBricks);
+        EQ_GL_ERROR("before Texture::copyFromFrameBuffer");
     }
 
-    void createAndFillVertexBuffer( const NodeIds& renderBricks )
+    void createAndFillVertexBuffer(const NodeIds& renderBricks)
     {
         Vector3fs positions;
-        positions.reserve( 36 * renderBricks.size( ));
-        for( const NodeId& rb: renderBricks )
+        positions.reserve(36 * renderBricks.size());
+        for (const NodeId& rb : renderBricks)
         {
-            const LODNode& lodNode = _dataSource.getNode( rb );
-            createBrick( lodNode, positions );
+            const LODNode& lodNode = _dataSource.getNode(rb);
+            createBrick(lodNode, positions);
         }
 
-        glGenBuffers( 1, &_posVBO );
-        glBindBuffer( GL_ARRAY_BUFFER, _posVBO );
-        glBufferData( GL_ARRAY_BUFFER,
-                      positions.size() * 3 * sizeof( float ),
-                      positions.data(), GL_STATIC_DRAW );
+        glGenBuffers(1, &_posVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, _posVBO);
+        glBufferData(GL_ARRAY_BUFFER, positions.size() * 3 * sizeof(float),
+                     positions.data(), GL_STATIC_DRAW);
     }
 
-    void createBrick( const LODNode& lodNode, Vector3fs& positions  ) const
+    void createBrick(const LODNode& lodNode, Vector3fs& positions) const
     {
         const Boxf& worldBox = lodNode.getWorldBox();
         const Vector3f& minPos = worldBox.getMin();
         const Vector3f& maxPos = worldBox.getMax();
 
         // BACK
-        positions.emplace_back( maxPos[0], minPos[1], minPos[2] );
-        positions.emplace_back( minPos[0], minPos[1], minPos[2] );
-        positions.emplace_back( minPos[0], maxPos[1], minPos[2] );
+        positions.emplace_back(maxPos[0], minPos[1], minPos[2]);
+        positions.emplace_back(minPos[0], minPos[1], minPos[2]);
+        positions.emplace_back(minPos[0], maxPos[1], minPos[2]);
 
-        positions.emplace_back( minPos[0], maxPos[1], minPos[2] );
-        positions.emplace_back( maxPos[0], maxPos[1], minPos[2] );
-        positions.emplace_back( maxPos[0], minPos[1], minPos[2] );
+        positions.emplace_back(minPos[0], maxPos[1], minPos[2]);
+        positions.emplace_back(maxPos[0], maxPos[1], minPos[2]);
+        positions.emplace_back(maxPos[0], minPos[1], minPos[2]);
 
         // FRONT
-        positions.emplace_back( maxPos[0], maxPos[1], maxPos[2] );
-        positions.emplace_back( minPos[0], maxPos[1], maxPos[2] );
-        positions.emplace_back( minPos[0], minPos[1], maxPos[2] );
+        positions.emplace_back(maxPos[0], maxPos[1], maxPos[2]);
+        positions.emplace_back(minPos[0], maxPos[1], maxPos[2]);
+        positions.emplace_back(minPos[0], minPos[1], maxPos[2]);
 
-        positions.emplace_back( minPos[0], minPos[1], maxPos[2] );
-        positions.emplace_back( maxPos[0], minPos[1], maxPos[2] );
-        positions.emplace_back( maxPos[0], maxPos[1], maxPos[2] );
+        positions.emplace_back(minPos[0], minPos[1], maxPos[2]);
+        positions.emplace_back(maxPos[0], minPos[1], maxPos[2]);
+        positions.emplace_back(maxPos[0], maxPos[1], maxPos[2]);
 
         // LEFT
-        positions.emplace_back( minPos[0], maxPos[1], minPos[2] );
-        positions.emplace_back( minPos[0], minPos[1], minPos[2] );
-        positions.emplace_back( minPos[0], minPos[1], maxPos[2] );
+        positions.emplace_back(minPos[0], maxPos[1], minPos[2]);
+        positions.emplace_back(minPos[0], minPos[1], minPos[2]);
+        positions.emplace_back(minPos[0], minPos[1], maxPos[2]);
 
-        positions.emplace_back( minPos[0], minPos[1], maxPos[2] );
-        positions.emplace_back( minPos[0], maxPos[1], maxPos[2] );
-        positions.emplace_back( minPos[0], maxPos[1], minPos[2] );
+        positions.emplace_back(minPos[0], minPos[1], maxPos[2]);
+        positions.emplace_back(minPos[0], maxPos[1], maxPos[2]);
+        positions.emplace_back(minPos[0], maxPos[1], minPos[2]);
 
         // RIGHT
-        positions.emplace_back( maxPos[0], maxPos[1], maxPos[2] );
-        positions.emplace_back( maxPos[0], minPos[1], maxPos[2] );
-        positions.emplace_back( maxPos[0], minPos[1], minPos[2] );
+        positions.emplace_back(maxPos[0], maxPos[1], maxPos[2]);
+        positions.emplace_back(maxPos[0], minPos[1], maxPos[2]);
+        positions.emplace_back(maxPos[0], minPos[1], minPos[2]);
 
-        positions.emplace_back( maxPos[0], minPos[1], minPos[2] );
-        positions.emplace_back( maxPos[0], maxPos[1], minPos[2] );
-        positions.emplace_back( maxPos[0], maxPos[1], maxPos[2] );
+        positions.emplace_back(maxPos[0], minPos[1], minPos[2]);
+        positions.emplace_back(maxPos[0], maxPos[1], minPos[2]);
+        positions.emplace_back(maxPos[0], maxPos[1], maxPos[2]);
 
         // BOTTOM
-        positions.emplace_back( maxPos[0], minPos[1], maxPos[2] );
-        positions.emplace_back( minPos[0], minPos[1], maxPos[2] );
-        positions.emplace_back( minPos[0], minPos[1], minPos[2] );
+        positions.emplace_back(maxPos[0], minPos[1], maxPos[2]);
+        positions.emplace_back(minPos[0], minPos[1], maxPos[2]);
+        positions.emplace_back(minPos[0], minPos[1], minPos[2]);
 
-        positions.emplace_back( minPos[0], minPos[1], minPos[2] );
-        positions.emplace_back( maxPos[0], minPos[1], minPos[2] );
-        positions.emplace_back( maxPos[0], minPos[1], maxPos[2] );
+        positions.emplace_back(minPos[0], minPos[1], minPos[2]);
+        positions.emplace_back(maxPos[0], minPos[1], minPos[2]);
+        positions.emplace_back(maxPos[0], minPos[1], maxPos[2]);
 
         // TOP
-        positions.emplace_back( maxPos[0], maxPos[1], minPos[2] );
-        positions.emplace_back( minPos[0], maxPos[1], minPos[2] );
-        positions.emplace_back( minPos[0], maxPos[1], maxPos[2] );
+        positions.emplace_back(maxPos[0], maxPos[1], minPos[2]);
+        positions.emplace_back(minPos[0], maxPos[1], minPos[2]);
+        positions.emplace_back(minPos[0], maxPos[1], maxPos[2]);
 
-        positions.emplace_back( minPos[0], maxPos[1], maxPos[2] );
-        positions.emplace_back( maxPos[0], maxPos[1], maxPos[2] );
-        positions.emplace_back( maxPos[0], maxPos[1], minPos[2] );
+        positions.emplace_back(minPos[0], maxPos[1], maxPos[2]);
+        positions.emplace_back(maxPos[0], maxPos[1], maxPos[2]);
+        positions.emplace_back(maxPos[0], maxPos[1], minPos[2]);
     }
 
-    void onFrameRender( const PixelViewport& view,
-                        const NodeIds& bricks )
+    void onFrameRender(const PixelViewport& view, const NodeIds& bricks)
     {
-    EQ_GL_ERROR( "before Texture::copyFromFrameBuffer" );
+        EQ_GL_ERROR("before Texture::copyFromFrameBuffer");
         size_t index = 0;
-        for( const NodeId& brick: bricks )
-            renderBrick( view, brick, index++ );
+        for (const NodeId& brick : bricks)
+            renderBrick(view, brick, index++);
     }
 
-    void renderVBO( const size_t index, bool front, bool back )
+    void renderVBO(const size_t index, bool front, bool back)
     {
-        if( !front && !back )
+        if (!front && !back)
             return;
 
-        else if( front && !back )
-            glCullFace( GL_BACK );
+        else if (front && !back)
+            glCullFace(GL_BACK);
 
-        else if( !front && back )
-            glCullFace( GL_FRONT );
+        else if (!front && back)
+            glCullFace(GL_FRONT);
 
-    EQ_GL_ERROR( "before Texture::copyFromFrameBuffer" );
-        glBindBuffer( GL_ARRAY_BUFFER, _posVBO );
-    EQ_GL_ERROR( "before Texture::copyFromFrameBuffer" );
-        glEnableVertexAttribArray( 0 );
-    EQ_GL_ERROR( "before Texture::copyFromFrameBuffer" );
-        glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, NULL );
-    EQ_GL_ERROR( "before Texture::copyFromFrameBuffer" );
-        glDrawArrays( GL_TRIANGLES, index * 36, 36 );
-    EQ_GL_ERROR( "before Texture::copyFromFrameBuffer" );
+        EQ_GL_ERROR("before Texture::copyFromFrameBuffer");
+        glBindBuffer(GL_ARRAY_BUFFER, _posVBO);
+        EQ_GL_ERROR("before Texture::copyFromFrameBuffer");
+        glEnableVertexAttribArray(0);
+        EQ_GL_ERROR("before Texture::copyFromFrameBuffer");
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+        EQ_GL_ERROR("before Texture::copyFromFrameBuffer");
+        glDrawArrays(GL_TRIANGLES, index * 36, 36);
+        EQ_GL_ERROR("before Texture::copyFromFrameBuffer");
     }
 
-    void renderBrick( const PixelViewport& viewport,
-                      const NodeId& rb,
-                      const size_t index )
+    void renderBrick(const PixelViewport& viewport, const NodeId& rb,
+                     const size_t index)
     {
-    EQ_GL_ERROR( "before Texture::copyFromFrameBuffer" );
-        GLSLShaders::Handle program = _shaders.getProgram( );
-        LBASSERT( program );
+        EQ_GL_ERROR("before Texture::copyFromFrameBuffer");
+        GLSLShaders::Handle program = _shaders.getProgram();
+        LBASSERT(program);
 
         // Enable shaders
-        glUseProgram( program );
+        glUseProgram(program);
 
         const ConstTextureObjectPtr textureObj =
-                std::static_pointer_cast< const TextureObject >( _textureCache.get( rb.getId( )));
+            std::static_pointer_cast<const TextureObject>(
+                _textureCache.get(rb.getId()));
         const TextureState& texState = textureObj->getTextureState();
-        const LODNode& lodNode = _dataSource.getNode( rb );
+        const LODNode& lodNode = _dataSource.getNode(rb);
 
-        if( texState.textureId == INVALID_TEXTURE_ID )
+        if (texState.textureId == INVALID_TEXTURE_ID)
         {
-            LBERROR << "Invalid texture for node : "
-                    << lodNode.getNodeId() << std::endl;
+            LBERROR << "Invalid texture for node : " << lodNode.getNodeId()
+                    << std::endl;
             return;
         }
 
-    EQ_GL_ERROR( "before Texture::copyFromFrameBuffer" );
-        GLint tParamNameGL = glGetUniformLocation( program, "aabbMin" );
-        glUniform3fv( tParamNameGL, 1, lodNode.getWorldBox().getMin().array );
+        EQ_GL_ERROR("before Texture::copyFromFrameBuffer");
+        GLint tParamNameGL = glGetUniformLocation(program, "aabbMin");
+        glUniform3fv(tParamNameGL, 1, lodNode.getWorldBox().getMin().array);
 
-        tParamNameGL = glGetUniformLocation( program, "aabbMax" );
-        glUniform3fv( tParamNameGL, 1, lodNode.getWorldBox().getMax().array );
+        tParamNameGL = glGetUniformLocation(program, "aabbMax");
+        glUniform3fv(tParamNameGL, 1, lodNode.getWorldBox().getMax().array);
 
-        tParamNameGL = glGetUniformLocation( program, "textureMin" );
-        glUniform3fv( tParamNameGL, 1, texState.textureCoordsMin.array );
+        tParamNameGL = glGetUniformLocation(program, "textureMin");
+        glUniform3fv(tParamNameGL, 1, texState.textureCoordsMin.array);
 
-    EQ_GL_ERROR( "before Texture::copyFromFrameBuffer" );
-        tParamNameGL = glGetUniformLocation( program, "textureMax" );
-        glUniform3fv( tParamNameGL, 1, texState.textureCoordsMax.array );
+        EQ_GL_ERROR("before Texture::copyFromFrameBuffer");
+        tParamNameGL = glGetUniformLocation(program, "textureMax");
+        glUniform3fv(tParamNameGL, 1, texState.textureCoordsMax.array);
 
-        const Vector3f& voxSize = texState.textureSize / lodNode.getWorldBox().getSize();
-        tParamNameGL = glGetUniformLocation( program, "voxelSpacePerWorldSpace" );
-        glUniform3fv( tParamNameGL, 1, voxSize.array );
+        const Vector3f& voxSize =
+            texState.textureSize / lodNode.getWorldBox().getSize();
+        tParamNameGL = glGetUniformLocation(program, "voxelSpacePerWorldSpace");
+        glUniform3fv(tParamNameGL, 1, voxSize.array);
 
-    EQ_GL_ERROR( "before Texture::copyFromFrameBuffer" );
-        readFromFrameBuffer( viewport );
+        EQ_GL_ERROR("before Texture::copyFromFrameBuffer");
+        readFromFrameBuffer(viewport);
 
-        glActiveTexture( GL_TEXTURE2 );
-        _framebufferTexture.bind( );
-        _framebufferTexture.applyZoomFilter( eq::FILTER_LINEAR );
-        _framebufferTexture.applyWrap( );
+        glActiveTexture(GL_TEXTURE2);
+        _framebufferTexture.bind();
+        _framebufferTexture.applyZoomFilter(eq::FILTER_LINEAR);
+        _framebufferTexture.applyWrap();
 
-        tParamNameGL = glGetUniformLocation( program, "frameBufferTex" );
-        glUniform1i( tParamNameGL, 2 );
-    EQ_GL_ERROR( "before Texture::copyFromFrameBuffer" );
+        tParamNameGL = glGetUniformLocation(program, "frameBufferTex");
+        glUniform1i(tParamNameGL, 2);
+        EQ_GL_ERROR("before Texture::copyFromFrameBuffer");
 
-        glActiveTexture( GL_TEXTURE1 );
-        glBindTexture( GL_TEXTURE_1D, _transferFunctionTexture ); //preintegrated values
-        tParamNameGL = glGetUniformLocation( program, "transferFnTex" );
-        glUniform1i( tParamNameGL, 1 ); //f-shader
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_1D,
+                      _transferFunctionTexture); // preintegrated values
+        tParamNameGL = glGetUniformLocation(program, "transferFnTex");
+        glUniform1i(tParamNameGL, 1); // f-shader
 
-        glActiveTexture( GL_TEXTURE0 );
+        glActiveTexture(GL_TEXTURE0);
         texState.bind();
-        tParamNameGL = glGetUniformLocation( program, "volumeTexUint8" );
-        glUniform1i( tParamNameGL, 0 );
-    EQ_GL_ERROR( "before Texture::copyFromFrameBuffer" );
+        tParamNameGL = glGetUniformLocation(program, "volumeTexUint8");
+        glUniform1i(tParamNameGL, 0);
+        EQ_GL_ERROR("before Texture::copyFromFrameBuffer");
 
-        tParamNameGL = glGetUniformLocation( program, "volumeTexFloat" );
-        glUniform1i( tParamNameGL, 0 );
+        tParamNameGL = glGetUniformLocation(program, "volumeTexFloat");
+        glUniform1i(tParamNameGL, 0);
 
         const uint32_t refLevel = lodNode.getRefLevel();
 
-        tParamNameGL = glGetUniformLocation( program, "refLevel" );
-        glUniform1i( tParamNameGL, refLevel );
-    EQ_GL_ERROR( "before Texture::copyFromFrameBuffer" );
+        tParamNameGL = glGetUniformLocation(program, "refLevel");
+        glUniform1i(tParamNameGL, refLevel);
+        EQ_GL_ERROR("before Texture::copyFromFrameBuffer");
 
-        _usedTextures[1].push_back( texState.textureId );
+        _usedTextures[1].push_back(texState.textureId);
 
-    EQ_GL_ERROR( "before Texture::copyFromFrameBuffer" );
-        renderVBO( index, false /* draw front */, true /* cull back */ );
-    EQ_GL_ERROR( "before Texture::copyFromFrameBuffer" );
+        EQ_GL_ERROR("before Texture::copyFromFrameBuffer");
+        renderVBO(index, false /* draw front */, true /* cull back */);
+        EQ_GL_ERROR("before Texture::copyFromFrameBuffer");
 
-        glUseProgram( 0 );
-    EQ_GL_ERROR( "before Texture::copyFromFrameBuffer" );
+        glUseProgram(0);
+        EQ_GL_ERROR("before Texture::copyFromFrameBuffer");
     }
 
     void onFrameEnd()
     {
-        std::sort( _usedTextures[1].begin(), _usedTextures[1].end( ));
+        std::sort(_usedTextures[1].begin(), _usedTextures[1].end());
 #ifdef LIVRE_DEBUG_RENDERING
-        if( _usedTextures[0] != _usedTextures[1] )
+        if (_usedTextures[0] != _usedTextures[1])
         {
             std::cout << "Rendered ";
-            std::copy( _usedTextures[1].begin(), _usedTextures[1].end(),
-                       std::ostream_iterator< uint32_t >( std::cout, " " ));
+            std::copy(_usedTextures[1].begin(), _usedTextures[1].end(),
+                      std::ostream_iterator<uint32_t>(std::cout, " "));
             std::cout << " in " << (void*)this << std::endl;
         }
 #endif
-        _usedTextures[0].swap( _usedTextures[1] );
+        _usedTextures[0].swap(_usedTextures[1]);
         _usedTextures[1].clear();
 
-        glDeleteBuffers( 1, &_posVBO );
+        glDeleteBuffers(1, &_posVBO);
     }
 
     eq::util::Texture _framebufferTexture;
@@ -521,58 +523,54 @@ struct RayCastRenderer::Impl
     uint32_t _nSamplesPerPixel;
     uint32_t _computedSamplesPerRay;
     uint32_t _transferFunctionTexture;
-    std::vector< uint32_t > _usedTextures[2]; // last, current frame
+    std::vector<uint32_t> _usedTextures[2]; // last, current frame
     const Cache& _textureCache;
     const DataSource& _dataSource;
     const VolumeInformation& _volInfo;
     GLuint _posVBO;
 };
 
-RayCastRenderer::RayCastRenderer( const DataSource& dataSource,
-                                  const Cache& textureCache,
-                                  const uint32_t samplesPerRay,
-                                  const uint32_t samplesPerPixel )
-    : _impl( new RayCastRenderer::Impl( dataSource,
-                                        textureCache,
-                                        samplesPerRay,
-                                        samplesPerPixel ))
-{}
+RayCastRenderer::RayCastRenderer(const DataSource& dataSource,
+                                 const Cache& textureCache,
+                                 const uint32_t samplesPerRay,
+                                 const uint32_t samplesPerPixel)
+    : _impl(new RayCastRenderer::Impl(dataSource, textureCache, samplesPerRay,
+                                      samplesPerPixel))
+{
+}
 
 RayCastRenderer::~RayCastRenderer()
-{}
-
-void RayCastRenderer::update( const FrameData& frameData )
 {
-    _impl->update( frameData );
 }
 
-
-NodeIds RayCastRenderer::order( const NodeIds& bricks,
-                                const Frustum& frustum ) const
+void RayCastRenderer::update(const FrameData& frameData)
 {
-    return _impl->order( bricks, frustum );
+    _impl->update(frameData);
 }
 
-void RayCastRenderer::_onFrameStart(  const Frustum& frustum,
-                                      const ClipPlanes& planes,
-                                      const PixelViewport&,
-                                      const NodeIds& renderBricks )
+NodeIds RayCastRenderer::order(const NodeIds& bricks,
+                               const Frustum& frustum) const
 {
-    _impl->onFrameStart( frustum, planes, renderBricks );
+    return _impl->order(bricks, frustum);
 }
 
-void RayCastRenderer::_onFrameRender( const Frustum&,
-                                      const ClipPlanes&,
-                                      const PixelViewport& view,
-                                      const NodeIds& orderedBricks )
+void RayCastRenderer::_onFrameStart(const Frustum& frustum,
+                                    const ClipPlanes& planes,
+                                    const PixelViewport&,
+                                    const NodeIds& renderBricks)
 {
-    _impl->onFrameRender( view, orderedBricks );
+    _impl->onFrameStart(frustum, planes, renderBricks);
 }
 
-void RayCastRenderer::_onFrameEnd( const Frustum&,
-                                   const ClipPlanes&,
-                                   const PixelViewport&,
-                                   const NodeIds& )
+void RayCastRenderer::_onFrameRender(const Frustum&, const ClipPlanes&,
+                                     const PixelViewport& view,
+                                     const NodeIds& orderedBricks)
+{
+    _impl->onFrameRender(view, orderedBricks);
+}
+
+void RayCastRenderer::_onFrameEnd(const Frustum&, const ClipPlanes&,
+                                  const PixelViewport&, const NodeIds&)
 {
     _impl->onFrameEnd();
 }
@@ -581,5 +579,4 @@ size_t RayCastRenderer::getNumBricksUsed() const
 {
     return _impl->_usedTextures[0].size();
 }
-
 }

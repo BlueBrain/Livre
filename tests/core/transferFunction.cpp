@@ -26,64 +26,62 @@
 #include <fstream>
 #include <lunchbox/file.h>
 
-const std::string& tfDir = lunchbox::getRootPath() +
-                               "/share/Livre/examples/";
+const std::string& tfDir = lunchbox::getRootPath() + "/share/Livre/examples/";
 
-BOOST_AUTO_TEST_CASE( transferFunction )
+BOOST_AUTO_TEST_CASE(transferFunction)
 {
     const size_t nChannels = livre::TransferFunction1D::getNumChannels();
     const size_t defaultSize = nChannels * 256;
     livre::TransferFunction1D tf_default;
-    BOOST_CHECK_EQUAL( tf_default.getLutSize(), defaultSize );
+    BOOST_CHECK_EQUAL(tf_default.getLutSize(), defaultSize);
 }
 
-std::vector< uint8_t > readFile( const std::string& file )
+std::vector<uint8_t> readFile(const std::string& file)
 {
-    std::vector< uint8_t > values;
-    std::ifstream ifs( file );
+    std::vector<uint8_t> values;
+    std::ifstream ifs(file);
 
     std::string line, val;
-    std::getline( ifs, line );
+    std::getline(ifs, line);
 
-    while( ifs >> val )
-        values.push_back( std::stoi( val ));
+    while (ifs >> val)
+        values.push_back(std::stoi(val));
 
     return values;
 }
 
-BOOST_AUTO_TEST_CASE( loadTransferFunctionFile )
+BOOST_AUTO_TEST_CASE(loadTransferFunctionFile)
 {
-    std::vector< uint8_t > values = readFile( tfDir + "tf_f.1dt" );
-    livre::TransferFunction1D tfFile( tfDir + "tf_f.1dt" );
-    BOOST_CHECK_EQUAL( values.size(), tfFile.getLutSize( ));
+    std::vector<uint8_t> values = readFile(tfDir + "tf_f.1dt");
+    livre::TransferFunction1D tfFile(tfDir + "tf_f.1dt");
+    BOOST_CHECK_EQUAL(values.size(), tfFile.getLutSize());
 
-    values = readFile( tfDir + "tf_c.1dt" );
-    tfFile = livre::TransferFunction1D( tfDir + "tf_c.1dt" );
-    BOOST_CHECK_EQUAL( values.size(), tfFile.getLutSize( ));
-    BOOST_CHECK_EQUAL_COLLECTIONS( values.begin(), values.end(),
-                                   tfFile.getLut(),
-                                   tfFile.getLut() + tfFile.getLutSize( ));
+    values = readFile(tfDir + "tf_c.1dt");
+    tfFile = livre::TransferFunction1D(tfDir + "tf_c.1dt");
+    BOOST_CHECK_EQUAL(values.size(), tfFile.getLutSize());
+    BOOST_CHECK_EQUAL_COLLECTIONS(values.begin(), values.end(), tfFile.getLut(),
+                                  tfFile.getLut() + tfFile.getLutSize());
 }
 
-BOOST_AUTO_TEST_CASE( serialization )
+BOOST_AUTO_TEST_CASE(serialization)
 {
-    livre::TransferFunction1D tfFile( tfDir + "tf_c.1dt" );
-    lunchbox::saveBinary( tfFile, "tf.lbb" );
-    lunchbox::saveAscii( tfFile, "tf.lba" );
+    livre::TransferFunction1D tfFile(tfDir + "tf_c.1dt");
+    lunchbox::saveBinary(tfFile, "tf.lbb");
+    lunchbox::saveAscii(tfFile, "tf.lba");
 
-    livre::TransferFunction1D tfFilea( "tf.lbb" );
-    BOOST_CHECK_EQUAL( tfFile, tfFilea );
+    livre::TransferFunction1D tfFilea("tf.lbb");
+    BOOST_CHECK_EQUAL(tfFile, tfFilea);
 
-    livre::TransferFunction1D tfFileb( "tf.lba" );
-    BOOST_CHECK_EQUAL( tfFile, tfFileb );
+    livre::TransferFunction1D tfFileb("tf.lba");
+    BOOST_CHECK_EQUAL(tfFile, tfFileb);
 }
 
-BOOST_AUTO_TEST_CASE( loadWrongTransferFunctionFile )
+BOOST_AUTO_TEST_CASE(loadWrongTransferFunctionFile)
 {
     livre::TransferFunction1D defaultTf;
-    livre::TransferFunction1D tfFile( tfDir + "inexistent_file.1dt" );
-    BOOST_CHECK_EQUAL_COLLECTIONS( defaultTf.getLut(),
-                                   defaultTf.getLut() + defaultTf.getLutSize(),
-                                   tfFile.getLut(),
-                                   tfFile.getLut() + tfFile.getLutSize( ));
+    livre::TransferFunction1D tfFile(tfDir + "inexistent_file.1dt");
+    BOOST_CHECK_EQUAL_COLLECTIONS(defaultTf.getLut(),
+                                  defaultTf.getLut() + defaultTf.getLutSize(),
+                                  tfFile.getLut(),
+                                  tfFile.getLut() + tfFile.getLutSize());
 }

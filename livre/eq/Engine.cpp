@@ -20,12 +20,11 @@
 
 #include "Engine.h"
 
-#include <livre/core/version.h>
 #include <livre/core/data/DataSource.h>
+#include <livre/core/version.h>
 
 #include <livre/lib/configuration/ApplicationParameters.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
-
 
 #include <eq/eq.h>
 #include <livre/eq/Channel.h>
@@ -42,23 +41,31 @@ namespace
 class NodeFactory : public eq::NodeFactory
 {
 public:
-    NodeFactory()
-    {}
+    NodeFactory() {}
+    virtual eq::Config* createConfig(eq::ServerPtr parent)
+    {
+        return new livre::Config(parent);
+    }
 
-    virtual eq::Config* createConfig( eq::ServerPtr parent )
-        { return new livre::Config( parent ); }
+    virtual eq::Node* createNode(eq::Config* parent)
+    {
+        return new livre::Node(parent);
+    }
 
-    virtual eq::Node* createNode( eq::Config* parent )
-        { return new livre::Node( parent ); }
+    virtual eq::Pipe* createPipe(eq::Node* parent)
+    {
+        return new livre::Pipe(parent);
+    }
 
-    virtual eq::Pipe* createPipe( eq::Node* parent )
-        { return new livre::Pipe( parent ); }
+    virtual eq::Window* createWindow(eq::Pipe* parent)
+    {
+        return new livre::Window(parent);
+    }
 
-    virtual eq::Window* createWindow( eq::Pipe* parent )
-        { return new livre::Window( parent ); }
-
-    virtual eq::Channel* createChannel( eq::Window* parent )
-        { return new livre::Channel( parent ); }
+    virtual eq::Channel* createChannel(eq::Window* parent)
+    {
+        return new livre::Channel(parent);
+    }
 };
 }
 
@@ -66,76 +73,79 @@ namespace livre
 {
 struct Engine::Impl
 {
-    Impl( int argc, char** argv )
+    Impl(int argc, char** argv)
     {
-        _initParams( argc, const_cast< const char** >( argv ));
+        _initParams(argc, const_cast<const char**>(argv));
 
-        livre::initErrors( );
+        livre::initErrors();
 
-        if( !eq::init( argc, argv, &nodeFactory ))
+        if (!eq::init(argc, argv, &nodeFactory))
         {
             eq::exit();
             livre::exitErrors();
-            LBTHROW( std::runtime_error( "Equalizer init failed" ));
+            LBTHROW(std::runtime_error("Equalizer init failed"));
         }
 
         DataSource::loadPlugins();
 
-        client = new livre::Client( argc, argv, _applicationParameters.isResident );
+        client =
+            new livre::Client(argc, argv, _applicationParameters.isResident);
         config = client->chooseConfig();
-        if( !config )
-            LBTHROW( std::runtime_error( "No matching config on server" ));
+        if (!config)
+            LBTHROW(std::runtime_error("No matching config on server"));
 
         // framedata setup gets volume URI from application params which is
         // needed in Node::configInit() to load volume
         FrameData& frameData = config->getFrameData();
-        frameData.setup( _applicationParameters, _rendererParameters );
+        frameData.setup(_applicationParameters, _rendererParameters);
 
-        if( !config->init( ))
+        if (!config->init())
         {
-            client->releaseConfig( config );
+            client->releaseConfig(config);
             config = nullptr;
-            LBTHROW( std::runtime_error( "Config init failed" ));
+            LBTHROW(std::runtime_error("Config init failed"));
         }
     }
 
     ~Impl()
     {
-        if( config )
+        if (config)
         {
             config->exit();
-            client->releaseConfig( config );
+            client->releaseConfig(config);
         }
 
         eq::exit();
         livre::exitErrors();
     }
 
-    void _initParams( const int argc, const char** argv )
+    void _initParams(const int argc, const char** argv)
     {
-        if( !_applicationParameters.initialize( argc, argv ) ||
-            !_rendererParameters.initialize( argc, argv ))
+        if (!_applicationParameters.initialize(argc, argv) ||
+            !_rendererParameters.initialize(argc, argv))
         {
-            LBTHROW( std::runtime_error( "Error parsing command line arguments" ));
+            LBTHROW(std::runtime_error("Error parsing command line arguments"));
         }
 
-        if( _applicationParameters.dataFileName.empty())
+        if (_applicationParameters.dataFileName.empty())
             _applicationParameters.dataFileName = "mem:///#4096,4096,4096,40";
     }
 
     NodeFactory nodeFactory;
-    lunchbox::RefPtr< livre::Client > client;
+    lunchbox::RefPtr<livre::Client> client;
     Config* config = nullptr;
     ApplicationParameters _applicationParameters;
     VolumeRendererParameters _rendererParameters;
 };
 
-Engine::Engine( int argc, char** argv )
-    : _impl( new Engine::Impl( argc, argv ))
-{}
+Engine::Engine(int argc, char** argv)
+    : _impl(new Engine::Impl(argc, argv))
+{
+}
 
 Engine::~Engine()
-{}
+{
+}
 
 std::string Engine::getHelp()
 {
@@ -145,8 +155,8 @@ std::string Engine::getHelp()
     ApplicationParameters applicationParameters;
 
     Configuration conf;
-    conf.addDescription( vrParameters.getConfiguration( ));
-    conf.addDescription( applicationParameters.getConfiguration( ));
+    conf.addDescription(vrParameters.getConfiguration());
+    conf.addDescription(applicationParameters.getConfiguration());
 
     std::stringstream os;
     os << conf;
@@ -160,65 +170,67 @@ std::string Engine::getVersion()
     return os.str();
 }
 
-void Engine::run( const int argc, char** argv )
+void Engine::run(const int argc, char** argv)
 {
-    _impl->config->initCommunicator( argc, argv );
+    _impl->config->initCommunicator(argc, argv);
 
     uint32_t maxFrames = _impl->_applicationParameters.maxFrames;
-    while( _impl->config->isRunning() && maxFrames-- )
+    while (_impl->config->isRunning() && maxFrames--)
     {
-        if( !_impl->config->frame()) // If not valid, reset maxFrames
+        if (!_impl->config->frame()) // If not valid, reset maxFrames
             maxFrames++;
 
-        if( _impl->client->getIdleFunction( ))
+        if (_impl->client->getIdleFunction())
             _impl->client->getIdleFunction()(); // order is important to latency
 
         // wait for an event requiring redraw
-        while( !_impl->config->needRedraw( ))
+        while (!_impl->config->needRedraw())
         {
             // execute non-critical pending commands
-            if( _impl->client->processCommands( ))
+            if (_impl->client->processCommands())
                 _impl->config->handleEvents(); // non-blocking
-            else  // no pending commands, block on user event
+            else // no pending commands, block on user event
             {
                 // Poll ZeroEq subscribers at least every 100 ms in handleEvents
-                const eq::EventICommand& event = _impl->config->getNextEvent( 100 );
-                if( event.isValid( ))
-                    _impl->config->handleEvent( event );
-                _impl->config->handleEvents(); // non-blocking
-                _impl->config->handleNetworkEvents(); //blocking
+                const eq::EventICommand& event =
+                    _impl->config->getNextEvent(100);
+                if (event.isValid())
+                    _impl->config->handleEvent(event);
+                _impl->config->handleEvents();        // non-blocking
+                _impl->config->handleNetworkEvents(); // blocking
             }
         }
-        _impl->config->handleEvents(); // process all pending events
-        _impl->config->handleNetworkEvents(); //blocking
+        _impl->config->handleEvents();        // process all pending events
+        _impl->config->handleNetworkEvents(); // blocking
     }
 }
 
-bool Engine::render( const eq::View::ScreenshotFunc& func )
+bool Engine::render(const eq::View::ScreenshotFunc& func)
 {
     auto layout = _impl->config->getActiveLayout();
     auto view = layout ? layout->getViews()[0] : nullptr;
-    if( view )
-        view->enableScreenshot( eq::Frame::Buffer::color, func );
+    if (view)
+        view->enableScreenshot(eq::Frame::Buffer::color, func);
 
     _impl->config->frame();
-    if( _impl->client->getIdleFunction( ))
+    if (_impl->client->getIdleFunction())
         _impl->client->getIdleFunction()(); // order is important to latency
     _impl->config->handleEvents();
 
-    if( view )
+    if (view)
         view->disableScreenshot();
 
     return _impl->config->needRedraw();
 }
 
-void Engine::resize( const Vector2ui& size )
+void Engine::resize(const Vector2ui& size)
 {
     _impl->config->finishAllFrames();
     auto layout = _impl->config->getActiveLayout();
-    if( layout )
-        layout->setPixelViewport( eq::PixelViewport{ 0, 0, int32_t(size.x()),
-                                                     int32_t(size.y( )) });;
+    if (layout)
+        layout->setPixelViewport(
+            eq::PixelViewport{0, 0, int32_t(size.x()), int32_t(size.y())});
+    ;
 }
 
 const Histogram& Engine::getHistogram() const
@@ -240,5 +252,4 @@ ApplicationParameters& Engine::getApplicationParameters()
 {
     return _impl->_applicationParameters;
 }
-
 }

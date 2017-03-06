@@ -18,16 +18,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #ifndef _AnimationController_h_
 #define _AnimationController_h_
 
-#include <livreGUI/types.h>
 #include <QWidget>
+#include <livreGUI/types.h>
 
 namespace livre
 {
-
 /**
  * AnimationController is the Widget for playing/pausing animations as well as
  * positionning animation to a specific frame
@@ -37,14 +35,12 @@ class AnimationController : public QWidget
     Q_OBJECT
 
 public:
-
     /**
      * @param controller The GUI connection to ZeroEQ world.
      * @param parentWgt Parent widget.
      */
-    AnimationController( Controller& controller,
-                         QWidget *parentWgt = 0 );
-    ~AnimationController( );
+    AnimationController(Controller& controller, QWidget* parentWgt = 0);
+    ~AnimationController();
 
 signals:
 
@@ -56,14 +52,12 @@ private Q_SLOTS:
     void _disconnect();
     void _onFrameChanged();
     void _togglePlayPause();
-    void _setFollow( int on );
+    void _setFollow(int on);
     void _onNewFrameReceived();
 
 private:
-
     struct Impl;
     Impl* _impl;
 };
-
 }
 #endif

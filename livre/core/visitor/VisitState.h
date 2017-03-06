@@ -27,7 +27,8 @@
 namespace livre
 {
 /**
- * The VisitState class is used to keep visit states through traversal. Not thread-safe.
+ * The VisitState class is used to keep visit states through traversal. Not
+ * thread-safe.
  */
 class VisitState
 {
@@ -37,39 +38,39 @@ public:
     /**
      * @return True, if children should be visited.
      */
-    LIVRECORE_API bool getVisitChild( ) const;
+    LIVRECORE_API bool getVisitChild() const;
 
     /**
      * @return True, if traversal should be broken.
      */
-    LIVRECORE_API bool getBreakTraversal( ) const;
+    LIVRECORE_API bool getBreakTraversal() const;
 
     /**
      * @return True, if neigbours should be visited.
      */
-    LIVRECORE_API bool getVisitNeighbours( ) const;
+    LIVRECORE_API bool getVisitNeighbours() const;
 
     /**
      * @param visitChild If true, informs the callee, not to visit children.
      */
-    LIVRECORE_API void setVisitChild( const bool visitChild );
+    LIVRECORE_API void setVisitChild(const bool visitChild);
 
     /**
      * @param breakVisitTraversal If true, traversal is broken.
      */
-    LIVRECORE_API void setBreakTraversal( const bool breakVisitTraversal );
+    LIVRECORE_API void setBreakTraversal(const bool breakVisitTraversal);
 
     /**
-     * @param visitNeighbours If false, neighbours won't be visited by the callee.
+     * @param visitNeighbours If false, neighbours won't be visited by the
+     * callee.
      */
-    LIVRECORE_API void setVisitNeighbours( const bool visitNeighbours );
+    LIVRECORE_API void setVisitNeighbours(const bool visitNeighbours);
 
 protected:
     bool visitChild_;
     bool breakVisitTraversal_;
     bool visitNeighbours_;
 };
-
 }
 
 #endif // _VisitState_h_

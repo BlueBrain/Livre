@@ -21,21 +21,20 @@
 #ifndef _VolumeRendererParameters_h_
 #define _VolumeRendererParameters_h_
 
+#include <co/distributable.h>
 #include <livre/core/configuration/Parameters.h>
 #include <livre/lib/api.h>
 #include <livre/lib/zerobuf/volumeRendererParameters.h>
-#include <co/distributable.h>
 
 namespace livre
 {
-
 /**
  * Enhance the ZeroBuf VolumeRendererParameters for Collage serialization and
  * initialization from config file and/or commandline parameters.
  */
 class VolumeRendererParameters
-        : public co::Distributable< v1::VolumeRendererParameters >,
-          public Parameters
+    : public co::Distributable<v1::VolumeRendererParameters>,
+      public Parameters
 {
 public:
     LIVRE_API VolumeRendererParameters();
@@ -43,7 +42,6 @@ public:
 protected:
     LIVRE_API void initialize_() final;
 };
-
 }
 
 #endif // _VolumeRendererParameters_h_

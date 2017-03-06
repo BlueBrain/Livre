@@ -21,24 +21,22 @@
 
 namespace livre
 {
-
-
-bool Parameters::initialize( const int32_t argc, const char **argv )
+bool Parameters::initialize(const int32_t argc, const char **argv)
 {
     try
     {
-        configuration_.parseCommandLine( argc, argv );
-        initialize_( );
+        configuration_.parseCommandLine(argc, argv);
+        initialize_();
         return true;
     }
-    catch( const boost::program_options::error& exception )
+    catch (const boost::program_options::error &exception)
     {
         LBINFO << "Error parsing : " << exception.what() << std::endl;
     }
 
     return false;
 }
-const std::string& Parameters::getParameterName() const
+const std::string &Parameters::getParameterName() const
 {
     return configGroupName_;
 }
@@ -48,13 +46,12 @@ const Configuration &Parameters::getConfiguration() const
     return configuration_;
 }
 
-Parameters::~Parameters( )
-{}
-
-Parameters::Parameters( const std::string &configGroupName )
-    : configGroupName_( configGroupName )
+Parameters::~Parameters()
 {
 }
 
-
+Parameters::Parameters(const std::string &configGroupName)
+    : configGroupName_(configGroupName)
+{
+}
 }

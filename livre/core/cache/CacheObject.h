@@ -26,14 +26,12 @@
 
 namespace livre
 {
-
 /**
  * The CacheObject class for cached objects that can be managed with \see Cache.
  */
 class CacheObject
 {
 public:
-
     LIVRECORE_API virtual ~CacheObject();
 
     /** @return The memory size of the object in bytes. */
@@ -43,22 +41,21 @@ public:
     LIVRECORE_API CacheId getId() const;
 
     /** @return On default returns true if cache ids are same */
-    virtual bool operator==( const CacheObject& cacheObject ) const;
+    virtual bool operator==(const CacheObject& cacheObject) const;
 
 protected:
-
     /**
      * Constructor
-     * The inheriting class should throw CacheLoadException if the object can not be constructed
+     * The inheriting class should throw CacheLoadException if the object can
+     * not be constructed
      */
-    LIVRECORE_API explicit CacheObject( const CacheId& cacheId = INVALID_CACHE_ID );
+    LIVRECORE_API explicit CacheObject(
+        const CacheId& cacheId = INVALID_CACHE_ID);
 
 private:
-
     struct Impl;
-    std::unique_ptr< Impl > _impl;
+    std::unique_ptr<Impl> _impl;
 };
-
 }
 
 #endif // _CacheObject_h_

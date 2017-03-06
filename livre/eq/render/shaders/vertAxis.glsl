@@ -18,10 +18,10 @@ uniform mat4 normalMatrix;
 
 void main()
 {
-    gl_Position = modelViewProjectionMatrix * vec4( vertexPosition, 1.0 );
-    normal = vec3( normalMatrix * vec4( normalize( vertexNormal ), 0.0 ));
-    normal2 = vec3( normalMatrix * vec4( normalize( vertexNormal2 ), 0.0 ));
-    eyePos = vec3( modelView * vec4( vertexPosition, 1.0 ));
+    gl_Position = modelViewProjectionMatrix * vec4(vertexPosition, 1.0);
+    normal = vec3(normalMatrix * vec4(normalize(vertexNormal), 0.0));
+    normal2 = vec3(normalMatrix * vec4(normalize(vertexNormal2), 0.0));
+    eyePos = vec3(modelView * vec4(vertexPosition, 1.0));
     color = vertexColor;
-    type =  vertexType;
+    type = vertexType;
 }

@@ -24,7 +24,6 @@
 
 namespace livre
 {
-
 /**
  * Is base class for implementing different scheduling
  * algorithms for Executable objects. i.e. The IO or
@@ -35,27 +34,24 @@ namespace livre
 class Executor
 {
 public:
-
     LIVRECORE_API virtual ~Executor() {}
-
     /**
-     * Schedules the executables for execution. The deriving class should implement a
-     * scheduling algorithm for the execution. ( i.e. there may be a work queue and
+     * Schedules the executables for execution. The deriving class should
+     * implement a
+     * scheduling algorithm for the execution. ( i.e. there may be a work queue
+     * and
      * executables are selected from the work queue according to their pre-post
      * conditions
      * @param executable to schedule
      */
-    virtual void schedule( ExecutablePtr executable ) = 0;
+    virtual void schedule(ExecutablePtr executable) = 0;
 
 protected:
-
     /**
      * Clears the executor ( i.e : Implementation can empty the work queue )
      */
     LIVRECORE_API virtual void clear() {}
-
 };
-
 }
 
 #endif // _Executor_h_

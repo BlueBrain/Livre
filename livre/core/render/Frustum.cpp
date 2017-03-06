@@ -21,57 +21,48 @@
 
 namespace livre
 {
-
 struct Frustum::Impl
 {
-    Impl( Frustum& frustum, const Matrix4f& modelViewMatrix,
-          const Matrix4f& projectionMatrix )
-        : _frustum( frustum )
-        , _mvMatrix( modelViewMatrix )
-        , _invMVMatrix( _mvMatrix.inverse( ))
-        , _projMatrix( projectionMatrix )
-        , _invProjMatrix( _projMatrix.inverse( ))
-        , _culler( projectionMatrix * modelViewMatrix )
+    Impl(Frustum& frustum, const Matrix4f& modelViewMatrix,
+         const Matrix4f& projectionMatrix)
+        : _frustum(frustum)
+        , _mvMatrix(modelViewMatrix)
+        , _invMVMatrix(_mvMatrix.inverse())
+        , _projMatrix(projectionMatrix)
+        , _invProjMatrix(_projMatrix.inverse())
+        , _culler(projectionMatrix * modelViewMatrix)
     {
         computeLimitsFromProjectionMatrix();
         _eye = _invMVMatrix.getTranslation();
 
-        const Vector4f eyeDir = _invMVMatrix.getColumn( 2 );
-        _dir[ 0 ] = eyeDir[ 0 ];
-        _dir[ 1 ] = eyeDir[ 1 ];
-        _dir[ 2 ] = eyeDir[ 2 ];
+        const Vector4f eyeDir = _invMVMatrix.getColumn(2);
+        _dir[0] = eyeDir[0];
+        _dir[1] = eyeDir[1];
+        _dir[2] = eyeDir[2];
     }
 
-    const Plane& getNearPlane() const
+    const Plane& getNearPlane() const { return _culler.getNearPlane(); }
+    bool isInFrustum(const Boxf& worldBox) const
     {
-        return _culler.getNearPlane();
-    }
-
-    bool isInFrustum( const Boxf &worldBox ) const
-    {
-        const vmml::Visibility vis = _culler.test( worldBox );
+        const vmml::Visibility vis = _culler.test(worldBox);
         return vis != vmml::VISIBILITY_NONE;
     }
 
-    Matrix4f getMVPMatrix() const
-    {
-        return _projMatrix * _mvMatrix;
-    }
-
+    Matrix4f getMVPMatrix() const { return _projMatrix * _mvMatrix; }
     Matrix4f getNormalMatrix() const
     {
-        return vmml::transpose( _mvMatrix.inverse( ));
+        return vmml::transpose(_mvMatrix.inverse());
     }
 
-    bool operator==( const Frustum::Impl& rhs ) const
+    bool operator==(const Frustum::Impl& rhs) const
     {
-        return _mvMatrix.equals( rhs._mvMatrix,
-                                 std::numeric_limits< float >::epsilon( ));
+        return _mvMatrix.equals(rhs._mvMatrix,
+                                std::numeric_limits<float>::epsilon());
     }
 
     void computeLimitsFromProjectionMatrix()
     {
-        *static_cast< Frustumf* >( &_frustum ) = Frustumf( _projMatrix );
+        *static_cast<Frustumf*>(&_frustum) = Frustumf(_projMatrix);
     }
 
     Frustum& _frustum;
@@ -84,22 +75,24 @@ struct Frustum::Impl
     FrustumCullerf _culler;
 };
 
-Frustum::Frustum( const Matrix4f& modelViewMatrix,
-                  const Matrix4f& projectionMatrix )
-    : _impl( new Frustum::Impl( *this, modelViewMatrix, projectionMatrix ))
-{}
+Frustum::Frustum(const Matrix4f& modelViewMatrix,
+                 const Matrix4f& projectionMatrix)
+    : _impl(new Frustum::Impl(*this, modelViewMatrix, projectionMatrix))
+{
+}
 
 Frustum::~Frustum()
-{}
+{
+}
 
 const Plane& Frustum::getNearPlane() const
 {
     return _impl->getNearPlane();
 }
 
-bool Frustum::isInFrustum( const Boxf& worldBox ) const
+bool Frustum::isInFrustum(const Boxf& worldBox) const
 {
-    return _impl->isInFrustum( worldBox );
+    return _impl->isInFrustum(worldBox);
 }
 
 const Matrix4f& Frustum::getMVMatrix() const
@@ -142,9 +135,8 @@ const Vector3f& Frustum::getViewDir() const
     return _impl->_dir;
 }
 
-bool Frustum::operator==( const Frustum& rhs ) const
+bool Frustum::operator==(const Frustum& rhs) const
 {
     return *_impl == *rhs._impl;
 }
-
 }

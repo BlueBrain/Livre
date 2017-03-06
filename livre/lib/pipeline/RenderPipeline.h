@@ -27,7 +27,6 @@
 
 namespace livre
 {
-
 /** The Caches struct */
 struct Caches
 {
@@ -53,9 +52,7 @@ struct RenderParams
  */
 class RenderPipeline
 {
-
 public:
-
     /**
      * Constructor
      * @param caches the data, texture and histogram cache
@@ -63,10 +60,8 @@ public:
      * @param texturePool the pool for textures
      * @param glContext the gl context that will be shared
      */
-    RenderPipeline( DataSource& dataSource,
-                    Caches& caches,
-                    TexturePool& texturePool,
-                    ConstGLContextPtr glContext );
+    RenderPipeline(DataSource& dataSource, Caches& caches,
+                   TexturePool& texturePool, ConstGLContextPtr glContext);
 
     ~RenderPipeline();
 
@@ -76,19 +71,17 @@ public:
      * @param redrawFilter executed on data update
      * @param sendHistogramFilter executed on histogram computation
      * @param renderer the rendering algorithm
-     * @param availability the number of available and not available nodes are written
+     * @param availability the number of available and not available nodes are
+     * written
      */
-    void render( const RenderParams& renderParams,
-                 PipeFilter redrawFilter,
-                 PipeFilter sendHistogramFilter,
-                 Renderer& renderer,
-                 NodeAvailability& avaibility ) const;
-private:
+    void render(const RenderParams& renderParams, PipeFilter redrawFilter,
+                PipeFilter sendHistogramFilter, Renderer& renderer,
+                NodeAvailability& avaibility) const;
 
+private:
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };
-
 }
 
 #endif

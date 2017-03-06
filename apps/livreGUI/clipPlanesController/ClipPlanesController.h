@@ -17,16 +17,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #ifndef _ClipPlanesController_h_
 #define _ClipPlanesController_h_
 
-#include <livreGUI/types.h>
 #include <QWidget>
+#include <livreGUI/types.h>
 
 namespace livre
 {
-
 /** A widget which shows and modifies the clip planes of Livre. */
 class ClipPlanesController : public QWidget
 {
@@ -37,8 +35,7 @@ public:
      * @param controller The GUI connection to ZeroEQ world.
      * @param parentWgt Parent widget.
      */
-    ClipPlanesController( Controller& controller,
-                          QWidget* parentWgt = nullptr );
+    ClipPlanesController(Controller& controller, QWidget* parentWgt = nullptr);
     virtual ~ClipPlanesController();
 
 signals:
@@ -47,9 +44,8 @@ signals:
 
 private:
     struct Impl;
-    std::unique_ptr< Impl > _impl;
+    std::unique_ptr<Impl> _impl;
 };
-
 }
 
 #endif

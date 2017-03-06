@@ -17,8 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/core/pipeline/Workers.h>
 #include <livre/core/pipeline/Executable.h>
+#include <livre/core/pipeline/Workers.h>
 #include <livre/core/render/GLContext.h>
 
 #include <lunchbox/mtQueue.h>
@@ -27,40 +27,37 @@
 
 namespace livre
 {
-
 struct Workers::Impl
 {
-    Impl( Workers& workers,
-          const size_t nThreads,
-          const ConstGLContextPtr& glContext )
-        : _workers( workers )
-        , _glContext( glContext )
+    Impl(Workers& workers, const size_t nThreads,
+         const ConstGLContextPtr& glContext)
+        : _workers(workers)
+        , _glContext(glContext)
     {
-        for( size_t i = 0; i < nThreads; ++i )
-            _threadGroup.create_thread( boost::bind( &Impl::execute,
-                                                     this ));
+        for (size_t i = 0; i < nThreads; ++i)
+            _threadGroup.create_thread(boost::bind(&Impl::execute, this));
     }
 
     void execute()
     {
         GLContextPtr context;
-        if( _glContext )
+        if (_glContext)
         {
             context = _glContext->clone();
-            context->share( *_glContext );
+            context->share(*_glContext);
             context->makeCurrent();
         }
 
-        while( true )
+        while (true)
         {
             ExecutablePtr exec = _workQueue.pop();
-            if( !exec )
+            if (!exec)
                 break;
 
             exec->execute();
         }
 
-        if( context )
+        if (context)
         {
             context->doneCurrent();
             context.reset();
@@ -69,47 +66,40 @@ struct Workers::Impl
 
     ~Impl()
     {
-        for( size_t i = 0; i < getSize(); ++i )
-            _workQueue.push( ExecutablePtr( ));
+        for (size_t i = 0; i < getSize(); ++i)
+            _workQueue.push(ExecutablePtr());
         _threadGroup.join_all();
         _glContext.reset();
     }
 
-
-    void submitWork( ExecutablePtr executable )
+    void submitWork(ExecutablePtr executable)
     {
-        _workQueue.pushFront( executable );
+        _workQueue.pushFront(executable);
     }
 
-    size_t getSize() const
-    {
-        return _threadGroup.size();
-    }
-
+    size_t getSize() const { return _threadGroup.size(); }
     Workers& _workers;
-    lunchbox::MTQueue< ExecutablePtr > _workQueue;
+    lunchbox::MTQueue<ExecutablePtr> _workQueue;
     boost::thread_group _threadGroup;
     ConstGLContextPtr _glContext;
 };
 
-Workers::Workers( const size_t nThreads,
-                  ConstGLContextPtr glContext )
-    : _impl( new Workers::Impl( *this,
-                                nThreads,
-                                glContext ))
-{}
+Workers::Workers(const size_t nThreads, ConstGLContextPtr glContext)
+    : _impl(new Workers::Impl(*this, nThreads, glContext))
+{
+}
 
 Workers::~Workers()
-{}
-
-void Workers::schedule( ExecutablePtr executable )
 {
-    _impl->submitWork( executable );
+}
+
+void Workers::schedule(ExecutablePtr executable)
+{
+    _impl->submitWork(executable);
 }
 
 size_t Workers::getSize() const
 {
     return _impl->getSize();
 }
-
 }

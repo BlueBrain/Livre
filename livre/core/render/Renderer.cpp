@@ -19,35 +19,30 @@
 
 #include "Renderer.h"
 
-#include <livre/core/render/Frustum.h>
-#include <livre/core/data/LODNode.h>
-#include <livre/core/data/DataSource.h>
 #include <eq/gl.h>
+#include <livre/core/data/DataSource.h>
+#include <livre/core/data/LODNode.h>
+#include <livre/core/render/Frustum.h>
 
 namespace livre
 {
-
 Renderer::~Renderer()
 {
 }
 
-
-void Renderer::render( const Frustum& frustum,
-                       const ClipPlanes& planes,
-                       const PixelViewport& view,
-                       const NodeIds& bricks,
-                       const uint32_t renderStages )
+void Renderer::render(const Frustum& frustum, const ClipPlanes& planes,
+                      const PixelViewport& view, const NodeIds& bricks,
+                      const uint32_t renderStages)
 {
-    const NodeIds& ordered = order( bricks, frustum );
+    const NodeIds& ordered = order(bricks, frustum);
 
-    if( renderStages & RENDER_BEGIN )
-        _onFrameStart( frustum, planes, view, ordered );
+    if (renderStages & RENDER_BEGIN)
+        _onFrameStart(frustum, planes, view, ordered);
 
-    if( renderStages & RENDER_FRAME )
-        _onFrameRender( frustum, planes, view, ordered );
+    if (renderStages & RENDER_FRAME)
+        _onFrameRender(frustum, planes, view, ordered);
 
-    if( renderStages & RENDER_END )
-        _onFrameEnd( frustum, planes, view, ordered );
+    if (renderStages & RENDER_END)
+        _onFrameEnd(frustum, planes, view, ordered);
 }
-
 }

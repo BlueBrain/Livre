@@ -29,7 +29,6 @@
 
 namespace livre
 {
-
 /**
  * A widget showing the color gradient, providing a curve to change the alpha
  * values and showing the histogram of the selected data range.
@@ -39,26 +38,25 @@ class AlphaWidget : public ControlPointsWidget
     Q_OBJECT
 
 public:
-    AlphaWidget( QWidget* parent );
+    AlphaWidget(QWidget* parent);
 
-    void setGradientStops( const QGradientStops& stops );
-    void setHistogram( const lexis::render::Histogram& histogram,
-                       bool isLogScale );
-    void setRange( const vmml::Vector2f& range );
+    void setGradientStops(const QGradientStops& stops);
+    void setHistogram(const lexis::render::Histogram& histogram,
+                      bool isLogScale);
+    void setRange(const vmml::Vector2f& range);
 
 signals:
-    void histIndexChanged( size_t index, double ratio );
+    void histIndexChanged(size_t index, double ratio);
 
 private:
-    QSize sizeHint() const final { return { 255, 255 }; }
-    void mouseMoveEvent( QMouseEvent* event ) final;
-    void leaveEvent( QEvent* event ) final;
-    void resizeEvent( QResizeEvent* ) final;
+    QSize sizeHint() const final { return {255, 255}; }
+    void mouseMoveEvent(QMouseEvent* event) final;
+    void leaveEvent(QEvent* event) final;
+    void resizeEvent(QResizeEvent*) final;
 
     lexis::render::Histogram _histogram;
-    bool _isLogScale { true };
-    QLinearGradient _gradient { 0, 0, 0, 0 };
-    vmml::Vector2f _range { 0, 1 };
+    bool _isLogScale{true};
+    QLinearGradient _gradient{0, 0, 0, 0};
+    vmml::Vector2f _range{0, 1};
 };
-
 }

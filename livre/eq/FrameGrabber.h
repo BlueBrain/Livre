@@ -26,33 +26,31 @@ typedef void* tjhandle;
 
 namespace livre
 {
-
 class FrameGrabber : public eq::ResultImageListener
 {
 public:
-
     FrameGrabber();
 
     ~FrameGrabber();
 
     /**
-     * Grabs the frame from the specified channel and posts a GRABBED_IMAGE application
+     * Grabs the frame from the specified channel and posts a GRABBED_IMAGE
+     * application
      * event containing the dimensions and the buffer of the image
-     * @return A pointer to the buffer containing the JPeg image or 0 if encoding failed.
+     * @return A pointer to the buffer containing the JPeg image or 0 if
+     * encoding failed.
      */
-    void notifyNewImage( eq::Channel& channel, const eq::Image& image ) override;
+    void notifyNewImage(eq::Channel& channel, const eq::Image& image) override;
 
 private:
-
     /**
      * Converts RGBA RAW image into jpeg
      * @return A pointer to the buffer containing the jpeg image
      */
-    uint8_t* _encodeJpeg( const uint32_t width, const uint32_t height,
-                          const uint8_t* rawData, unsigned long& jpSize );
+    uint8_t* _encodeJpeg(const uint32_t width, const uint32_t height,
+                         const uint8_t* rawData, unsigned long& jpSize);
     tjhandle _compressor;
 };
-
 }
 
 #endif // _FrameGrabber_h_

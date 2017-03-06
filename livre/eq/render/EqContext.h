@@ -25,7 +25,6 @@
 
 namespace livre
 {
-
 class Window;
 
 /**
@@ -35,16 +34,17 @@ class EqContext : public GLContext
 {
 public:
     /**
-     * @param window is the parent equalizer window that has the rendering context.
+     * @param window is the parent equalizer window that has the rendering
+     * context.
      */
-    EqContext( Window* const window );
+    EqContext(Window* const window);
 
     ~EqContext();
 
     /**
      * @copydoc GLContext::share
      */
-    void share( const GLContext& src ) final;
+    void share(const GLContext& src) final;
 
     /**
      * @copydoc GLContext::clone
@@ -62,12 +62,10 @@ public:
     virtual void doneCurrent() final;
 
 private:
-
     EqContext();
     Window* const _window;
     eq::SystemWindow* _systemWindow;
 };
-
 }
 
 #endif // _EqContext_h_

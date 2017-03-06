@@ -24,13 +24,12 @@
 
 #include <eq/window.h>
 
+#include <livre/core/types.h>
 #include <livre/eq/api.h>
 #include <livre/eq/types.h>
-#include <livre/core/types.h>
 
 namespace livre
 {
-
 /**
  * The Window class represents a window in the rendering system.
  */
@@ -38,7 +37,7 @@ class Window : public eq::Window
 {
 public:
     /** @param parent The pipe that owns the window. */
-    LIVREEQ_API Window( eq::Pipe* parent );
+    LIVREEQ_API Window(eq::Pipe* parent);
 
     /** @return The texture cache. */
     Cache& getTextureCache();
@@ -50,15 +49,13 @@ public:
     const RenderPipeline& getRenderPipeline() const;
 
 private:
-
-    bool configInit( const eq::uint128_t& initId ) final;
-    bool configInitGL( const eq::uint128_t& initId ) final;
+    bool configInit(const eq::uint128_t& initId) final;
+    bool configInitGL(const eq::uint128_t& initId) final;
     bool configExitGL() final;
 
     struct Impl;
-    std::unique_ptr< Impl > _impl;
+    std::unique_ptr<Impl> _impl;
 };
-
 }
 
 #endif //_Window_h_

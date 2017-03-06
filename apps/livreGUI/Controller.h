@@ -27,7 +27,6 @@
 
 namespace livre
 {
-
 /**
  * Provides continuous receive on the subscriber for registered events and posts
  * requests for registered events on the heartbeat event of Livre. This allows
@@ -44,7 +43,7 @@ public:
      * @return true if the publication of the object was successful, false
      *         otherwise
      */
-    bool publish( const ::zerobuf::Zerobuf& zerobuf );
+    bool publish(const ::zerobuf::Zerobuf& zerobuf);
 
     /**
      * Subscribe the given ZeroBuf object and publish a request for a first-time
@@ -53,7 +52,7 @@ public:
      * @param zerobuf the ZeroBuf object to subscribe for updates
      * @return true if the object was successfully subscribed
      */
-    bool subscribe( ::zerobuf::Zerobuf& zerobuf );
+    bool subscribe(::zerobuf::Zerobuf& zerobuf);
 
     /**
      * Unsubscribe the given ZeroBuf object from receival of updates.
@@ -61,12 +60,11 @@ public:
      * @param zerobuf the ZeroBuf object to unsubscribe
      * @return true if the objec twas successfully unsubscribed
      */
-    bool unsubscribe( const ::zerobuf::Zerobuf& zerobuf );
+    bool unsubscribe(const ::zerobuf::Zerobuf& zerobuf);
 
 private:
     class Impl;
-    std::unique_ptr< Impl > _impl;
+    std::unique_ptr<Impl> _impl;
 };
-
 }
-#endif  // _Controller_h_
+#endif // _Controller_h_

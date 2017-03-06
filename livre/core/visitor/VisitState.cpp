@@ -21,42 +21,40 @@
 
 namespace livre
 {
+VisitState::VisitState()
+    : visitChild_(true)
+    , breakVisitTraversal_(false)
+    , visitNeighbours_(true)
+{
+}
 
-VisitState::VisitState( )
-    : visitChild_( true )
-    , breakVisitTraversal_( false )
-    , visitNeighbours_( true )
-{}
-
-bool VisitState::getVisitChild( ) const
+bool VisitState::getVisitChild() const
 {
     return visitChild_;
 }
 
-bool VisitState::getBreakTraversal( ) const
+bool VisitState::getBreakTraversal() const
 {
     return breakVisitTraversal_;
 }
 
-bool VisitState::getVisitNeighbours( ) const
+bool VisitState::getVisitNeighbours() const
 {
     return visitNeighbours_;
 }
 
-void VisitState::setVisitChild( const bool visitChild )
+void VisitState::setVisitChild(const bool visitChild)
 {
     visitChild_ = visitChild;
 }
 
-void VisitState::setBreakTraversal( const bool breakVisitTraversal )
+void VisitState::setBreakTraversal(const bool breakVisitTraversal)
 {
     breakVisitTraversal_ = breakVisitTraversal;
 }
 
-void VisitState::setVisitNeighbours( const bool visitNeighbours )
+void VisitState::setVisitNeighbours(const bool visitNeighbours)
 {
     visitNeighbours_ = visitNeighbours;
 }
-
-
 }

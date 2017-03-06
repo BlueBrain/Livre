@@ -17,34 +17,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/core/render/GLContext.h>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/tss.hpp>
+#include <livre/core/render/GLContext.h>
 
 namespace livre
 {
-void dontCleanup( livre::GLContext* )
-{}
-
-boost::thread_specific_ptr< livre::GLContext > perThreadContext_( dontCleanup );
-
-GLContext::GLContext( const GLEWContext* glewContext )
-    : _glewContext( glewContext )
+void dontCleanup(livre::GLContext*)
 {
-    perThreadContext_.reset( this );
+}
+
+boost::thread_specific_ptr<livre::GLContext> perThreadContext_(dontCleanup);
+
+GLContext::GLContext(const GLEWContext* glewContext)
+    : _glewContext(glewContext)
+{
+    perThreadContext_.reset(this);
 }
 
 GLContext::~GLContext()
-{}
+{
+}
 
 void GLContext::makeCurrent()
 {
-    perThreadContext_.reset( this );
+    perThreadContext_.reset(this);
 }
 
 void GLContext::doneCurrent()
 {
-     perThreadContext_.reset( 0 );
+    perThreadContext_.reset(0);
 }
 
 const GLContext* GLContext::getCurrent()
@@ -56,5 +58,4 @@ const GLEWContext* GLContext::glewGetContext() const
 {
     return _glewContext;
 }
-
 }

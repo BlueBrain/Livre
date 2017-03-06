@@ -17,16 +17,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #include <livre/core/util/ThreadClock.h>
 
 namespace livre
 {
-
-lunchbox::Clock& ThreadClock::getClock( )
+lunchbox::Clock& ThreadClock::getClock()
 {
     ThreadClock* threadClock = _perThreadClock_.get();
-    if( !_perThreadClock_ )
+    if (!_perThreadClock_)
     {
         threadClock = new ThreadClock();
         _perThreadClock_ = threadClock;
@@ -34,5 +32,4 @@ lunchbox::Clock& ThreadClock::getClock( )
 
     return threadClock->clock_;
 }
-
 }

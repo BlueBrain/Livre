@@ -23,11 +23,13 @@
 
 #include <lexis/render/Histogram.h>
 
-namespace Ui { class RangeWidget; }
+namespace Ui
+{
+class RangeWidget;
+}
 
 namespace livre
 {
-
 /**
  * A widget showing the histogram of the entire data range and providing a range
  * selector to 'zoom' in the data range.
@@ -37,14 +39,16 @@ class RangeWidget : public QWidget
     Q_OBJECT
 
 public:
-    RangeWidget( QWidget* parent );
+    RangeWidget(QWidget* parent);
     ~RangeWidget();
 
-    Q_PROPERTY(qreal rangeX READ getRangeX WRITE setRangeX NOTIFY rangeXChanged);
-    Q_PROPERTY(qreal rangeY READ getRangeY WRITE setRangeY NOTIFY rangeYChanged);
+    Q_PROPERTY(
+        qreal rangeX READ getRangeX WRITE setRangeX NOTIFY rangeXChanged);
+    Q_PROPERTY(
+        qreal rangeY READ getRangeY WRITE setRangeY NOTIFY rangeYChanged);
 
-    void setHistogram( const lexis::render::Histogram& histogram,
-                       bool isLogScale );
+    void setHistogram(const lexis::render::Histogram& histogram,
+                      bool isLogScale);
 
     qreal getRangeX() const;
     qreal getRangeY() const;
@@ -52,8 +56,8 @@ public:
     vmml::Vector2d fromNormalizedRange() const;
 
 signals:
-    void rangeChanged( vmml::Vector2f range );
-    void histIndexChanged( size_t index, double ratio );
+    void rangeChanged(vmml::Vector2f range);
+    void histIndexChanged(size_t index, double ratio);
     void rangeXChanged(qreal);
     void rangeYChanged(qreal);
 
@@ -62,17 +66,15 @@ private slots:
     void setRangeY(qreal);
 
 private:
-    bool eventFilter( QObject* watched, QEvent* event ) final;
-    QSize sizeHint() const final { return { 255, 255 }; }
-
+    bool eventFilter(QObject* watched, QEvent* event) final;
+    QSize sizeHint() const final { return {255, 255}; }
     Ui::RangeWidget* _ui;
     lexis::render::Histogram _histogram;
-    bool _isLogScale { true };
-    qreal _rangeX {0};
-    qreal _rangeY {1};
+    bool _isLogScale{true};
+    qreal _rangeX{0};
+    qreal _rangeY{1};
 
-    qreal _convertFromNormalizedRange( qreal value ) const;
-    qreal _convertToNormalizedRange( qreal value ) const;
+    qreal _convertFromNormalizedRange(qreal value) const;
+    qreal _convertToNormalizedRange(qreal value) const;
 };
-
 }

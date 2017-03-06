@@ -20,15 +20,15 @@
 
 #include <livre/core/pipeline/SimpleExecutor.h>
 
-#include <livre/core/pipeline/Filter.h>
-#include <livre/core/pipeline/Workers.h>
 #include <livre/core/pipeline/Executable.h>
+#include <livre/core/pipeline/Filter.h>
 #include <livre/core/pipeline/FutureMap.h>
 #include <livre/core/pipeline/FuturePromise.h>
 #include <livre/core/pipeline/PipeFilter.h>
+#include <livre/core/pipeline/Workers.h>
 
-#include <livre/core/data/NodeId.h>
 #include <livre/core/data/LODNode.h>
+#include <livre/core/data/NodeId.h>
 #include <livre/core/render/GLContext.h>
 
 #include <lunchbox/mtQueue.h>
@@ -40,75 +40,75 @@
 
 namespace livre
 {
-
-bool operator<( const Future& future1, const Future& future2 )
+bool operator<(const Future& future1, const Future& future2)
 {
     return future1.getId() < future2.getId();
 }
 
 struct SimpleExecutor::Impl
 {
-
-    Impl( const size_t threadCount, ConstGLContextPtr glContext )
-        : _workers( threadCount, glContext )
-        , _unlockPromise( DataInfo( "LoopUnlock", getType< bool >( )))
-        , _workThread( boost::thread( boost::bind( &Impl::schedule, this )))
-    {}
+    Impl(const size_t threadCount, ConstGLContextPtr glContext)
+        : _workers(threadCount, glContext)
+        , _unlockPromise(DataInfo("LoopUnlock", getType<bool>()))
+        , _workThread(boost::thread(boost::bind(&Impl::schedule, this)))
+    {
+    }
 
     ~Impl()
     {
         _mtWorkQueue.clear();
-        _mtWorkQueue.push( 0 );
+        _mtWorkQueue.push(0);
         {
-            ScopedLock lock( _promiseReset );
-             _unlockPromise.set( true );
+            ScopedLock lock(_promiseReset);
+            _unlockPromise.set(true);
         }
         _workThread.join();
     }
 
     void schedule()
     {
-        std::set< Future > inputConditions;
-        std::list< ExecutablePtr > executables;
-        while( true )
+        std::set<Future> inputConditions;
+        std::list<ExecutablePtr> executables;
+        while (true)
         {
-            Futures futures = { Future( _unlockPromise ) };
-            futures.insert( futures.end(),
-                            inputConditions.begin(), inputConditions.end( ));
-            waitForAny( futures );
+            Futures futures = {Future(_unlockPromise)};
+            futures.insert(futures.end(), inputConditions.begin(),
+                           inputConditions.end());
+            waitForAny(futures);
             {
-                ScopedLock lock( _promiseReset );
-                if( _unlockPromise.getFuture().isReady( ))
+                ScopedLock lock(_promiseReset);
+                if (_unlockPromise.getFuture().isReady())
                 {
-                    while( !_mtWorkQueue.empty( ))
+                    while (!_mtWorkQueue.empty())
                     {
                         ExecutablePtr exec = _mtWorkQueue.pop();
                         // In destruction tine "0" is pushed to the queue
                         // and no further executable is scheduled
-                        if( !exec )
+                        if (!exec)
                             return;
 
-                        executables.push_back( exec );
+                        executables.push_back(exec);
                         const Futures& preConds = exec->getPreconditions();
-                        inputConditions.insert( preConds.begin(), preConds.end( ));
+                        inputConditions.insert(preConds.begin(),
+                                               preConds.end());
                     }
 
                     _unlockPromise.reset();
                 }
             }
 
-            std::list< ExecutablePtr >::iterator it = executables.begin();
-            while( it != executables.end( ))
+            std::list<ExecutablePtr>::iterator it = executables.begin();
+            while (it != executables.end())
             {
                 ExecutablePtr executable = *it;
                 const Futures& preConds = executable->getPreconditions();
-                const FutureMap futureMap( preConds );
-                if( futureMap.isReady( ))
+                const FutureMap futureMap(preConds);
+                if (futureMap.isReady())
                 {
-                    _workers.schedule( executable );
-                    it = executables.erase( it );
-                    for( const auto& future: futureMap.getFutures( ))
-                        inputConditions.erase( future );
+                    _workers.schedule(executable);
+                    it = executables.erase(it);
+                    for (const auto& future : futureMap.getFutures())
+                        inputConditions.erase(future);
                 }
                 else
                     ++it;
@@ -116,43 +116,40 @@ struct SimpleExecutor::Impl
         }
     }
 
-    void clear()
+    void clear() { _mtWorkQueue.clear(); }
+    void schedule(ExecutablePtr exec)
     {
-        _mtWorkQueue.clear();
-    }
-
-    void schedule( ExecutablePtr exec )
-    {
-        ScopedLock lock( _promiseReset );
+        ScopedLock lock(_promiseReset);
         const bool wasEmpty = _mtWorkQueue.empty();
-        _mtWorkQueue.pushFront( exec );
-        if( wasEmpty )
-            _unlockPromise.set( true );
+        _mtWorkQueue.pushFront(exec);
+        if (wasEmpty)
+            _unlockPromise.set(true);
     }
 
-    lunchbox::MTQueue< ExecutablePtr > _mtWorkQueue;
+    lunchbox::MTQueue<ExecutablePtr> _mtWorkQueue;
     Workers _workers;
     Promise _unlockPromise;
     boost::mutex _promiseReset;
     boost::thread _workThread;
 };
 
-SimpleExecutor::SimpleExecutor( const size_t threadCount, ConstGLContextPtr glContext )
-    : _impl( new Impl( threadCount, glContext ))
+SimpleExecutor::SimpleExecutor(const size_t threadCount,
+                               ConstGLContextPtr glContext)
+    : _impl(new Impl(threadCount, glContext))
 {
 }
 
-SimpleExecutor::~SimpleExecutor( )
-{}
+SimpleExecutor::~SimpleExecutor()
+{
+}
 
 void SimpleExecutor::clear()
 {
     _impl->clear();
 }
 
-void SimpleExecutor::schedule( ExecutablePtr executable )
+void SimpleExecutor::schedule(ExecutablePtr executable)
 {
-    _impl->schedule( executable );
+    _impl->schedule(executable);
 }
-
 }

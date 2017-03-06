@@ -20,31 +20,30 @@
 #ifndef _TextureObject_h_
 #define _TextureObject_h_
 
+#include <livre/core/cache/CacheObject.h>
 #include <livre/lib/api.h>
 #include <livre/lib/types.h>
-#include <livre/core/cache/CacheObject.h>
 
 namespace livre
 {
-
 /**
- * The TextureObject class holds the informarmation for the data which is on the GPU.
+ * The TextureObject class holds the informarmation for the data which is on the
+ * GPU.
   */
 class TextureObject : public CacheObject
 {
 public:
-
     /**
      * Constructor
      * @param cacheId is the unique identifier
      * @param dataCache source for the raw data
      * @param dataSource provides information about spatial structure of texture
-     * @throws CacheLoadException when the data cache does not have the data for cache id
+     * @throws CacheLoadException when the data cache does not have the data for
+     * cache id
      */
-    LIVRE_API TextureObject( const CacheId& cacheId,
-                             const Cache& dataCache,
-                             const DataSource& dataSource,
-                             TexturePool& texturePool );
+    LIVRE_API TextureObject(const CacheId& cacheId, const Cache& dataCache,
+                            const DataSource& dataSource,
+                            TexturePool& texturePool);
 
     LIVRE_API virtual ~TextureObject();
 
@@ -55,11 +54,9 @@ public:
     LIVRE_API const TextureState& getTextureState() const;
 
 private:
-
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };
-
 }
 
 #endif // _TextureObject_h_

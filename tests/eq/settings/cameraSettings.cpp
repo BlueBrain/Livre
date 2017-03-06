@@ -26,119 +26,117 @@
 
 namespace ut = boost::unit_test;
 
-BOOST_AUTO_TEST_CASE( defaultCameraSettings )
+BOOST_AUTO_TEST_CASE(defaultCameraSettings)
 {
     livre::CameraSettings cameraSettings;
 
     livre::Matrix4f identity;
 
-    for( int i = 0; i < 16; ++i )
+    for (int i = 0; i < 16; ++i)
     {
-        BOOST_CHECK_CLOSE( cameraSettings.getModelViewMatrix().data()[i], identity.data()[i],
-                           TOLERANCE );
+        BOOST_CHECK_CLOSE(cameraSettings.getModelViewMatrix().data()[i],
+                          identity.data()[i], TOLERANCE);
     }
 }
 
-BOOST_AUTO_TEST_CASE( cameraSettingsSpinModel )
+BOOST_AUTO_TEST_CASE(cameraSettingsSpinModel)
 {
     livre::CameraSettings cameraSettings;
     const float deltaX = 20.0f;
     const float deltaY = 20.0f;
-    float correctMatrix[16] = { 0.408082f, 0.0f, 0.912945f, 0.0f,
-                                0.833469f, 0.408082f, -0.372557f, 0.0f,
-                                -0.372557f, 0.912945f, 0.166531f, 0.0f,
-                                0.0f, 0.0f, 0.0f, 1.0f };
+    float correctMatrix[16] = {0.408082f,  0.0f,      0.912945f,  0.0f,
+                               0.833469f,  0.408082f, -0.372557f, 0.0f,
+                               -0.372557f, 0.912945f, 0.166531f,  0.0f,
+                               0.0f,       0.0f,      0.0f,       1.0f};
 
-    cameraSettings.spinModel( deltaX, deltaY );
+    cameraSettings.spinModel(deltaX, deltaY);
 
-    for( int i = 0; i < 16; ++i )
+    for (int i = 0; i < 16; ++i)
     {
-        BOOST_CHECK_CLOSE( cameraSettings.getModelViewMatrix().data()[i], correctMatrix[i],
-                           TOLERANCE );
+        BOOST_CHECK_CLOSE(cameraSettings.getModelViewMatrix().data()[i],
+                          correctMatrix[i], TOLERANCE);
     }
 }
 
-BOOST_AUTO_TEST_CASE( cameraSettingsMoveCamera )
+BOOST_AUTO_TEST_CASE(cameraSettingsMoveCamera)
 {
     livre::CameraSettings cameraSettings;
     const float deltaX = 20.0f;
     const float deltaY = 20.0f;
     const float deltaZ = 20.0f;
-    float correctMatrix[16] = { 1.0f, 0.0f, 0.0f, 0.0f,
-                                0.0f, 1.0f, 0.0f, 0.0f,
-                                0.0f, 0.0f, 1.0f, 0.0f,
-                                20.0f, 20.0f, 20.0f, 1.0f };
+    float correctMatrix[16] = {1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 1.0f,
+                               0.0f,  0.0f,  0.0f,  0.0f, 1.0f, 0.0f,
+                               20.0f, 20.0f, 20.0f, 1.0f};
 
-    cameraSettings.moveCamera( deltaX, deltaY, deltaZ );
+    cameraSettings.moveCamera(deltaX, deltaY, deltaZ);
 
-    for( int i = 0; i < 16; ++i )
+    for (int i = 0; i < 16; ++i)
     {
-        BOOST_CHECK_CLOSE( cameraSettings.getModelViewMatrix().data()[i], correctMatrix[i],
-                           TOLERANCE );
+        BOOST_CHECK_CLOSE(cameraSettings.getModelViewMatrix().data()[i],
+                          correctMatrix[i], TOLERANCE);
     }
 }
 
-BOOST_AUTO_TEST_CASE( cameraSettingsSetCameraPosition )
+BOOST_AUTO_TEST_CASE(cameraSettingsSetCameraPosition)
 {
     livre::CameraSettings cameraSettings;
-    const livre::Vector3f pos( 20.0f, 20.0f, 20.0f);
+    const livre::Vector3f pos(20.0f, 20.0f, 20.0f);
 
-    float correctMatrix[16] = { 1.0f, 0.0f, 0.0f, 0.0f,
-                                0.0f, 1.0f, 0.0f, 0.0f,
-                                0.0f, 0.0f, 1.0f, 0.0f,
-                                20.0f, 20.0f, 20.0f, 1.0f };
+    float correctMatrix[16] = {1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 1.0f,
+                               0.0f,  0.0f,  0.0f,  0.0f, 1.0f, 0.0f,
+                               20.0f, 20.0f, 20.0f, 1.0f};
 
-    cameraSettings.setCameraPosition( pos );
+    cameraSettings.setCameraPosition(pos);
 
-    for( int i = 0; i < 16; ++i )
+    for (int i = 0; i < 16; ++i)
     {
-        BOOST_CHECK_CLOSE( cameraSettings.getModelViewMatrix().data()[i], correctMatrix[i],
-                           TOLERANCE );
+        BOOST_CHECK_CLOSE(cameraSettings.getModelViewMatrix().data()[i],
+                          correctMatrix[i], TOLERANCE);
     }
 }
 
-BOOST_AUTO_TEST_CASE( cameraSettingsSetCameraLookat )
+BOOST_AUTO_TEST_CASE(cameraSettingsSetCameraLookat)
 {
-    //The default constructor puts camera at the origin.
+    // The default constructor puts camera at the origin.
     livre::CameraSettings cameraSettings;
-    const livre::Vector3f lookat( 20.0f, 20.0f, 20.0f);
+    const livre::Vector3f lookat(20.0f, 20.0f, 20.0f);
 
-    float correctMatrix[16] = { -0.707107f, -0.408248f, -0.57735f, 0.0f,
-                                0.0f, 0.816496f, -0.57735f, 0.0f,
-                                0.707107f, -0.408248f, -0.57735f, 0.0f,
-                                0.0f, 0.0f, 0.0f, 1.0f };
+    float correctMatrix[16] = {-0.707107f, -0.408248f, -0.57735f, 0.0f,
+                               0.0f,       0.816496f,  -0.57735f, 0.0f,
+                               0.707107f,  -0.408248f, -0.57735f, 0.0f,
+                               0.0f,       0.0f,       0.0f,      1.0f};
 
-    cameraSettings.setCameraLookAt( lookat );
+    cameraSettings.setCameraLookAt(lookat);
 
-    for( int i = 0; i < 16; ++i )
+    for (int i = 0; i < 16; ++i)
     {
-        BOOST_CHECK_CLOSE( cameraSettings.getModelViewMatrix().data()[i], correctMatrix[i],
-                           TOLERANCE );
+        BOOST_CHECK_CLOSE(cameraSettings.getModelViewMatrix().data()[i],
+                          correctMatrix[i], TOLERANCE);
     }
 }
 
-BOOST_AUTO_TEST_CASE( cameraSettingsEverything )
+BOOST_AUTO_TEST_CASE(cameraSettingsEverything)
 {
     livre::CameraSettings cameraSettings;
-    const livre::Vector3f lookat( 13.52f, 123.53f, 21.12f);
-    const livre::Vector3f pos( 0.5f, 1.17f, 6.78f );
+    const livre::Vector3f lookat(13.52f, 123.53f, 21.12f);
+    const livre::Vector3f pos(0.5f, 1.17f, 6.78f);
     const float deltaX = 13.54f;
     const float deltaY = 21.49f;
     const float deltaZ = 33.25f;
 
-    float correctMatrix[16] = { 0.413936f, -0.460246f, -0.785385f, 0.0f,
-                                0.328941f, -0.728848f, 0.600482f, 0.0f,
-                                -0.848796f, -0.506907f, -0.150303f, 0.0f,
-                                9.3526f, 26.597f, 35.243f, 1.0f };
+    float correctMatrix[16] = {0.413936f,  -0.460246f, -0.785385f, 0.0f,
+                               0.328941f,  -0.728848f, 0.600482f,  0.0f,
+                               -0.848796f, -0.506907f, -0.150303f, 0.0f,
+                               9.3526f,    26.597f,    35.243f,    1.0f};
 
-    cameraSettings.setCameraPosition( pos );
-    cameraSettings.setCameraLookAt( lookat );
-    cameraSettings.spinModel( deltaX, deltaY );
-    cameraSettings.moveCamera( deltaX, deltaY, deltaZ );
+    cameraSettings.setCameraPosition(pos);
+    cameraSettings.setCameraLookAt(lookat);
+    cameraSettings.spinModel(deltaX, deltaY);
+    cameraSettings.moveCamera(deltaX, deltaY, deltaZ);
 
-    for( int i = 0; i < 16; ++i )
+    for (int i = 0; i < 16; ++i)
     {
-        BOOST_CHECK_CLOSE( cameraSettings.getModelViewMatrix().data()[i], correctMatrix[i],
-                           TOLERANCE );
+        BOOST_CHECK_CLOSE(cameraSettings.getModelViewMatrix().data()[i],
+                          correctMatrix[i], TOLERANCE);
     }
 }

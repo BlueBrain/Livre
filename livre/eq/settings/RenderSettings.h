@@ -29,11 +29,9 @@
 
 namespace livre
 {
-
 class RenderSettings
 {
 public:
-
     /**
      * @brief RenderSettings constructor.
      */
@@ -43,7 +41,7 @@ public:
      * @brief setTransferFunction Sets the transfer function.
      * @param tf Transfer function.
      */
-    void setTransferFunction( const TransferFunction1D& tf );
+    void setTransferFunction(const TransferFunction1D& tf);
 
     /**
      * @brief resetTransferFunction Resets the transfer function.
@@ -54,28 +52,34 @@ public:
      * @return Returns the transfer function.
      */
     TransferFunction1D& getTransferFunction()
-        { _transferFunction.notifyChanged(); return _transferFunction; }
+    {
+        _transferFunction.notifyChanged();
+        return _transferFunction;
+    }
     const TransferFunction1D& getTransferFunction() const
-        { return _transferFunction; }
+    {
+        return _transferFunction;
+    }
 
     /**
      * @brief Sets the clip planes.
      * @param clipPlanes the clip planes
      */
-    void setClipPlanes( const ClipPlanes& clipPlanes );
+    void setClipPlanes(const ClipPlanes& clipPlanes);
 
     /**
      * @return Returns the clip planes.
      */
     ClipPlanes& getClipPlanes()
-        { _clipPlanes.notifyChanged(); return _clipPlanes; }
-    const ClipPlanes& getClipPlanes( ) const { return _clipPlanes; }
-
+    {
+        _clipPlanes.notifyChanged();
+        return _clipPlanes;
+    }
+    const ClipPlanes& getClipPlanes() const { return _clipPlanes; }
 private:
     TransferFunction1D _transferFunction;
     ClipPlanes _clipPlanes;
 };
-
 }
 
 #endif // _RenderInfo_h_

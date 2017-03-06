@@ -24,7 +24,6 @@
 
 namespace livre
 {
-
 /**
  * A widget showing the channel's color gradient to black and providing a curve
  * to change the channel's color curve.
@@ -32,11 +31,10 @@ namespace livre
 class ColorWidget : public ControlPointsWidget
 {
 public:
-    ColorWidget( QWidget* parent, Channel channel );
+    ColorWidget(QWidget* parent, Channel channel);
 
 private:
-    QSize sizeHint() const final { return { 255, 255 }; }
-    void resizeEvent( QResizeEvent* ) final;
+    QSize sizeHint() const final { return {255, 255}; }
+    void resizeEvent(QResizeEvent*) final;
 };
-
 }

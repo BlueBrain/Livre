@@ -20,13 +20,13 @@
 
 #include <livre/eq/EventHandler.h>
 
+#include <livre/core/data/VolumeInformation.h>
 #include <livre/eq/Config.h>
 #include <livre/eq/Event.h>
 #include <livre/eq/FrameData.h>
 #include <livre/eq/serialization.h>
 #include <livre/eq/settings/CameraSettings.h>
 #include <livre/eq/settings/FrameSettings.h>
-#include <livre/core/data/VolumeInformation.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 
 namespace livre
@@ -40,16 +40,17 @@ const float ADVANCE_SPEED = 0.05f;
 class ViewHistogram
 {
 public:
-    ViewHistogram( const Histogram& histogram_, const float area_,
-                   const uint32_t id_ )
-        : histogram( histogram_ )
-        , area( area_ )
-        , id( id_ )
-    {}
-
-    ViewHistogram& operator+=( const ViewHistogram& hist )
+    ViewHistogram(const Histogram& histogram_, const float area_,
+                  const uint32_t id_)
+        : histogram(histogram_)
+        , area(area_)
+        , id(id_)
     {
-        if( this == &hist )
+    }
+
+    ViewHistogram& operator+=(const ViewHistogram& hist)
+    {
+        if (this == &hist)
             return *this;
 
         histogram += hist.histogram;
@@ -60,7 +61,7 @@ public:
     bool isComplete() const
     {
         const float eps = 0.0001f;
-        return std::abs( 1.0f - area ) <= eps;
+        return std::abs(1.0f - area) <= eps;
     }
 
     Histogram histogram;
@@ -68,77 +69,79 @@ public:
     uint32_t id;
 };
 
-typedef std::deque< ViewHistogram > ViewHistogramQueue;
+typedef std::deque<ViewHistogram> ViewHistogramQueue;
 }
 
-template< class C > class EventHandler< C >::Impl
+template <class C>
+class EventHandler<C>::Impl
 {
 public:
-    Impl( Config& c )
-        : config( c )
-        , volumeBBox( Boxf::makeUnitBox( ))
-    {}
+    Impl(Config& c)
+        : config(c)
+        , volumeBBox(Boxf::makeUnitBox())
+    {
+    }
 
-    void gatherHistogram( const Histogram& histogram, const float area,
-                          const uint32_t currentId )
+    void gatherHistogram(const Histogram& histogram, const float area,
+                         const uint32_t currentId)
     {
         // If we get a very old frame skip it
-        if( !histogramQueue.empty() && currentId < histogramQueue.back().id )
+        if (!histogramQueue.empty() && currentId < histogramQueue.back().id)
             return;
 
-        const ViewHistogram viewHistogram( histogram, area, currentId );
-        for( auto it = histogramQueue.begin(); it != histogramQueue.end(); )
+        const ViewHistogram viewHistogram(histogram, area, currentId);
+        for (auto it = histogramQueue.begin(); it != histogramQueue.end();)
         {
             auto& data = *it;
             bool dataMerged = false;
 
-            if( currentId == data.id )
+            if (currentId == data.id)
             {
                 dataMerged = true;
                 data += viewHistogram;
             }
-            else if( currentId > data.id )
+            else if (currentId > data.id)
             {
                 dataMerged = true;
-                it = histogramQueue.emplace( it, viewHistogram );
+                it = histogramQueue.emplace(it, viewHistogram);
             }
 
-            if( data.isComplete( )) // Send histogram & remove all old ones
+            if (data.isComplete()) // Send histogram & remove all old ones
             {
-                if( config.getHistogram() != data.histogram )
+                if (config.getHistogram() != data.histogram)
                 {
-                    config.setHistogram( data.histogram );
+                    config.setHistogram(data.histogram);
 #ifdef LIVRE_USE_ZEROEQ
-                    config.publish( data.histogram );
+                    config.publish(data.histogram);
 #endif
                 }
-                histogramQueue.erase( it, histogramQueue.end( ));
+                histogramQueue.erase(it, histogramQueue.end());
                 return;
             }
 
-            if( dataMerged )
+            if (dataMerged)
                 break;
             ++it;
         }
 
-        if( histogramQueue.empty() && !viewHistogram.isComplete( ))
+        if (histogramQueue.empty() && !viewHistogram.isComplete())
         {
-            histogramQueue.push_back( viewHistogram );
+            histogramQueue.push_back(viewHistogram);
             return;
         }
 
-        if( viewHistogram.isComplete( ))
+        if (viewHistogram.isComplete())
         {
-            if( config.getHistogram() == viewHistogram.histogram )
+            if (config.getHistogram() == viewHistogram.histogram)
                 return;
-            config.setHistogram( viewHistogram.histogram );
+            config.setHistogram(viewHistogram.histogram);
 #ifdef LIVRE_USE_ZEROEQ
-            config.publish( viewHistogram.histogram );
+            config.publish(viewHistogram.histogram);
 #endif
             return;
         }
 
-        if( histogramQueue.size() > config.getLatency() + 1 )
+        if (histogramQueue.size() > config.getLatency() + 1)
             histogramQueue.pop_back();
     }
 
@@ -147,41 +150,45 @@ public:
     ViewHistogramQueue histogramQueue;
 };
 
-template< class C > template< class... ARGS >
-EventHandler< C >::EventHandler( Config& config, ARGS... args )
-    : C( args... )
-    , _impl( new Impl( config ))
-{}
-
-template< class C > EventHandler< C >::~EventHandler()
-{}
-
-template< class C >
-bool EventHandler< C >::handleEvent( const eq::EventType type,
-                                     const eq::Event& event )
+template <class C>
+template <class... ARGS>
+EventHandler<C>::EventHandler(Config& config, ARGS... args)
+    : C(args...)
+    , _impl(new Impl(config))
 {
-    switch( type )
+}
+
+template <class C>
+EventHandler<C>::~EventHandler()
+{
+}
+
+template <class C>
+bool EventHandler<C>::handleEvent(const eq::EventType type,
+                                  const eq::Event& event)
+{
+    switch (type)
     {
     case eq::EVENT_WINDOW_EXPOSE:
     case eq::EVENT_EXIT:
         _impl->config.postRedraw();
         return true;
     default:
-        return eq::Config::handleEvent( type, event );
+        return eq::Config::handleEvent(type, event);
     }
 }
 
-template< class C >
-bool EventHandler< C >::handleEvent( const eq::EventType type,
-                                     const eq::KeyEvent& event )
+template <class C>
+bool EventHandler<C>::handleEvent(const eq::EventType type,
+                                  const eq::KeyEvent& event)
 {
-    if( type != eq::EVENT_KEY_PRESS )
-        return eq::Config::handleEvent( type, event );
+    if (type != eq::EVENT_KEY_PRESS)
+        return eq::Config::handleEvent(type, event);
 
     FrameSettings& frameSettings =
         _impl->config.getFrameData().getFrameSettings();
 
-    switch( event.key )
+    switch (event.key)
     {
     case ' ':
         _impl->config.resetCamera();
@@ -196,8 +203,8 @@ bool EventHandler< C >::handleEvent( const eq::EventType type,
     case 'A':
     {
         auto& vrParams = _impl->config.getFrameData().getVRParameters();
-        vrParams.setShowAxes( !vrParams.getShowAxes( ));
-        _impl->config.publish( vrParams );
+        vrParams.setShowAxes(!vrParams.getShowAxes());
+        _impl->config.publish(vrParams);
         return true;
     }
 
@@ -207,66 +214,65 @@ bool EventHandler< C >::handleEvent( const eq::EventType type,
         return true;
 
     case 'l':
-        _impl->config.switchLayout( 1 );
+        _impl->config.switchLayout(1);
         return true;
 
     case 'L':
-        _impl->config.switchLayout( -1 );
+        _impl->config.switchLayout(-1);
         return true;
 
     default:
-        return eq::Config::handleEvent( type, event );
+        return eq::Config::handleEvent(type, event);
     }
 }
 
-template< class C >
-bool EventHandler< C >::handleEvent( const eq::EventType type,
-                                     const eq::PointerEvent& event )
+template <class C>
+bool EventHandler<C>::handleEvent(const eq::EventType type,
+                                  const eq::PointerEvent& event)
 {
     CameraSettings& camera = _impl->config.getFrameData().getCameraSettings();
 
-    switch( type )
+    switch (type)
     {
     case eq::EVENT_CHANNEL_POINTER_MOTION:
-        switch( event.buttons )
+        switch (event.buttons)
         {
         case eq::PTR_BUTTON1:
-            camera.spinModel( -ROTATE_AND_ZOOM_SPEED * event.dy,
-                              -ROTATE_AND_ZOOM_SPEED * event.dx );
+            camera.spinModel(-ROTATE_AND_ZOOM_SPEED * event.dy,
+                             -ROTATE_AND_ZOOM_SPEED * event.dx);
             return true;
 
         case eq::PTR_BUTTON2:
-            camera.moveCamera( 0.f, 0.f, ROTATE_AND_ZOOM_SPEED * -event.dy );
+            camera.moveCamera(0.f, 0.f, ROTATE_AND_ZOOM_SPEED * -event.dy);
             return true;
 
         case eq::PTR_BUTTON3:
-            camera.moveCamera( PAN_SPEED * event.dx, -PAN_SPEED * event.dy,
-                               0.f );
+            camera.moveCamera(PAN_SPEED * event.dx, -PAN_SPEED * event.dy, 0.f);
             return true;
         }
-        return eq::Config::handleEvent( type, event );
+        return eq::Config::handleEvent(type, event);
 
     case eq::EVENT_CHANNEL_POINTER_WHEEL:
-        camera.moveCamera( -ADVANCE_SPEED * event.xAxis, 0.f,
-                            ADVANCE_SPEED * event.yAxis );
+        camera.moveCamera(-ADVANCE_SPEED * event.xAxis, 0.f,
+                          ADVANCE_SPEED * event.yAxis);
         return true;
 
     default:
-        return eq::Config::handleEvent( type, event );
+        return eq::Config::handleEvent(type, event);
     }
 }
 
-template< class C >
-bool EventHandler< C >::handleEvent( eq::EventICommand command )
+template <class C>
+bool EventHandler<C>::handleEvent(eq::EventICommand command)
 {
-    switch( command.getEventType( ))
+    switch (command.getEventType())
     {
     case HISTOGRAM_DATA:
     {
-        const Histogram& histogram = command.read< Histogram >();
-        const float area = command.read< float >();
-        const uint32_t id = command.read< uint32_t >();
-        _impl->gatherHistogram( histogram, area, id );
+        const Histogram& histogram = command.read<Histogram>();
+        const float area = command.read<float>();
+        const uint32_t id = command.read<uint32_t>();
+        _impl->gatherHistogram(histogram, area, id);
         return false;
     }
 
@@ -279,16 +285,15 @@ bool EventHandler< C >::handleEvent( eq::EventICommand command )
         return true;
     }
 
-    if( !eq::Config::handleEvent( command ))
+    if (!eq::Config::handleEvent(command))
         return false;
 
     _impl->config.postRedraw();
     return true;
 }
-
 }
 
 // Instantiate:
-template class livre::EventHandler< eq::Config >;
-template livre::EventHandler< eq::Config >::EventHandler( livre::Config&,
-                                                          eq::ServerPtr );
+template class livre::EventHandler<eq::Config>;
+template livre::EventHandler<eq::Config>::EventHandler(livre::Config&,
+                                                       eq::ServerPtr);

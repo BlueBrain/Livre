@@ -20,22 +20,21 @@
 #ifndef _DataUploadFilter_h_
 #define _DataUploadFilter_h_
 
-#include <livre/lib/types.h>
 #include <livre/core/pipeline/Filter.h>
+#include <livre/lib/types.h>
 
 namespace livre
 {
-
-
 /**
- * DataUploadFilter class implements the parallel data loading for raw volume data and
- * textures. A group of uploaders is executed in rendering pipeline and each uploader
+ * DataUploadFilter class implements the parallel data loading for raw volume
+ * data and
+ * textures. A group of uploaders is executed in rendering pipeline and each
+ * uploader
  * has an id in the group.
  */
 class DataUploadFilter : public Filter
 {
 public:
-
     /**
      * Constructor
      * @param id of the data uploader ( in a group of other uploaders )
@@ -45,18 +44,15 @@ public:
      * @param dataSource data source
      * @param texturePool the pool for 3D textures
      */
-    DataUploadFilter( const size_t id,
-                      const size_t nbUploaders,
-                      Cache& dataCache,
-                      Cache& textureCache,
-                      DataSource& dataSource,
-                      TexturePool& texturePool );
+    DataUploadFilter(const size_t id, const size_t nbUploaders,
+                     Cache& dataCache, Cache& textureCache,
+                     DataSource& dataSource, TexturePool& texturePool);
     ~DataUploadFilter();
 
     /**
      * @copydoc Filter::execute
      */
-    void execute( const FutureMap& input, PromiseMap& output ) const final;
+    void execute(const FutureMap& input, PromiseMap& output) const final;
 
     /**
      * @copydoc Filter::getInputDataInfos
@@ -69,7 +65,6 @@ public:
     DataInfos getOutputDataInfos() const final;
 
 private:
-
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };

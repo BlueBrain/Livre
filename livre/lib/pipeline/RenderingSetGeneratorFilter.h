@@ -27,26 +27,24 @@
 
 namespace livre
 {
-
 /**
- * RenderingSetGeneratorFilter class generates the rendering set given the visibles.
+ * RenderingSetGeneratorFilter class generates the rendering set given the
+ * visibles.
  */
 class RenderingSetGeneratorFilter : public Filter
 {
-
 public:
-
     /**
      * Constructor
      * @param textureCache the texture cache
      */
-    explicit RenderingSetGeneratorFilter( const Cache& textureCache );
+    explicit RenderingSetGeneratorFilter(const Cache& textureCache);
     ~RenderingSetGeneratorFilter();
 
     /**
      * @copydoc Filter::execute
      */
-    void execute( const FutureMap& input, PromiseMap& output ) const final;
+    void execute(const FutureMap& input, PromiseMap& output) const final;
 
     /**
      * @copydoc Filter::getInputDataInfos
@@ -59,11 +57,9 @@ public:
     DataInfos getOutputDataInfos() const final;
 
 private:
-
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };
-
 }
 
 #endif

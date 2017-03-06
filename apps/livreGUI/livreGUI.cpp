@@ -28,18 +28,18 @@
 
 QT_USE_NAMESPACE
 
-int main( int argc, char *argv[] )
+int main(int argc, char *argv[])
 {
-    QApplication app( argc, argv );
+    QApplication app(argc, argv);
 
-    Q_INIT_RESOURCE( resources );
+    Q_INIT_RESOURCE(resources);
 
     livre::setCoreSettingsNames();
 
     livre::Controller controller;
 
-    livre::MainWindow window( controller );
-    window.resize( QDesktopWidget().availableGeometry( &window ).size() / 2.0 );
+    livre::MainWindow window(controller);
+    window.resize(QDesktopWidget().availableGeometry(&window).size() / 2.0);
     window.show();
 
     return app.exec();

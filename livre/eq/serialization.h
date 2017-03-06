@@ -20,17 +20,15 @@
 #ifndef _serialization_h_
 #define _serialization_h_
 
-#include <livre/core/data/VolumeInformation.h>
 #include <co/dataIStream.h>
 #include <co/dataOStream.h>
+#include <livre/core/data/VolumeInformation.h>
 #include <lunchbox/bitOperation.h>
-
 
 namespace livre
 {
-
-inline co::DataOStream& operator << ( co::DataOStream& os,
-                                      const VolumeInformation& info )
+inline co::DataOStream& operator<<(co::DataOStream& os,
+                                   const VolumeInformation& info)
 {
     os << info.bigEndian << info.compCount << info.dataType << info.overlap
        << info.maximumBlockSize << info.voxels << info.worldSize
@@ -41,20 +39,18 @@ inline co::DataOStream& operator << ( co::DataOStream& os,
     return os;
 }
 
-inline co::DataIStream& operator >> ( co::DataIStream& is,
-                                      VolumeInformation& info )
+inline co::DataIStream& operator>>(co::DataIStream& is, VolumeInformation& info)
 {
     uint32_t depth;
     Vector3ui blockSize;
-    is >> info.bigEndian >> info.compCount >> info.dataType >> info.overlap
-       >> info.maximumBlockSize >> info.voxels >> info.worldSize
-       >> info.dataToLivreTransform >> info.resolution
-       >> info.worldSpacePerVoxel >> info.meterToDataUnitRatio >> depth
-       >> blockSize >> info.frameRange >> info.description;
-    info.rootNode = RootNode( depth, blockSize );
+    is >> info.bigEndian >> info.compCount >> info.dataType >> info.overlap >>
+        info.maximumBlockSize >> info.voxels >> info.worldSize >>
+        info.dataToLivreTransform >> info.resolution >>
+        info.worldSpacePerVoxel >> info.meterToDataUnitRatio >> depth >>
+        blockSize >> info.frameRange >> info.description;
+    info.rootNode = RootNode(depth, blockSize);
     return is;
 }
-
 }
 
 #endif // _serialization_h_

@@ -21,39 +21,35 @@
 
 #include <livre/core/render/TexturePool.h>
 
-#include <livre/core/defines.h>
 #include <eq/gl.h>
+#include <livre/core/defines.h>
 
 namespace livre
 {
-
-
-TextureState::TextureState( TexturePool& texturePool )
-    : textureCoordsMin( 0.0f )
-    , textureCoordsMax( 0.0f )
-    , textureSize( 0.0f )
-    , textureId( INVALID_TEXTURE_ID )
-    , _texturePool( texturePool )
+TextureState::TextureState(TexturePool& texturePool)
+    : textureCoordsMin(0.0f)
+    , textureCoordsMax(0.0f)
+    , textureSize(0.0f)
+    , textureId(INVALID_TEXTURE_ID)
+    , _texturePool(texturePool)
 {
-    _texturePool.generateTexture( *this );
+    _texturePool.generateTexture(*this);
 }
 
 TextureState::~TextureState()
 {
-    _texturePool.releaseTexture( *this );
+    _texturePool.releaseTexture(*this);
 }
 
 void TextureState::bind() const
 {
-    LBASSERTINFO( textureId != INVALID_TEXTURE_ID,
-                  "GL error: " << glGetError( ));
-    if( textureId == INVALID_TEXTURE_ID )
+    LBASSERTINFO(textureId != INVALID_TEXTURE_ID, "GL error: " << glGetError());
+    if (textureId == INVALID_TEXTURE_ID)
         return;
 
-    glBindTexture( GL_TEXTURE_3D, textureId );
+    glBindTexture(GL_TEXTURE_3D, textureId);
     const GLenum glErr = glGetError();
-    if ( glErr != GL_NO_ERROR )
-        LBERROR << "Error binding texture: "  << glErr << std::endl;
+    if (glErr != GL_NO_ERROR)
+        LBERROR << "Error binding texture: " << glErr << std::endl;
 }
-
 }

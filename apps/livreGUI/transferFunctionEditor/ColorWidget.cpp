@@ -25,14 +25,13 @@
 
 namespace livre
 {
-
 namespace
 {
-const QUrl QML_ROOT_COMPONENT( "qrc:/qml/ColorWidget.qml" );
+const QUrl QML_ROOT_COMPONENT("qrc:/qml/ColorWidget.qml");
 
-QColor getColor( const ControlPointsWidget::Channel channel )
+QColor getColor(const ControlPointsWidget::Channel channel)
 {
-    switch( channel )
+    switch (channel)
     {
     case ControlPointsWidget::Channel::red:
         return Qt::red;
@@ -45,29 +44,28 @@ QColor getColor( const ControlPointsWidget::Channel channel )
 }
 }
 
-ColorWidget::ColorWidget( QWidget* parent_, const Channel channel )
-    : ControlPointsWidget( parent_, channel )
+ColorWidget::ColorWidget(QWidget* parent_, const Channel channel)
+    : ControlPointsWidget(parent_, channel)
 {
-    setSource( QML_ROOT_COMPONENT );
+    setSource(QML_ROOT_COMPONENT);
 
-    rootObject()->setProperty( "color", getColor( channel ));
+    rootObject()->setProperty("color", getColor(channel));
 }
 
-void ColorWidget::resizeEvent( QResizeEvent* ev )
+void ColorWidget::resizeEvent(QResizeEvent* ev)
 {
-    ControlPointsWidget::resizeEvent( ev );
+    ControlPointsWidget::resizeEvent(ev);
 
-    if( _background.isNull() || _background.size() != ev->size( ))
+    if (_background.isNull() || _background.size() != ev->size())
     {
-        _background = QImage( size(), QImage::Format_RGB32 );
+        _background = QImage(size(), QImage::Format_RGB32);
 
-        QLinearGradient gradient( 0, 0, 0, height( ));
-        gradient.setColorAt( 1, Qt::black );
-        gradient.setColorAt( 0, getColor( getChannel( )));
+        QLinearGradient gradient(0, 0, 0, height());
+        gradient.setColorAt(1, Qt::black);
+        gradient.setColorAt(0, getColor(getChannel()));
 
-        QPainter painter( &_background );
-        painter.fillRect( rect(), gradient );
+        QPainter painter(&_background);
+        painter.fillRect(rect(), gradient);
     }
 }
-
 }

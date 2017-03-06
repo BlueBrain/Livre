@@ -30,7 +30,7 @@ namespace livre
 struct Step
 {
     Step();
-    Step( int32_t fr, const Vector3f& pos, const Vector3f& rot );
+    Step(int32_t fr, const Vector3f& pos, const Vector3f& rot);
 
     int32_t frame;
     Vector3f position;
@@ -38,13 +38,14 @@ struct Step
 };
 
 /**
- * The CameraPath class is used to iterate over the steps of an animation. It keeps the current state of
- * animation. The code is mostly taken from the eqPly example of Equalizer package.
+ * The CameraPath class is used to iterate over the steps of an animation. It
+ * keeps the current state of
+ * animation. The code is mostly taken from the eqPly example of Equalizer
+ * package.
  */
 class CameraPath
 {
 public:
-
     CameraPath();
 
     /**
@@ -52,7 +53,7 @@ public:
      * @param fileName Animation filename to load.
      * @return False if the animation cannot be loaded.
      */
-    bool loadAnimation( const std::string& fileName );
+    bool loadAnimation(const std::string& fileName);
 
     /**
      * @return The number of frames loaded.
@@ -67,7 +68,7 @@ public:
     /**
      * @return The next step of the animation.
      */
-    Step getNextStep( );
+    Step getNextStep();
 
     /**
      * @return The current step of animation.
@@ -80,13 +81,11 @@ public:
     const Vector3f& modelRotation() const;
 
 private:
-
     Vector3f modelRotation_;
-    std::vector< Step > steps_;
+    std::vector<Step> steps_;
     uint32_t curStep_;
     int32_t curFrame_;
     int32_t totalFrameNumber_;
 };
-
 }
 #endif //_CameraPath_h_

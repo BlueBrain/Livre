@@ -32,45 +32,46 @@ const uint32_t VOXEL_SIZE_X = 75;
 const uint32_t VOXEL_SIZE_Y = 75;
 const uint32_t VOXEL_SIZE_Z = 138;
 
-#include <lunchbox/pluginRegisterer.h>
 #include <livre/uvf/UVFDataSource.h>
+#include <lunchbox/pluginRegisterer.h>
 
-// Explicit registration required because the folder of the data source plugin is not
+// Explicit registration required because the folder of the data source plugin
+// is not
 // in the LD_LIBRARY_PATH of the test executable.
-lunchbox::PluginRegisterer< livre::UVFDataSource > registerer;
+lunchbox::PluginRegisterer<livre::UVFDataSource> registerer;
 
-BOOST_AUTO_TEST_CASE( UVFDataSource )
+BOOST_AUTO_TEST_CASE(UVFDataSource)
 {
     std::cout << "uvf://" UVF_DATA_FILE << std::endl;
-    const lunchbox::URI uri( "uvf://" UVF_DATA_FILE );
-    livre::DataSource source( uri );
+    const lunchbox::URI uri("uvf://" UVF_DATA_FILE);
+    livre::DataSource source(uri);
     const livre::VolumeInformation& info = source.getVolumeInfo();
 
-    BOOST_CHECK( info.rootNode.getDepth() == 2 );
-    BOOST_CHECK( info.compCount == 1 );
-    BOOST_CHECK( info.dataType == livre::DT_UINT8 );
-    BOOST_CHECK( info.voxels == livre::Vector3ui( VOXEL_SIZE_X,
-                                                  VOXEL_SIZE_Y,
-                                                  VOXEL_SIZE_Z ));
+    BOOST_CHECK(info.rootNode.getDepth() == 2);
+    BOOST_CHECK(info.compCount == 1);
+    BOOST_CHECK(info.dataType == livre::DT_UINT8);
+    BOOST_CHECK(info.voxels ==
+                livre::Vector3ui(VOXEL_SIZE_X, VOXEL_SIZE_Y, VOXEL_SIZE_Z));
 
-    BOOST_CHECK( info.overlap == livre::Vector3ui( OVERLAP_SIZE ));
+    BOOST_CHECK(info.overlap == livre::Vector3ui(OVERLAP_SIZE));
 
     const uint32_t level = 0;
-    const livre::Vector3f position( 0, 0, 0 );
+    const livre::Vector3f position(0, 0, 0);
     const uint32_t frame = 0;
-    const livre::NodeId parentNodeId( level, position, frame );
-    const livre::NodeId firstChildNodeId =
-        parentNodeId.getChildren().front();
+    const livre::NodeId parentNodeId(level, position, frame);
+    const livre::NodeId firstChildNodeId = parentNodeId.getChildren().front();
 
-    const livre::LODNode& lodNode = source.getNode( firstChildNodeId );
-    BOOST_CHECK( lodNode.isValid( ));
-    BOOST_CHECK_EQUAL( lodNode.getVoxelBox().getSize(),
-                       livre::Vector3ui( BLOCK_SIZE ));
+    const livre::LODNode& lodNode = source.getNode(firstChildNodeId);
+    BOOST_CHECK(lodNode.isValid());
+    BOOST_CHECK_EQUAL(lodNode.getVoxelBox().getSize(),
+                      livre::Vector3ui(BLOCK_SIZE));
 
-    const livre::Vector3ui& blockSize = lodNode.getBlockSize() +
-                                       livre::Vector3ui( info.overlap ) * 2;
-    BOOST_CHECK( blockSize == info.maximumBlockSize );
+    const livre::Vector3ui& blockSize =
+        lodNode.getBlockSize() + livre::Vector3ui(info.overlap) * 2;
+    BOOST_CHECK(blockSize == info.maximumBlockSize);
 }
 #else
-BOOST_AUTO_TEST_CASE( UVFDataSource ) {}
+BOOST_AUTO_TEST_CASE(UVFDataSource)
+{
+}
 #endif // LIVRE_USE_TUVOK

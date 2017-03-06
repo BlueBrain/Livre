@@ -21,14 +21,13 @@
 #define _Filter_h_
 
 #include <livre/core/api.h>
-#include <livre/core/types.h>
-#include <livre/core/pipeline/FuturePromise.h>
 #include <livre/core/pipeline/FutureMap.h>
+#include <livre/core/pipeline/FuturePromise.h>
 #include <livre/core/pipeline/PromiseMap.h>
+#include <livre/core/types.h>
 
 namespace livre
 {
-
 /**
  * Filters are similar to functions ( immutable ). Their inputs and
  * outputs are provided with given name and data types. At execution time
@@ -38,33 +37,36 @@ namespace livre
 class Filter
 {
 public:
-
     /**
      * This function is called by the @PipeFilter while the filter
      * is being executed.
      * @param input The Future that can be read for input parameters
      * @param output The Promise that can be written to for output parameters
      */
-    virtual void execute( const FutureMap& input, PromiseMap& output ) const = 0;
+    virtual void execute(const FutureMap& input, PromiseMap& output) const = 0;
 
     /**
      * @return map for the name and data types for the filter
      * communication. In execution time using these names and types,
      * data can be set.
      */
-    LIVRECORE_API virtual DataInfos getInputDataInfos() const  { return DataInfos(); }
+    LIVRECORE_API virtual DataInfos getInputDataInfos() const
+    {
+        return DataInfos();
+    }
 
     /**
      * @return map for the name and data types for the filter
      * communication. In execution time using these names and types,
      * data can be retrieved.
      */
-    LIVRECORE_API virtual DataInfos getOutputDataInfos() const { return DataInfos(); }
+    LIVRECORE_API virtual DataInfos getOutputDataInfos() const
+    {
+        return DataInfos();
+    }
 
     LIVRECORE_API virtual ~Filter() {}
 };
-
 }
 
 #endif // _Filter_h_
-

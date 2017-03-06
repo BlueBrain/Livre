@@ -28,102 +28,101 @@
 
 namespace livre
 {
-
 #define glewGetContext() GLContext::glewGetContext()
 
-TexturePool::TexturePool( const DataSource& dataSource )
-    : _maxBlockSize( dataSource.getVolumeInfo().maximumBlockSize )
-    , _internalTextureFormat( 0 )
-    , _format( 0 )
-    , _textureType( 0 )
+TexturePool::TexturePool(const DataSource& dataSource)
+    : _maxBlockSize(dataSource.getVolumeInfo().maximumBlockSize)
+    , _internalTextureFormat(0)
+    , _format(0)
+    , _textureType(0)
 {
-    if( dataSource.getVolumeInfo().compCount != 1 )
-        LBTHROW( std::runtime_error( "Unsupported number of channels." ));
+    if (dataSource.getVolumeInfo().compCount != 1)
+        LBTHROW(std::runtime_error("Unsupported number of channels."));
 
-    switch( dataSource.getVolumeInfo().dataType )
+    switch (dataSource.getVolumeInfo().dataType)
     {
     case DT_UINT8:
         _internalTextureFormat = GL_R8UI;
         _format = GL_RED_INTEGER;
         _textureType = GL_UNSIGNED_BYTE;
-    break;
+        break;
     case DT_UINT16:
         _internalTextureFormat = GL_R16UI;
         _format = GL_RED_INTEGER;
         _textureType = GL_UNSIGNED_SHORT;
-    break;
+        break;
     case DT_UINT32:
         _internalTextureFormat = GL_R32UI;
         _format = GL_RED_INTEGER;
         _textureType = GL_UNSIGNED_INT;
-    break;
+        break;
     case DT_INT8:
         _internalTextureFormat = GL_R8I;
         _format = GL_RED_INTEGER;
         _textureType = GL_BYTE;
-    break;
+        break;
     case DT_INT16:
         _internalTextureFormat = GL_R16I;
         _format = GL_RED_INTEGER;
         _textureType = GL_SHORT;
-    break;
+        break;
     case DT_INT32:
         _internalTextureFormat = GL_R32I;
         _format = GL_RED_INTEGER;
         _textureType = GL_INT;
-    break;
+        break;
     case DT_FLOAT:
         _internalTextureFormat = GL_R32F;
         _format = GL_RED;
         _textureType = GL_FLOAT;
-    break;
+        break;
     case DT_UNDEFINED:
     default:
-       LBTHROW( std::runtime_error( "Undefined data type" ));
-    break;
+        LBTHROW(std::runtime_error("Undefined data type"));
+        break;
     }
 }
 
 TexturePool::~TexturePool()
-{}
-
-void TexturePool::generateTexture( TextureState& textureState )
 {
-    ScopedLock lock( _mutex );
-    LBASSERT( textureState.textureId == INVALID_TEXTURE_ID );
-    if( !_textureStack.empty() )
+}
+
+void TexturePool::generateTexture(TextureState& textureState)
+{
+    ScopedLock lock(_mutex);
+    LBASSERT(textureState.textureId == INVALID_TEXTURE_ID);
+    if (!_textureStack.empty())
     {
         textureState.textureId = _textureStack.back();
         _textureStack.pop_back();
     }
     else
     {
-        glGenTextures( 1, &textureState.textureId );
-        glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+        glGenTextures(1, &textureState.textureId);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         textureState.bind();
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
         // Allocate a texture
-        glTexImage3D( GL_TEXTURE_3D, 0, _internalTextureFormat,
-                      _maxBlockSize[ 0 ], _maxBlockSize[ 1 ], _maxBlockSize[ 2 ], 0,
-                      _format, _textureType, (GLvoid *)NULL );
+        glTexImage3D(GL_TEXTURE_3D, 0, _internalTextureFormat, _maxBlockSize[0],
+                     _maxBlockSize[1], _maxBlockSize[2], 0, _format,
+                     _textureType, (GLvoid*)NULL);
 
         const GLenum glErr = glGetError();
-        if( glErr != GL_NO_ERROR )
-            LBERROR << "Error loading the texture into GPU, error number: " << glErr << std::endl;
-
+        if (glErr != GL_NO_ERROR)
+            LBERROR << "Error loading the texture into GPU, error number: "
+                    << glErr << std::endl;
     }
 }
 
-void TexturePool::releaseTexture( TextureState& textureState )
+void TexturePool::releaseTexture(TextureState& textureState)
 {
-    ScopedLock lock( _mutex );
-    LBASSERT( textureState.textureId );
-    _textureStack.push_back( textureState.textureId );
+    ScopedLock lock(_mutex);
+    LBASSERT(textureState.textureId);
+    _textureStack.push_back(textureState.textureId);
 }
-
 }

@@ -20,25 +20,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/eq/Pipe.h>
 #include <livre/eq/Config.h>
 #include <livre/eq/FrameData.h>
+#include <livre/eq/Pipe.h>
 
 namespace livre
 {
-
 struct Pipe::Impl
 {
 public:
-    explicit Impl( livre::Pipe* pipe )
-        : _pipe( pipe )
-    {}
-
-    bool mapFrameData( const eq::uint128_t& initId )
+    explicit Impl(livre::Pipe* pipe)
+        : _pipe(pipe)
     {
-        livre::Config* config = static_cast< livre::Config* >( _pipe->getConfig( ));
-        _frameData.initialize( config );
-        if( !_frameData.map( config, initId ))
+    }
+
+    bool mapFrameData(const eq::uint128_t& initId)
+    {
+        livre::Config* config = static_cast<livre::Config*>(_pipe->getConfig());
+        _frameData.initialize(config);
+        if (!_frameData.map(config, initId))
             return false;
         _frameData.mapObjects();
         return true;
@@ -47,50 +47,42 @@ public:
     void unmapFrameData()
     {
         _frameData.unmapObjects();
-        _frameData.unmap( static_cast< livre::Config* >( _pipe->getConfig( )));
+        _frameData.unmap(static_cast<livre::Config*>(_pipe->getConfig()));
     }
 
-    void frameStart( const eq::uint128_t& frameId )
+    void frameStart(const eq::uint128_t& frameId) { _frameData.sync(frameId); }
+    bool configInit(const eq::uint128_t& initId)
     {
-        _frameData.sync( frameId );
+        return mapFrameData(initId);
     }
 
-    bool configInit( const eq::uint128_t& initId )
-    {
-        return mapFrameData( initId );
-    }
-
-    void configExit()
-    {
-        unmapFrameData();
-    }
-
+    void configExit() { unmapFrameData(); }
     livre::Pipe* const _pipe;
     FrameData _frameData;
 };
 
-Pipe::Pipe( eq::Node* parent )
-    : eq::Pipe( parent )
-    , _impl( new Impl( this ))
+Pipe::Pipe(eq::Node* parent)
+    : eq::Pipe(parent)
+    , _impl(new Impl(this))
 {
 }
 
-Pipe::~Pipe( )
+Pipe::~Pipe()
 {
 }
 
-void Pipe::frameStart( const eq::uint128_t& frameId, const uint32_t frameNumber )
+void Pipe::frameStart(const eq::uint128_t& frameId, const uint32_t frameNumber)
 {
-    _impl->frameStart( frameId );
-    eq::Pipe::frameStart( frameId, frameNumber );
+    _impl->frameStart(frameId);
+    eq::Pipe::frameStart(frameId, frameNumber);
 }
 
-bool Pipe::configInit( const eq::uint128_t& initId )
+bool Pipe::configInit(const eq::uint128_t& initId)
 {
-    if( !eq::Pipe::configInit( initId ))
+    if (!eq::Pipe::configInit(initId))
         return false;
 
-    return _impl->configInit( initId );
+    return _impl->configInit(initId);
 }
 
 bool Pipe::configExit()
@@ -103,5 +95,4 @@ const FrameData& Pipe::getFrameData() const
 {
     return _impl->_frameData;
 }
-
 }

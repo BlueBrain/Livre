@@ -24,27 +24,25 @@
 
 namespace livre
 {
-
 /**
  * The BoundingAxis class create and redner bounding axis of a volume
  */
 class BoundingAxis
 {
-
-struct BoundingAxisData
-{
-    VolumeInformation volInfo;
-    Floats vertices;
-    Floats normals;
-    Floats normals2;
-    Floats colors;
-    UInt8s types;
-    float tickDistance;
-    float factor;
-};
+    struct BoundingAxisData
+    {
+        VolumeInformation volInfo;
+        Floats vertices;
+        Floats normals;
+        Floats normals2;
+        Floats colors;
+        UInt8s types;
+        float tickDistance;
+        float factor;
+    };
 
 public:
-    BoundingAxis( const VolumeInformation& volInfo );
+    BoundingAxis(const VolumeInformation& volInfo);
 
     ~BoundingAxis();
 
@@ -54,21 +52,21 @@ public:
     void draw();
 
 private:
+    void _createTicks(BoundingAxisData& bbAxisData);
 
-    void _createTicks( BoundingAxisData& bbAxisData  );
+    void _createAxisTicks(const Vector3f& start, const Vector3f& end,
+                          const Vector3f& normal, const Vector3f& normal2,
+                          bool flipTick, BoundingAxisData& bbAxisData);
 
-    void _createAxisTicks( const Vector3f& start, const Vector3f& end, const Vector3f& normal,
-                           const Vector3f& normal2, bool flipTick, BoundingAxisData& bbAxisData );
+    void _sendDataToGPU(const BoundingAxisData& bbAxisData);
 
-    void _sendDataToGPU( const BoundingAxisData& bbAxisData );
-
-    const Vector2f _computeRange( const VolumeInformation& volInfo, const size_t axis ) const;
+    const Vector2f _computeRange(const VolumeInformation& volInfo,
+                                 const size_t axis) const;
 
     uint32_t _axisBufferId;
     size_t _nVertices;
 
     uint32_t _typeBufferId;
 };
-
 }
 #endif // _BoundingAxis_h_

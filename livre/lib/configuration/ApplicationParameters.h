@@ -21,12 +21,11 @@
 #ifndef _ApplicationParameters_h_
 #define _ApplicationParameters_h_
 
-#include <livre/lib/api.h>
 #include <livre/core/configuration/Parameters.h> // base class
+#include <livre/lib/api.h>
 
 namespace livre
 {
-
 /**
  * The ApplicationParameters struct keeps the parameters for main application.
  */
@@ -34,23 +33,24 @@ struct ApplicationParameters : public Parameters
 {
     LIVRE_API ApplicationParameters();
 
-    Vector3f cameraPosition; //!< Camera position in world space.
-    Vector3f cameraLookAt; //!< Camera orientation (lookAt vector) in world space.
-    Vector2ui frames; //!< Range of frames to render: [start end).
-    uint32_t maxFrames; //!< Max number of frames to render.
-    int32_t animation; //!< animation forward/backward speed
-    uint32_t animationFPS; //!< animation frames per second
-    bool isResident; //!< Is the main app resident.
+    Vector3f cameraPosition;  //!< Camera position in world space.
+    Vector3f cameraLookAt;    //!< Camera orientation (lookAt vector) in world
+                              //! space.
+    Vector2ui frames;         //!< Range of frames to render: [start end).
+    uint32_t maxFrames;       //!< Max number of frames to render.
+    int32_t animation;        //!< animation forward/backward speed
+    uint32_t animationFPS;    //!< animation frames per second
+    bool isResident;          //!< Is the main app resident.
     std::string dataFileName; //!< Data file name.
     std::string transferFunction; //!< Path to transfer function file
 
     /** @param parameters The source parameters. */
-    LIVRE_API ApplicationParameters& operator=( const ApplicationParameters& parameters );
+    LIVRE_API ApplicationParameters& operator=(
+        const ApplicationParameters& parameters);
 
 private:
     void initialize_() final;
 };
-
 }
 
 #endif // _ApplicationParameters_h_

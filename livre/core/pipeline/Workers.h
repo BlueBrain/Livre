@@ -25,22 +25,20 @@
 
 namespace livre
 {
-
 /**
  * A simple thread pool
  */
 class Workers
 {
 public:
-
     /**
      * Constructs a thread pool given the number of threads.
      * @param nThreads is the number of threads.
      * @param glContext if given, the threads can share this
      * context.
      */
-    LIVRECORE_API Workers( size_t nThreads = 4,
-                           ConstGLContextPtr glContext = ConstGLContextPtr( ));
+    LIVRECORE_API Workers(size_t nThreads = 4,
+                          ConstGLContextPtr glContext = ConstGLContextPtr());
     LIVRECORE_API ~Workers();
 
     /**
@@ -48,7 +46,7 @@ public:
      * queue.
      * @param executable is executed by thread pool.
      */
-    LIVRECORE_API void schedule( ExecutablePtr executable );
+    LIVRECORE_API void schedule(ExecutablePtr executable);
 
     /**
      * @return the size of thread pool.
@@ -56,13 +54,9 @@ public:
     LIVRECORE_API size_t getSize() const;
 
 private:
-
     struct Impl;
     std::unique_ptr<Impl> _impl;
-
 };
-
 }
 
 #endif // _Workers_h_
-

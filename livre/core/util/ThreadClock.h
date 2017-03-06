@@ -25,10 +25,9 @@
 
 namespace livre
 {
-
 class ThreadClock;
 
-static lunchbox::PerThread< ThreadClock > _perThreadClock_; //!< Per thread clock.
+static lunchbox::PerThread<ThreadClock> _perThreadClock_; //!< Per thread clock.
 
 /**
  * The ThreadClock class contructs a clock per thread.
@@ -36,18 +35,15 @@ static lunchbox::PerThread< ThreadClock > _perThreadClock_; //!< Per thread cloc
 class ThreadClock
 {
 public:
-
     /**
      * @return The threads local clock.
      */
-    static lunchbox::Clock& getClock( );
+    static lunchbox::Clock& getClock();
 
 private:
-
-    ThreadClock( ) { }
+    ThreadClock() {}
     lunchbox::Clock clock_;
 };
-
 }
 
 #endif // _ThreadClock_h_

@@ -17,54 +17,35 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/core/pipeline/OutputPort.h>
-#include <livre/core/pipeline/InputPort.h>
 #include <livre/core/pipeline/FuturePromise.h>
+#include <livre/core/pipeline/InputPort.h>
+#include <livre/core/pipeline/OutputPort.h>
 
 namespace livre
 {
-
 struct OutputPort::Impl
 {
-    Impl( const DataInfo& dataInfo )
-        : _promise( dataInfo )
-    {}
-
-    ~Impl()
+    Impl(const DataInfo& dataInfo)
+        : _promise(dataInfo)
     {
-       flush();
     }
 
-    void flush()
-    {
-        _promise.flush();
-    }
-
-    std::type_index getDataType() const
-    {
-        return _promise.getDataType();
-    }
-
-    std::string getName() const
-    {
-        return _promise.getName();
-    }
-
-    void reset()
-    {
-        _promise.reset();
-    }
-
+    ~Impl() { flush(); }
+    void flush() { _promise.flush(); }
+    std::type_index getDataType() const { return _promise.getDataType(); }
+    std::string getName() const { return _promise.getName(); }
+    void reset() { _promise.reset(); }
     Promise _promise;
 };
 
-OutputPort::OutputPort( const DataInfo& dataInfo )
-    : _impl( new OutputPort::Impl( dataInfo ))
-{}
-
+OutputPort::OutputPort(const DataInfo& dataInfo)
+    : _impl(new OutputPort::Impl(dataInfo))
+{
+}
 
 OutputPort::~OutputPort()
-{}
+{
+}
 
 std::string OutputPort::getName() const
 {
@@ -81,14 +62,13 @@ Promise OutputPort::getPromise() const
     return _impl->_promise;
 }
 
-void OutputPort::connect( InputPort& port )
+void OutputPort::connect(InputPort& port)
 {
-    port.connect( *this );
+    port.connect(*this);
 }
 
 void OutputPort::reset()
 {
     _impl->reset();
 }
-
 }

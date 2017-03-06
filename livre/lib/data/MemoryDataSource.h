@@ -26,7 +26,6 @@
 
 namespace livre
 {
-
 /**
  * Generates in-memory volume data.
  *
@@ -42,8 +41,7 @@ namespace livre
 class MemoryDataSource : public DataSourcePlugin
 {
 public:
-
-    MemoryDataSource( const DataSourcePluginData& initData );
+    MemoryDataSource(const DataSourcePluginData& initData);
     virtual ~MemoryDataSource();
 
     /**
@@ -51,15 +49,14 @@ public:
      * @param node LODNode to be read.
      * @return The block data for the node.
      */
-    MemoryUnitPtr getData( const LODNode& node ) final;
+    MemoryUnitPtr getData(const LODNode& node) final;
 
-    static bool handles( const DataSourcePluginData& initData );
+    static bool handles(const DataSourcePluginData& initData);
     static std::string getDescription();
 
 private:
     float _sparsity;
 };
-
 }
 
 #endif // _MemoryDataSource_h_

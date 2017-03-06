@@ -23,19 +23,17 @@
 #include <livre/eq/Error.h>
 
 #ifndef __APPLE__
-#  include <eq/fabric/errorRegistry.h>
-#  include <co/global.h>
+#include <co/global.h>
+#include <eq/fabric/errorRegistry.h>
 #else
-#  include <eq/fabric/errorRegistry.h>
-#  include <co/global.h>
+#include <co/global.h>
+#include <eq/fabric/errorRegistry.h>
 #endif
 
 namespace livre
 {
-
 namespace
 {
-
 struct ErrorData
 {
     const uint32_t code;
@@ -43,28 +41,29 @@ struct ErrorData
 };
 
 ErrorData errors_[] = {
-    { ERROR_LIVRE_ARB_SHADER_OBJECTS_MISSING,      "GL_ARB_shader_objects extension missing" },
-    { ERROR_LIVRE_EXT_BLEND_FUNC_SEPARATE_MISSING, "GL_EXT_blend_func_separate extension missing" },
-    { ERROR_LIVRE_ARB_MULTITEXTURE_MISSING,        "GL_ARB_multitexture extension missing" },
-    { 0, "" } // last!
+    {ERROR_LIVRE_ARB_SHADER_OBJECTS_MISSING,
+     "GL_ARB_shader_objects extension missing"},
+    {ERROR_LIVRE_EXT_BLEND_FUNC_SEPARATE_MISSING,
+     "GL_EXT_blend_func_separate extension missing"},
+    {ERROR_LIVRE_ARB_MULTITEXTURE_MISSING,
+     "GL_ARB_multitexture extension missing"},
+    {0, ""} // last!
 };
-
 }
 
 void initErrors()
 {
     eq::fabric::ErrorRegistry& registry = eq::Global::getErrorRegistry();
 
-    for( size_t i=0; errors_[i].code != 0; ++i )
-        registry.setString( errors_[i].code, errors_[i].text );
+    for (size_t i = 0; errors_[i].code != 0; ++i)
+        registry.setString(errors_[i].code, errors_[i].text);
 }
 
 void exitErrors()
 {
     eq::fabric::ErrorRegistry& registry = eq::Global::getErrorRegistry();
 
-    for( size_t i=0; errors_[i].code != 0; ++i )
-        registry.eraseString( errors_[i].code );
+    for (size_t i = 0; errors_[i].code != 0; ++i)
+        registry.eraseString(errors_[i].code);
 }
-
 }

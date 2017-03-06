@@ -26,15 +26,17 @@
 
 namespace livre
 {
-
 /**
  * The Error enum defines errors produced by Livre.
  */
 enum Error
 {
-    ERROR_LIVRE_ARB_SHADER_OBJECTS_MISSING = eq::ERROR_CUSTOM, //!< GL_ARB_shader_objects extension missing.
-    ERROR_LIVRE_EXT_BLEND_FUNC_SEPARATE_MISSING, //!< GL_EXT_blend_func_separate extension missing.
-    ERROR_LIVRE_ARB_MULTITEXTURE_MISSING, //!< GL_ARB_multitexture extension missing.
+    ERROR_LIVRE_ARB_SHADER_OBJECTS_MISSING =
+        eq::ERROR_CUSTOM, //!< GL_ARB_shader_objects extension missing.
+    ERROR_LIVRE_EXT_BLEND_FUNC_SEPARATE_MISSING, //!< GL_EXT_blend_func_separate
+                                                 //! extension missing.
+    ERROR_LIVRE_ARB_MULTITEXTURE_MISSING, //!< GL_ARB_multitexture extension
+                                          //! missing.
 };
 
 /**
@@ -46,6 +48,5 @@ LIVREEQ_API void initErrors();
  * Clear livre-specific error codes.
  */
 LIVREEQ_API void exitErrors();
-
 }
 #endif // _Error_h_

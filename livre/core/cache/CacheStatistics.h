@@ -35,13 +35,12 @@ namespace livre
 class CacheStatistics
 {
 public:
-
     /**
      * Constructor
      * @param name of the cache statistics
      * @param maxMemBytes maximum memory.
      */
-    LIVRECORE_API CacheStatistics( const std::string& name, size_t maxMemBytes );
+    LIVRECORE_API CacheStatistics(const std::string& name, size_t maxMemBytes);
 
     LIVRECORE_API ~CacheStatistics();
 
@@ -49,43 +48,37 @@ public:
      * @return Number of objects in the corresponding \see Cache.
      */
     LIVRECORE_API size_t getBlockCount() const { return _objCount; }
-
     /**
      * @return Used memory in bytes used by the \see Cache.
      */
     LIVRECORE_API size_t getUsedMemory() const { return _usedMemBytes; }
-
     /**
      * @return Max memory in bytes used by the \see Cache.
      */
     LIVRECORE_API size_t getMaximumMemory() const { return _maxMemBytes; }
-
     /**
      * @return the name of the statistics
      */
     LIVRECORE_API std::string getName() const { return _name; }
-
     /**
      * Notifies the statistics for cache misses
      */
     void notifyMiss() { ++_cacheMiss; }
-
     /**
      * Notifies the statistics for cache hits
      */
     void notifyHit() { ++_cacheHit; }
-
     /**
      * Notifies statistics when an object is loaded.
      * @param cacheObject is the cache object.
      */
-    LIVRECORE_API void notifyLoaded( const CacheObject& cacheObject );
+    LIVRECORE_API void notifyLoaded(const CacheObject& cacheObject);
 
     /**
      * Notifies statistics when an object is unloaded.
      * @param cacheObject is the cache object.
      */
-    LIVRECORE_API void notifyUnloaded( const CacheObject& cacheObject );
+    LIVRECORE_API void notifyUnloaded(const CacheObject& cacheObject);
 
     /**
       * Clears the statistics
@@ -97,19 +90,17 @@ public:
      * @param cacheStatistics Input \see CacheStatistics
      * @return The output stream.
      */
-    LIVRECORE_API friend std::ostream& operator<<( std::ostream& stream,
-                                                   const CacheStatistics& statistics );
+    LIVRECORE_API friend std::ostream& operator<<(
+        std::ostream& stream, const CacheStatistics& statistics);
 
 private:
-
     std::string _name;
     size_t _usedMemBytes;
     const size_t _maxMemBytes;
     size_t _objCount;
     size_t _cacheHit;
-    size_t _cacheMiss;  
+    size_t _cacheMiss;
 };
-
 }
 
 #endif // _CacheStatistics_h_

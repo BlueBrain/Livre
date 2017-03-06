@@ -22,14 +22,15 @@
 #ifndef _Node_h_
 #define _Node_h_
 
+#include <eq/node.h>
 #include <livre/eq/api.h>
 #include <livre/lib/types.h>
-#include <eq/node.h>
 
 namespace livre
 {
 /**
- * The Node class is a standard EQ abstraction for a process. It manages the data loaders
+ * The Node class is a standard EQ abstraction for a process. It manages the
+ * data loaders
  * and keeps the data cache.
  */
 class Node : public eq::Node
@@ -38,7 +39,7 @@ public:
     /**
      * @param parent config that owns the Node.
      */
-    LIVREEQ_API Node( eq::Config* parent );
+    LIVREEQ_API Node(eq::Config* parent);
     LIVREEQ_API ~Node();
 
     /** @return The data source. */
@@ -54,14 +55,14 @@ public:
     Cache& getHistogramCache();
 
 private:
-    bool configInit( const eq::uint128_t& initId ) final;
-    void frameStart(  const eq::uint128_t& frameId, const uint32_t frameNumber ) final;
+    bool configInit(const eq::uint128_t& initId) final;
+    void frameStart(const eq::uint128_t& frameId,
+                    const uint32_t frameNumber) final;
     bool configExit() final;
 
     struct Impl;
-    std::unique_ptr< Impl >  _impl;
+    std::unique_ptr<Impl> _impl;
 };
-
 }
 
 #endif //_Node_h_

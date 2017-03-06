@@ -27,90 +27,88 @@
 
 namespace
 {
-const QUrl QML_ROOT_COMPONENT( "qrc:/qml/AlphaWidget.qml" );
+const QUrl QML_ROOT_COMPONENT("qrc:/qml/AlphaWidget.qml");
 }
 
 namespace livre
 {
-
-AlphaWidget::AlphaWidget( QWidget* parent_ )
-    : ControlPointsWidget( parent_, Channel::alpha )
+AlphaWidget::AlphaWidget(QWidget* parent_)
+    : ControlPointsWidget(parent_, Channel::alpha)
 {
-    setSource( QML_ROOT_COMPONENT );
+    setSource(QML_ROOT_COMPONENT);
 }
 
-void AlphaWidget::mouseMoveEvent( QMouseEvent* mouseEvent )
+void AlphaWidget::mouseMoveEvent(QMouseEvent* mouseEvent)
 {
     size_t index = (float)_histogram.getBins().size() *
-                         (float)mouseEvent->pos().x() / (float)width();
+                   (float)mouseEvent->pos().x() / (float)width();
     index *= (_range[1] - _range[0]);
     index += _histogram.getBins().size() * _range[0];
-    emit histIndexChanged( index, _histogram.getRatio( index ));
+    emit histIndexChanged(index, _histogram.getRatio(index));
 }
 
-void AlphaWidget::leaveEvent( QEvent* )
+void AlphaWidget::leaveEvent(QEvent*)
 {
-    emit histIndexChanged( -1u, 0.0f );
+    emit histIndexChanged(-1u, 0.0f);
 }
 
-void AlphaWidget::resizeEvent( QResizeEvent* ev )
+void AlphaWidget::resizeEvent(QResizeEvent* ev)
 {
-    ControlPointsWidget::resizeEvent( ev );
+    ControlPointsWidget::resizeEvent(ev);
 
-    if( _background.isNull() || _background.size() != ev->size( ))
+    if (_background.isNull() || _background.size() != ev->size())
     {
-        _background = QImage( size(), QImage::Format_ARGB32_Premultiplied );
+        _background = QImage(size(), QImage::Format_ARGB32_Premultiplied);
 
-        _gradient.setFinalStop( width(), 0 );
-        _background.fill( 0 );
-        QPainter painter( &_background );
-        painter.fillRect( _background.rect(), _gradient );
+        _gradient.setFinalStop(width(), 0);
+        _background.fill(0);
+        QPainter painter(&_background);
+        painter.fillRect(_background.rect(), _gradient);
     }
 }
 
-void AlphaWidget::setGradientStops( const QGradientStops& stops )
+void AlphaWidget::setGradientStops(const QGradientStops& stops)
 {
     // the gradient here is needed for the color lookup in getColorAtPoint().
     // The visual appearance is performed by QML.
-    _gradient = QLinearGradient( 0.0f, 0.0f, width(), 0.0f );
-    for( int i = 0; i < stops.size(); ++i )
-        _gradient.setColorAt( stops.at( i ).first, stops.at( i ).second );
+    _gradient = QLinearGradient(0.0f, 0.0f, width(), 0.0f);
+    for (int i = 0; i < stops.size(); ++i)
+        _gradient.setColorAt(stops.at(i).first, stops.at(i).second);
 
     // convert the gradient stops to something that QML understands
-    QList< QVariant > positions;
-    QList< QVariant > colors;
-    for( const auto& stop: stops )
+    QList<QVariant> positions;
+    QList<QVariant> colors;
+    for (const auto& stop : stops)
     {
-        positions.push_back( stop.first );
+        positions.push_back(stop.first);
         const auto& color = stop.second;
-        colors.push_back( QVector4D(color.redF(), color.greenF(),
-                                    color.blueF(), color.alphaF( )));
+        colors.push_back(QVector4D(color.redF(), color.greenF(), color.blueF(),
+                                   color.alphaF()));
     }
 
-    rootObject()->setProperty( "positions", positions );
-    rootObject()->setProperty( "colors", colors );
+    rootObject()->setProperty("positions", positions);
+    rootObject()->setProperty("colors", colors);
 }
 
-void AlphaWidget::setHistogram( const lexis::render::Histogram& histogram,
-                                const bool isLogScale )
+void AlphaWidget::setHistogram(const lexis::render::Histogram& histogram,
+                               const bool isLogScale)
 {
-    if( _histogram == histogram && isLogScale == _isLogScale )
+    if (_histogram == histogram && isLogScale == _isLogScale)
         return;
 
     _histogram = histogram;
     _isLogScale = isLogScale;
-    rootObject()->setProperty( "histogram",
-                               sampleHistogram( _histogram, _isLogScale, _range ));
+    rootObject()->setProperty("histogram",
+                              sampleHistogram(_histogram, _isLogScale, _range));
 }
 
-void AlphaWidget::setRange( const vmml::Vector2f& range )
+void AlphaWidget::setRange(const vmml::Vector2f& range)
 {
-    if( _range == range )
+    if (_range == range)
         return;
 
     _range = range;
-    rootObject()->setProperty( "histogram",
-                               sampleHistogram( _histogram, _isLogScale, _range ));
+    rootObject()->setProperty("histogram",
+                              sampleHistogram(_histogram, _isLogScale, _range));
 }
-
 }

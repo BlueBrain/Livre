@@ -26,7 +26,6 @@
 
 namespace livre
 {
-
 class CameraSettings;
 class Channel;
 class Client;
@@ -40,7 +39,6 @@ class RayCastRenderer;
 class RenderSettings;
 class VolumeSettings;
 class Window;
-
 }
 
 #endif // _livreEqTypes_h_

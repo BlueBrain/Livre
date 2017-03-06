@@ -21,73 +21,71 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "livre/core/data/VolumeInformation.h"
 #include "livre/core/data/DataSourcePlugin.h"
 #include "livre/core/data/LODNode.h"
+#include "livre/core/data/VolumeInformation.h"
 
 namespace ut = boost::unit_test;
 
 livre::VolumeInformation makeTestVolumeInformation()
 {
     livre::VolumeInformation volume;
-    volume.maximumBlockSize = livre::Vector3ui( 64u );
-    volume.overlap = livre::Vector3ui( 0u );
-    volume.voxels = livre::Vector3ui( 2048u );
-    volume.frameRange = livre::Vector2ui( 0u, 1u );
+    volume.maximumBlockSize = livre::Vector3ui(64u);
+    volume.overlap = livre::Vector3ui(0u);
+    volume.voxels = livre::Vector3ui(2048u);
+    volume.frameRange = livre::Vector2ui(0u, 1u);
     return volume;
 }
 
-BOOST_AUTO_TEST_CASE( defaultVolumeInformation )
+BOOST_AUTO_TEST_CASE(defaultVolumeInformation)
 {
     livre::VolumeInformation volume;
 
-    BOOST_CHECK_EQUAL( volume.bigEndian, false );
-    BOOST_CHECK_EQUAL( volume.compCount, 1u );
-    BOOST_CHECK_EQUAL( volume.dataType, livre::DT_UINT8 );
-    BOOST_CHECK_EQUAL( volume.overlap, livre::Vector3ui( 0u ));
-    BOOST_CHECK_EQUAL( volume.maximumBlockSize, livre::Vector3ui( 0u ));
-    BOOST_CHECK_EQUAL( volume.voxels, livre::Vector3ui( 256u ));
-    BOOST_CHECK_EQUAL( volume.worldSize, livre::Vector3f( 0.f ));
-    BOOST_CHECK_EQUAL( volume.dataToLivreTransform, livre::Matrix4f( ));
-    BOOST_CHECK_EQUAL( volume.meterToDataUnitRatio, 1.0f );
-    BOOST_CHECK_EQUAL( volume.worldSpacePerVoxel, 0.f );
-    BOOST_CHECK_EQUAL( volume.frameRange, livre::INVALID_FRAME_RANGE );
+    BOOST_CHECK_EQUAL(volume.bigEndian, false);
+    BOOST_CHECK_EQUAL(volume.compCount, 1u);
+    BOOST_CHECK_EQUAL(volume.dataType, livre::DT_UINT8);
+    BOOST_CHECK_EQUAL(volume.overlap, livre::Vector3ui(0u));
+    BOOST_CHECK_EQUAL(volume.maximumBlockSize, livre::Vector3ui(0u));
+    BOOST_CHECK_EQUAL(volume.voxels, livre::Vector3ui(256u));
+    BOOST_CHECK_EQUAL(volume.worldSize, livre::Vector3f(0.f));
+    BOOST_CHECK_EQUAL(volume.dataToLivreTransform, livre::Matrix4f());
+    BOOST_CHECK_EQUAL(volume.meterToDataUnitRatio, 1.0f);
+    BOOST_CHECK_EQUAL(volume.worldSpacePerVoxel, 0.f);
+    BOOST_CHECK_EQUAL(volume.frameRange, livre::INVALID_FRAME_RANGE);
 }
 
-BOOST_AUTO_TEST_CASE( regularOctree )
+BOOST_AUTO_TEST_CASE(regularOctree)
 {
     livre::VolumeInformation volume = makeTestVolumeInformation();
-    livre::fillRegularVolumeInfo( volume );
-    BOOST_CHECK_EQUAL( volume.worldSpacePerVoxel, 1.f / 2048.f );
-    BOOST_CHECK_EQUAL( volume.worldSize, livre::Vector3f( 1.f ));
-    BOOST_CHECK_EQUAL( volume.rootNode.getDepth(), 6u );
-    BOOST_CHECK_EQUAL( volume.rootNode.getBlockSize(), livre::Vector3ui( 1u ));
+    livre::fillRegularVolumeInfo(volume);
+    BOOST_CHECK_EQUAL(volume.worldSpacePerVoxel, 1.f / 2048.f);
+    BOOST_CHECK_EQUAL(volume.worldSize, livre::Vector3f(1.f));
+    BOOST_CHECK_EQUAL(volume.rootNode.getDepth(), 6u);
+    BOOST_CHECK_EQUAL(volume.rootNode.getBlockSize(), livre::Vector3ui(1u));
 }
 
-BOOST_AUTO_TEST_CASE( irregularOctrees )
+BOOST_AUTO_TEST_CASE(irregularOctrees)
 {
     livre::VolumeInformation volume = makeTestVolumeInformation();
     volume.voxels[1] = 2099u;
-    livre::fillRegularVolumeInfo( volume );
-    BOOST_CHECK_EQUAL( volume.rootNode.getDepth(), 6u );
-    BOOST_CHECK_EQUAL( volume.rootNode.getBlockSize(),
-                       livre::Vector3ui( 1u, 2u, 1u ));
-    BOOST_CHECK_EQUAL( volume.worldSpacePerVoxel, 1.f / 2099.f );
-    BOOST_CHECK_EQUAL( volume.worldSize, livre::Vector3f( 2048.f / 2099.f,
-                                                          1.f,
-                                                          2048.f / 2099.f ));
+    livre::fillRegularVolumeInfo(volume);
+    BOOST_CHECK_EQUAL(volume.rootNode.getDepth(), 6u);
+    BOOST_CHECK_EQUAL(volume.rootNode.getBlockSize(),
+                      livre::Vector3ui(1u, 2u, 1u));
+    BOOST_CHECK_EQUAL(volume.worldSpacePerVoxel, 1.f / 2099.f);
+    BOOST_CHECK_EQUAL(volume.worldSize,
+                      livre::Vector3f(2048.f / 2099.f, 1.f, 2048.f / 2099.f));
 
     volume.voxels[1] = 2037u;
-    livre::fillRegularVolumeInfo( volume );
-    BOOST_CHECK_EQUAL( volume.rootNode.getDepth(), 6u );
-    BOOST_CHECK_EQUAL( volume.rootNode.getBlockSize(), livre::Vector3ui( 1u ));
-    BOOST_CHECK_EQUAL( volume.worldSpacePerVoxel, 1.f / 2048.f );
-    BOOST_CHECK_EQUAL( volume.worldSize, livre::Vector3f( 1.f,
-                                                          2037.f / 2048.f,
-                                                          1.f ));
+    livre::fillRegularVolumeInfo(volume);
+    BOOST_CHECK_EQUAL(volume.rootNode.getDepth(), 6u);
+    BOOST_CHECK_EQUAL(volume.rootNode.getBlockSize(), livre::Vector3ui(1u));
+    BOOST_CHECK_EQUAL(volume.worldSpacePerVoxel, 1.f / 2048.f);
+    BOOST_CHECK_EQUAL(volume.worldSize,
+                      livre::Vector3f(1.f, 2037.f / 2048.f, 1.f));
 }
 
-BOOST_AUTO_TEST_CASE( nonOctreeLODTree )
+BOOST_AUTO_TEST_CASE(nonOctreeLODTree)
 {
     // This highlights a known corner case, where the parent-child relationship
     // is lost for a border portion of the octree.
@@ -99,11 +97,10 @@ BOOST_AUTO_TEST_CASE( nonOctreeLODTree )
     livre::VolumeInformation volume = makeTestVolumeInformation();
     volume.voxels[1] = 2049u;
 
-    livre::fillRegularVolumeInfo( volume );
-    BOOST_CHECK_EQUAL( volume.rootNode.getDepth(), 6u );
-    BOOST_CHECK_EQUAL( volume.rootNode.getBlockSize(), livre::Vector3ui( 1u ));
-    BOOST_CHECK_EQUAL( volume.worldSpacePerVoxel, 1.f / 2049.f );
-    BOOST_CHECK_EQUAL( volume.worldSize, livre::Vector3f( 2048.f / 2049.f,
-                                                          1.f,
-                                                          2048.f / 2049.f ));
+    livre::fillRegularVolumeInfo(volume);
+    BOOST_CHECK_EQUAL(volume.rootNode.getDepth(), 6u);
+    BOOST_CHECK_EQUAL(volume.rootNode.getBlockSize(), livre::Vector3ui(1u));
+    BOOST_CHECK_EQUAL(volume.worldSpacePerVoxel, 1.f / 2049.f);
+    BOOST_CHECK_EQUAL(volume.worldSize,
+                      livre::Vector3f(2048.f / 2049.f, 1.f, 2048.f / 2049.f));
 }

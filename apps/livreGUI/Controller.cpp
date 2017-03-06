@@ -20,12 +20,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #include "Controller.h"
 
-#include <zeroeq/zeroeq.h>
-#include <zerobuf/Zerobuf.h>
 #include <lexis/request.h>
+#include <zerobuf/Zerobuf.h>
+#include <zeroeq/zeroeq.h>
 
 #include <algorithm>
 #include <thread>
@@ -34,59 +33,58 @@
 
 namespace livre
 {
-
 class Controller::Impl
 {
 public:
     Impl()
         : _subscriber()
-        , _replySubscriber( (::zeroeq::Receiver&)_subscriber )
+        , _replySubscriber((::zeroeq::Receiver&)_subscriber)
     {
-        _timer.connect( &_timer, &QTimer::timeout, [this]
-        {
-            for( const auto& request : _requests )
-                _publisher.publish( ::lexis::Request( request ));
-            _subscriber.receive( 0 );
+        _timer.connect(&_timer, &QTimer::timeout, [this] {
+            for (const auto& request : _requests)
+                _publisher.publish(::lexis::Request(request));
+            _subscriber.receive(0);
         });
-        _timer.start( 100 );
+        _timer.start(100);
     }
 
-    void onReply( const ::zeroeq::uint128_t& event )
+    void onReply(const ::zeroeq::uint128_t& event)
     {
-        const auto& i = std::find( _requests.begin(), _requests.end(), event );
-        if( i == _requests.end( ))
+        const auto& i = std::find(_requests.begin(), _requests.end(), event);
+        if (i == _requests.end())
             return;
 
-        _requests.erase( i );
-        _replySubscriber.unsubscribe( event );
+        _requests.erase(i);
+        _replySubscriber.unsubscribe(event);
     }
 
-    bool publish( const ::zerobuf::Zerobuf& zerobuf )
+    bool publish(const ::zerobuf::Zerobuf& zerobuf)
     {
-        return _publisher.publish( zerobuf );
+        return _publisher.publish(zerobuf);
     }
 
-    bool subscribe( ::zerobuf::Zerobuf& zerobuf )
+    bool subscribe(::zerobuf::Zerobuf& zerobuf)
     {
-        if( !_subscriber.subscribe( zerobuf ))
+        if (!_subscriber.subscribe(zerobuf))
             return false;
 
-        _requests.push_back( zerobuf.getTypeIdentifier( ));
-        return _replySubscriber.subscribe( zerobuf.getTypeIdentifier(),
-            [&]() { onReply( zerobuf.getTypeIdentifier( )); });
+        _requests.push_back(zerobuf.getTypeIdentifier());
+        return _replySubscriber.subscribe(zerobuf.getTypeIdentifier(), [&]() {
+            onReply(zerobuf.getTypeIdentifier());
+        });
     }
 
-    bool unsubscribe( const ::zerobuf::Zerobuf& zerobuf )
+    bool unsubscribe(const ::zerobuf::Zerobuf& zerobuf)
     {
-        if( !_subscriber.unsubscribe( zerobuf ))
+        if (!_subscriber.unsubscribe(zerobuf))
             return false;
 
-        const auto& i = std::find( _requests.begin(), _requests.end(),
-                                   zerobuf.getTypeIdentifier( ));
-        if( i != _requests.end( ))
+        const auto& i = std::find(_requests.begin(), _requests.end(),
+                                  zerobuf.getTypeIdentifier());
+        if (i != _requests.end())
         {
-            _requests.erase( i );
-            _replySubscriber.unsubscribe( zerobuf.getTypeIdentifier( ));
+            _requests.erase(i);
+            _replySubscriber.unsubscribe(zerobuf.getTypeIdentifier());
         }
 
         return true;
@@ -99,30 +97,30 @@ private:
 
     QTimer _timer;
 
-    std::vector< ::zeroeq::uint128_t > _requests;
+    std::vector<::zeroeq::uint128_t> _requests;
 };
 
-
 Controller::Controller()
-    : _impl( new Controller::Impl( ))
-{}
+    : _impl(new Controller::Impl())
+{
+}
 
 Controller::~Controller()
-{}
-
-bool Controller::publish( const ::zerobuf::Zerobuf& zerobuf )
 {
-    return _impl->publish( zerobuf );
 }
 
-bool Controller::subscribe( ::zerobuf::Zerobuf& zerobuf )
+bool Controller::publish(const ::zerobuf::Zerobuf& zerobuf)
 {
-    return _impl->subscribe( zerobuf );
+    return _impl->publish(zerobuf);
 }
 
-bool Controller::unsubscribe( const ::zerobuf::Zerobuf& zerobuf )
+bool Controller::subscribe(::zerobuf::Zerobuf& zerobuf)
 {
-    return _impl->unsubscribe( zerobuf );
+    return _impl->subscribe(zerobuf);
 }
 
+bool Controller::unsubscribe(const ::zerobuf::Zerobuf& zerobuf)
+{
+    return _impl->unsubscribe(zerobuf);
+}
 }

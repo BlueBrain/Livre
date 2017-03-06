@@ -28,21 +28,20 @@
 
 namespace livre
 {
-
 /**
  * The DataObject class stores raw data from the volume data source.
  */
 class DataObject : public CacheObject
 {
 public:
-
     /**
      * Constructor
      * @param cacheId is the unique identifier
      * @param dataSource the data source cache object is created from
-     * @throws CacheLoadException when the data cache does not have the data for cache id
+     * @throws CacheLoadException when the data cache does not have the data for
+     * cache id
      */
-    LIVRE_API DataObject( const CacheId& cacheId, DataSource& dataSource );
+    LIVRE_API DataObject(const CacheId& cacheId, DataSource& dataSource);
     LIVRE_API ~DataObject();
 
     /** @return A pointer to the data or 0 if no data is loaded. */
@@ -52,12 +51,9 @@ public:
     LIVRE_API size_t getSize() const final;
 
 private:
-
     struct Impl;
     std::unique_ptr<Impl> _impl;
-
 };
-
 }
 
 #endif // _DataObject_h_

@@ -21,13 +21,12 @@
 #define _Pipeline_h_
 
 #include <livre/core/api.h>
-#include <livre/core/types.h>
-#include <livre/core/pipeline/PipeFilter.h>
 #include <livre/core/pipeline/Executable.h>
+#include <livre/core/pipeline/PipeFilter.h>
+#include <livre/core/types.h>
 
 namespace livre
 {
-
 /**
  * Implements the executable graph. Accesing the copies of the object from
  * other threads for non-const functions is not thread safe.
@@ -35,8 +34,7 @@ namespace livre
 class Pipeline : public Executable
 {
 public:
-
-    typedef std::unique_ptr< Executable > UniqueExecutablePtr;
+    typedef std::unique_ptr<Executable> UniqueExecutablePtr;
 
     LIVRECORE_API Pipeline();
     LIVRECORE_API ~Pipeline();
@@ -47,13 +45,9 @@ public:
      * @param wait If true, on scheduled execution, pipeline
      * can wait on given pipeline post conditions.
      */
-    void add( const std::string& name,
-              Pipeline& pipeline,
-              bool wait = true )
+    void add(const std::string& name, Pipeline& pipeline, bool wait = true)
     {
-        _add( name,
-              UniqueExecutablePtr( new Pipeline( pipeline )),
-              wait );
+        _add(name, UniqueExecutablePtr(new Pipeline(pipeline)), wait);
     }
 
     /**
@@ -67,14 +61,11 @@ public:
      * @throw std::runtime_error if an executable with same name is present
      */
 
-    template< class FilterT, bool wait = true, class... Args >
-    PipeFilter add( const std::string& name,
-                    Args&&... args )
+    template <class FilterT, bool wait = true, class... Args>
+    PipeFilter add(const std::string& name, Args&&... args)
     {
-        PipeFilterT< FilterT > pipeFilter( name, args... );
-        _add( name,
-              UniqueExecutablePtr( new PipeFilter( pipeFilter )),
-              wait );
+        PipeFilterT<FilterT> pipeFilter(name, args...);
+        _add(name, UniqueExecutablePtr(new PipeFilter(pipeFilter)), wait);
         return pipeFilter;
     }
 
@@ -83,7 +74,7 @@ public:
      * @return the executable
      * @throw std::runtime_error if a pipe filter or pipeline does not exist
      */
-    LIVRECORE_API Executable& getExecutable( const std::string& name );
+    LIVRECORE_API Executable& getExecutable(const std::string& name);
 
     /**
      * @copydoc Executable::execute
@@ -106,22 +97,16 @@ public:
     LIVRECORE_API void reset() final;
 
 private:
+    void _add(const std::string& name, UniqueExecutablePtr exec, bool wait);
 
-    void _add( const std::string& name,
-               UniqueExecutablePtr exec,
-               bool wait );
 private:
-
-    void _schedule( Executor& executor ) final;
+    void _schedule(Executor& executor) final;
 
     ExecutablePtr clone() const final;
 
     struct Impl;
-    std::shared_ptr< Impl > _impl;
-
+    std::shared_ptr<Impl> _impl;
 };
-
 }
 
 #endif // _Pipeline_h_
-

@@ -26,22 +26,23 @@
 namespace livre
 {
 /** Handles application events for a Config. */
-template< class C > class EventHandler : public C
+template <class C>
+class EventHandler : public C
 {
 public:
-    template< class... ARGS > EventHandler( Config& config, ARGS... args );
+    template <class... ARGS>
+    EventHandler(Config& config, ARGS... args);
     ~EventHandler();
 
-    bool handleEvent( eq::EventICommand command ) override;
-    bool handleEvent( eq::EventType type, const eq::Event& event ) override;
-    bool handleEvent( eq::EventType type, const eq::KeyEvent& ) override;
-    bool handleEvent( eq::EventType type, const eq::PointerEvent& ) override;
+    bool handleEvent(eq::EventICommand command) override;
+    bool handleEvent(eq::EventType type, const eq::Event& event) override;
+    bool handleEvent(eq::EventType type, const eq::KeyEvent&) override;
+    bool handleEvent(eq::EventType type, const eq::PointerEvent&) override;
 
 private:
     class Impl;
-    std::unique_ptr< Impl > _impl;
+    std::unique_ptr<Impl> _impl;
 };
-
 }
 
 #endif // _EventHandler_h_

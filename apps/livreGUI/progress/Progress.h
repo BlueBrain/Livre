@@ -17,16 +17,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #ifndef _Progress_h_
 #define _Progress_h_
 
-#include <livreGUI/types.h>
 #include <QWidget>
+#include <livreGUI/types.h>
 
 namespace livre
 {
-
 /**
  * Progress is the Widget for playing/pausing animations as well as
  * positionning animation to a specific frame
@@ -40,8 +38,8 @@ public:
      * @param controller The GUI connection to zeq world.
      * @param parent Parent widget.
      */
-    Progress( Controller& controller, QWidget *parent = 0 );
-    ~Progress( );
+    Progress(Controller& controller, QWidget* parent = 0);
+    ~Progress();
 
 signals:
     void updated();
@@ -52,8 +50,7 @@ private Q_SLOTS:
 
 private:
     struct Impl;
-    std::unique_ptr< Impl > _impl;
+    std::unique_ptr<Impl> _impl;
 };
-
 }
 #endif

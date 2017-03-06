@@ -26,7 +26,6 @@
 
 namespace livre
 {
-
 /**
  * The TexturePool class is responsible for allocating texture slots and copying
  * textures into the texture slots. The methods are not thread safe.
@@ -34,38 +33,40 @@ namespace livre
 class TexturePool
 {
 public:
-
     /**
      * Constructor.
      * @param dataSource the data source
      * @throws std::runtime_error if data has multiple channels
      */
-    LIVRECORE_API TexturePool( const DataSource& dataSource );
+    LIVRECORE_API TexturePool(const DataSource& dataSource);
     LIVRECORE_API ~TexturePool();
 
     /** @return The OpenGL GPU internal format of the texture data. */
-    LIVRECORE_API int32_t getInternalFormat() const { return _internalTextureFormat; }
+    LIVRECORE_API int32_t getInternalFormat() const
+    {
+        return _internalTextureFormat;
+    }
 
     /** @return The OpenGL data type of the texture data. */
     LIVRECORE_API uint32_t getFormat() const { return _format; }
-
     /** @return The OpenGL data type of the texture data. */
     LIVRECORE_API uint32_t getTextureType() const { return _textureType; };
-
     /**
-     * Generates / uses a preallocated a 3D OpenGL texture based on OpenGL parameters.
-     * @param textureState The destination state is filled with needed information.
+     * Generates / uses a preallocated a 3D OpenGL texture based on OpenGL
+     * parameters.
+     * @param textureState The destination state is filled with needed
+     * information.
      */
-    LIVRECORE_API void generateTexture( TextureState& textureState );
+    LIVRECORE_API void generateTexture(TextureState& textureState);
 
     /**
      * Releases a texture slot.
-     * @param textureState The destination state is filled with needed information.
+     * @param textureState The destination state is filled with needed
+     * information.
      */
-    LIVRECORE_API void releaseTexture( TextureState& textureState );
+    LIVRECORE_API void releaseTexture(TextureState& textureState);
 
 private:
-
     UInt32s _textureStack;
 
     const Vector3ui _maxBlockSize;
@@ -75,8 +76,6 @@ private:
 
     boost::mutex _mutex;
 };
-
-
 }
 
 #endif // _TexturePool_h_

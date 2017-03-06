@@ -26,7 +26,6 @@
 
 namespace livre
 {
-
 /**
  * Histogram filter computes the accumulated histogram for given node ids that
  * are in or intersecting the frustum.
@@ -34,24 +33,21 @@ namespace livre
  */
 class HistogramFilter : public Filter
 {
-
 public:
-
     /**
      * Constructor
      * @param histogramCache the cache for histogram
      * @param dataCache data cache
      * @param dataSource data source
      */
-    HistogramFilter( Cache& histogramCache,
-                     const Cache& dataCache,
-                     const DataSource& dataSource );
+    HistogramFilter(Cache& histogramCache, const Cache& dataCache,
+                    const DataSource& dataSource);
     ~HistogramFilter();
 
     /**
      * @copydoc Filter::execute
      */
-    void execute( const FutureMap& input, PromiseMap& output ) const final;
+    void execute(const FutureMap& input, PromiseMap& output) const final;
 
     /**
      * @copydoc Filter::getInputDataInfos
@@ -64,12 +60,9 @@ public:
     DataInfos getOutputDataInfos() const final;
 
 private:
-
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };
-
 }
 
 #endif
-

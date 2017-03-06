@@ -24,8 +24,8 @@
 #include "ColorWidget.h"
 #include "RangeWidget.h"
 
-#include <livreGUI/ui_TransferFunctionEditor.h>
 #include <livreGUI/Controller.h>
+#include <livreGUI/ui_TransferFunctionEditor.h>
 
 #include <lexis/render/lookupTable1D.h>
 #include <lexis/render/materialLUT.h>
@@ -42,143 +42,146 @@ namespace livre
 {
 namespace
 {
-const ColorWidget::Channel channels[] =
-                            { ColorWidget::Channel::red,
-                              ColorWidget::Channel::green,
-                              ColorWidget::Channel::blue,
-                              ColorWidget::Channel::alpha };
-
+const ColorWidget::Channel channels[] = {ColorWidget::Channel::red,
+                                         ColorWidget::Channel::green,
+                                         ColorWidget::Channel::blue,
+                                         ColorWidget::Channel::alpha};
 }
 
-TransferFunctionEditor::TransferFunctionEditor( Controller& controller,
-                                                QWidget* parent_ )
-    : QWidget( parent_ )
-    , _controller( controller )
-    , _ui( new Ui::TransferFunctionEditor )
+TransferFunctionEditor::TransferFunctionEditor(Controller& controller,
+                                               QWidget* parent_)
+    : QWidget(parent_)
+    , _controller(controller)
+    , _ui(new Ui::TransferFunctionEditor)
 {
-    _ui->setupUi( this );
+    _ui->setupUi(this);
 
-    _rangeWidget = new RangeWidget( this );
-    connect( _rangeWidget, SIGNAL( histIndexChanged(size_t,double)),
-             this, SLOT( _onHistIndexChanged(size_t,double)));
-    connect( _rangeWidget, SIGNAL( rangeChanged( vmml::Vector2f )),
-            this, SLOT( _onRangeChanged( vmml::Vector2f )));
-    _ui->widgetsLayout->addWidget( _rangeWidget );
+    _rangeWidget = new RangeWidget(this);
+    connect(_rangeWidget, SIGNAL(histIndexChanged(size_t, double)), this,
+            SLOT(_onHistIndexChanged(size_t, double)));
+    connect(_rangeWidget, SIGNAL(rangeChanged(vmml::Vector2f)), this,
+            SLOT(_onRangeChanged(vmml::Vector2f)));
+    _ui->widgetsLayout->addWidget(_rangeWidget);
 
-    _alphaWidget = new AlphaWidget( this );
-    connect( _alphaWidget, SIGNAL( colorsChanged( )),
-             this, SIGNAL( transferFunctionChanged( )));
-    connect( _alphaWidget, SIGNAL( histIndexChanged(size_t,double)),
-             this, SLOT( _onHistIndexChanged(size_t,double)));
-    _ui->widgetsLayout->addWidget( _alphaWidget );
+    _alphaWidget = new AlphaWidget(this);
+    connect(_alphaWidget, SIGNAL(colorsChanged()), this,
+            SIGNAL(transferFunctionChanged()));
+    connect(_alphaWidget, SIGNAL(histIndexChanged(size_t, double)), this,
+            SLOT(_onHistIndexChanged(size_t, double)));
+    _ui->widgetsLayout->addWidget(_alphaWidget);
     _controlPointsWidgets[3] = _alphaWidget;
 
-    for( const auto& channel: channels )
+    for (const auto& channel : channels)
     {
-        if( channel == ColorWidget::Channel::alpha )
+        if (channel == ColorWidget::Channel::alpha)
             break;
 
-        auto widget = new ColorWidget( this, channel );
-        _ui->widgetsLayout->addWidget( widget );
-        _controlPointsWidgets[ (size_t)channel ] = widget;
-        connect( widget, SIGNAL( colorsChanged( )),
-                this, SIGNAL( transferFunctionChanged( )));
+        auto widget = new ColorWidget(this, channel);
+        _ui->widgetsLayout->addWidget(widget);
+        _controlPointsWidgets[(size_t)channel] = widget;
+        connect(widget, SIGNAL(colorsChanged()), this,
+                SIGNAL(transferFunctionChanged()));
     }
 
-    connect( _ui->histogramScaleCheckBox, SIGNAL( clicked( bool )), this,
-             SLOT( _onHistogramChanged( bool )));
+    connect(_ui->histogramScaleCheckBox, SIGNAL(clicked(bool)), this,
+            SLOT(_onHistogramChanged(bool)));
 
-    connect( _ui->resetButton, SIGNAL( clicked( )), this, SLOT( _setDefault()));
-    connect( _ui->clearButton, SIGNAL( clicked( )), this, SLOT( _clear()));
-    connect( _ui->loadButton, SIGNAL( clicked() ), this, SLOT( _load()));
-    connect( _ui->saveButton, SIGNAL( clicked( )), this, SLOT( _save()));
+    connect(_ui->resetButton, SIGNAL(clicked()), this, SLOT(_setDefault()));
+    connect(_ui->clearButton, SIGNAL(clicked()), this, SLOT(_clear()));
+    connect(_ui->loadButton, SIGNAL(clicked()), this, SLOT(_load()));
+    connect(_ui->saveButton, SIGNAL(clicked()), this, SLOT(_save()));
 
-    connect( this, &TransferFunctionEditor::transferFunctionChanged,
-             this, &TransferFunctionEditor::_onTransferFunctionChanged, Qt::QueuedConnection );
+    connect(this, &TransferFunctionEditor::transferFunctionChanged, this,
+            &TransferFunctionEditor::_onTransferFunctionChanged,
+            Qt::QueuedConnection);
 
-    connect( this, &TransferFunctionEditor::histogramChanged,
-             this, &TransferFunctionEditor::_onHistogramChanged, Qt::QueuedConnection );
+    connect(this, &TransferFunctionEditor::histogramChanged, this,
+            &TransferFunctionEditor::_onHistogramChanged, Qt::QueuedConnection);
 
-    _controller.subscribe( _histogram );
-    _histogram.registerDeserializedCallback( [&]
-        { emit histogramChanged( _ui->histogramScaleCheckBox->checkState() == Qt::Checked ); });
+    _controller.subscribe(_histogram);
+    _histogram.registerDeserializedCallback([&] {
+        emit histogramChanged(_ui->histogramScaleCheckBox->checkState() ==
+                              Qt::Checked);
+    });
 
     _setDefault();
 }
 
 TransferFunctionEditor::~TransferFunctionEditor()
 {
-    _controller.unsubscribe( _histogram );
+    _controller.unsubscribe(_histogram);
     delete _ui;
 }
 
 void TransferFunctionEditor::_setGradientStops()
 {
-    ControlPoints allControlPoints( compareControlPoints );
-    for( auto& widget: _controlPointsWidgets )
+    ControlPoints allControlPoints(compareControlPoints);
+    for (auto& widget : _controlPointsWidgets)
     {
         const auto& controlPoints = widget->getControlPoints();
-        allControlPoints.insert( controlPoints.begin(), controlPoints.end());
+        allControlPoints.insert(controlPoints.begin(), controlPoints.end());
     }
 
     QGradientStops stops;
     constexpr size_t nChannels = 4;
-    for( const auto& point : allControlPoints )
+    for (const auto& point : allControlPoints)
     {
-        int colors[ nChannels ] = { 0 };
-        for( size_t j = 0; j < nChannels; ++j )
-            colors[ j ] = _controlPointsWidgets[ j ]->getColorAtPoint( point.x() );
+        int colors[nChannels] = {0};
+        for (size_t j = 0; j < nChannels; ++j)
+            colors[j] = _controlPointsWidgets[j]->getColorAtPoint(point.x());
 
-        QColor color((0x00ff0000 & colors[ 0 ]) >> 16,  // R (16)
-                     (0x0000ff00 & colors[ 1 ]) >> 8,   // G (8)
-                     (0x000000ff & colors[ 2 ]),        // B (1)
-                     (0xff000000 & colors[ 3 ]) >> 24); // A (24)
+        QColor color((0x00ff0000 & colors[0]) >> 16,  // R (16)
+                     (0x0000ff00 & colors[1]) >> 8,   // G (8)
+                     (0x000000ff & colors[2]),        // B (1)
+                     (0xff000000 & colors[3]) >> 24); // A (24)
 
-        stops << QGradientStop( point.x(), color );
+        stops << QGradientStop(point.x(), color);
     }
 
-    _alphaWidget->setGradientStops( stops );
+    _alphaWidget->setGradientStops(stops);
 }
 
 void TransferFunctionEditor::_setDefault()
 {
-    for( auto& widget: _controlPointsWidgets )
+    for (auto& widget : _controlPointsWidgets)
     {
         QPolygonF points;
-        switch( widget->getChannel())
+        switch (widget->getChannel())
         {
         case ColorWidget::Channel::red:
         case ColorWidget::Channel::green:
-            points << QPointF( 0.0, 0.0 );
-            points << QPointF( 0.4, 0.0 );
-            points << QPointF( 0.6, 1.0 );
-            points << QPointF( 1.0, 1.0 );
+            points << QPointF(0.0, 0.0);
+            points << QPointF(0.4, 0.0);
+            points << QPointF(0.6, 1.0);
+            points << QPointF(1.0, 1.0);
             break;
         case ColorWidget::Channel::blue:
-            points << QPointF( 0.0, 0.0 );
-            points << QPointF( 0.2, 1.0 );
-            points << QPointF( 0.6, 1.0 );
-            points << QPointF( 0.8, 0.0 );
-            points << QPointF( 1.0, 0.0 );
+            points << QPointF(0.0, 0.0);
+            points << QPointF(0.2, 1.0);
+            points << QPointF(0.6, 1.0);
+            points << QPointF(0.8, 0.0);
+            points << QPointF(1.0, 0.0);
             break;
         case ColorWidget::Channel::alpha:
-            points << QPointF( 0.0, 0.0 );
-            points << QPointF( 0.1, 0.2 );
-            points << QPointF( 1.0, 0.8 );
+            points << QPointF(0.0, 0.0);
+            points << QPointF(0.1, 0.2);
+            points << QPointF(1.0, 0.8);
             break;
         }
-        widget->setControlPoints( points );
+        widget->setControlPoints(points);
     }
 
     emit transferFunctionChanged();
 }
 
-void TransferFunctionEditor::_onHistIndexChanged( size_t index, const double ratio )
+void TransferFunctionEditor::_onHistIndexChanged(size_t index,
+                                                 const double ratio)
 {
-    const QString indexText = index == -1u ? "" : QString( "%1" ).arg( index, 4 );
-    const QString valText = index == -1u ? "" : QString( "%1" ).arg( ratio * 100.0, 4, 'f', 3 );
-    _ui->histogramValLabel->setText( valText );
-    _ui->histogramIndexLabel->setText( indexText );
+    const QString indexText = index == -1u ? "" : QString("%1").arg(index, 4);
+    const QString valText =
+        index == -1u ? "" : QString("%1").arg(ratio * 100.0, 4, 'f', 3);
+    _ui->histogramValLabel->setText(valText);
+    _ui->histogramIndexLabel->setText(indexText);
 }
 
 void TransferFunctionEditor::_publishTransferFunction()
@@ -186,59 +189,60 @@ void TransferFunctionEditor::_publishTransferFunction()
     lexis::render::LookupTable1D lut;
 
     size_t i = 0;
-    for( const auto& widget: _controlPointsWidgets )
+    for (const auto& widget : _controlPointsWidgets)
     {
         const UInt8s& curve = widget->getCurve();
-        if( curve.empty() || curve.size() * 4 != lut.getLutSize( ))
+        if (curve.empty() || curve.size() * 4 != lut.getLutSize())
             return;
 
-        for( uint32_t j = 0; j < lut.getLutSize() / 4; ++j )
-            lut.getLut()[ 4 * j + i ] = curve[ j ];
+        for (uint32_t j = 0; j < lut.getLutSize() / 4; ++j)
+            lut.getLut()[4 * j + i] = curve[j];
         ++i;
     }
 
-    _controller.publish( lut );
+    _controller.publish(lut);
 }
 
 void TransferFunctionEditor::_publishMaterialLUT()
 {
     lexis::render::MaterialLUT lut;
 
-    lut.getDiffuse().resize( COLORSAMPLES );
-    lut.getAlpha().resize( COLORSAMPLES );
-    lut.getContribution().resize( COLORSAMPLES );
+    lut.getDiffuse().resize(COLORSAMPLES);
+    lut.getAlpha().resize(COLORSAMPLES);
+    lut.getContribution().resize(COLORSAMPLES);
 
     const auto& reds = _controlPointsWidgets[0]->getCurve();
     const auto& greens = _controlPointsWidgets[1]->getCurve();
     const auto& blues = _controlPointsWidgets[2]->getCurve();
     const auto& alphas = _controlPointsWidgets[3]->getCurve();
 
-    for( size_t i = 0; i < COLORSAMPLES; ++i )
+    for (size_t i = 0; i < COLORSAMPLES; ++i)
     {
-        lut.getDiffuse()[i] = lexis::render::Color( reds[i] / 255.f,
-                                                    greens[i] / 255.f,
-                                                    blues[i] / 255.f );
+        lut.getDiffuse()[i] =
+            lexis::render::Color(reds[i] / 255.f, greens[i] / 255.f,
+                                 blues[i] / 255.f);
         lut.getAlpha()[i] = alphas[i] / 255.f;
         lut.getContribution()[i] = 1.0f;
     }
 
-    if( !_histogram.isEmpty( ))
-        lut.setRange( _rangeWidget->fromNormalizedRange().array );
+    if (!_histogram.isEmpty())
+        lut.setRange(_rangeWidget->fromNormalizedRange().array);
 
-    _controller.publish( lut );
+    _controller.publish(lut);
 }
 
 void TransferFunctionEditor::_clear()
 {
     QPolygonF points;
-    points.push_back( { 0, 0 } );
-    points.push_back( { 1, 1 } );
-    for( const auto& channel: channels )
-        _controlPointsWidgets[ (size_t)channel ]->setControlPoints( points );
+    points.push_back({0, 0});
+    points.push_back({1, 1});
+    for (const auto& channel : channels)
+        _controlPointsWidgets[(size_t)channel]->setControlPoints(points);
 
     _histogram = lexis::render::Histogram();
-    _controller.publish( ::lexis::Request( _histogram.getTypeIdentifier( )));
-    emit histogramChanged( _ui->histogramScaleCheckBox->checkState() == Qt::Checked );
+    _controller.publish(::lexis::Request(_histogram.getTypeIdentifier()));
+    emit histogramChanged(_ui->histogramScaleCheckBox->checkState() ==
+                          Qt::Checked);
     emit transferFunctionChanged();
 }
 
@@ -248,32 +252,33 @@ const quint32 TF_FILE_HEADER = 0xdeadbeef;
 const quint32 TF_FILE_VERSION_1 = 1; // stores control points absolutely
                                      // considering widget geometry (sigh)
 const quint32 TF_FILE_VERSION_2 = 2; // stores control points normalized
-const QString TF_FILE_FILTER( "Transfer function's control points, *.tf" );
-const QString DT_FILE_FILTER( "ImageVis3d compatible ascii, *.1dt" );
-const QString TF_FILTERS( TF_FILE_FILTER + ";;" + DT_FILE_FILTER );
+const QString TF_FILE_FILTER("Transfer function's control points, *.tf");
+const QString DT_FILE_FILTER("ImageVis3d compatible ascii, *.1dt");
+const QString TF_FILTERS(TF_FILE_FILTER + ";;" + DT_FILE_FILTER);
 
-QPolygonF _filterPoints( const QPolygonF& points )
+QPolygonF _filterPoints(const QPolygonF& points)
 {
     QPolygonF filteredPoints;
     float prevSlope = 0;
     QPointF prevPoint = points.first();
     const float epsilon = 0.001f;
-    for( int i = 1; i < points.size() - 1; ++i )
+    for (int i = 1; i < points.size() - 1; ++i)
     {
         const auto& currentPoint = points[i];
-        const QLineF currentLine( prevPoint, currentPoint );
-        const float currentSlope = float(currentLine.dy()) / float(currentLine.dx());
+        const QLineF currentLine(prevPoint, currentPoint);
+        const float currentSlope =
+            float(currentLine.dy()) / float(currentLine.dx());
 
         bool change = std::abs(prevSlope - currentSlope) > epsilon;
-        if( change )
+        if (change)
         {
-            const QLineF nextLine( currentPoint, points[ i + 1 ] );
+            const QLineF nextLine(currentPoint, points[i + 1]);
             const float nextSlope = float(nextLine.dy()) / float(nextLine.dx());
-            if( std::abs(prevSlope - nextSlope) <= epsilon )
+            if (std::abs(prevSlope - nextSlope) <= epsilon)
                 change = false;
         }
 
-        if( change || i == 1 )
+        if (change || i == 1)
         {
             prevSlope = currentSlope;
             filteredPoints << prevPoint;
@@ -288,67 +293,68 @@ QPolygonF _filterPoints( const QPolygonF& points )
 void TransferFunctionEditor::_load()
 {
     QString selectedFilter;
-    const QString filename = QFileDialog::getOpenFileName( this, "Load transfer function",
-                                                           QString(),
-                                                           TF_FILTERS, &selectedFilter );
-    if( filename.isEmpty( ))
+    const QString filename =
+        QFileDialog::getOpenFileName(this, "Load transfer function", QString(),
+                                     TF_FILTERS, &selectedFilter);
+    if (filename.isEmpty())
         return;
 
-    if( selectedFilter == TF_FILE_FILTER )
+    if (selectedFilter == TF_FILE_FILTER)
     {
-        QFile file( filename );
-        file.open( QIODevice::ReadOnly );
-        QDataStream in( &file );
+        QFile file(filename);
+        file.open(QIODevice::ReadOnly);
+        QDataStream in(&file);
 
         quint32 header;
         in >> header;
-        if( header != TF_FILE_HEADER )
+        if (header != TF_FILE_HEADER)
             return;
 
         quint32 version;
         in >> version;
-        if( version != TF_FILE_VERSION_1 && version != TF_FILE_VERSION_2 )
+        if (version != TF_FILE_VERSION_1 && version != TF_FILE_VERSION_2)
             return;
 
-        for( auto& widget: _controlPointsWidgets )
+        for (auto& widget : _controlPointsWidgets)
         {
             QPolygonF points;
             in >> points;
-            if( version == TF_FILE_VERSION_1 )
+            if (version == TF_FILE_VERSION_1)
             {
-                for( auto& point : points )
+                for (auto& point : points)
                 {
-                    point.setX( point.x() / widget->width( ));
-                    point.setY( 1.f - (point.y() / widget->height( )));
+                    point.setX(point.x() / widget->width());
+                    point.setY(1.f - (point.y() / widget->height()));
                 }
             }
-            widget->setControlPoints( points );
+            widget->setControlPoints(points);
         }
     }
-    else if( selectedFilter == DT_FILE_FILTER )
+    else if (selectedFilter == DT_FILE_FILTER)
     {
-        std::ifstream file( filename.toStdString( ));
+        std::ifstream file(filename.toStdString());
         uint32_t samples;
         file >> samples;
-        if( samples != COLORSAMPLES )
+        if (samples != COLORSAMPLES)
             return;
 
         constexpr size_t nChannels = 4;
         QPolygonF points[nChannels];
-        for( size_t i = 0; i < nChannels; ++i )
-            points[i].resize( samples );
+        for (size_t i = 0; i < nChannels; ++i)
+            points[i].resize(samples);
 
-        for( size_t i = 0; i < samples; ++i )
+        for (size_t i = 0; i < samples; ++i)
         {
-            for( size_t j = 0; j < nChannels; ++j )
+            for (size_t j = 0; j < nChannels; ++j)
             {
-                points[j][i].rx() = i/float(samples-1);
+                points[j][i].rx() = i / float(samples - 1);
                 file >> points[j][i].ry();
             }
         }
 
-        for( size_t i = 0; i < nChannels; ++i )
-            _controlPointsWidgets[i]->setControlPoints( _filterPoints( points[i] ));
+        for (size_t i = 0; i < nChannels; ++i)
+            _controlPointsWidgets[i]->setControlPoints(
+                _filterPoints(points[i]));
     }
     else
         return;
@@ -359,31 +365,31 @@ void TransferFunctionEditor::_load()
 void TransferFunctionEditor::_save()
 {
     QString selectedFilter;
-    QString filename = QFileDialog::getSaveFileName( this, "Save transfer function",
-                                                           QString(),
-                                                           TF_FILTERS, &selectedFilter );
-    if( selectedFilter == TF_FILE_FILTER )
+    QString filename =
+        QFileDialog::getSaveFileName(this, "Save transfer function", QString(),
+                                     TF_FILTERS, &selectedFilter);
+    if (selectedFilter == TF_FILE_FILTER)
     {
-        if( !filename.endsWith( ".tf" ))
-            filename.append( ".tf" );
+        if (!filename.endsWith(".tf"))
+            filename.append(".tf");
 
-        QFile file( filename );
-        file.open( QIODevice::WriteOnly );
-        QDataStream out( &file );
-        out.setVersion( QDataStream::Qt_5_0 );
+        QFile file(filename);
+        file.open(QIODevice::WriteOnly);
+        QDataStream out(&file);
+        out.setVersion(QDataStream::Qt_5_0);
 
         out << TF_FILE_HEADER << TF_FILE_VERSION_2;
 
-        for( const auto& widget : _controlPointsWidgets )
+        for (const auto& widget : _controlPointsWidgets)
             out << widget->getControlPoints();
     }
-    else if( selectedFilter == DT_FILE_FILTER )
+    else if (selectedFilter == DT_FILE_FILTER)
     {
-        if( !filename.endsWith( ".1dt" ))
-            filename.append( ".1dt" );
+        if (!filename.endsWith(".1dt"))
+            filename.append(".1dt");
 
         std::ofstream file;
-        file.open( filename.toStdString( ));
+        file.open(filename.toStdString());
         file << COLORSAMPLES << std::endl;
 
         const auto& reds = _controlPointsWidgets[0]->getCurve();
@@ -391,7 +397,7 @@ void TransferFunctionEditor::_save()
         const auto& blues = _controlPointsWidgets[2]->getCurve();
         const auto& alphas = _controlPointsWidgets[3]->getCurve();
 
-        for( size_t i = 0; i < COLORSAMPLES; ++i )
+        for (size_t i = 0; i < COLORSAMPLES; ++i)
             file << reds[i] / 255.f << " " << greens[i] / 255.f << " "
                  << blues[i] / 255.f << " " << alphas[i] / 255.f << std::endl;
     }
@@ -404,17 +410,16 @@ void TransferFunctionEditor::_onTransferFunctionChanged()
     _publishMaterialLUT();
 }
 
-void TransferFunctionEditor::_onRangeChanged( const vmml::Vector2f range )
+void TransferFunctionEditor::_onRangeChanged(const vmml::Vector2f range)
 {
-    _alphaWidget->setRange( range );
+    _alphaWidget->setRange(range);
     _publishTransferFunction();
     _publishMaterialLUT();
 }
 
-void TransferFunctionEditor::_onHistogramChanged( const bool logScale )
+void TransferFunctionEditor::_onHistogramChanged(const bool logScale)
 {
-    _alphaWidget->setHistogram( _histogram, logScale );
-    _rangeWidget->setHistogram( _histogram, logScale );
+    _alphaWidget->setHistogram(_histogram, logScale);
+    _rangeWidget->setHistogram(_histogram, logScale);
 }
-
 }

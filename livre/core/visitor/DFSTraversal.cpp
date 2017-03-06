@@ -17,51 +17,48 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/core/visitor/VisitState.h>
-#include <livre/core/visitor/NodeVisitor.h>
 #include <livre/core/data/DataSource.h>
 #include <livre/core/visitor/DFSTraversal.h>
+#include <livre/core/visitor/NodeVisitor.h>
+#include <livre/core/visitor/VisitState.h>
 #include <livre/core/visitor/VisitState.h>
 
 namespace livre
 {
-
 struct DFSTraversal::Impl
 {
 public:
-
-    bool traverse( const NodeId& nodeId,
-                   const uint32_t depth,
-                   livre::NodeVisitor& visitor )
+    bool traverse(const NodeId& nodeId, const uint32_t depth,
+                  livre::NodeVisitor& visitor)
     {
-        if( depth == 0 || _state.getBreakTraversal() )
+        if (depth == 0 || _state.getBreakTraversal())
             return false;
 
         _state = VisitState();
 
-        if( _state.getBreakTraversal( ) )
+        if (_state.getBreakTraversal())
             return true;
 
-        visitor.visit( nodeId, _state );
+        visitor.visit(nodeId, _state);
 
-        if( _state.getBreakTraversal() || !_state.getVisitChild() )
+        if (_state.getBreakTraversal() || !_state.getVisitChild())
         {
-            _state.setVisitChild( true );
+            _state.setVisitChild(true);
             return false;
         }
 
         const NodeIds& nodeIds = nodeId.getChildren();
-        for( const NodeId& childNodeId: nodeIds )
+        for (const NodeId& childNodeId : nodeIds)
         {
-            traverse( childNodeId, depth - 1, visitor );
-            if( !_state.getVisitNeighbours() )
+            traverse(childNodeId, depth - 1, visitor);
+            if (!_state.getVisitNeighbours())
                 break;
         }
 
-        _state.setVisitNeighbours( true );
+        _state.setVisitNeighbours(true);
 
         bool retVal = _state.getBreakTraversal();
-        _state.setBreakTraversal( false );
+        _state.setBreakTraversal(false);
 
         return retVal;
     }
@@ -69,39 +66,36 @@ public:
     VisitState _state; //!< Status of the travel
 };
 
-DFSTraversal::DFSTraversal( )
-    : _impl( new DFSTraversal::Impl() )
+DFSTraversal::DFSTraversal()
+    : _impl(new DFSTraversal::Impl())
 {
 }
 
 DFSTraversal::~DFSTraversal()
 {
-    
 }
 
-bool DFSTraversal::traverse( const RootNode& rootNode, const NodeId& node,
-                             NodeVisitor& visitor )
+bool DFSTraversal::traverse(const RootNode& rootNode, const NodeId& node,
+                            NodeVisitor& visitor)
 {
     visitor.visitPre();
-    const bool ret = _impl->traverse( node, rootNode.getDepth(), visitor );
+    const bool ret = _impl->traverse(node, rootNode.getDepth(), visitor);
     visitor.visitPost();
     return ret;
 }
 
-void DFSTraversal::traverse( const RootNode& rootNode, NodeVisitor& visitor,
-                             const uint32_t timeStep )
+void DFSTraversal::traverse(const RootNode& rootNode, NodeVisitor& visitor,
+                            const uint32_t timeStep)
 {
     visitor.visitPre();
     const Vector3ui& blockSize = rootNode.getBlockSize();
-    for( uint32_t x = 0; x < blockSize.x(); ++x )
-        for( uint32_t y = 0; y < blockSize.y(); ++y )
-            for( uint32_t z = 0; z < blockSize.z(); ++z )
+    for (uint32_t x = 0; x < blockSize.x(); ++x)
+        for (uint32_t y = 0; y < blockSize.y(); ++y)
+            for (uint32_t z = 0; z < blockSize.z(); ++z)
             {
-                _impl->traverse( NodeId( 0, Vector3ui( x, y, z ), timeStep ),
-                                 rootNode.getDepth(), visitor );
+                _impl->traverse(NodeId(0, Vector3ui(x, y, z), timeStep),
+                                rootNode.getDepth(), visitor);
             }
     visitor.visitPost();
 }
-
-
 }

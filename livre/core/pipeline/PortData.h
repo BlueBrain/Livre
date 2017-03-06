@@ -24,7 +24,6 @@
 
 namespace livre
 {
-
 /**
  * Base class for keeping the track for types of data
  * by using the std::type_index.
@@ -35,35 +34,36 @@ public:
     const std::type_index dataType;
 
 protected:
-    explicit PortData( const std::type_index& dataType_ )
-        : dataType( dataType_ ) {}
+    explicit PortData(const std::type_index& dataType_)
+        : dataType(dataType_)
+    {
+    }
     virtual ~PortData() {}
 };
 
 /**
  * Holds the T typed data.
  */
-template< class T>
+template <class T>
 struct PortDataT final : public PortData
 {
     /**
      * Constructor
      * @param data_ is copied
      */
-    explicit PortDataT( const T& data_ )
-        : PortData( getType< T >())
-        , data( data_ )
-    {}
+    explicit PortDataT(const T& data_)
+        : PortData(getType<T>())
+        , data(data_)
+    {
+    }
 
     ~PortDataT() {}
     const T data;
 
-    PortDataT( const PortDataT< T >& ) = delete;
-    PortDataT( PortDataT< T >&& ) = delete;
-    PortDataT< T >& operator=( const PortDataT< T >& ) = delete;
+    PortDataT(const PortDataT<T>&) = delete;
+    PortDataT(PortDataT<T>&&) = delete;
+    PortDataT<T>& operator=(const PortDataT<T>&) = delete;
 };
-
 }
 
 #endif // _PortData_h_
-

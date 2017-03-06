@@ -21,12 +21,11 @@
 #define _FutureMap_h_
 
 #include <livre/core/api.h>
-#include <livre/core/types.h>
 #include <livre/core/pipeline/FuturePromise.h>
+#include <livre/core/types.h>
 
 namespace livre
 {
-
 /**
  * FutureMap is a wrapper class to query the map of ( name, future )
  * futures with for data and state. In the map there can be multiple futures
@@ -43,12 +42,11 @@ namespace livre
 class FutureMap
 {
 public:
-
     /**
      * @param futures is the list of futures
      * future names are used for name-future association.
      */
-    LIVRECORE_API explicit FutureMap( const Futures& futures );
+    LIVRECORE_API explicit FutureMap(const Futures& futures);
     LIVRECORE_API ~FutureMap();
 
     /**
@@ -61,12 +59,12 @@ public:
      * @throw std::runtime_error when the data is not exact
      * type T
      */
-    template< class T >
-    std::vector< T > get( const std::string& name ) const
+    template <class T>
+    std::vector<T> get(const std::string& name) const
     {
-        std::vector< T > results;
-        for( const auto& future: getFutures( name ))
-            results.push_back( future.get< T >( ));
+        std::vector<T> results;
+        for (const auto& future : getFutures(name))
+            results.push_back(future.get<T>());
 
         return results;
     }
@@ -80,16 +78,16 @@ public:
      * @throw std::runtime_error when the data is not exact
      * type T
      */
-    template< class T >
-    std::vector< T > getReady( const std::string& name ) const
+    template <class T>
+    std::vector<T> getReady(const std::string& name) const
     {
-        std::vector< T > results;
-        for( const auto& future: getFutures( name ))
+        std::vector<T> results;
+        for (const auto& future : getFutures(name))
         {
-            if( !future.isReady())
+            if (!future.isReady())
                 continue;
 
-            results.push_back( future.get< T >( ));
+            results.push_back(future.get<T>());
         }
         return results;
     }
@@ -98,7 +96,7 @@ public:
      * @param name of the future.
      * @return the futures with the given name
      */
-    LIVRECORE_API Futures getFutures( const std::string& name ) const;
+    LIVRECORE_API Futures getFutures(const std::string& name) const;
 
     /**
      * @return the futures
@@ -112,7 +110,7 @@ public:
      * @throw std::logic_error when there is no future associated with the
      * given name
      */
-    LIVRECORE_API bool isReady( const std::string& name ) const;
+    LIVRECORE_API bool isReady(const std::string& name) const;
 
     /**
      * Queries if all futures are ready
@@ -128,7 +126,7 @@ public:
      * @throw std::logic_error when there is no future associated with the
      * given name
      */
-    LIVRECORE_API void wait( const std::string& name ) const;
+    LIVRECORE_API void wait(const std::string& name) const;
 
     /**
      * Waits all futures
@@ -143,7 +141,7 @@ public:
      * @throw std::logic_error when there is no future associated with the
      * given name
      */
-    LIVRECORE_API void waitForAny( const std::string& name ) const;
+    LIVRECORE_API void waitForAny(const std::string& name) const;
 
     /**
      * Waits all futures.
@@ -153,7 +151,6 @@ public:
     LIVRECORE_API void waitForAny() const;
 
 private:
-
     struct Impl;
     std::shared_ptr<Impl> _impl;
 };
@@ -166,12 +163,11 @@ private:
 class UniqueFutureMap
 {
 public:
-
     /**
      * @param futures the list of futures.
      * @throw std::logic_error when futures are not unique in names
      */
-    LIVRECORE_API explicit UniqueFutureMap( const Futures& futures );
+    LIVRECORE_API explicit UniqueFutureMap(const Futures& futures);
     LIVRECORE_API ~UniqueFutureMap();
 
     /**
@@ -185,10 +181,10 @@ public:
      * @throw std::runtime_error when the data is not exact
      * type T
      */
-    template< class T >
-    const T& get( const std::string& name ) const
+    template <class T>
+    const T& get(const std::string& name) const
     {
-         return getFuture( name ).get< T >();
+        return getFuture(name).get<T>();
     }
 
     /**
@@ -197,7 +193,7 @@ public:
      * @throw std::logic_error when there is no future associated with the
      * given name
      */
-    LIVRECORE_API Future getFuture( const std::string& name ) const;
+    LIVRECORE_API Future getFuture(const std::string& name) const;
 
     /**
      * @return all the futures.
@@ -211,7 +207,7 @@ public:
      * @throw std::logic_error when there is no future associated with the
      * given name
      */
-    LIVRECORE_API bool isReady( const std::string& name ) const;
+    LIVRECORE_API bool isReady(const std::string& name) const;
 
     /**
      * Queries if future is ready for a given name
@@ -227,7 +223,7 @@ public:
      * @throw std::logic_error when there is no future associated with the
      * given name
      */
-    LIVRECORE_API void wait( const std::string& name ) const;
+    LIVRECORE_API void wait(const std::string& name) const;
 
     /**
      * Waits for all the futures
@@ -242,11 +238,9 @@ public:
     LIVRECORE_API void waitForAny() const;
 
 private:
-
     struct Impl;
     std::shared_ptr<Impl> _impl;
 };
-
 }
 
 #endif // _FutureMap_h_

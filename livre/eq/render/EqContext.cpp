@@ -19,58 +19,58 @@
 
 #include <eq/eq.h>
 
-#include <livre/eq/render/EqContext.h>
 #include <livre/eq/Pipe.h>
 #include <livre/eq/Window.h>
+#include <livre/eq/render/EqContext.h>
 
 namespace livre
 {
-
 namespace
 {
 boost::mutex glContextMutex;
 }
 
-EqContext::EqContext( Window* const window )
-    : GLContext( window->glewGetContext( ))
-    , _window( window )
-    , _systemWindow( 0 )
-{}
+EqContext::EqContext(Window* const window)
+    : GLContext(window->glewGetContext())
+    , _window(window)
+    , _systemWindow(0)
+{
+}
 
 EqContext::~EqContext()
 {
     delete _systemWindow;
 }
 
-void EqContext::share( const GLContext& src )
+void EqContext::share(const GLContext& src)
 {
-    LBASSERT( _window );
-    ScopedLock lock( glContextMutex );
+    LBASSERT(_window);
+    ScopedLock lock(glContextMutex);
 
     // Context is already created so return.
-    if( _systemWindow )
+    if (_systemWindow)
         return;
 
-    const EqContext* parent = dynamic_cast< const EqContext* >( &src );
-    if( !parent )
+    const EqContext* parent = dynamic_cast<const EqContext*>(&src);
+    if (!parent)
     {
         LBERROR << "Only same kind of contexts can be shared" << std::endl;
         return;
     }
 
-    if( !parent->_window )
+    if (!parent->_window)
     {
         LBERROR << "Parent context can not be NULL" << std::endl;
         return;
     }
 
     eq::WindowSettings settings = _window->getSettings();
-    settings.setSharedContextWindow( _window->getSystemWindow() );
-    settings.setIAttribute( eq::WindowSettings::IATTR_HINT_DRAWABLE, eq::OFF );
+    settings.setSharedContextWindow(_window->getSystemWindow());
+    settings.setIAttribute(eq::WindowSettings::IATTR_HINT_DRAWABLE, eq::OFF);
     const eq::Pipe* pipe = _window->getPipe();
-    _systemWindow = pipe->getWindowSystem().createWindow( _window, settings );
+    _systemWindow = pipe->getWindowSystem().createWindow(_window, settings);
 
-    if( !_systemWindow->configInit( ))
+    if (!_systemWindow->configInit())
     {
         delete _systemWindow;
         _systemWindow = 0;
@@ -79,12 +79,12 @@ void EqContext::share( const GLContext& src )
 
 GLContextPtr EqContext::clone() const
 {
-    return GLContextPtr( new EqContext( _window ));
+    return GLContextPtr(new EqContext(_window));
 }
 
 void EqContext::makeCurrent()
 {
-    if( _systemWindow )
+    if (_systemWindow)
     {
         GLContext::makeCurrent();
         _systemWindow->makeCurrent();
@@ -93,11 +93,10 @@ void EqContext::makeCurrent()
 
 void EqContext::doneCurrent()
 {
-    if( _systemWindow )
+    if (_systemWindow)
     {
         GLContext::doneCurrent();
         _systemWindow->doneCurrent();
     }
 }
-
 }

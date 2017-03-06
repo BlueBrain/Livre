@@ -28,7 +28,6 @@
 
 namespace livre
 {
-
 /**
  * The application class to create a Livre renderer which can run() in an
  * automatic render loop or from an external loop with explicit render() calls.
@@ -36,7 +35,7 @@ namespace livre
 class Engine
 {
 public:
-    LIVREEQ_API Engine( int argc, char** argv );
+    LIVREEQ_API Engine(int argc, char** argv);
     LIVREEQ_API ~Engine();
 
     /** @return Help string */
@@ -52,7 +51,7 @@ public:
      * @param argc Argument count.
      * @param argv Argument list.
      */
-    LIVREEQ_API void run( const int argc, char** argv );
+    LIVREEQ_API void run(const int argc, char** argv);
 
     /**
      * Render a frame and return its result in the provided callback.
@@ -61,7 +60,7 @@ public:
      * @param func callback function containing the rendered image.
      * @return true if a redraw is required, e.g. data is still dirty/loaded.
      */
-    LIVREEQ_API bool render( const eq::View::ScreenshotFunc& func );
+    LIVREEQ_API bool render(const eq::View::ScreenshotFunc& func);
 
     /** @return the per-frame data. */
     LIVREEQ_API FrameData& getFrameData();
@@ -70,7 +69,7 @@ public:
     LIVREEQ_API const VolumeInformation& getVolumeInformation() const;
 
     /** Resize the active layout aka windows/drawables/buffers */
-    LIVREEQ_API void resize( const Vector2ui& size );
+    LIVREEQ_API void resize(const Vector2ui& size);
 
     /** @return the current histogram. */
     LIVREEQ_API const Histogram& getHistogram() const;
@@ -80,8 +79,7 @@ public:
 
 private:
     struct Impl;
-    std::unique_ptr< Impl > _impl;
+    std::unique_ptr<Impl> _impl;
 };
-
 }
 #endif

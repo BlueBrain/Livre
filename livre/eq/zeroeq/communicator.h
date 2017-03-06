@@ -24,7 +24,6 @@ namespace livre
 {
 namespace zeroeq
 {
-
 /**
  * Communicator using ZeroEQ to setup publishers and subscribers for event
  * exchange with other applications.
@@ -33,7 +32,7 @@ namespace zeroeq
 class Communicator
 {
 public:
-    Communicator( Config& config, int argc, char** argv );
+    Communicator(Config& config, int argc, char** argv);
     ~Communicator();
 
     /**
@@ -42,7 +41,7 @@ public:
      * @param data pointer to image pixels
      * @param size size of image pixels pointer
      */
-    void publishImageJPEG( const uint8_t* data, const uint64_t size );
+    void publishImageJPEG(const uint8_t* data, const uint64_t size);
 
     /** Publish frame (start, current, end, delta) parameters */
     void publishFrame();
@@ -51,21 +50,20 @@ public:
      * Publish Camera
      * @param modelview the livre space modelview matrix
      */
-    void publishCamera( const Matrix4f& modelview );
+    void publishCamera(const Matrix4f& modelview);
 
     /** Publish a serializable object */
-    bool publish( const servus::Serializable& serializable );
+    bool publish(const servus::Serializable& serializable);
 
     /** Non-blocking receive & handle of all pending events. */
     void handleEvents();
 
 private:
     class Impl;
-    std::unique_ptr< Impl > _impl;
+    std::unique_ptr<Impl> _impl;
 
-    Communicator( const Communicator& ) = delete;
-    Communicator& operator=( const Communicator& ) = delete;
+    Communicator(const Communicator&) = delete;
+    Communicator& operator=(const Communicator&) = delete;
 };
-
 }
 }
