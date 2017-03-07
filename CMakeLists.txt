@@ -36,7 +36,8 @@ if(APPLE) # WAR otherwise MacPorts X11 (/opt/local) is preferred
 endif()
 
 if(CMAKE_SYSTEM_NAME MATCHES "Linux")
-  git_subproject(Tuvok https://github.com/BlueBrain/Tuvok.git bbp)
+  set(TUVOK_QUIET ON)
+  git_subproject(Tuvok https://github.com/SCIInstitute/Tuvok.git master)
 endif()
 
 common_find_package(Boost REQUIRED COMPONENTS filesystem program_options thread

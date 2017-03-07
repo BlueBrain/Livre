@@ -230,7 +230,6 @@ void Engine::resize(const Vector2ui& size)
     if (layout)
         layout->setPixelViewport(
             eq::PixelViewport{0, 0, int32_t(size.x()), int32_t(size.y())});
-    ;
 }
 
 const Histogram& Engine::getHistogram() const
