@@ -61,7 +61,7 @@ common_find_package(ZeroBuf REQUIRED)
 common_find_package_post()
 
 include(EqGLLibraries)
-set(LIVRE_DEPENDENT_LIBRARIES vmmlib Lunchbox Equalizer ZeroBuf)
+set(LIVRE_DEPENDENT_LIBRARIES vmmlib Lexis Lunchbox Equalizer ZeroBuf)
 
 add_definitions(-DBOOST_PROGRAM_OPTIONS_DYN_LINK) # Fix for windows and shared boost.
 add_subdirectory(livre)
