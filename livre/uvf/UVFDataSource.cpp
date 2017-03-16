@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -244,8 +244,6 @@ public:
         const UINT64VECTOR4& coords = _uvfDataSetPtr->KeyToTOCVector(brickKey);
         const TOCEntry& blockInfo = _uvfTOCBlock->GetBrickInfo(coords);
 
-        MemoryUnitPtr memUnitPtr;
-
         if (blockInfo.m_eCompression == CT_NONE)
         {
             const std::uint64_t offset = _offset + blockInfo.m_iOffset;
@@ -254,38 +252,40 @@ public:
                 (const unsigned char*)_tuvokLargeMMapFilePtr->rd(offset, length)
                     .get();
 
-            memUnitPtr.reset(new ConstMemoryUnit(dataPtr));
+            // 'touch' aka copy the data first from mmap. Otherwise, the OpenGL
+            // texture upload will do that for you which leads to a lock in the
+            // driver and causes every other GL call to wait. This basically
+            // means that your rendering can't continue and your entire
+            // application is blocked.
+            auto memoryUnit = new AllocMemoryUnit(length);
+            memcpy(memoryUnit->getData<uint8_t>(), dataPtr, length);
+            return MemoryUnitPtr{memoryUnit};
         }
-        else
+
+        const Vector3ui dimensions =
+            node.getVoxelBox().getSize() + _volumeInfo.overlap * 2;
+        const size_t uncompressedSize = dimensions.product() *
+                                        _volumeInfo.compCount *
+                                        _volumeInfo.getBytesPerVoxel();
+
+        std::vector<T> tuvokData;
+        tuvokData.resize(uncompressedSize);
+
+        if (blockInfo.m_eCompression == CT_ZLIB)
         {
-            const Vector3ui dimensions =
-                node.getVoxelBox().getSize() + _volumeInfo.overlap * 2;
-            const uint32_t uncompressedSize = dimensions.product() *
-                                              _volumeInfo.compCount *
-                                              _volumeInfo.getBytesPerVoxel();
+            const void* dataPtr =
+                _tuvokLargeMMapFilePtr
+                    ->rd(_offset + blockInfo.m_iOffset, blockInfo.m_iLength)
+                    .get();
 
-            std::vector<T> tuvokData;
-            tuvokData.resize(uncompressedSize);
-
-            if (blockInfo.m_eCompression == CT_ZLIB)
-            {
-                const void* dataPtr =
-                    _tuvokLargeMMapFilePtr
-                        ->rd(_offset + blockInfo.m_iOffset, blockInfo.m_iLength)
-                        .get();
-
-                std::shared_ptr<std::uint8_t> src(
-                    (std::uint8_t*)dataPtr, DontDeleteObject<std::uint8_t>());
-                std::shared_ptr<std::uint8_t> dst(
-                    (std::uint8_t*)&tuvokData[0],
-                    DontDeleteObject<std::uint8_t>());
-                zDecompress(src, dst, uncompressedSize);
-            }
-
-            memUnitPtr.reset(new AllocMemoryUnit(tuvokData));
+            std::shared_ptr<std::uint8_t> src((std::uint8_t*)dataPtr,
+                                              DontDeleteObject<std::uint8_t>());
+            std::shared_ptr<std::uint8_t> dst((std::uint8_t*)&tuvokData[0],
+                                              DontDeleteObject<std::uint8_t>());
+            zDecompress(src, dst, uncompressedSize);
         }
 
-        return memUnitPtr;
+        return MemoryUnitPtr{new AllocMemoryUnit(tuvokData)};
     }
 
     LODNode internalNodeToLODNode(const NodeId& internalNode) const

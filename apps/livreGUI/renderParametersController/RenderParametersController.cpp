@@ -76,6 +76,11 @@ struct RenderParametersController::Impl
                             _params.setShowAxes(value != 0);
                             publish();
                         });
+        parent->connect(_ui.linearFilteringCheckBox, &QCheckBox::stateChanged,
+                        [&](int value) {
+                            _params.setLinearFiltering(value != 0);
+                            publish();
+                        });
 
         parent->connect(&_params, &v1::VolumeRendererParameters::maxLodChanged,
                         [&](uint32_t value) {
@@ -109,6 +114,11 @@ struct RenderParametersController::Impl
                         &v1::VolumeRendererParameters::showAxesChanged,
                         [&](bool value) {
                             _ui.showAxesCheckBox->setChecked(value);
+                        });
+        parent->connect(&_params,
+                        &v1::VolumeRendererParameters::linearFilteringChanged,
+                        [&](bool value) {
+                            _ui.linearFilteringCheckBox->setChecked(value);
                         });
 
         _controller.subscribe(_params);

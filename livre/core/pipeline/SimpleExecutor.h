@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -38,13 +38,15 @@ class SimpleExecutor : public Executor
 {
 public:
     /**
+     * @param name name for the thread
      * @param threadCount is number of worker threads
      * @param glContext if a gl context is provided, a new context will be
      * created and
      * the worker threads will share the context with the given context
      */
     LIVRECORE_API SimpleExecutor(
-        size_t threadCount, ConstGLContextPtr glContext = ConstGLContextPtr());
+        const std::string& name, size_t threadCount,
+        ConstGLContextPtr glContext = ConstGLContextPtr());
 
     LIVRECORE_API virtual ~SimpleExecutor();
 

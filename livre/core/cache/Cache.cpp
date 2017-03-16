@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -160,8 +160,12 @@ struct Cache::Impl
         ReadLock readLock(_mutex);
         ConstCacheMap::const_iterator it = _cacheMap.find(cacheId);
         if (it == _cacheMap.end())
+        {
+            _statistics.notifyMiss();
             return CacheObjectPtr();
+        }
 
+        _statistics.notifyHit();
         return it->second;
     }
 

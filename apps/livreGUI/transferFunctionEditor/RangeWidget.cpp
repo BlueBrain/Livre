@@ -132,7 +132,7 @@ bool RangeWidget::eventFilter(QObject* watched, QEvent* event)
 
 void RangeWidget::setRangeX(const qreal rangeX)
 {
-    if (qFuzzyCompare(_rangeX, rangeX))
+    if (qFuzzyCompare(_rangeX, rangeX) || !std::isfinite(rangeX))
         return;
 
     _rangeX = rangeX;
@@ -147,7 +147,7 @@ qreal RangeWidget::getRangeX() const
 
 void RangeWidget::setRangeY(const qreal rangeY)
 {
-    if (qFuzzyCompare(_rangeY, rangeY))
+    if (qFuzzyCompare(_rangeY, rangeY) || !std::isfinite(rangeY))
         return;
 
     _rangeY = rangeY;

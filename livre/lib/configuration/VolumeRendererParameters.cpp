@@ -30,6 +30,7 @@ const std::string MINLOD_PARAM = "min-lod";
 const std::string MAXLOD_PARAM = "max-lod";
 const std::string SAMPLESPERRAY_PARAM = "samples-per-ray";
 const std::string SAMPLESPERPIXEL_PARAM = "samples-per-pixel";
+const std::string LINEARFILTERING_PARAM = "linear-filtering";
 
 VolumeRendererParameters::VolumeRendererParameters()
     : Parameters("Volume Renderer Parameters")
@@ -65,6 +66,9 @@ VolumeRendererParameters::VolumeRendererParameters()
     configuration_.addDescription(configGroupName_, SAMPLESPERPIXEL_PARAM,
                                   "Number of samples per pixel",
                                   getSamplesPerPixel());
+    configuration_.addDescription(
+        configGroupName_, LINEARFILTERING_PARAM,
+        "Use linear texture filtering instead of nearest", false);
 }
 
 void VolumeRendererParameters::initialize_()
@@ -83,6 +87,8 @@ void VolumeRendererParameters::initialize_()
         configuration_.getValue(SAMPLESPERRAY_PARAM, getSamplesPerRay()));
     setSamplesPerPixel(
         configuration_.getValue(SAMPLESPERPIXEL_PARAM, getSamplesPerPixel()));
+    setLinearFiltering(
+        configuration_.getValue(LINEARFILTERING_PARAM, getLinearFiltering()));
 }
 
 } // Livre

@@ -234,7 +234,7 @@ BOOST_AUTO_TEST_CASE(testWaitPipeline)
     const uint32_t inputValue = 90;
     livre::Pipeline pipeline = createPipeline(inputValue, 1);
 
-    livre::SimpleExecutor executor(2);
+    livre::SimpleExecutor executor("test", 2);
     const livre::FutureMap pipelineFutures(pipeline.schedule(executor));
     pipelineFutures.wait();
 
@@ -250,7 +250,7 @@ BOOST_AUTO_TEST_CASE(testAsynchronousPipeline)
     const uint32_t inputValue = 90;
 
     livre::Pipeline pipeline = createPipeline(inputValue, 1);
-    livre::SimpleExecutor executor(2);
+    livre::SimpleExecutor executor("test", 2);
 
     pipeline.schedule(executor);
     const livre::Executable& pipeOutput = pipeline.getExecutable("Consumer");
@@ -270,7 +270,7 @@ BOOST_AUTO_TEST_CASE(testOneToManyManyToOnePipeline)
         livre::Pipeline pipeline =
             createPipeline(inputValue, convertFilterCount);
 
-        livre::SimpleExecutor executor(2);
+        livre::SimpleExecutor executor("test", 2);
         pipeline.schedule(executor);
         const livre::Executable& pipeOutput =
             pipeline.getExecutable("Consumer");
@@ -288,7 +288,7 @@ BOOST_AUTO_TEST_CASE(testOneToManyManyToOnePipeline)
         livre::Pipeline pipeline =
             createPipeline(inputValue, convertFilterCount);
 
-        livre::SimpleExecutor executor(8);
+        livre::SimpleExecutor executor("test", 8);
         const livre::Futures& futures = pipeline.schedule(executor);
         const livre::Executable& pipeOutput =
             pipeline.getExecutable("Consumer");

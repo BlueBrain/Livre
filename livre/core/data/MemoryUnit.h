@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -89,10 +89,10 @@ private:
 class ConstMemoryUnit : public MemoryUnit
 {
 public:
-    explicit ConstMemoryUnit(const uint8_t* ptr);
+    ConstMemoryUnit(const uint8_t* ptr, size_t size);
     ~ConstMemoryUnit() {}
 protected:
-    size_t getAllocSize() const final { return 0; }
+    size_t getAllocSize() const final { return size_; }
     const uint8_t* _getData() const final;
     uint8_t* _getData() final
     {
@@ -100,6 +100,7 @@ protected:
         return 0;
     }
     const uint8_t* const ptr_;
+    const size_t size_;
 };
 
 /**

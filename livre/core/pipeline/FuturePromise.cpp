@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -39,7 +39,7 @@ struct Future::Impl
     {
     }
 
-    std::string getName() const { return _name; }
+    const std::string& getName() const { return _name; }
     PortDataPtr get(const std::type_index& dataType) const
     {
         const PortDataPtr& data = _future.get();
@@ -70,7 +70,7 @@ struct Promise::Impl
     {
     }
 
-    std::string getName() const { return _dataInfo.first; }
+    const std::string& getName() const { return _dataInfo.first; }
     std::type_index getDataType() const { return _dataInfo.second; }
     void set(const PortDataPtr& data)
     {
@@ -139,7 +139,7 @@ std::type_index Promise::getDataType() const
     return _impl->getDataType();
 }
 
-std::string Promise::getName() const
+const std::string& Promise::getName() const
 {
     return _impl->getName();
 }
@@ -176,11 +176,16 @@ Future::Future(const Future& future)
 {
 }
 
+Future::Future(Future&& future)
+    : _impl(std::move(future._impl))
+{
+}
+
 Future::~Future()
 {
 }
 
-std::string Future::getName() const
+const std::string& Future::getName() const
 {
     return _impl->getName();
 }

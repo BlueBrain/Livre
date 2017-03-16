@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                     Daniel Nachbaur <daniel.nachbaur@epfl.ch>
  *
@@ -22,10 +22,6 @@
 
 #include <livre/core/cache/Cache.h>
 #include <livre/core/data/DataSource.h>
-#include <livre/core/data/LODNode.h>
-#include <livre/core/data/MemoryUnit.h>
-
-#include <eq/gl.h>
 
 namespace livre
 {
@@ -42,39 +38,11 @@ public:
 
     ~Impl() {}
     const void* getDataPtr() const { return _data->getData<void>(); }
-    template <class DEST_TYPE>
-    bool readTextureData(const CacheId& cacheId, DataSource& dataSource)
+    bool load(const CacheId& cacheId, DataSource& dataSource)
     {
         const NodeId nodeId(cacheId);
         _data = dataSource.getData(nodeId);
-        if (!_data)
-            return false;
-        return true;
-    }
-
-    bool load(const CacheId& cacheId, DataSource& dataSource)
-    {
-        const DataType dataType = dataSource.getVolumeInfo().dataType;
-        switch (dataType)
-        {
-        case DT_UINT8:
-            return readTextureData<uint8_t>(cacheId, dataSource);
-        case DT_UINT16:
-            return readTextureData<uint16_t>(cacheId, dataSource);
-        case DT_UINT32:
-            return readTextureData<uint32_t>(cacheId, dataSource);
-        case DT_INT8:
-            return readTextureData<int8_t>(cacheId, dataSource);
-        case DT_INT16:
-            return readTextureData<int16_t>(cacheId, dataSource);
-        case DT_INT32:
-            return readTextureData<int32_t>(cacheId, dataSource);
-        case DT_FLOAT:
-            return readTextureData<float>(cacheId, dataSource);
-        case DT_UNDEFINED:
-            LBTHROW(std::runtime_error("Undefined data type"));
-        }
-        return false;
+        return !!_data;
     }
 
     ConstMemoryUnitPtr _data;

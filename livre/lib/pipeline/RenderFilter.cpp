@@ -38,14 +38,17 @@ struct RenderFilter::Impl
     {
         NodeIds renderBricks;
         for (const auto& cacheObjects : input.getFutures("CacheObjects"))
-            for (const auto& cacheObject :
-                 cacheObjects.get<ConstCacheObjects>())
+        {
+            const auto& objects = cacheObjects.get<ConstCacheObjects>();
+            renderBricks.reserve(renderBricks.size() + objects.size());
+            for (const auto& cacheObject : objects)
             {
                 const ConstTextureObjectPtr& texture =
                     std::static_pointer_cast<const TextureObject>(cacheObject);
 
                 renderBricks.emplace_back(texture->getId());
             }
+        }
 
         const auto& frustums = input.get<Frustum>("Frustum");
         const auto& clipPlanes = input.get<ClipPlanes>("ClipPlanes");

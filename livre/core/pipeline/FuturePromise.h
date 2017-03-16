@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -47,7 +47,7 @@ public:
     /**
      * @return the name of the connection
      */
-    LIVRECORE_API std::string getName() const;
+    LIVRECORE_API const std::string& getName() const;
 
     /**
      * Sets the port with the value.
@@ -103,17 +103,13 @@ class Future
 {
 public:
     ~Future();
-
-    /**
-     * Copy constructor
-     * @param future to be copied
-     */
     Future(const Future& future);
+    Future(Future&& future);
 
     /**
      * @return name of the future
      */
-    std::string getName() const;
+    const std::string& getName() const;
 
     /**
      * Constructs a shallow copy of the future with the given name

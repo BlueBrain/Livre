@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -33,11 +33,9 @@ namespace livre
 struct DataUploadFilter::Impl
 {
 public:
-    Impl(const size_t id, const size_t nUploaders, Cache& dataCache,
-         Cache& textureCache, DataSource& dataSource, TexturePool& texturePool)
-        : _id(id)
-        , _nUploaders(nUploaders)
-        , _dataCache(dataCache)
+    Impl(Cache& dataCache, Cache& textureCache, DataSource& dataSource,
+         TexturePool& texturePool)
+        : _dataCache(dataCache)
         , _textureCache(textureCache)
         , _dataSource(dataSource)
         , _texturePool(texturePool)
@@ -86,7 +84,8 @@ public:
         {
             ConstCacheObjectPtr texture =
                 _textureCache.get<TextureObject>(nodeId.getId());
-            cacheObjects.push_back(texture);
+            if (texture)
+                cacheObjects.push_back(texture);
         }
 
         return cacheObjects;
@@ -101,30 +100,26 @@ public:
         const auto& visibles = uniqueInputs.get<NodeIds>("VisibleNodes");
 
         const bool isAsync = !vrParams.getSynchronousMode();
-        const size_t perThreadSize =
-            std::max((size_t)1, visibles.size() / _nUploaders);
-
-        NodeIds partialVisibles;
-
-        if (_id * perThreadSize < visibles.size())
-        {
-            const NodeId* begin = visibles.data() + perThreadSize * _id;
-            if (_id == _nUploaders - 1) // last item
-                partialVisibles =
-                    NodeIds(begin,
-                            begin + (visibles.size() - (perThreadSize * _id)));
-            else
-                partialVisibles = NodeIds(begin, begin + perThreadSize);
-        }
 
         if (isAsync)
         {
-            output.set("CacheObjects",
-                       get(partialVisibles)); // Already loaded ones
-            load(partialVisibles);            // load
+            output.set("CacheObjects", get(visibles)); // Already loaded ones
+
+            // only load 1 missing texture at a time aka per frame. This might
+            // seem a waste of bandwidth but leads to a more responsive
+            // application as blocks which are not visible anymore won't still
+            // be queued for uploading.
+            for (const auto& node : visibles)
+            {
+                if (!_textureCache.get<TextureObject>(node.getId()))
+                {
+                    load(NodeIds(1, node)); // load
+                    break;
+                }
+            }
         }
         else
-            output.set("CacheObjects", load(partialVisibles)); // load all
+            output.set("CacheObjects", load(visibles)); // load all
     }
 
     DataInfos getInputDataInfos() const
@@ -142,20 +137,17 @@ public:
         };
     }
 
-    const size_t _id;
-    const size_t _nUploaders;
     Cache& _dataCache;
     Cache& _textureCache;
     DataSource& _dataSource;
     TexturePool& _texturePool;
 };
 
-DataUploadFilter::DataUploadFilter(const size_t id, const size_t nUploaders,
-                                   Cache& dataCache, Cache& textureCache,
+DataUploadFilter::DataUploadFilter(Cache& dataCache, Cache& textureCache,
                                    DataSource& dataSource,
                                    TexturePool& texturePool)
-    : _impl(new DataUploadFilter::Impl(id, nUploaders, dataCache, textureCache,
-                                       dataSource, texturePool))
+    : _impl(new DataUploadFilter::Impl(dataCache, textureCache, dataSource,
+                                       texturePool))
 {
 }
 

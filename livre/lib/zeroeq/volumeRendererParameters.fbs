@@ -11,4 +11,5 @@ table VolumeRendererParameters {
   max_gpu_cache_memory:uint64_t = 3072;
   max_cpu_cache_memory:uint64_t = 8192;
   show_axes:bool = false;
+  linear_filtering:bool = false;
 }

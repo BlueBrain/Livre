@@ -40,7 +40,7 @@ namespace
 {
 const size_t nRenderThreads = 2;
 const size_t nUploadThreads = 1;
-const size_t nComputeThreads = 2;
+const size_t nComputeThreads = 4; // for faster histogram calculation
 }
 
 struct RenderPipeline::Impl
@@ -52,9 +52,9 @@ struct RenderPipeline::Impl
         , _textureCache(caches.textureCache)
         , _histogramCache(caches.histogramCache)
         , _texturePool(texturePool)
-        , _renderExecutor(nRenderThreads, glContext)
-        , _computeExecutor(nComputeThreads, glContext)
-        , _uploadExecutor(nUploadThreads, glContext)
+        , _renderExecutor("Render", nRenderThreads, glContext)
+        , _computeExecutor("Compute", nComputeThreads, glContext)
+        , _uploadExecutor("Upload", nUploadThreads, glContext)
     {
     }
 
@@ -67,7 +67,12 @@ struct RenderPipeline::Impl
             renderParams.frameInfo.timeStep);
         visibleSetGenerator.getPromise("DataRange")
             .set(renderParams.renderDataRange);
-        visibleSetGenerator.getPromise("Params").set(renderParams.vrParams);
+
+        // lower LOD level if the user is interacting through the volume
+        auto vrParams = renderParams.vrParams;
+        if (!renderParams.idle)
+            vrParams.setMaxLod(vrParams.getMinLod());
+        visibleSetGenerator.getPromise("Params").set(vrParams);
         visibleSetGenerator.getPromise("Viewport")
             .set(renderParams.pixelViewPort);
         visibleSetGenerator.getPromise("ClipPlanes")
@@ -196,21 +201,14 @@ struct RenderPipeline::Impl
         renderingSetGenerator.connect("RenderingDone", redrawFilter,
                                       "RenderingDone");
 
-        for (size_t i = 0; i < nUploadThreads; ++i)
-        {
-            std::stringstream name;
-            name << "DataUploader" << i;
-            PipeFilter uploader =
-                uploadPipeline.add<DataUploadFilter>(name.str(), i,
-                                                     nUploadThreads, _dataCache,
-                                                     _textureCache, _dataSource,
-                                                     _texturePool);
+        PipeFilter uploader =
+            uploadPipeline.add<DataUploadFilter>("DataUploader", _dataCache,
+                                                 _textureCache, _dataSource,
+                                                 _texturePool);
 
-            visibleSetGenerator.connect("VisibleNodes", uploader,
-                                        "VisibleNodes");
-            visibleSetGenerator.connect("Params", uploader, "Params");
-            uploader.connect("CacheObjects", redrawFilter, "CacheObjects");
-        }
+        visibleSetGenerator.connect("VisibleNodes", uploader, "VisibleNodes");
+        visibleSetGenerator.connect("Params", uploader, "Params");
+        uploader.connect("CacheObjects", redrawFilter, "CacheObjects");
 
         setupRenderFilter(renderFilter, renderParams, RENDER_ALL);
 
@@ -250,21 +248,15 @@ struct RenderPipeline::Impl
                                                renderer);
         setupRenderFilter(renderFilter, renderParams, renderStages);
 
-        for (size_t i = 0; i < nUploadThreads; ++i)
-        {
-            std::stringstream name;
-            name << "DataUploader" << i;
-            PipeFilter uploader =
-                uploadPipeline.add<DataUploadFilter>(name.str(), i,
-                                                     nUploadThreads, _dataCache,
-                                                     _textureCache, _dataSource,
-                                                     _texturePool);
+        PipeFilter uploader =
+            uploadPipeline.add<DataUploadFilter>("DataUploader", _dataCache,
+                                                 _textureCache, _dataSource,
+                                                 _texturePool);
 
-            uploader.getPromise("VisibleNodes").set(nodeIds);
-            uploader.getPromise("Params").set(renderParams.vrParams);
-            uploader.connect("CacheObjects", renderFilter, "CacheObjects");
-            uploader.connect("CacheObjects", histogramFilter, "CacheObjects");
-        }
+        uploader.getPromise("VisibleNodes").set(nodeIds);
+        uploader.getPromise("Params").set(renderParams.vrParams);
+        uploader.connect("CacheObjects", renderFilter, "CacheObjects");
+        uploader.connect("CacheObjects", histogramFilter, "CacheObjects");
 
         renderPipeline.schedule(_renderExecutor);
         uploadPipeline.schedule(_uploadExecutor);
