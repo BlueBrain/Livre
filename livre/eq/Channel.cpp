@@ -303,7 +303,12 @@ public:
         initializeRenderer();
     }
 
-    void configExit() { _frame.getFrameData()->flush(); }
+    void configExit()
+    {
+        _frame.getFrameData()->flush();
+        _frame.setFrameData(nullptr);
+    }
+
     void addImageListener()
     {
         if (getFrameData().getFrameSettings().getGrabFrame())
