@@ -76,7 +76,7 @@ public:
         return _publisher.publish(_frame);
     }
 
-    ::lexis::render::LookOut _getLookOut(const Matrix4f& livreModelView)
+    ::lexis::render::LookOut _createLookOut(const Matrix4f& livreModelView)
     {
         // this computation does not work if spaces are rotated in respect to
         // each other.
@@ -109,7 +109,7 @@ public:
 
     bool publishCamera(const Matrix4f& livreModelview)
     {
-        return _publisher.publish(_getLookOut(livreModelview));
+        return _publisher.publish(_createLookOut(livreModelview));
     }
 
     void onCamera(const ::lexis::render::LookOut& lookOut)
@@ -206,6 +206,9 @@ private:
     RequestFuncs _requests;
 #ifdef ZEROEQ_USE_CPPNETLIB
     std::unique_ptr<::zeroeq::http::Server> _httpServer;
+    ::lexis::render::Exit _exit;
+    ::lexis::render::ImageJPEG _imageJPEG;
+    ::lexis::render::LookOut _lookOut;
 #endif
     ::lexis::render::Frame _frame;
     Config& _config;
@@ -243,32 +246,20 @@ private:
         if (!_httpServer)
             return;
 
-        _httpServer->handlePUT(::lexis::render::Exit::ZEROBUF_TYPE_NAME(),
-                               ::lexis::render::Exit::ZEROBUF_SCHEMA(),
-                               [&] { return requestExit(); });
+        _exit.registerDeserializedCallback([this]() { requestExit(); });
+        _httpServer->handlePUT(_exit);
 
-        _httpServer->handleGET(::lexis::render::ImageJPEG::ZEROBUF_TYPE_NAME(),
-                               ::lexis::render::ImageJPEG::ZEROBUF_SCHEMA(),
-                               [&] { return _config.renderJPEG(); });
+        _imageJPEG.registerSerializeCallback(
+            [this]() { _config.renderJPEG(_imageJPEG); });
+        _httpServer->handleGET(_imageJPEG);
 
-        _httpServer->handlePUT(::lexis::render::LookOut::ZEROBUF_TYPE_NAME(),
-                               ::lexis::render::LookOut::ZEROBUF_SCHEMA(),
-                               [&](const std::string& json) {
-                                   ::lexis::render::LookOut lookOut;
-                                   if (!lookOut.fromJSON(json))
-                                       return false;
-
-                                   onCamera(lookOut);
-                                   return true;
-                               });
-
-        _httpServer->handleGET(::lexis::render::LookOut::ZEROBUF_TYPE_NAME(),
-                               ::lexis::render::LookOut::ZEROBUF_SCHEMA(), [&] {
-                                   return _getLookOut(_getFrameData()
-                                                          .getCameraSettings()
-                                                          .getModelViewMatrix())
-                                       .toJSON();
-                               });
+        _lookOut.registerDeserializedCallback([this]() { onCamera(_lookOut); });
+        _lookOut.registerSerializeCallback([this]() {
+            const auto& camera = _getFrameData().getCameraSettings();
+            const auto lookout = _createLookOut(camera.getModelViewMatrix());
+            _lookOut.setMatrix(lookout.getMatrixVector());
+        });
+        _httpServer->handle(_lookOut);
 
         _httpServer->handle(_frame);
         _httpServer->handle(_getFrameData().getVRParameters());

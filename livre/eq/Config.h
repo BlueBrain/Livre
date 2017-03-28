@@ -28,6 +28,8 @@
 #include <livre/eq/api.h>
 #include <livre/eq/types.h>
 
+#include <lexis/render/imageJPEG.h>
+
 namespace livre
 {
 /** Drives a configuration, aka the main application loop. */
@@ -104,7 +106,7 @@ public:
 
     void handleNetworkEvents();
 
-    std::string renderJPEG();
+    void renderJPEG(::lexis::render::ImageJPEG& target);
 
     /** @return the current volume information. */
     const VolumeInformation& getVolumeInformation() const;
