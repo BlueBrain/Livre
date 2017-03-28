@@ -33,8 +33,6 @@
 #include <livre/core/data/VolumeInformation.h>
 #include <livre/core/util/FrameUtils.h>
 
-#include <lexis/render/imageJPEG.h>
-
 #ifdef LIVRE_USE_ZEROEQ
 #include <livre/eq/zeroeq/communicator.h>
 #endif
@@ -103,7 +101,7 @@ const FrameData& Config::getFrameData() const
     return _impl->framedata;
 }
 
-std::string Config::renderJPEG()
+void Config::renderJPEG(::lexis::render::ImageJPEG& target)
 {
     getFrameData().getFrameSettings().setGrabFrame(true);
     frame();
@@ -120,14 +118,12 @@ std::string Config::renderJPEG()
             const uint8_t* data = reinterpret_cast<const uint8_t*>(
                 event.getRemainingBuffer(size));
 
-            ::lexis::render::ImageJPEG imageJPEG;
-            imageJPEG.setData(data, size);
-            return imageJPEG.toJSON();
+            target.setData(data, size);
+            return;
         }
 
         handleEvent(event);
     }
-    return "";
 }
 
 void Config::setHistogram(const Histogram& histogram)
