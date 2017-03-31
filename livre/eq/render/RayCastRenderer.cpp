@@ -168,6 +168,7 @@ struct RayCastRenderer::Impl
         _computedSamplesPerRay = _nSamplesPerRay;
         _nSamplesPerPixel = frameData.getVRParameters().getSamplesPerPixel();
         _drawAxis = frameData.getVRParameters().getShowAxes();
+        _linearFiltering = frameData.getVRParameters().getLinearFiltering();
 
         const auto& range =
             frameData.getRenderSettings().getTransferFunction().getRange();
@@ -286,7 +287,6 @@ struct RayCastRenderer::Impl
             dataSourceRange = _dataSourceRange;
         }
 
-        glDisable(GL_LIGHTING);
         glEnable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
@@ -545,7 +545,16 @@ struct RayCastRenderer::Impl
 
         glActiveTexture(GL_TEXTURE0);
         texState.bind();
-        tParamNameGL = glGetUniformLocation(program, "volumeTexUint8");
+
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER,
+                        _linearFiltering ? GL_LINEAR : GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER,
+                        _linearFiltering ? GL_LINEAR : GL_NEAREST);
+
+        tParamNameGL = glGetUniformLocation(program, "volumeTexUint");
+        glUniform1i(tParamNameGL, 0);
+
+        tParamNameGL = glGetUniformLocation(program, "volumeTexInt");
         glUniform1i(tParamNameGL, 0);
 
         tParamNameGL = glGetUniformLocation(program, "volumeTexFloat");
@@ -648,6 +657,7 @@ struct RayCastRenderer::Impl
     BoundingAxis _axis;
     GLint _drawBuffer;
     bool _drawAxis;
+    bool _linearFiltering{false};
     Vector2f _dataSourceRange;
 };
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -29,10 +29,11 @@ namespace livre
 {
 struct Workers::Impl
 {
-    Impl(Workers& workers, const size_t nThreads,
+    Impl(const std::string& name, Workers& workers, const size_t nThreads,
          const ConstGLContextPtr& glContext)
         : _workers(workers)
         , _glContext(glContext)
+        , _name(name + "Worker")
     {
         for (size_t i = 0; i < nThreads; ++i)
             _threadGroup.create_thread(boost::bind(&Impl::execute, this));
@@ -40,6 +41,7 @@ struct Workers::Impl
 
     void execute()
     {
+        lunchbox::Thread::setName(_name);
         GLContextPtr context;
         if (_glContext)
         {
@@ -66,6 +68,7 @@ struct Workers::Impl
 
     ~Impl()
     {
+        _workQueue.clear();
         for (size_t i = 0; i < getSize(); ++i)
             _workQueue.push(ExecutablePtr());
         _threadGroup.join_all();
@@ -82,10 +85,12 @@ struct Workers::Impl
     lunchbox::MTQueue<ExecutablePtr> _workQueue;
     boost::thread_group _threadGroup;
     ConstGLContextPtr _glContext;
+    const std::string _name;
 };
 
-Workers::Workers(const size_t nThreads, ConstGLContextPtr glContext)
-    : _impl(new Workers::Impl(*this, nThreads, glContext))
+Workers::Workers(const std::string& name, const size_t nThreads,
+                 ConstGLContextPtr glContext)
+    : _impl(new Workers::Impl(name, *this, nThreads, glContext))
 {
 }
 

@@ -1,7 +1,7 @@
 
-/* Copyright (c) 2016, EPFL/Blue Brain Project
- *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
- *                     Stefan.Eilemann@epfl.ch
+/* Copyright (c) 2016-2017, EPFL/Blue Brain Project
+ *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
+ *                          Stefan.Eilemann@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -118,7 +118,7 @@ struct RawDataSource::Impl
         const size_t size = node.getBlockSize().product();
         const uint8_t* ptr = _mmap.getAddress<uint8_t>() + _headerSize;
         if (_inputType == _outputType)
-            return MemoryUnitPtr(new ConstMemoryUnit(ptr));
+            return MemoryUnitPtr(new ConstMemoryUnit(ptr, size));
 
         // only unsigned integer conversions are supported!
         if (_inputType == DT_UINT16 && _outputType == DT_UINT8)

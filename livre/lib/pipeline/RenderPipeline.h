@@ -45,6 +45,7 @@ struct RenderParams
     PixelViewport pixelViewPort;
     Viewport viewport;
     ClipPlanes clipPlanes;
+    bool idle;
 };
 
 /**

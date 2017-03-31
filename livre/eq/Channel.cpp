@@ -268,7 +268,6 @@ public:
         if (frame >= INVALID_TIMESTEP)
             return;
 
-        applyCamera();
         const Frustum& frustum = setupFrustum();
         _frameInfo =
             FrameInfo(frustum, frame, _channel->getPipe()->getCurrentFrame());
@@ -285,25 +284,17 @@ public:
 
         _renderer->update(getFrameData());
         renderPipeline.render(
-            {
-                getFrameData().getVRParameters(),
-                _frameInfo,
-                {{_drawRange.start, _drawRange.end}},
-                getFrameData().getVolumeSettings().getDataSourceRange(),
-                PixelViewport(pixVp.x, pixVp.y, pixVp.w, pixVp.h),
-                Viewport(vp.x, vp.y, vp.w, vp.h),
-                getFrameData().getRenderSettings().getClipPlanes(),
-            },
+            {getFrameData().getVRParameters(),
+             _frameInfo,
+             {{_drawRange.start, _drawRange.end}},
+             getFrameData().getVolumeSettings().getDataSourceRange(),
+             PixelViewport(pixVp.x, pixVp.y, pixVp.w, pixVp.h),
+             Viewport(vp.x, vp.y, vp.w, vp.h),
+             getFrameData().getRenderSettings().getClipPlanes(),
+             getFrameData().getFrameSettings().isIdle()},
             PipeFilterT<RedrawFilter>("RedrawFilter", _channel),
             PipeFilterT<SendHistogramFilter>("SendHistogramFilter", _channel),
             *_renderer, _availability);
-    }
-
-    void applyCamera()
-    {
-        const CameraSettings& cameraSettings =
-            getFrameData().getCameraSettings();
-        glMultMatrixf(cameraSettings.getModelViewMatrix().array);
     }
 
     void configInit()

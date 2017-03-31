@@ -234,6 +234,12 @@ bool EventHandler<C>::handleEvent(const eq::EventType type,
 
     switch (type)
     {
+    case eq::EVENT_CHANNEL_POINTER_BUTTON_PRESS:
+        _impl->config.getFrameData().getFrameSettings().setIdle(false);
+        return true;
+    case eq::EVENT_CHANNEL_POINTER_BUTTON_RELEASE:
+        _impl->config.getFrameData().getFrameSettings().setIdle(true);
+        return true;
     case eq::EVENT_CHANNEL_POINTER_MOTION:
         switch (event.buttons)
         {

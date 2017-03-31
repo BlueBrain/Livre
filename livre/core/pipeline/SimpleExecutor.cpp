@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -47,10 +47,12 @@ bool operator<(const Future& future1, const Future& future2)
 
 struct SimpleExecutor::Impl
 {
-    Impl(const size_t threadCount, ConstGLContextPtr glContext)
-        : _workers(threadCount, glContext)
+    Impl(const std::string& name, const size_t threadCount,
+         ConstGLContextPtr glContext)
+        : _workers(name, threadCount, glContext)
         , _unlockPromise(DataInfo("LoopUnlock", getType<bool>()))
         , _workThread(boost::thread(boost::bind(&Impl::schedule, this)))
+        , _name(name + "Exec")
     {
     }
 
@@ -67,6 +69,8 @@ struct SimpleExecutor::Impl
 
     void schedule()
     {
+        lunchbox::Thread::setName(_name);
+
         std::set<Future> inputConditions;
         std::list<ExecutablePtr> executables;
         while (true)
@@ -131,11 +135,13 @@ struct SimpleExecutor::Impl
     Promise _unlockPromise;
     boost::mutex _promiseReset;
     boost::thread _workThread;
+    const std::string _name;
 };
 
-SimpleExecutor::SimpleExecutor(const size_t threadCount,
+SimpleExecutor::SimpleExecutor(const std::string& name,
+                               const size_t threadCount,
                                ConstGLContextPtr glContext)
-    : _impl(new Impl(threadCount, glContext))
+    : _impl(new Impl(name, threadCount, glContext))
 {
 }
 

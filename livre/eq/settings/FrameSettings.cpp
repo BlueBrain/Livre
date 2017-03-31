@@ -42,12 +42,12 @@ void FrameSettings::reset()
 
 void FrameSettings::serialize(co::DataOStream& os, uint64_t)
 {
-    os << frameNumber_ << statistics_ << info_ << grabFrame_;
+    os << frameNumber_ << statistics_ << info_ << grabFrame_ << idle_;
 }
 
 void FrameSettings::deserialize(co::DataIStream& is, uint64_t)
 {
-    is >> frameNumber_ >> statistics_ >> info_ >> grabFrame_;
+    is >> frameNumber_ >> statistics_ >> info_ >> grabFrame_ >> idle_;
 }
 
 void FrameSettings::setFrameNumber(uint32_t frame)
@@ -93,5 +93,19 @@ void FrameSettings::setGrabFrame(const bool setValue)
 bool FrameSettings::getGrabFrame() const
 {
     return grabFrame_;
+}
+
+void FrameSettings::setIdle(const bool idle)
+{
+    if (idle == idle_)
+        return;
+
+    idle_ = idle;
+    setDirty(DIRTY_ALL);
+}
+
+bool FrameSettings::isIdle() const
+{
+    return idle_;
 }
 }

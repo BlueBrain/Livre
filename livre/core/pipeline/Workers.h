@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -33,11 +33,12 @@ class Workers
 public:
     /**
      * Constructs a thread pool given the number of threads.
+     * @param name name of the thread
      * @param nThreads is the number of threads.
      * @param glContext if given, the threads can share this
      * context.
      */
-    LIVRECORE_API Workers(size_t nThreads = 4,
+    LIVRECORE_API Workers(const std::string& name, size_t nThreads = 4,
                           ConstGLContextPtr glContext = ConstGLContextPtr());
     LIVRECORE_API ~Workers();
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -27,25 +27,19 @@ namespace livre
 {
 /**
  * DataUploadFilter class implements the parallel data loading for raw volume
- * data and
- * textures. A group of uploaders is executed in rendering pipeline and each
- * uploader
- * has an id in the group.
+ * data and textures.
  */
 class DataUploadFilter : public Filter
 {
 public:
     /**
      * Constructor
-     * @param id of the data uploader ( in a group of other uploaders )
-     * @param nbUploaders total number of uploders
      * @param dataCache data cache
      * @param textureCache texture cache
      * @param dataSource data source
      * @param texturePool the pool for 3D textures
      */
-    DataUploadFilter(const size_t id, const size_t nbUploaders,
-                     Cache& dataCache, Cache& textureCache,
+    DataUploadFilter(Cache& dataCache, Cache& textureCache,
                      DataSource& dataSource, TexturePool& texturePool);
     ~DataUploadFilter();
 

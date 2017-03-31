@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -29,8 +29,9 @@ MemoryUnit::~MemoryUnit()
 {
 }
 
-ConstMemoryUnit::ConstMemoryUnit(const uint8_t* ptr)
+ConstMemoryUnit::ConstMemoryUnit(const uint8_t* ptr, const size_t size)
     : ptr_(ptr)
+    , size_(size)
 {
 }
 

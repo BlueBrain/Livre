@@ -3,6 +3,13 @@ Changelog {#Changelog}
 
 # git master
 
+* [#386](https://github.com/BlueBrain/Livre/pull/386):
+  * Fix GL texture upload 'blocking' rendering
+  * Only upload 1 block per frame in async case to increase responsivness
+  * Add idle rendering state which is active if user stops interacting;
+    otherwise rendering takes minLOD level to speedup interaction
+  * Fix reporting of cache sizes and hits
+  * Add linear filtering support
 * [#382](https://github.com/BlueBrain/Livre/pull/382):
   Support data range selection in livreGUI
 * [#375](https://github.com/BlueBrain/Livre/pull/375):

@@ -77,6 +77,15 @@ public:
      */
     bool getGrabFrame() const;
 
+    /**
+     * Set idle rendering state aka the user stopped interacting: leads to
+     * higher quality, slower interaction.
+     */
+    void setIdle(bool idle);
+
+    /** @return true if idle rendering is active. */
+    bool isIdle() const;
+
 private:
     void serialize(co::DataOStream& os, const uint64_t dirtyBits) final;
     void deserialize(co::DataIStream& is, const uint64_t dirtyBits) final;
@@ -85,6 +94,7 @@ private:
     bool statistics_;
     bool info_;
     bool grabFrame_;
+    bool idle_{true};
 };
 }
 
