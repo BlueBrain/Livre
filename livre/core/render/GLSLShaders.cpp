@@ -50,32 +50,28 @@ void GLSLShaders::_printShaderLog(const Handle shader)
 {
     GLint length = 0;
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
-    if (length <= 1)
-    {
-        LBERROR << "Shader compile failed, but log is empty" << std::endl;
+    if (length == 0)
         return;
-    }
+
     std::string log;
     log.resize(length);
 
     glGetShaderInfoLog(shader, length, 0, &log[0]);
-    LBERROR << "Shader error: " << log << std::endl;
+    LBERROR << "Shader log: " << log << std::endl;
 }
 
 void GLSLShaders::_printProgramLog(const Handle program)
 {
     GLint length = 0;
     glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
-    if (length <= 1)
-    {
-        LBERROR << "Shader program link failed, but log is empty" << std::endl;
+    if (length == 0)
         return;
-    }
+
     std::string log;
     log.resize(length);
 
     glGetProgramInfoLog(program, length, 0, &log[0]);
-    LBERROR << "Program error: " << log << std::endl;
+    LBERROR << "Program log: " << log << std::endl;
 }
 
 int GLSLShaders::_load(GLSLShaders::Handle& handle, const std::string& shader,
@@ -120,11 +116,13 @@ int GLSLShaders::_load(GLSLShaders::Handle& handle, const std::string& shader,
     glGetShaderiv(handle, GL_COMPILE_STATUS, &status);
     if (status == GL_FALSE)
     {
+        LBERROR << "Shader compile failed:" << std::endl;
         _printShaderLog(handle);
         glDeleteShader(handle);
         handle = 0;
     }
-
+    else
+        _printShaderLog(handle);
     return ret;
 }
 
@@ -219,6 +217,7 @@ int GLSLShaders::loadShaders(const ShaderData& shaderData)
     glGetProgramiv(program, GL_LINK_STATUS, &status);
     if (status == GL_FALSE)
     {
+        LBERROR << "Program link failed:" << std::endl;
         _printProgramLog(program);
         _deleteShader(geometryShader);
         _deleteShader(fragmentShader);
@@ -226,6 +225,8 @@ int GLSLShaders::loadShaders(const ShaderData& shaderData)
         glDeleteProgram(program);
         return _glError(error);
     }
+    else
+        _printProgramLog(program);
 
     _program = program;
     return GL_NO_ERROR;
