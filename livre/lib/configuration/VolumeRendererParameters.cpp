@@ -29,7 +29,6 @@ const std::string CPUCACHEMEM_PARAM = "cpu-cache-mem";
 const std::string MINLOD_PARAM = "min-lod";
 const std::string MAXLOD_PARAM = "max-lod";
 const std::string SAMPLESPERRAY_PARAM = "samples-per-ray";
-const std::string SAMPLESPERPIXEL_PARAM = "samples-per-pixel";
 const std::string LINEARFILTERING_PARAM = "linear-filtering";
 
 VolumeRendererParameters::VolumeRendererParameters()
@@ -63,9 +62,6 @@ VolumeRendererParameters::VolumeRendererParameters()
         "Number of samples per ray. The value of 0 (default) sets"
         " the number of samples automatically, based on the volume size",
         getSamplesPerRay());
-    configuration_.addDescription(configGroupName_, SAMPLESPERPIXEL_PARAM,
-                                  "Number of samples per pixel",
-                                  getSamplesPerPixel());
     configuration_.addDescription(
         configGroupName_, LINEARFILTERING_PARAM,
         "Use linear texture filtering instead of nearest", false);
@@ -85,8 +81,6 @@ void VolumeRendererParameters::initialize_()
     setMaxLod(configuration_.getValue(MAXLOD_PARAM, getMaxLod()));
     setSamplesPerRay(
         configuration_.getValue(SAMPLESPERRAY_PARAM, getSamplesPerRay()));
-    setSamplesPerPixel(
-        configuration_.getValue(SAMPLESPERPIXEL_PARAM, getSamplesPerPixel()));
     setLinearFiltering(
         configuration_.getValue(LINEARFILTERING_PARAM, getLinearFiltering()));
 }

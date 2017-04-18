@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>250</width>
-    <height>260</height>
+    <height>228</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -31,7 +31,7 @@
      <x>0</x>
      <y>0</y>
      <width>226</width>
-     <height>251</height>
+     <height>221</height>
     </rect>
    </property>
    <layout class="QFormLayout" name="formLayout">
@@ -157,47 +157,27 @@
      </widget>
     </item>
     <item row="5" column="0">
-     <widget class="QLabel" name="samplesPerPixelLabel">
-      <property name="text">
-       <string>Samples per pixel</string>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="1">
-     <widget class="QSpinBox" name="samplesPerPixelSpinBox">
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-      <property name="minimum">
-       <number>1</number>
-      </property>
-      <property name="maximum">
-       <number>64</number>
-      </property>
-     </widget>
-    </item>
-    <item row="6" column="0">
      <widget class="QLabel" name="showAxesLabel">
       <property name="text">
        <string>Show axes</string>
       </property>
      </widget>
     </item>
-    <item row="6" column="1">
+    <item row="5" column="1">
      <widget class="QCheckBox" name="showAxesCheckBox">
       <property name="tristate">
        <bool>false</bool>
       </property>
      </widget>
     </item>
-    <item row="7" column="0">
+    <item row="6" column="0">
      <widget class="QLabel" name="linearFilteringLabel">
       <property name="text">
        <string>Linear filtering</string>
       </property>
      </widget>
     </item>
-    <item row="7" column="1">
+    <item row="6" column="1">
      <widget class="QCheckBox" name="linearFilteringCheckBox">
       <property name="tristate">
        <bool>false</bool>

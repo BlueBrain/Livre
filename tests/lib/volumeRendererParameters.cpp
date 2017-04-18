@@ -30,7 +30,6 @@ BOOST_AUTO_TEST_CASE(defaultValues)
     BOOST_CHECK_EQUAL(params.getMinLod(), 0);
     BOOST_CHECK(!params.getSynchronousMode());
     BOOST_CHECK_EQUAL(params.getSamplesPerRay(), 0);
-    BOOST_CHECK_EQUAL(params.getSamplesPerPixel(), 1);
     BOOST_CHECK(!params.getShowAxes());
 
 #ifdef __i386__
@@ -75,9 +74,7 @@ BOOST_AUTO_TEST_CASE(initFromArgv)
                           "--max-lod",
                           "6",
                           "--samples-per-ray",
-                          "42",
-                          "--samples-per-pixel",
-                          "4"};
+                          "42"};
     const int argc = sizeof(argv) / sizeof(char*);
 
     livre::VolumeRendererParameters params;
@@ -87,7 +84,6 @@ BOOST_AUTO_TEST_CASE(initFromArgv)
     BOOST_CHECK_EQUAL(params.getMinLod(), 2);
     BOOST_CHECK(params.getSynchronousMode());
     BOOST_CHECK_EQUAL(params.getSamplesPerRay(), 42);
-    BOOST_CHECK_EQUAL(params.getSamplesPerPixel(), 4);
     BOOST_CHECK_EQUAL(params.getScreenSpaceError(), 1.4f);
     BOOST_CHECK_EQUAL(params.getMaxGpuCacheMemory(), 12345u);
     BOOST_CHECK_EQUAL(params.getMaxCpuCacheMemory(), 54321u);

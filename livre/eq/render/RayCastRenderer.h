@@ -36,10 +36,9 @@ public:
      * @param dataSource the data source
      * @param textureCache the source for cached textures
      * @param samplesPerRay Number of samples per ray.
-     * @param samplesPerPixel Number of samples per pixel.
      */
     RayCastRenderer(const DataSource& dataSource, const Cache& textureCache,
-                    uint32_t samplesPerRay, uint32_t samplesPerPixel);
+                    uint32_t samplesPerRay);
     ~RayCastRenderer();
 
     /**

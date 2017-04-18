@@ -7,7 +7,6 @@ table VolumeRendererParameters {
   screen_space_error:float = 4.0;
   synchronous_mode:bool = false;
   samples_per_ray:uint32_t = 0;
-  samples_per_pixel:uint32_t = 1;
   max_gpu_cache_memory:uint64_t = 3072;
   max_cpu_cache_memory:uint64_t = 8192;
   show_axes:bool = false;
