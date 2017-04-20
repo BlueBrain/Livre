@@ -57,13 +57,6 @@ struct RenderParametersController::Impl
                             _params.setSynchronousMode(value != 0);
                             publish();
                         });
-        parent->connect(_ui.samplesPerPixelSpinBox,
-                        static_cast<void (QSpinBox::*)(int)>(
-                            &QSpinBox::valueChanged),
-                        [&](int value) {
-                            _params.setSamplesPerPixel(value);
-                            publish();
-                        });
         parent->connect(_ui.samplesPerRaySpinBox,
                         static_cast<void (QSpinBox::*)(int)>(
                             &QSpinBox::valueChanged),
@@ -99,11 +92,6 @@ struct RenderParametersController::Impl
                         &v1::VolumeRendererParameters::synchronousModeChanged,
                         [&](bool value) {
                             _ui.synchronousCheckBox->setChecked(value);
-                        });
-        parent->connect(&_params,
-                        &v1::VolumeRendererParameters::samplesPerPixelChanged,
-                        [&](uint32_t value) {
-                            _ui.samplesPerPixelSpinBox->setValue(value);
                         });
         parent->connect(&_params,
                         &v1::VolumeRendererParameters::samplesPerRayChanged,

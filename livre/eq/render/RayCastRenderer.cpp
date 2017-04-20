@@ -101,10 +101,9 @@ const GLfloat fullScreenQuad[] = {-1.0f, -1.0f, 0.0f, 1.0f,  -1.0f, 0.0f,
 struct RayCastRenderer::Impl
 {
     Impl(const DataSource& dataSource, const Cache& textureCache,
-         const uint32_t samplesPerRay, const uint32_t samplesPerPixel)
+         const uint32_t samplesPerRay)
         : _renderTexture(GL_TEXTURE_RECTANGLE_ARB, glewGetContext())
         , _nSamplesPerRay(samplesPerRay)
-        , _nSamplesPerPixel(samplesPerPixel)
         , _computedSamplesPerRay(samplesPerRay)
         , _transferFunctionTexture(0)
         , _textureCache(textureCache)
@@ -166,7 +165,6 @@ struct RayCastRenderer::Impl
             frameData.getRenderSettings().getTransferFunction());
         _nSamplesPerRay = frameData.getVRParameters().getSamplesPerRay();
         _computedSamplesPerRay = _nSamplesPerRay;
-        _nSamplesPerPixel = frameData.getVRParameters().getSamplesPerPixel();
         _drawAxis = frameData.getVRParameters().getShowAxes();
         _linearFiltering = frameData.getVRParameters().getLinearFiltering();
 
@@ -338,9 +336,6 @@ struct RayCastRenderer::Impl
 
         tParamNameGL = glGetUniformLocation(program, "maxSamplesPerRay");
         glUniform1i(tParamNameGL, maxSamplesPerRay);
-
-        tParamNameGL = glGetUniformLocation(program, "nSamplesPerPixel");
-        glUniform1i(tParamNameGL, _nSamplesPerPixel);
 
         tParamNameGL = glGetUniformLocation(program, "nearPlaneDist");
         glUniform1f(tParamNameGL, frustum.nearPlane());
@@ -646,7 +641,6 @@ struct RayCastRenderer::Impl
     GLSLShaders _texCopyShaders;
     GLSLShaders _axisShaders;
     uint32_t _nSamplesPerRay;
-    uint32_t _nSamplesPerPixel;
     uint32_t _computedSamplesPerRay;
     uint32_t _transferFunctionTexture;
     std::vector<uint32_t> _usedTextures[2]; // last, current frame
@@ -663,10 +657,8 @@ struct RayCastRenderer::Impl
 
 RayCastRenderer::RayCastRenderer(const DataSource& dataSource,
                                  const Cache& textureCache,
-                                 const uint32_t samplesPerRay,
-                                 const uint32_t samplesPerPixel)
-    : _impl(new RayCastRenderer::Impl(dataSource, textureCache, samplesPerRay,
-                                      samplesPerPixel))
+                                 const uint32_t samplesPerRay)
+    : _impl(new RayCastRenderer::Impl(dataSource, textureCache, samplesPerRay))
 {
 }
 

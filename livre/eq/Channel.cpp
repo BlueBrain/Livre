@@ -126,10 +126,8 @@ struct SendHistogramFilter : public Filter
 struct EqRaycastRenderer : public RayCastRenderer
 {
     EqRaycastRenderer(Channel::Impl& channel, const DataSource& dataSource,
-                      const Cache& textureCache, uint32_t samplesPerRay,
-                      uint32_t samplesPerPixel)
-        : RayCastRenderer(dataSource, textureCache, samplesPerRay,
-                          samplesPerPixel)
+                      const Cache& textureCache, uint32_t samplesPerRay)
+        : RayCastRenderer(dataSource, textureCache, samplesPerRay)
         , _channel(channel)
     {
     }
@@ -171,16 +169,13 @@ public:
     {
         const uint32_t nSamplesPerRay =
             getFrameData().getVRParameters().getSamplesPerRay();
-        const uint32_t nSamplesPerPixel =
-            getFrameData().getVRParameters().getSamplesPerPixel();
 
         const Window* window =
             static_cast<const Window*>(_channel->getWindow());
         const Node* node = static_cast<const Node*>(_channel->getNode());
         _renderer.reset(new EqRaycastRenderer(*this, node->getDataSource(),
                                               window->getTextureCache(),
-                                              nSamplesPerRay,
-                                              nSamplesPerPixel));
+                                              nSamplesPerRay));
     }
 
     Frustum setupFrustum() const

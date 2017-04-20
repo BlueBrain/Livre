@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # git master
 
+* [#391](https://github.com/BlueBrain/Livre/pull/391):
+  Remove samples per pixel option
 * [#386](https://github.com/BlueBrain/Livre/pull/386):
   * Fix GL texture upload 'blocking' rendering
   * Only upload 1 block per frame in async case to increase responsivness
