@@ -197,11 +197,11 @@ void Engine::run(const int argc, char** argv)
                 if (event.isValid())
                     _impl->config->handleEvent(event);
                 _impl->config->handleEvents();        // non-blocking
-                _impl->config->handleNetworkEvents(); // blocking
+                _impl->config->handleNetworkEvents(); // non-blocking
             }
         }
         _impl->config->handleEvents();        // process all pending events
-        _impl->config->handleNetworkEvents(); // blocking
+        _impl->config->handleNetworkEvents(); // ...all ZeroEQ events
     }
 }
 

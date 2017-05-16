@@ -51,6 +51,10 @@
 #include <livre/core/pipeline/FutureMap.h>
 #include <livre/core/pipeline/PipeFilter.h>
 
+#ifdef UXMAL
+#include <uxmal/aabb.h>
+#include <uxmal/frustum.h>
+#endif
 #ifdef LIVRE_USE_ZEROEQ
 #include <zeroeq/publisher.h>
 #endif
@@ -284,13 +288,10 @@ public:
         if (frame >= INVALID_TIMESTEP)
             return;
 
-        const Frustum& frustum = setupFrustum();
-        _frameInfo =
-            FrameInfo(frustum, frame, _channel->getPipe()->getCurrentFrame());
+        const auto& frustum = setupFrustum();
+        _frameInfo = FrameInfo(frustum, frame, _channel->getCurrentFrame());
 
-        const eq::PixelViewport& pixVp = _channel->getPixelViewport();
-        _drawRange = _channel->getRange();
-
+        const eq::PixelViewport& pvp = _channel->getPixelViewport();
         const eq::Viewport& vp = _channel->getViewport();
         _drawRange = _channel->getRange();
 
@@ -304,13 +305,34 @@ public:
              _frameInfo,
              {{_drawRange.start, _drawRange.end}},
              getFrameData().getVolumeSettings().getDataSourceRange(),
-             PixelViewport(pixVp.x, pixVp.y, pixVp.w, pixVp.h),
+             PixelViewport(pvp.x, pvp.y, pvp.w, pvp.h),
              Viewport(vp.x, vp.y, vp.w, vp.h),
              getFrameData().getRenderSettings().getClipPlanes(),
              getFrameData().getFrameSettings().isIdle()},
             PipeFilterT<RedrawFilter>("RedrawFilter", _channel),
             PipeFilterT<SendHistogramFilter>("SendHistogramFilter", _channel),
             *_renderer, _availability);
+
+#ifdef UXMAL
+        const auto xfm = frustum.getInvMVMatrix();
+        _publisher.publish(
+            uxmal::Frustum(_channel->getCurrentFrame(), frustum.left(),
+                           frustum.right(), frustum.bottom(), frustum.top(),
+                           frustum.nearPlane(), frustum.farPlane(),
+                           {xfm.data(), xfm.data() + 16}));
+
+        livre::Node* node = static_cast<livre::Node*>(_channel->getNode());
+        const auto& dataSource = node->getDataSource();
+        for (const auto& id : _renderer->getVisibleNodes())
+        {
+            const auto& box = dataSource.getNode(id).getWorldBox();
+            _publisher.publish(
+                uxmal::AABB(_channel->getCurrentFrame(),
+                            {box.getMin()[0], box.getMin()[1], box.getMin()[2]},
+                            {box.getMax()[0], box.getMax()[1],
+                             box.getMax()[2]}));
+        }
+#endif
     }
 
     void configInit()
@@ -369,7 +391,7 @@ public:
         const VolumeInformation& info = node->getDataSource().getVolumeInfo();
 
         std::ostringstream os;
-        const size_t nBricks = _renderer->getNumBricksUsed();
+        const size_t nBricks = _renderer->getVisibleNodes().size();
         const float mbBricks = float(info.maximumBlockSize.product()) / 1024.f /
                                1024.f * float(nBricks);
         os << nBricks << " bricks / " << mbBricks << " MB rendered" << std::endl

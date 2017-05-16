@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -48,13 +48,13 @@ public:
      */
     void update(const FrameData& frameData);
 
-    /** @internal @return number of bricks rendered in the last render() pass */
-    size_t getNumBricksUsed() const;
+    /** @internal @return the bricks rendered in the last render() pass */
+    const NodeIds& getVisibleNodes() const;
 
     /**
      * @copydoc Renderer::order
      */
-    NodeIds order(const NodeIds& bricks, const Frustum& frustum) const override;
+    NodeIds order(const NodeIds& bricks, const Frustum& frustum) const final;
 
 protected:
     void _onFrameStart(const Frustum& frustum, const ClipPlanes& planes,
@@ -67,7 +67,7 @@ protected:
 
     void _onFrameEnd(const Frustum& frustum, const ClipPlanes& planes,
                      const PixelViewport& view,
-                     const NodeIds& renderBricks) override;
+                     const NodeIds& renderBricks) final;
 
     struct Impl;
     std::unique_ptr<Impl> _impl;

@@ -467,6 +467,7 @@ struct RayCastRenderer::Impl
 
     void onFrameRender(const NodeIds& bricks)
     {
+        _visibleNodes.clear();
         const GLuint posVBO = createAndFillVertexBuffer(bricks);
 
         size_t index = 0;
@@ -561,6 +562,7 @@ struct RayCastRenderer::Impl
         glUniform1i(tParamNameGL, refLevel);
 
         _usedTextures[1].push_back(texState.textureId);
+        _visibleNodes.push_back(rb);
 
         renderBrickVBO(index, posVBO, false /* draw front */,
                        true /* cull back */);
@@ -644,6 +646,7 @@ struct RayCastRenderer::Impl
     uint32_t _computedSamplesPerRay;
     uint32_t _transferFunctionTexture;
     std::vector<uint32_t> _usedTextures[2]; // last, current frame
+    NodeIds _visibleNodes;
     const Cache& _textureCache;
     const DataSource& _dataSource;
     const VolumeInformation& _volInfo;
@@ -698,8 +701,8 @@ void RayCastRenderer::_onFrameEnd(const Frustum& frustum, const ClipPlanes&,
     _impl->onFrameEnd(frustum);
 }
 
-size_t RayCastRenderer::getNumBricksUsed() const
+const NodeIds& RayCastRenderer::getVisibleNodes() const
 {
-    return _impl->_usedTextures[0].size();
+    return _impl->_visibleNodes;
 }
 }
