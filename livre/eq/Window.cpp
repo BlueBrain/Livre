@@ -129,17 +129,17 @@ bool Window::configInitGL(const eq::uint128_t& initId)
 {
     if (!GLEW_ARB_shader_objects)
     {
-        sendError(ERROR_LIVRE_ARB_SHADER_OBJECTS_MISSING);
+        sendError(ERROR_ARB_SHADER_OBJECTS_MISSING);
         return false;
     }
     if (!GLEW_EXT_blend_func_separate)
     {
-        sendError(ERROR_LIVRE_EXT_BLEND_FUNC_SEPARATE_MISSING);
+        sendError(ERROR_EXT_BLEND_FUNC_SEPARATE_MISSING);
         return false;
     }
     if (!GLEW_ARB_multitexture)
     {
-        sendError(ERROR_LIVRE_ARB_MULTITEXTURE_MISSING);
+        sendError(ERROR_ARB_MULTITEXTURE_MISSING);
         return false;
     }
 

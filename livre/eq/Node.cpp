@@ -78,8 +78,8 @@ public:
         }
         catch (const std::runtime_error& err)
         {
-            LBWARN << "Data source initialization failed: " << err.what()
-                   << std::endl;
+            LBWARN << err.what() << std::endl;
+            _node->sendError(ERROR_DATASOURCE_FAILED);
             return false;
         }
 

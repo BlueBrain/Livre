@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2016, Stefan Eilemann <eile@eyescale.ch>
+ * Copyright (c) 2010-2017, Stefan Eilemann <eile@eyescale.ch>
  *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -31,12 +31,13 @@ namespace livre
  */
 enum Error
 {
-    ERROR_LIVRE_ARB_SHADER_OBJECTS_MISSING =
+    ERROR_ARB_SHADER_OBJECTS_MISSING =
         eq::ERROR_CUSTOM, //!< GL_ARB_shader_objects extension missing.
-    ERROR_LIVRE_EXT_BLEND_FUNC_SEPARATE_MISSING, //!< GL_EXT_blend_func_separate
-                                                 //! extension missing.
-    ERROR_LIVRE_ARB_MULTITEXTURE_MISSING, //!< GL_ARB_multitexture extension
-                                          //! missing.
+    ERROR_EXT_BLEND_FUNC_SEPARATE_MISSING, //!< GL_EXT_blend_func_separate
+                                           //! extension missing
+    ERROR_ARB_MULTITEXTURE_MISSING,        //!< GL_ARB_multitexture extension
+                                           //! missing
+    ERROR_DATASOURCE_FAILED                //!< Given volume failed to load
 };
 
 /**
