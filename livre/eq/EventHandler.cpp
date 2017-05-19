@@ -20,7 +20,7 @@
 
 #include <livre/eq/EventHandler.h>
 
-#include <livre/core/data/VolumeInformation.h>
+#include <livre/data/VolumeInformation.h>
 #include <livre/eq/Config.h>
 #include <livre/eq/Event.h>
 #include <livre/eq/FrameData.h>

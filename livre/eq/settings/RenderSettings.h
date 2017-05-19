@@ -65,20 +65,20 @@ public:
      * @brief Sets the clip planes.
      * @param clipPlanes the clip planes
      */
-    void setClipPlanes(const ClipPlanes& clipPlanes);
+    void setClipPlanes(const ClipPlanesDist& clipPlanes);
 
     /**
      * @return Returns the clip planes.
      */
-    ClipPlanes& getClipPlanes()
+    ClipPlanesDist& getClipPlanes()
     {
         _clipPlanes.notifyChanged();
         return _clipPlanes;
     }
-    const ClipPlanes& getClipPlanes() const { return _clipPlanes; }
+    const ClipPlanesDist& getClipPlanes() const { return _clipPlanes; }
 private:
     TransferFunction1D _transferFunction;
-    ClipPlanes _clipPlanes;
+    ClipPlanesDist _clipPlanes;
 };
 }
 

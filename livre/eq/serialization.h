@@ -1,5 +1,5 @@
 /**
- * Copyright (c) BBP/EPFL 2005-2016 Ahmet.Bilgili@epfl.ch
+ * Copyright (c) BBP/EPFL 2005-2017 Ahmet.Bilgili@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -22,7 +22,7 @@
 
 #include <co/dataIStream.h>
 #include <co/dataOStream.h>
-#include <livre/core/data/VolumeInformation.h>
+#include <livre/data/VolumeInformation.h>
 #include <lunchbox/bitOperation.h>
 
 namespace livre

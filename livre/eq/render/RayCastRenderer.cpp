@@ -32,13 +32,13 @@
 #include <livre/lib/data/BoundingAxis.h>
 
 #include <livre/core/cache/Cache.h>
-#include <livre/core/data/DataSource.h>
-#include <livre/core/data/LODNode.h>
-#include <livre/core/data/VolumeInformation.h>
-#include <livre/core/render/Frustum.h>
 #include <livre/core/render/GLContext.h>
 #include <livre/core/render/GLSLShaders.h>
 #include <livre/core/render/TransferFunction1D.h>
+#include <livre/data/DataSource.h>
+#include <livre/data/Frustum.h>
+#include <livre/data/LODNode.h>
+#include <livre/data/VolumeInformation.h>
 
 #include <eq/eq.h>
 #include <eq/gl.h>

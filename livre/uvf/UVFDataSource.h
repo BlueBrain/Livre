@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -20,7 +20,7 @@
 #ifndef _UVFDataSource_h_
 #define _UVFDataSource_h_
 
-#include <livre/core/data/DataSourcePlugin.h>
+#include <livre/data/DataSourcePlugin.h>
 #include <livre/uvf/tuvokTypes.h>
 
 namespace livre

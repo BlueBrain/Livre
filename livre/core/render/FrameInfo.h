@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2017, EPFL/Blue Brain Project
  *                     Stefan.Eilemann@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -22,8 +22,8 @@
 
 #include <livre/core/api.h>
 #include <livre/core/cache/CacheObject.h> // member
-#include <livre/core/data/NodeId.h>       // member
-#include <livre/core/render/Frustum.h>    // member
+#include <livre/data/Frustum.h>           // member
+#include <livre/data/NodeId.h>            // member
 
 namespace livre
 {

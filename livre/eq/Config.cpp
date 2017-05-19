@@ -30,8 +30,8 @@
 #include <livre/lib/configuration/ApplicationParameters.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 
-#include <livre/core/data/VolumeInformation.h>
 #include <livre/core/util/FrameUtils.h>
+#include <livre/data/VolumeInformation.h>
 
 #ifdef LIVRE_USE_ZEROEQ
 #include <livre/eq/zeroeq/communicator.h>

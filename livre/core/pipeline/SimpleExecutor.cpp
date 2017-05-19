@@ -27,9 +27,9 @@
 #include <livre/core/pipeline/PipeFilter.h>
 #include <livre/core/pipeline/Workers.h>
 
-#include <livre/core/data/LODNode.h>
-#include <livre/core/data/NodeId.h>
 #include <livre/core/render/GLContext.h>
+#include <livre/data/LODNode.h>
+#include <livre/data/NodeId.h>
 
 #include <lunchbox/mtQueue.h>
 

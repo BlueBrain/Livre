@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                          Stefan.Eilemann@epfl.ch
  *
@@ -21,11 +21,13 @@
 #define BOOST_TEST_MODULE DataSource
 #include <boost/test/unit_test.hpp>
 
-#include <livre/core/data/DataSource.h>
-#include <livre/core/data/LODNode.h>
-#include <livre/core/data/MemoryUnit.h>
-#include <livre/core/data/NodeId.h>
-#include <livre/core/data/VolumeInformation.h>
+#include <livre/data/DataSource.h>
+#include <livre/data/LODNode.h>
+#include <livre/data/MemoryUnit.h>
+#include <livre/data/NodeId.h>
+#include <livre/data/VolumeInformation.h>
+
+#include <servus/uri.h>
 
 namespace
 {
@@ -36,7 +38,7 @@ const uint32_t VOXEL_SIZE_Z = 512;
 
 void _testDataSource(const std::string& uriStr)
 {
-    const lunchbox::URI uri(uriStr);
+    const servus::URI uri(uriStr);
     livre::DataSource source(uri);
     const livre::VolumeInformation& info = source.getVolumeInfo();
 

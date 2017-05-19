@@ -23,11 +23,11 @@
 #include <livre/lib/cache/HistogramObject.h>
 
 #include <livre/core/cache/CacheStatistics.h>
-#include <livre/core/data/DataSource.h>
-#include <livre/core/data/LODNode.h>
-#include <livre/core/data/MemoryUnit.h>
-#include <livre/core/data/NodeId.h>
-#include <livre/core/data/VolumeInformation.h>
+#include <livre/data/DataSource.h>
+#include <livre/data/LODNode.h>
+#include <livre/data/MemoryUnit.h>
+#include <livre/data/NodeId.h>
+#include <livre/data/VolumeInformation.h>
 
 #define BOOST_TEST_MODULE Cache
 #include <boost/test/unit_test.hpp>

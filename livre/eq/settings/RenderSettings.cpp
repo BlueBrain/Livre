@@ -40,7 +40,7 @@ void RenderSettings::setTransferFunction(const TransferFunction1D& tf)
     _transferFunction = tf;
 }
 
-void RenderSettings::setClipPlanes(const ClipPlanes& clipPlanes)
+void RenderSettings::setClipPlanes(const ClipPlanesDist& clipPlanes)
 {
     _clipPlanes = clipPlanes;
 }

@@ -19,8 +19,8 @@
 
 #include <livre/uvf/UVFDataSource.h>
 
-#include <livre/core/data/LODNode.h>
-#include <livre/core/data/MemoryUnit.h>
+#include <livre/data/LODNode.h>
+#include <livre/data/MemoryUnit.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
@@ -45,6 +45,12 @@ namespace livre
 namespace
 {
 lunchbox::PluginRegisterer<UVFDataSource> registerer;
+
+template <typename T>
+struct DontDeleteObject
+{
+    void operator()(const T*) const {}
+};
 }
 
 struct UVFDataSource::Impl
@@ -189,7 +195,7 @@ public:
 
     MemoryUnitPtr getData(const LODNode& node)
     {
-        const Vector3i& minPos = node.getAbsolutePosition();
+        const Vector3ui& minPos = node.getAbsolutePosition();
         const UINTVECTOR3& tuvokBricksInThisLod =
             _uvfDataSetPtr->GetBrickLayout(treeLevelToTuvokLevel(
                                                node.getRefLevel()),
@@ -349,7 +355,7 @@ public:
     }
 
     uint32_t getBrickIndex(const uint32_t x, const uint32_t y, const uint32_t z,
-                           const Vector3i& max) const
+                           const Vector3ui& max) const
     {
         return x + y * max[0] + z * max[0] * max[1];
     }

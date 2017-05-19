@@ -21,6 +21,7 @@
 #ifndef _coreTypes_h_
 #define _coreTypes_h_
 
+#include <livre/data/types.h>
 #include <lunchbox/debug.h>
 #include <lunchbox/log.h>
 #include <lunchbox/uri.h>
@@ -56,28 +57,19 @@
 
 namespace livre
 {
-class AllocMemoryUnit;
 class Cache;
 class CacheObject;
 class CacheStatistics;
-using ClipPlanes = co::Distributable<::lexis::render::ClipPlanes>;
+using ClipPlanesDist = co::Distributable<::lexis::render::ClipPlanes>;
 class Configuration;
 class Frustum;
 class GLContext;
 class GLSLShaders;
 using Histogram = co::Distributable<::lexis::render::Histogram>;
-class LODNode;
-class MemoryUnit;
-class NodeId;
-class NodeVisitor;
 class Parameter;
 class Renderer;
 class RootNode;
 class TexturePool;
-class VisitState;
-class DataSource;
-class DataSourcePlugin;
-class DataSourcePluginData;
 
 /** Pipeline */
 class AsyncData;
@@ -101,25 +93,17 @@ class Workers;
 struct FrameInfo;
 struct NodeAvailability;
 struct TextureState;
-struct VolumeInformation;
 
 using servus::uint128_t;
 using lunchbox::Strings;
 
-typedef uint64_t Identifier;
 typedef Identifier CacheId;
-typedef std::array<float, 2> Range;
 
 /** SmartPtr definitions */
-typedef std::shared_ptr<AllocMemoryUnit> AllocMemoryUnitPtr;
 typedef std::shared_ptr<GLContext> GLContextPtr;
 typedef std::shared_ptr<const GLContext> ConstGLContextPtr;
 typedef std::shared_ptr<TextureState> TextureStatePtr;
 typedef std::shared_ptr<const TextureState> ConstTextureStatePtr;
-typedef std::shared_ptr<DataSource> DataSourcePtr;
-typedef std::shared_ptr<const DataSource> ConstDataSourcePtr;
-typedef std::shared_ptr<MemoryUnit> MemoryUnitPtr;
-typedef std::shared_ptr<const MemoryUnit> ConstMemoryUnitPtr;
 typedef std::shared_ptr<CacheObject> CacheObjectPtr;
 typedef std::shared_ptr<const CacheObject> ConstCacheObjectPtr;
 typedef std::shared_ptr<CacheObject> CacheObjectPtr;
@@ -140,12 +124,6 @@ template <typename T>
 struct DeleteObject
 {
     void operator()(const T* t) const { delete t; }
-};
-
-template <typename T>
-struct DontDeleteObject
-{
-    void operator()(const T*) const {}
 };
 
 /** Vector definitions basic types */
@@ -190,30 +168,12 @@ typedef boost::shared_lock<ReadWriteMutex> ReadLock;
 typedef boost::unique_lock<ReadWriteMutex> WriteLock;
 typedef boost::unique_lock<boost::mutex> ScopedLock;
 
-// Enums
-
-enum AccessMode
-{
-    MODE_READ = 0u,
-    MODE_WRITE = 1u
-};
-
 // Constants
 const uint32_t INVALID_TEXTURE_ID = -1; //!< Invalid OpenGL texture id.
 const Identifier INVALID_CACHE_ID = -1; //!< Invalid cache id.
-const Identifier INVALID_NODE_ID = -1;  //!< Invalid node ID.
-
-const uint32_t MAX_CHILDREN_BITS = 4;     //!< Maximum number of children is 16
-const uint32_t NODEID_LEVEL_BITS = 4;     //>! see NodeId
-const uint32_t NODEID_BLOCK_BITS = 14;    //>! see NodeId
-const uint32_t NODEID_TIMESTEP_BITS = 18; //>! see NodeId
 
 const uint32_t INVALID_POSITION =
     (1u << NODEID_BLOCK_BITS) - 1; //!< Invalid node ID.
-const uint32_t INVALID_LEVEL =
-    (1u << NODEID_LEVEL_BITS) - 1; //!< Invalid tree level.4 bits is on
-const uint32_t INVALID_TIMESTEP =
-    (1u << NODEID_TIMESTEP_BITS) - 1; //!< Invalid time step. 18 bits is on
 const uint32_t INVALID_FRAMEID = -1;
 const uint32_t LATEST_FRAME = INT_MAX; //!< Maximum frame number
 
@@ -263,10 +223,6 @@ using vmml::Quaternionf; //!< Float quaternion.
 /** Viewport definitions */
 typedef vmml::Vector4i PixelViewport;
 typedef vmml::Vector4f Viewport;
-
-/** Definitions */
-const Vector2ui INVALID_FRAME_RANGE(INVALID_TIMESTEP);
-const Vector2ui FULL_FRAME_RANGE(0, INVALID_TIMESTEP);
 
 /** Vector definitions */
 typedef std::vector<Vector3f> Vector3fs;

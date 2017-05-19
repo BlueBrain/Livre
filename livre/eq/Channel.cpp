@@ -42,10 +42,10 @@
 
 #include <livre/core/cache/Cache.h>
 #include <livre/core/cache/CacheStatistics.h>
-#include <livre/core/data/DataSource.h>
 #include <livre/core/render/FrameInfo.h>
-#include <livre/core/render/Frustum.h>
-#include <livre/core/visitor/DFSTraversal.h>
+#include <livre/data/DFSTraversal.h>
+#include <livre/data/DataSource.h>
+#include <livre/data/Frustum.h>
 
 #include <livre/core/pipeline/Filter.h>
 #include <livre/core/pipeline/FutureMap.h>

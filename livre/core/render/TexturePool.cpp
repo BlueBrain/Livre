@@ -22,7 +22,7 @@
 #include <livre/core/defines.h>
 #include <livre/core/render/GLContext.h>
 
-#include <livre/core/data/DataSource.h>
+#include <livre/data/DataSource.h>
 
 #include <eq/gl.h>
 
