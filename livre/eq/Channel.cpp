@@ -316,10 +316,10 @@ public:
 #ifdef UXMAL
         const auto xfm = frustum.getInvMVMatrix();
         _publisher.publish(
-            uxmal::Frustum(_channel->getCurrentFrame(), frustum.left(),
-                           frustum.right(), frustum.bottom(), frustum.top(),
-                           frustum.nearPlane(), frustum.farPlane(),
-                           {xfm.data(), xfm.data() + 16}));
+            uxmal::Frustum(_channel->getID(), _channel->getCurrentFrame(),
+                           frustum.left(), frustum.right(), frustum.bottom(),
+                           frustum.top(), frustum.nearPlane(),
+                           frustum.farPlane(), {xfm.data(), xfm.data() + 16}));
 
         livre::Node* node = static_cast<livre::Node*>(_channel->getNode());
         const auto& dataSource = node->getDataSource();
@@ -327,7 +327,7 @@ public:
         {
             const auto& box = dataSource.getNode(id).getWorldBox();
             _publisher.publish(
-                uxmal::AABB(_channel->getCurrentFrame(),
+                uxmal::AABB(_channel->getID(), _channel->getCurrentFrame(),
                             {box.getMin()[0], box.getMin()[1], box.getMin()[2]},
                             {box.getMax()[0], box.getMax()[1],
                              box.getMax()[2]}));
