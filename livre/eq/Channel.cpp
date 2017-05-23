@@ -180,16 +180,37 @@ public:
 
     Frustum setupFrustum() const
     {
-        const eq::Matrix4f& modelView = computeModelView();
-        const eq::Frustumf& eqFrustum = _channel->getFrustum();
-        const eq::Matrix4f& projection = eqFrustum.computePerspectiveMatrix();
-        return Frustum(modelView, projection);
+        // compute dynamic near/far plane of whole model
+        const auto view = _channel->getHeadTransform();
+        const auto viewInv = view.inverse();
+        const auto zero = viewInv * eq::Vector4f();
+        auto front = (viewInv * eq::Vector4f(0.0f, 0.0f, -1.0f, 1.0f) - zero);
+        front.normalize();
+
+        const auto center = getFrameData()
+                                .getCameraSettings()
+                                .getModelViewMatrix()
+                                .getTranslation();
+        const eq::Vector3f nearPoint = view * (center - front);
+        const eq::Vector3f farPoint = view * (center + front);
+
+        // estimate minimal value of near plane based on frustum size
+        const eq::Frustumf& frustum = _channel->getFrustum();
+        const float width = std::fabs(frustum.right() - frustum.left());
+        const float height = std::fabs(frustum.top() - frustum.bottom());
+        const float size = std::min(width, height);
+        const float minNear = std::fabs(frustum.nearPlane() / size * .001f);
+
+        const float zNear = std::max(minNear, -nearPoint.z());
+        const float zFar = std::max(zNear * 2.f, -farPoint.z());
+
+        _channel->setNearFar(zNear, zFar);
+        return Frustum(computeModelView(), frustum.computePerspectiveMatrix());
     }
 
     Matrix4f computeModelView() const
     {
-        const CameraSettings& cameraSettings =
-            getFrameData().getCameraSettings();
+        const auto& cameraSettings = getFrameData().getCameraSettings();
         return _channel->getHeadTransform() *
                cameraSettings.getModelViewMatrix();
     }
