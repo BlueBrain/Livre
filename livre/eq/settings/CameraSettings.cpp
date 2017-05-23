@@ -49,21 +49,12 @@ void CameraSettings::spinModel(const float x, const float y)
     if (x == 0.f && y == 0.f)
         return;
 
-    float translation[3];
-    translation[0] = _modelview(0, 3);
-    translation[1] = _modelview(1, 3);
-    translation[2] = _modelview(2, 3);
-
-    _modelview(0, 3) = 0.0;
-    _modelview(1, 3) = 0.0;
-    _modelview(2, 3) = 0.0;
+    const auto translation = _modelview.getTranslation();
+    _modelview.setTranslation(Vector3f());
 
     _modelview.pre_rotate_x(x);
     _modelview.pre_rotate_y(y);
-
-    _modelview(0, 3) = translation[0];
-    _modelview(1, 3) = translation[1];
-    _modelview(2, 3) = translation[2];
+    _modelview.setTranslation(translation);
 
     setDirty(DIRTY_ALL);
     _notifyChangedFunc(_modelview);
@@ -81,9 +72,7 @@ void CameraSettings::moveCamera(const float x, const float y, const float z)
 
 void CameraSettings::setCameraPosition(const Vector3f& pos)
 {
-    _modelview(0, 3) = pos.x();
-    _modelview(1, 3) = pos.y();
-    _modelview(2, 3) = pos.z();
+    _modelview.setTranslation(pos);
 
     setDirty(DIRTY_ALL);
     _notifyChangedFunc(_modelview);
@@ -97,7 +86,7 @@ void CameraSettings::registerNotifyChanged(
 
 void CameraSettings::setCameraLookAt(const Vector3f& lookAt)
 {
-    const Vector3f eye(_modelview(0, 3), _modelview(1, 3), _modelview(2, 3));
+    const Vector3f eye = _modelview.getTranslation();
     const Vector3f zAxis = vmml::normalize(eye - lookAt);
 
     // Avoid Gimbal lock effect when looking upwards/downwards
