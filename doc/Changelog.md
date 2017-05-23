@@ -3,6 +3,8 @@ Changelog {#Changelog}
 
 # git master
 
+* [#394](https://github.com/BlueBrain/Livre/pull/394):
+  Support closer visualization through dynamic near/far calculation
 * [#391](https://github.com/BlueBrain/Livre/pull/391):
   Remove samples per pixel option
 * [#386](https://github.com/BlueBrain/Livre/pull/386):
