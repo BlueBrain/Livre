@@ -1,5 +1,6 @@
 #
-# Copyright (c) 2011-2016, EPFL/Blue Brain Project
+# Copyright (c) 2011-2017, EPFL/Blue Brain Project
+#                          Chevtchenko Grigori <chevtchenko.grigori@epfl.ch>
 #                          David Steiner <steiner@ifi.uzh.ch>
 #                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
 #                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
@@ -11,10 +12,14 @@
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 project(Livre VERSION 0.8.0)
-set(Livre_VERSION_ABI 8)
+set(Livre_VERSION_ABI 7)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
                               ${CMAKE_SOURCE_DIR}/CMake/common)
+
+if(NOT EXISTS ${CMAKE_SOURCE_DIR}/CMake/common/Common.cmake)
+  message(FATAL_ERROR "CMake/common missing, run: git submodule update --init")
+endif()
 
 include(GitExternal)
 

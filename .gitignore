@@ -1,6 +1,5 @@
 CMakeLists.txt.user*
 Makefile
-CMake/common/
 ___*
 build/
 /Collage/
@@ -10,11 +9,9 @@ build/
 /GLStats/
 /Lunchbox/
 /Pression/
-/RESTBridge/
 /Servus/
 /Tuvok/
 /ZeroBuf/
-/cppnetlib/
 /hwsd/
 /vmmlib/
 /ZeroEQ/
