@@ -1,7 +1,7 @@
 Changelog {#Changelog}
 =========
 
-# git master
+# Release 0.8 (31-05-2017)
 
 * [#394](https://github.com/BlueBrain/Livre/pull/394):
   Support closer visualization through dynamic near/far calculation
@@ -24,6 +24,8 @@ Changelog {#Changelog}
 * [#372](https://github.com/BlueBrain/Livre/pull/372):
   Fix crash with histogram not being ready in synchronous mode while moving clip
   planes
+* [#370](https://github.com/BlueBrain/Livre/pull/370):
+  Fix a crash due to a bug related to the include directive in glsl
 * [#368](https://github.com/BlueBrain/Livre/pull/368):
   Make "Show axes" available in livreGUI and python API
 * [#367](https://github.com/BlueBrain/Livre/pull/367):

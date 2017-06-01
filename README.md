@@ -32,3 +32,13 @@ The following platforms and build environments are tested:
 
 The [API documentation](http://bluebrain.github.io/Livre-0.5/index.html)
 can be found on [bluebrain.github.io](http://bluebrain.github.io/).
+
+## Building
+
+Building from source is as simple as:
+
+    git clone https://github.com/BlueBrain/Livre/
+    mkdir Livre/Build
+    cd Livre/Build
+    cmake -GNinja -DCLONE_SUBPROJECTS=ON ..
+    ninja
