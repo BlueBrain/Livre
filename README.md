@@ -37,7 +37,7 @@ can be found on [bluebrain.github.io](http://bluebrain.github.io/).
 
 Building from source is as simple as:
 
-    git clone https://github.com/BlueBrain/Livre/
+    git clone --recursive https://github.com/BlueBrain/Livre/
     mkdir Livre/Build
     cd Livre/Build
     cmake -GNinja -DCLONE_SUBPROJECTS=ON ..
