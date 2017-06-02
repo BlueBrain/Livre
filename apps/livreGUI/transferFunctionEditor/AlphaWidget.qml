@@ -18,8 +18,9 @@ Item {
         for (var i = 0; i < colors.length; i++) {
             var colorVec = colors[i]
             var position = positions[i]
+            var alpha = colorVec.w / 2.0 + 0.5
             code += 'GradientStop { position: ' + position + '; color: Qt.rgba('
-                    + colorVec.x + ', ' + colorVec.y + ', ' + colorVec.z + ',' + colorVec.w + ')}'
+                    + colorVec.x + ', ' + colorVec.y + ', ' + colorVec.z + ',' + alpha + ')}'
         }
         code += '}'
         var o = Qt.createQmlObject(code, root, 'qml')
