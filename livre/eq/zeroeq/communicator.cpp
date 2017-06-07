@@ -31,8 +31,8 @@
 #include <livre/lib/configuration/ApplicationParameters.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 
-#include <livre/core/data/DataSource.h>
-#include <livre/core/data/VolumeInformation.h>
+#include <livre/data/DataSource.h>
+#include <livre/data/VolumeInformation.h>
 
 #include <lexis/lexis.h>
 #include <zeroeq/zeroeq.h>

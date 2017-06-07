@@ -20,9 +20,9 @@
 #include <livre/lib/cache/TextureObject.h>
 #include <livre/lib/pipeline/RenderFilter.h>
 
-#include <livre/core/data/DataSource.h>
-#include <livre/core/render/Frustum.h>
 #include <livre/core/render/Renderer.h>
+#include <livre/data/DataSource.h>
+#include <livre/data/Frustum.h>
 
 namespace livre
 {

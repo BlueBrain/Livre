@@ -21,7 +21,7 @@
 #include <livre/lib/cache/DataObject.h>
 
 #include <livre/core/cache/Cache.h>
-#include <livre/core/data/DataSource.h>
+#include <livre/data/DataSource.h>
 
 namespace livre
 {

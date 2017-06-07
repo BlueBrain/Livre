@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, EPFL/Blue Brain Project
+/* Copyright (c) 2016-2017, EPFL/Blue Brain Project
  *                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -20,7 +20,8 @@
 #ifndef _BoundingAxis_h_
 #define _BoundingAxis_h_
 
-#include <livre/core/data/VolumeInformation.h>
+#include <livre/core/types.h>
+#include <livre/data/VolumeInformation.h>
 
 namespace livre
 {

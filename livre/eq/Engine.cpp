@@ -20,8 +20,8 @@
 
 #include "Engine.h"
 
-#include <livre/core/data/DataSource.h>
 #include <livre/core/version.h>
+#include <livre/data/DataSource.h>
 
 #include <livre/lib/configuration/ApplicationParameters.h>
 #include <livre/lib/configuration/VolumeRendererParameters.h>

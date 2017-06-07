@@ -25,9 +25,9 @@
 #include <livre/lib/pipeline/VisibleSetGeneratorFilter.h>
 
 #include <livre/core/cache/Cache.h>
-#include <livre/core/data/DataSource.h>
 #include <livre/core/pipeline/Pipeline.h>
 #include <livre/core/pipeline/SimpleExecutor.h>
+#include <livre/data/DataSource.h>
 
 #include <livre/core/render/Renderer.h>
 #include <livre/core/render/TexturePool.h>

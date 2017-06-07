@@ -20,7 +20,7 @@
 
 #include "ApplicationParameters.h"
 
-#include <livre/core/data/DataSource.h>
+#include <livre/data/DataSource.h>
 
 namespace vmml
 {

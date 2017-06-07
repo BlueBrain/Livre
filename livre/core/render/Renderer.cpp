@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2015, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -20,9 +20,9 @@
 #include "Renderer.h"
 
 #include <eq/gl.h>
-#include <livre/core/data/DataSource.h>
-#include <livre/core/data/LODNode.h>
-#include <livre/core/render/Frustum.h>
+#include <livre/data/DataSource.h>
+#include <livre/data/Frustum.h>
+#include <livre/data/LODNode.h>
 
 namespace livre
 {

@@ -21,8 +21,8 @@
 #include <livre/lib/pipeline/HistogramFilter.h>
 
 #include <livre/core/cache/Cache.h>
-#include <livre/core/data/DataSource.h>
-#include <livre/core/render/Frustum.h>
+#include <livre/data/DataSource.h>
+#include <livre/data/Frustum.h>
 
 namespace livre
 {

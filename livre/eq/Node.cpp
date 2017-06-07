@@ -36,7 +36,7 @@
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 
 #include <livre/core/cache/Cache.h>
-#include <livre/core/data/DataSource.h>
+#include <livre/data/DataSource.h>
 
 #include <eq/eq.h>
 #include <eq/gl.h>

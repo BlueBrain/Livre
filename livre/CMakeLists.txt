@@ -1,4 +1,4 @@
-# Copyright (c) 2014-2015, EPFL/Blue Brain Project
+# Copyright (c) 2014-2017, EPFL/Blue Brain Project
 #                          Stefan.Eilemann@epfl.ch
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -13,6 +13,7 @@ if(LIVRE_DEBUG_RENDERING)
   add_definitions(-DLIVRE_DEBUG_RENDERING)
 endif()
 
+add_subdirectory(data)
 add_subdirectory(core)
 add_subdirectory(lib)
 add_subdirectory(eq)

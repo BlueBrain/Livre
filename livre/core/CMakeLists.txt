@@ -9,12 +9,6 @@
 set(LIVRECORE_PUBLIC_HEADERS
   configuration/Configuration.h
   configuration/Parameters.h
-  data/DataSource.h
-  data/DataSourcePlugin.h
-  data/LODNode.h
-  data/MemoryUnit.h
-  data/NodeId.h
-  data/VolumeInformation.h
   render/GLContext.h
   render/GLSLShaders.h
   render/TransferFunction1D.h
@@ -39,18 +33,11 @@ set(LIVRECORE_HEADERS
   pipeline/SimpleExecutor.h
   pipeline/Workers.h
   render/FrameInfo.h
-  render/Frustum.h
   render/Renderer.h
-  render/SelectVisibles.h
   render/TexturePool.h
   render/TextureState.h
   util/FrameUtils.h
-  util/ThreadClock.h
-  visitor/DFSTraversal.h
-  visitor/NodeVisitor.h
-  visitor/DataSourceVisitor.h
-  visitor/DFSTraversal.h
-  visitor/VisitState.h)
+  util/ThreadClock.h)
 
 set(LIVRECORE_SOURCES
   cache/Cache.cpp
@@ -58,12 +45,6 @@ set(LIVRECORE_SOURCES
   cache/CacheStatistics.cpp
   configuration/Configuration.cpp
   configuration/Parameters.cpp
-  data/LODNode.cpp
-  data/MemoryUnit.cpp
-  data/NodeId.cpp
-  data/DataSource.cpp
-  data/DataSourcePlugin.cpp
-  data/VolumeInformation.cpp
   pipeline/Executable.cpp
   pipeline/FutureMap.cpp
   pipeline/InputPort.cpp
@@ -75,23 +56,18 @@ set(LIVRECORE_SOURCES
   pipeline/SimpleExecutor.cpp
   pipeline/Workers.cpp
   render/FrameInfo.cpp
-  render/Frustum.cpp
   render/GLContext.cpp
   render/GLSLShaders.cpp
   render/Renderer.cpp
-  render/SelectVisibles.cpp
   render/TexturePool.cpp
   render/TextureState.cpp
   render/TransferFunction1D.cpp
   util/FrameUtils.cpp
   util/ThreadClock.cpp
-  util/Utilities.cpp
-  visitor/DataSourceVisitor.cpp
-  visitor/DFSTraversal.cpp
-  visitor/VisitState.cpp)
+  util/Utilities.cpp)
 
 set(LIVRECORE_LINK_LIBRARIES
-  PUBLIC ${Boost_LIBRARIES} Collage Lexis Lunchbox vmmlib ZeroBuf
+  PUBLIC LivreData ${Boost_LIBRARIES} Collage Lexis Lunchbox vmmlib ZeroBuf
   PRIVATE Equalizer ${GLEW_MX_LIBRARIES})
 
 set(LIVRECORE_INCLUDE_NAME livre/core)

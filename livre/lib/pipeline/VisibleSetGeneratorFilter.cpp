@@ -21,12 +21,12 @@
 #include <livre/lib/pipeline/VisibleSetGeneratorFilter.h>
 
 #include <livre/core/cache/Cache.h>
-#include <livre/core/data/DataSource.h>
 #include <livre/core/pipeline/InputPort.h>
 #include <livre/core/pipeline/PortData.h>
 #include <livre/core/pipeline/Workers.h>
-#include <livre/core/render/SelectVisibles.h>
-#include <livre/core/visitor/DFSTraversal.h>
+#include <livre/data/DFSTraversal.h>
+#include <livre/data/DataSource.h>
+#include <livre/data/SelectVisibles.h>
 
 namespace livre
 {

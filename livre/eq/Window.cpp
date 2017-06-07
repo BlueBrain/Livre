@@ -36,8 +36,8 @@
 #include <livre/lib/pipeline/RenderPipeline.h>
 
 #include <livre/core/cache/Cache.h>
-#include <livre/core/data/DataSource.h>
 #include <livre/core/render/TexturePool.h>
+#include <livre/data/DataSource.h>
 
 #include <eq/gl.h>
 

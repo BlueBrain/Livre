@@ -1,4 +1,4 @@
-# Copyright (c) 2011-2015, EPFL/Blue Brain Project
+# Copyright (c) 2011-2017, EPFL/Blue Brain Project
 #                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
 #
 # This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -26,9 +26,7 @@ set(LIVRELIB_PUBLIC_HEADERS
   pipeline/RenderingSetGeneratorFilter.h
   pipeline/RenderPipeline.h
   pipeline/VisibleSetGeneratorFilter.h
-  data/BoundingAxis.h
-  data/MemoryDataSource.h
-  data/RawDataSource.h)
+  data/BoundingAxis.h)
 
 set(LIVRELIB_SOURCES
   ${ZEROBUF_GENERATED_SOURCES}
@@ -44,9 +42,7 @@ set(LIVRELIB_SOURCES
   pipeline/RenderingSetGeneratorFilter.cpp
   pipeline/RenderPipeline.cpp
   pipeline/VisibleSetGeneratorFilter.cpp
-  data/BoundingAxis.cpp
-  data/MemoryDataSource.cpp
-  data/RawDataSource.cpp)
+  data/BoundingAxis.cpp)
 
 set(LIVRELIB_LINK_LIBRARIES PUBLIC LivreCore PRIVATE Equalizer)
 set(LIVRELIB_INCLUDE_NAME livre/lib)

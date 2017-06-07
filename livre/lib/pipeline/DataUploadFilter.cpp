@@ -23,8 +23,8 @@
 #include <livre/lib/pipeline/DataUploadFilter.h>
 
 #include <livre/core/cache/Cache.h>
-#include <livre/core/data/NodeId.h>
 #include <livre/core/pipeline/Pipeline.h>
+#include <livre/data/NodeId.h>
 
 #include <eq/gl.h>
 
