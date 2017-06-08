@@ -260,63 +260,6 @@ BOOST_AUTO_TEST_CASE(testAsynchronousPipeline)
     BOOST_CHECK_EQUAL(outputData.thanksForAllTheFish, 222);
 }
 
-BOOST_AUTO_TEST_CASE(testOneToManyManyToOnePipeline)
-{
-    // Try using 1 execution thread, output result should not change
-    {
-        const size_t convertFilterCount = 10;
-        const uint32_t inputValue = 90;
-
-        livre::Pipeline pipeline =
-            createPipeline(inputValue, convertFilterCount);
-
-        livre::SimpleExecutor executor("test", 2);
-        pipeline.schedule(executor);
-        const livre::Executable& pipeOutput =
-            pipeline.getExecutable("Consumer");
-        const livre::UniqueFutureMap portFutures(
-            pipeOutput.getPostconditions());
-        const OutputData& outputData =
-            portFutures.get<OutputData>("TestOutputData");
-        BOOST_CHECK_EQUAL(outputData.thanksForAllTheFish, 1761);
-    }
-
-    // Try using 8 execution thread, output result should not change
-    {
-        const size_t convertFilterCount = 10;
-        const uint32_t inputValue = 90;
-        livre::Pipeline pipeline =
-            createPipeline(inputValue, convertFilterCount);
-
-        livre::SimpleExecutor executor("test", 8);
-        const livre::Futures& futures = pipeline.schedule(executor);
-        const livre::Executable& pipeOutput =
-            pipeline.getExecutable("Consumer");
-        const livre::UniqueFutureMap portFutures1(
-            pipeOutput.getPostconditions());
-        const OutputData& outputData1 =
-            portFutures1.get<OutputData>("TestOutputData");
-        BOOST_CHECK_EQUAL(outputData1.thanksForAllTheFish, 1761);
-
-        // Reset the pipeline but wait pipeline execution before
-        const livre::FutureMap futureMap(futures);
-        futureMap.wait();
-
-        pipeline.reset();
-        pipeline.schedule(executor);
-
-        livre::PipeFilter pipeInput = static_cast<const livre::PipeFilter&>(
-            pipeline.getExecutable("Producer"));
-        pipeInput.getPromise("TestInputData").set(InputData(inputValue));
-
-        const livre::UniqueFutureMap portFutures2(
-            pipeOutput.getPostconditions());
-        const OutputData& outputData2 =
-            portFutures2.get<OutputData>("TestOutputData");
-        BOOST_CHECK_EQUAL(outputData2.thanksForAllTheFish, 1761);
-    }
-}
-
 BOOST_AUTO_TEST_CASE(testPromiseFuture)
 {
     livre::Promise promise(
