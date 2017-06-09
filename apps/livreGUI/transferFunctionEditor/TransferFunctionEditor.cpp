@@ -28,7 +28,6 @@
 #include <livreGUI/ui_TransferFunctionEditor.h>
 
 #include <lexis/render/materialLUT.h>
-#include <lexis/request.h>
 
 #include <vmmlib/vector.hpp>
 
@@ -86,7 +85,6 @@ TransferFunctionEditor::TransferFunctionEditor(Controller& controller,
             SLOT(_onHistogramChanged(bool)));
 
     connect(_ui->resetButton, SIGNAL(clicked()), this, SLOT(_setDefault()));
-    connect(_ui->clearButton, SIGNAL(clicked()), this, SLOT(_clear()));
     connect(_ui->loadButton, SIGNAL(clicked()), this, SLOT(_load()));
     connect(_ui->saveButton, SIGNAL(clicked()), this, SLOT(_save()));
 
@@ -209,21 +207,6 @@ void TransferFunctionEditor::_publishMaterialLUT()
         lut.setRange(_rangeWidget->fromNormalizedRange().array);
 
     _controller.publish(lut);
-}
-
-void TransferFunctionEditor::_clear()
-{
-    QPolygonF points;
-    points.push_back({0, 0});
-    points.push_back({1, 1});
-    for (const auto& channel : channels)
-        _controlPointsWidgets[(size_t)channel]->setControlPoints(points);
-
-    _histogram = lexis::render::Histogram();
-    _controller.publish(::lexis::Request(_histogram.getTypeIdentifier()));
-    emit histogramChanged(_ui->histogramScaleCheckBox->checkState() ==
-                          Qt::Checked);
-    emit transferFunctionChanged();
 }
 
 namespace

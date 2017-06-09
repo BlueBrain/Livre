@@ -1,5 +1,5 @@
-/* Copyright (c) 2016, EPFL/Blue Brain Project
- *                     Stefan.Eilemann@epfl.ch
+/* Copyright (c) 2016-2017, EPFL/Blue Brain Project
+ *                          Stefan.Eilemann@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -65,7 +65,7 @@ struct Progress::Impl
         , _progress(0)
     {
         _ui.setupUi(parent);
-        _ui.verticalLayout->setAlignment(Qt::AlignTop);
+        _ui.verticalLayout->setAlignment(Qt::AlignBottom);
 
         _progress.registerDeserializedCallback(
             [parent]() { emit parent->updated(); });

@@ -49,7 +49,6 @@ signals:
     void histogramChanged(bool logScale);
 
 private Q_SLOTS:
-    void _clear();
     void _load();
     void _save();
     void _setDefault();

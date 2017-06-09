@@ -21,13 +21,6 @@
    <item row="1" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <widget class="QPushButton" name="clearButton">
-       <property name="text">
-        <string>Clear</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QPushButton" name="resetButton">
        <property name="text">
         <string>Default</string>

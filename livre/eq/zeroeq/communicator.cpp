@@ -58,7 +58,6 @@ public:
         if (!servus::Servus::isAvailable())
             return;
 
-        _setupRequests();
         _setupSubscriber();
         _setupHTTPServer(argc, argv);
     }
@@ -157,14 +156,6 @@ public:
                _frame.getEnd() != params.frames.y();
     }
 
-    bool onRequest(::lexis::ConstRequestPtr request)
-    {
-        const auto& i = _requests.find(request->getEvent());
-        if (i == _requests.end())
-            return false;
-        return i->second();
-    }
-
     void updateFrame()
     {
         if (_config.getVolumeInformation().frameRange == INVALID_FRAME_RANGE)
@@ -186,12 +177,6 @@ public:
         params.frames = {_frame.getStart(), _frame.getEnd()};
     }
 
-    bool requestExit()
-    {
-        _config.stopRunning();
-        return true;
-    }
-
     void handleEvents()
     {
         while (_subscriber.receive(0))
@@ -201,42 +186,14 @@ public:
 private:
     ::zeroeq::Subscriber _subscriber;
     ::zeroeq::Publisher _publisher;
-    typedef std::function<bool()> RequestFunc;
-    typedef std::map<::zeroeq::uint128_t, RequestFunc> RequestFuncs;
-    RequestFuncs _requests;
+
 #ifdef ZEROEQ_USE_CPPNETLIB
     std::unique_ptr<::zeroeq::http::Server> _httpServer;
-    ::lexis::render::Exit _exit;
     ::lexis::render::ImageJPEG _imageJPEG;
     ::lexis::render::LookOut _lookOut;
 #endif
     ::lexis::render::Frame _frame;
     Config& _config;
-
-    void _setupRequests()
-    {
-        _requests[_frame.getTypeIdentifier()] = [&] { return publishFrame(); };
-        _requests[_getFrameData().getVRParameters().getTypeIdentifier()] = [&] {
-            return _publisher.publish(_getFrameData().getVRParameters());
-        };
-        _requests[ ::lexis::render::LookOut::ZEROBUF_TYPE_IDENTIFIER()] = [&] {
-            return publishCamera(
-                _getFrameData().getCameraSettings().getModelViewMatrix());
-        };
-        _requests
-            [_getRenderSettings().getTransferFunction().getTypeIdentifier()] =
-                [&] {
-                    return _publisher.publish(
-                        _getRenderSettings().getTransferFunction());
-                };
-        _requests[_getRenderSettings().getClipPlanes().getTypeIdentifier()] =
-            [&] {
-                return _publisher.publish(_getRenderSettings().getClipPlanes());
-            };
-        _requests[_config.getHistogram().getTypeIdentifier()] = [&] {
-            return _publisher.publish(_config.getHistogram());
-        };
-    }
 
     void _setupHTTPServer(const int argc LB_UNUSED, char** argv LB_UNUSED)
     {
@@ -245,9 +202,6 @@ private:
 
         if (!_httpServer)
             return;
-
-        _exit.registerDeserializedCallback([this]() { requestExit(); });
-        _httpServer->handlePUT(_exit);
 
         _imageJPEG.registerSerializeCallback(
             [this]() { _config.renderJPEG(_imageJPEG); });
@@ -270,12 +224,6 @@ private:
 
     void _setupSubscriber()
     {
-        _subscriber.subscribe(::lexis::Request::ZEROBUF_TYPE_IDENTIFIER(),
-                              [&](const void* data, const size_t size) {
-                                  onRequest(
-                                      ::lexis::Request::create(data, size));
-                              });
-
         _subscriber.subscribe(
             ::lexis::render::LookOut::ZEROBUF_TYPE_IDENTIFIER(),
             [&](const void* data, const size_t size) {
