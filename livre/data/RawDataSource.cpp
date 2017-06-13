@@ -32,10 +32,6 @@
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-
 namespace livre
 {
 namespace

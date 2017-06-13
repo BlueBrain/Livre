@@ -17,10 +17,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <livre/uvf/UVFDataSource.h>
+#include "UVFDataSource.h"
 
 #include <livre/data/LODNode.h>
 #include <livre/data/MemoryUnit.h>
+#include <livre/data/version.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
@@ -40,12 +41,20 @@
 
 #define MAX_ACCEPTABLE_BLOCK_SIZE 512
 
+extern "C" int LunchboxPluginGetVersion()
+{
+    return LIVREDATA_VERSION_ABI;
+}
+extern "C" bool LunchboxPluginRegister()
+{
+    lunchbox::PluginRegisterer<livre::UVFDataSource> registerer;
+    return true;
+}
+
 namespace livre
 {
 namespace
 {
-lunchbox::PluginRegisterer<UVFDataSource> registerer;
-
 template <typename T>
 struct DontDeleteObject
 {
