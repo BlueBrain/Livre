@@ -1,6 +1,11 @@
 Changelog {#Changelog}
 =========
 
+# master
+
+* [#400](https://github.com/BlueBrain/Livre/pull/400):
+  Fix histogram calculation for float data
+
 # Release 0.8 (31-05-2017)
 
 * [#394](https://github.com/BlueBrain/Livre/pull/394):
