@@ -64,7 +64,7 @@ void binDataSlow(const SRC_TYPE* rawData, Histogram& histogram,
 
     const size_t binCount = histogram.getBins().size();
     uint64_t* dstData = histogram.getBins().data();
-    const size_t perBinCount = std::ceil(range / (binCount - 1));
+    const SRC_TYPE perBinCount = range / (binCount - 1);
     for (const auto& value : values)
     {
         const size_t binIndex = (value.first - minVal) / perBinCount;
