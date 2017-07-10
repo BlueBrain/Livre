@@ -49,11 +49,28 @@ namespace livre
 {
 namespace zeroeq
 {
+class Monitor : public ::zeroeq::Monitor
+{
+public:
+    Monitor(::zeroeq::Publisher& publisher, Communicator::Impl& communicator)
+        : ::zeroeq::Monitor(publisher)
+        , _communicator(communicator)
+    {
+    }
+
+private:
+    Communicator::Impl& _communicator;
+
+    void notifyNewConnection() final;
+};
+
 class Communicator::Impl
 {
 public:
     Impl(Config& config, const int argc, char** argv)
         : _config(config)
+        , _monitor(_publisher, *this)
+        , _subscriber(_monitor)
     {
         if (!servus::Servus::isAvailable())
             return;
@@ -75,40 +92,14 @@ public:
         return _publisher.publish(_frame);
     }
 
-    ::lexis::render::LookOut _createLookOut(const Matrix4f& livreModelView)
-    {
-        // this computation does not work if spaces are rotated in respect to
-        // each other.
-        Matrix4f rotation;
-        rotation.setSubMatrix<3, 3>(livreModelView.getSubMatrix<3, 3>(0, 0), 0,
-                                    0);
-
-        Vector4f translation = livreModelView.getColumn(3);
-
-        translation = -rotation.inverse() * translation;
-        translation[3] = 1.0f;
-
-        const auto& volumeInfo = _config.getVolumeInformation();
-        translation =
-            -rotation * volumeInfo.dataToLivreTransform.inverse() * translation;
-        translation *= (1.0f / volumeInfo.meterToDataUnitRatio);
-        translation[3] = 1.0f;
-
-        Matrix4f networkModelView;
-        networkModelView.setSubMatrix<3, 3>(rotation.getSubMatrix<3, 3>(0, 0),
-                                            0, 0);
-        networkModelView.setColumn(3, translation);
-
-        ::lexis::render::LookOut lookOut;
-
-        std::copy(&networkModelView.array[0], &networkModelView.array[0] + 16,
-                  lookOut.getMatrix());
-        return lookOut;
-    }
-
     bool publishCamera(const Matrix4f& livreModelview)
     {
         return _publisher.publish(_createLookOut(livreModelview));
+    }
+
+    bool publishHistogram()
+    {
+        return _publisher.publish(_config.getHistogram());
     }
 
     void onCamera(const ::lexis::render::LookOut& lookOut)
@@ -184,8 +175,11 @@ public:
     }
 
 private:
-    ::zeroeq::Subscriber _subscriber;
+    Config& _config;
+
     ::zeroeq::Publisher _publisher;
+    Monitor _monitor;
+    ::zeroeq::Subscriber _subscriber;
 
 #ifdef ZEROEQ_USE_CPPNETLIB
     std::unique_ptr<::zeroeq::http::Server> _httpServer;
@@ -193,7 +187,6 @@ private:
     ::lexis::render::LookOut _lookOut;
 #endif
     ::lexis::render::Frame _frame;
-    Config& _config;
 
     void _setupHTTPServer(const int argc LB_UNUSED, char** argv LB_UNUSED)
     {
@@ -257,7 +250,44 @@ private:
     {
         return _getFrameData().getRenderSettings();
     }
+
+    ::lexis::render::LookOut _createLookOut(const Matrix4f& livreModelView)
+    {
+        // this computation does not work if spaces are rotated in respect to
+        // each other.
+        Matrix4f rotation;
+        rotation.setSubMatrix<3, 3>(livreModelView.getSubMatrix<3, 3>(0, 0), 0,
+                                    0);
+
+        Vector4f translation = livreModelView.getColumn(3);
+
+        translation = -rotation.inverse() * translation;
+        translation[3] = 1.0f;
+
+        const auto& volumeInfo = _config.getVolumeInformation();
+        translation =
+            -rotation * volumeInfo.dataToLivreTransform.inverse() * translation;
+        translation *= (1.0f / volumeInfo.meterToDataUnitRatio);
+        translation[3] = 1.0f;
+
+        Matrix4f networkModelView;
+        networkModelView.setSubMatrix<3, 3>(rotation.getSubMatrix<3, 3>(0, 0),
+                                            0, 0);
+        networkModelView.setColumn(3, translation);
+
+        ::lexis::render::LookOut lookOut;
+
+        std::copy(&networkModelView.array[0], &networkModelView.array[0] + 16,
+                  lookOut.getMatrix());
+        return lookOut;
+    }
 };
+
+void Monitor::notifyNewConnection()
+{
+    _communicator.publishFrame();
+    _communicator.publishHistogram();
+}
 
 Communicator::Communicator(Config& config, const int argc, char* argv[])
     : _impl(new Impl(config, argc, argv))

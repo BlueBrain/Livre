@@ -1,4 +1,4 @@
-/* Copyright (c) 2006-2016, Daniel.Nachbaur@epfl.ch
+/* Copyright (c) 2006-2017, Daniel.Nachbaur@epfl.ch
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
  *
@@ -58,8 +58,9 @@ public:
     /** Non-blocking receive & handle of all pending events. */
     void handleEvents();
 
-private:
     class Impl;
+
+private:
     std::unique_ptr<Impl> _impl;
 
     Communicator(const Communicator&) = delete;
