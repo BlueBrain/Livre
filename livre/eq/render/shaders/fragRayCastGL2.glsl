@@ -43,7 +43,6 @@ uniform vec2 depthRange;
 
 uniform int nSamplesPerRay;
 uniform int maxSamplesPerRay;
-uniform int nSamplesPerPixel;
 uniform float shininess;
 uniform int refLevel;
 
@@ -131,109 +130,98 @@ void main(void)
     if (result.a > EARLY_EXIT)
         discard;
 
-    vec4 brickResult = vec4(0.0f);
+    float xPixelDelta = rand(vec2(gl_FragCoord.x, gl_FragCoord.y * i)) / 2.0f;
+    float yPixelDelta =
+        rand(vec2(gl_FragCoord.x * 2, gl_FragCoord.y * 2 * i)) / 2.0f;
+    vec4 localResult = result;
 
-    for (int i = 0; i < nSamplesPerPixel; i++)
+    vec4 subPixelCoord =
+        gl_FragCoord + vec4(xPixelDelta, yPixelDelta, 0.0f, 0.0f);
+    vec4 pixelEyeSpacePos =
+        calcPositionInEyeSpaceFromWindowSpace(subPixelCoord);
+    vec3 pixelWorldSpacePos = vec3((invModelViewMatrix * pixelEyeSpacePos).xyz);
+    vec3 rayDirection = normalize(pixelWorldSpacePos - worldEyePosition);
+    Ray eye = Ray(worldEyePosition, rayDirection);
+
+    AABB aabb = AABB(aabbMin, aabbMax);
+    AABB globalAABB = AABB(globalAABBMin, globalAABBMax);
+
+    float tnear, tfar;
+    intersectBox(eye, aabb, tnear, tfar);
+
+    float tnearGlobal, tfarGlobal;
+    intersectBox(eye, globalAABB, tnearGlobal, tfarGlobal);
+
+    vec3 nearPlaneNormal = vec3(0.0f, 0.0f, 1.0f);
+    float tNearPlane = dot(nearPlaneNormal, vec3(0.0, 0.0, -nearPlaneDist)) /
+                       dot(nearPlaneNormal, normalize(pixelEyeSpacePos.xyz));
+
+    if (tnear < tNearPlane)
+        tnear = tNearPlane;
+
+    float stepSize = 1.0 / float(nSamplesPerRay);
+
+    float residu = mod(tnear - tnearGlobal, stepSize);
+
+    if (residu > 0.0f)
+        tnear += stepSize - residu;
+
+    if (tnear > tfar)
+        discard;
+
+    for (int i = 0; i < nClipPlanes; i++)
     {
-        float xPixelDelta =
-            rand(vec2(gl_FragCoord.x * i, gl_FragCoord.y * i)) / 2.0f;
-        float yPixelDelta =
-            rand(vec2(gl_FragCoord.x * 2 * i, gl_FragCoord.y * 2 * i)) / 2.0f;
-        vec4 localResult = result;
-
-        vec4 subPixelCoord =
-            gl_FragCoord + vec4(xPixelDelta, yPixelDelta, 0.0f, 0.0f);
-        vec4 pixelEyeSpacePos =
-            calcPositionInEyeSpaceFromWindowSpace(subPixelCoord);
-        vec3 pixelWorldSpacePos =
-            vec3((invModelViewMatrix * pixelEyeSpacePos).xyz);
-        vec3 rayDirection = normalize(pixelWorldSpacePos - worldEyePosition);
-        Ray eye = Ray(worldEyePosition, rayDirection);
-
-        AABB aabb = AABB(aabbMin, aabbMax);
-        AABB globalAABB = AABB(globalAABBMin, globalAABBMax);
-
-        float tnear, tfar;
-        intersectBox(eye, aabb, tnear, tfar);
-
-        float tnearGlobal, tfarGlobal;
-        intersectBox(eye, globalAABB, tnearGlobal, tfarGlobal);
-
-        vec3 nearPlaneNormal = vec3(0.0f, 0.0f, 1.0f);
-        float tNearPlane =
-            dot(nearPlaneNormal, vec3(0.0, 0.0, -nearPlaneDist)) /
-            dot(nearPlaneNormal, normalize(pixelEyeSpacePos.xyz));
-
-        if (tnear < tNearPlane)
-            tnear = tNearPlane;
-
-        float stepSize = 1.0 / float(nSamplesPerRay);
-
-        float residu = mod(tnear - tnearGlobal, stepSize);
-
-        if (residu > 0.0f)
-            tnear += stepSize - residu;
-
-        if (tnear > tfar)
-            discard;
-
-        for (int i = 0; i < nClipPlanes; i++)
-        {
-            vec3 planeNormal = clipPlanes[i].xyz;
-            float rn = dot(rayDirection, planeNormal);
-            if (rn == 0)
-                rn = EPSILON;
-            float d = clipPlanes[i].w;
-            float t = -(dot(planeNormal, worldEyePosition) + d) / rn;
-            if (rn > 0.0) // opposite direction plane
-                tnear = max(tnear, t);
-            else
-                tfar = min(tfar, t);
-        }
-
-        if (tnear > tfar)
-            discard;
-
-        vec3 rayStart = eye.Origin + eye.Dir * tnear;
-        vec3 rayStop = eye.Origin + eye.Dir * tfar;
-
-        // http://stackoverflow.com/questions/12494439/opacity-correction-in-raycasting-volume-rendering
-        float alphaCorrection = float(maxSamplesPerRay) / float(nSamplesPerRay);
-
-        vec3 pos = rayStart;
-        vec3 step = normalize(rayStop - rayStart) * stepSize;
-
-        // Used later for MAD optimization in the raymarching loop
-        float multiplyer = 1 / (dataSourceRange.g - dataSourceRange.r);
-        float addedValue =
-            -dataSourceRange.r / (dataSourceRange.g - dataSourceRange.r);
-
-        // Front-to-back absorption-emission integrator
-        for (float travel = distance(rayStop, rayStart); travel > 0.0;
-             pos += step, travel -= stepSize)
-        {
-            vec3 texPos = calcTexturePositionFromAABBPos(pos);
-
-            float density = 0;
-            if (datatype == SH_UINT)
-                density =
-                    float(texture3D(volumeTexUint, texPos).r) * multiplyer +
-                    addedValue;
-            else if (datatype == SH_INT)
-                density =
-                    float(texture3D(volumeTexInt, texPos).r) * multiplyer +
-                    addedValue;
-            else if (datatype == SH_FLOAT)
-                density = texture3D(volumeTexFloat, texPos).r * multiplyer +
-                          addedValue;
-
-            vec4 transferFn = texture1D(transferFnTex, density);
-            localResult = composite(transferFn, localResult, alphaCorrection);
-
-            if (localResult.a > EARLY_EXIT)
-                break;
-        }
-        brickResult += localResult;
+        vec3 planeNormal = clipPlanes[i].xyz;
+        float rn = dot(rayDirection, planeNormal);
+        if (rn == 0)
+            rn = EPSILON;
+        float d = clipPlanes[i].w;
+        float t = -(dot(planeNormal, worldEyePosition) + d) / rn;
+        if (rn > 0.0) // opposite direction plane
+            tnear = max(tnear, t);
+        else
+            tfar = min(tfar, t);
     }
-    gl_FragColor = brickResult / nSamplesPerPixel;
+
+    if (tnear > tfar)
+        discard;
+
+    vec3 rayStart = eye.Origin + eye.Dir * tnear;
+    vec3 rayStop = eye.Origin + eye.Dir * tfar;
+
+    // http://stackoverflow.com/questions/12494439/opacity-correction-in-raycasting-volume-rendering
+    float alphaCorrection = float(maxSamplesPerRay) / float(nSamplesPerRay);
+
+    vec3 pos = rayStart;
+    vec3 step = normalize(rayStop - rayStart) * stepSize;
+
+    // Used later for MAD optimization in the raymarching loop
+    float multiplyer = 1 / (dataSourceRange.g - dataSourceRange.r);
+    float addedValue =
+        -dataSourceRange.r / (dataSourceRange.g - dataSourceRange.r);
+
+    // Front-to-back absorption-emission integrator
+    for (float travel = distance(rayStop, rayStart); travel > 0.0;
+         pos += step, travel -= stepSize)
+    {
+        vec3 texPos = calcTexturePositionFromAABBPos(pos);
+
+        float density = 0;
+        if (datatype == SH_UINT)
+            density = float(texture3D(volumeTexUint, texPos).r) * multiplyer +
+                      addedValue;
+        else if (datatype == SH_INT)
+            density = float(texture3D(volumeTexInt, texPos).r) * multiplyer +
+                      addedValue;
+        else if (datatype == SH_FLOAT)
+            density =
+                texture3D(volumeTexFloat, texPos).r * multiplyer + addedValue;
+
+        vec4 transferFn = texture1D(transferFnTex, density);
+        localResult = composite(transferFn, localResult, alphaCorrection);
+
+        if (localResult.a > EARLY_EXIT)
+            break;
+    }
+    gl_FragColor = localResult;
 }
