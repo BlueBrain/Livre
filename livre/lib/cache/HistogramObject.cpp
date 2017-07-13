@@ -92,7 +92,11 @@ void binData(const SRC_TYPE* rawData, Histogram& histogram,
     for (size_t i = 0; i < numVoxels; ++i)
     {
         const SRC_TYPE data = rawData[i];
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wabsolute-value"
         ++values[data + std::abs(std::numeric_limits<SRC_TYPE>::min())];
+#pragma GCC diagnostic pop
         minVal = std::min(data, minVal);
         maxVal = std::max(data, maxVal);
     }

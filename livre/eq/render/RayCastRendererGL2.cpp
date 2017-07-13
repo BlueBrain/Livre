@@ -27,13 +27,13 @@
 #include <livre/lib/configuration/VolumeRendererParameters.h>
 
 #include <livre/core/cache/Cache.h>
-#include <livre/core/data/DataSource.h>
-#include <livre/core/data/LODNode.h>
-#include <livre/core/data/VolumeInformation.h>
-#include <livre/core/render/Frustum.h>
 #include <livre/core/render/GLContext.h>
 #include <livre/core/render/GLSLShaders.h>
 #include <livre/core/render/TransferFunction1D.h>
+#include <livre/data/DataSource.h>
+#include <livre/data/Frustum.h>
+#include <livre/data/LODNode.h>
+#include <livre/data/VolumeInformation.h>
 
 #include <eq/eq.h>
 #include <eq/gl.h>
@@ -92,10 +92,9 @@ const uint32_t minSamplesPerRay = 512;
 struct RayCastRenderer::Impl
 {
     Impl(const DataSource& dataSource, const Cache& textureCache,
-         const uint32_t samplesPerRay, const uint32_t samplesPerPixel)
+         const uint32_t samplesPerRay)
         : _framebufferTexture(GL_TEXTURE_RECTANGLE_ARB, glewGetContext())
         , _nSamplesPerRay(samplesPerRay)
-        , _nSamplesPerPixel(samplesPerPixel)
         , _computedSamplesPerRay(samplesPerRay)
         , _transferFunctionTexture(0)
         , _textureCache(textureCache)
@@ -129,13 +128,10 @@ struct RayCastRenderer::Impl
             frameData.getRenderSettings().getTransferFunction());
         _nSamplesPerRay = frameData.getVRParameters().getSamplesPerRay();
         _computedSamplesPerRay = _nSamplesPerRay;
-        _nSamplesPerPixel = frameData.getVRParameters().getSamplesPerPixel();
     }
 
     void initTransferFunction(const TransferFunction1D& transferFunction)
     {
-        assert(transferFunction.getNumChannels() == 4u);
-
         if (_transferFunctionTexture == 0)
         {
             GLuint tfTexture = 0;
@@ -149,10 +145,9 @@ struct RayCastRenderer::Impl
         }
         glBindTexture(GL_TEXTURE_1D, _transferFunctionTexture);
 
-        const uint8_t* transferFunctionData = transferFunction.getLut();
-        glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA,
-                     GLsizei(transferFunction.getLutSize() / 4u), 0, GL_RGBA,
-                     GL_UNSIGNED_BYTE, transferFunctionData);
+        const auto& lut = transferFunction.getLUT();
+        glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, lut.size(), 0, GL_RGBA,
+                     GL_UNSIGNED_BYTE, lut.data());
     }
 
     void readFromFrameBuffer(const PixelViewport& viewport)
@@ -240,9 +235,6 @@ struct RayCastRenderer::Impl
 
         tParamNameGL = glGetUniformLocation(program, "maxSamplesPerRay");
         glUniform1i(tParamNameGL, maxSamplesPerRay);
-
-        tParamNameGL = glGetUniformLocation(program, "nSamplesPerPixel");
-        glUniform1i(tParamNameGL, _nSamplesPerPixel);
 
         tParamNameGL = glGetUniformLocation(program, "nearPlaneDist");
         glUniform1f(tParamNameGL, frustum.nearPlane());
@@ -520,7 +512,6 @@ struct RayCastRenderer::Impl
     eq::util::Texture _framebufferTexture;
     GLSLShaders _shaders;
     uint32_t _nSamplesPerRay;
-    uint32_t _nSamplesPerPixel;
     uint32_t _computedSamplesPerRay;
     uint32_t _transferFunctionTexture;
     std::vector<uint32_t> _usedTextures[2]; // last, current frame
@@ -532,10 +523,8 @@ struct RayCastRenderer::Impl
 
 RayCastRenderer::RayCastRenderer(const DataSource& dataSource,
                                  const Cache& textureCache,
-                                 const uint32_t samplesPerRay,
-                                 const uint32_t samplesPerPixel)
-    : _impl(new RayCastRenderer::Impl(dataSource, textureCache, samplesPerRay,
-                                      samplesPerPixel))
+                                 const uint32_t samplesPerRay)
+    : _impl(new RayCastRenderer::Impl(dataSource, textureCache, samplesPerRay))
 {
 }
 
@@ -573,10 +562,5 @@ void RayCastRenderer::_onFrameEnd(const Frustum&, const ClipPlanes&,
                                   const PixelViewport&, const NodeIds&)
 {
     _impl->onFrameEnd();
-}
-
-size_t RayCastRenderer::getNumBricksUsed() const
-{
-    return _impl->_usedTextures[0].size();
 }
 }
