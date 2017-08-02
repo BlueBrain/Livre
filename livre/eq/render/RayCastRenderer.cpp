@@ -86,8 +86,7 @@ namespace
 {
 std::string where(const char* file, const int line)
 {
-    return std::string(" in ") + std::string(file) + ":" +
-           boost::lexical_cast<std::string>(line);
+    return std::string(" in ") + std::string(file) + ":" + std::to_string(line);
 }
 
 const uint32_t maxSamplesPerRay = 32;
