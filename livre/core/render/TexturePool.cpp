@@ -28,7 +28,7 @@
 
 namespace livre
 {
-#define glewGetContext() GLContext::glewGetContext()
+#define glewGetContext() GLContext::getCurrent()->glewGetContext()
 
 TexturePool::TexturePool(const DataSource& dataSource)
     : _maxBlockSize(dataSource.getVolumeInfo().maximumBlockSize)

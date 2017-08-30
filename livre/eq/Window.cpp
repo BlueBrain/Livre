@@ -68,7 +68,7 @@ public:
         Caches caches = {node->getDataCache(), *_textureCache,
                          node->getHistogramCache()};
         _renderPipeline.reset(new RenderPipeline(node->getDataSource(), caches,
-                                                 *_texturePool, _glContext));
+                                                 *_texturePool, *_glContext));
     }
 
     bool configExitGL()

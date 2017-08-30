@@ -46,7 +46,7 @@ const size_t nComputeThreads = 4; // for faster histogram calculation
 struct RenderPipeline::Impl
 {
     Impl(DataSource& dataSource, Caches& caches, TexturePool& texturePool,
-         ConstGLContextPtr glContext)
+         const GLContext& glContext)
         : _dataSource(dataSource)
         , _dataCache(caches.dataCache)
         , _textureCache(caches.textureCache)
@@ -289,7 +289,7 @@ struct RenderPipeline::Impl
 
 RenderPipeline::RenderPipeline(DataSource& dataSource, Caches& caches,
                                TexturePool& texturePool,
-                               ConstGLContextPtr glContext)
+                               const GLContext& glContext)
     : _impl(
           new RenderPipeline::Impl(dataSource, caches, texturePool, glContext))
 {
