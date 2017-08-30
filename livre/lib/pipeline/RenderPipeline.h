@@ -62,7 +62,7 @@ public:
      * @param glContext the gl context that will be shared
      */
     RenderPipeline(DataSource& dataSource, Caches& caches,
-                   TexturePool& texturePool, ConstGLContextPtr glContext);
+                   TexturePool& texturePool, const GLContext& glContext);
 
     ~RenderPipeline();
 

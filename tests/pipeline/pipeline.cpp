@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -27,6 +27,7 @@
 #include <livre/core/pipeline/PromiseMap.h>
 #include <livre/core/pipeline/SimpleExecutor.h>
 #include <livre/core/pipeline/Workers.h>
+#include <livre/core/render/GLContext.h>
 
 #include <boost/test/unit_test.hpp>
 
@@ -229,12 +230,33 @@ BOOST_AUTO_TEST_CASE(testSynchronousPipeline)
     BOOST_CHECK_EQUAL(outputData.thanksForAllTheFish, 222);
 }
 
+namespace
+{
+class DummyContext : public livre::GLContext
+{
+public:
+    DummyContext()
+        : livre::GLContext(nullptr)
+    {
+    }
+
+private:
+    void share(const GLContext&) final {}
+    livre::GLContextPtr clone() const final
+    {
+        return livre::GLContextPtr(new DummyContext);
+    }
+};
+}
+
 BOOST_AUTO_TEST_CASE(testWaitPipeline)
 {
     const uint32_t inputValue = 90;
     livre::Pipeline pipeline = createPipeline(inputValue, 1);
 
-    livre::SimpleExecutor executor("test", 2);
+    const DummyContext context;
+    livre::SimpleExecutor executor("test", 2, context);
+
     const livre::FutureMap pipelineFutures(pipeline.schedule(executor));
     pipelineFutures.wait();
 
@@ -248,9 +270,10 @@ BOOST_AUTO_TEST_CASE(testWaitPipeline)
 BOOST_AUTO_TEST_CASE(testAsynchronousPipeline)
 {
     const uint32_t inputValue = 90;
-
     livre::Pipeline pipeline = createPipeline(inputValue, 1);
-    livre::SimpleExecutor executor("test", 2);
+
+    const DummyContext context;
+    livre::SimpleExecutor executor("test", 2, context);
 
     pipeline.schedule(executor);
     const livre::Executable& pipeOutput = pipeline.getExecutable("Consumer");

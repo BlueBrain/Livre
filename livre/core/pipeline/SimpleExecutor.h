@@ -44,9 +44,8 @@ public:
      * created and
      * the worker threads will share the context with the given context
      */
-    LIVRECORE_API SimpleExecutor(
-        const std::string& name, size_t threadCount,
-        ConstGLContextPtr glContext = ConstGLContextPtr());
+    LIVRECORE_API SimpleExecutor(const std::string& name, size_t threadCount,
+                                 const GLContext& glContext);
 
     LIVRECORE_API virtual ~SimpleExecutor();
 

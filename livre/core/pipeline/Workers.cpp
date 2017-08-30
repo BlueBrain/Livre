@@ -30,11 +30,12 @@ namespace livre
 struct Workers::Impl
 {
     Impl(const std::string& name, Workers& workers, const size_t nThreads,
-         const ConstGLContextPtr& glContext)
+         const GLContext& glContext)
         : _workers(workers)
-        , _glContext(glContext)
+        , _glContext(glContext.clone())
         , _name(name + "Worker")
     {
+        _glContext->share(glContext);
         for (size_t i = 0; i < nThreads; ++i)
             _threadGroup.create_thread(boost::bind(&Impl::execute, this));
     }
@@ -42,13 +43,8 @@ struct Workers::Impl
     void execute()
     {
         lunchbox::Thread::setName(_name);
-        GLContextPtr context;
-        if (_glContext)
-        {
-            context = _glContext->clone();
-            context->share(*_glContext);
-            context->makeCurrent();
-        }
+        GLContextPtr context(_glContext->clone());
+        context->share(*_glContext);
 
         while (true)
         {
@@ -59,11 +55,7 @@ struct Workers::Impl
             exec->execute();
         }
 
-        if (context)
-        {
-            context->doneCurrent();
-            context.reset();
-        }
+        context->doneCurrent();
     }
 
     ~Impl()
@@ -84,12 +76,12 @@ struct Workers::Impl
     Workers& _workers;
     lunchbox::MTQueue<ExecutablePtr> _workQueue;
     boost::thread_group _threadGroup;
-    ConstGLContextPtr _glContext;
+    GLContextPtr _glContext;
     const std::string _name;
 };
 
 Workers::Workers(const std::string& name, const size_t nThreads,
-                 ConstGLContextPtr glContext)
+                 const GLContext& glContext)
     : _impl(new Workers::Impl(name, *this, nThreads, glContext))
 {
 }

@@ -48,7 +48,7 @@ bool operator<(const Future& future1, const Future& future2)
 struct SimpleExecutor::Impl
 {
     Impl(const std::string& name, const size_t threadCount,
-         ConstGLContextPtr glContext)
+         const GLContext& glContext)
         : _workers(name, threadCount, glContext)
         , _unlockPromise(DataInfo("LoopUnlock", getType<bool>()))
         , _workThread(boost::thread(boost::bind(&Impl::schedule, this)))
@@ -140,7 +140,7 @@ struct SimpleExecutor::Impl
 
 SimpleExecutor::SimpleExecutor(const std::string& name,
                                const size_t threadCount,
-                               ConstGLContextPtr glContext)
+                               const GLContext& glContext)
     : _impl(new Impl(name, threadCount, glContext))
 {
 }
