@@ -99,7 +99,7 @@ struct Engine::Impl
         FrameData& frameData = config->getFrameData();
         frameData.setup(_applicationParameters, _rendererParameters);
 
-        if (!config->init())
+        if (!config->init(argc, argv))
         {
             client->releaseConfig(config);
             config = nullptr;
@@ -178,10 +178,8 @@ std::string Engine::getVersion()
     return os.str();
 }
 
-void Engine::run(const int argc, char** argv)
+void Engine::run()
 {
-    _impl->config->initCommunicator(argc, argv);
-
     uint32_t maxFrames = _impl->_applicationParameters.maxFrames;
     while (_impl->config->isRunning() && maxFrames--)
     {

@@ -57,21 +57,10 @@ public:
     void unmapFrameData();
 
     /**
-     * Resets camera.
-     */
-    void resetCamera();
-
-    /**
      * Initializes the config.
      * @return True if initalization is successful.
      */
-    bool init();
-
-    /**
-     * Initialize ZeroEQ communication, i.e. setup publisher, subscriber and
-     * HTTP server (if set in argv).
-     */
-    void initCommunicator(int argc, char** argv);
+    bool init(int argc, char** argv);
 
     /**
      * Exits the config.
@@ -105,7 +94,6 @@ public:
     /** @return the current histogram. */
     const Histogram& getHistogram() const;
 
-    void setHistogram(const Histogram& histogram);     //!< @internal
     bool handleEvent(eq::EventICommand command) final; //!< @internal
 
 private:
