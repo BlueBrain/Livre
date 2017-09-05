@@ -47,11 +47,8 @@ public:
     /**
      * Run the render loop. Only returns when the application is finished, i.e.
      * maxFrames exceeded, ESC key pressed, etc.
-     *
-     * @param argc Argument count.
-     * @param argv Argument list.
      */
-    LIVREEQ_API void run(const int argc, char** argv);
+    LIVREEQ_API void run();
 
     /**
      * Render a frame and return its result in the provided callback.

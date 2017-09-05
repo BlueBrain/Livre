@@ -92,14 +92,14 @@ public:
     {
     }
 
-    void gatherHistogram(const Histogram& histogram, const float area,
+    void gatherHistogram(const Histogram& subHistogram, const float area,
                          const uint32_t currentId)
     {
         // If we get a very old frame skip it
         if (!histogramQueue.empty() && currentId < histogramQueue.back().id)
             return;
 
-        const ViewHistogram viewHistogram(histogram, area, currentId);
+        const ViewHistogram viewHistogram(subHistogram, area, currentId);
         for (auto it = histogramQueue.begin(); it != histogramQueue.end();)
         {
             auto& data = *it;
@@ -118,9 +118,9 @@ public:
 
             if (data.isComplete()) // Send histogram & remove all old ones
             {
-                if (config.getHistogram() != data.histogram)
+                if (histogram != data.histogram)
                 {
-                    config.setHistogram(data.histogram);
+                    histogram = data.histogram;
 #ifdef LIVRE_USE_ZEROEQ
                     config.publish(data.histogram);
 #endif
@@ -142,9 +142,9 @@ public:
 
         if (viewHistogram.isComplete())
         {
-            if (config.getHistogram() == viewHistogram.histogram)
+            if (histogram == viewHistogram.histogram)
                 return;
-            config.setHistogram(viewHistogram.histogram);
+            histogram = viewHistogram.histogram;
 #ifdef LIVRE_USE_ZEROEQ
             config.publish(viewHistogram.histogram);
 #endif
@@ -153,6 +153,28 @@ public:
 
         if (histogramQueue.size() > config.getLatency() + 1)
             histogramQueue.pop_back();
+    }
+
+    void resetCamera()
+    {
+        framedata.getCameraSettings().setCameraPosition(
+            framedata.getApplicationParameters().cameraPosition);
+        framedata.getCameraSettings().setCameraLookAt(
+            framedata.getApplicationParameters().cameraLookAt);
+    }
+
+    void initCommunicator(const int argc LB_UNUSED, char** argv LB_UNUSED)
+    {
+#ifdef LIVRE_USE_ZEROEQ
+        for (int i = 1; i < argc; ++i)
+            if (std::string(argv[i]) == "--disable-communicator")
+                return;
+
+        communicator.reset(new zeroeq::Communicator(config, argc, argv));
+        framedata.getCameraSettings().registerNotifyChanged(
+            std::bind(&zeroeq::Communicator::publishCamera, communicator.get(),
+                      std::placeholders::_1));
+#endif
     }
 
     Config& config;
@@ -165,10 +187,10 @@ public:
     VolumeInformation volumeInfo;
     int64_t frameStart;
 
-    Histogram _histogram;
-
     Boxf volumeBBox;
+
     ViewHistogramQueue histogramQueue;
+    Histogram histogram;
 };
 
 Config::Config(eq::ServerPtr parent)
@@ -217,14 +239,9 @@ void Config::renderJPEG(::lexis::render::ImageJPEG& target)
     }
 }
 
-void Config::setHistogram(const Histogram& histogram)
-{
-    _impl->_histogram = histogram;
-}
-
 const Histogram& Config::getHistogram() const
 {
-    return _impl->_histogram;
+    return _impl->histogram;
 }
 
 const VolumeInformation& Config::getVolumeInformation() const
@@ -249,17 +266,9 @@ void Config::unmapFrameData()
     _impl->framedata.unmap(this);
 }
 
-void Config::resetCamera()
+bool Config::init(const int argc, char** argv)
 {
-    _impl->framedata.getCameraSettings().setCameraPosition(
-        _impl->framedata.getApplicationParameters().cameraPosition);
-    _impl->framedata.getCameraSettings().setCameraLookAt(
-        _impl->framedata.getApplicationParameters().cameraLookAt);
-}
-
-bool Config::init()
-{
-    resetCamera();
+    _impl->resetCamera();
     FrameData& framedata = _impl->framedata;
     FrameSettings& frameSettings = framedata.getFrameSettings();
     const ApplicationParameters& params = framedata.getApplicationParameters();
@@ -282,18 +291,8 @@ bool Config::init()
     }
 
     _impl->defaultLatency = getLatency();
+    _impl->initCommunicator(argc, argv);
     return true;
-}
-
-void Config::initCommunicator(const int argc LB_UNUSED, char** argv LB_UNUSED)
-{
-#ifdef LIVRE_USE_ZEROEQ
-    _impl->communicator.reset(new zeroeq::Communicator(*this, argc, argv));
-
-    _impl->framedata.getCameraSettings().registerNotifyChanged(
-        std::bind(&zeroeq::Communicator::publishCamera,
-                  _impl->communicator.get(), std::placeholders::_1));
-#endif
 }
 
 bool Config::frame()
@@ -418,7 +417,7 @@ bool Config::handleEvent(const eq::EventType type, const eq::KeyEvent& event)
     switch (event.key)
     {
     case ' ':
-        resetCamera();
+        _impl->resetCamera();
         return true;
 
     case 's':

@@ -41,6 +41,6 @@ int main(const int argc, char** argv)
     }
 
     livre::Engine engine(argc, argv);
-    engine.run(argc, argv);
+    engine.run();
     return EXIT_SUCCESS;
 }
