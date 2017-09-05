@@ -13,7 +13,6 @@ set(LIVRECORE_PUBLIC_HEADERS
   render/GLSLShaders.h
   render/TransferFunction1D.h
   types.h
-  util/Utilities.h
 )
 
 set(LIVRECORE_HEADERS
@@ -36,8 +35,7 @@ set(LIVRECORE_HEADERS
   render/Renderer.h
   render/TexturePool.h
   render/TextureState.h
-  util/FrameUtils.h
-  util/ThreadClock.h)
+  util/FrameUtils.h)
 
 set(LIVRECORE_SOURCES
   cache/Cache.cpp
@@ -62,9 +60,7 @@ set(LIVRECORE_SOURCES
   render/TexturePool.cpp
   render/TextureState.cpp
   render/TransferFunction1D.cpp
-  util/FrameUtils.cpp
-  util/ThreadClock.cpp
-  util/Utilities.cpp)
+  util/FrameUtils.cpp)
 
 set(LIVRECORE_LINK_LIBRARIES
   PUBLIC LivreData ${Boost_LIBRARIES} Collage Lexis Lunchbox vmmlib ZeroBuf

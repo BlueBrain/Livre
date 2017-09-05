@@ -23,10 +23,10 @@
 #ifndef _Config_h_
 #define _Config_h_
 
-#include <eq/config.h> // base class
 #include <livre/eq/api.h>
 #include <livre/eq/types.h>
 
+#include <eq/config.h> // base class
 #include <lexis/render/imageJPEG.h>
 
 namespace livre

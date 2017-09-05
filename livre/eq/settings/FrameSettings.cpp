@@ -20,6 +20,7 @@
  */
 
 #include <livre/eq/settings/FrameSettings.h>
+#include <livre/eq/types.h>
 
 #include <co/dataIStream.h>
 #include <co/dataOStream.h>

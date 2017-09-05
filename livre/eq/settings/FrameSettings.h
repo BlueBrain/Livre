@@ -23,7 +23,6 @@
 #define _FrameSettings_h_
 
 #include <co/serializable.h> // base class
-#include <livre/eq/types.h>
 
 namespace livre
 {

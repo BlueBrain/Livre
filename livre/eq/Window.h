@@ -22,11 +22,10 @@
 #ifndef _Window_h_
 #define _Window_h_
 
-#include <eq/window.h>
-
-#include <livre/core/types.h>
 #include <livre/eq/api.h>
 #include <livre/eq/types.h>
+
+#include <eq/window.h> // base class
 
 namespace livre
 {

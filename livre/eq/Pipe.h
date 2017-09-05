@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2006-2016, Stefan Eilemann <eile@equalizergraphics.com>
+/* Copyright (c) 2006-2017, Stefan Eilemann <eile@equalizergraphics.com>
  *                          Maxim Makhinya  <maxmah@gmail.com>
  *                          David Steiner   <steiner@ifi.uzh.ch>
  *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
@@ -8,9 +8,10 @@
 #ifndef _Pipe_h_
 #define _Pipe_h_
 
-#include <eq/pipe.h>
 #include <livre/eq/api.h>
 #include <livre/eq/types.h>
+
+#include <eq/pipe.h> // base class
 
 namespace livre
 {

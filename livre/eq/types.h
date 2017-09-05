@@ -17,8 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _livreEqTypes_h_
-#define _livreEqTypes_h_
+#pragma once_
 
 #include <livre/lib/types.h>
 
@@ -27,18 +26,11 @@
 namespace livre
 {
 class CameraSettings;
-class Channel;
-class Client;
 class Config;
 class Engine;
 class FrameData;
 class FrameSettings;
-class Node;
-class Pipe;
-class RayCastRenderer;
+class RenderPipeline;
 class RenderSettings;
 class VolumeSettings;
-class Window;
 }
-
-#endif // _livreEqTypes_h_
