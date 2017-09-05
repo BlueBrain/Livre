@@ -92,22 +92,6 @@ public:
     {
     }
 
-    void switchLayout(const int32_t increment)
-    {
-        const eq::Canvases& canvases = config.getCanvases();
-        if (canvases.empty())
-            return;
-
-        auto currentCanvas = canvases.front();
-        size_t index = currentCanvas->getActiveLayoutIndex() + increment;
-        const eq::Layouts& layouts = currentCanvas->getLayouts();
-        LBASSERT(!layouts.empty());
-
-        index = (index % layouts.size());
-        currentCanvas->useLayout(uint32_t(index));
-        activeLayout = currentCanvas->getActiveLayout();
-    }
-
     void gatherHistogram(const Histogram& histogram, const float area,
                          const uint32_t currentId)
     {
@@ -172,7 +156,7 @@ public:
     }
 
     Config& config;
-    uint32_t latency = 0;
+    uint32_t defaultLatency{0};
     FrameData framedata;
 #ifdef LIVRE_USE_ZEROEQ
     std::unique_ptr<zeroeq::Communicator> communicator;
@@ -181,7 +165,6 @@ public:
     VolumeInformation volumeInfo;
     int64_t frameStart;
 
-    eq::Layout* activeLayout = nullptr;
     Histogram _histogram;
 
     Boxf volumeBBox;
@@ -298,8 +281,7 @@ bool Config::init()
         return false;
     }
 
-    _impl->switchLayout(0); // update active layout
-    _impl->latency = getLatency();
+    _impl->defaultLatency = getLatency();
     return true;
 }
 
@@ -336,7 +318,7 @@ bool Config::frame()
     if (_impl->framedata.getVRParameters().getSynchronousMode())
         setLatency(0);
     else
-        setLatency(_impl->latency);
+        setLatency(_impl->defaultLatency);
 
     // reset data and advance current frame
     frameSettings.setGrabFrame(false);
@@ -378,16 +360,6 @@ bool Config::publish(const servus::Serializable& serializable)
         return _impl->communicator->publish(serializable);
 #endif
     return false;
-}
-
-void Config::switchLayout(const int32_t increment)
-{
-    return _impl->switchLayout(increment);
-}
-
-eq::Layout* Config::getActiveLayout()
-{
-    return _impl->activeLayout;
 }
 
 bool Config::exit()
@@ -466,14 +438,6 @@ bool Config::handleEvent(const eq::EventType type, const eq::KeyEvent& event)
     case 'i':
     case 'I':
         frameSettings.toggleInfo();
-        return true;
-
-    case 'l':
-        switchLayout(1);
-        return true;
-
-    case 'L':
-        switchLayout(-1);
         return true;
 
     default:
