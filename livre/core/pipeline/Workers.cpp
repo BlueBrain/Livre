@@ -35,7 +35,6 @@ struct Workers::Impl
         , _glContext(glContext.clone())
         , _name(name + "Worker")
     {
-        _glContext->share(glContext);
         for (size_t i = 0; i < nThreads; ++i)
             _threadGroup.create_thread(boost::bind(&Impl::execute, this));
     }
@@ -44,7 +43,6 @@ struct Workers::Impl
     {
         lunchbox::Thread::setName(_name);
         GLContextPtr context(_glContext->clone());
-        context->share(*_glContext);
 
         while (true)
         {

@@ -27,59 +27,47 @@ namespace livre
 {
 namespace
 {
-boost::mutex glContextMutex;
 }
 
 EqContext::EqContext(Window* const window)
     : GLContext(window->glewGetContext())
     , _window(window)
-    , _systemWindow(0)
+    , _systemWindow(window->getSystemWindow())
 {
+    if (!_systemWindow)
+        throw std::runtime_error("Missing system window");
 }
 
-EqContext::~EqContext()
+EqContext::EqContext(const EqContext& shared)
+    : GLContext(shared._window->glewGetContext())
+    , _window(shared._window)
+    , _systemWindow(nullptr)
 {
-    delete _systemWindow;
-}
-
-void EqContext::share(const GLContext& src)
-{
-    LBASSERT(_window);
-    ScopedLock lock(glContextMutex);
-
-    // Context is already created so return.
-    if (_systemWindow)
-        return;
-
-    const EqContext* parent = dynamic_cast<const EqContext*>(&src);
-    if (!parent)
-    {
-        LBERROR << "Only same kind of contexts can be shared" << std::endl;
-        return;
-    }
-
-    if (!parent->_window)
-    {
-        LBERROR << "Parent context can not be NULL" << std::endl;
-        return;
-    }
+    static std::mutex glContextMutex;
+    std::lock_guard<std::mutex> lock(glContextMutex);
 
     eq::WindowSettings settings = _window->getSettings();
     settings.setSharedContextWindow(_window->getSystemWindow());
     settings.setIAttribute(eq::WindowSettings::IATTR_HINT_DRAWABLE, eq::OFF);
     const eq::Pipe* pipe = _window->getPipe();
-    _systemWindow = pipe->getWindowSystem().createWindow(_window, settings);
 
-    if (!_systemWindow->configInit())
-    {
-        delete _systemWindow;
-        _systemWindow = 0;
-    }
+    _newSystemWindow.reset(
+        pipe->getWindowSystem().createWindow(_window, settings));
+    if (_newSystemWindow->configInit())
+        _systemWindow = _newSystemWindow.get();
+    else
+        _newSystemWindow.reset();
+    if (!_systemWindow)
+        throw std::runtime_error("Missing system window in clone");
+}
+
+EqContext::~EqContext()
+{
 }
 
 GLContextPtr EqContext::clone() const
 {
-    return GLContextPtr(new EqContext(_window));
+    return GLContextPtr(new EqContext(*this));
 }
 
 void EqContext::makeCurrent()

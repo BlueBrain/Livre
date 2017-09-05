@@ -39,11 +39,6 @@ public:
     ~EqContext();
 
     /**
-     * @copydoc GLContext::share
-     */
-    void share(const GLContext& src) final;
-
-    /**
      * @copydoc GLContext::clone
      */
     GLContextPtr clone() const final;
@@ -59,9 +54,12 @@ public:
     virtual void doneCurrent() final;
 
 private:
-    EqContext();
+    EqContext() = delete;
+    EqContext(const EqContext& shared);
+
     Window* const _window;
     eq::SystemWindow* _systemWindow;
+    std::unique_ptr<eq::SystemWindow> _newSystemWindow;
 };
 }
 

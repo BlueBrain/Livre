@@ -35,13 +35,7 @@ public:
     LIVRECORE_API virtual ~GLContext();
 
     /**
-     * Shares the context with the source context.
-     * @param src is the source context to share the context with
-     */
-    virtual void share(const GLContext& src) = 0;
-
-    /**
-     * @return a clone of the context.
+     * @return a cloned, shared context.
      */
     virtual GLContextPtr clone() const = 0;
 
