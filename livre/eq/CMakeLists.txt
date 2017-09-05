@@ -31,7 +31,6 @@ set(LIVREEQ_HEADERS
   Config.h
   ConnectionDefinitions.h
   Error.h
-  EventHandler.h
   FrameGrabber.h
   Node.h
   Pipe.h
@@ -47,7 +46,6 @@ set(LIVREEQ_SOURCES
   Config.cpp
   Engine.cpp
   Error.cpp
-  EventHandler.cpp
   FrameData.cpp
   FrameGrabber.cpp
   Node.cpp

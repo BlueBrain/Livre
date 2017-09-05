@@ -23,8 +23,7 @@
 #ifndef _Config_h_
 #define _Config_h_
 
-#include <eq/config.h>             // CRTP base class
-#include <livre/eq/EventHandler.h> // base class
+#include <eq/config.h> // base class
 #include <livre/eq/api.h>
 #include <livre/eq/types.h>
 
@@ -33,7 +32,7 @@
 namespace livre
 {
 /** Drives a configuration, aka the main application loop. */
-class Config : public EventHandler<eq::Config>
+class Config : public eq::Config
 {
 public:
     /**
@@ -115,13 +114,17 @@ public:
     /** @return the current histogram. */
     const Histogram& getHistogram() const;
 
-    /** @internal */
-    void setHistogram(const Histogram& histogram);
+    void setHistogram(const Histogram& histogram);     //!< @internal
+    bool handleEvent(eq::EventICommand command) final; //!< @internal
 
 private:
     LIVREEQ_API virtual ~Config();
 
     bool _keepCurrentFrame(uint32_t fps) const;
+
+    bool handleEvent(eq::EventType type, const eq::Event& event) final;
+    bool handleEvent(eq::EventType type, const eq::KeyEvent&) final;
+    bool handleEvent(eq::EventType type, const eq::PointerEvent&) final;
 
     class Impl;
     std::unique_ptr<Impl> _impl;
