@@ -241,7 +241,6 @@ public:
     }
 
 private:
-    void share(const GLContext&) final {}
     livre::GLContextPtr clone() const final
     {
         return livre::GLContextPtr(new DummyContext);
