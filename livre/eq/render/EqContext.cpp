@@ -43,14 +43,12 @@ EqContext::EqContext(const EqContext& shared)
     , _window(shared._window)
     , _systemWindow(nullptr)
 {
-    static std::mutex glContextMutex;
-    std::lock_guard<std::mutex> lock(glContextMutex);
-
     eq::WindowSettings settings = _window->getSettings();
     settings.setSharedContextWindow(_window->getSystemWindow());
     settings.setIAttribute(eq::WindowSettings::IATTR_HINT_DRAWABLE, eq::OFF);
     const eq::Pipe* pipe = _window->getPipe();
 
+    _window->getSystemWindow()->doneCurrent();
     _newSystemWindow.reset(
         pipe->getWindowSystem().createWindow(_window, settings));
     if (_newSystemWindow->configInit())
