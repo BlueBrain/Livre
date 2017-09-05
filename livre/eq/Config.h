@@ -94,15 +94,6 @@ public:
     /** Publish a serializable object */
     bool publish(const servus::Serializable& serializable);
 
-    /**
-     * Switches the layout.
-     * @param increment Increments the layout value.
-     */
-    void switchLayout(const int32_t increment);
-
-    /** @return the active layout. */
-    eq::Layout* getActiveLayout();
-
     void handleNetworkEvents();
 
     void renderJPEG(::lexis::render::ImageJPEG& target);

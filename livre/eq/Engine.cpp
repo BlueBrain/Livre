@@ -131,6 +131,14 @@ struct Engine::Impl
             _applicationParameters.dataFileName = "mem:///#4096,4096,4096,40";
     }
 
+    eq::Layout* getActiveLayout()
+    {
+        auto& canvases = config->getCanvases();
+        if (!canvases.empty())
+            return canvases.front()->getActiveLayout();
+        return nullptr;
+    }
+
     NodeFactory nodeFactory;
     lunchbox::RefPtr<livre::Client> client;
     Config* config = nullptr;
@@ -207,10 +215,17 @@ void Engine::run(const int argc, char** argv)
 
 bool Engine::render(const eq::View::ScreenshotFunc& func)
 {
-    auto layout = _impl->config->getActiveLayout();
-    auto view = layout ? layout->getViews()[0] : nullptr;
-    if (view)
-        view->enableScreenshot(eq::Frame::Buffer::color, func);
+    eq::View* view{nullptr};
+    auto layout = _impl->getActiveLayout();
+    if (layout)
+    {
+        auto& views = layout->getViews();
+        if (!views.empty())
+        {
+            view = views.front();
+            view->enableScreenshot(eq::Frame::Buffer::color, func);
+        }
+    }
 
     _impl->config->frame();
     if (_impl->client->getIdleFunction())
@@ -226,7 +241,7 @@ bool Engine::render(const eq::View::ScreenshotFunc& func)
 void Engine::resize(const Vector2ui& size)
 {
     _impl->config->finishAllFrames();
-    auto layout = _impl->config->getActiveLayout();
+    auto layout = _impl->getActiveLayout();
     if (layout)
         layout->setPixelViewport(
             eq::PixelViewport{0, 0, int32_t(size.x()), int32_t(size.y())});
