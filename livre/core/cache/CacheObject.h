@@ -22,7 +22,6 @@
 
 #include <livre/core/api.h>
 #include <livre/core/types.h>
-#include <livre/core/util/ThreadClock.h>
 
 namespace livre
 {

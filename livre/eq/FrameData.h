@@ -22,8 +22,8 @@
 #define _FrameData_h_
 
 #include <co/objectFactory.h> // member
+#include <eq/types.h>
 #include <livre/eq/types.h>
-#include <livre/lib/types.h>
 
 namespace livre
 {
@@ -95,9 +95,9 @@ public:
     bool map(eq::Config* config, const eq::uint128_t& uuid);
 
     /**
-    * Unmaps frame data from config.
-    * @param config eq Config.
-    */
+     * Unmaps frame data from config.
+     * @param config eq Config.
+     */
     void unmap(eq::Config* config);
 
     /**

@@ -22,11 +22,10 @@
 #ifndef _Client_h_
 #define _Client_h_
 
-#include <eq/client.h>
-#include <eq/view.h>
-
 #include <livre/eq/api.h>
 #include <livre/eq/types.h>
+
+#include <eq/client.h> // base class
 
 namespace livre
 {

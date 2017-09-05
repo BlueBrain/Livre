@@ -87,9 +87,9 @@ TexturePool::~TexturePool()
 {
 }
 
-void TexturePool::generateTexture(TextureState& textureState)
+void TexturePool::generate(TextureState& textureState)
 {
-    ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> lock(_mutex);
     LBASSERT(textureState.textureId == INVALID_TEXTURE_ID);
     if (!_textureStack.empty())
     {
@@ -118,9 +118,9 @@ void TexturePool::generateTexture(TextureState& textureState)
     }
 }
 
-void TexturePool::releaseTexture(TextureState& textureState)
+void TexturePool::release(TextureState& textureState)
 {
-    ScopedLock lock(_mutex);
+    std::lock_guard<std::mutex> lock(_mutex);
     LBASSERT(textureState.textureId);
     _textureStack.push_back(textureState.textureId);
 }

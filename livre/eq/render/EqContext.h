@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                     Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -21,12 +21,9 @@
 #define _EqContext_h_
 
 #include <livre/core/render/GLContext.h>
-#include <livre/eq/types.h>
 
 namespace livre
 {
-class Window;
-
 /**
  * The EqContext class for wrapping the GLContext for equalizer library.
  */

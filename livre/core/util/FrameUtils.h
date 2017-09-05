@@ -26,8 +26,8 @@
 namespace livre
 {
 /**
- * Class that takes care of the computation of a valid frame range and uses it
- * as a reference to compute valid frame numbers.
+ * Computes a valid frame range and uses it as a reference to compute valid
+ * frame numbers.
  */
 class FrameUtils
 {

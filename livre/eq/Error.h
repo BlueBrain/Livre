@@ -22,7 +22,6 @@
 #define _Error_h_
 
 #include <livre/eq/api.h>
-#include <livre/eq/types.h>
 
 namespace livre
 {

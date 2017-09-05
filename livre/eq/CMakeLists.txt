@@ -29,7 +29,6 @@ set(LIVREEQ_HEADERS
   Channel.h
   Client.h
   Config.h
-  ConnectionDefinitions.h
   Error.h
   FrameGrabber.h
   Node.h

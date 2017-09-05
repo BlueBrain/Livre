@@ -24,11 +24,13 @@
 #include <livre/core/render/TextureState.h>
 #include <livre/core/types.h>
 
+#include <mutex>
+
 namespace livre
 {
 /**
- * The TexturePool class is responsible for allocating texture slots and copying
- * textures into the texture slots. The methods are not thread safe.
+ * Allocates texture slots and copies textures into the texture slots.
+ * Thread safe.
  */
 class TexturePool
 {
@@ -57,14 +59,14 @@ public:
      * @param textureState The destination state is filled with needed
      * information.
      */
-    LIVRECORE_API void generateTexture(TextureState& textureState);
+    LIVRECORE_API void generate(TextureState& textureState);
 
     /**
      * Releases a texture slot.
      * @param textureState The destination state is filled with needed
      * information.
      */
-    LIVRECORE_API void releaseTexture(TextureState& textureState);
+    LIVRECORE_API void release(TextureState& textureState);
 
 private:
     UInt32s _textureStack;
@@ -74,7 +76,7 @@ private:
     uint32_t _format;
     uint32_t _textureType;
 
-    boost::mutex _mutex;
+    std::mutex _mutex;
 };
 }
 

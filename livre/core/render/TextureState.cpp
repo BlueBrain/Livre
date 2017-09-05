@@ -33,12 +33,12 @@ TextureState::TextureState(TexturePool& texturePool)
     , textureId(INVALID_TEXTURE_ID)
     , _texturePool(texturePool)
 {
-    _texturePool.generateTexture(*this);
+    _texturePool.generate(*this);
 }
 
 TextureState::~TextureState()
 {
-    _texturePool.releaseTexture(*this);
+    _texturePool.release(*this);
 }
 
 void TextureState::bind() const
