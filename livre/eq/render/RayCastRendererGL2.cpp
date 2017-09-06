@@ -107,9 +107,9 @@ struct RayCastRenderer::Impl
         const int error = _shaders.loadShaders(
             ShaderData(vertRayCastGL2_glsl, fragRayCastGL2_glsl));
         if (error != GL_NO_ERROR)
-            LBTHROW(std::runtime_error("Can't load glsl shaders: " +
-                                       eq::glError(error) +
-                                       where(__FILE__, __LINE__)));
+            LBTHROW(std::runtime_error(
+                "Can't load glsl shaders: " + eq::glError(error) +
+                where(__FILE__, __LINE__)));
     }
 
     ~Impl() { _framebufferTexture.flush(); }
@@ -377,6 +377,7 @@ struct RayCastRenderer::Impl
 
     void onFrameRender(const PixelViewport& view, const NodeIds& bricks)
     {
+        _visibleNodes.clear();
         EQ_GL_ERROR("before Texture::copyFromFrameBuffer");
         size_t index = 0;
         for (const NodeId& brick : bricks)
@@ -423,7 +424,7 @@ struct RayCastRenderer::Impl
 
         if (texState.textureId == INVALID_TEXTURE_ID)
         {
-            LBERROR << "Invalid texture for node : " << lodNode.getNodeId()
+            LBERROR << "Invalid texture for node: " << lodNode.getNodeId()
                     << std::endl;
             return;
         }
@@ -488,6 +489,8 @@ struct RayCastRenderer::Impl
 
         glUseProgram(0);
         EQ_GL_ERROR("before Texture::copyFromFrameBuffer");
+
+        _visibleNodes.push_back(rb);
     }
 
     void onFrameEnd()
@@ -518,6 +521,7 @@ struct RayCastRenderer::Impl
     const DataSource& _dataSource;
     const VolumeInformation& _volInfo;
     GLuint _posVBO;
+    NodeIds _visibleNodes;
 };
 
 RayCastRenderer::RayCastRenderer(const DataSource& dataSource,
@@ -540,6 +544,11 @@ NodeIds RayCastRenderer::order(const NodeIds& bricks,
                                const Frustum& frustum) const
 {
     return _impl->order(bricks, frustum);
+}
+
+const NodeIds& RayCastRenderer::getVisibleNodes() const
+{
+    return _impl->_visibleNodes;
 }
 
 void RayCastRenderer::_onFrameStart(const Frustum& frustum,

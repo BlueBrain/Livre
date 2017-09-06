@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2006-2015, Stefan Eilemann <eile@equalizergraphics.com>
+/* Copyright (c) 2006-2017, Stefan Eilemann <eile@equalizergraphics.com>
  *                          Maxim Makhinya  <maxmah@gmail.com>
  *                          Ahmet Bilgili   <ahmet.bilgili@epfl.ch>
  *
@@ -44,7 +44,6 @@ private:
 
     void frameStart(const eq::uint128_t&, const uint32_t) final;
     void frameDraw(const eq::uint128_t& frameId) final;
-    void frameViewStart(const eq::uint128_t& frameId) final;
     void frameViewFinish(const eq::uint128_t& frameID) final;
     void frameAssemble(const eq::uint128_t&, const eq::Frames&) final;
     void frameReadback(const eq::uint128_t&, const eq::Frames&) final;

@@ -30,7 +30,6 @@ class FrameGrabber : public eq::ResultImageListener
 {
 public:
     FrameGrabber();
-
     ~FrameGrabber();
 
     /**

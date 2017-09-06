@@ -339,24 +339,14 @@ public:
     {
         initializeFrame();
         initializeRenderer();
+        _channel->addResultImageListener(&_frameGrabber);
     }
 
     void configExit()
     {
+        _channel->removeResultImageListener(&_frameGrabber);
         _frame.getFrameData()->flush();
         _frame.setFrameData(nullptr);
-    }
-
-    void addImageListener()
-    {
-        if (getFrameData().getFrameSettings().getGrabFrame())
-            _channel->addResultImageListener(&_frameGrabber);
-    }
-
-    void removeImageListener()
-    {
-        if (getFrameData().getFrameSettings().getGrabFrame())
-            _channel->removeResultImageListener(&_frameGrabber);
     }
 
     void frameViewFinish()
@@ -672,19 +662,12 @@ void Channel::frameDraw(const lunchbox::uint128_t& frameId)
     _impl->frameDraw();
 }
 
-void Channel::frameViewStart(const uint128_t& frameId)
-{
-    eq::Channel::frameViewStart(frameId);
-    _impl->addImageListener();
-}
-
 void Channel::frameViewFinish(const eq::uint128_t& frameID)
 {
     setupAssemblyState();
     _impl->frameViewFinish();
     resetAssemblyState();
     eq::Channel::frameViewFinish(frameID);
-    _impl->removeImageListener();
 }
 
 void Channel::frameAssemble(const eq::uint128_t&, const eq::Frames& frames)

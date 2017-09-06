@@ -118,24 +118,24 @@ struct RayCastRenderer::Impl
             ShaderData(vertRayCast_glsl, fragRayCast_glsl));
 
         if (error != GL_NO_ERROR)
-            LBTHROW(std::runtime_error("Can't load glsl shaders: " +
-                                       eq::glError(error) +
-                                       where(__FILE__, __LINE__)));
+            LBTHROW(std::runtime_error(
+                "Can't load glsl shaders: " + eq::glError(error) +
+                where(__FILE__, __LINE__)));
 
         error = _texCopyShaders.loadShaders(
             ShaderData(vertTexCopy_glsl, fragTexCopy_glsl));
 
         if (error != GL_NO_ERROR)
-            LBTHROW(std::runtime_error("Can't load glsl shaders: " +
-                                       eq::glError(error) +
-                                       where(__FILE__, __LINE__)));
+            LBTHROW(std::runtime_error(
+                "Can't load glsl shaders: " + eq::glError(error) +
+                where(__FILE__, __LINE__)));
 
         error =
             _axisShaders.loadShaders(ShaderData(vertAxis_glsl, fragAxis_glsl));
         if (error != GL_NO_ERROR)
-            LBTHROW(std::runtime_error("Can't load glsl shaders: " +
-                                       eq::glError(error) +
-                                       where(__FILE__, __LINE__)));
+            LBTHROW(std::runtime_error(
+                "Can't load glsl shaders: " + eq::glError(error) +
+                where(__FILE__, __LINE__)));
 
         // Create QUAD VBO
         glGenBuffers(1, &_quadVBO);

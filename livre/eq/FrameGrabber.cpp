@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
  * This file is part of Livre <https://github.com/BlueBrain/Livre>
@@ -17,9 +17,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <livre/eq/FrameGrabber.h>
+
 #include <livre/eq/Channel.h>
 #include <livre/eq/Event.h>
-#include <livre/eq/FrameGrabber.h>
+#include <livre/eq/FrameData.h>
+#include <livre/eq/Pipe.h>
+#include <livre/eq/settings/FrameSettings.h>
 
 #include <eq/image.h>
 
@@ -30,12 +34,7 @@
 namespace livre
 {
 FrameGrabber::FrameGrabber()
-    : ResultImageListener()
-#ifdef LIVRE_USE_LIBJPEGTURBO
-    , _compressor(tjInitCompress())
-#else
-    , _compressor(nullptr)
-#endif
+    : _compressor(nullptr)
 {
 }
 
@@ -53,6 +52,9 @@ uint8_t* FrameGrabber::_encodeJpeg(const uint32_t width LB_UNUSED,
                                    unsigned long& dataSize LB_UNUSED)
 {
 #ifdef LIVRE_USE_LIBJPEGTURBO
+    if (!_compressor)
+        _compressor = tjInitCompress();
+
     uint8_t* tjSrcBuffer = const_cast<uint8_t*>(rawData);
     const int32_t pixelFormat = TJPF_BGRA;
     const int32_t color_components = 4; // Color Depth
@@ -72,10 +74,12 @@ uint8_t* FrameGrabber::_encodeJpeg(const uint32_t width LB_UNUSED,
     if (success != 0)
     {
         LBERROR << "libjpeg-turbo image conversion failure" << std::endl;
-        return 0;
+        dataSize = 0;
+        return nullptr;
     }
     return static_cast<uint8_t*>(tjJpegBuf);
 #else
+    dataSize = 0;
     if (!_compressor) // just to silence unused private field warning
         return nullptr;
     return nullptr;
@@ -84,6 +88,10 @@ uint8_t* FrameGrabber::_encodeJpeg(const uint32_t width LB_UNUSED,
 
 void FrameGrabber::notifyNewImage(eq::Channel& channel, const eq::Image& image)
 {
+    const Pipe* pipe = static_cast<Pipe*>(channel.getPipe());
+    if (!pipe->getFrameData().getFrameSettings().getGrabFrame())
+        return;
+
     const uint64_t size = image.getPixelDataSize(eq::Frame::Buffer::color);
     const uint8_t* data = image.getPixelPointer(eq::Frame::Buffer::color);
     const eq::PixelViewport& pvp = image.getPixelViewport();
@@ -92,10 +100,8 @@ void FrameGrabber::notifyNewImage(eq::Channel& channel, const eq::Image& image)
     uint8_t* jpegData = _encodeJpeg(pvp.w, pvp.h, data, jpegSize);
 
     if (!jpegData)
-    {
-        jpegSize = 0;
-        LBERROR << "Returning an empty jpeg image" << std::endl;
-    }
+        LBERROR << "Jpeg compression failed" << std::endl;
+
     channel.getConfig()->sendEvent(GRAB_IMAGE)
         << uint64_t(jpegSize) << co::Array<const uint8_t>(jpegData, jpegSize);
 #ifdef LIVRE_USE_LIBJPEGTURBO
