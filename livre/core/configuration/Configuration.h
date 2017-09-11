@@ -113,7 +113,7 @@ public:
      * @param argc Number of arguments.
      * @param argv Arguments array.
      */
-    LIVRECORE_API void parseCommandLine(int32_t argc, const char** argv);
+    LIVRECORE_API void parseCommandLine(int32_t argc, const char* const argv[]);
 
     /**
      * Gets the value of a key from the dictionary.

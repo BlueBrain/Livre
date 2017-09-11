@@ -41,7 +41,7 @@ public:
      * @param argv Argument list.
      * @return True if arguments can be parsed.
      */
-    LIVRECORE_API bool initialize(const int32_t argc, const char** argv);
+    LIVRECORE_API bool initialize(const int32_t argc, const char* const argv[]);
 
     /**
      * @return The parameter name.

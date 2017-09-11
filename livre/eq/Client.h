@@ -26,6 +26,7 @@
 #include <livre/eq/types.h>
 
 #include <eq/client.h> // base class
+#include <eq/view.h>   // nested type
 
 namespace livre
 {
@@ -37,14 +38,8 @@ typedef std::function<void()> IdleFunc;
 class Client : public eq::Client
 {
 public:
-    LIVREEQ_API Client(int argc, char** argv, bool isResident);
+    LIVREEQ_API Client(int argc, char* argv[]);
     LIVREEQ_API ~Client();
-
-    /** @return the new chosen config if successful, nullptr otherwise. */
-    LIVREEQ_API Config* chooseConfig();
-
-    /** Release the config from chooseConfig(). */
-    LIVREEQ_API void releaseConfig(Config* config);
 
     /**
      * @param idleFunc function which is called every frame, e.g. for updating
@@ -55,12 +50,40 @@ public:
     /** @return the currently set idle function. */
     LIVREEQ_API const IdleFunc& getIdleFunction() const;
 
+    /** Exit this client. Can't be done in dtor, it would never be reached due
+     * to Eq ref-counting. */
+    LIVREEQ_API void exit();
+
     /**
-     * Process all pending commands.
-     *
-     * @return true if there were commands to process, false otherwise
+     * Run the render loop. Only returns when the application is finished, i.e.
+     * maxFrames exceeded, ESC key pressed, etc.
      */
-    LIVREEQ_API bool processCommands();
+    LIVREEQ_API void run();
+
+    /**
+     * Render a frame and return its result in the provided callback.
+     * Do not mix with run().
+     *
+     * @param func callback function containing the rendered image.
+     * @return true if a redraw is required, e.g. data is still dirty/loaded.
+     */
+    LIVREEQ_API bool render(const eq::View::ScreenshotFunc& func);
+
+    /** Resize the active layout aka windows/drawables/buffers */
+    LIVREEQ_API void resize(const Vector2ui& size);
+
+    /** @return the current histogram. */
+    const Histogram& getHistogram() const;
+
+    /** @return The per-frame data. */
+    const FrameData& getFrameData() const;
+    FrameData& getFrameData();
+
+    /** @return the current volume information. */
+    const VolumeInformation& getVolumeInformation() const;
+
+    /** @return the application parameters */
+    ApplicationParameters& getApplicationParameters();
 
 protected:
     /** @override eq::Client::initLocal() */
@@ -68,6 +91,9 @@ protected:
 
     /** Infinite loop on remote render client. */
     void clientLoop() final;
+
+    /** @return the first active layout of this client. */
+    eq::Layout* getActiveLayout();
 
 private:
     struct Impl;

@@ -34,18 +34,25 @@ namespace livre
 {
 struct Client::Impl
 {
-    Impl(const bool isResident_)
-        : isResident(isResident_)
-    {
-    }
     IdleFunc _idleFunc;
     eq::ServerPtr server;
-    bool isResident = false;
+    Config* config{nullptr};
+    ApplicationParameters applicationParameters;
+    VolumeRendererParameters rendererParameters;
 };
 
-Client::Client(const int argc, char** argv, const bool isResident)
-    : _impl(new Client::Impl(isResident))
+Client::Client(const int argc, char* argv[])
+    : _impl(new Client::Impl)
 {
+    if (!_impl->applicationParameters.initialize(argc, argv) ||
+        !_impl->rendererParameters.initialize(argc, argv))
+    {
+        LBTHROW(std::runtime_error("Error parsing command line arguments"));
+    }
+
+    if (_impl->applicationParameters.dataFileName.empty())
+        _impl->applicationParameters.dataFileName = "mem:///#4096,4096,4096,40";
+
     if (!initLocal(argc, argv))
         LBTHROW(std::runtime_error("Can't init client"));
 
@@ -55,23 +62,97 @@ Client::Client(const int argc, char** argv, const bool isResident)
         exitLocal();
         LBTHROW(std::runtime_error("Can't open server"));
     }
+
+    eq::fabric::ConfigParams configParams;
+    _impl->config =
+        static_cast<Config*>(_impl->server->chooseConfig(configParams));
+    if (!_impl->config)
+        LBTHROW(std::runtime_error("No matching config on server"));
+
+    // framedata setup gets volume URI from application params which is
+    // needed in Node::configInit() to load volume
+    FrameData& frameData = _impl->config->getFrameData();
+    frameData.setup(_impl->applicationParameters, _impl->rendererParameters);
+
+    if (!_impl->config->init(argc, argv))
+    {
+        _impl->server->releaseConfig(_impl->config);
+        _impl->config = nullptr;
+        LBTHROW(std::runtime_error("Config init failed"));
+    }
 }
 
 Client::~Client()
 {
 }
 
-Config* Client::chooseConfig()
+void Client::run()
 {
-    eq::fabric::ConfigParams configParams;
-    auto config =
-        static_cast<Config*>(_impl->server->chooseConfig(configParams));
-    return config;
+    uint32_t maxFrames = _impl->applicationParameters.maxFrames;
+    while (_impl->config->isRunning() && maxFrames--)
+    {
+        if (!_impl->config->frame()) // If not valid, reset maxFrames
+            maxFrames++;
+
+        if (getIdleFunction())
+            getIdleFunction()(); // order is important to latency
+
+        // wait for an event requiring redraw
+        while (!_impl->config->needRedraw())
+        {
+            if (hasCommands())
+            {
+                processCommand();
+                _impl->config->handleEvents(); // non-blocking
+            }
+            else // no pending commands, block on user event
+            {
+                // Poll ZeroEq subscribers at least every 100 ms in handleEvents
+                const eq::EventICommand& event =
+                    _impl->config->getNextEvent(100);
+                if (event.isValid())
+                    _impl->config->handleEvent(event);
+                _impl->config->handleEvents();        // non-blocking
+                _impl->config->handleNetworkEvents(); // non-blocking
+            }
+        }
+        _impl->config->handleEvents();        // process all pending events
+        _impl->config->handleNetworkEvents(); // ...all ZeroEQ events
+    }
 }
 
-void Client::releaseConfig(Config* config)
+bool Client::render(const eq::View::ScreenshotFunc& func)
 {
-    _impl->server->releaseConfig(config);
+    eq::View* view{nullptr};
+    auto layout = getActiveLayout();
+    if (layout)
+    {
+        auto& views = layout->getViews();
+        if (!views.empty())
+        {
+            view = views.front();
+            view->enableScreenshot(eq::Frame::Buffer::color, func);
+        }
+    }
+
+    _impl->config->frame();
+    if (getIdleFunction())
+        getIdleFunction()(); // order is important to latency
+    _impl->config->handleEvents();
+
+    if (view)
+        view->disableScreenshot();
+
+    return _impl->config->needRedraw();
+}
+
+void Client::exit()
+{
+    if (_impl->config)
+    {
+        _impl->config->exit();
+        _impl->server->releaseConfig(_impl->config);
+    }
     if (!disconnectServer(_impl->server))
         LBERROR << "Client::disconnectServer failed" << std::endl;
     _impl->server = 0;
@@ -79,6 +160,15 @@ void Client::releaseConfig(Config* config)
 
     LBASSERTINFO(getRefCount() == 1, "Client still referenced by "
                                          << getRefCount() - 1);
+}
+
+void Client::resize(const Vector2ui& size)
+{
+    _impl->config->finishAllFrames();
+    auto layout = getActiveLayout();
+    if (layout)
+        layout->setPixelViewport(
+            eq::PixelViewport{0, 0, int32_t(size.x()), int32_t(size.y())});
 }
 
 void Client::setIdleFunction(const IdleFunc& idleFunc)
@@ -91,15 +181,6 @@ const IdleFunc& Client::getIdleFunction() const
     return _impl->_idleFunc;
 }
 
-bool Client::processCommands()
-{
-    if (!hasCommands())
-        return false;
-
-    processCommand();
-    return true;
-}
-
 bool Client::initLocal(const int argc, char** argv)
 {
     addActiveLayout("Simple"); // prefer single GPU layout by default
@@ -108,17 +189,49 @@ bool Client::initLocal(const int argc, char** argv)
 
 void Client::clientLoop()
 {
-    do
+    LBINFO << "Entered client loop" << std::endl;
+    const uint32_t timeout = 100; // Run idle function every 100ms
+    while (isRunning())
     {
-        LBINFO << "Entered client loop" << std::endl;
-        const uint32_t timeout = 100; // Run idle function every 100ms
-        while (isRunning())
-        {
-            if (_impl->_idleFunc)
-                _impl->_idleFunc(); // order is important for latency
+        if (_impl->_idleFunc)
+            _impl->_idleFunc(); // order is important for latency
 
-            processCommand(timeout);
-        }
-    } while (_impl->isResident); // execute at least one config run
+        processCommand(timeout);
+    }
+}
+
+eq::Layout* Client::getActiveLayout()
+{
+    if (!_impl->config)
+        return nullptr;
+    auto& canvases = _impl->config->getCanvases();
+    if (!canvases.empty())
+        return canvases.front()->getActiveLayout();
+    return nullptr;
+}
+
+const Histogram& Client::getHistogram() const
+{
+    return _impl->config->getHistogram();
+}
+
+const FrameData& Client::getFrameData() const
+{
+    return _impl->config->getFrameData();
+}
+
+FrameData& Client::getFrameData()
+{
+    return _impl->config->getFrameData();
+}
+
+const VolumeInformation& Client::getVolumeInformation() const
+{
+    return _impl->config->getVolumeInformation();
+}
+
+ApplicationParameters& Client::getApplicationParameters()
+{
+    return _impl->applicationParameters;
 }
 }
