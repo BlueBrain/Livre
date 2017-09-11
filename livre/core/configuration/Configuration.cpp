@@ -28,7 +28,7 @@ Configuration::Configuration()
 {
 }
 
-void Configuration::parseCommandLine(int32_t argc, const char** argv)
+void Configuration::parseCommandLine(int32_t argc, const char* const argv[])
 {
     // Add group for config file
     ProgramOptionsDescription description;

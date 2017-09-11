@@ -21,7 +21,7 @@
 
 namespace livre
 {
-bool Parameters::initialize(const int32_t argc, const char **argv)
+bool Parameters::initialize(const int32_t argc, const char *const argv[])
 {
     try
     {
