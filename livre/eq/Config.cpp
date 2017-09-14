@@ -352,7 +352,7 @@ bool Config::needRedraw()
            _impl->framedata.getApplicationParameters().animation != 0;
 }
 
-bool Config::publish(const servus::Serializable& serializable)
+bool Config::publish(const servus::Serializable& serializable LB_UNUSED)
 {
 #ifdef LIVRE_USE_ZEROEQ
     if (_impl->communicator)
