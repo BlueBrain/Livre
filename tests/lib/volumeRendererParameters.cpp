@@ -77,8 +77,7 @@ BOOST_AUTO_TEST_CASE(initFromArgv)
                           "42"};
     const int argc = sizeof(argv) / sizeof(char*);
 
-    livre::VolumeRendererParameters params;
-    params.initialize(argc, argv);
+    livre::VolumeRendererParameters params(argc, argv);
 
     BOOST_CHECK_EQUAL(params.getMaxLod(), 6);
     BOOST_CHECK_EQUAL(params.getMinLod(), 2);

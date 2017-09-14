@@ -34,6 +34,12 @@ namespace livre
 {
 struct Client::Impl
 {
+    Impl(const int argc, char* argv[])
+        : applicationParameters(argc, argv)
+        , rendererParameters(argc, argv)
+    {
+    }
+
     IdleFunc _idleFunc;
     eq::ServerPtr server;
     Config* config{nullptr};
@@ -42,14 +48,8 @@ struct Client::Impl
 };
 
 Client::Client(const int argc, char* argv[])
-    : _impl(new Client::Impl)
+    : _impl(new Client::Impl(argc, argv))
 {
-    if (!_impl->applicationParameters.initialize(argc, argv) ||
-        !_impl->rendererParameters.initialize(argc, argv))
-    {
-        LBTHROW(std::runtime_error("Error parsing command line arguments"));
-    }
-
     if (_impl->applicationParameters.dataFileName.empty())
         _impl->applicationParameters.dataFileName = "mem:///#4096,4096,4096,40";
 

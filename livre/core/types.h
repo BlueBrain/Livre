@@ -183,6 +183,9 @@ typedef boost::program_options::options_description ProgramOptionsDescription;
 typedef std::map<std::string, ProgramOptionsDescription>
     ProgramOptionsDescriptionMap;
 
+using boost::program_options::variables_map;
+using boost::program_options::options_description;
+
 // Const definitions
 static const std::string NO_PREFIX = "";
 
