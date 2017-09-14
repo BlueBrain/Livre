@@ -21,6 +21,7 @@
 #include "ApplicationParameters.h"
 
 #include <livre/data/DataSource.h>
+#include <lunchbox/term.h>
 
 namespace vmml
 {
@@ -35,93 +36,98 @@ std::istream& operator>>(std::istream& is, Vector2ui& vec)
 }
 }
 
+namespace
+{
+const char ANIMATION_PARAM[] = "animation";
+const char ANIMATION_FPS_PARAM[] = "animation-fps";
+const char ANIMATION_FOLLOW_DATA_PARAM[] = "animation-follow-data";
+const char FRAMES_PARAM[] = "frames";
+const char NUMFRAMES_PARAM[] = "num-frames";
+const char CAMERAPOS_PARAM[] = "camera-position";
+const char CAMERALOOKAT_PARAM[] = "camera-lookat";
+const char SYNC_CAMERA_PARAM[] = "sync-camera";
+const char DATAFILE_PARAM[] = "volume";
+const char TRANSFERFUNCTION_PARAM[] = "transfer-function";
+}
+
 namespace livre
 {
-const std::string ANIMATION_PARAM = "animation";
-const std::string ANIMATION_FPS_PARAM = "animation-fps";
-const std::string ANIMATION_FOLLOW_DATA_PARAM = "animation-follow-data";
-const std::string FRAMES_PARAM = "frames";
-const std::string NUMFRAMES_PARAM = "num-frames";
-const std::string CAMERAPOS_PARAM = "camera-position";
-const std::string CAMERALOOKAT_PARAM = "camera-lookat";
-const std::string SYNC_CAMERA_PARAM = "sync-camera";
-const std::string DATAFILE_PARAM = "volume";
-const std::string TRANSFERFUNCTION_PARAM = "transfer-function";
-
 ApplicationParameters::ApplicationParameters()
-    : Parameters("Application Parameters")
-    , cameraPosition(0, 0, 1.5)
+    : cameraPosition(0, 0, 1.5)
     , cameraLookAt(0, 0, 0)
     , frames(FULL_FRAME_RANGE)
     , maxFrames(std::numeric_limits<uint32_t>::max())
     , animation(0)
     , animationFPS(0)
-    , isResident(false)
 {
-    configuration_.addDescription(configGroupName_, ANIMATION_PARAM,
-                                  "Enable animation mode (optional frame delta "
-                                  "for animation speed, use --animation=-<int> "
-                                  "for reverse animation)",
-                                  animation, 1);
-    configuration_.addDescription(configGroupName_, ANIMATION_FPS_PARAM,
-                                  "Animation frames per second. By default "
-                                  "(value of 0), it will request a new frame "
-                                  "as soon as the previous one is done",
-                                  animationFPS);
-    configuration_.addDescription(configGroupName_, ANIMATION_FOLLOW_DATA_PARAM,
-                                  "Enable animation and follow volume data "
-                                  "stream (overrides --animation=value)",
-                                  false);
-    configuration_.addDescription(configGroupName_, FRAMES_PARAM,
-                                  "Frames to render [start end)", frames);
-    configuration_.addDescription(configGroupName_, NUMFRAMES_PARAM,
-                                  "Maximum nuber of frames to render",
-                                  maxFrames);
-    configuration_.addDescription(configGroupName_, CAMERAPOS_PARAM,
-                                  "Camera position", cameraPosition);
-    configuration_.addDescription(configGroupName_, CAMERALOOKAT_PARAM,
-                                  "Camera orientation", cameraLookAt);
-    configuration_.addDescription<std::string>(configGroupName_, DATAFILE_PARAM,
-                                               DataSource::getDescriptions());
-    configuration_.addDescription(
-        configGroupName_, TRANSFERFUNCTION_PARAM,
-        ".1dt transfer function file (from ImageVis3D)", transferFunction);
 }
-
-ApplicationParameters& ApplicationParameters::operator=(
-    const ApplicationParameters& parameters)
+ApplicationParameters::ApplicationParameters(const int32_t argc,
+                                             const char* const argv[])
+    : ApplicationParameters()
 {
-    if (this == &parameters)
-        return *this;
+    const auto& options = _getOptions();
+    variables_map vm;
+    try
+    {
+        boost::program_options::store(
+            boost::program_options::command_line_parser(argc, argv)
+                .options(options)
+                .allow_unregistered()
+                .run(),
+            vm);
+    }
+    catch (const boost::program_options::error& exception)
+    {
+        LBTHROW(std::runtime_error(
+            std::string("Error parsing application command line arguments") +
+            exception.what()));
+    }
 
-    cameraPosition = parameters.cameraPosition;
-    cameraLookAt = parameters.cameraLookAt;
-    frames = parameters.frames;
-    maxFrames = parameters.maxFrames;
-    animation = parameters.animation;
-    animationFPS = parameters.animationFPS;
-    isResident = parameters.isResident;
-    dataFileName = parameters.dataFileName;
-    transferFunction = parameters.transferFunction;
-
-    return *this;
-}
-
-void ApplicationParameters::initialize_()
-{
-    animation = configuration_.getValue(ANIMATION_PARAM, animation);
-    animationFPS = configuration_.getValue(ANIMATION_FPS_PARAM, animationFPS);
-    frames = configuration_.getValue(FRAMES_PARAM, frames);
-    maxFrames = configuration_.getValue(NUMFRAMES_PARAM, maxFrames);
-    cameraPosition = configuration_.getValue(CAMERAPOS_PARAM, cameraPosition);
-    cameraLookAt = configuration_.getValue(CAMERALOOKAT_PARAM, cameraLookAt);
-    dataFileName = configuration_.getValue(DATAFILE_PARAM, dataFileName);
-    transferFunction =
-        configuration_.getValue(TRANSFERFUNCTION_PARAM, transferFunction);
-    bool animationFollowData = false;
-    animationFollowData = configuration_.getValue(ANIMATION_FOLLOW_DATA_PARAM,
-                                                  animationFollowData);
-    if (animationFollowData)
+    animation = vm[ANIMATION_PARAM].as<int32_t>();
+    animationFPS = vm[ANIMATION_FPS_PARAM].as<uint32_t>();
+    frames = vm[FRAMES_PARAM].as<Vector2ui>();
+    maxFrames = vm[NUMFRAMES_PARAM].as<uint32_t>();
+    cameraPosition = vm[CAMERAPOS_PARAM].as<Vector3f>();
+    cameraLookAt = vm[CAMERALOOKAT_PARAM].as<Vector3f>();
+    dataFileName = vm[DATAFILE_PARAM].as<std::string>();
+    transferFunction = vm[TRANSFERFUNCTION_PARAM].as<std::string>();
+    if (vm[ANIMATION_FOLLOW_DATA_PARAM].as<bool>())
         animation = LATEST_FRAME;
+}
+
+options_description ApplicationParameters::_getOptions() const
+{
+    options_description options("Application Parameters",
+                                lunchbox::term::getSize().first);
+    addOption(options, ANIMATION_PARAM,
+              "Enable animation mode (optional frame delta for animation "
+              "speed, use --animation=-<int>  for reverse animation)",
+              animation, 1);
+    addOption(options, ANIMATION_FPS_PARAM,
+              "Animation frames per second. By default (0), it will request a "
+              "new frame as soon as the previous one is done",
+              animationFPS);
+    addOption(options, ANIMATION_FOLLOW_DATA_PARAM,
+              "Enable animation and follow volume data stream (overrides "
+              "--animation=value)",
+              false);
+    addOption(options, FRAMES_PARAM, "Frames to render [start end)", frames);
+    addOption(options, NUMFRAMES_PARAM, "Maximum nuber of frames to render",
+              maxFrames);
+    addOption(options, CAMERAPOS_PARAM, "Camera position", cameraPosition);
+    addOption(options, CAMERALOOKAT_PARAM, "Camera orientation", cameraLookAt);
+    addOption(options, DATAFILE_PARAM, DataSource::getDescriptions(),
+              std::string());
+    addOption(options, TRANSFERFUNCTION_PARAM,
+              ".1dt transfer function file (from ImageVis3D)",
+              transferFunction);
+    return options;
+}
+
+std::string ApplicationParameters::getHelp()
+{
+    std::stringstream os;
+    os << ApplicationParameters()._getOptions();
+    return os.str();
 }
 }

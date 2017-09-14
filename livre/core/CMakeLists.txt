@@ -7,8 +7,6 @@
 #
 
 set(LIVRECORE_PUBLIC_HEADERS
-  configuration/Configuration.h
-  configuration/Parameters.h
   render/GLContext.h
   render/GLSLShaders.h
   render/TransferFunction1D.h
@@ -41,8 +39,6 @@ set(LIVRECORE_SOURCES
   cache/Cache.cpp
   cache/CacheObject.cpp
   cache/CacheStatistics.cpp
-  configuration/Configuration.cpp
-  configuration/Parameters.cpp
   pipeline/Executable.cpp
   pipeline/FutureMap.cpp
   pipeline/InputPort.cpp

@@ -18,30 +18,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _VolumeRendererParameters_h_
-#define _VolumeRendererParameters_h_
+#pragma once
 
-#include <co/distributable.h>
-#include <livre/core/configuration/Parameters.h>
 #include <livre/lib/api.h>
-#include <livre/lib/zerobuf/volumeRendererParameters.h>
+#include <livre/lib/types.h>
+#include <livre/lib/zerobuf/volumeRendererParameters.h> // base class
+
+#include <co/distributable.h> // base class
 
 namespace livre
 {
 /**
  * Enhance the ZeroBuf VolumeRendererParameters for Collage serialization and
- * initialization from config file and/or commandline parameters.
+ * initialization from commandline parameters.
  */
 class VolumeRendererParameters
-    : public co::Distributable<v1::VolumeRendererParameters>,
-      public Parameters
+    : public co::Distributable<v1::VolumeRendererParameters>
 {
 public:
     LIVRE_API VolumeRendererParameters();
+    LIVRE_API VolumeRendererParameters(const int32_t argc,
+                                       const char* const argv[]);
+    static std::string getHelp();
 
-protected:
-    LIVRE_API void initialize_() final;
+private:
+    options_description _getOptions() const;
 };
 }
-
-#endif // _VolumeRendererParameters_h_

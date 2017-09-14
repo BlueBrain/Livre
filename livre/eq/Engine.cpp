@@ -112,17 +112,8 @@ Engine::~Engine()
 std::string Engine::getHelp()
 {
     DataSource::loadPlugins(); // needed to complete --volume
-
-    VolumeRendererParameters vrParameters;
-    ApplicationParameters applicationParameters;
-
-    Configuration conf;
-    conf.addDescription(vrParameters.getConfiguration());
-    conf.addDescription(applicationParameters.getConfiguration());
-
-    std::stringstream os;
-    os << conf;
-    return os.str();
+    return ApplicationParameters().getHelp() +
+           VolumeRendererParameters().getHelp();
 }
 
 std::string Engine::getVersion()

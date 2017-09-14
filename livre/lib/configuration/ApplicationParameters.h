@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2016, EPFL/Blue Brain Project
+/* Copyright (c) 2011-2017, EPFL/Blue Brain Project
  *                          Ahmet Bilgili <ahmet.bilgili@epfl.ch>
  *                          Stefan.Eilemann@epfl.ch
  *
@@ -18,20 +18,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _ApplicationParameters_h_
-#define _ApplicationParameters_h_
+#pragma once
 
-#include <livre/core/configuration/Parameters.h> // base class
 #include <livre/lib/api.h>
+#include <livre/lib/types.h>
 
 namespace livre
 {
 /**
  * The ApplicationParameters struct keeps the parameters for main application.
  */
-struct ApplicationParameters : public Parameters
+struct ApplicationParameters
 {
     LIVRE_API ApplicationParameters();
+    LIVRE_API ApplicationParameters(const int32_t argc,
+                                    const char* const argv[]);
+
+    static std::string getHelp();
 
     Vector3f cameraPosition;  //!< Camera position in world space.
     Vector3f cameraLookAt;    //!< Camera orientation (lookAt vector) in world
@@ -40,17 +43,10 @@ struct ApplicationParameters : public Parameters
     uint32_t maxFrames;       //!< Max number of frames to render.
     int32_t animation;        //!< animation forward/backward speed
     uint32_t animationFPS;    //!< animation frames per second
-    bool isResident;          //!< Is the main app resident.
     std::string dataFileName; //!< Data file name.
     std::string transferFunction; //!< Path to transfer function file
 
-    /** @param parameters The source parameters. */
-    LIVRE_API ApplicationParameters& operator=(
-        const ApplicationParameters& parameters);
-
 private:
-    void initialize_() final;
+    options_description _getOptions() const;
 };
 }
-
-#endif // _ApplicationParameters_h_

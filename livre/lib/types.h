@@ -36,6 +36,36 @@ struct ApplicationParameters;
 typedef std::shared_ptr<const DataObject> ConstDataObjectPtr;
 typedef std::shared_ptr<const TextureObject> ConstTextureObjectPtr;
 typedef std::shared_ptr<const HistogramObject> ConstHistogramObjectPtr;
+
+template <class T>
+inline void addOption(options_description& set, const std::string& shortDesc,
+                      const std::string& longDesc, const T defaultValue)
+{
+    set.add_options()(shortDesc.c_str(),
+                      boost::program_options::value<T>()->default_value(
+                          defaultValue),
+                      longDesc.c_str());
+}
+
+template <class T>
+inline void addOption(options_description& set, const std::string& shortDesc,
+                      const std::string& longDesc, const T defaultValue,
+                      const T implicitValue)
+{
+    set.add_options()(shortDesc.c_str(), boost::program_options::value<T>()
+                                             ->default_value(defaultValue)
+                                             ->implicit_value(implicitValue),
+                      longDesc.c_str());
+}
+
+inline void addOption(options_description& set, const std::string& shortDesc,
+                      const std::string& longDesc, const bool defaultValue)
+{
+    set.add_options()(shortDesc.c_str(),
+                      boost::program_options::bool_switch()->default_value(
+                          defaultValue),
+                      longDesc.c_str());
+}
 }
 
 #endif // _types_h_
