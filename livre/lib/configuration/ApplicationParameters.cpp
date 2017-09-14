@@ -45,7 +45,6 @@ const char FRAMES_PARAM[] = "frames";
 const char NUMFRAMES_PARAM[] = "num-frames";
 const char CAMERAPOS_PARAM[] = "camera-position";
 const char CAMERALOOKAT_PARAM[] = "camera-lookat";
-const char SYNC_CAMERA_PARAM[] = "sync-camera";
 const char DATAFILE_PARAM[] = "volume";
 const char TRANSFERFUNCTION_PARAM[] = "transfer-function";
 }

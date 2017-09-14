@@ -1,8 +1,8 @@
 # -*- mode: cmake -*-
 git_subproject(vmmlib https://github.com/Eyescale/vmmlib.git f4b3706)
 git_subproject(Servus https://github.com/HBPVIS/Servus.git 132ee50)
-git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git f1245ae)
-git_subproject(ZeroEQ https://github.com/HBPVis/ZeroEQ.git 6a2d44e)
+git_subproject(ZeroBuf https://github.com/HBPVIS/ZeroBuf.git 6d403bc)
+git_subproject(ZeroEQ https://github.com/HBPVis/ZeroEQ.git 89bbe4f)
 git_subproject(Lexis https://github.com/HBPVis/Lexis.git a4e458a)
 git_subproject(Lunchbox https://github.com/Eyescale/Lunchbox.git 80c14e0)
 git_subproject(Collage https://github.com/Eyescale/Collage.git e2bc13d)
