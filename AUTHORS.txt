@@ -1,14 +1,19 @@
 Ahmet Bilgili
-Carsten Rohn
-Cedric Stalder
+Grigori Chevtchenko
+Fabien Delalondre
+Raphael Dumusc
+Stefan Eilemann
 Daniel Nachbaur
 Daniel Pfeifer
-Dardo D Kleiner
-Fabien Delalondre
 Jafet Villafranca
-Juan Hernando
-Marwan Abdellah
-Rafael Ballester
-Sarah Amsellem
-Stefan Eilemann
-steiner
+
+Marwan Abdellah (contributor)
+Sarah Amsellem (contributor)
+Rafael Ballester (contributor)
+Cyrille Favreau  (contributor)
+Juan Bautista Hernando Vieites (contributor)
+Dardo D. Kleiner (contributor)
+Enrique G. Paredes  (contributor)
+Carsten Rohn (contributor)
+Cedric Stalder (contributor)
+David Steiner (contributor)
