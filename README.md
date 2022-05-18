@@ -65,7 +65,7 @@ Livre is licensed under the LGPL, unless noted otherwise, e.g., for external dep
 See file LICENSE.txt for the full license. External dependencies are either LGPL or
 BSD-licensed. See file ACKNOWLEDGEMENTS.txt and AUTHORS.txt for further details.
 
-Copyright (C) 2005-2021 Blue Brain Project/EPFL, Eyescale Software GmbH, Visualization and
+Copyright (C) 2005-2022 Blue Brain Project/EPFL, Eyescale Software GmbH, Visualization and
 Multimedia Lab at University of Zurich, King Abdullah University of Science and Technology
 and AUTHORS.txt.
 
